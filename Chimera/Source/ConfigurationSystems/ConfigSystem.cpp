@@ -2,15 +2,12 @@
 #include "stdafx.h"
 
 #include "ConfigurationSystems/ConfigSystem.h"
-#include "NIAWG/NiawgCore.h"
 #include "Andor/AndorCameraCore.h"
 #include <RealTimeDataAnalysis/DataAnalysisControl.h>
 #include "PrimaryWindows/QtAuxiliaryWindow.h"
 #include "PrimaryWindows/QtAndorWindow.h"
 #include "PrimaryWindows/QtScriptWindow.h"
-#include "PrimaryWindows/QtBaslerWindow.h"
 #include "PrimaryWindows/QtMainWindow.h"
-#include "PrimaryWindows/QtDeformableMirrorWindow.h"
 #include "ExcessDialogs/openWithExplorer.h"
 #include "ExcessDialogs/saveWithExplorer.h"
 #include <qdebug.h>
@@ -39,16 +36,6 @@ void ConfigSystem::initialize( QPoint& pos, IChimeraQtWindow* win){
 		}});
 	py += 25;
 	updateConfigurationSavedStatus( true );
-}
-
-std::string ConfigSystem::getNiawgScriptAddrFromConfig(ConfigStream& configStream){
-	// open configuration file and grab the niawg script file address from it.
-	initializeAtDelim (configStream, "SCRIPTS");
-	configStream.get ();
-	auto getlineF = ConfigSystem::getGetlineFunc (configStream.ver);
-	std::string niawgScriptAddresses;
-	getlineF (configStream, niawgScriptAddresses);
-	return niawgScriptAddresses;
 }
 
 void ConfigSystem::checkSaveEntireProfile(IChimeraQtWindow* win){
@@ -112,12 +99,6 @@ void ConfigSystem::openConfigFromPath( std::string pathToConfig, IChimeraQtWindo
 		win->andorWin->windowOpenConfig(cStream );
 		win->auxWin->windowOpenConfig(cStream );
 		win->mainWin->windowOpenConfig(cStream );
-		if (cStream.ver >= Version ( "3.4" ) ){
-			win->basWin->windowOpenConfig (cStream );
-		}
-		if (cStream.ver >= Version ("5.0")){
-			//dmWin->windowOpenConfig (cStream);
-		}
 	}
 	catch ( ChimeraError& err ){
 		errBox( "ERROR: Unhandled error while opening configuration files!\n\n" + err.trace() );
@@ -218,7 +199,6 @@ void ConfigSystem::saveConfiguration(IChimeraQtWindow* win){
 	win->andorWin->windowSaveConfig(saveStream);
 	win->auxWin->windowSaveConfig(saveStream);
 	win->mainWin->windowSaveConfig(saveStream);
-	win->basWin->windowSaveConfig (saveStream);
 	std::ofstream configSaveFile (currentProfile.configLocation + configNameToSave + "." + CONFIG_EXTENSION);
 	if (!configSaveFile.is_open ()){
 		thrower ("Couldn't save configuration file! Check the name for weird characters, or call Mark about bugs if "
@@ -258,7 +238,6 @@ void ConfigSystem::saveConfigurationAs(IChimeraQtWindow* win){
 	win->andorWin->windowSaveConfig(configSaveStream);
 	win->auxWin->windowSaveConfig(configSaveStream);
 	win->mainWin->windowSaveConfig(configSaveStream);
-	win->basWin->windowSaveConfig (configSaveStream);
 	// check if file already exists
 	std::ofstream configSaveFile (configurationPathToSave);
 	if (!configSaveFile.is_open ()){

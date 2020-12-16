@@ -1,27 +1,19 @@
 #include "stdafx.h"
 #include "QtAuxiliaryWindow.h"
-#include "Agilent/AgilentSettings.h"
 #include <qdesktopwidget.h>
 #include <PrimaryWindows/QtScriptWindow.h>
 #include <PrimaryWindows/QtAndorWindow.h>
 #include <PrimaryWindows/QtAuxiliaryWindow.h>
 #include <PrimaryWindows/QtMainWindow.h>
-#include <PrimaryWindows/QtBaslerWindow.h>
-#include <PrimaryWindows/QtDeformableMirrorWindow.h>
 #include <ExcessDialogs/saveWithExplorer.h>
 #include <ExcessDialogs/openWithExplorer.h>
 #include <ExcessDialogs/doChannelInfoDialog.h>
 #include <ExcessDialogs/AoSettingsDialog.h>
 
-QtAuxiliaryWindow::QtAuxiliaryWindow (QWidget* parent) : IChimeraQtWindow (parent), uwSys(this),
-topBottomTek (TOP_BOTTOM_TEK_SAFEMODE, TOP_BOTTOM_TEK_USB_ADDRESS, "TOP_BOTTOM_TEKTRONICS_AFG"),
-eoAxialTek (EO_AXIAL_TEK_SAFEMODE, EO_AXIAL_TEK_USB_ADDRESS, "EO_AXIAL_TEKTRONICS_AFG"),
-agilents{ Agilent{TOP_BOTTOM_AGILENT_SETTINGS,this}, Agilent{AXIAL_AGILENT_SETTINGS,this},
-Agilent{FLASHING_AGILENT_SETTINGS,this}, Agilent{UWAVE_AGILENT_SETTINGS,this} },
+QtAuxiliaryWindow::QtAuxiliaryWindow (QWidget* parent) : IChimeraQtWindow (parent), 
 	ttlBoard (this, DOFTDI_SAFEMODE, true),
 	aoSys (this, ANALOG_OUT_SAFEMODE), configParamCtrl (this, "CONFIG_PARAMETERS"),
-	globalParamCtrl (this, "GLOBAL_PARAMETERS"), dds (this, DDS_SAFEMODE),
-	piezo1 (this, PIEZO_1_INFO), piezo2 (this, PIEZO_2_INFO), piezo3(this, PIEZO_3_INFO){	
+	globalParamCtrl (this, "GLOBAL_PARAMETERS"), dds (this, DDS_SAFEMODE){	
 	statBox = new ColorBox ();
 	setWindowTitle ("Auxiliary Window");
 }
@@ -47,24 +39,9 @@ void QtAuxiliaryWindow::initializeWidgets (){
 		statBox->initialize (loc, this, 480, mainWin->getDevices (), 2);
 		ttlBoard.initialize (loc, this);
 		aoSys.initialize (loc, this);
-		aiSys.initialize (loc, this);
-		topBottomTek.initialize (loc, this, "Top-Bottom-Tek", "Top", "Bottom", 480);
-		eoAxialTek.initialize (loc, this, "EO / Axial", "EO", "Axial", 480);
-		uwSys.initialize (loc, this);
-		loc = QPoint{ 480, 25 };
-
-		agilents[(int)AgilentEnum::name::TopBottom].initialize (loc, "Top-Bottom-Agilent", 100, this);
-		agilents[(int)AgilentEnum::name::Axial].initialize (loc, "Microwave-Axial-Agilent", 100, this);
-		agilents[(int)AgilentEnum::name::Flashing].initialize (loc, "Flashing-Agilent", 100, this);
-		agilents[(int)AgilentEnum::name::Microwave].initialize (loc, "Microwave-Agilent", 100, this);
 		loc = QPoint{ 1440, 25 };
-		loc.rx() += 300;
-		piezo1.initialize (loc, this, 180, { "Top-x", "Top-y", "Axial-y" });
-		piezo2.initialize (loc, this, 180, { "EO-x", "EO-y", "Axial-x" });
-		piezo3.initialize (loc, this, 180, { "Bot-x", "Bot-y", "---" });
-		loc.rx () -= 300;
 		loc.ry() = 25;
-		globalParamCtrl.initialize (loc, this, "GLOBAL PARAMETERS", ParameterSysType::global, 300, 500);
+		globalParamCtrl.initialize (loc, this, "GLOBAL PARAMETERS", ParameterSysType::global, 480, 500);
 		configParamCtrl.initialize (loc, this, "CONFIGURATION PARAMETERS", ParameterSysType::config);
 		configParamCtrl.setParameterControlActive (false);
 		dds.initialize (loc, this, "DDS SYSTEM");
@@ -156,100 +133,8 @@ void QtAuxiliaryWindow::updateOptimization (AllExperimentInput& input){
 	reportStatus (qstr(msg));
 }
 
-// MESSAGE MAP FUNCTION
-LRESULT QtAuxiliaryWindow::onLogVoltsMessage (WPARAM wp, LPARAM lp){
-	aiSys.refreshCurrentValues ();
-	aiSys.refreshDisplays ();
-	andorWin->writeVolts (wp, aiSys.getCurrentValues ());
-	return TRUE;
-}
-
-
-void QtAuxiliaryWindow::newAgilentScript (AgilentEnum::name name){
-	try{
-		agilents[(int)name].verifyScriptable ();
-		mainWin->updateConfigurationSavedStatus (false);
-		agilents[(int)name].checkSave (mainWin->getProfileSettings ().configLocation, mainWin->getRunInfo ());
-		agilents[(int)name].agilentScript.newScript ();
-		agilents[(int)name].agilentScript.updateScriptNameText (mainWin->getProfileSettings ().configLocation);
-	}
-	catch (ChimeraError& err){
-		reportErr (err.qtrace ());
-	}
-}
-
-void QtAuxiliaryWindow::openAgilentScript (AgilentEnum::name name, IChimeraQtWindow* parent){
-	try{
-		agilents[(int)name].verifyScriptable ();
-		mainWin->updateConfigurationSavedStatus (false);
-		agilents[(int)name].agilentScript.checkSave (mainWin->getProfileSettings ().configLocation,
-			mainWin->getRunInfo ());
-		std::string openFileName = openWithExplorer (parent, Script::AGILENT_SCRIPT_EXTENSION);
-		agilents[(int)name].agilentScript.openParentScript (openFileName,
-			mainWin->getProfileSettings ().configLocation, mainWin->getRunInfo ());
-		agilents[(int)name].agilentScript.updateScriptNameText (mainWin->getProfileSettings ().configLocation);
-	}
-	catch (ChimeraError& err){
-		reportErr (err.qtrace ());
-	}
-}
-
-
-void QtAuxiliaryWindow::updateAgilent (AgilentEnum::name name){
-	try	{
-		mainWin->updateConfigurationSavedStatus (false);
-		agilents[(int)name].checkSave (mainWin->getProfileSettings ().configLocation, mainWin->getRunInfo ());
-		agilents[(int)name].readGuiSettings ();
-	}
-	catch (ChimeraError&){
-		throwNested ("Failed to update agilent.");
-	}
-}
-
-
-void QtAuxiliaryWindow::saveAgilentScript (AgilentEnum::name name){
-	try	{
-		agilents[(int)name].verifyScriptable ();
-		mainWin->updateConfigurationSavedStatus (false);
-		agilents[(int)name].agilentScript.saveScript (mainWin->getProfileSettings ().configLocation,
-			mainWin->getRunInfo ());
-		agilents[(int)name].agilentScript.updateScriptNameText (mainWin->getProfileSettings ().configLocation);
-	}
-	catch (ChimeraError& err){
-		reportErr (err.qtrace ());
-	}
-}
-
-
-void QtAuxiliaryWindow::saveAgilentScriptAs (AgilentEnum::name name, IChimeraQtWindow* parent){
-	try	{
-		agilents[(int)name].verifyScriptable ();
-		mainWin->updateConfigurationSavedStatus (false);
-		std::string extensionNoPeriod = agilents[(int)name].agilentScript.getExtension ();
-		if (extensionNoPeriod.size () == 0)	{
-			return;
-		}
-		extensionNoPeriod = extensionNoPeriod.substr (1, extensionNoPeriod.size ());
-		std::string newScriptAddress = saveWithExplorer ( parent, extensionNoPeriod,
-														  mainWin->getProfileSettings () );
-		agilents[(int)name].agilentScript.saveScriptAs (newScriptAddress, mainWin->getRunInfo ());
-		agilents[(int)name].agilentScript.updateScriptNameText (mainWin->getProfileSettings ().configLocation);
-	}
-	catch (ChimeraError& err){
-		reportErr (err.qtrace ());
-	}
-}
-
 ParameterSystem& QtAuxiliaryWindow::getGlobals (){
 	return globalParamCtrl;
-}
-
-std::vector<std::reference_wrapper<PiezoCore> > QtAuxiliaryWindow::getPiezoControllers (){
-	std::vector<std::reference_wrapper<PiezoCore> > controllers;
-	controllers.push_back (piezo1.getCore ());
-	controllers.push_back (piezo2.getCore ());
-	controllers.push_back (piezo3.getCore ());
-	return controllers;
 }
 
 std::pair<unsigned, unsigned> QtAuxiliaryWindow::getTtlBoardSize (){
@@ -261,18 +146,7 @@ void QtAuxiliaryWindow::windowSaveConfig (ConfigStream& saveFile){
 	configParamCtrl.handleSaveConfig (saveFile);
 	ttlBoard.handleSaveConfig (saveFile);
 	aoSys.handleSaveConfig (saveFile);
-	for (auto& agilent : agilents){
-		agilent.handleSavingConfig (saveFile, mainWin->getProfileSettings ().configLocation,
-			mainWin->getRunInfo ());
-	}
-	topBottomTek.handleSaveConfig (saveFile);
-	eoAxialTek.handleSaveConfig (saveFile);
 	dds.handleSaveConfig (saveFile);
-	piezo1.handleSaveConfig (saveFile);
-	piezo2.handleSaveConfig (saveFile);
-	piezo3.handleSaveConfig (saveFile);
-	aiSys.handleSaveConfig (saveFile);
-	uwSys.handleSaveConfig (saveFile);
 }
 
 void QtAuxiliaryWindow::windowOpenConfig (ConfigStream& configFile){
@@ -281,32 +155,7 @@ void QtAuxiliaryWindow::windowOpenConfig (ConfigStream& configFile){
 		ConfigSystem::standardOpenConfig (configFile, "TTLS", &ttlBoard);
 		ConfigSystem::standardOpenConfig (configFile, "DACS", &aoSys);
 		aoSys.updateEdits ();
-		for (auto& agilent : agilents){
-			deviceOutputInfo info;
-			ConfigSystem::stdGetFromConfig (configFile, agilent.getCore (), info, Version ("4.0"));
-			agilent.setOutputSettings (info);
-			agilent.updateSettingsDisplay (mainWin->getProfileSettings ().configLocation, mainWin->getRunInfo ());
-		}
-		tektronixInfo info;
-		ConfigSystem::stdGetFromConfig (configFile, topBottomTek.getCore (), info);
-		topBottomTek.setSettings (info);
-		ConfigSystem::stdGetFromConfig (configFile, eoAxialTek.getCore (), info);
-		eoAxialTek.setSettings (info);
-
-		ConfigSystem::standardOpenConfig (configFile, topBottomTek.getDelim (), &topBottomTek, Version ("4.0"));
-		ConfigSystem::standardOpenConfig (configFile, eoAxialTek.getDelim (), &eoAxialTek, Version ("4.0"));
-		if (configFile.ver >= Version ("4.5")) {
-			ConfigSystem::standardOpenConfig (configFile, dds.getDelim (), &dds, Version ("4.5"));
-		}
-		ConfigSystem::standardOpenConfig (configFile, piezo1.getConfigDelim (), &piezo1, Version ("4.6"));
-		ConfigSystem::standardOpenConfig (configFile, piezo2.getConfigDelim (), &piezo2, Version ("4.6"));
-		ConfigSystem::standardOpenConfig (configFile, piezo3.getConfigDelim (), &piezo3, Version ("5.2"));
-		AiSettings settings;
-		ConfigSystem::stdGetFromConfig (configFile, aiSys, settings, Version ("4.9"));
-		aiSys.setAiSettings (settings);
-		microwaveSettings uwsettings;
-		ConfigSystem::stdGetFromConfig (configFile, uwSys.getCore (), uwsettings, Version ("4.10"));
-		uwSys.setMicrowaveSettings (uwsettings);
+		ConfigSystem::standardOpenConfig (configFile, dds.getDelim (), &dds, Version ("4.5"));
 	}
 	catch (ChimeraError&){
 		throwNested ("Auxiliary Window failed to read parameters from the configuration file.");
@@ -381,9 +230,6 @@ DoCore& QtAuxiliaryWindow::getTtlCore (){
 void QtAuxiliaryWindow::fillMasterThreadInput (ExperimentThreadInput* input){
 	try	{
 		input->globalParameters = globalParamCtrl.getAllParams ();
-		if (aiSys.wantsQueryBetweenVariations ()) {
-			input->numAiMeasurements = configParamCtrl.getTotalVariationNumber ();
-		}
 	}
 	catch (ChimeraError&) {
 		throwNested ("Auxiliary window failed to fill master thread input.");
@@ -392,10 +238,6 @@ void QtAuxiliaryWindow::fillMasterThreadInput (ExperimentThreadInput* input){
 
 AoSystem& QtAuxiliaryWindow::getAoSys () {
 	return aoSys;
-}
-
-AiSystem& QtAuxiliaryWindow::getAiSys () {
-	return aiSys;
 }
 
 void QtAuxiliaryWindow::handleAbort (){
@@ -610,14 +452,6 @@ std::string QtAuxiliaryWindow::getOtherSystemStatusMsg (){
 	else{
 		msg += "\tCode System is disabled! Enable in \"constants.h\"\n";
 	}
-	msg += "Analog In System:\n";
-	if (!ANALOG_IN_SAFEMODE){
-		msg += "\tCode System is Active!\n";
-		msg += "\t" + aiSys.getSystemStatus () + "\n";
-	}
-	else{
-		msg += "\tCode System is disabled! Enable in \"constants.h\"\n";
-	}
 	msg += "DDS System:\n";
 	if (!DDS_SAFEMODE){
 		msg += "\tDDS System is Active!\n";
@@ -627,62 +461,15 @@ std::string QtAuxiliaryWindow::getOtherSystemStatusMsg (){
 	else{
 		msg += "\tDDS System is disabled! Enable in \"constants.h\"\n";
 	}
-	msg += "Piezo System:\n";
-	msg += "\tPiezo System is Active!\n";
-	msg += "\tDevice List: " + piezo1.getPiezoDeviceList () + "\n";
-	msg += "\t Device Info:\n" + str ("\t\t");
-	msg += piezo1.getDeviceInfo () + "\n";
-	msg += piezo2.getDeviceInfo () + "\n";
-	msg += piezo3.getDeviceInfo () + "\n";
-	msg += "- End Dev Info";
 	return msg;
 }
-
 
 std::string QtAuxiliaryWindow::getVisaDeviceStatus (){
 	std::string msg;
-	msg += "----------------------------------------------------------------------------------- VISA Devices\n";
-	msg += "Tektronix 1:\n\t" + topBottomTek.queryIdentity ();
-	msg += "Tektronix 2:\n\t" + eoAxialTek.queryIdentity ();
-	for (auto& agilent : agilents){
-		msg += agilent.getCore ().configDelim + ":\n\t" + agilent.getDeviceIdentity ();
-	}
 	return msg;
-}
-
-
-std::string QtAuxiliaryWindow::getMicrowaveSystemStatus (){
-	std::string msg;
-	msg += "Microwave System:\n";
-	if (!(MICROWAVE_SYSTEM_DEVICE_TYPE == microwaveDevice::NONE)){
-		msg += "\tCode System is Active!\n";
-		msg += "\t" + uwSys.getIdentity ();
-	}
-	else{
-		msg += "\tCode System is disabled! Enable in \"constants.h\"";
-	}
-	return msg;
-}
-
-std::vector<std::reference_wrapper<AgilentCore>> QtAuxiliaryWindow::getAgilents () {
-	std::vector<std::reference_wrapper<AgilentCore>> ags;
-	for (auto& ag : agilents) {
-		ags.push_back (ag.getCore ());
-	}
-	return ags;
 }
 
 void QtAuxiliaryWindow::fillExpDeviceList (DeviceList& list){
-	list.list.push_back (topBottomTek.getCore ());
-	list.list.push_back (eoAxialTek.getCore ());
-	list.list.push_back (uwSys.getCore ());
-	for (auto& ag : agilents){
-		list.list.push_back (ag.getCore ());
-	}
-	list.list.push_back (aiSys);
 	list.list.push_back (dds.getCore ());
-	list.list.push_back (piezo1.getCore ());
-	list.list.push_back (piezo2.getCore ());
-	list.list.push_back (piezo3.getCore ());
 }
 

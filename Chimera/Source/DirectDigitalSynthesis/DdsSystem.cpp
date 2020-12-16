@@ -3,7 +3,7 @@
 #include "DirectDigitalSynthesis/DdsSystem.h"
 #include "PrimaryWindows/QtAuxiliaryWindow.h"
 #include "GeneralObjects/multiDimensionalKey.h"
-#include "afxcmn.h"
+#include <ParameterSystem/Expression.h>
 #include <boost/lexical_cast.hpp>
 #include <qheaderview.h>
 #include <qmenu.h>

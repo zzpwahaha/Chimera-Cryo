@@ -1,16 +1,14 @@
 #include "stdafx.h"
 #include "DoCore.h"
 #include "DoStructures.h"
+#include "DoRows.h"
 
-DoCore::DoCore (bool ftSafemode, bool serialSafemode) : ftFlume (ftSafemode),	winSerial (serialSafemode, ""), 
-														names(4, 16){
-	try
-	{
+DoCore::DoCore (bool ftSafemode, bool serialSafemode) : ftFlume (ftSafemode), names(4, 16){
+	try	{
 		connectType = ftdiConnectionOption::Async;
 		ftdi_connectasync ("FT2E722BB");
 	}
-	catch (ChimeraError &)
-	{
+	catch (ChimeraError &)	{
 		throwNested ("Failed to initialize DO Core!?!");
 	}
 }
@@ -31,34 +29,13 @@ void DoCore::ftdi_connectasync (const char devSerial[]){
 }
 
 void DoCore::ftdi_disconnect (){
-	if (connectType == ftdiConnectionOption::Serial){
-		winSerial.close ();
-	}
-	else if (connectType == ftdiConnectionOption::Async){
-		ftFlume.close ();
-	}
-	else{
-		thrower ("No connection to close...");
-	}
+	ftFlume.close ();
 	connectType = ftdiConnectionOption::None;
 }
 
-
 DWORD DoCore::ftdi_trigger (){
-	std::vector<unsigned char> dataBuffer = { 161, 0, 0, 0, 0, 0, 1 };
-	if (connectType == ftdiConnectionOption::Serial){
-		unsigned long totalBytesSent = 0;
-		while (totalBytesSent < 7){
-			winSerial.write (std::string (dataBuffer.begin (), dataBuffer.end ()));
-		}
-		return totalBytesSent;
-	}
-	else if (connectType == ftdiConnectionOption::Async){
-		return ftFlume.trigger ();
-	}
-	return 0;
+	return ftFlume.trigger ();
 }
-
 
 /*
 * Takes data from "mem" structure and writes to the dio board.
@@ -73,23 +50,7 @@ DWORD DoCore::ftdi_write (unsigned variation, bool loadSkip){
 		unsigned int totalBytes = 0;
 		unsigned int number = 0;
 		unsigned long dwNumberOfBytesSent = 0;
-		if (connectType == ftdiConnectionOption::Serial){
-			while (dwNumberOfBytesSent < buf.bytesToWrite){
-				/*auto bytesWritten = winSerial.writeFile( dwNumberOfBytesSent, buf.pts );
-				if ( bytesWritten > 0 )
-				{
-					++totalBytes;
-				}
-				else
-				{
-					thrower ( "bad value for dwNumberOfBytesWritten: " + str( bytesWritten ) );
-				}*/
-			}
-			totalBytes += dwNumberOfBytesSent;
-		}
-		else{
-			totalBytes += ftFlume.write (buf.pts, buf.bytesToWrite);
-		}
+		totalBytes += ftFlume.write (buf.pts, buf.bytesToWrite);
 		return totalBytes;
 	}
 	else{
@@ -515,7 +476,7 @@ void DoCore::organizeTtlCommands (unsigned variation, DoSnapshot initSnap)
 		if (commandInc == 0 || fabs (orderedCommandList[commandInc].time - timeOrganizer.back ().first) > 1e-6)
 		{
 			// new time
-			std::vector<USHORT> testVec = { USHORT (commandInc) };
+			std::vector<unsigned short> testVec = { unsigned short (commandInc) };
 			timeOrganizer.push_back ({ orderedCommandList[commandInc].time, testVec });
 		}
 		else

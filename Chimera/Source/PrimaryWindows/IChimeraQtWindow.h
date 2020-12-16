@@ -12,8 +12,6 @@ class ColorBox;
 class QtMainWindow;
 class QtScriptWindow;
 class QtAuxiliaryWindow;
-class QtBaslerWindow;
-class QtDeformableMirrorWindow;
 class QtAndorWindow;
 
 namespace Ui {
@@ -35,7 +33,7 @@ class IChimeraQtWindow : public QMainWindow{
 		void initializeShortcuts ();
 		void initializeMenu ();
 		void loadFriends (QtMainWindow* mainWin_, QtScriptWindow* scriptWin_, QtAuxiliaryWindow* auxWin_,
-						  QtBaslerWindow* basWin_, QtDeformableMirrorWindow* dmWindow_, QtAndorWindow* andorWin_);
+						  QtAndorWindow* andorWin_);
 		void reportErr (QString errStr, unsigned errorLevel=0);
 		void reportStatus (QString statusStr, unsigned notificationLevel=0);
 
@@ -44,9 +42,7 @@ class IChimeraQtWindow : public QMainWindow{
 		QtScriptWindow* scriptWin = NULL;
 		QtAndorWindow* andorWin = NULL;
 		QtAuxiliaryWindow* auxWin = NULL;
-		QtBaslerWindow* basWin = NULL;
-		QtDeformableMirrorWindow* dmWin = NULL;
-		static constexpr unsigned numWindows = 6;
+		static constexpr unsigned numWindows = 5;
 		ColorBox* statBox;
 		virtual void changeBoxColor (std::string sysDelim, std::string color);
 	private:

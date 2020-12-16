@@ -2,28 +2,23 @@
 
 #include <QMainWindow>
 #include <QTimer>
-#include "NIAWG/NiawgSystem.h"
 #include "ConfigurationSystems/ProfileIndicator.h"
 #include "ConfigurationSystems/profileSettings.h"
-#include "Agilent/Agilent.h"
 #include "ExperimentThread/ExperimentThreadInput.h"
 #include "IChimeraQtWindow.h"
-#include <AnalogInput/CalibrationManager.h>
-#include <AnalogInput/ServoManager.h>
 #include "ConfigurationSystems/ConfigSystem.h"
 #include "MiscellaneousExperimentOptions/DebugOptionsControl.h"
 #include "MiscellaneousExperimentOptions/MainOptionsControl.h"
 #include "ExperimentMonitoringAndStatus/StatusControl.h"
 #include "ExperimentMonitoringAndStatus/StatusIndicator.h"
-#include "Python/SmsTextingControl.h"
 #include "ConfigurationSystems/MasterConfiguration.h"
 #include "MiscellaneousExperimentOptions/Repetitions.h"
 #include "DataLogging/DataLogger.h"
 #include "ConfigurationSystems/NoteSystem.h"
 #include "ConfigurationSystems/profileSettings.h"
-#include "Plotting/ScopeViewer.h"
 #include "GeneralUtilityFunctions/commonFunctions.h"
 #include "CustomMessages.h"
+#include <AnalogOutput/calInfo.h>
 #include <string>
 #include <vector>
 #include <future>
@@ -44,10 +39,6 @@ class QtMainWindow : public IChimeraQtWindow{
 
 		void fillExpDeviceList (DeviceList& list);
 
-		LRESULT onNoAtomsAlertMessage (WPARAM wp, LPARAM lp);
-		LRESULT onNoMotAlertMessage (WPARAM wp, LPARAM lp);
-
-		void onMachineOptRoundFin ();
 		void onAutoCalFin (QString msg, profileSettings finishedConfig);
 		void setStyleSheets ();
 		//
@@ -79,7 +70,6 @@ class QtMainWindow : public IChimeraQtWindow{
 		void abortMasterThread ();
 		std::string getSystemStatusString ();
 		bool masterIsRunning ();
-		RunInfo getRunInfo ();
 		void handleFinishText ();
 		unsigned getRepNumber ();
 		void logParams (DataLogger* logger, ExperimentThreadInput* input);
@@ -94,7 +84,6 @@ class QtMainWindow : public IChimeraQtWindow{
 		QThread* getExpThread();
 		ExpThreadWorker* getExpThreadWorker();
 		void pauseExperiment ();
-		std::vector<calResult> getCalInfo ();
 	public Q_SLOTS:
 		void handleColorboxUpdate (QString color, QString systemDelim);
 		void handleNotification (QString txt, unsigned level=0);
@@ -117,16 +106,11 @@ class QtMainWindow : public IChimeraQtWindow{
 		MainOptionsControl mainOptsCtrl;
 		StatusControl mainStatus;
 		StatusControl errorStatus;
-		SmsTextingControl texter;
 		StatusIndicator shortStatus;
-		CalibrationManager calManager;
 
 		ExpThreadWorker* expWorker;
 		QThread* expThread;
 		std::atomic<bool> experimentIsRunning = false;
-
-		RunInfo systemRunningInfo;
-		ScopeViewer masterRepumpScope, motScope, expScope;
 		//
 		friend void commonFunctions::handleCommonMessage (int msgID, IChimeraQtWindow* win);
 		unsigned autoCalNum = 0;

@@ -3,15 +3,9 @@
 
 #include "DigitalOutput/DoSystem.h"
 #include "AnalogOutput/AoSystem.h"
-#include "AnalogInput/AiSystem.h"
 #include "ParameterSystem/ParameterSystem.h"
-#include "Microwave/MicrowaveCore.h"
 #include "MiscellaneousExperimentOptions/DebugOptionsControl.h"
-#include "Agilent/AgilentCore.h"
-#include "NIAWG/NiawgCore.h"
-#include "Tektronix/TekCore.h"
 #include "MiscellaneousExperimentOptions/MainOptionsControl.h"
-#include "Piezo/PiezoCore.h"
 #include "Andor/AndorCameraCore.h"
 #include "expSystemRunList.h" 
 #include "Andor/AndorRunSettings.h"
@@ -19,11 +13,10 @@
 #include "ConfigurationSystems/profileSettings.h"
 #include "RealTimeDataAnalysis/atomCruncherInput.h"
 #include "RealTimeDataAnalysis/realTimePlotterInput.h"
-#include "Basler/BaslerCamera.h"
-#include "Basler/baslerSettings.h"
 #include "ExperimentType.h"
 #include "DeviceList.h"
 #include "DirectDigitalSynthesis/DdsCore.h"
+#include <AnalogOutput/calInfo.h>
 
 #include <chrono>
 #include <vector>
@@ -50,7 +43,6 @@ struct ExperimentThreadInput{
 	DataLogger& logger;
 	unsigned numVariations = 1;
 	bool quiet = false;
-	//expSystemRunList runList;
 	unsigned numAiMeasurements=0;
 	bool updatePlotterXVals = false;
 	std::atomic<bool>* skipNext = NULL;

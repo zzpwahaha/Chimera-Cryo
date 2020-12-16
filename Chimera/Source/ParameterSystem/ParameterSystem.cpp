@@ -11,7 +11,6 @@
 #include <iomanip>
 #include <unordered_map>
 #include <random>
-#include "afxcmn.h"
 #include <boost/lexical_cast.hpp>
 #include <qmenu.h>
 #include <GeneralObjects/ChimeraStyleSheets.h>
@@ -670,7 +669,6 @@ void ParameterSystem::generateKey( std::vector<parameterType>& parameters, bool 
 				break;
 			}
 		}
-
 		for (auto keyInc : range (randomizerMultiKey.values.size ())){
 			tempKeyRandomized.values[keyInc] = tempKey.values[randomizerMultiKey.values[keyInc]];
 		}

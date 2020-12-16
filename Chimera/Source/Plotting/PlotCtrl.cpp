@@ -5,7 +5,6 @@
 #include <qgraphicslayout.h>
 #include <qdebug.h>
 #include <qmenu.h>
-#include <AnalogInput/CalibrationManager.h>
 
 PlotCtrl::PlotCtrl( unsigned numTraces, plotStyle inStyle, std::vector<int> thresholds_in,
 					std::string titleIn, bool narrowOpt, bool plotHistOption ) :
@@ -274,7 +273,7 @@ void PlotCtrl::resetChart () {
 	view->chart ()->setTitle (title.c_str ());
 }
 
-void PlotCtrl::init( QPoint& pos, LONG width, LONG height, IChimeraQtWindow* parent ){ 
+void PlotCtrl::init( QPoint& pos, long width, long height, IChimeraQtWindow* parent ){ 
 	auto& px = pos.rx (), &py = pos.ry ();
 	chart = new QtCharts::QChart ();
 	view = new QtCharts::QChartView (chart, parent);

@@ -2,10 +2,8 @@
 
 #include <QMainWindow>
 #include <QTimer>
-#include "NIAWG/NiawgSystem.h"
 #include "ConfigurationSystems/ProfileIndicator.h"
 #include "ConfigurationSystems/profileSettings.h"
-#include "Agilent/Agilent.h"
 #include "ExperimentThread/ExperimentThreadInput.h"
 #include "IChimeraQtWindow.h"
 
@@ -21,7 +19,6 @@
 #include "RealTimeDataAnalysis/atomCruncherInput.h"
 #include "GeneralObjects/commonTypes.h"
 #include "GeneralObjects/Queues.h"
-#include <Piezo/PiezoController.h>
 #include <Python/NewPythonHandler.h>
 #include <bitset>
 
@@ -100,7 +97,6 @@ class QtAndorWindow : public IChimeraQtWindow{
 
 		void fillExpDeviceList (DeviceList& list);
 		void handleSetAnalysisPress ();
-		piezoChan<double> getAlignmentVals ();
 		CruncherThreadWorker* atomCruncherWorker;
 		AnalysisThreadWorker* analysisThreadWorker;
 		void handleTransformationModeChange ();
@@ -124,7 +120,6 @@ class QtAndorWindow : public IChimeraQtWindow{
 		DataLogger dataHandler;
 		std::vector<PlotCtrl*> mainAnalysisPlots;
 		coordinate selectedPixel = { 0,0 };
-		CMenu menu;
 		// some picture menu options
 		bool autoScalePictureData;
 		bool alwaysShowGrid;
@@ -151,7 +146,6 @@ class QtAndorWindow : public IChimeraQtWindow{
 		unsigned mostRecentPicNum = 0;
 		unsigned currentPictureNum = 0;
 		Matrix<long> avgBackground;
-		PiezoController imagingPiezo;
 	Q_SIGNALS:
 		void newImage (NormalImage);
 
