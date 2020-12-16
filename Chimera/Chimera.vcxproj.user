@@ -4,8 +4,8 @@
     <ShowAllFiles>true</ShowAllFiles>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <LocalDebuggerEnvironment>PATH=$(ProjectDir)3rd_Party\Andor\Lib;$(ProjectDir)3rd_Party;$(ProjectDir)3rd_Party\DM\Lib;$(ProjectDir)3rd_Party\Pylon\Lib;$(ProjectDir)3rd_Party\Thorlabs\Lib;$(ProjectDir)3rd_Party\Thorlabs;$(QTDIR)\bin;$(ProjectDir)3rd_Party\Python;%PATH%
-$(LocalDebuggerEnvironment)</LocalDebuggerEnvironment>
+    <LocalDebuggerEnvironment>PATH=$(QTDIR)\bin;%(Path)
+%</LocalDebuggerEnvironment>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
 </Project>

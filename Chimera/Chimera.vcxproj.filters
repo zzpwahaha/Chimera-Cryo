@@ -24,42 +24,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Source\Agilent\Agilent.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Agilent\AgilentChannelMode.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Agilent\AgilentCore.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Agilent\scriptedAgilentWaveform.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Agilent\Segment.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Agilent\SegmentEnd.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Agilent\whichAg.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\AnalogInput\AiSystem.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\AnalogInput\AiUnits.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\AnalogInput\CalibrationManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\AnalogInput\CalibrationThreadWorker.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\AnalogInput\ServoManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Source\AnalogOutput\AnalogOutput.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -99,21 +63,6 @@
     <ClCompile Include="Source\Andor\PictureSettingsControl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Basler\BaslerCamera.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Basler\BaslerSettings.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Basler\BaslerSettingsControl.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Basler\BaslerWrapper.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Basler\ImageEventHandler.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Source\ConfigurationSystems\ConfigStream.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -142,18 +91,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\DataLogging\DataLogger.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\DeformableMirror\DmControl.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\DeformableMirror\DmCore.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\DeformableMirror\DmFlume.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\DeformableMirror\DmProfileCreator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\DigitalOutput\DigitalOutput.cpp">
@@ -213,16 +150,10 @@
     <ClCompile Include="Source\GeneralFlumes\ftdiFlume.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\GeneralFlumes\GpibFlume.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Source\GeneralFlumes\QtSerialFlume.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\GeneralFlumes\VisaFlume.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\GeneralFlumes\WinSerialFlume.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\GeneralImaging\ImageLabel.cpp">
@@ -264,18 +195,6 @@
     <ClCompile Include="Source\LowLevel\stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Microwave\MicrowaveCore.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Microwave\MicrowaveSystem.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Microwave\RsgFlume.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Microwave\WindFreakFlume.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Source\MiscellaneousExperimentOptions\DebugOptionsControl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -283,24 +202,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\MiscellaneousExperimentOptions\Repetitions.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\NIAWG\Rearrangement\rerngGuiControl.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\NIAWG\Rearrangement\rerngOptionStructures.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\NIAWG\Fgen.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\NIAWG\NiawgCore.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\NIAWG\NiawgStructures.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\NIAWG\NiawgSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\ParameterSystem\Expression.cpp">
@@ -312,18 +213,6 @@
     <ClCompile Include="Source\ParameterSystem\ParameterSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Piezo\PiezoController.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Piezo\PiezoCore.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Piezo\PiezoFlume.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Piezo\SerialPiezoFlume.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Source\Plotting\PlotCtrl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -331,12 +220,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\Plotting\PlottingInfo.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Plotting\ScopeThreadWorker.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Plotting\ScopeViewer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\PrimaryWindows\IChimeraQtWindow.cpp">
@@ -348,12 +231,6 @@
     <ClCompile Include="Source\PrimaryWindows\QtAuxiliaryWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\PrimaryWindows\QtBaslerWindow.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\PrimaryWindows\QtDeformableMirrorWindow.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Source\PrimaryWindows\QtMainWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -361,9 +238,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\Python\NewPythonHandler.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Python\SmsTextingControl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\RealTimeDataAnalysis\AnalysisThreadWorker.cpp">
@@ -393,74 +267,11 @@
     <ClCompile Include="Source\Scripts\SyntaxHighlighter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Tektronix\TekCore.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Tektronix\TektronixAfgControl.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Tektronix\TektronixChannelControl.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Source\Agilent\Agilent.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Agilent\AgilentChannelMode.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Agilent\AgilentCore.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Agilent\AgilentSettings.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Agilent\agilentStructures.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Agilent\scriptedAgilentWaveform.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Agilent\Segment.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Agilent\SegmentEnd.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Agilent\segmentStructs.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Agilent\whichAg.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\AnalogInput\AiSettings.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\AnalogInput\AiSystem.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\AnalogInput\AiUnits.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\AnalogInput\CalibrationManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\AnalogInput\calInfo.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\AnalogInput\PhotodetectorCalibration.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\AnalogInput\servoInfo.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\AnalogInput\ServoManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Source\AnalogOutput\AnalogOutput.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -468,6 +279,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\AnalogOutput\AoSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\AnalogOutput\calInfo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\AnalogOutput\DaqMxFlume.h">
@@ -509,21 +323,6 @@
     <ClInclude Include="Source\Andor\PictureSettingsControl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Basler\BaslerCamera.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Basler\BaslerSettings.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Basler\BaslerSettingsControl.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Basler\BaslerWrapper.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Basler\ImageEventHandler.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Source\ConfigurationSystems\ConfigStream.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -555,21 +354,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\DataLogging\DataLogger.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\DeformableMirror\DmControl.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\DeformableMirror\DmCore.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\DeformableMirror\dmFlume.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\DeformableMirror\DmOutputForm.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\DeformableMirror\DmProfileCreator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\DigitalOutput\DigitalOutput.h">
@@ -641,16 +425,10 @@
     <ClInclude Include="Source\GeneralFlumes\ftdiStructures.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\GeneralFlumes\GpibFlume.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Source\GeneralFlumes\QtSerialFlume.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\GeneralFlumes\VisaFlume.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\GeneralFlumes\WinSerialFlume.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\GeneralImaging\imageParameters.h">
@@ -722,21 +500,6 @@
     <ClInclude Include="Source\LowLevel\targetver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Microwave\MicrowaveCore.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Microwave\microwaveSettings.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Microwave\MicrowaveSystem.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Microwave\RsgFlume.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Microwave\WindFreakFlume.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Source\MiscellaneousExperimentOptions\debugInfo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -749,67 +512,10 @@
     <ClInclude Include="Source\MiscellaneousExperimentOptions\Repetitions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\NIAWG\Rearrangement\rerngContainer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\NIAWG\Rearrangement\rerngGuiControl.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\NIAWG\Rearrangement\rerngMoveStructures.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\NIAWG\Rearrangement\rerngOptionStructures.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\NIAWG\Rearrangement\rerngThreadInput.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\NIAWG\directions.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\NIAWG\Fgen.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\NIAWG\NiawgConstants.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\NIAWG\NiawgCore.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\NIAWG\NiawgStructures.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\NIAWG\NiawgSystem.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\NIAWG\rampInfo.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Source\ParameterSystem\Expression.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\ParameterSystem\ParameterSystemStructures.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Piezo\CmdLibrary.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Piezo\piezoChan.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Piezo\PiezoController.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Piezo\PiezoCore.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Piezo\PiezoFlume.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Piezo\PiezoType.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Piezo\SerialPiezoFlume.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\Plotting\dataPoint.h">
@@ -828,9 +534,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\Python\NewPythonHandler.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Python\SmsTextingControl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\RealTimeDataAnalysis\analysisSettings.h">
@@ -863,30 +566,12 @@
     <ClInclude Include="Source\Scripts\ScriptStream.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Tektronix\TekCore.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Tektronix\TektronixAfgControl.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Tektronix\TektronixChannelControl.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Tektronix\TektronixStructures.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Source\stdafx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <QtMoc Include="Source\AnalogInput\CalibrationThreadWorker.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
     <QtMoc Include="Source\Andor\AndorCameraThreadWorker.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="Source\Basler\BaslerGrabThreadWorker.h">
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="Source\ExcessDialogs\AoSettingsDialog.h">
@@ -916,12 +601,6 @@
     <QtMoc Include="Source\Plotting\PlotCtrl.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <QtMoc Include="Source\Plotting\ScopeThreadWorker.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="Source\Plotting\ScopeViewer.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
     <QtMoc Include="Source\PrimaryWindows\IChimeraQtWindow.h">
       <Filter>Header Files</Filter>
     </QtMoc>
@@ -929,12 +608,6 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="Source\PrimaryWindows\QtAuxiliaryWindow.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="Source\PrimaryWindows\QtBaslerWindow.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="Source\PrimaryWindows\QtDeformableMirrorWindow.h">
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="Source\PrimaryWindows\QtMainWindow.h">
@@ -955,10 +628,5 @@
     <QtMoc Include="Source\Scripts\SyntaxHighlighter.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="Source\LowLevel\Chimera.rc">
-      <Filter>Resource Files</Filter>
-    </ResourceCompile>
   </ItemGroup>
 </Project>
