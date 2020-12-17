@@ -497,9 +497,6 @@
     <ClInclude Include="Source\LowLevel\resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\LowLevel\targetver.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Source\MiscellaneousExperimentOptions\debugInfo.h">
       <Filter>Header Files</Filter>
     </ClInclude>

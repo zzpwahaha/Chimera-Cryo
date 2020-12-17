@@ -264,7 +264,6 @@
     <ClInclude Include="Source\GeneralUtilityFunctions\Thrower.h" />
     <ClInclude Include="Source\LowLevel\constants.h" />
     <ClInclude Include="Source\LowLevel\resource.h" />
-    <ClInclude Include="Source\LowLevel\targetver.h" />
     <ClInclude Include="Source\MiscellaneousExperimentOptions\debugInfo.h" />
     <ClInclude Include="Source\MiscellaneousExperimentOptions\DebugOptionsControl.h" />
     <ClInclude Include="Source\MiscellaneousExperimentOptions\MainOptionsControl.h" />
