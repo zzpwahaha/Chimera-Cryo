@@ -252,12 +252,6 @@
     <ClCompile Include="Source\RealTimeDataAnalysis\MachineOptimizer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\RealTimeDataAnalysis\PlotDesignerDialog.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\RealTimeDataAnalysis\QtPlotDesignerDlg.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Source\Scripts\Script.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -548,9 +542,6 @@
     <ClInclude Include="Source\RealTimeDataAnalysis\MachineOptimizer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\RealTimeDataAnalysis\PlotDesignerDialog.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Source\RealTimeDataAnalysis\realTimePlotterInput.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -617,9 +608,6 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="Source\RealTimeDataAnalysis\AtomCruncherWorker.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="Source\RealTimeDataAnalysis\QtPlotDesignerDlg.h">
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="Source\Scripts\SyntaxHighlighter.h">
