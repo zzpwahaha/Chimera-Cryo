@@ -9,7 +9,7 @@
 class StatusIndicator
 {
 	public:
-		void initialize(QPoint &loc, IChimeraQtWindow* parent );
+		void initialize(IChimeraQtWindow* parent );
 		void setText(std::string text);
 		void setColor(std::string color);
 		QLabel* statusLabel() const { return status; }

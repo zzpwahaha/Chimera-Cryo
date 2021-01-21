@@ -9,9 +9,11 @@
 #include <PrimaryWindows/IChimeraQtWindow.h>
 #include <CustomQtControls/AutoNotifyCtrls.h>
 
-class Repetitions{
+class Repetitions :public QWidget
+{
+	Q_OBJECT
 	public:
-		void initialize(QPoint& pos, IChimeraQtWindow* mainWin );
+		void initialize(IChimeraQtWindow* mainWin );
 		void setRepetitions(unsigned number);
 		unsigned int getRepetitionNumber();
 		static unsigned getSettingsFromConfig (ConfigStream& openFile );

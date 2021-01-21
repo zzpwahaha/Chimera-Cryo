@@ -6,6 +6,7 @@
 #include "PrimaryWindows/QtAuxiliaryWindow.h"
 #include <boost/lexical_cast.hpp>
 #include "PrimaryWindows/QtMainWindow.h"
+#include <qlayout.h>
 
 unsigned Repetitions::getSettingsFromConfig (ConfigStream& openFile ){
 	unsigned repNum;
@@ -24,18 +25,21 @@ void Repetitions::updateNumber(long repNumber){
 }
 
 
-void Repetitions::initialize(QPoint& pos, IChimeraQtWindow* parent ){
-	auto& px = pos.rx (), & py = pos.ry ();
+void Repetitions::initialize(IChimeraQtWindow* parent )
+{
+	QHBoxLayout* layout = new QHBoxLayout(this);
+	layout->setContentsMargins(0, 0, 0, 0);
 	repetitionNumber = 100;
 	// title
 	repetitionText = new QLabel ("Repetition #", parent);
-	repetitionText->setGeometry (QRect (px, py, 180, 20));
 	repetitionEdit = new CQLineEdit (cstr (repetitionNumber), parent);
-	repetitionEdit->setGeometry (QRect (px + 180, py, 150, 20));
 	parent->connect (repetitionEdit, &QLineEdit::textChanged, [parent]() {parent->configUpdated (); });
 	repetitionDisp = new QLabel ("-", parent);
-	repetitionDisp->setGeometry (QRect (px + 330, py, 150, 20));
-	py += 20;
+
+	layout->addWidget(repetitionText, 0);
+	layout->addWidget(repetitionEdit, 1);
+	layout->addWidget(repetitionDisp, 0);
+
 }
 
 void Repetitions::setRepetitions(unsigned number){

@@ -3,7 +3,7 @@
 #include "StatusIndicator.h"
 #include <PrimaryWindows/IChimeraQtWindow.h>
 
-void StatusIndicator::initialize(QPoint &loc, IChimeraQtWindow* parent ){
+void StatusIndicator::initialize(IChimeraQtWindow* parent ){
 	status = new QLabel ("Passively Outputing Default Waveform", parent);
 	status->setMinimumSize(960, 100);
 	status->setStyleSheet ("QLabel {font: bold 30pt;}");

@@ -12,12 +12,14 @@
 
 #include <string>
 
-class NoteSystem{
+class NoteSystem : public QWidget
+{
+	Q_OBJECT
 	public:
 		void handleSaveConfig(ConfigStream& saveFile);
 		void handleOpenConfig(ConfigStream& openFile );
 		void setConfigurationNotes(std::string notes);
-		void initialize( QPoint& topLeftPos, IChimeraQtWindow* parent );
+		void initialize( IChimeraQtWindow* parent );
 		std::string getConfigurationNotes();
 	private:
 		QLabel* header;

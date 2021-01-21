@@ -17,12 +17,14 @@ struct mainOptions{
 };
 
 // this got whittled down recently, but keeping so that I can put more stuff in later.
-class MainOptionsControl{
+class MainOptionsControl : public QWidget
+{
+	Q_OBJECT
 	public:
 		void handleSaveConfig(ConfigStream& saveFile);
 		static mainOptions getSettingsFromConfig(ConfigStream& openFile );
 		void setOptions ( mainOptions opts );
-		void initialize(QPoint& loc, IChimeraQtWindow* parent );
+		void initialize( IChimeraQtWindow* parent );
 		mainOptions getOptions();
 
 	private:

@@ -6,31 +6,35 @@
 #include "PrimaryWindows/QtMainWindow.h"
 #include <boost/lexical_cast.hpp>
 #include <qdebug.h>
+#include <qlayout.h>
 
-void MainOptionsControl::initialize( QPoint& loc, IChimeraQtWindow* parent ){
-	auto& px = loc.rx (), & py = loc.ry ();
+void MainOptionsControl::initialize( IChimeraQtWindow* parent )
+{
+	QVBoxLayout* layout = new QVBoxLayout(this);
+	layout->setContentsMargins(0, 0, 0, 0);
+
 	header = new QLabel ("MAIN OPTIONS", parent);
-	header->setGeometry (QRect (px, py, 480, 20));
-	py += 20;
 	auto configUpdate = [parent]() {parent->configUpdated (); };
 	randomizeVariationsButton = new QCheckBox ("Randomize Variations?", parent);
-	randomizeVariationsButton->setGeometry (QRect (px, py, 480, 20));
 	parent->connect (randomizeVariationsButton, &QCheckBox::stateChanged, configUpdate);
-	py += 20;
-
 	delayAutoCal = new QCheckBox ("Delay Auto-Calibration", parent);
-	delayAutoCal->setGeometry (px, py, 480, 20);
-	delayAutoCal->setChecked (true);
-	py += 20;
+	delayAutoCal->setChecked(true);
 
+	layout->addWidget(header, 0);
+	layout->addWidget(randomizeVariationsButton, 0);
+	layout->addWidget(delayAutoCal, 0);
+
+	QHBoxLayout* layout1 = new QHBoxLayout();
+	layout1->setContentsMargins(0, 0, 0, 0);
 	atomThresholdForSkipText = new QLabel ("Atom Threshold for Load Skip:", parent);
-	atomThresholdForSkipText->setGeometry (px, py, 240, 25);
 	atomThresholdForSkipEdit = new QLineEdit ("-1", parent);
-	atomThresholdForSkipEdit->setGeometry (px+240, py, 240, 25);
 	parent->connect (atomThresholdForSkipEdit, &QLineEdit::textChanged, configUpdate);
-
-	py += 25;
 	currentOptions.randomizeVariations = true;
+	layout1->addWidget(atomThresholdForSkipText, 0);
+	layout1->addWidget(atomThresholdForSkipEdit, 1);
+
+	layout->addLayout(layout1);
+
 }
 
 void MainOptionsControl::handleSaveConfig(ConfigStream& saveFile){

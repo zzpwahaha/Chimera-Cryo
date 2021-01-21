@@ -111,28 +111,34 @@ void QtMainWindow::pauseExperiment () {
 
 void QtMainWindow::initializeWidgets (){
 	statBox = new ColorBox(this, getDevices());
+
 	/// initialize main window controls.
 	QWidget* centralWidget = new QWidget();
 	setCentralWidget(centralWidget);
 	QGridLayout* layout = new QGridLayout(centralWidget);
+	//centralWidget->setStyleSheet("border: 2px solid  black; ");
+
+	mainStatus.initialize (this, "EXPERIMENT STATUS", { "#7474FF","#4848FF","#2222EF" });
+	shortStatus.initialize (this);
+	errorStatus.initialize (this, "ERROR STATUS", { "#FF0000", "#800000"});
 	
-	QPoint controlLocation = { 0, 25 };
-	mainStatus.initialize (controlLocation, this, 870, "EXPERIMENT STATUS", { "#7474FF","#4848FF","#2222EF" });
-	layout->addWidget(&mainStatus, 0, 0);
-	shortStatus.initialize (controlLocation, this);
-	layout->addWidget(shortStatus.statusLabel(), 1, 0, 1, 2);
-	errorStatus.initialize (controlLocation, this, 870, "ERROR STATUS", { "#FF0000", "#800000"});
-	layout->addWidget(&errorStatus, 0, 1);
+	layout->addWidget(&mainStatus, 0, 0, 5, 1);
+	layout->addWidget(shortStatus.statusLabel(), 5, 0, 1, 2);
+	layout->addWidget(&errorStatus, 0, 1, 5, 1);
 
 
-	controlLocation = { 960, 25 };
-	profile.initialize (controlLocation, this);
-	controlLocation = { 960, 50 };
-	notes.initialize (controlLocation, this);
-	controlLocation = { 1440, 50 };
-	repetitionControl.initialize (controlLocation, this);
-	mainOptsCtrl.initialize (controlLocation, this);
-	debugger.initialize (controlLocation, this);
+	profile.initialize (this);
+	notes.initialize (this);
+	repetitionControl.initialize (this);
+	mainOptsCtrl.initialize (this);
+	debugger.initialize (this);
+
+	layout->addWidget(&profile, 0, 2);
+	layout->addWidget(&notes, 1, 2);
+	layout->addWidget(&repetitionControl, 2, 2);
+	layout->addWidget(&mainOptsCtrl, 3, 2);
+	layout->addWidget(&debugger, 4, 2);
+	
 }
 
 unsigned QtMainWindow::getAutoCalNumber () { return autoCalNum; }

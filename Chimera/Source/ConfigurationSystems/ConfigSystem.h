@@ -22,7 +22,8 @@
 	that can be checked to determine if the user should be prompted to save at a given point, and all of the functions 
 	for saving, renaming, deleting, and creating new levels within the code. 
 */
-class ConfigSystem : public IChimeraSystem {
+class ConfigSystem : public IChimeraSystem, public QWidget {
+	Q_OBJECT
 	public:
 		static constexpr auto CONFIG_EXTENSION = "Config";
 
@@ -47,7 +48,7 @@ class ConfigSystem : public IChimeraSystem {
 		static void reloadCombo (QComboBox* combo, std::string locationToLook, std::string extension,
 								  std::string nameToLoad );
 		bool fileOrFolderExists ( std::string filePathway );
-		void initialize( QPoint& topLeftPosition, IChimeraQtWindow* win);
+		void initialize(IChimeraQtWindow* win);
 		void handleSelectConfigButton(IChimeraQtWindow* win);
 		
 		template <class sysType>

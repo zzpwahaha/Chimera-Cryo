@@ -4,9 +4,9 @@
 #include "LowLevel/constants.h"
 #include "ConfigurationSystems/ConfigSystem.h"
 #include <PrimaryWindows/QtMainWindow.h>
-#include <QBoxLayout>
 #include <QFile>
 #include <string>
+#include <qlayout.h>
 
 void NoteSystem::handleSaveConfig(ConfigStream& saveFile){
 	saveFile << "CONFIGURATION_NOTES\n";
@@ -37,14 +37,14 @@ void NoteSystem::handleOpenConfig(ConfigStream& openFile){
 	openFile.seekg ( pos );
 }
 
-void NoteSystem::initialize(QPoint& topLeftPos, IChimeraQtWindow* win){
-	unsigned noteSize = 80;
-	auto & px = topLeftPos.rx(), & py = topLeftPos.ry();
+void NoteSystem::initialize(IChimeraQtWindow* win)
+{
+	QVBoxLayout* layout = new QVBoxLayout(this);
+	layout->setContentsMargins(0, 0, 0, 0);
 	header = new QLabel ("CONFIGURATION NOTES", win);
-	header->setGeometry (px, py, 480, 25);
 	edit = new CQTextEdit (win);
-	edit->setGeometry (px, py += 25, 480, noteSize);
-	py += noteSize;
+	layout->addWidget(header, 0);
+	layout->addWidget(edit, 1);
 }
 
 void NoteSystem::setConfigurationNotes(std::string notes){

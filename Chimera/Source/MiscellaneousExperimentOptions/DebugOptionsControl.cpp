@@ -3,22 +3,26 @@
 #include "DebugOptionsControl.h"
 #include "ConfigurationSystems/ConfigSystem.h"
 #include <boost/lexical_cast.hpp>
+#include <qlayout.h>
 
-void DebugOptionsControl::initialize( QPoint& loc, IChimeraQtWindow* parent ){
-	auto& px = loc.rx (), & py = loc.ry ();
-	// Debugging Options Title
+void DebugOptionsControl::initialize( IChimeraQtWindow* parent )
+{
+	QVBoxLayout* layout = new  QVBoxLayout(this);
+	layout->setContentsMargins(0, 0, 0, 0);
 	header = new QLabel ("DEBUGGING OPTIONS", parent);
-	header->setGeometry (px, py, 480, 25);
-	py += 25;
 	auto configUpdate = [parent]() {parent->configUpdated (); };
+	layout->addWidget(header, 0);
+
+	QHBoxLayout* layout1 = new QHBoxLayout();
+	layout1->setContentsMargins(0, 0, 0, 0);
 	pauseText = new QLabel ("Pause Btwn Variations (ms):", parent);
-	pauseText->setGeometry (px, py, 280, 20);
-
 	pauseEdit = new QLineEdit ("0", parent);
-	pauseEdit->setGeometry (px + 280, py, 200, 20);
-	parent->connect (pauseEdit, &QLineEdit::textChanged, configUpdate);
+	parent->connect(pauseEdit, &QLineEdit::textChanged, configUpdate);
+	layout1->addWidget(pauseText, 0);
+	layout1->addWidget(pauseEdit, 1);
 
-	py += 20;
+	layout->addLayout(layout1);
+
 }
 
 

@@ -4,26 +4,23 @@
 #include <PrimaryWindows/IChimeraQtWindow.h>
 #include <qlayout.h>
 
-void StatusControl::initialize (QPoint& loc, IChimeraQtWindow* parent, long size,
-	std::string headerText, std::vector<std::string> textColors) {
+void StatusControl::initialize(IChimeraQtWindow* parent, std::string headerText, std::vector<std::string> textColors)
+{
+	
 	QVBoxLayout* layout = new QVBoxLayout(this);
 	QHBoxLayout* layout1 = new QHBoxLayout();
+	layout1->setContentsMargins(0, 0, 0, 0);
+	layout->setContentsMargins(0, 0, 0, 0);
 	this->setMaximumWidth(widgetWidthMax);
+
 	if (textColors.size () == 0) {
 		thrower ("Need to set a nonzero number of colors for status control!");
 	}
 	colors = textColors;
 	//defaultColor = textColor;
-	header = new QLabel (headerText.c_str (), parent);
-	layout1->addWidget(header, 0);
-
-
-	debugLevelLabel = new QLabel ("Debug Level", parent);
-	layout1->addWidget(debugLevelLabel, 1);
-
-
+	header = new QLabel (headerText.c_str (), parent);	
+	debugLevelLabel = new QLabel ("Debug Level", parent);	
 	debugLevelEdit = new CQLineEdit (parent);
-	layout1->addWidget(debugLevelEdit, 0);
 	debugLevelEdit->setText ("-1");
 	parent->connect (debugLevelEdit, &QLineEdit::textChanged, [this]() {
 		try {
@@ -36,13 +33,18 @@ void StatusControl::initialize (QPoint& loc, IChimeraQtWindow* parent, long size
 		});
 	clearBtn = new QPushButton (parent);
 	clearBtn->setText ("Clear");
-	layout1->addWidget(clearBtn, 0);
-	layout->addLayout(layout1);
 	edit = new QPlainTextEdit (parent);
+	edit->setReadOnly(true);
+	edit->setStyleSheet("QPlainTextEdit { color: " + qstr(textColors[0]) + "; }");
+	parent->connect(clearBtn, &QPushButton::released, [this]() {clear(); });
+
+	layout1->addWidget(header, 0);
+	layout1->addWidget(debugLevelLabel, 1);
+	layout1->addWidget(debugLevelEdit, 0);
+	layout1->addWidget(clearBtn, 0);
+	layout->addLayout(layout1, 0);
 	layout->addWidget(edit, 1);
-	edit->setReadOnly (true);
-	edit->setStyleSheet ("QPlainTextEdit { color: " + qstr (textColors[0]) + "; }");
-	parent->connect (clearBtn, &QPushButton::released, [this]() {clear (); });
+
 }
 
 void StatusControl::addStatusText (std::string text, unsigned level){

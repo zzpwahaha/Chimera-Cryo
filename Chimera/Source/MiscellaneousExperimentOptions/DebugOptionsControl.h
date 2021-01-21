@@ -11,11 +11,13 @@
 
 class MainWindow;
 
-class DebugOptionsControl {
+class DebugOptionsControl : public QWidget
+{
+	Q_OBJECT
 	public:
 		void handleSaveConfig(ConfigStream& saveFile);
 		void handleOpenConfig(ConfigStream& openFile );
-		void initialize( QPoint& loc, IChimeraQtWindow* parent );
+		void initialize( IChimeraQtWindow* parent );
 		void handleEvent(unsigned id, MainWindow* comm);
 		debugInfo getOptions();
 		void setOptions(debugInfo options);

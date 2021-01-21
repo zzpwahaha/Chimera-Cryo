@@ -320,13 +320,7 @@
     <ClInclude Include="Source\ConfigurationSystems\ConfigStream.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\ConfigurationSystems\ConfigSystem.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Source\ConfigurationSystems\MasterConfiguration.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\ConfigurationSystems\NoteSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\ConfigurationSystems\profileSettings.h">
@@ -485,15 +479,6 @@
     <ClInclude Include="Source\MiscellaneousExperimentOptions\debugInfo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\MiscellaneousExperimentOptions\DebugOptionsControl.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\MiscellaneousExperimentOptions\MainOptionsControl.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\MiscellaneousExperimentOptions\Repetitions.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Source\ParameterSystem\Expression.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -611,6 +596,21 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="Source\ExperimentMonitoringAndStatus\StatusControl.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\ConfigurationSystems\ConfigSystem.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\ConfigurationSystems\NoteSystem.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\MiscellaneousExperimentOptions\DebugOptionsControl.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\MiscellaneousExperimentOptions\MainOptionsControl.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\MiscellaneousExperimentOptions\Repetitions.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>

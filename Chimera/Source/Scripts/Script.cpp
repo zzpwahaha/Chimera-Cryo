@@ -53,8 +53,9 @@ void Script::initialize(IChimeraQtWindow* parent, std::string deviceTypeInput, s
 	}
 	QHBoxLayout* layout1 = new QHBoxLayout();
 	savedIndicator = new CQCheckBox ("Saved?", parent);
+	savedIndicator->setEnabled(false);
 	savedIndicator->setChecked (true);
-	savedIndicator->setEnabled (false);
+	
 	fileNameText = new QLabel ("", parent);
 	isSaved = true;
 	help = new QLabel ("?", parent);

@@ -18,8 +18,7 @@ class StatusControl : public QWidget
 		widgetHeigthMax = 100000
 	};
 	public:
-		void initialize(QPoint& loc, IChimeraQtWindow* parent, long size, std::string headerText,
-			std::vector<std::string> textColors);
+		void initialize(IChimeraQtWindow* parent, std::string headerText, std::vector<std::string> textColors);
 		void addStatusText(std::string text, unsigned level = 0);
 		void addStatusText (std::string text, std::string color);
 		void clear();

@@ -205,9 +205,9 @@
     <ClInclude Include="Source\Andor\cameraThreadInput.h" />
     <ClInclude Include="Source\Andor\PictureSettingsControl.h" />
     <ClInclude Include="Source\ConfigurationSystems\ConfigStream.h" />
-    <ClInclude Include="Source\ConfigurationSystems\ConfigSystem.h" />
+    <QtMoc Include="Source\ConfigurationSystems\ConfigSystem.h" />
     <ClInclude Include="Source\ConfigurationSystems\MasterConfiguration.h" />
-    <ClInclude Include="Source\ConfigurationSystems\NoteSystem.h" />
+    <QtMoc Include="Source\ConfigurationSystems\NoteSystem.h" />
     <QtMoc Include="Source\ConfigurationSystems\ProfileIndicator.h" />
     <ClInclude Include="Source\ConfigurationSystems\profileSettings.h" />
     <ClInclude Include="Source\ConfigurationSystems\Version.h" />
@@ -263,9 +263,9 @@
     <ClInclude Include="Source\LowLevel\constants.h" />
     <ClInclude Include="Source\LowLevel\resource.h" />
     <ClInclude Include="Source\MiscellaneousExperimentOptions\debugInfo.h" />
-    <ClInclude Include="Source\MiscellaneousExperimentOptions\DebugOptionsControl.h" />
-    <ClInclude Include="Source\MiscellaneousExperimentOptions\MainOptionsControl.h" />
-    <ClInclude Include="Source\MiscellaneousExperimentOptions\Repetitions.h" />
+    <QtMoc Include="Source\MiscellaneousExperimentOptions\DebugOptionsControl.h" />
+    <QtMoc Include="Source\MiscellaneousExperimentOptions\MainOptionsControl.h" />
+    <QtMoc Include="Source\MiscellaneousExperimentOptions\Repetitions.h" />
     <ClInclude Include="Source\ParameterSystem\Expression.h" />
     <ClInclude Include="Source\ParameterSystem\ParameterSystemStructures.h" />
     <ClInclude Include="Source\Plotting\dataPoint.h" />

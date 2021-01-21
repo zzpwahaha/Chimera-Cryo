@@ -12,21 +12,23 @@
 #include "ExcessDialogs/saveWithExplorer.h"
 #include <qdebug.h>
 #include <fstream>
+#include <qlayout.h>
+
+
 
 ConfigSystem::ConfigSystem(std::string fileSystemPath, IChimeraQtWindow* parent) : IChimeraSystem(parent) {
 	FILE_SYSTEM_PATH = fileSystemPath;
 }
 
-void ConfigSystem::initialize( QPoint& pos, IChimeraQtWindow* win){
-	auto& px=pos.rx(), & py = pos.ry ();
+void ConfigSystem::initialize( IChimeraQtWindow* win)
+{
+	QHBoxLayout* layout = new QHBoxLayout(this);
+	layout->setContentsMargins(0, 0, 0, 0);
 	configDisplay = new QLabel ("No Configuruation Selected!", win);
 	configDisplay->setStyleSheet(" QLabel{ font: bold 8pt; }");
-	configDisplay->setGeometry (QRect (px, py, 700, 25));
-	configurationSavedIndicator = new QCheckBox ("Saved?", win);
-	configurationSavedIndicator->setGeometry (QRect (px + 860, py, 100, 25));
+	configurationSavedIndicator = new QCheckBox ("Saved?", win);	
 	configurationSavedIndicator->setChecked (true);
 	selectConfigButton = new QPushButton ("Open Config.", win);
-	selectConfigButton->setGeometry (QRect (px + 700, py, 160, 25));
 	win->connect (selectConfigButton, &QPushButton::released, [this, win]() {
 		try {
 			handleSelectConfigButton (win);
@@ -34,7 +36,11 @@ void ConfigSystem::initialize( QPoint& pos, IChimeraQtWindow* win){
 		catch (ChimeraError & err) {
 			emit error (err.qtrace ());
 		}});
-	py += 25;
+	
+	layout->addWidget(configDisplay, 1);
+	layout->addWidget(selectConfigButton, 0);
+	layout->addWidget(configurationSavedIndicator, 0);
+
 	updateConfigurationSavedStatus( true );
 }
 
