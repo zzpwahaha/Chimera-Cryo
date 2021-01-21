@@ -17,7 +17,7 @@
 QtMainWindow::QtMainWindow () : 
 	profile (PROFILES_PATH, this),
 	masterConfig (MASTER_CONFIGURATION_FILE_ADDRESS){
-	statBox = new ColorBox ();
+	
 	startupTimes.push_back (chronoClock::now ());
 	/// Initialize Windows
 	std::string which = "";
@@ -54,9 +54,10 @@ QtMainWindow::QtMainWindow () :
 		auto screen = qApp->screens ()[monitorNum[winCount++] % numMonitors];
 		window->setWindowState ((windowState () & ~Qt::WindowMinimized) | Qt::WindowActive);
 		window->activateWindow ();
-		window->show (); 
-		window->move (screen->availableGeometry ().topLeft());
-		window->resize (screen->availableGeometry ().width (), screen->availableGeometry().height());
+		window->setGeometry(0, 0, 1200, 800);
+		window->showMaximized (); 
+		//window->move (screen->availableGeometry ().topLeft());
+		//window->resize (screen->availableGeometry ().width (), screen->availableGeometry().height());
 	}
 	// hide the splash just before the first window requiring input pops up.
 	try	{
@@ -82,6 +83,7 @@ QtMainWindow::QtMainWindow () :
 	catch (ChimeraError & err) {
 		errBox (err.trace ());
 	}
+	
 	QTimer* timer = new QTimer (this);
 	connect (timer, &QTimer::timeout, [this]() {
 		// should auto quit in the handling here if calibration has already been completed for the day. 
@@ -108,13 +110,21 @@ void QtMainWindow::pauseExperiment () {
 }
 
 void QtMainWindow::initializeWidgets (){
+	statBox = new ColorBox(this, getDevices());
 	/// initialize main window controls.
+	QWidget* centralWidget = new QWidget();
+	setCentralWidget(centralWidget);
+	QGridLayout* layout = new QGridLayout(centralWidget);
+	
 	QPoint controlLocation = { 0, 25 };
 	mainStatus.initialize (controlLocation, this, 870, "EXPERIMENT STATUS", { "#7474FF","#4848FF","#2222EF" });
-	statBox->initialize (controlLocation, this, 960, getDevices ());
+	layout->addWidget(&mainStatus, 0, 0);
 	shortStatus.initialize (controlLocation, this);
-	controlLocation = { 480, 25 };
+	layout->addWidget(shortStatus.statusLabel(), 1, 0, 1, 2);
 	errorStatus.initialize (controlLocation, this, 870, "ERROR STATUS", { "#FF0000", "#800000"});
+	layout->addWidget(&errorStatus, 0, 1);
+
+
 	controlLocation = { 960, 25 };
 	profile.initialize (controlLocation, this);
 	controlLocation = { 960, 50 };

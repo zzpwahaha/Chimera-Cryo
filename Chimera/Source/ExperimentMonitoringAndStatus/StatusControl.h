@@ -9,8 +9,14 @@
 #include <PrimaryWindows/IChimeraQtWindow.h>
 #include <qplaintextedit.h>
 
-class StatusControl
+class StatusControl : public QWidget
 {
+	Q_OBJECT
+
+	enum {
+		widgetWidthMax = 640,
+		widgetHeigthMax = 100000
+	};
 	public:
 		void initialize(QPoint& loc, IChimeraQtWindow* parent, long size, std::string headerText,
 			std::vector<std::string> textColors);

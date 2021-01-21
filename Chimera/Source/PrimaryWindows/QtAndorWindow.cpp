@@ -18,7 +18,7 @@ QtAndorWindow::QtAndorWindow (QWidget* parent) : IChimeraQtWindow (parent),
 	andor (ANDOR_SAFEMODE),
 	pics (false, "ANDOR_PICTURE_MANAGER", false, Qt::SmoothTransformation),
 	analysisHandler (this){
-	statBox = new ColorBox ();
+	
 	setWindowTitle ("Andor Window");
 }
 
@@ -29,9 +29,10 @@ int QtAndorWindow::getDataCalNum () {
 }
 
 void QtAndorWindow::initializeWidgets (){
+	statBox = new ColorBox(this, mainWin->getDevices());
 	andor.initializeClass (this, &imageTimes);
 	QPoint position = { 0,25 };
-	statBox->initialize (position, this, 480, mainWin->getDevices (), 2);
+	//statBox->initialize (position, this, 480, mainWin->getDevices (), 2);
 	alerts.alertMainThread (0);
 	alerts.initialize (position, this);
 	analysisHandler.initialize (position, this);

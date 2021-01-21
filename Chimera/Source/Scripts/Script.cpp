@@ -20,9 +20,18 @@
 #include <qcombobox.h>
 #include <QInputDialog.h>
 
-void Script::initialize (int width, int height, QPoint& loc, IChimeraQtWindow* parent,
-	std::string deviceTypeInput, std::string scriptHeader){
-	auto& px = loc.rx (), & py = loc.ry ();
+Script::Script(IChimeraQtWindow* parent) : IChimeraSystem(parent) 
+{
+	isSaved = true;
+	editChangeEnd = 0;
+	editChangeBegin = ULONG_MAX;
+	setMaximumWidth(widgetWidthMax);
+}
+
+void Script::initialize(IChimeraQtWindow* parent, std::string deviceTypeInput, std::string scriptHeader)
+{
+	QVBoxLayout* layout = new QVBoxLayout(this);
+
 	deviceType = deviceTypeInput;
 	ScriptableDevice devenum;
 	if (deviceTypeInput == "Agilent") {
@@ -39,18 +48,22 @@ void Script::initialize (int width, int height, QPoint& loc, IChimeraQtWindow* p
 	}
 	if (scriptHeader != "")	{
 		title = new QLabel (cstr (scriptHeader), parent);
-		title->setGeometry (px, py, width, 25);
-		py += 25;
+		layout->addWidget(title, 0);
+		//title->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 	}
+	QHBoxLayout* layout1 = new QHBoxLayout();
 	savedIndicator = new CQCheckBox ("Saved?", parent);
-	savedIndicator->setGeometry (px, py, 80, 20);
 	savedIndicator->setChecked (true);
 	savedIndicator->setEnabled (false);
 	fileNameText = new QLabel ("", parent);
-	fileNameText->setGeometry (px + 80, py, width - 100, 20);
 	isSaved = true;
 	help = new QLabel ("?", parent);
-	help->setGeometry (px + width - 20, py, 20, 20);
+	
+	layout1->addWidget(savedIndicator, 0);
+	layout1->addWidget(fileNameText, 1);
+	layout1->addWidget(help, 0);
+	layout1->setContentsMargins(0, 0, 0, 0);
+
 	if (deviceType == "Master"){
 		help->setToolTip ("This is a script for programming master timing for TTLs, DACs, the RSG, and the raman outputs.\n"
 							"Acceptable Commands:\n"
@@ -102,9 +115,8 @@ void Script::initialize (int width, int height, QPoint& loc, IChimeraQtWindow* p
 	else{
 		help->setToolTip ("No Help available");
 	}
-	py += 20;
+	
 	availableFunctionsCombo.combo = new CQComboBox (parent);
-	availableFunctionsCombo.combo->setGeometry (px, py, width, 25);
 	loadFunctions ();
 	availableFunctionsCombo.combo->setCurrentIndex (0);
 	parent->connect (availableFunctionsCombo.combo, qOverload<int> (&QComboBox::activated), [this, parent]() {
@@ -115,22 +127,27 @@ void Script::initialize (int width, int height, QPoint& loc, IChimeraQtWindow* p
 		catch (ChimeraError & err) {
 			parent->reportErr (err.qtrace ());
 		}});
-	py += 25;
 
 	edit = new CQTextEdit ("", parent);
-	edit->setGeometry (px, py, width, height);
 	edit->setAcceptRichText (false);
 	QFont font;
-	font.setFamily ("Courier");
-	font.setStyleHint (QFont::Monospace);
-	font.setFixedPitch (true);
-	font.setPointSize (10);
-	edit->setFont (font);
-	edit->setTabStopDistance (40);
+	{
+		font.setFamily("Courier");
+		font.setStyleHint(QFont::Monospace);
+		font.setFixedPitch(true);
+		font.setPointSize(10);
+		edit->setFont(font);
+		edit->setTabStopDistance(40);
+	}
+
 
 	parent->connect (edit, &QTextEdit::textChanged, [this, parent]() { updateSavedStatus (false); });
 	highlighter = new SyntaxHighlighter (devenum, edit->document ());
-	py += height;
+
+	layout->addLayout(layout1);
+	layout->addWidget(availableFunctionsCombo.combo, 0);
+	layout->addWidget(edit, 1);
+	layout->setContentsMargins(0, 0, 0, 0);
 }
 
 void Script::functionChangeHandler(std::string configPath){
@@ -142,11 +159,7 @@ void Script::functionChangeHandler(std::string configPath){
 	}
 }
 
-Script::Script(IChimeraQtWindow* parent) : IChimeraSystem(parent) {
-	isSaved = true;
-	editChangeEnd = 0;
-	editChangeBegin = ULONG_MAX;
-}
+
 
 std::string Script::getScriptPath(){
 	return scriptPath;

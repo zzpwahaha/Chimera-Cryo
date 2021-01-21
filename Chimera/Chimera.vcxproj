@@ -208,7 +208,7 @@
     <ClInclude Include="Source\ConfigurationSystems\ConfigSystem.h" />
     <ClInclude Include="Source\ConfigurationSystems\MasterConfiguration.h" />
     <ClInclude Include="Source\ConfigurationSystems\NoteSystem.h" />
-    <ClInclude Include="Source\ConfigurationSystems\ProfileIndicator.h" />
+    <QtMoc Include="Source\ConfigurationSystems\ProfileIndicator.h" />
     <ClInclude Include="Source\ConfigurationSystems\profileSettings.h" />
     <ClInclude Include="Source\ConfigurationSystems\Version.h" />
     <ClInclude Include="Source\CustomQtControls\AutoNotifyCtrls.h" />
@@ -226,9 +226,9 @@
     <ClInclude Include="Source\ExcessDialogs\openWithExplorer.h" />
     <ClInclude Include="Source\ExcessDialogs\saveWithExplorer.h" />
     <ClInclude Include="Source\ExperimentMonitoringAndStatus\AlertSystem.h" />
-    <ClInclude Include="Source\ExperimentMonitoringAndStatus\ColorBox.h" />
+    <QtMoc Include="Source\ExperimentMonitoringAndStatus\ColorBox.h" />
     <ClInclude Include="Source\ExperimentMonitoringAndStatus\ExperimentTimer.h" />
-    <ClInclude Include="Source\ExperimentMonitoringAndStatus\StatusControl.h" />
+    <QtMoc Include="Source\ExperimentMonitoringAndStatus\StatusControl.h" />
     <ClInclude Include="Source\ExperimentMonitoringAndStatus\StatusIndicator.h" />
     <ClInclude Include="Source\ExperimentThread\AllExperimentInput.h" />
     <ClInclude Include="Source\ExperimentThread\autoCalConfigInfo.h" />
@@ -280,7 +280,7 @@
     <ClInclude Include="Source\RealTimeDataAnalysis\DataAnalysisControl.h" />
     <ClInclude Include="Source\RealTimeDataAnalysis\MachineOptimizer.h" />
     <ClInclude Include="Source\RealTimeDataAnalysis\realTimePlotterInput.h" />
-    <ClInclude Include="Source\Scripts\Script.h" />
+    <QtMoc Include="Source\Scripts\Script.h" />
     <ClInclude Include="Source\Scripts\ScriptableDevices.h" />
     <ClInclude Include="Source\Scripts\ScriptStream.h" />
     <ClInclude Include="Source\stdafx.h" />

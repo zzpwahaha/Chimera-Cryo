@@ -14,7 +14,7 @@ QtAuxiliaryWindow::QtAuxiliaryWindow (QWidget* parent) : IChimeraQtWindow (paren
 	ttlBoard (this, DOFTDI_SAFEMODE, true),
 	aoSys (this, ANALOG_OUT_SAFEMODE), configParamCtrl (this, "CONFIG_PARAMETERS"),
 	globalParamCtrl (this, "GLOBAL_PARAMETERS"), dds (this, DDS_SAFEMODE){	
-	statBox = new ColorBox ();
+	
 	setWindowTitle ("Auxiliary Window");
 }
 
@@ -34,9 +34,10 @@ bool QtAuxiliaryWindow::eventFilter (QObject* obj, QEvent* event){
 }
 
 void QtAuxiliaryWindow::initializeWidgets (){
+	statBox = new ColorBox(this, mainWin->getDevices());
 	QPoint loc{ 0, 25 };
 	try{
-		statBox->initialize (loc, this, 480, mainWin->getDevices (), 2);
+		//statBox->initialize (loc, this, 480, mainWin->getDevices (), 2);
 		ttlBoard.initialize (loc, this);
 		aoSys.initialize (loc, this);
 		loc = QPoint{ 1440, 25 };

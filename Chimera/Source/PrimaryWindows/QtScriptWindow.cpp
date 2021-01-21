@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "QtScriptWindow.h"
 #include <qdesktopwidget.h>
+#include <qlayout.h>
 #include <PrimaryWindows/QtScriptWindow.h>
 #include <PrimaryWindows/QtAndorWindow.h>
 #include <PrimaryWindows/QtAuxiliaryWindow.h>
@@ -8,9 +9,9 @@
 #include <ExcessDialogs/saveWithExplorer.h>
 #include <ExcessDialogs/openWithExplorer.h>
 
-QtScriptWindow::QtScriptWindow (QWidget* parent) : IChimeraQtWindow (parent),
-		masterScript(this) {
-	statBox = new ColorBox ();
+QtScriptWindow::QtScriptWindow (QWidget* parent) : IChimeraQtWindow (parent)
+	, masterScript(this) 
+{
 	setWindowTitle ("Script Window");
 }
 
@@ -18,13 +19,18 @@ QtScriptWindow::~QtScriptWindow (){
 }
 
 void QtScriptWindow::initializeWidgets (){
+	statBox = new ColorBox (this, mainWin->getDevices());
 	int id = 2000;
-	QPoint startLocation = { 0, 50 };
-	startLocation = { 2 * 640, 50 };
-	masterScript.initialize (640, 900, startLocation, this, "Master", "Master Script");
-	startLocation = { 1000, 25 };
-	statBox->initialize (startLocation, this, 900, mainWin->getDevices ());
-	profileDisplay.initialize ({ 0,25 }, this);
+	QWidget* centralWidget = new QWidget();
+	setCentralWidget(centralWidget);
+	QHBoxLayout* layout = new QHBoxLayout(centralWidget);
+	//centralWidget->setStyleSheet("border: 2px solid  black; ");
+	masterScript.initialize(this, "Master", "Master Script");
+	
+	profileDisplay.initialize (this);
+	layout->addWidget(&profileDisplay, 1);
+	layout->addWidget(&masterScript, 1);
+	
 	updateDoAoNames ();
 	updateVarNames ();
 }

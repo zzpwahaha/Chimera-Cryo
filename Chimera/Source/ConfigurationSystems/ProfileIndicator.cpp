@@ -3,13 +3,16 @@
 #include "ProfileIndicator.h"
 #include "GeneralUtilityFunctions/my_str.h"
 
-void ProfileIndicator::initialize(QPoint pos, QWidget* parent ) {
-	auto& px = pos.rx (), & py = pos.ry ();
-	header = new QLabel ("Congfiguration: ", parent);
-	header->setGeometry (px, py, 200, 20);
-	indicator = new QLabel ("", parent);
-	indicator->setGeometry (px + 200, py, 1000, 20);
-	py += 20;
+void ProfileIndicator::initialize(QWidget* parent ) {
+	QHBoxLayout* layout = new QHBoxLayout(this);
+	setLayout(layout);
+	header = new QLabel("Congfiguration: ", parent);
+	indicator = new QLabel("placeholder", parent);
+	layout->addWidget(header, 0, Qt::AlignTop);
+	layout->addWidget(indicator, 1, Qt::AlignTop);
+	layout->setContentsMargins(0, 0, 0, 0);
+	this->setMaximumWidth(widgetWidthMax);
+
 }
 
 void ProfileIndicator::update(std::string text)

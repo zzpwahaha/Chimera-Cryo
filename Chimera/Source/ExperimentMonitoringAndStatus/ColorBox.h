@@ -6,6 +6,7 @@
 #include "GeneralObjects/commonTypes.h"
 #include <PrimaryWindows/IChimeraQtWindow.h>
 #include <qlabel.h>
+#include <qstatusbar.h>
 /*
  * I put one of these controls on every window. It shows the colors for every system running.
  */
@@ -15,9 +16,11 @@ struct boxInfo{
 	std::string delim;
 };
 
-class ColorBox{
+class ColorBox : public QStatusBar 
+{
+	Q_OBJECT
 	public:
-		void initialize( QPoint& pos, IChimeraQtWindow* parent, int length, DeviceList devices, unsigned numRows=1);
+		ColorBox::ColorBox(IChimeraQtWindow* parent, DeviceList devices);
 		void changeColor (std::string delim, std::string color);
 		bool initialized = false;
 	private:
