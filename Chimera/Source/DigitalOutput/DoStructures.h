@@ -2,6 +2,7 @@
 #pragma once
 #include <array>
 #include "GeneralObjects/commonTypes.h"
+#include "DigitalOutput/DoRows.h"
 
 // this struct keeps variable names.
 struct DoCommandForm
@@ -33,6 +34,6 @@ struct DoSnapshot
 	// the time of the snapshot
 	double time;
 	// all values at this time.
-	std::array< std::array<bool, 16>, 4 > ttlStatus;
+	std::array< std::array<bool, size_t(DOGrid::numOFunit)>, size_t(DOGrid::numPERunit) > ttlStatus;
 };
 

@@ -7,14 +7,13 @@
 
 AnalogOutput::AnalogOutput( ){}
 
-void AnalogOutput::initialize ( QPoint& pos, IChimeraQtWindow* parent, int whichDac) {
-	auto& px = pos.rx (), & py = pos.ry ();
+void AnalogOutput::initialize ( IChimeraQtWindow* parent, int whichDac) {
+	layout = new QHBoxLayout();
+	layout->setContentsMargins(0, 0, 0, 0);
 	label = new QLabel (cstr (whichDac), parent);
-	label->setGeometry (QRect{ QPoint{px, py}, QPoint{px + 20, py + 20} });
 	label->setToolTip ( (info.name + "\n" + info.note).c_str() );
-
+	
 	edit = new CQLineEdit ("0", parent);
-	edit->setGeometry ({ QPoint{px + 20, py},QPoint{px + 160, py += 20} });
 	edit->setToolTip ( (info.name + "\r\n" + info.note).c_str() );
 	edit->installEventFilter (parent);
 	parent->connect (edit, &QLineEdit::textChanged, 		
@@ -22,6 +21,9 @@ void AnalogOutput::initialize ( QPoint& pos, IChimeraQtWindow* parent, int which
 			handleEdit ();
 		});
 	edit->setStyleSheet ("QLineEdit { border: none }");
+
+	layout->addWidget(label, 0);
+	layout->addWidget(edit, 1);
 }
 
 bool AnalogOutput::eventFilter (QObject* obj, QEvent* event) {
@@ -61,7 +63,7 @@ bool AnalogOutput::eventFilter (QObject* obj, QEvent* event) {
 			double size = pow (10, decimalPos - 1);
 			// handle the extra decimal character with the ternary operator here. 
 			int editPlace = (cursorPos > decimalPos ? cursorPos - 1 : cursorPos);
-			double inc = size / pow (10, editPlace);
+			double inc = size / pow(10, editPlace - 1);
 			info.currVal += up ? inc : -inc;
 			updateEdit (false);
 			auto newTxt = edit->text (); 

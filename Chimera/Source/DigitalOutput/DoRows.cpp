@@ -9,7 +9,8 @@ for (auto row : DoRows::allRows)
 	// ...
 }
 */
-const std::array<DoRows::which, 4> DoRows::allRows = {which::A,which::B,which::C,which::D};
+const std::array<DoRows::which, size_t(DOGrid::numOFunit)> DoRows::allRows = 
+{ which::A,which::B,which::C,which::D,which::E,which::F,which::G,which::H };
 
 
 /*
@@ -19,7 +20,7 @@ DoRows::which DoRows::fromStr ( std::string rowStr )
 {
 	for ( auto w : allRows )
 	{
-		if ( str(rowStr,13,false,true) == toStr ( w ) )
+		if (str(rowStr, 13, false, true) == toStr(w))
 		{
 			return w;
 		}
@@ -41,6 +42,14 @@ std::string DoRows::toStr ( which m )
 			return "c";
 		case which::D:
 			return "d";
+		case which::E:
+			return "e";
+		case which::F:
+			return "f";
+		case which::G:
+			return "g";
+		case which::H:
+			return "h";
 	}
 	thrower  ( "Faied to convert dio row to string!" );
 	return "";

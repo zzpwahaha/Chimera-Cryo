@@ -24,7 +24,9 @@
 /**/
 class AuxiliaryWindow;
 
-class DoSystem : public IChimeraSystem {
+class DoSystem : public IChimeraSystem
+{
+	Q_OBJECT
 	public:
 		// THIS CLASS IS NOT COPYABLE.
 		DoSystem& operator=(const DoSystem&) = delete;
@@ -36,13 +38,13 @@ class DoSystem : public IChimeraSystem {
 		std::string getDoSystemInfo ();
 		void handleSaveConfig(ConfigStream& saveFile);
 		void handleOpenConfig(ConfigStream& openFile);
-		void initialize(QPoint& startLocation, IChimeraQtWindow* master );
+		void initialize( IChimeraQtWindow* master );
 		int getNumberOfTTLRows();
 		int getNumberOfTTLsPerRow();
 		void zeroBoard();
 		void handleTTLPress (DigitalOutput& out);
 		void handleHoldPress();
-		void setTtlStatusNoForceOut(std::array< std::array<bool, 16>, 4 > status);
+		void setTtlStatusNoForceOut(std::array< std::array<bool, size_t(DOGrid::numPERunit)>, size_t(DOGrid::numOFunit) > status);
 		bool getFtFlumeSafemode ();
 
 		std::pair<unsigned, unsigned> getTtlBoardSize();
@@ -54,7 +56,7 @@ class DoSystem : public IChimeraSystem {
 		void updateDefaultTtl( DoRows::which row, unsigned column, bool state);
 		bool getDefaultTtl( DoRows::which row, unsigned column);
 		std::pair<unsigned short, unsigned short> calcDoubleShortTime( double time );
-		std::array< std::array<bool, 16>, 4 > getCurrentStatus( );
+		std::array< std::array<bool, size_t(DOGrid::numPERunit)>, size_t(DOGrid::numOFunit) > getCurrentStatus( );
 		void updatePush( DoRows::which row, unsigned col );
 		allDigitalOutputs& getDigitalOutputs();
 		DoCore& getCore ();
@@ -67,8 +69,8 @@ class DoSystem : public IChimeraSystem {
 		QLabel* ttlTitle;
 		CQPushButton* ttlHold;
 		CQPushButton* zeroTtls;
-		std::array< QLabel*, 16 > ttlNumberLabels;
-		std::array< QLabel*, 16 > ttlRowLabels;
+		//std::array< QLabel*, 16 > ttlNumberLabels;
+		//std::array< QLabel*, 16 > ttlRowLabels;
 		allDigitalOutputs outputs;
 
 		// tells whether the hold button is down or not.

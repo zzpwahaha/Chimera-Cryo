@@ -5,6 +5,7 @@
 #include <qgraphicslayout.h>
 #include <qdebug.h>
 #include <qmenu.h>
+#include <qlayout.h>
 
 PlotCtrl::PlotCtrl( unsigned numTraces, plotStyle inStyle, std::vector<int> thresholds_in,
 					std::string titleIn, bool narrowOpt, bool plotHistOption ) :
@@ -261,7 +262,7 @@ void PlotCtrl::resetChart () {
 	view->chart ()->createDefaultAxes ();
 	view->chart ()->layout ()->setContentsMargins (0, 0, 0, 0);
 	view->chart ()->setBackgroundRoundness (0);
-	view->chart ()->setBackgroundBrush (QBrush (QColor (20, 20, 20)));
+	view->chart ()->setBackgroundBrush (QBrush (QColor (255, 255, 255)));
 	view->chart ()->setMargins (QMargins (0, 0, 0, 0));
 	if (view->chart ()->axes (Qt::Horizontal)[0]) {
 		auto pen = view->chart ()->axes (Qt::Horizontal)[0]->gridLinePen ();
@@ -273,8 +274,8 @@ void PlotCtrl::resetChart () {
 	view->chart ()->setTitle (title.c_str ());
 }
 
-void PlotCtrl::init( QPoint& pos, long width, long height, IChimeraQtWindow* parent ){ 
-	auto& px = pos.rx (), &py = pos.ry ();
+void PlotCtrl::init(IChimeraQtWindow* parent)
+{ 
 	chart = new QtCharts::QChart ();
 	view = new QtCharts::QChartView (chart, parent);
 	view->setContextMenuPolicy (Qt::CustomContextMenu);
@@ -286,7 +287,7 @@ void PlotCtrl::init( QPoint& pos, long width, long height, IChimeraQtWindow* par
 		view->chart()->addSeries (qtLineData[datanum]);
 	}
 	resetChart ();
+	view->setMaximumWidth(600);
 	view->setRenderHint (QPainter::Antialiasing);
-	view->setGeometry (px, py, width, height);
-	py += height;
+
 }

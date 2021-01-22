@@ -11,6 +11,7 @@
 #include "PrimaryWindows/IChimeraQtWindow.h"
 #include <qlineedit.h>
 #include <qtablewidget.h>
+#include <qwidget.h>
 
 struct optimizationAlgorithm
 {
@@ -74,8 +75,9 @@ struct HillClimbingInfo
 };
 
 
-class MachineOptimizer
+class MachineOptimizer : public QWidget
 {
+	Q_OBJECT
 	public:
 		void initialize ( QPoint& pos, IChimeraQtWindow* parent );
 		void reset ( );
@@ -118,5 +120,10 @@ class MachineOptimizer
 		optimizationSettings currentSettings;
 		std::vector<std::shared_ptr<optParamSettings>> optParams;
 		HillClimbingInfo optStatus;
+
+public slots:
+
+signals:
+
 };
 

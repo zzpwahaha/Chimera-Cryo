@@ -10,6 +10,8 @@
 #include <ExcessDialogs/doChannelInfoDialog.h>
 #include <ExcessDialogs/AoSettingsDialog.h>
 
+#include <qlayout.h>
+
 QtAuxiliaryWindow::QtAuxiliaryWindow (QWidget* parent) : IChimeraQtWindow (parent), 
 	ttlBoard (this, DOFTDI_SAFEMODE, true),
 	aoSys (this, ANALOG_OUT_SAFEMODE), configParamCtrl (this, "CONFIG_PARAMETERS"),
@@ -23,7 +25,7 @@ QtAuxiliaryWindow::~QtAuxiliaryWindow () {}
 bool QtAuxiliaryWindow::eventFilter (QObject* obj, QEvent* event){
 	if (aoSys.eventFilter (obj, event)) {
 		try {
-			aoSys.forceDacs (ttlBoard.getCore (), { 0, ttlBoard.getCurrentStatus () });
+			aoSys.forceDacs(ttlBoard.getCore(), { 0, ttlBoard.getCurrentStatus() });
 		}
 		catch (ChimeraError& err) {
 			reportErr (err.qtrace ());
@@ -35,23 +37,40 @@ bool QtAuxiliaryWindow::eventFilter (QObject* obj, QEvent* event){
 
 void QtAuxiliaryWindow::initializeWidgets (){
 	statBox = new ColorBox(this, mainWin->getDevices());
+	QWidget* centralWidget = new QWidget();
+	setCentralWidget(centralWidget);
+	//centralWidget->setStyleSheet("border: 2px solid  black; ");
+	QHBoxLayout* layout = new QHBoxLayout(centralWidget);
 	QPoint loc{ 0, 25 };
 	try{
-		//statBox->initialize (loc, this, 480, mainWin->getDevices (), 2);
-		ttlBoard.initialize (loc, this);
-		aoSys.initialize (loc, this);
-		loc = QPoint{ 1440, 25 };
-		loc.ry() = 25;
-		globalParamCtrl.initialize (loc, this, "GLOBAL PARAMETERS", ParameterSysType::global, 480, 500);
-		configParamCtrl.initialize (loc, this, "CONFIGURATION PARAMETERS", ParameterSysType::config);
-		configParamCtrl.setParameterControlActive (false);
-		dds.initialize (loc, this, "DDS SYSTEM");
-		optimizer.initialize (loc, this);
+		QVBoxLayout* layout1 = new QVBoxLayout();
+		ttlBoard.initialize (this);
+		layout1->addWidget(&ttlBoard, 0);
+		
+		aoSys.initialize (this);
 
-		loc = QPoint{ 960, 25 };
+		layout1->addWidget(&aoSys, 0);
+		layout1->addStretch(1);
+
+		globalParamCtrl.initialize (this, "GLOBAL PARAMETERS", ParameterSysType::global, 480, 500);
+		
+		QVBoxLayout* layout3 = new QVBoxLayout();
+		layout3->addWidget(&globalParamCtrl, 1);
+
+		configParamCtrl.initialize (this, "CONFIGURATION PARAMETERS", ParameterSysType::config);
+		configParamCtrl.setParameterControlActive (false);
+		layout3->addWidget(&configParamCtrl, 1);
+		
+		dds.initialize (this, "DDS SYSTEM");
+		layout3->addWidget(&dds, 1);
+		
+		optimizer.initialize (loc, this);
+		layout3->addWidget(&optimizer, 1);
+		
+		QVBoxLayout* layout2 = new QVBoxLayout();
+		
 		aoPlots.resize (NUM_DAC_PLTS);
 		// initialize plot controls.
-		unsigned dacPlotSize = 500 / NUM_DAC_PLTS;
 		for (auto dacPltCount : range (aoPlots.size ())){
 			std::string titleTxt;
 			switch (dacPltCount){
@@ -66,11 +85,11 @@ void QtAuxiliaryWindow::initializeWidgets (){
 				break;
 			}
 			aoPlots[dacPltCount] = new PlotCtrl (8, plotStyle::DacPlot, std::vector<int> (), titleTxt);
-			aoPlots[dacPltCount]->init (loc, 480, dacPlotSize, this);
+			aoPlots[dacPltCount]->init ( this);
+			layout2->addWidget(aoPlots[dacPltCount]->getView(), 1);
 		}
 		// ttl plots are similar to aoSys.
 		ttlPlots.resize (NUM_TTL_PLTS);
-		unsigned ttlPlotSize = 500 / NUM_TTL_PLTS;
 		for (auto ttlPltCount : range (ttlPlots.size ())){
 			// currently assuming 4 ttl plots...
 			std::string titleTxt;
@@ -89,8 +108,15 @@ void QtAuxiliaryWindow::initializeWidgets (){
 				break;
 			}
 			ttlPlots[ttlPltCount] = new PlotCtrl (16, plotStyle::TtlPlot, std::vector<int> (), titleTxt);
-			ttlPlots[ttlPltCount]->init (loc, 480, ttlPlotSize, this);
+			ttlPlots[ttlPltCount]->init (this);
+			layout2->addWidget(ttlPlots[ttlPltCount]->getView(), 1);
 		}
+		layout1->setContentsMargins(0, 0, 0, 0);
+		layout2->setContentsMargins(0, 0, 0, 0);
+		layout3->setContentsMargins(0, 0, 0, 0);
+		layout->addLayout(layout1);
+		layout->addLayout(layout2);
+		layout->addLayout(layout3);
 	}
 	catch (ChimeraError& err){
 		errBox ("Failed to initialize auxiliary window properly! Trace: " + err.trace ());
@@ -174,7 +200,7 @@ Matrix<std::string> QtAuxiliaryWindow::getTtlNames (){
 }
 
 
-std::array<AoInfo, 24> QtAuxiliaryWindow::getDacInfo (){
+std::array<AoInfo, size_t(AOGrid::total)> QtAuxiliaryWindow::getDacInfo (){
 	return aoSys.getDacInfo ();
 }
 

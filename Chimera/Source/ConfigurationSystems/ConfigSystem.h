@@ -22,7 +22,8 @@
 	that can be checked to determine if the user should be prompted to save at a given point, and all of the functions 
 	for saving, renaming, deleting, and creating new levels within the code. 
 */
-class ConfigSystem : public IChimeraSystem, public QWidget {
+class ConfigSystem : public IChimeraSystem
+{
 	Q_OBJECT
 	public:
 		static constexpr auto CONFIG_EXTENSION = "Config";

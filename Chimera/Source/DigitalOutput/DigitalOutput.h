@@ -8,7 +8,7 @@
 class DigitalOutput
 {
 	public:
-		void initialize ( QPoint& pos, IChimeraQtWindow* parent );
+		void initialize ( IChimeraQtWindow* parent );
 		void initLoc ( unsigned num, DoRows::which row);
 		
 		void enable ( bool enabledStatus );
@@ -37,8 +37,9 @@ class allDigitalOutputs
 	public:
 		allDigitalOutputs ( );
 		DigitalOutput & operator()( unsigned num, DoRows::which row );
-		static const unsigned numRows = 4;
-		static const unsigned numColumns = 16;
+		/*assume unit is a row and get stacked vertically*/
+		static const unsigned numRows = size_t(DOGrid::numOFunit);
+		static const unsigned numColumns = size_t(DOGrid::numPERunit);
 		// here, typename tells the compiler that the return will be a type.
 		typename std::array<DigitalOutput, numRows*numColumns>::iterator begin ( ) { return core.begin ( ); }
 		typename std::array<DigitalOutput, numRows*numColumns>::iterator end ( ) { return core.end ( ); }

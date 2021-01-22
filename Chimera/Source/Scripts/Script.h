@@ -23,7 +23,8 @@ class IChimeraQtWindow;
 
 
 
-class Script : public IChimeraSystem, public QWidget {
+class Script : public IChimeraSystem
+{
 	Q_OBJECT
 
 	enum {

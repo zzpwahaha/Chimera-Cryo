@@ -25,7 +25,7 @@ class DoCore
 		void ftdi_disconnect ();
 		DWORD ftdi_write (unsigned variation, bool loadSkipf);
 		DWORD ftdi_trigger ();
-		std::array< std::array<bool, 16>, 4 > getFinalSnapshot ();
+		std::array< std::array<bool, size_t(DOGrid::numPERunit)>, size_t(DOGrid::numOFunit) > getFinalSnapshot ();
 		std::string getDoSystemInfo ();
 		void standardNonExperimentStartDoSequence (DoSnapshot initSnap);
 		void restructureCommands ();
@@ -41,7 +41,7 @@ class DoCore
 		std::string getTtlSequenceMessage (unsigned variation);
 		std::vector<double> getFinalTimes ();
 		unsigned countTriggers (std::pair<DoRows::which, unsigned> which, unsigned variation);
-		DWORD ftdi_ForceOutput (DoRows::which row, int number, int state, std::array<std::array<bool, 16>, 4> status);
+		DWORD ftdi_ForceOutput (DoRows::which row, int number, int state, std::array<std::array<bool, size_t(DOGrid::numPERunit)>, size_t(DOGrid::numOFunit)> status);
 		// returns -1 if not a name.
 		bool isValidTTLName (std::string name);
 		int getNameIdentifier (std::string name, DoRows::which& row, unsigned& number);

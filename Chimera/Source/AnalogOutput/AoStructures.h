@@ -5,6 +5,13 @@
 #include "GeneralObjects/commonTypes.h"
 #include <array>
 
+enum class AOGrid : size_t
+{
+	numPERunit = 16,
+	numOFunit = 2,
+	total = numPERunit*numOFunit
+};
+
 
 struct AoInfo
 {
@@ -46,5 +53,5 @@ struct AoCommand
 struct AoSnapshot
 {
 	double time;
-	std::array<double, 24> dacValues;
+	std::array<double, size_t(AOGrid::total)> dacValues;
 };

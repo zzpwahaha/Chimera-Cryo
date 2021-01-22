@@ -5,8 +5,9 @@
 
 class IChimeraQtWindow;
 
-class IChimeraSystem : public QObject {
-	Q_OBJECT;
+class IChimeraSystem : public QWidget 
+{
+	Q_OBJECT
 	public:
 		IChimeraSystem(IChimeraQtWindow* parent_in);
 		IChimeraQtWindow* parentWin;

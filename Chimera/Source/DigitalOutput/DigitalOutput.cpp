@@ -42,9 +42,9 @@ void DigitalOutput::setHoldStatus ( bool stat ){
 	holdStatus = stat;
 }
 
-void DigitalOutput::initialize ( QPoint& pos, IChimeraQtWindow* parent ){
+void DigitalOutput::initialize ( IChimeraQtWindow* parent ){
 	check = new CQCheckBox ("", parent);
-	check->setGeometry ({ QPoint{ long (pos.x()), long (pos.y()) }, QPoint{ long (pos.x() + 28), long (pos.y() + 28) } });
+
 }
 
 
@@ -54,7 +54,7 @@ void DigitalOutput::enable ( bool enabledStatus ){
 
 
 DigitalOutput& allDigitalOutputs::operator()( unsigned num, DoRows::which row ){
-	return core[ unsigned long ( row ) * 16L + num ];
+	return core[ unsigned long ( row ) * size_t(DOGrid::numPERunit) + num ];
 }
 
 allDigitalOutputs::allDigitalOutputs ( ){

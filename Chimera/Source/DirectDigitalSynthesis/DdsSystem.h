@@ -32,7 +32,7 @@ class DdsSystem : public IChimeraSystem{
 		void handleSaveConfig (ConfigStream& file );
 		void handleOpenConfig (ConfigStream& file );
 		void handleContextMenu (const QPoint& pos);
-		void initialize(QPoint& pos, IChimeraQtWindow* master, std::string title );
+		void initialize( IChimeraQtWindow* master, std::string title );
 		void refreshCurrentRamps ();
 		void programNow (std::vector<parameterType>& constants);
 		std::string getSystemInfo ( );

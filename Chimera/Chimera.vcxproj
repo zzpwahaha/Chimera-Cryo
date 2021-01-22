@@ -52,8 +52,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
-      <PreprocessorDefinitions>
-      </PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(Qt_INCLUDEPATH_);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <WarningLevel>Level3</WarningLevel>
     </ClCompile>
@@ -61,6 +60,11 @@
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>$(Qt_LIBS_);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
   </ItemDefinitionGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="QtSettings">
     <QtInstall>msvc2019_64</QtInstall>
@@ -182,11 +186,14 @@
     <ClCompile Include="Source\RealTimeDataAnalysis\AtomCruncherWorker.cpp" />
     <ClCompile Include="Source\RealTimeDataAnalysis\DataAnalysisControl.cpp" />
     <ClCompile Include="Source\RealTimeDataAnalysis\MachineOptimizer.cpp" />
+    <ClCompile Include="Source\RealTimeDataAnalysis\PlotDesignerDialog.cpp" />
+    <ClCompile Include="Source\RealTimeDataAnalysis\QtPlotDesignerDlg.cpp" />
     <ClCompile Include="Source\Scripts\Script.cpp" />
     <ClCompile Include="Source\Scripts\ScriptStream.cpp" />
     <ClCompile Include="Source\Scripts\SyntaxHighlighter.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <QtMoc Include="Source\Scripts\Script.h" />
     <ClInclude Include="Source\AnalogOutput\AnalogOutput.h" />
     <ClInclude Include="Source\AnalogOutput\AoStructures.h" />
     <ClInclude Include="Source\AnalogOutput\AoSystem.h" />
@@ -194,6 +201,7 @@
     <ClInclude Include="Source\AnalogOutput\DaqMxFlume.h" />
     <ClInclude Include="Source\Andor\AndorCameraCore.h" />
     <ClInclude Include="Source\Andor\AndorCameraSettingsControl.h" />
+    <QtMoc Include="Source\Andor\AndorCameraThreadWorker.h" />
     <ClInclude Include="Source\Andor\AndorFlume.h" />
     <ClInclude Include="Source\Andor\andorPicSettingsGroup.h" />
     <ClInclude Include="Source\Andor\AndorRunMode.h" />
@@ -219,10 +227,12 @@
     <ClInclude Include="Source\DigitalOutput\DoCore.h" />
     <ClInclude Include="Source\DigitalOutput\DoRows.h" />
     <ClInclude Include="Source\DigitalOutput\DoStructures.h" />
-    <ClInclude Include="Source\DigitalOutput\DoSystem.h" />
+    <QtMoc Include="Source\DigitalOutput\DoSystem.h" />
     <ClInclude Include="Source\DirectDigitalSynthesis\DdsCore.h" />
     <ClInclude Include="Source\DirectDigitalSynthesis\DdsSystem.h" />
     <ClInclude Include="Source\DirectDigitalSynthesis\DdsSystemStructures.h" />
+    <QtMoc Include="Source\ExcessDialogs\AoSettingsDialog.h" />
+    <QtMoc Include="Source\ExcessDialogs\doChannelInfoDialog.h" />
     <ClInclude Include="Source\ExcessDialogs\openWithExplorer.h" />
     <ClInclude Include="Source\ExcessDialogs\saveWithExplorer.h" />
     <ClInclude Include="Source\ExperimentMonitoringAndStatus\AlertSystem.h" />
@@ -236,11 +246,14 @@
     <ClInclude Include="Source\ExperimentThread\ExperimentThreadInput.h" />
     <ClInclude Include="Source\ExperimentThread\ExperimentType.h" />
     <ClInclude Include="Source\ExperimentThread\expSystemRunList.h" />
+    <QtMoc Include="Source\ExperimentThread\ExpThreadWorker.h" />
     <ClInclude Include="Source\GeneralFlumes\ftdiFlume.h" />
     <ClInclude Include="Source\GeneralFlumes\ftdiStructures.h" />
     <ClInclude Include="Source\GeneralFlumes\QtSerialFlume.h" />
     <ClInclude Include="Source\GeneralFlumes\VisaFlume.h" />
+    <QtMoc Include="Source\GeneralImaging\ImageLabel.h" />
     <ClInclude Include="Source\GeneralImaging\imageParameters.h" />
+    <QtMoc Include="Source\GeneralImaging\PictureControl.h" />
     <ClInclude Include="Source\GeneralImaging\PictureManager.h" />
     <ClInclude Include="Source\GeneralImaging\PictureStats.h" />
     <ClInclude Include="Source\GeneralImaging\softwareAccumulationOption.h" />
@@ -249,6 +262,7 @@
     <ClInclude Include="Source\GeneralObjects\commonTypes.h" />
     <ClInclude Include="Source\GeneralObjects\coordinate.h" />
     <ClInclude Include="Source\GeneralObjects\ExpWrap.h" />
+    <QtMoc Include="Source\GeneralObjects\IChimeraSystem.h" />
     <ClInclude Include="Source\GeneralObjects\IDeviceCore.h" />
     <ClInclude Include="Source\GeneralObjects\Matrix.h" />
     <ClInclude Include="Source\GeneralObjects\multiDimensionalKey.h" />
@@ -262,46 +276,41 @@
     <ClInclude Include="Source\GeneralUtilityFunctions\Thrower.h" />
     <ClInclude Include="Source\LowLevel\constants.h" />
     <ClInclude Include="Source\LowLevel\resource.h" />
+    <ClInclude Include="Source\LowLevel\targetver.h" />
     <ClInclude Include="Source\MiscellaneousExperimentOptions\debugInfo.h" />
     <QtMoc Include="Source\MiscellaneousExperimentOptions\DebugOptionsControl.h" />
     <QtMoc Include="Source\MiscellaneousExperimentOptions\MainOptionsControl.h" />
     <QtMoc Include="Source\MiscellaneousExperimentOptions\Repetitions.h" />
     <ClInclude Include="Source\ParameterSystem\Expression.h" />
+    <QtMoc Include="Source\ParameterSystem\ParameterModel.h" />
+    <QtMoc Include="Source\ParameterSystem\ParameterSystem.h" />
     <ClInclude Include="Source\ParameterSystem\ParameterSystemStructures.h" />
     <ClInclude Include="Source\Plotting\dataPoint.h" />
+    <QtMoc Include="Source\Plotting\PlotCtrl.h" />
     <ClInclude Include="Source\Plotting\PlotDataSet.h" />
     <ClInclude Include="Source\Plotting\PlottingInfo.h" />
     <ClInclude Include="Source\Plotting\tinyPlotInfo.h" />
     <ClInclude Include="Source\PrimaryWindows\CustomMessages.h" />
+    <QtMoc Include="Source\PrimaryWindows\IChimeraQtWindow.h" />
+    <QtMoc Include="Source\PrimaryWindows\QtAndorWindow.h" />
+    <QtMoc Include="Source\PrimaryWindows\QtAuxiliaryWindow.h" />
+    <QtMoc Include="Source\PrimaryWindows\QtMainWindow.h" />
+    <QtMoc Include="Source\PrimaryWindows\QtScriptWindow.h" />
     <ClInclude Include="Source\Python\NewPythonHandler.h" />
     <ClInclude Include="Source\RealTimeDataAnalysis\analysisSettings.h" />
+    <QtMoc Include="Source\RealTimeDataAnalysis\AnalysisThreadWorker.h" />
     <ClInclude Include="Source\RealTimeDataAnalysis\atomCruncherInput.h" />
+    <QtMoc Include="Source\RealTimeDataAnalysis\AtomCruncherWorker.h" />
     <ClInclude Include="Source\RealTimeDataAnalysis\atomGrid.h" />
     <ClInclude Include="Source\RealTimeDataAnalysis\DataAnalysisControl.h" />
-    <ClInclude Include="Source\RealTimeDataAnalysis\MachineOptimizer.h" />
+    <QtMoc Include="Source\RealTimeDataAnalysis\MachineOptimizer.h" />
+    <ClInclude Include="Source\RealTimeDataAnalysis\PlotDesignerDialog.h" />
+    <QtMoc Include="Source\RealTimeDataAnalysis\QtPlotDesignerDlg.h" />
     <ClInclude Include="Source\RealTimeDataAnalysis\realTimePlotterInput.h" />
-    <QtMoc Include="Source\Scripts\Script.h" />
     <ClInclude Include="Source\Scripts\ScriptableDevices.h" />
     <ClInclude Include="Source\Scripts\ScriptStream.h" />
-    <ClInclude Include="Source\stdafx.h" />
     <QtMoc Include="Source\Scripts\SyntaxHighlighter.h" />
-    <QtMoc Include="Source\RealTimeDataAnalysis\AtomCruncherWorker.h" />
-    <QtMoc Include="Source\RealTimeDataAnalysis\AnalysisThreadWorker.h" />
-    <QtMoc Include="Source\PrimaryWindows\QtScriptWindow.h" />
-    <QtMoc Include="Source\PrimaryWindows\QtMainWindow.h" />
-    <QtMoc Include="Source\PrimaryWindows\QtAuxiliaryWindow.h" />
-    <QtMoc Include="Source\PrimaryWindows\QtAndorWindow.h" />
-    <QtMoc Include="Source\PrimaryWindows\IChimeraQtWindow.h" />
-    <QtMoc Include="Source\Plotting\PlotCtrl.h" />
-    <QtMoc Include="Source\ParameterSystem\ParameterSystem.h" />
-    <QtMoc Include="Source\ParameterSystem\ParameterModel.h" />
-    <QtMoc Include="Source\GeneralObjects\IChimeraSystem.h" />
-    <QtMoc Include="Source\GeneralImaging\PictureControl.h" />
-    <QtMoc Include="Source\GeneralImaging\ImageLabel.h" />
-    <QtMoc Include="Source\ExperimentThread\ExpThreadWorker.h" />
-    <QtMoc Include="Source\ExcessDialogs\doChannelInfoDialog.h" />
-    <QtMoc Include="Source\ExcessDialogs\AoSettingsDialog.h" />
-    <QtMoc Include="Source\Andor\AndorCameraThreadWorker.h" />
+    <ClInclude Include="Source\stdafx.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

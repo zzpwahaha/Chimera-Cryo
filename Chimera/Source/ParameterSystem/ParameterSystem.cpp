@@ -87,22 +87,24 @@ void ParameterSystem::handleContextMenu (const QPoint& pos){
 	menu.exec (parametersView->mapToGlobal (pos));	
 }
 
-void ParameterSystem::initialize (QPoint& pos, IChimeraQtWindow* parent, std::string title, ParameterSysType type, 
-								  unsigned width, unsigned height ){
-
-	auto& px = pos.rx (), & py = pos.ry ();
+void ParameterSystem::initialize (IChimeraQtWindow* parent, std::string title, ParameterSysType type, 
+								  unsigned width, unsigned height )
+{
+	this->setMaximumWidth(900);
+	QVBoxLayout* layout = new QVBoxLayout(this);
 	paramSysType = type;
 
 	parametersHeader = new QLabel (cstr (title), parent);
-	parametersHeader->setGeometry (px, py, width, 25);
 	parametersView = new QTableView (parent);
-	parametersView->setGeometry (px, py += 25, width, height);
+	layout->addWidget(parametersHeader, 0);
+	layout->addWidget(parametersView, 1);
+
 	parametersView->setModel (&paramModel);
 	parametersView->show ();
 	
-	parametersView->horizontalHeader ()->setFixedHeight (25);
-	parametersView->verticalHeader ()->setFixedWidth (40);
-	parametersView->verticalHeader ()->setDefaultSectionSize (22);
+	//parametersView->horizontalHeader ()->setFixedHeight (25);
+	//parametersView->verticalHeader ()->setFixedWidth (40);
+	//parametersView->verticalHeader ()->setDefaultSectionSize (22);
 	parametersView->horizontalHeader ()->setStretchLastSection (true); 
 	parametersView->horizontalHeader ()->setSectionResizeMode (QHeaderView::ResizeToContents);
 	parametersView->horizontalHeader ()->setSectionResizeMode (QHeaderView::Interactive);	
@@ -117,7 +119,8 @@ void ParameterSystem::initialize (QPoint& pos, IChimeraQtWindow* parent, std::st
 	}
 	else {
 		parametersView->connect (parametersView, &QTableView::doubleClicked, [this](const QModelIndex& index) {
-			if (index.column() == 1) {
+			if (index.column() == 1) 
+			{
 				auto params = paramModel.getParams ();
 				params[index.row ()].constant = !params[index.row ()].constant;
 				paramModel.setParams (params);
@@ -125,7 +128,6 @@ void ParameterSystem::initialize (QPoint& pos, IChimeraQtWindow* parent, std::st
 	}
 	parametersView->connect (&paramModel, &ParameterModel::paramsChanged, 
 							 parent->scriptWin, &QtScriptWindow::updateVarNames);
-	py += height;
 	setTableviewColumnSize ();
 }
 

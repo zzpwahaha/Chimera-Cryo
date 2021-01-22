@@ -14,6 +14,8 @@
 #include "nidaqmx2.h"
 #include <boost/lexical_cast.hpp>
 
+#include <qlayout.h> 
+
 // I don't use this because I manually import dll functions.
 // #include "Dio64.h"
 DoSystem::DoSystem( IChimeraQtWindow* parent, bool ftSafemode, bool serialSafemode ) 
@@ -34,7 +36,8 @@ void DoSystem::handleOpenConfig(ConfigStream& openFile){
 }
 
 
-void DoSystem::setTtlStatusNoForceOut(std::array< std::array<bool, 16>, 4 > status){
+void DoSystem::setTtlStatusNoForceOut(std::array< std::array<bool, size_t(DOGrid::numPERunit)>, size_t(DOGrid::numOFunit) > status)
+{
 	for ( auto rowInc : range(status.size()) ){
 		for ( auto numInc : range(status[rowInc].size()) ){
 			outputs ( numInc, DoRows::which ( rowInc ) ).set ( status[ rowInc ][ numInc ] );
@@ -70,15 +73,18 @@ std::pair<unsigned, unsigned> DoSystem::getTtlBoardSize(){
 	return { outputs.numRows, outputs.numColumns };
 }
 
-void DoSystem::initialize( QPoint& loc, IChimeraQtWindow* parent ){
-	auto& px = loc.rx (), & py = loc.ry ();
+void DoSystem::initialize( IChimeraQtWindow* parent ){
+	QVBoxLayout* layout = new QVBoxLayout(this);
+	this->setMaximumWidth(1000);
 	// title
 	ttlTitle = new QLabel ("DIGITAL OUTPUT", parent);
-	ttlTitle->setGeometry (px, py, 480, 25);
-	py += 25;
+	layout->addWidget(ttlTitle, 0);
 	// all number numberLabels
+
+	QHBoxLayout* layout1 = new QHBoxLayout();
+	layout1->setContentsMargins(0, 0, 0, 0);
+
 	ttlHold = new CQPushButton ("Hold Current Values", parent);
-	ttlHold->setGeometry (px, py, 240, 20);
 	ttlHold->setToolTip ("Press this button to change multiple TTLs simultaneously. Press the button, then change the "
 		"ttls, then press the button again to release it. Upon releasing the button, the TTLs will change.");
 	parent->connect (ttlHold, &QPushButton::released, [parent, this]() {
@@ -94,7 +100,6 @@ void DoSystem::initialize( QPoint& loc, IChimeraQtWindow* parent ){
 	ttlHold->setCheckable (true);
 
 	zeroTtls = new CQPushButton ("Zero DOs", parent);
-	zeroTtls->setGeometry (px + 240, py, 240, 20);
 	zeroTtls->setToolTip( "Press this button to set all ttls to their zero (false) state." );
 	parent->connect (zeroTtls, &QPushButton::released, [parent, this]() {
 		try	{
@@ -107,27 +112,31 @@ void DoSystem::initialize( QPoint& loc, IChimeraQtWindow* parent ){
 			emit error(exception.qtrace ());
 		}
 	});
-	py += 20;
+	layout1->addWidget(ttlHold);
+	layout1->addWidget(zeroTtls);
+	layout->addLayout(layout1);
 
-	for (long ttlNumberInc : range (ttlNumberLabels.size ())) {
-		ttlNumberLabels[ttlNumberInc] = new QLabel (cstr (ttlNumberInc), parent);
-		ttlNumberLabels[ttlNumberInc]->setGeometry ({ QPoint (px + 32 + ttlNumberInc * 28, py),
-													  QPoint (px + 32 + (ttlNumberInc + 1) * 28, py + 20) });
-	}
-	py += 20;
+	
+	//for (long ttlNumberInc : range (ttlNumberLabels.size ())) {
+	//	ttlNumberLabels[ttlNumberInc] = new QLabel (cstr (ttlNumberInc), parent);
+	//	ttlNumberLabels[ttlNumberInc]->setGeometry ({ QPoint (px + 32 + ttlNumberInc * 28, py),
+	//												  QPoint (px + 32 + (ttlNumberInc + 1) * 28, py + 20) });
+	//}
 	// all row numberLabels
-	for ( auto row : DoRows::allRows ) {
-		ttlRowLabels[int (row)] = new QLabel ((DoRows::toStr (row)).c_str(), parent);
-		ttlRowLabels[int (row)]->setGeometry (px, py + int (row) * 28, 32, 28);
-	}
+	//for ( auto row : DoRows::allRows ) {
+	//	ttlRowLabels[int (row)] = new QLabel ((DoRows::toStr (row)).c_str(), parent);
+	//	ttlRowLabels[int (row)]->setGeometry (px, py + int (row) * 28, 32, 28);
+	//}
 	// all push buttons
+
+	QGridLayout* DOGridLayout = new QGridLayout();
 	unsigned runningCount = 0;
-	auto startX = px + 32;
 	for (auto row : DoRows::allRows ){
-		px = startX;
-		for (unsigned number = 0; number < outputs.numColumns; number++){
+		runningCount++;
+		QHBoxLayout* DOsubGridLayout = new QHBoxLayout();
+		for (size_t number = 0; number < outputs.numColumns; number++){
 			auto& out = outputs (number, row);
-			out.initialize ( loc, parent );
+			out.initialize ( parent );
 			parent->connect ( out.check, &QCheckBox::stateChanged, [this, &out, parent]() {
 				try {
 					handleTTLPress (out);
@@ -139,11 +148,14 @@ void DoSystem::initialize( QPoint& loc, IChimeraQtWindow* parent ){
 					emit error ("DO Press Handler Failed.\n" + exception.qtrace () + "\n");
 				}
 			});
-			px += 28;
+			DOsubGridLayout->addWidget(out.check);
 		}
-		py += 28;
+		DOsubGridLayout->setSpacing(8);
+		DOGridLayout->addLayout(DOsubGridLayout, runningCount % 3, 2 - runningCount / 3);
 	}
-	px = startX - 32;
+	DOGridLayout->setHorizontalSpacing(20);
+	DOGridLayout->setVerticalSpacing(12);
+	layout->addLayout(DOGridLayout);
 }
 
 int DoSystem::getNumberOfTTLRows(){
@@ -184,8 +196,8 @@ void DoSystem::handleHoldPress(){
 	}
 }
 
-std::array< std::array<bool, 16>, 4 > DoSystem::getCurrentStatus( ){
-	std::array< std::array<bool, 16>, 4 > currentStatus;
+std::array< std::array<bool, size_t(DOGrid::numPERunit)>, size_t(DOGrid::numOFunit) > DoSystem::getCurrentStatus( ){
+	std::array< std::array<bool, size_t(DOGrid::numPERunit)>, size_t(DOGrid::numOFunit) > currentStatus;
 	for ( auto& out : outputs ){
 		currentStatus[ int ( out.getPosition ( ).first ) ][ out.getPosition ( ).second ] = out.getStatus();
 	}

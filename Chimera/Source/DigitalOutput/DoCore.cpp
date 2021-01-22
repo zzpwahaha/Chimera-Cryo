@@ -120,7 +120,8 @@ void DoCore::convertToFinalFtdiFormat (unsigned variation){
 }
 
 
-std::array< std::array<bool, 16>, 4 > DoCore::getFinalSnapshot (){
+std::array< std::array<bool, size_t(DOGrid::numPERunit)>, size_t(DOGrid::numOFunit) > DoCore::getFinalSnapshot ()
+{
 	auto numVar = ttlSnapshots.getNumVariations ();
 	if (numVar > 0){
 		if (ttlSnapshots (numVar - 1).size () > 0){
@@ -359,7 +360,8 @@ unsigned DoCore::countTriggers (std::pair<DoRows::which, unsigned> which, unsign
 }
 
 
-DWORD DoCore::ftdi_ForceOutput (DoRows::which row, int number, int state, std::array<std::array<bool, 16>, 4> status)
+DWORD DoCore::ftdi_ForceOutput (DoRows::which row, int number, int state, 
+	std::array<std::array<bool, size_t(DOGrid::numPERunit)>, size_t(DOGrid::numOFunit)> status)
 {
 	//outputs (number, row).set (state);
 	resetTtlEvents ();

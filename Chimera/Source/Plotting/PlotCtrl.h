@@ -42,7 +42,8 @@ struct plotMinMax {
 * All the plotting is now done using QtCharts. It used to be done manually by standard win32 / MFC
 * functionality. Plotting used to be done by gnuplot.
 */
-class PlotCtrl : public QObject {
+class PlotCtrl : public QObject 
+{
 	Q_OBJECT;
 	public: 
 		PlotCtrl( unsigned numTraces, plotStyle inStyle, std::vector<int> thresholds,
@@ -51,13 +52,15 @@ class PlotCtrl : public QObject {
 		void initializeCalData (calSettings cal);
 		void removeData ();
 		QtCharts::QScatterSeries* getCalData ();
-		void init( QPoint& topLeftLoc, long width, long height, IChimeraQtWindow* parent );
+		void init(  IChimeraQtWindow* parent );
 		dataPoint getMainAnalysisResult ( );
 		void resetChart ();
 		void setStyle (plotStyle newStyle);
 		void setTitle (std::string newTitle);
 		void setThresholds (std::vector<int> newThresholds);
 		void handleContextMenu (const QPoint& pos);
+
+		QtCharts::QChartView* getView() const { return view; }
 
 	private:
 		const bool narrow;

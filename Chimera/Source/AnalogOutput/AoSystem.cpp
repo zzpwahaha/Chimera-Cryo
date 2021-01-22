@@ -12,6 +12,8 @@
 #include <ExperimentThread/ExpThreadWorker.h>
 #include "calInfo.h"
 
+#include <qlayout.h>
+
 AoSystem::AoSystem(IChimeraQtWindow* parent, bool aoSafemode) : IChimeraSystem(parent), daqmx( aoSafemode ){
 	/// set some constants...
 	// Both are 0-INDEXED. D16
@@ -77,7 +79,7 @@ void AoSystem::zeroDacs( DoCore& ttls, DoSnapshot initSnap){
 	ttls.resetTtlEvents( );
 	prepareForce( );
 	ttls.prepareForce( );
-	for ( int dacInc : range( 24 ) ){
+	for ( int dacInc : range(size_t(AOGrid::total)) ){
 		prepareDacForceChange( dacInc, 0, ttls );
 	}
 	standardNonExperiemntStartDacsSequence( );
@@ -86,8 +88,8 @@ void AoSystem::zeroDacs( DoCore& ttls, DoSnapshot initSnap){
 }
 
 
-std::array<AoInfo, 24> AoSystem::getDacInfo( ){
-	std::array<AoInfo, 24> info;
+std::array<AoInfo, size_t(AOGrid::total)> AoSystem::getDacInfo( ){
+	std::array<AoInfo, size_t(AOGrid::total)> info;
 	for ( auto dacNum : range(outputs.size()) ){
 		info[ dacNum ] = outputs[ dacNum ].info;
 	}
@@ -183,41 +185,47 @@ double AoSystem::getDefaultValue(unsigned dacNum){
 }
 
 // this function returns the end location of the set of controls. This can be used for the location for the next control beneath it.
-void AoSystem::initialize(QPoint& pos, IChimeraQtWindow* parent ){
-	auto& px = pos.rx (), & py = pos.ry ();
+void AoSystem::initialize( IChimeraQtWindow* parent )
+{
+	QVBoxLayout* layout = new QVBoxLayout(this);
+	this->setMaximumWidth(1000);
 	// title
+
 	dacTitle = new QLabel ("ANALOG OUTPUT", parent);
-	dacTitle->setGeometry ({ QPoint{px, py},QPoint{px+480, py += 25} });
+	layout->addWidget(dacTitle, 0);
+	
+	QHBoxLayout* layout1 = new QHBoxLayout();
+	layout1->setContentsMargins(0, 0, 0, 0);
 
 	dacSetButton = new CQPushButton ("Set New DAC Values", parent);
-	dacSetButton->setGeometry ({ QPoint{px, py},QPoint{px+160, py+25} });
 	dacSetButton->setToolTip("Press this button to attempt force all DAC values to the values currently recorded in the"
 							 " edits below.");
 	parent->connect (dacSetButton, &QPushButton::released, [parent]() {parent->auxWin->SetDacs (); });
 	zeroDacsButton = new CQPushButton ("Zero DACs", parent);
-	zeroDacsButton->setGeometry ({ QPoint{px+160, py},QPoint{px+320, py+25} });
 	zeroDacsButton->setToolTip( "Press this button to set all dac values to zero." );
 	parent->connect (zeroDacsButton, &QPushButton::released, [parent]() { parent->auxWin->zeroDacs(); });
 	// 
 	quickChange = new CQCheckBox ("Quick-Change", parent);
-	quickChange->setGeometry ({ QPoint{px + 320, py},QPoint{px + 480, py += 25} });
 	quickChange->setToolTip ( "With this checked, you can quickly change a DAC's value by using the arrow keys while "
 							 "having the cursor before the desired digit selected in the DAC's edit.");
 
-	int collumnInc = 0;
+	layout1->addWidget(dacSetButton, 0);
+	layout1->addWidget(zeroDacsButton, 0);
+	layout1->addWidget(quickChange, 0);
+	layout->addLayout(layout1);
 	
-	unsigned dacInc = 0;
-	for ( auto& out : outputs )	{
-		if ( dacInc == outputs.size ( ) / 3 || dacInc == 2 * outputs.size ( ) / 3 )	{
-			collumnInc++;
-			// go to second or third collumn
-			py -= 20 * outputs.size ( ) / 3;
-			px += 160;
-		}
-		out.initialize ( pos, parent, dacInc );
-		dacInc++;
+
+	QGridLayout* DOGridLayout = new QGridLayout();
+	unsigned runningCount = 0;
+	for ( auto& out : outputs )	
+	{
+		out.initialize ( parent, runningCount);
+		DOGridLayout->addLayout(out.getLayout(), 
+			runningCount % size_t(AOGrid::numPERunit), 
+			runningCount / size_t(AOGrid::numPERunit));
+		runningCount++;
 	}
-	px -= 320;
+	layout->addLayout(DOGridLayout);
 }
 
 bool AoSystem::eventFilter (QObject* obj, QEvent* event){
@@ -252,7 +260,7 @@ void AoSystem::handleSetDacsButtonPress(DoCore& ttls, bool useDefault ){
 	dacCommandFormList.clear( );
 	prepareForce( );
 	ttls.prepareForce( );
-	std::array<double, 24> vals;
+	std::array<double, size_t(AOGrid::total)> vals;
 	for (auto dacInc : range(outputs.size()) )
 	{
 		vals[ dacInc ] = outputs[ dacInc ].getVal ( useDefault );
@@ -312,7 +320,7 @@ void AoSystem::organizeDacCommands(unsigned variation)
 	auto& snap = dacSnapshots(variation);
 	snap.clear();
 	// first copy the initial settings so that things that weren't changed remain unchanged.
-	std::array<double, 24> dacValues;
+	std::array<double, size_t(AOGrid::total)> dacValues;
 	for ( auto i : range ( outputs.size ( ) ) )
 	{
 		dacValues[ i ] = outputs[ i ].info.currVal;
@@ -353,7 +361,7 @@ void AoSystem::findLoadSkipSnapshots( double time, std::vector<parameterType>& v
 }
 
 
-std::array<double, 24> AoSystem::getFinalSnapshot()
+std::array<double, size_t(AOGrid::total)> AoSystem::getFinalSnapshot()
 {
 	auto numVar = dacSnapshots.getNumVariations ();
 	if (numVar != 0)
@@ -373,7 +381,7 @@ std::array<double, 24> AoSystem::getFinalSnapshot()
  * program doesn't change it's internal memory of all of the status of the aoSys as the experiment runs. (it can't, 
  * besides it would intensive to keep track of that in real time).
  */
-void AoSystem::setDacStatusNoForceOut(std::array<double, 24> status)
+void AoSystem::setDacStatusNoForceOut(std::array<double, size_t(AOGrid::total)> status)
 {
 	// set the internal values
 	for ( auto outInc : range(outputs.size()) )
@@ -395,12 +403,12 @@ void AoSystem::resetDacs (unsigned varInc, bool skipOption){
 }
 
 std::vector<std::vector<plotDataVec>> AoSystem::getPlotData( unsigned var ){
-	std::vector<std::vector<plotDataVec>> dacData(3, std::vector<plotDataVec>(8));
+	std::vector<std::vector<plotDataVec>> dacData(static_cast<size_t>(AOGrid::numOFunit), std::vector<plotDataVec>(size_t(AOGrid::numPERunit)));
 	std::string message;
 	// each element of dacData should be one ttl line.
-	unsigned linesPerPlot = 24 / 3;
+	unsigned linesPerPlot = size_t(AOGrid::numPERunit);
 
-	for ( auto line : range( 24 ) )	{
+	for ( auto line : range(size_t(AOGrid::total)) )	{
 		auto& data = dacData[line / linesPerPlot][line % linesPerPlot];
 		data.clear( );
 		if ( dacSnapshots.getNumVariations() <= var ){
@@ -704,7 +712,7 @@ ExpWrap<std::vector<AoSnapshot>> AoSystem::getSnapshots ( ){
 	return dacSnapshots;
 }
 
-ExpWrap<std::array<std::vector<double>, 3>> AoSystem::getFinData ( ){
+ExpWrap<std::array<std::vector<double>, size_t(AOGrid::numOFunit)>> AoSystem::getFinData ( ){
 	/* used by the unit testing suite. */
 	return finalFormatDacData;
 }
@@ -756,7 +764,7 @@ void AoSystem::configureClocks(unsigned variation, bool loadSkip){
 
 void AoSystem::writeDacs(unsigned variation, bool loadSkip){
 	std::vector<AoSnapshot>& snapshots = loadSkip ? loadSkipDacSnapshots(variation) : dacSnapshots(variation);
-	std::array<std::vector<double>, 3>& finalData = loadSkip ? loadSkipDacFinalFormat(variation)
+	std::array<std::vector<double>, size_t(AOGrid::numOFunit)>& finalData = loadSkip ? loadSkipDacFinalFormat(variation)
 															 : finalFormatDacData(variation);
 	if (snapshots.size() <= 1){
 		// need at least 2 events to run aoSys.
@@ -799,13 +807,13 @@ void AoSystem::makeFinalDataFormat(unsigned variation){
 		data.clear( );
 	}
 	for (AoSnapshot snapshot : normSnapshots){
-		for ( auto dacInc : range( 24 ) ){
-			finalNormal[dacInc / 8].push_back( snapshot.dacValues[dacInc] );
+		for ( auto dacInc : range(size_t(AOGrid::total)) ){
+			finalNormal[dacInc / size_t(AOGrid::numPERunit)].push_back(snapshot.dacValues[dacInc]);
 		}
 	}
 	for ( AoSnapshot snapshot : loadSkipSnapshots ){
-		for ( auto dacInc : range( 24 ) ){
-			finalLoadSkip[dacInc/8].push_back( snapshot.dacValues[dacInc] );
+		for ( auto dacInc : range(size_t(AOGrid::total)) ){
+			finalLoadSkip[dacInc / size_t(AOGrid::numPERunit)].push_back(snapshot.dacValues[dacInc]);
 		}
 	}
 }
@@ -842,7 +850,7 @@ int AoSystem::getDacIdentifier(std::string name){
 
 /* only handles basic names like dac5.*/
 int AoSystem::getBasicDacIdentifier (std::string name){
-	for (auto dacInc : range (24)){
+	for (auto dacInc : range (size_t(AOGrid::total))){
 		if (name == "dac" + str (dacInc)){
 			return dacInc;
 		}

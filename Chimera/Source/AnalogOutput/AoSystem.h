@@ -26,7 +26,8 @@ class MainWindow;
  * multiple copies of the object. This class is based off of the DAC.bas module in the original VB6 code, of course 
  * adapted for this gui in controlling the relevant controls and handling changes more directly.
  */
-class AoSystem : public IChimeraSystem {
+class AoSystem : public IChimeraSystem 
+{
 	public:
 		// THIS CLASS IS NOT COPYABLE.
 		AoSystem& operator=(const AoSystem&) = delete;
@@ -34,7 +35,7 @@ class AoSystem : public IChimeraSystem {
 		AoSystem(IChimeraQtWindow* parent, bool aoSafemode );
 
 		// standard functions for gui elements
-		void initialize( QPoint& pos, IChimeraQtWindow* master);
+		void initialize( IChimeraQtWindow* master);
 		void standardExperimentPrep (unsigned variationInc, DoCore& ttls, std::vector<parameterType>& expParams,
 									 double currLoadSkipTime);
 		bool eventFilter (QObject* obj, QEvent* event);
@@ -57,7 +58,7 @@ class AoSystem : public IChimeraSystem {
 		// processing to determine how dac's get set
 		void handleSetDacsButtonPress( DoCore& ttls, bool useDefault=false );
 		void setDacCommandForm( AoCommandForm command );
-		void setDacStatusNoForceOut(std::array<double, 24> status);
+		void setDacStatusNoForceOut(std::array<double, size_t(AOGrid::total)> status);
 		void prepareDacForceChange(int line, double voltage, DoCore& ttls);
 		void setDacTriggerEvents( DoCore& ttls, unsigned variation );
 		void calculateVariations( std::vector<parameterType>& variables, ExpThreadWorker* threadworker, 
@@ -95,12 +96,12 @@ class AoSystem : public IChimeraSystem {
 		unsigned int getNumberOfDacs( );
 		std::pair<double, double> getDacRange( int dacNumber );
 
-		std::array<AoInfo, 24> getDacInfo ( );
-		std::array<double, 24> getFinalSnapshot( );
+		std::array<AoInfo, size_t(AOGrid::total)> getDacInfo ( );
+		std::array<double, size_t(AOGrid::total)> getFinalSnapshot( );
 
 
 		ExpWrap<std::vector<AoSnapshot>> getSnapshots ( );
-		ExpWrap<std::array<std::vector<double>, 3>> getFinData ( );
+		ExpWrap<std::array<std::vector<double>, size_t(AOGrid::numOFunit)>> getFinData ( );
 
 	private:
 		void setForceDacEvent (int line, double val, DoCore& ttls, unsigned variation);
@@ -109,12 +110,12 @@ class AoSystem : public IChimeraSystem {
 		CQPushButton* dacSetButton;
 		CQPushButton* zeroDacsButton;
 		CQCheckBox* quickChange;
-		std::array<AnalogOutput, 24> outputs;
+		std::array<AnalogOutput, size_t(AOGrid::total)> outputs;
 
 		std::vector<AoCommandForm> dacCommandFormList;
 		ExpWrap<std::vector<AoCommand>> dacCommandList;
 		ExpWrap<std::vector<AoSnapshot>> dacSnapshots, loadSkipDacSnapshots;
-		ExpWrap<std::array<std::vector<double>, 3>> finalFormatDacData, loadSkipDacFinalFormat;
+		ExpWrap<std::array<std::vector<double>, size_t(AOGrid::numOFunit)>> finalFormatDacData, loadSkipDacFinalFormat;
 		std::pair<unsigned short, unsigned short> dacTriggerLine;
 
 		double dacTriggerTime;

@@ -9,9 +9,11 @@
 #include <qmenu.h>
 #include <PrimaryWindows/QtMainWindow.h>
 
-DdsSystem::DdsSystem (IChimeraQtWindow* parent, bool ftSafemode) : core( ftSafemode ), IChimeraSystem (parent) { }
+DdsSystem::DdsSystem (IChimeraQtWindow* parent, bool ftSafemode) : core( ftSafemode )
+	, IChimeraSystem (parent) { }
 
-void DdsSystem::handleContextMenu (const QPoint& pos){
+void DdsSystem::handleContextMenu (const QPoint& pos)
+{
 	QTableWidgetItem* item = rampListview->itemAt (pos);
 	QMenu menu;
 	menu.setStyleSheet (chimeraStyleSheets::stdStyleSheet ());
@@ -33,13 +35,16 @@ void DdsSystem::handleContextMenu (const QPoint& pos){
 	menu.exec (rampListview->mapToGlobal (pos));
 }
 
-void DdsSystem::initialize ( QPoint& pos, IChimeraQtWindow* parent, std::string title ){
-	auto& px = pos.rx (), & py = pos.ry ();
-	ddsHeader = new QLabel (cstr (title), parent);
-	ddsHeader->setGeometry (px, py, 480, 25);
+void DdsSystem::initialize ( IChimeraQtWindow* parent, std::string title ){
+	QVBoxLayout* layout = new QVBoxLayout(this);
+	this->setMaximumWidth(900);
 
+	ddsHeader = new QLabel (cstr (title), parent);
+	layout->addWidget(ddsHeader, 0);
+	QHBoxLayout* layout1 = new QHBoxLayout();
+	layout1->setContentsMargins(0, 0, 0, 0);
 	programNowButton = new QPushButton ("Program Now", parent);
-	programNowButton->setGeometry (px, py + 25, 360, 25);
+	layout1->addWidget(programNowButton, 0);
 	parent->connect (programNowButton, &QPushButton::released, [this, parent]() {
 		try	{
 			programNow (parent->auxWin->getUsableConstants ());
@@ -49,12 +54,12 @@ void DdsSystem::initialize ( QPoint& pos, IChimeraQtWindow* parent, std::string 
 		}
 	});
 	controlCheck = new CQCheckBox ("Control?", parent);
-	controlCheck->setGeometry (px + 360, py += 25, 120, 25);
-
+	layout1->addWidget(controlCheck, 0);
+	layout->addLayout(layout1);
 	rampListview = new QTableWidget (parent);
-	rampListview->setGeometry (px, py+= 25, 480, 160);
-	py += 160;
-	rampListview->horizontalHeader ()->setFixedHeight (30);
+	layout->addWidget(rampListview);
+
+	//rampListview->horizontalHeader ()->setFixedHeight (30);
 	rampListview->setColumnWidth (0, 60);
 	rampListview->setColumnWidth (1, 60);
 	rampListview->setColumnWidth (2, 60);

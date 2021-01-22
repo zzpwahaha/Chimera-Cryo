@@ -24,6 +24,18 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Scripts\Script.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Scripts\ScriptStream.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Scripts\SyntaxHighlighter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="Source\AnalogOutput\AnalogOutput.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -252,20 +264,23 @@
     <ClCompile Include="Source\RealTimeDataAnalysis\MachineOptimizer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Scripts\Script.cpp">
+    <ClCompile Include="Source\RealTimeDataAnalysis\PlotDesignerDialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Scripts\ScriptStream.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Scripts\SyntaxHighlighter.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="main.cpp">
+    <ClCompile Include="Source\RealTimeDataAnalysis\QtPlotDesignerDlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\stdafx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Scripts\ScriptableDevices.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Scripts\ScriptStream.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="Source\AnalogOutput\AnalogOutput.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -351,9 +366,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\DigitalOutput\DoStructures.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\DigitalOutput\DoSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\DirectDigitalSynthesis\DdsCore.h">
@@ -476,6 +488,9 @@
     <ClInclude Include="Source\LowLevel\resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Source\LowLevel\targetver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="Source\MiscellaneousExperimentOptions\debugInfo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -515,30 +530,45 @@
     <ClInclude Include="Source\RealTimeDataAnalysis\DataAnalysisControl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\RealTimeDataAnalysis\MachineOptimizer.h">
+    <ClInclude Include="Source\RealTimeDataAnalysis\PlotDesignerDialog.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\RealTimeDataAnalysis\realTimePlotterInput.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Scripts\ScriptableDevices.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Scripts\ScriptStream.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\stdafx.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <QtMoc Include="Source\Scripts\Script.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\Scripts\SyntaxHighlighter.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
     <QtMoc Include="Source\Andor\AndorCameraThreadWorker.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\ConfigurationSystems\ConfigSystem.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\ConfigurationSystems\NoteSystem.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\ConfigurationSystems\ProfileIndicator.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\DigitalOutput\DoSystem.h">
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="Source\ExcessDialogs\AoSettingsDialog.h">
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="Source\ExcessDialogs\doChannelInfoDialog.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\ExperimentMonitoringAndStatus\ColorBox.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\ExperimentMonitoringAndStatus\StatusControl.h">
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="Source\ExperimentThread\ExpThreadWorker.h">
@@ -551,6 +581,15 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="Source\GeneralObjects\IChimeraSystem.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\MiscellaneousExperimentOptions\DebugOptionsControl.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\MiscellaneousExperimentOptions\MainOptionsControl.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\MiscellaneousExperimentOptions\Repetitions.h">
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="Source\ParameterSystem\ParameterModel.h">
@@ -583,34 +622,10 @@
     <QtMoc Include="Source\RealTimeDataAnalysis\AtomCruncherWorker.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <QtMoc Include="Source\Scripts\SyntaxHighlighter.h">
+    <QtMoc Include="Source\RealTimeDataAnalysis\QtPlotDesignerDlg.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <QtMoc Include="Source\Scripts\Script.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="Source\ConfigurationSystems\ProfileIndicator.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="Source\ExperimentMonitoringAndStatus\ColorBox.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="Source\ExperimentMonitoringAndStatus\StatusControl.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="Source\ConfigurationSystems\ConfigSystem.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="Source\ConfigurationSystems\NoteSystem.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="Source\MiscellaneousExperimentOptions\DebugOptionsControl.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="Source\MiscellaneousExperimentOptions\MainOptionsControl.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="Source\MiscellaneousExperimentOptions\Repetitions.h">
+    <QtMoc Include="Source\RealTimeDataAnalysis\MachineOptimizer.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
