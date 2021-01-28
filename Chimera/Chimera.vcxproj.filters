@@ -270,6 +270,9 @@
     <ClCompile Include="Source\RealTimeDataAnalysis\QtPlotDesignerDlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\ZynqTCP\ZynqTCP.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\stdafx.h">
@@ -534,6 +537,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\RealTimeDataAnalysis\realTimePlotterInput.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ZynqTCP\ZynqTCP.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ZynqTCP\DioStructures.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ZynqTCP\DacStructures.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ZynqTCP\DDSStructures.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

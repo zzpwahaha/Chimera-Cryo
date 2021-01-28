@@ -23,9 +23,9 @@ QtAuxiliaryWindow::QtAuxiliaryWindow (QWidget* parent) : IChimeraQtWindow (paren
 QtAuxiliaryWindow::~QtAuxiliaryWindow () {}
 
 bool QtAuxiliaryWindow::eventFilter (QObject* obj, QEvent* event){
-	if (aoSys.eventFilter (obj, event)) {
+	if (aoSys.eventFilter (obj, event)/* && aoSys.IsquickChange()*/) {
 		try {
-			aoSys.forceDacs(ttlBoard.getCore(), { 0, ttlBoard.getCurrentStatus() });
+			//aoSys.forceDacs(ttlBoard.getCore(), { 0, ttlBoard.getCurrentStatus() });
 		}
 		catch (ChimeraError& err) {
 			reportErr (err.qtrace ());
@@ -414,7 +414,12 @@ void QtAuxiliaryWindow::SetDacs (){
 	reportStatus ("----------------------\r\nSetting Dacs... ");
 	try{
 		mainWin->updateConfigurationSavedStatus (false);
-		aoSys.forceDacs (ttlBoard.getCore (), { 0, ttlBoard.getCurrentStatus () });
+		aoSys.resetDacEvents();
+		//ttlBoard.resetTtlEvents();
+		reportStatus("Setting Dacs...\r\n");
+		aoSys.handleSetDacsButtonPress(ttlBoard.getCore(), true);
+		aoSys.setDACs();
+		//aoSys.forceDacs (ttlBoard.getCore (), { 0, ttlBoard.getCurrentStatus () });
 		reportStatus ("Finished Setting Dacs.\r\n");
 	}
 	catch (ChimeraError& exception){
@@ -422,6 +427,7 @@ void QtAuxiliaryWindow::SetDacs (){
 		reportStatus (": " + exception.qtrace () + "\r\n");
 		reportErr (exception.qtrace ());
 	}
+	mainWin->updateConfigurationSavedStatus(false);
 }
 
 void QtAuxiliaryWindow::ViewOrChangeTTLNames (){

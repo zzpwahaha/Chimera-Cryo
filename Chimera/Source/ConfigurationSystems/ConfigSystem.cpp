@@ -16,7 +16,10 @@
 
 
 
-ConfigSystem::ConfigSystem(std::string fileSystemPath, IChimeraQtWindow* parent) : IChimeraSystem(parent) {
+ConfigSystem::ConfigSystem(std::string fileSystemPath, IChimeraQtWindow* parent) 
+	: IChimeraSystem(parent)
+	, configurationSavedIndicator(nullptr)
+{
 	FILE_SYSTEM_PATH = fileSystemPath;
 }
 

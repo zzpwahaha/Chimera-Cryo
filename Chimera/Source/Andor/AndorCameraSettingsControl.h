@@ -77,9 +77,9 @@ class AndorCameraSettingsControl{
 		CQCheckBox* controlAndorCameraCheck;
 		// Hardware Accumulation Parameters
 		QLabel* accumulationCycleTimeLabel;
-		CQLineEdit* accumulationCycleTimeEdit;
+		CQLineEdit* accumulationCycleTimeEdit = nullptr;
 		QLabel* accumulationNumberLabel;
-		CQLineEdit* accumulationNumberEdit;
+		CQLineEdit* accumulationNumberEdit = nullptr;
 		// 
 		CQComboBox* cameraModeCombo;
 
@@ -87,22 +87,22 @@ class AndorCameraSettingsControl{
 		CQComboBox* horizontalShiftSpeedCombo;
 
 		QLabel* emGainLabel;
-		CQLineEdit* emGainEdit;
-		CQPushButton* emGainBtn;
+		CQLineEdit* emGainEdit = nullptr;
+		CQPushButton* emGainBtn = nullptr;
 		QLabel* emGainDisplay;
-		CQComboBox* triggerCombo;
+		CQComboBox* triggerCombo = nullptr;
 		// Temperature
-		CQPushButton* setTemperatureButton;
-		CQPushButton* temperatureOffButton;
-		CQLineEdit* temperatureEdit;
+		CQPushButton* setTemperatureButton = nullptr;
+		CQPushButton* temperatureOffButton = nullptr;
+		CQLineEdit* temperatureEdit = nullptr;
 		QLabel* temperatureDisplay;
 		QLabel* temperatureMsg;
 
 		// Kinetic Cycle Time
-		CQLineEdit* kineticCycleTimeEdit;
-		QLabel* kineticCycleTimeLabel;
-		QLabel* minKineticCycleTimeDisp;
-		QLabel* minKineticCycleTimeLabel;
+		CQLineEdit* kineticCycleTimeEdit = nullptr;
+		QLabel* kineticCycleTimeLabel = nullptr;
+		QLabel* minKineticCycleTimeDisp = nullptr;
+		QLabel* minKineticCycleTimeLabel = nullptr;
 		// two subclassed groups.
 		ImageDimsControl imageDimensionsObj;
 		PictureSettingsControl picSettingsObj;

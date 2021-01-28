@@ -78,14 +78,12 @@ void PictureControl::initialize( QPoint loc, int width, int height, IChimeraQtWi
 	if ( histOption ){
 		QPoint pt{ 300,0 };
 		vertGraph = new PlotCtrl ( 1, plotStyle::VertHist, std::vector<int>(), "", true );
-		//vertGraph->init (pt, 65, 860, parent );
 		vertGraph->init (parent );
 		px += 65;
 	}
 	if ( histOption ){
 		horGraph = new PlotCtrl ( 1, plotStyle::HistPlot, std::vector<int> ( ), "", true );
 		QPoint pt{ 365, long (860) };
-		//horGraph->init ( pt, 1565 - 50, 65, parent );
 		horGraph->init(parent);
 	}
 	pictureObject = new ImageLabel (parent);

@@ -32,8 +32,10 @@ struct AoCommandForm
 {
 	// can either be "dac", "dacarange", or "daclinspace"
 	std::string commandName;
-	unsigned short line=0;
+
+	unsigned short line = 0;
 	timeType time;
+
 	Expression initVal;
 	Expression finalVal;
 	Expression rampTime;
@@ -47,6 +49,8 @@ struct AoCommand
 	unsigned short line;
 	double time;
 	double value;
+	double endValue;
+	double rampTime;
 };
 
 
@@ -54,4 +58,16 @@ struct AoSnapshot
 {
 	double time;
 	std::array<double, size_t(AOGrid::total)> dacValues;
+	std::array<double, size_t(AOGrid::total)> dacEndValues;
+	std::array<double, size_t(AOGrid::total)> dacRampTimes;
+};
+
+
+struct AoChannelSnapshot
+{
+	unsigned short channel;
+	double time;
+	double dacValue;
+	double dacEndValue;
+	double dacRampTime;
 };

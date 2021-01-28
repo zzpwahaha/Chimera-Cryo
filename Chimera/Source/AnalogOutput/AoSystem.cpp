@@ -14,7 +14,11 @@
 
 #include <qlayout.h>
 
-AoSystem::AoSystem(IChimeraQtWindow* parent, bool aoSafemode) : IChimeraSystem(parent), daqmx( aoSafemode ){
+AoSystem::AoSystem(IChimeraQtWindow* parent, bool aoSafemode) 
+	: IChimeraSystem(parent)
+	, daqmx( aoSafemode )
+	, roundToDacPrecision(false)
+{
 	/// set some constants...
 	// Both are 0-INDEXED. D16
 	dacTriggerLine = { 3, 15 };
@@ -60,7 +64,8 @@ void AoSystem::standardNonExperiemntStartDacsSequence( ){
 	updateEdits( );
 	organizeDacCommands( 0 );
 	makeFinalDataFormat( 0 );
-	resetDacs (0, false);
+	//resetDacs (0, false);
+	writeDacs(0, false);
 }
 
 
@@ -133,7 +138,7 @@ void AoSystem::handleSaveConfig(ConfigStream& saveFile){
 
 std::string AoSystem::getDacSequenceMessage( unsigned variation ){
 	std::string message;
-	for ( auto snap : dacSnapshots(variation) ){
+	for ( auto snap : dacSnapshots[variation] ){
 		std::string time = str( snap.time, 12, true );
 		message += time + ":\r\n";
 		int dacCount = 0;
@@ -206,6 +211,7 @@ void AoSystem::initialize( IChimeraQtWindow* parent )
 	parent->connect (zeroDacsButton, &QPushButton::released, [parent]() { parent->auxWin->zeroDacs(); });
 	// 
 	quickChange = new CQCheckBox ("Quick-Change", parent);
+	quickChange->setChecked(false);
 	quickChange->setToolTip ( "With this checked, you can quickly change a DAC's value by using the arrow keys while "
 							 "having the cursor before the desired digit selected in the DAC's edit.");
 
@@ -226,11 +232,15 @@ void AoSystem::initialize( IChimeraQtWindow* parent )
 		runningCount++;
 	}
 	layout->addLayout(DOGridLayout);
+
+
 }
 
 bool AoSystem::eventFilter (QObject* obj, QEvent* event){
 	for (auto& out : outputs) {
-		if ( out.eventFilter (obj, event) ) {
+		if ( out.eventFilter (obj, event) && quickChange->isChecked()) 
+		{
+			parentWin->auxWin->SetDacs();
 			return true;
 		}
 	}
@@ -264,13 +274,16 @@ void AoSystem::handleSetDacsButtonPress(DoCore& ttls, bool useDefault ){
 	for (auto dacInc : range(outputs.size()) )
 	{
 		vals[ dacInc ] = outputs[ dacInc ].getVal ( useDefault );
-		prepareDacForceChange( dacInc, vals[dacInc], ttls );
+		prepareDacForceChange( dacInc, vals[dacInc], ttls ); /*mainly for the trigger, not need in zynq*/
 	}
 	// wait until after all this to actually do this to make sure things get through okay.
+	/*this is already done in prepareDacForceChange*/
 	for ( auto outputNum : range ( outputs.size() ) )
 	{
 		outputs[ outputNum ].info.currVal = vals[ outputNum ];
 	}
+
+	dacValues = std::move(vals);
 }
 
 
@@ -289,7 +302,7 @@ void AoSystem::organizeDacCommands(unsigned variation)
 	// which commands were at this time, for
 	// ease of retrieving all of the values in a moment.
 	std::vector<std::pair<double, std::vector<AoCommand>>> timeOrganizer;
-	std::vector<AoCommand> tempEvents(dacCommandList(variation));
+	std::vector<AoCommand> tempEvents(dacCommandList[variation]);
 	// sort the events by time. using a lambda here.
 	std::sort( tempEvents.begin(), tempEvents.end(), 
 			   [](AoCommand a, AoCommand b){ return a.time < b.time; });
@@ -317,14 +330,14 @@ void AoSystem::organizeDacCommands(unsigned variation)
 		// no commands, that's fine.
 		return;
 	}
-	auto& snap = dacSnapshots(variation);
+	auto& snap = dacSnapshots[variation];
 	snap.clear();
 	// first copy the initial settings so that things that weren't changed remain unchanged.
-	std::array<double, size_t(AOGrid::total)> dacValues;
-	for ( auto i : range ( outputs.size ( ) ) )
-	{
-		dacValues[ i ] = outputs[ i ].info.currVal;
-	}
+	//std::array<double, size_t(AOGrid::total)> dacValues;
+	//for ( auto i : range ( outputs.size ( ) ) )
+	//{
+	//	dacValues[ i ] = outputs[ i ].info.currVal;
+	//}
 	snap.push_back({ 0, dacValues });
 	for (auto& command : timeOrganizer)
 	{
@@ -344,8 +357,8 @@ void AoSystem::organizeDacCommands(unsigned variation)
 void AoSystem::findLoadSkipSnapshots( double time, std::vector<parameterType>& variables, unsigned variation )
 {
 	// find the splitting time and set the loadSkip snapshots to have everything after that time.
-	auto& snaps = dacSnapshots(variation);
-	auto& loadSkipSnaps = loadSkipDacSnapshots(variation);
+	auto& snaps = dacSnapshots[variation];
+	auto& loadSkipSnaps = loadSkipDacSnapshots[variation];
 	if ( snaps.size( ) == 0 )
 	{
 		return;
@@ -363,12 +376,12 @@ void AoSystem::findLoadSkipSnapshots( double time, std::vector<parameterType>& v
 
 std::array<double, size_t(AOGrid::total)> AoSystem::getFinalSnapshot()
 {
-	auto numVar = dacSnapshots.getNumVariations ();
+	auto numVar = dacSnapshots.size();
 	if (numVar != 0)
 	{
-		if ( dacSnapshots( numVar-1 ).size( ) != 0 )
+		if ( dacSnapshots[ numVar-1 ].size( ) != 0 )
 		{
-			return dacSnapshots ( numVar - 1 ).back( ).dacValues;
+			return dacSnapshots [ numVar - 1 ].back( ).dacValues;
 		}
 	}
 	thrower ("No DAC Events");
@@ -393,13 +406,13 @@ void AoSystem::setDacStatusNoForceOut(std::array<double, size_t(AOGrid::total)> 
 
 
 void AoSystem::resetDacs (unsigned varInc, bool skipOption){
-	stopDacs ();
+	stopDacs ();/*not used zzp*/
 	// it's important to grab the skipoption from input->skipNext only once because in principle
 	// if the cruncher thread was running behind, it could change between writing and configuring the 
 	// aoSys and configuring the TTLs, resulting in some funny behavior;
-	configureClocks (varInc, skipOption);
+	configureClocks (varInc, skipOption);/*not used zzp*/
 	writeDacs (varInc, skipOption);
-	startDacs ();
+	startDacs ();/*not used zzp*/
 }
 
 std::vector<std::vector<plotDataVec>> AoSystem::getPlotData( unsigned var ){
@@ -411,15 +424,15 @@ std::vector<std::vector<plotDataVec>> AoSystem::getPlotData( unsigned var ){
 	for ( auto line : range(size_t(AOGrid::total)) )	{
 		auto& data = dacData[line / linesPerPlot][line % linesPerPlot];
 		data.clear( );
-		if ( dacSnapshots.getNumVariations() <= var ){
+		if ( dacSnapshots.size() <= var ){
 			thrower ( "Attempted to use dac data from variation " + str( var ) + ", which does not exist!" );
 		}
 
-		for ( auto snapn : range(dacSnapshots(var).size()) ){
+		for ( auto snapn : range(dacSnapshots[var].size()) ){
 			if (snapn != 0) {
-				data.push_back ({ dacSnapshots (var)[snapn].time, double (dacSnapshots (var)[snapn-1].dacValues[line]), 0 });
+				data.push_back({ dacSnapshots[var][snapn].time, double(dacSnapshots[var][snapn - 1].dacValues[line]), 0 });
 			}
-			data.push_back ({ dacSnapshots (var)[snapn].time, double (dacSnapshots (var)[snapn].dacValues[line]), 0 });
+			data.push_back({ dacSnapshots[var][snapn].time, double(dacSnapshots[var][snapn].dacValues[line]), 0 });
 		}
 	}
 	return dacData;
@@ -439,11 +452,17 @@ void AoSystem::calculateVariations( std::vector<parameterType>& params, ExpThrea
 		variations = 1;
 	}
 	/// imporantly, this sizes the relevant structures.
-	dacCommandList.uniformSizeReset (  variations );
-	dacSnapshots.uniformSizeReset ( variations );
-	loadSkipDacSnapshots.uniformSizeReset ( variations );
-	finalFormatDacData.uniformSizeReset ( variations );
-	loadSkipDacFinalFormat.uniformSizeReset ( variations );
+	dacCommandList.clear();
+	dacSnapshots.clear();
+	loadSkipDacSnapshots.clear();
+	finalFormatDacData.clear();
+	loadSkipDacFinalFormat.clear();
+	dacCommandList.resize (  variations );
+	dacSnapshots.resize( variations );
+	loadSkipDacSnapshots.resize( variations );
+	finalFormatDacData.resize( variations );
+	loadSkipDacFinalFormat.resize( variations );
+
 	bool resolutionWarningPosted = false;
 	bool nonIntegerWarningPosted = false;
 	sTimer.tick ( "After-init" );
@@ -451,7 +470,7 @@ void AoSystem::calculateVariations( std::vector<parameterType>& params, ExpThrea
 		if ( variationInc == 0 ){
 			sTimer.tick ( "Variation-" + str ( variationInc ) + "-Start" );
 		}
-		auto& cmdList = dacCommandList(variationInc);
+		auto& cmdList = dacCommandList[variationInc];
 		for (auto eventInc : range( dacCommandFormList.size ( ) ) )	{
 			AoCommand tempEvent;
 			auto& formList = dacCommandFormList[eventInc];
@@ -593,14 +612,14 @@ void AoSystem::calculateVariations( std::vector<parameterType>& params, ExpThrea
 
 
 unsigned AoSystem::getNumberSnapshots(unsigned variation){
-	return dacSnapshots(variation).size();
+	return dacSnapshots[variation].size();
 }
 
 
 void AoSystem::checkTimingsWork(unsigned variation){
 	std::vector<double> times;
 	// grab all the times.
-	for (auto snapshot : dacSnapshots(variation)){
+	for (auto& snapshot : dacSnapshots[variation]) {
 		times.push_back(snapshot.time);
 	}
 
@@ -625,7 +644,7 @@ void AoSystem::checkTimingsWork(unsigned variation){
 }
 
 unsigned long AoSystem::getNumberEvents(unsigned variation){
-	return dacSnapshots(variation).size();
+	return dacSnapshots[variation].size();
 }
 
 
@@ -642,7 +661,7 @@ void AoSystem::setDacCommandForm( AoCommandForm command){
 // add a ttl trigger command for every unique dac snapshot.
 // MUST interpret key for dac and organize dac commands before setting the trigger events.
 void AoSystem::setDacTriggerEvents(DoCore& ttls, unsigned variation){
-	for ( auto snapshot : dacSnapshots(variation)){
+	for ( auto snapshot : dacSnapshots[variation]){
 		ttls.ttlOnDirect( dacTriggerLine.first, dacTriggerLine.second, snapshot.time, variation );
 		ttls.ttlOffDirect( dacTriggerLine.first, dacTriggerLine.second, snapshot.time + dacTriggerTime, variation );
 	}
@@ -655,25 +674,22 @@ std::string AoSystem::getSystemInfo( ){
 
 
 // this is a function called in preparation for forcing a dac change. Remember, you need to call ___ to actually change things.
+/*mainly for preparing the trigger which is not needed in zynq*/
 void AoSystem::prepareDacForceChange(int line, double voltage, DoCore& ttls){
 	// change parameters in the AoSystem object so that the object knows what the current settings are.
-	//std::string volt = str(roundToDacResolution(voltage));
 	std::string valStr = roundToDacPrecision? str ( AnalogOutput::roundToDacResolution ( voltage ), 13 ) : str ( voltage, 13 );
 	if (valStr.find(".") != std::string::npos)	{
 		// then it's a double. kill extra zeros on the end.
 		valStr.erase(valStr.find_last_not_of('0') + 1, std::string::npos);
 	}
 	outputs[ line ].info.currVal = voltage;
-	// I'm not sure it's necessary to go through the procedure of doing this and using the DIO to trigger the aoSys
-	// for a foce out. I'm guessing it's possible to tell the DAC to just immediately change without waiting for a 
-	// trigger.
-	setForceDacEvent ( line, voltage, ttls, 0 );
+
 }
 
 
 void AoSystem::checkValuesAgainstLimits(unsigned variation){
 	for (auto line : range(outputs.size())){
-		for (auto snapshot : dacSnapshots(variation)){
+		for (auto snapshot : dacSnapshots[variation]){
 			if (snapshot.dacValues[line] > outputs[line].info.maxVal || snapshot.dacValues[line] <outputs[ line ].info.minVal )	{
 				thrower ("Attempted to set Dac" + str(line) + " value outside min/max range for this line. The "
 						"value was " + str(snapshot.dacValues[line]) + ", while the minimum accepted value is " +
@@ -685,6 +701,8 @@ void AoSystem::checkValuesAgainstLimits(unsigned variation){
 }
 
 
+
+/*to be deleted*/
 void AoSystem::setForceDacEvent( int line, double val, DoCore& ttls, unsigned variation ){
 	if (val > outputs[ line ].info.maxVal || val < outputs[ line ].info.minVal ){
 		thrower ("Attempted to set Dac" + str(line) + " value outside min/max range for this line. The "
@@ -696,26 +714,56 @@ void AoSystem::setForceDacEvent( int line, double val, DoCore& ttls, unsigned va
 	eventInfo.line = line;
 	eventInfo.time = 1;	
 	eventInfo.value = val;
-	dacCommandList(variation).push_back( eventInfo );
+	dacCommandList[variation].push_back( eventInfo );
 	// important! need at least 2 states to run the dac board. can't just give it one value. This is how this was done in the VB code,
 	// there might be better ways of dealing with this. 
 	eventInfo.time = 10;
-	dacCommandList(variation).push_back( eventInfo );
+	dacCommandList[variation].push_back( eventInfo );
+
 	// you need to set up a corresponding pulse trigger to tell the aoSys to change the output at the correct time.
-	ttls.ttlOnDirect( dacTriggerLine.first, dacTriggerLine.second, 1, 0 );
-	ttls.ttlOffDirect( dacTriggerLine.first, dacTriggerLine.second, 1 + dacTriggerTime, 0 );
+	//ttls.ttlOnDirect( dacTriggerLine.first, dacTriggerLine.second, 1, 0 );
+	//ttls.ttlOffDirect( dacTriggerLine.first, dacTriggerLine.second, 1 + dacTriggerTime, 0 );
+
+	std::ostringstream stringStream;
+	stringStream << "DAC_" << line << "_" << std::setprecision(3) << val;
+	std::string command = stringStream.str();
+
+	if (getNumberEvents(variation) != 0) {
+		int tcp_connect;
+		try
+		{
+			tcp_connect = zynq_tcp.connectTCP(ZYNQ_ADDRESS);
+		}
+		catch (ChimeraError& err)
+		{
+			tcp_connect = 1;
+			errBox(err.what());
+		}
+
+		if (tcp_connect == 0)
+		{
+			zynq_tcp.writeCommand(command);
+			zynq_tcp.disconnect();
+		}
+		else
+		{
+			errBox("connection to zynq failed. can't write DAC data\n");
+		}
+	}
 }
 
 
-ExpWrap<std::vector<AoSnapshot>> AoSystem::getSnapshots ( ){
+std::vector<std::vector<AoSnapshot>> AoSystem::getSnapshots ( ){
 	/* used by the unit testing suite. */
 	return dacSnapshots;
 }
 
-ExpWrap<std::array<std::vector<double>, size_t(AOGrid::numOFunit)>> AoSystem::getFinData ( ){
+std::vector<std::array<std::vector<double>, size_t(AOGrid::numOFunit)>> AoSystem::getFinData ( ){
 	/* used by the unit testing suite. */
 	return finalFormatDacData;
 }
+
+
 
 
 void AoSystem::prepareForce( ){
@@ -725,11 +773,19 @@ void AoSystem::prepareForce( ){
 
 void AoSystem::initializeDataObjects( unsigned cmdNum ){
 	dacCommandFormList = vec<AoCommandForm>( cmdNum );
-	dacCommandList.uniformSizeReset (  cmdNum );
-	dacSnapshots.uniformSizeReset ( cmdNum );
-	loadSkipDacSnapshots.uniformSizeReset ( cmdNum );
-	finalFormatDacData.uniformSizeReset ( cmdNum );
-	loadSkipDacFinalFormat.uniformSizeReset ( cmdNum );
+
+	dacCommandList.clear();
+	dacSnapshots.clear();
+	loadSkipDacSnapshots.clear();
+	finalFormatDacData.clear();
+	loadSkipDacFinalFormat.clear();
+
+	dacCommandList.resize(cmdNum);
+	dacSnapshots.resize(cmdNum);
+	loadSkipDacSnapshots.resize(cmdNum);
+	finalFormatDacData.resize(cmdNum);
+	loadSkipDacFinalFormat.resize(cmdNum);
+
 }
 
 
@@ -748,10 +804,10 @@ void AoSystem::stopDacs(){
 void AoSystem::configureClocks(unsigned variation, bool loadSkip){
 	long sampleNumber;
 	if ( loadSkip ){
-		sampleNumber = loadSkipDacSnapshots(variation).size( );
+		sampleNumber = loadSkipDacSnapshots[variation].size( );
 	}
 	else{
-		sampleNumber = dacSnapshots(variation).size( );
+		sampleNumber = dacSnapshots[variation].size( );
 	}
 	daqmx.configSampleClkTiming( analogOutTask0, cstr("/" + board0Name + "/PFI0"), 1000000, DAQmx_Val_Rising, 
 								 DAQmx_Val_FiniteSamps, sampleNumber );
@@ -763,29 +819,103 @@ void AoSystem::configureClocks(unsigned variation, bool loadSkip){
 
 
 void AoSystem::writeDacs(unsigned variation, bool loadSkip){
-	std::vector<AoSnapshot>& snapshots = loadSkip ? loadSkipDacSnapshots(variation) : dacSnapshots(variation);
-	std::array<std::vector<double>, size_t(AOGrid::numOFunit)>& finalData = loadSkip ? loadSkipDacFinalFormat(variation)
-															 : finalFormatDacData(variation);
-	if (snapshots.size() <= 1){
-		// need at least 2 events to run aoSys.
-		return;
+	if (getNumberEvents(variation) != 0) {
+		int tcp_connect;
+		try
+		{
+			tcp_connect = zynq_tcp.connectTCP(ZYNQ_ADDRESS);
+		}
+		catch (ChimeraError& err)
+		{
+			tcp_connect = 1;
+			errBox(err.what());
+		}
+
+		if (tcp_connect == 0)
+		{
+			zynq_tcp.writeDACs(finalDacSnapshots[variation]);
+			zynq_tcp.disconnect();
+		}
+		else
+		{
+			errBox("connection to zynq failed. can't write DAC data\n");
+		}
 	}
-	if (finalData[0].size() != 8 * snapshots.size() 
-		 || finalData[1].size() != 8 * snapshots.size()
-		 || finalData[2].size() != 8 * snapshots.size()){
-		thrower ( "Data array size doesn't match the number of time slices in the experiment!" );
-	}
-	// Should probably run a check on samples written.
-	int32 samplesWritten;
-	//
-	daqmx.writeAnalogF64( analogOutTask0, snapshots.size(), false, 0.01, DAQmx_Val_GroupByScanNumber, 
-						  &finalData[0].front(), &samplesWritten );
-	daqmx.writeAnalogF64( analogOutTask1, snapshots.size(), false, 0.01, DAQmx_Val_GroupByScanNumber, 
-						  &finalData[1].front(), &samplesWritten );
-	daqmx.writeAnalogF64( analogOutTask2, snapshots.size(), false, 0.01, DAQmx_Val_GroupByScanNumber, 
-						  &finalData[2].front(), &samplesWritten );
 }
 
+void AoSystem::formatDacForFPGA(UINT variation)
+{
+	for (int i = 0; i < dacSnapshots[variation].size(); ++i)
+	{
+		AoSnapshot snapshotPrev;
+		AoSnapshot snapshot;
+		AoChannelSnapshot channelSnapshot;
+		std::vector<int> channels;
+
+		snapshot = dacSnapshots[variation][i];
+
+		if (i == 0) {
+			for (int j = 0; j < 32; ++j) {
+				if (snapshot.dacValues[j] != dacValues[j] || (snapshot.dacValues[j] == dacValues[j] && snapshot.dacRampTimes[j] != 0)) {
+					channels.push_back(j);
+				}
+			}
+		}
+		else {
+			snapshotPrev = dacSnapshots[variation][i - 1];
+			for (int j = 0; j < 32; ++j) {
+				if (snapshot.dacValues[j] != snapshotPrev.dacValues[j] ||
+					(snapshot.dacValues[j] == snapshotPrev.dacValues[j] && snapshot.dacRampTimes[j] != 0 && snapshotPrev.dacRampTimes[j] == 0)) {
+					channels.push_back(j);
+				}
+			}
+		}
+
+		//for each channel with a changed voltage add a dacSnapshot to the final list
+		for (int channel : channels) {
+			channelSnapshot.time = snapshot.time;
+			channelSnapshot.channel = channel;
+			channelSnapshot.dacValue = snapshot.dacValues[channel];
+			channelSnapshot.dacEndValue = snapshot.dacEndValues[channel];
+			channelSnapshot.dacRampTime = snapshot.dacRampTimes[channel];
+			finalDacSnapshots[variation].push_back(channelSnapshot);
+		}
+	}
+}
+
+
+
+
+void AoSystem::setDACs()
+{
+	int tcp_connect;
+	try
+	{
+		tcp_connect = zynq_tcp.connectTCP(ZYNQ_ADDRESS);
+	}
+	catch (ChimeraError& err)
+	{
+		tcp_connect = 1;
+		errBox(err.what());
+	}
+
+	if (tcp_connect == 0)
+	{
+		std::ostringstream stringStream;
+		std::string command;
+		for (int line = 0; line < dacValues.size(); ++line) {
+			stringStream.str("");
+			stringStream << "DAC_" << line << "_" << std::fixed << std::setprecision(4) << dacValues[line];
+			command = stringStream.str();
+			zynq_tcp.writeCommand(command);
+		}
+		zynq_tcp.disconnect();
+	}
+	else
+	{
+		errBox("connection to zynq failed. can't trigger the sequence or new settings\n");
+	}
+}
 
 void AoSystem::startDacs(){
 	daqmx.startTask( analogOutTask0 );
@@ -795,10 +925,10 @@ void AoSystem::startDacs(){
 
 
 void AoSystem::makeFinalDataFormat(unsigned variation){
-	auto& finalNormal = finalFormatDacData(variation);
-	auto& finalLoadSkip = loadSkipDacFinalFormat(variation);
-	auto& normSnapshots = dacSnapshots(variation);
-	auto& loadSkipSnapshots = loadSkipDacSnapshots(variation);
+	auto& finalNormal = finalFormatDacData[variation];
+	auto& finalLoadSkip = loadSkipDacFinalFormat[variation];
+	auto& normSnapshots = dacSnapshots[variation];
+	auto& loadSkipSnapshots = loadSkipDacSnapshots[variation];
 
 	for ( auto& data : finalNormal ){
 		data.clear( );

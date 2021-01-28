@@ -16,7 +16,12 @@
 #include <qheaderview.h>
 #include <qmenu.h>
 
-DataAnalysisControl::DataAnalysisControl (IChimeraQtWindow* parent) : IChimeraSystem(parent) {
+DataAnalysisControl::DataAnalysisControl (IChimeraQtWindow* parent) 
+	: IChimeraSystem(parent)
+	, gridSpacing(nullptr)
+	, gridHeight(nullptr)
+	, gridWidth(nullptr)
+{
 	std::vector<std::string> names = ConfigSystem::searchForFiles (PLOT_FILES_SAVE_LOCATION, str ("*.") + PLOTTING_EXTENSION);
 	for (auto name : names) {
 		PlottingInfo totalInfo (PLOT_FILES_SAVE_LOCATION + "\\" + name + "." + PLOTTING_EXTENSION); 

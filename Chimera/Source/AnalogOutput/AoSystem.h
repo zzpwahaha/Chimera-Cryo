@@ -12,6 +12,8 @@
 #include <GeneralObjects/IChimeraSystem.h>
 #include "ConfigurationSystems/Version.h"
 #include "PrimaryWindows/IChimeraQtWindow.h"
+#include "ZynqTCP/ZynqTCP.h"
+
 #include "Qlabel.h"
 #include <qpushbutton.h>
 #include <qcheckbox.h>
@@ -55,6 +57,8 @@ class AoSystem : public IChimeraSystem
 		void setMinMax( int dacNumber, double min, double max );
 		std::vector<std::vector<plotDataVec>> getPlotData (unsigned variation);
 		void handleEditChange( unsigned dacNumber );
+
+
 		// processing to determine how dac's get set
 		void handleSetDacsButtonPress( DoCore& ttls, bool useDefault=false );
 		void setDacCommandForm( AoCommandForm command );
@@ -67,6 +71,8 @@ class AoSystem : public IChimeraSystem
 		void handleDacScriptCommand( AoCommandForm command, std::string name, std::vector<parameterType>& vars, 
 									 DoCore& ttls );
 		void findLoadSkipSnapshots( double time, std::vector<parameterType>& variables, unsigned variation );
+		
+		
 		// formatting data and communicating with the underlying daqmx api for actual communicaition with the cards.
 		void makeFinalDataFormat( unsigned variation);
 		void writeDacs( unsigned variation, bool loadSkip );
@@ -100,9 +106,14 @@ class AoSystem : public IChimeraSystem
 		std::array<double, size_t(AOGrid::total)> getFinalSnapshot( );
 
 
-		ExpWrap<std::vector<AoSnapshot>> getSnapshots ( );
-		ExpWrap<std::array<std::vector<double>, size_t(AOGrid::numOFunit)>> getFinData ( );
+		std::vector<std::vector<AoSnapshot>> getSnapshots ( );
+		std::vector<std::array<std::vector<double>, size_t(AOGrid::numOFunit)>> getFinData ( );
 
+
+		void setDACs();
+		void formatDacForFPGA(UINT variation);
+
+		bool IsquickChange() { return quickChange->isChecked(); }
 	private:
 		void setForceDacEvent (int line, double val, DoCore& ttls, unsigned variation);
 
@@ -112,14 +123,33 @@ class AoSystem : public IChimeraSystem
 		CQCheckBox* quickChange;
 		std::array<AnalogOutput, size_t(AOGrid::total)> outputs;
 
+		std::array<double, 32> dacValues;
+		//std::array<std::string, 32> dacNames;
+		//std::array<double, 32> dacMinVals;
+		//std::array<double, 32> dacMaxVals;
+		//std::array<double, 32> defaultVals;
+
+
 		std::vector<AoCommandForm> dacCommandFormList;
-		ExpWrap<std::vector<AoCommand>> dacCommandList;
-		ExpWrap<std::vector<AoSnapshot>> dacSnapshots, loadSkipDacSnapshots;
-		ExpWrap<std::array<std::vector<double>, size_t(AOGrid::numOFunit)>> finalFormatDacData, loadSkipDacFinalFormat;
+		std::vector<std::vector<AoCommand>> dacCommandList;
+		std::vector<std::vector<AoSnapshot>> dacSnapshots, loadSkipDacSnapshots;
+		std::vector<std::array<std::vector<double>, size_t(AOGrid::numOFunit)>> finalFormatDacData, loadSkipDacFinalFormat;
 		std::pair<unsigned short, unsigned short> dacTriggerLine;
 
 		double dacTriggerTime;
 		bool roundToDacPrecision;
+
+
+		std::vector<std::vector<AoChannelSnapshot>> finalDacSnapshots;
+		//Zynq tcp connection
+		ZynqTCP zynq_tcp;
+
+
+
+
+
+
+
 
 		// For DACboard0 (tasks are a national instruments DAQmx thing)
 		TaskHandle analogOutTask0 = nullptr;

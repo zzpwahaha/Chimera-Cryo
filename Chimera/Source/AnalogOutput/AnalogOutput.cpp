@@ -5,7 +5,7 @@
 #include <QlineEdit>
 #include <QKeyEvent>
 
-AnalogOutput::AnalogOutput( ){}
+AnalogOutput::AnalogOutput( ) {}
 
 void AnalogOutput::initialize ( IChimeraQtWindow* parent, int whichDac) {
 	layout = new QHBoxLayout();
@@ -24,6 +24,7 @@ void AnalogOutput::initialize ( IChimeraQtWindow* parent, int whichDac) {
 
 	layout->addWidget(label, 0);
 	layout->addWidget(edit, 1);
+	updateEdit(false);
 }
 
 bool AnalogOutput::eventFilter (QObject* obj, QEvent* event) {
@@ -53,6 +54,8 @@ bool AnalogOutput::eventFilter (QObject* obj, QEvent* event) {
 			if (fabs (val - info.currVal) > 1e-12){
 				return true;
 			}
+
+
 			auto decimalPos = txt.indexOf (".");
 			auto cursorPos = edit->cursorPosition ();
 			if (decimalPos == -1){
@@ -77,6 +80,7 @@ bool AnalogOutput::eventFilter (QObject* obj, QEvent* event) {
 			else {
 				edit->setCursorPosition (cursorPos);
 			}
+			updateEdit(false);
 			return true;
 		}
 		return false;
@@ -104,7 +108,7 @@ double AnalogOutput::getVal ( bool useDefault ){
 
 void AnalogOutput::updateEdit ( bool roundToDacPrecision ){
 	std::string valStr = roundToDacPrecision ? str ( roundToDacResolution ( info.currVal ), 13, true, false, true )
-		: str ( info.currVal, 5, false, false, true );
+		: str ( info.currVal, numDigits, false, false, false );
 	int pos = edit->cursorPosition ();
 	edit->setText (cstr (valStr));
 	edit->setCursorPosition (pos);
@@ -127,7 +131,7 @@ void AnalogOutput::handleEdit ( bool roundToDacPrecision ){
 		if ( roundToDacPrecision ){
 			double roundNum = roundToDacResolution ( info.currVal );
 			if ( fabs ( roundToDacResolution ( info.currVal ) - boost::lexical_cast<double>( str(edit->text()) ) ) < 1e-8 )	{
-				matches = true;
+				matches = true; /*seems match is unused*/
 			}
 		}
 		else{
@@ -140,7 +144,7 @@ void AnalogOutput::handleEdit ( bool roundToDacPrecision ){
 }
 
 double AnalogOutput::roundToDacResolution ( double num ){
-	double dacResolution = 10.0 / pow ( 2, 16 );
+	//double dacResolution = 10.0 / pow ( 2, 16 );
 	return long ( ( num + dacResolution / 2 ) / dacResolution ) * dacResolution;
 }
 

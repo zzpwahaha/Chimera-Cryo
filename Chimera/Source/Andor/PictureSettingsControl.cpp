@@ -11,6 +11,10 @@
 #include "Commctrl.h"
 #include <boost/lexical_cast.hpp>
 
+PictureSettingsControl::PictureSettingsControl()
+{
+}
+
 void PictureSettingsControl::initialize( QPoint& pos, IChimeraQtWindow* parent ){
 	auto& px = pos.rx (), &py = pos.ry ();
 	// introducing things row by row
@@ -59,7 +63,7 @@ void PictureSettingsControl::initialize( QPoint& pos, IChimeraQtWindow* parent )
 		exposureEdits[picInc]->setGeometry (px + 100 + 95 * picInc, py, 95, 20);
 		parent->connect (exposureEdits[picInc], &QLineEdit::textChanged, handleChange);
 	}
-	setUnofficialExposures ( std::vector<float> ( 4, 10 / 1000.0f ) );
+	setUnofficialExposures(std::vector<float>(4, 10 / 1000.0f));
 
 	/// Thresholds
 	thresholdLabel = new QLabel ("Threshold (cts)", parent);
@@ -70,6 +74,7 @@ void PictureSettingsControl::initialize( QPoint& pos, IChimeraQtWindow* parent )
 		parent->connect (thresholdEdits[picInc], &QLineEdit::textChanged, handleChange);
 		currentPicSettings.thresholds[ picInc ] = { 100 };
 	}
+	
 	/// colormaps
 	colormapLabel = new QLabel ("Colormap", parent);
 	colormapLabel->setGeometry (px, py += 20,100, 25);

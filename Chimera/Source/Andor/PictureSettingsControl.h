@@ -27,7 +27,7 @@ struct displayTypeOption{
 class PictureSettingsControl {
 	public:
 		// must have parent. Enforced partially because both are singletons.
-		// PictureSettingsControl( )
+		PictureSettingsControl();
 		void updateAllSettings ( andorPicSettingsGroup inputSettings );
 		void handleSaveConfig(ConfigStream& saveFile);
 		void handleOpenConfig(ConfigStream& openFile, AndorCameraCore* andor);
@@ -68,14 +68,14 @@ class PictureSettingsControl {
 		QLabel* transfModeLabel;
 		CQComboBox* transformationModeCombo;
 		// 
-		std::array<CQRadioButton*, 4> totalNumberChoice;
-		std::array<QLabel*, 4> pictureNumbers;
-		std::array<CQLineEdit*, 4> exposureEdits;
-		std::array<CQLineEdit*, 4> thresholdEdits;
-		std::array<CQComboBox*, 4> colormapCombos;
-		std::array<CQComboBox*, 4> displayTypeCombos;
-		std::array<CQCheckBox*, 4> softwareAccumulateAll;
-		std::array<CQLineEdit*, 4> softwareAccumulateNum;
+		std::array<CQRadioButton*, 4> totalNumberChoice = std::array<CQRadioButton*, 4>();
+		std::array<QLabel*, 4> pictureNumbers = std::array<QLabel*, 4>();
+		std::array<CQLineEdit*, 4> exposureEdits = std::array<CQLineEdit*, 4>();
+		std::array<CQLineEdit*, 4> thresholdEdits = std::array<CQLineEdit*, 4>();
+		std::array<CQComboBox*, 4> colormapCombos = std::array<CQComboBox*, 4>();
+		std::array<CQComboBox*, 4> displayTypeCombos = std::array<CQComboBox*, 4>();
+		std::array<CQCheckBox*, 4> softwareAccumulateAll = std::array<CQCheckBox*, 4>();
+		std::array<CQLineEdit*, 4> softwareAccumulateNum = std::array<CQLineEdit*, 4>();
 };
 
 

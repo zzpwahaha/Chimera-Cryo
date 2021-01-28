@@ -43,11 +43,11 @@ struct AndorRunSettings{
 	- Also some auxiliary settings which are never directly programmed to the camera, but are key for the way the 
 	camera is used in the code.
 */
-struct AndorCameraSettings{
+struct AndorCameraSettings {
 	AndorRunSettings andor;
 	// not directly programmed to camera
 	std::array<std::vector<int>, 4> thresholds;
-	std::array<int, 4> palleteNumbers;
+	std::array<int, 4> palleteNumbers = { 0,0,0,0 };
 	double mostRecentTemp;
 };
 

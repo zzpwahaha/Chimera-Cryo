@@ -7,4 +7,8 @@
     <LocalDebuggerEnvironment>PATH=$(QTDIR)\bin;$(ProjectDir)3rd_Party\Andor\Lib;$(ProjectDir)3rd_Party\Thorlabs\Lib;%(Path)%</LocalDebuggerEnvironment>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LocalDebuggerEnvironment>PATH=$(QTDIR)\bin;$(ProjectDir)3rd_Party\Andor\Lib;$(ProjectDir)3rd_Party\Thorlabs\Lib;%(Path)%</LocalDebuggerEnvironment>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+  </PropertyGroup>
 </Project>

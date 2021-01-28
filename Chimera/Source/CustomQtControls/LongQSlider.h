@@ -19,9 +19,9 @@ class LongQSlider{
 		void reposition ( QPoint loc, long totalheight );
 		unsigned getEditId ( );
 		void hide ( int hideornot );
-		QSlider* slider;
-		CQLineEdit* edit;
-		QLabel* header;
+		QSlider* slider = nullptr;
+		CQLineEdit* edit = nullptr;
+		QLabel* header = nullptr;
 	private:
 		double currentValue;
 		const double maxVal = 1000;
