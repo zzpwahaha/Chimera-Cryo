@@ -14,12 +14,16 @@
 #include "nidaqmx2.h"
 #include <boost/lexical_cast.hpp>
 
+#include "ExperimentMonitoringAndStatus/ColorBox.h""
 #include <qlayout.h> 
 
 // I don't use this because I manually import dll functions.
 // #include "Dio64.h"
 DoSystem::DoSystem( IChimeraQtWindow* parent, bool ftSafemode, bool serialSafemode ) 
-	: core(ftSafemode, serialSafemode), IChimeraSystem(parent){
+	: core(ftSafemode, serialSafemode)
+	, IChimeraSystem(parent)
+	, holdStatus(false)
+{
 	for (auto& out : outputs) { out.set(0); }
 }
 
@@ -73,50 +77,50 @@ std::pair<unsigned, unsigned> DoSystem::getTtlBoardSize(){
 	return { outputs.numRows, outputs.numColumns };
 }
 
-void DoSystem::initialize( IChimeraQtWindow* parent ){
+void DoSystem::initialize(IChimeraQtWindow* parent) {
 	QVBoxLayout* layout = new QVBoxLayout(this);
 	this->setMaximumWidth(1000);
 	// title
-	ttlTitle = new QLabel ("DIGITAL OUTPUT", parent);
+	ttlTitle = new QLabel("DIGITAL OUTPUT", parent);
 	layout->addWidget(ttlTitle, 0);
 	// all number numberLabels
 
 	QHBoxLayout* layout1 = new QHBoxLayout();
 	layout1->setContentsMargins(0, 0, 0, 0);
 
-	ttlHold = new CQPushButton ("Hold Current Values", parent);
-	ttlHold->setToolTip ("Press this button to change multiple TTLs simultaneously. Press the button, then change the "
+	ttlHold = new CQPushButton("Hold Current Values", parent);
+	ttlHold->setToolTip("Press this button to change multiple TTLs simultaneously. Press the button, then change the "
 		"ttls, then press the button again to release it. Upon releasing the button, the TTLs will change.");
-	parent->connect (ttlHold, &QPushButton::released, [parent, this]() {
-		try{
-			parent->configUpdated ();
-			handleHoldPress ();
-			emit notification ("Handling Hold Press.\n", 2);
-		}
-		catch (ChimeraError& exception){
-			emit error ("TTL Hold Handler Failed: " + exception.qtrace () + "\n");
-		}
-	});
-	ttlHold->setCheckable (true);
-
-	zeroTtls = new CQPushButton ("Zero DOs", parent);
-	zeroTtls->setToolTip( "Press this button to set all ttls to their zero (false) state." );
-	parent->connect (zeroTtls, &QPushButton::released, [parent, this]() {
-		try	{
-			zeroBoard ();
+	parent->connect(ttlHold, &QPushButton::released, [parent, this]() {
+		try {
 			parent->configUpdated();
-			emit notification ("Zero'd DOs.\n",2);
+			handleHoldPress();
+			emit notification("Handling Hold Press.\n", 2);
 		}
 		catch (ChimeraError& exception) {
-			emit notification ("Failed to Zero DOs!!!\n",1);
-			emit error(exception.qtrace ());
+			emit error("TTL Hold Handler Failed: " + exception.qtrace() + "\n");
 		}
-	});
+		});
+	ttlHold->setCheckable(true);
+
+	zeroTtls = new CQPushButton("Zero DOs", parent);
+	zeroTtls->setToolTip("Press this button to set all ttls to their zero (false) state.");
+	parent->connect(zeroTtls, &QPushButton::released, [parent, this]() {
+		try {
+			zeroBoard();
+			parent->configUpdated();
+			emit notification("Zero'd DOs.\n", 2);
+		}
+		catch (ChimeraError& exception) {
+			emit notification("Failed to Zero DOs!!!\n", 1);
+			emit error(exception.qtrace());
+		}
+		});
 	layout1->addWidget(ttlHold);
 	layout1->addWidget(zeroTtls);
 	layout->addLayout(layout1);
 
-	
+
 	//for (long ttlNumberInc : range (ttlNumberLabels.size ())) {
 	//	ttlNumberLabels[ttlNumberInc] = new QLabel (cstr (ttlNumberInc), parent);
 	//	ttlNumberLabels[ttlNumberInc]->setGeometry ({ QPoint (px + 32 + ttlNumberInc * 28, py),
@@ -131,23 +135,23 @@ void DoSystem::initialize( IChimeraQtWindow* parent ){
 
 	QGridLayout* DOGridLayout = new QGridLayout();
 	unsigned runningCount = 0;
-	for (auto row : DoRows::allRows ){
+	for (auto row : DoRows::allRows) {
 		runningCount++;
 		QHBoxLayout* DOsubGridLayout = new QHBoxLayout();
-		for (size_t number = 0; number < outputs.numColumns; number++){
-			auto& out = outputs (number, row);
-			out.initialize ( parent );
-			parent->connect ( out.check, &QCheckBox::stateChanged, [this, &out, parent]() {
+		for (size_t number = 0; number < outputs.numColumns; number++) {
+			auto& out = outputs(number, row);
+			out.initialize(parent);
+			parent->connect(out.check, &QCheckBox::stateChanged, [this, &out, parent]() {
 				try {
-					handleTTLPress (out);
-					emit notification ("Handled DO " + qstr (DoRows::toStr(out.getPosition ().first)) + ","
-						+ qstr (out.getPosition ().second) + " State Change.\n", 2);
-					parent->configUpdated ();
+					handleTTLPress(out);
+					emit notification("Handled DO " + qstr(DoRows::toStr(out.getPosition().first)) + ","
+						+ qstr(out.getPosition().second) + " State Change.\n", 2);
+					parent->configUpdated();
 				}
-				catch (ChimeraError& exception)	{
-					emit error ("DO Press Handler Failed.\n" + exception.qtrace () + "\n");
+				catch (ChimeraError& exception) {
+					emit error("DO Press Handler Failed.\n" + exception.qtrace() + "\n");
 				}
-			});
+				});
 			DOsubGridLayout->addWidget(out.check);
 		}
 		DOsubGridLayout->setSpacing(8);
@@ -156,6 +160,9 @@ void DoSystem::initialize( IChimeraQtWindow* parent ){
 	DOGridLayout->setHorizontalSpacing(20);
 	DOGridLayout->setVerticalSpacing(12);
 	layout->addLayout(DOGridLayout);
+
+
+
 }
 
 int DoSystem::getNumberOfTTLRows(){
@@ -168,9 +175,8 @@ int DoSystem::getNumberOfTTLsPerRow(){
 
 void DoSystem::handleTTLPress(DigitalOutput& out){
 	if ( holdStatus == false ){
-		//out.set (!out.getStatus ());
 		out.set (out.check->isChecked ());
-		core.ftdi_ForceOutput(out.getPosition().first, out.getPosition().second, !out.getStatus(), getCurrentStatus ());
+		core.FPGAForceOutput(getCurrentStatus ());
 	}
 	else{
 		out.setHoldStatus ( !out.holdStatus );
@@ -185,8 +191,8 @@ void DoSystem::handleHoldPress(){
 		// make changes
 		for ( auto& out : outputs )	{
 			out.set ( out.holdStatus );
-			core.ftdi_ForceOutput (out.getPosition ().first, out.getPosition ().second, out.getStatus (), getCurrentStatus());
 		}
+		core.FPGAForceOutput(getCurrentStatus());
 	}
 	else{
 		holdStatus = true;
@@ -196,7 +202,8 @@ void DoSystem::handleHoldPress(){
 	}
 }
 
-std::array< std::array<bool, size_t(DOGrid::numPERunit)>, size_t(DOGrid::numOFunit) > DoSystem::getCurrentStatus( ){
+std::array< std::array<bool, size_t(DOGrid::numPERunit)>, size_t(DOGrid::numOFunit) > DoSystem::getCurrentStatus()
+{
 	std::array< std::array<bool, size_t(DOGrid::numPERunit)>, size_t(DOGrid::numOFunit) > currentStatus;
 	for ( auto& out : outputs ){
 		currentStatus[ int ( out.getPosition ( ).first ) ][ out.getPosition ( ).second ] = out.getStatus();
@@ -245,8 +252,8 @@ bool DoSystem::getFtFlumeSafemode () { return core.getFtFlumeSafemode (); }
 void DoSystem::zeroBoard( ){
 	for ( auto& out : outputs ){
 		out.set (0); 
-		core.ftdi_ForceOutput (out.getPosition ().first, out.getPosition ().second, 0, getCurrentStatus ());	
 	}
+	core.FPGAForceOutput(getCurrentStatus());
 }
 
 DoCore& DoSystem::getCore (){

@@ -19,8 +19,7 @@ QtScriptWindow::~QtScriptWindow (){
 }
 
 void QtScriptWindow::initializeWidgets (){
-	statBox = new ColorBox (this, mainWin->getDevices());
-	int id = 2000;
+	statBox = new ColorBox(this, mainWin->getDevices());
 	QWidget* centralWidget = new QWidget();
 	setCentralWidget(centralWidget);
 	QHBoxLayout* layout = new QHBoxLayout(centralWidget);

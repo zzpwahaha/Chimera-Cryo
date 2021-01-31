@@ -105,18 +105,6 @@
     <ClCompile Include="Source\DataLogging\DataLogger.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\DigitalOutput\DigitalOutput.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\DigitalOutput\DoCore.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\DigitalOutput\DoRows.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\DigitalOutput\DoSystem.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Source\DirectDigitalSynthesis\DdsCore.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -273,6 +261,18 @@
     <ClCompile Include="Source\ZynqTCP\ZynqTCP.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\DigitalOutput\DigitalOutput.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\DigitalOutput\DoCore.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\DigitalOutput\DoRows.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\DigitalOutput\DoSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\stdafx.h">
@@ -357,18 +357,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\DataLogging\DataLogger.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\DigitalOutput\DigitalOutput.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\DigitalOutput\DoCore.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\DigitalOutput\DoRows.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\DigitalOutput\DoStructures.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\DirectDigitalSynthesis\DdsCore.h">
@@ -539,16 +527,19 @@
     <ClInclude Include="Source\RealTimeDataAnalysis\realTimePlotterInput.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Source\DigitalOutput\DigitalOutput.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\DigitalOutput\DoCore.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\DigitalOutput\DoRows.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\DigitalOutput\DoStructures.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="Source\ZynqTCP\ZynqTCP.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\ZynqTCP\DioStructures.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\ZynqTCP\DacStructures.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\ZynqTCP\DDSStructures.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -569,9 +560,6 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="Source\ConfigurationSystems\ProfileIndicator.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="Source\DigitalOutput\DoSystem.h">
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="Source\ExcessDialogs\AoSettingsDialog.h">
@@ -641,6 +629,9 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="Source\RealTimeDataAnalysis\MachineOptimizer.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\DigitalOutput\DoSystem.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>

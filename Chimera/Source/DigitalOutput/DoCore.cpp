@@ -2,6 +2,7 @@
 #include "DoCore.h"
 #include "DoStructures.h"
 #include "DoRows.h"
+#include "qdebug.h"
 
 DoCore::DoCore (bool ftSafemode, bool serialSafemode) : ftFlume (ftSafemode), names(4, 16){
 	try	{
@@ -122,10 +123,10 @@ void DoCore::convertToFinalFtdiFormat (unsigned variation){
 
 std::array< std::array<bool, size_t(DOGrid::numPERunit)>, size_t(DOGrid::numOFunit) > DoCore::getFinalSnapshot ()
 {
-	auto numVar = ttlSnapshots.getNumVariations ();
+	auto numVar = ttlSnapshots.size();
 	if (numVar > 0){
-		if (ttlSnapshots (numVar - 1).size () > 0){
-			return ttlSnapshots ( numVar - 1 ).back ().ttlStatus;
+		if (ttlSnapshots [numVar - 1].size () > 0){
+			return ttlSnapshots [ numVar - 1 ].back ().ttlStatus;
 		}
 	}
 	thrower ("Attempted to get final snapshot from dio system but no snapshots!");
@@ -159,9 +160,33 @@ void DoCore::standardNonExperimentStartDoSequence (DoSnapshot initSnap){
 
 void DoCore::initializeDataObjects (unsigned variationNum){
 	ttlCommandFormList = std::vector<DoCommandForm>();
-	ttlCommandList.uniformSizeReset (variationNum);
-	ttlSnapshots.uniformSizeReset (variationNum);
-	loadSkipTtlSnapshots.uniformSizeReset (variationNum);
+
+	doFPGA.clear();
+	doFPGA.resize(variationNum);
+
+	ttlCommandList.clear();
+	ttlCommandList.resize(variationNum);
+
+	ttlSnapshots.clear();
+	ttlSnapshots.resize(variationNum);
+
+	loadSkipTtlSnapshots.clear();
+	loadSkipTtlSnapshots.resize(variationNum);
+
+	formattedTtlSnapshots.clear();
+	formattedTtlSnapshots.resize(variationNum);
+
+	loadSkipFormattedTtlSnapshots.clear();
+	loadSkipFormattedTtlSnapshots.resize(variationNum);
+	
+	finalFormatTtlData.clear();
+	finalFormatTtlData.resize(variationNum);
+	
+	loadSkipFinalFormatTtlData.clear();
+	loadSkipFinalFormatTtlData.resize(variationNum);
+
+
+	/* deprecated */
 	ftdiSnaps.uniformSizeReset (variationNum);
 	ftdiSnaps_loadSkip.uniformSizeReset (variationNum);
 	finFtdiBuffers.uniformSizeReset (variationNum);
@@ -184,7 +209,7 @@ void DoCore::ttlOnDirect (unsigned row, unsigned column, double timev, unsigned 
 	command.line = { row, column };
 	command.time = timev;
 	command.value = true;
-	ttlCommandList (variation).push_back (command);
+	ttlCommandList [variation].push_back (command);
 }
 
 
@@ -193,7 +218,7 @@ void DoCore::ttlOffDirect (unsigned row, unsigned column, double timev, unsigned
 	command.line = { row, column };
 	command.time = timev;
 	command.value = false;
-	ttlCommandList (variation).push_back (command);
+	ttlCommandList [variation].push_back (command);
 }
 
 
@@ -202,14 +227,15 @@ void DoCore::restructureCommands (){
 	if (ttlCommandFormList.size () == 0){
 		thrower ("No TTL Commands???");
 	}
-	ttlCommandList.resizeVariations (ttlCommandFormList[0].timeVals.size ());
-	for (auto varInc : range (ttlCommandList.getNumVariations ())){
+	ttlCommandList.clear();
+	ttlCommandList.resize (ttlCommandFormList[0].timeVals.size ());
+	for (auto varInc : range (ttlCommandList.size ())){
 		for (auto& cmd : ttlCommandFormList){
 			DoCommand nCmd;
 			nCmd.line = cmd.line;
 			nCmd.time = cmd.timeVals[varInc];
 			nCmd.value = cmd.value;
-			ttlCommandList (varInc).push_back (nCmd);
+			ttlCommandList [varInc].push_back (nCmd);
 		}
 	}
 }
@@ -218,9 +244,31 @@ void DoCore::restructureCommands (){
 
 void DoCore::sizeDataStructures (unsigned variations){
 	/// imporantly, this sizes the relevant structures.
-	ttlSnapshots.uniformSizeReset (variations);
-	ttlCommandList.uniformSizeReset (variations);
-	loadSkipTtlSnapshots.uniformSizeReset (variations);
+	doFPGA.clear();
+	doFPGA.resize(variations);
+
+	ttlCommandList.clear();
+	ttlCommandList.resize(variations);
+
+	ttlSnapshots.clear();
+	ttlSnapshots.resize(variations);
+
+	loadSkipTtlSnapshots.clear();
+	loadSkipTtlSnapshots.resize(variations);
+
+	formattedTtlSnapshots.clear();
+	formattedTtlSnapshots.resize(variations);
+
+	loadSkipFormattedTtlSnapshots.clear();
+	loadSkipFormattedTtlSnapshots.resize(variations);
+
+	finalFormatTtlData.clear();
+	finalFormatTtlData.resize(variations);
+
+	loadSkipFinalFormatTtlData.clear();
+	loadSkipFinalFormatTtlData.resize(variations);
+
+	/* deprecated */
 	ftdiSnaps.uniformSizeReset (variations);
 	finFtdiBuffers.uniformSizeReset (variations);
 	ftdiSnaps_loadSkip.uniformSizeReset (variations);
@@ -259,9 +307,9 @@ void DoCore::calculateVariations (std::vector<parameterType>& params, ExpThreadW
 std::vector<double> DoCore::getFinalTimes ()
 {
 	std::vector<double> finTimes;
-	finTimes.resize (ttlSnapshots.getNumVariations ());
-	for (auto varNum : range (ttlSnapshots.getNumVariations ())){
-		finTimes[varNum] = ttlSnapshots (varNum).back ().time;
+	finTimes.resize (ttlSnapshots.size ());
+	for (auto varNum : range (ttlSnapshots.size ())){
+		finTimes[varNum] = ttlSnapshots [varNum].back ().time;
 	}
 	return finTimes;
 }
@@ -270,7 +318,7 @@ std::vector<double> DoCore::getFinalTimes ()
 std::vector<std::vector<plotDataVec>> DoCore::getPlotData (unsigned variation){
 	std::vector<std::vector<plotDataVec>> ttlData(4, std::vector<plotDataVec>(16));
 	std::string message;
-	if (ttlSnapshots.getNumVariations () <= variation) {
+	if (ttlSnapshots.size () <= variation) {
 		thrower ("Attempted to retrieve ttl data from variation " + str (variation) + ", which does not "
 			"exist in the dio code object!");
 	}
@@ -279,13 +327,13 @@ std::vector<std::vector<plotDataVec>> DoCore::getPlotData (unsigned variation){
 	for (auto line : range (64)) {
 		auto& data = ttlData[line / linesPerPlot][line % linesPerPlot];
 		data.clear ();
-		for (auto snapn : range(ttlSnapshots (variation).size())){
+		for (auto snapn : range(ttlSnapshots [variation].size())){
 			if (snapn != 0){
-				data.push_back ({ ttlSnapshots (variation)[snapn].time,
-								  double (ttlSnapshots (variation)[snapn-1].ttlStatus[line / 16][line % 16]), 0 });
+				data.push_back ({ ttlSnapshots [variation][snapn].time,
+								  double (ttlSnapshots [variation][snapn-1].ttlStatus[line / 16][line % 16]), 0 });
 			}
-			data.push_back ({ ttlSnapshots (variation)[snapn].time, 
-							  double (ttlSnapshots (variation)[snapn].ttlStatus[line / 16][line % 16]), 0 });
+			data.push_back ({ ttlSnapshots [variation][snapn].time, 
+							  double (ttlSnapshots [variation][snapn].ttlStatus[line / 16][line % 16]), 0 });
 		}
 	}
 	return ttlData;
@@ -296,12 +344,12 @@ std::string DoCore::getTtlSequenceMessage (unsigned variation)
 {
 	std::string message;
 
-	if (ttlSnapshots.getNumVariations () <= variation)
+	if (ttlSnapshots.size () <= variation)
 	{
 		thrower ("Attempted to retrieve ttl sequence message from snapshot " + str (variation) + ", which does not "
 			"exist!");
 	}
-	for (auto snap : ttlSnapshots (variation))
+	for (auto snap : ttlSnapshots [variation])
 	{
 		message += str (snap.time) + ":\n";
 		int rowInc = 0;
@@ -338,14 +386,14 @@ std::string DoCore::getTtlSequenceMessage (unsigned variation)
 // which.first = row, which.second = number.
 unsigned DoCore::countTriggers (std::pair<DoRows::which, unsigned> which, unsigned variation)
 {
-	auto& snaps = ttlSnapshots (variation);
+	auto& snaps = ttlSnapshots [variation];
 	unsigned count = 0;
 	if (snaps.size () == 0)
 	{
 		return 0;
 		//thrower ( "No ttl events to examine in countTriggers?" );
 	}
-	for (auto snapshotInc : range (ttlSnapshots (variation).size () - 1))
+	for (auto snapshotInc : range (ttlSnapshots [variation].size () - 1))
 	{
 		// count each rising edge. Also count if the first snapshot is high. 
 		if ((snaps[snapshotInc].ttlStatus[int (which.first)][which.second] == false
@@ -365,23 +413,154 @@ DWORD DoCore::ftdi_ForceOutput (DoRows::which row, int number, int state,
 {
 	//outputs (number, row).set (state);
 	resetTtlEvents ();
-	initializeDataObjects (0);
+	//initializeDataObjects (0);
 	sizeDataStructures (1);
-	ttlSnapshots (0).push_back ({ 0.00001, status });
-	convertToFtdiSnaps (0);
-	convertToFinalFtdiFormat (0);
-	auto bytesWritten = ftdi_write (0, false);
-	ftdi_trigger ();
-	return bytesWritten;
+	ttlSnapshots [0].push_back ({ 1, status });
+	formatForFPGA(0);
+	writeTtlDataToFPGA(0, false);
+
+	int tcp_connect;
+	try
+	{
+		tcp_connect = zynq_tcp.connectTCP(ZYNQ_ADDRESS);
+	}
+	catch (ChimeraError& err)
+	{
+		tcp_connect = 1;
+		errBox(err.what());
+	}
+
+	if (tcp_connect == 0)
+	{
+		zynq_tcp.writeCommand("trigger");
+		zynq_tcp.writeCommand("disableMod");
+		zynq_tcp.disconnect();
+	}
+	else
+	{
+		errBox("connection to zynq failed. can't write DAC data\n");
+	}
+
+	return 0;
+}
+
+DWORD DoCore::FPGAForceOutput(std::array<std::array<bool, size_t(DOGrid::numPERunit)>, size_t(DOGrid::numOFunit)> status)
+{
+
+	resetTtlEvents();
+	sizeDataStructures(1);
+	ttlSnapshots[0].push_back({ 1, status });
+	formatForFPGA(0);
+	writeTtlDataToFPGA(0, false);
+
+	int tcp_connect;
+	try
+	{
+		tcp_connect = zynq_tcp.connectTCP(ZYNQ_ADDRESS);
+	}
+	catch (ChimeraError& err)
+	{
+		tcp_connect = 1;
+		errBox(err.what());
+	}
+
+	if (tcp_connect == 0)
+	{
+		zynq_tcp.writeCommand("trigger");
+		zynq_tcp.writeCommand("disableMod");
+		zynq_tcp.disconnect();
+	}
+	else
+	{
+		errBox("connection to zynq failed. can't write DAC data\n");
+	}
+
+	return 0;
+}
+
+
+void DoCore::formatForFPGA(UINT variation)
+{
+	int snapIndex = 0;
+	unsigned int timeConv = 100000; // DIO time given in multiples of 10 ns
+	std::array<char[DIO_LEN_BYTE_BUF], 1> byte_buf;
+	std::array<bool, size_t(DOGrid::numPERunit)> bankA;
+	std::array<bool, size_t(DOGrid::numPERunit)> bankB;
+	//char byte_buf[DIO_LEN_BYTE_BUF];
+	unsigned int time;
+	unsigned int outputA;
+	unsigned int outputB;
+	int outputAtest;
+	int outputBtest;
+
+	for (auto snapshot : ttlSnapshots[variation])
+	{
+		time = (unsigned int)(snapshot.time * timeConv);
+
+		//for each DIO bank convert the boolean array to a byte
+		outputA = 0;
+		outputB = 0;
+		outputAtest = 0;
+		outputBtest = 0;
+		for (int i = 0; i < 4; i++)
+		{
+			bankA = snapshot.ttlStatus[i]; //bank here is set of 8 booleans
+			bankB = snapshot.ttlStatus[i + 4]; //bank here is set of 8 booleans
+			for (int j = 0; j < 8; j++)
+			{
+				outputA |= (unsigned int)(bankA[j]) << 8 * i << j;
+				outputB |= (unsigned int)(bankB[j]) << 8 * i << j;
+
+				outputAtest += pow(256, i) * pow(2, j) * bankA[j];
+				outputBtest += pow(256, i) * pow(2, j) * bankB[j];
+				if (outputA != outputAtest || outputB != outputBtest)
+					qDebug() << "not equal!!!!";
+			}
+		}
+		
+		sprintf_s(byte_buf[0], DIO_LEN_BYTE_BUF, "t%08X_b%08X%08X", time, outputB, outputA);
+
+		doFPGA[variation].push_back(byte_buf);
+		snapIndex++;
+	}
+
+}
+
+void DoCore::writeTtlDataToFPGA(UINT variation, bool loadSkip) //arguments unused, just paralleling original DIO structure
+{
+
+	//dioFPGA[variation].write();
+	int tcp_connect;
+	try
+	{
+		tcp_connect = zynq_tcp.connectTCP(ZYNQ_ADDRESS);
+	}
+	catch (ChimeraError& err)
+	{
+		tcp_connect = 1;
+		errBox(err.what());
+	}
+
+	if (tcp_connect == 0)
+	{
+		zynq_tcp.writeDIO(doFPGA[variation]);
+		zynq_tcp.disconnect();
+	}
+	else
+	{
+		throw("connection to zynq failed. can't write Ttl data\n");
+	}
+
+
 }
 
 
 void DoCore::findLoadSkipSnapshots (double time, std::vector<parameterType>& variables, unsigned variation)
 {
 	// find the splitting time and set the loadSkip snapshots to have everything after that time.
-	auto& snaps = ttlSnapshots (variation);
-	auto& loadSkipSnaps = loadSkipTtlSnapshots (variation);
-	for (auto snapshotInc : range (ttlSnapshots (variation).size () - 1))
+	auto& snaps = ttlSnapshots [variation];
+	auto& loadSkipSnaps = loadSkipTtlSnapshots [variation];
+	for (auto snapshotInc : range (ttlSnapshots [variation].size () - 1))
 	{
 		if (snaps[snapshotInc].time < time && snaps[snapshotInc + 1].time >= time)
 		{
@@ -405,7 +584,7 @@ void DoCore::convertToFtdiSnaps (unsigned variation)
 	unsigned long timeConv = 100000;
 	for (auto loadSkip : { false, true })
 	{
-		auto ttlSnaps = loadSkip ? loadSkipTtlSnapshots (variation) : ttlSnapshots (variation);
+		auto ttlSnaps = loadSkip ? loadSkipTtlSnapshots [variation] : ttlSnapshots [variation];
 		auto& ftSnaps = loadSkip ? ftdiSnaps_loadSkip (variation) : ftdiSnaps (variation);
 		for (auto snapshot : ttlSnaps)
 		{
@@ -441,7 +620,7 @@ void DoCore::convertToFtdiSnaps (unsigned variation)
 	}
 }
 
-ExpWrap<std::vector<DoSnapshot>> DoCore::getTtlSnapshots ()
+std::vector<std::vector<DoSnapshot>> DoCore::getTtlSnapshots ()
 {
 	/* used in the unit testing suite */
 	return ttlSnapshots;
@@ -463,12 +642,12 @@ void DoCore::organizeTtlCommands (unsigned variation, DoSnapshot initSnap)
 	// each element of this is a different time (the double), and associated with each time is a vector which locates 
 	// which commands were on at this time, for ease of retrieving all of the values in a moment.
 	std::vector<std::pair<double, std::vector<unsigned short>>> timeOrganizer;
-	std::vector<DoCommand> orderedCommandList (ttlCommandList (variation));
+	std::vector<DoCommand> orderedCommandList (ttlCommandList [variation]);
 	// sort using a lambda. std::sort is effectively a quicksort algorithm.
 	std::sort (orderedCommandList.begin (), orderedCommandList.end (),
 		[variation](DoCommand a, DoCommand b) {return a.time < b.time; });
 	/// organize all of the commands.
-	for (auto commandInc : range (ttlCommandList (variation).size ()))
+	for (auto commandInc : range (ttlCommandList [variation].size ()))
 	{
 		// because the events are sorted by time, the time organizer will already be sorted by time, and therefore I 
 		// just need to check the back value's time. DIO64 uses a 10MHz clock, can do 100ns spacing, check diff 
@@ -493,7 +672,7 @@ void DoCore::organizeTtlCommands (unsigned variation, DoSnapshot initSnap)
 			"must contain something.\r\n");
 	}
 	/// now figure out the state of the system at each time.
-	auto& snaps = ttlSnapshots (variation);
+	auto& snaps = ttlSnapshots [variation];
 	snaps.clear ();
 	// start with the initial status.
 	snaps.push_back (initSnap);
@@ -579,7 +758,7 @@ double DoCore::getTotalTime (unsigned variation)
 
 unsigned long DoCore::getNumberEvents (unsigned variation)
 {
-	return ttlSnapshots (variation).size ();
+	return ttlSnapshots [variation].size ();
 }
 
 bool DoCore::getFtFlumeSafemode () { return ftFlume.getSafemodeSetting (); }

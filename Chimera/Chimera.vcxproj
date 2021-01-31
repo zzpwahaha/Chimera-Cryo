@@ -66,6 +66,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <PreprocessorDefinitions>_WINSOCKAPI_;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <AdditionalDependencies>ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -199,9 +200,11 @@
     <ClCompile Include="Source\ZynqTCP\ZynqTCP.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Source\ZynqTCP\DacStructures.h" />
-    <ClInclude Include="Source\ZynqTCP\DDSStructures.h" />
-    <ClInclude Include="Source\ZynqTCP\DioStructures.h" />
+    <ClInclude Include="Source\DigitalOutput\DigitalOutput.h" />
+    <ClInclude Include="Source\DigitalOutput\DoCore.h" />
+    <ClInclude Include="Source\DigitalOutput\DoRows.h" />
+    <ClInclude Include="Source\DigitalOutput\DoStructures.h" />
+    <QtMoc Include="Source\DigitalOutput\DoSystem.h" />
     <ClInclude Include="Source\ZynqTCP\ZynqTCP.h" />
     <QtMoc Include="Source\Scripts\Script.h" />
     <ClInclude Include="Source\AnalogOutput\AnalogOutput.h" />
@@ -233,11 +236,6 @@
     <ClInclude Include="Source\CustomQtControls\functionCombo.h" />
     <ClInclude Include="Source\CustomQtControls\LongQSlider.h" />
     <ClInclude Include="Source\DataLogging\DataLogger.h" />
-    <ClInclude Include="Source\DigitalOutput\DigitalOutput.h" />
-    <ClInclude Include="Source\DigitalOutput\DoCore.h" />
-    <ClInclude Include="Source\DigitalOutput\DoRows.h" />
-    <ClInclude Include="Source\DigitalOutput\DoStructures.h" />
-    <QtMoc Include="Source\DigitalOutput\DoSystem.h" />
     <ClInclude Include="Source\DirectDigitalSynthesis\DdsCore.h" />
     <ClInclude Include="Source\DirectDigitalSynthesis\DdsSystem.h" />
     <ClInclude Include="Source\DirectDigitalSynthesis\DdsSystemStructures.h" />

@@ -12,7 +12,7 @@ struct DoCommandForm
 	// the time to make the change
 	timeType time;
 	// the evaluated values of the time for each varation.
-	std::vector<double> timeVals;
+	std::vector<double> timeVals; /*not used for zynq, then DoCommandForm and DoCommand are the same*/
 	// the value to set it to. 
 	bool value;
 };
@@ -31,9 +31,9 @@ struct DoCommand
 // an object constructed for having all info the ttls for a single time
 struct DoSnapshot
 {
-	// the time of the snapshot
+	// the time of the snapshot in the unit of ms
 	double time;
 	// all values at this time.
-	std::array< std::array<bool, size_t(DOGrid::numOFunit)>, size_t(DOGrid::numPERunit) > ttlStatus;
+	std::array< std::array<bool, size_t(DOGrid::numPERunit)>, size_t(DOGrid::numOFunit) > ttlStatus;
 };
 

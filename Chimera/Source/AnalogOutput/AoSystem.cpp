@@ -65,7 +65,7 @@ void AoSystem::standardNonExperiemntStartDacsSequence( ){
 	organizeDacCommands( 0 );
 	makeFinalDataFormat( 0 );
 	//resetDacs (0, false);
-	writeDacs(0, false);
+	setDACs();
 }
 
 
@@ -83,12 +83,12 @@ void AoSystem::zeroDacs( DoCore& ttls, DoSnapshot initSnap){
 	resetDacEvents( );
 	ttls.resetTtlEvents( );
 	prepareForce( );
-	ttls.prepareForce( );
+	//ttls.prepareForce( );
 	for ( int dacInc : range(size_t(AOGrid::total)) ){
-		prepareDacForceChange( dacInc, 0, ttls );
+		prepareDacForceChange( dacInc, 0, ttls );/*this zeros dacValue*/
 	}
-	standardNonExperiemntStartDacsSequence( );
-	ttls.standardNonExperimentStartDoSequence( initSnap );
+	standardNonExperiemntStartDacsSequence( );/*this output dacs*/
+	//ttls.standardNonExperimentStartDoSequence( initSnap );
 	emit notification ("Zero'd Analog Outputs.\n", 2);
 }
 
@@ -677,12 +677,13 @@ std::string AoSystem::getSystemInfo( ){
 /*mainly for preparing the trigger which is not needed in zynq*/
 void AoSystem::prepareDacForceChange(int line, double voltage, DoCore& ttls){
 	// change parameters in the AoSystem object so that the object knows what the current settings are.
-	std::string valStr = roundToDacPrecision? str ( AnalogOutput::roundToDacResolution ( voltage ), 13 ) : str ( voltage, 13 );
-	if (valStr.find(".") != std::string::npos)	{
-		// then it's a double. kill extra zeros on the end.
-		valStr.erase(valStr.find_last_not_of('0') + 1, std::string::npos);
-	}
+	//std::string valStr = roundToDacPrecision? str ( AnalogOutput::roundToDacResolution ( voltage ), 13 ) : str ( voltage, 13 );
+	//if (valStr.find(".") != std::string::npos)	{
+	//	// then it's a double. kill extra zeros on the end.
+	//	valStr.erase(valStr.find_last_not_of('0') + 1, std::string::npos);
+	//}
 	outputs[ line ].info.currVal = voltage;
+	dacValues[line] = voltage;
 
 }
 

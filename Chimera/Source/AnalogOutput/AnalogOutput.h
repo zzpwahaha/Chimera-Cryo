@@ -27,6 +27,6 @@ class AnalogOutput{
 		CQLineEdit* edit;
 		QLabel* label;
 		QHBoxLayout* layout;
-		constexpr static double dacResolution = 20.0/0x10000; /*16bit dac*/
+		constexpr static double dacResolution = 20.0/0xffff; /*16bit dac*/
 		const int numDigits = static_cast<int>(abs(round(log10(dacResolution) - 0.49)));
 };

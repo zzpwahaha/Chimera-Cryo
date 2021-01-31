@@ -41,7 +41,6 @@ void ZynqTCP::disconnect() {
 
 int ZynqTCP::connectTCP(const char ip_address[])
 {
-
 	WSADATA wsaData;
 
 	int iResult;
@@ -89,7 +88,7 @@ int ZynqTCP::connectTCP(const char ip_address[])
 
 
 	// Connect to server.
-	iResult = connect(ConnectSocket, ptr->ai_addr, (int)ptr->ai_addrlen);
+	iResult = ::connect(ConnectSocket, ptr->ai_addr, (int)ptr->ai_addrlen);
 	if (iResult == SOCKET_ERROR) {
 		closesocket(ConnectSocket);
 		ConnectSocket = INVALID_SOCKET;
@@ -136,13 +135,20 @@ int ZynqTCP::writeCommand(std::string command)
 
 int ZynqTCP::writeDIO(std::vector<std::array<char[DIO_LEN_BYTE_BUF], 1>> TtlSnapshots)
 {
-
 	char buff[ZYNQ_MAX_BUFF];
 	memset(buff, 0, sizeof(buff));
 
 	int BytesSent = 0;
+	//std::string command(ZYNQ_MAX_BUFF,0);
+	//sprintf_s(command.data(), ZYNQ_MAX_BUFF, "DIOseq_%u", TtlSnapshots.size());
+	char command[ZYNQ_MAX_BUFF];
+	sprintf_s(command, ZYNQ_MAX_BUFF, "DIOseq_%u", TtlSnapshots.size());
+	//sprintf_s(buff, ZYNQ_MAX_BUFF, "DIOseq_%u", TtlSnapshots.size());
+	for (size_t i = 0; i < strlen(command); i++)
+	{
+		buff[i] = command[i];
+	}
 
-	sprintf_s(buff, ZYNQ_MAX_BUFF, "DIOseq_%u", TtlSnapshots.size());
 
 	BytesSent = send(ConnectSocket, buff, sizeof(buff), 0);
 	if (BytesSent == SOCKET_ERROR)

@@ -24,6 +24,15 @@ struct ddsExpSettings {
 	std::vector< ddsIndvRampListInfo> ramplist;
 };
 
+
+enum class DDSGrid : size_t
+{
+	numPERunit = 4,
+	numOFunit = 3,
+	total = numPERunit * numOFunit
+};
+
+
 class DdsCore : public IDeviceCore{
 	public:
 		// THIS CLASS IS NOT COPYABLE.
@@ -92,4 +101,30 @@ class DdsCore : public IDeviceCore{
 		void writeRampDeltaFreq ( UINT8 device, UINT8 channel, UINT8 index, double deltafreq );
 		void writeRampDeltaAmp ( UINT8 device, UINT8 channel, UINT8 index, double deltaamp );
 		void writeDDS ( UINT8 device, UINT16 address, UINT8 dat1, UINT8 dat2, UINT8 dat3, UINT8 dat4 );
+
+
+		//std::array<Control<CStatic>, 12> ddsLabels;
+		//std::array<Control<CEdit>, 12> breakoutBoardFreqEdits;
+		std::array<double, size_t(DDSGrid::numOFunit)> ddsValues;
+		std::array<std::string, size_t(DDSGrid::numOFunit)> ddsNames;
+		std::array<double, 12> ddsMinAmp;
+		std::array<double, 12> ddsMaxAmp;
+		std::array<double, 12> ddsMinFreq;
+		std::array<double, 12> ddsMaxFreq;
+		std::array<double, 12> defaultVals;
+		//std::array <const double, 2> ddsResolution;
+		std::vector<DDSCommandForm> ddsCommandFormList;
+		// the first vector is for each variation.
+		std::vector<std::vector<DDSCommand>> ddsCommandList;
+		std::vector<std::vector<DDSSnapshot>> ddsSnapshots;
+		std::vector<std::vector<DDSChannelSnapshot>> ddsChannelSnapshots;
+		std::vector<std::pair<double, std::vector<DDSCommand>>> timeOrganizer;
+
+
+		constexpr static double ddsFreqResolution = 500.0 / 0xffffffff; /*32bit, 500MHz clock freq*/
+		constexpr static double ddsAmplResolution = 10.0 / 0x3ff; /*10bit dac 0b1111111111, 10mA max dac current*/
+		const int numFreqDigits = static_cast<int>(abs(round(log10(ddsFreqResolution) - 0.49)));
+		const int numAmplDigits = static_cast<int>(abs(round(log10(ddsAmplResolution) - 0.49)));
+
+
 };

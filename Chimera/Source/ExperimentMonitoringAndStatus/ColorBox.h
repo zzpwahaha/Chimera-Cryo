@@ -7,6 +7,8 @@
 #include <PrimaryWindows/IChimeraQtWindow.h>
 #include <qlabel.h>
 #include <qstatusbar.h>
+#include <qprogressbar.h>
+
 /*
  * I put one of these controls on every window. It shows the colors for every system running.
  */
@@ -25,6 +27,7 @@ class ColorBox : public QStatusBar
 		bool initialized = false;
 	private:
 		std::vector<boxInfo> boxes;
+
 };
 
 

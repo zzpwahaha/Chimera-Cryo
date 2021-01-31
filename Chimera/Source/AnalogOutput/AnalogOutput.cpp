@@ -5,12 +5,14 @@
 #include <QlineEdit>
 #include <QKeyEvent>
 
+
 AnalogOutput::AnalogOutput( ) {}
 
 void AnalogOutput::initialize ( IChimeraQtWindow* parent, int whichDac) {
 	layout = new QHBoxLayout();
 	layout->setContentsMargins(0, 0, 0, 0);
-	label = new QLabel (cstr (whichDac), parent);
+	
+	label = new QLabel(QString("%1").arg(whichDac % size_t(AOGrid::numPERunit), 2), parent);
 	label->setToolTip ( (info.name + "\n" + info.note).c_str() );
 	
 	edit = new CQLineEdit ("0", parent);
@@ -20,10 +22,12 @@ void AnalogOutput::initialize ( IChimeraQtWindow* parent, int whichDac) {
 		[this, parent]() {
 			handleEdit ();
 		});
-	edit->setStyleSheet ("QLineEdit { border: none }");
+	//edit->setStyleSheet ("QLineEdit { border: none }");
 
 	layout->addWidget(label, 0);
 	layout->addWidget(edit, 1);
+	layout->addStretch(1);
+	edit->setMaximumWidth(150);
 	updateEdit(false);
 }
 

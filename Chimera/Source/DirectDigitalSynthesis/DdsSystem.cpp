@@ -59,7 +59,7 @@ void DdsSystem::initialize ( IChimeraQtWindow* parent, std::string title ){
 	rampListview = new QTableWidget (parent);
 	layout->addWidget(rampListview);
 
-	//rampListview->horizontalHeader ()->setFixedHeight (30);
+	rampListview->horizontalHeader()->setDefaultSectionSize(80);
 	rampListview->setColumnWidth (0, 60);
 	rampListview->setColumnWidth (1, 60);
 	rampListview->setColumnWidth (2, 60);
@@ -67,7 +67,7 @@ void DdsSystem::initialize ( IChimeraQtWindow* parent, std::string title ){
 	rampListview->setColumnWidth (4, 60);
 	rampListview->setColumnWidth (5, 60);
 	rampListview->setColumnWidth (6, 120);
-	//rampListview->verticalHeader ()->setDefaultSectionSize (60);
+	//rampListview->verticalHeader()->setDefaultSectionSize(80);
 
 	rampListview->setContextMenuPolicy (Qt::CustomContextMenu);
 	parent->connect (rampListview, &QTableWidget::customContextMenuRequested,

@@ -6,10 +6,12 @@
 #include <winsock2.h>
 #include <Ws2tcpip.h>
 #include "AnalogOutput/AoStructures.h"
+#include "DigitalOutput/DoStructures.h"
+#include "DirectDigitalSynthesis/DdsSystemStructures.h"
 
 //#include "DacStructures.h"
-#include "DDSStructures.h"
-#include "DioStructures.h"
+//#include "DDSStructures.h"
+//#include "DioStructures.h"
 
 #define ZNYQ_SAFEMODE false
 #define ZYNQ_ADDRESS "10.10.0.2"
@@ -24,8 +26,9 @@
 #define DDS_FPGA_ADDRESS "FT1I6IBSB" //Device Serial: FT1I6IBS, Use FT1I6IBSB in C++ to select Channel B
 
 
-class ZynqTCP
+class ZynqTCP 
 {
+
 private:
 	SOCKET ConnectSocket;
 public:
@@ -37,4 +40,6 @@ public:
 	int writeDACs(std::vector<AoChannelSnapshot> dacSnapshots);
 	int writeDDSs(std::vector<DDSChannelSnapshot> ddsSnapshots);
 	int writeCommand(std::string command);
+
+
 };

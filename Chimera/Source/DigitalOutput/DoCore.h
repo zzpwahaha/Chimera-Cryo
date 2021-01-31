@@ -6,6 +6,11 @@
 #include "Plotting/PlotCtrl.h"
 
 #include "DoStructures.h"
+#include "ZynqTCP/ZynqTCP.h"
+
+
+#define DIO_LEN_BYTE_BUF 28
+#define ZYNQ_ADDRESS "10.10.0.2"
 
 /*
 	(Stands for DigitalOutput Core)
@@ -56,7 +61,7 @@ class DoCore
 		void prepareForce ();
 		void findLoadSkipSnapshots (double time, std::vector<parameterType>& variables, unsigned variation);
 		void convertToFtdiSnaps (unsigned variation);
-		ExpWrap<std::vector<DoSnapshot>> getTtlSnapshots ();
+		std::vector<std::vector<DoSnapshot>> getTtlSnapshots ();
 		ExpWrap<finBufInfo> getFinalFtdiData ();
 		ExpWrap<std::array<ftdiPt, 2048>> getFtdiSnaps ();
 		void handleTtlScriptCommand (std::string command, timeType time, std::string name, Expression pulseLength,
@@ -66,7 +71,15 @@ class DoCore
 		void setNames (Matrix<std::string> namesIn);
 		Matrix<std::string> getAllNames ();
 		void standardExperimentPrep (unsigned variationInc, double currLoadSkipTime, std::vector<parameterType>& expParams);
-	private:
+	
+
+		void DoCore::formatForFPGA(UINT variation);
+		void DoCore::writeTtlDataToFPGA(UINT variation, bool loadSkip);
+		DWORD FPGAForceOutput(std::array<std::array<bool, size_t(DOGrid::numPERunit)>, size_t(DOGrid::numOFunit)> status);
+
+
+
+private:
 		const unsigned DIO_BUFFERSIZESER = 100;
 		const unsigned DIO_BUFFERSIZEASYNC = 2048;
 		const unsigned DIO_MSGLENGTH = 7;
@@ -81,10 +94,29 @@ class DoCore
 		const unsigned int BANKBOFFS = unsigned int (0x1800);
 		const unsigned int WBWRITE = (unsigned char)161;
 
-		std::vector<DoCommandForm> ttlCommandFormList;
-		ExpWrap<std::vector<DoCommand>> ttlCommandList;
-		ExpWrap<std::vector<DoSnapshot>> ttlSnapshots, loadSkipTtlSnapshots;
+		//std::vector<DoCommandForm> ttlCommandFormList;
+		//ExpWrap<std::vector<DoCommand>> ttlCommandList;
+		//ExpWrap<std::vector<DoSnapshot>> ttlSnapshots, loadSkipTtlSnapshots;
 		ExpWrap<std::array<ftdiPt, 2048>> ftdiSnaps, ftdiSnaps_loadSkip;
 		ExpWrap<finBufInfo> finFtdiBuffers, finFtdiBuffers_loadSkip;
 		Matrix<std::string> names;
+
+
+		//Zynq tcp connection
+		ZynqTCP zynq_tcp;
+
+		std::vector<std::vector<std::array<char[DIO_LEN_BYTE_BUF], 1>>> doFPGA;
+		std::vector<DoCommandForm> ttlCommandFormList;
+		// Each element of first vector is for each variation.
+		std::vector<std::vector<DoCommand>> ttlCommandList;
+		// Each element of first vector is for each variation.
+		std::vector<std::vector<DoSnapshot>> ttlSnapshots, loadSkipTtlSnapshots;
+		// Each element of first vector is for each variation.
+		std::vector<std::vector<std::array<WORD, 6>>> formattedTtlSnapshots, loadSkipFormattedTtlSnapshots;
+		// this is just a flattened version of the above snapshots. This is what gets directly sent to the dio64 card.
+		std::vector<std::vector<WORD>> finalFormatTtlData, loadSkipFinalFormatTtlData;
+		std::array<std::array<bool, size_t(DOGrid::numPERunit)>, size_t(DOGrid::numOFunit)> defaultTtlState;
+
+
+
 };
