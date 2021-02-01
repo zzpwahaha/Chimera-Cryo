@@ -47,6 +47,7 @@ class AoSystem : public IChimeraSystem
 
 		void forceDacs( DoCore& ttls, DoSnapshot initSnap);
 		void zeroDacs( DoCore& ttls, DoSnapshot initSnap);
+
 		void resetDacs (unsigned varInc, bool skipOption);
 		void handleRoundToDac( );
 		void updateEdits( );
@@ -122,6 +123,10 @@ class AoSystem : public IChimeraSystem
 		CQPushButton* zeroDacsButton;
 		CQCheckBox* quickChange;
 		std::array<AnalogOutput, size_t(AOGrid::total)> outputs;
+
+		static constexpr double dacResolution = 20.0 / 0xffff; /*16bit dac*/
+		const int numDigits = static_cast<int>(abs(round(log10(dacResolution) - 0.49)));
+
 
 		std::array<double, 32> dacValues;
 		//std::array<std::string, 32> dacNames;

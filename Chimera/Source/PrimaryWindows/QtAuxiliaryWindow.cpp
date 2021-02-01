@@ -23,7 +23,8 @@ QtAuxiliaryWindow::QtAuxiliaryWindow (QWidget* parent) : IChimeraQtWindow (paren
 QtAuxiliaryWindow::~QtAuxiliaryWindow () {}
 
 bool QtAuxiliaryWindow::eventFilter (QObject* obj, QEvent* event){
-	if (aoSys.eventFilter (obj, event)/* && aoSys.IsquickChange()*/) {
+	if (aoSys.eventFilter(obj, event) | dds.eventFilter(obj, event)/* && aoSys.IsquickChange()*/)
+	{
 		try {
 			//aoSys.forceDacs(ttlBoard.getCore(), { 0, ttlBoard.getCurrentStatus() });
 		}
@@ -48,23 +49,23 @@ void QtAuxiliaryWindow::initializeWidgets (){
 		layout1->addWidget(&ttlBoard, 0);
 		
 		aoSys.initialize (this);
-
 		layout1->addWidget(&aoSys, 0);
 		layout1->addStretch(1);
 
-		globalParamCtrl.initialize (this, "GLOBAL PARAMETERS", ParameterSysType::global, 480, 500);
-		
 		QVBoxLayout* layout3 = new QVBoxLayout();
+		globalParamCtrl.initialize (this, "GLOBAL PARAMETERS", ParameterSysType::global);
 		layout3->addWidget(&globalParamCtrl, 1);
 
 		configParamCtrl.initialize (this, "CONFIGURATION PARAMETERS", ParameterSysType::config);
 		configParamCtrl.setParameterControlActive (false);
 		layout3->addWidget(&configParamCtrl, 1);
 		
-		dds.initialize (this, "DDS SYSTEM");
-		layout3->addWidget(&dds, 1);
+		dds.initialize(this);
+		layout3->addWidget(&dds, 0);
+		//dds.initialize (this, "DDS SYSTEM");
+		//layout3->addWidget(&dds, 1);
 		
-		optimizer.initialize (loc, this);
+		optimizer.initialize (this);
 		layout3->addWidget(&optimizer, 1);
 		
 		QVBoxLayout* layout2 = new QVBoxLayout();
@@ -115,8 +116,8 @@ void QtAuxiliaryWindow::initializeWidgets (){
 		layout2->setContentsMargins(0, 0, 0, 0);
 		layout3->setContentsMargins(0, 0, 0, 0);
 		layout->addLayout(layout1);
-		layout->addLayout(layout2);
 		layout->addLayout(layout3);
+		layout->addLayout(layout2);
 	}
 	catch (ChimeraError& err){
 		errBox ("Failed to initialize auxiliary window properly! Trace: " + err.trace ());
@@ -243,6 +244,18 @@ void QtAuxiliaryWindow::zeroDacs (){
 	catch (ChimeraError& exception){
 		reportStatus ("Failed to Zero DACs!!!\n");
 		reportErr (exception.qtrace ());
+	}
+}
+
+void QtAuxiliaryWindow::zeroDds() {
+	try {
+		mainWin->updateConfigurationSavedStatus(false);
+		dds.zeroDds();
+		reportStatus("Zero'd DDSs.\n");
+	}
+	catch (ChimeraError& exception) {
+		reportStatus("Failed to Zero DDSs!!!\n");
+		reportErr(exception.qtrace());
 	}
 }
 
@@ -429,6 +442,28 @@ void QtAuxiliaryWindow::SetDacs (){
 	}
 	mainWin->updateConfigurationSavedStatus(false);
 }
+
+
+void QtAuxiliaryWindow::SetDds() {
+	reportStatus("----------------------\r\nSetting DDSs... ");
+	try {
+		mainWin->updateConfigurationSavedStatus(false);
+		//aoSys.resetDacEvents();
+		////ttlBoard.resetTtlEvents();
+		//reportStatus("Setting Dacs...\r\n");
+		dds.handleSetDdsButtonPress(true);
+		//dds.setDDSs();
+		//aoSys.forceDacs (ttlBoard.getCore (), { 0, ttlBoard.getCurrentStatus () });
+		reportStatus("Finished Setting DDSs.\r\n");
+	}
+	catch (ChimeraError& exception) {
+		errBox(exception.trace());
+		reportStatus(": " + exception.qtrace() + "\r\n");
+		reportErr(exception.qtrace());
+	}
+	mainWin->updateConfigurationSavedStatus(false);
+}
+
 
 void QtAuxiliaryWindow::ViewOrChangeTTLNames (){
 	mainWin->updateConfigurationSavedStatus (false);

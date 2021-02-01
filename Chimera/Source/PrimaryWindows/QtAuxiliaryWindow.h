@@ -50,10 +50,11 @@ class QtAuxiliaryWindow : public IChimeraQtWindow{
 
 		void fillMasterThreadInput (ExperimentThreadInput* input);
 		void SetDacs ();
+		void SetDds();
 
 		void handleAbort ();
 		void zeroDacs ();
-
+		void zeroDds();
 	 
 		std::vector<parameterType> getAllParams ();
 

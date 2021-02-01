@@ -112,10 +112,14 @@ int ZynqTCP::writeCommand(std::string command)
 {
 	char buff[ZYNQ_MAX_BUFF];
 	memset(buff, 0, sizeof(buff));
-	for (size_t i = 0; i < command.length(); i++)
+	if (command.length()!=0)
 	{
-		buff[i] = command[i];
+		for (size_t i = 0; i < command.length(); i++)
+		{
+			buff[i] = command[i];
+		}
 	}
+
 	int BytesSent = 0;
 	//char commandc[ZYNQ_MAX_BUFF];
 	//strcpy_s(commandc, ZYNQ_MAX_BUFF, command.c_str());
@@ -231,7 +235,7 @@ int ZynqTCP::writeDACs(std::vector<AoChannelSnapshot> dacChannelSnapshots)
 
 }
 
-int ZynqTCP::writeDDSs(std::vector<DDSChannelSnapshot> ddsChannelSnapshots)
+int ZynqTCP::writeDDSs(std::vector<DdsChannelSnapshot> ddsChannelSnapshots)
 {
 	char buff[ZYNQ_MAX_BUFF];
 	memset(buff, 0, sizeof(buff));
@@ -262,7 +266,7 @@ int ZynqTCP::writeDDSs(std::vector<DDSChannelSnapshot> ddsChannelSnapshots)
 
 		for (int i = 0; i < ddsChannelSnapshots.size(); ++i)
 		{
-			DDSChannelSnapshot snapshot = ddsChannelSnapshots[i];
+			DdsChannelSnapshot snapshot = ddsChannelSnapshots[i];
 
 			time = (unsigned int)(snapshot.time * timeConv);
 			type = snapshot.ampOrFreq;

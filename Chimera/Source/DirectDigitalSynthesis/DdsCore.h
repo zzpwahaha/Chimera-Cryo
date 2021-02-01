@@ -25,12 +25,6 @@ struct ddsExpSettings {
 };
 
 
-enum class DDSGrid : size_t
-{
-	numPERunit = 4,
-	numOFunit = 3,
-	total = numPERunit * numOFunit
-};
 
 
 class DdsCore : public IDeviceCore{
@@ -105,26 +99,23 @@ class DdsCore : public IDeviceCore{
 
 		//std::array<Control<CStatic>, 12> ddsLabels;
 		//std::array<Control<CEdit>, 12> breakoutBoardFreqEdits;
-		std::array<double, size_t(DDSGrid::numOFunit)> ddsValues;
+		std::array<std::array<double, 2>, size_t(DDSGrid::numOFunit)> ddsValues;
 		std::array<std::string, size_t(DDSGrid::numOFunit)> ddsNames;
-		std::array<double, 12> ddsMinAmp;
-		std::array<double, 12> ddsMaxAmp;
-		std::array<double, 12> ddsMinFreq;
-		std::array<double, 12> ddsMaxFreq;
-		std::array<double, 12> defaultVals;
+		std::array<double, size_t(DDSGrid::numOFunit)> ddsMinAmp;
+		std::array<double, size_t(DDSGrid::numOFunit)> ddsMaxAmp;
+		std::array<double, size_t(DDSGrid::numOFunit)> ddsMinFreq;
+		std::array<double, size_t(DDSGrid::numOFunit)> ddsMaxFreq;
+		std::array<std::array<double, 2>, size_t(DDSGrid::numOFunit)> defaultVals;
 		//std::array <const double, 2> ddsResolution;
-		std::vector<DDSCommandForm> ddsCommandFormList;
+		std::vector<DdsCommandForm> ddsCommandFormList;
 		// the first vector is for each variation.
-		std::vector<std::vector<DDSCommand>> ddsCommandList;
-		std::vector<std::vector<DDSSnapshot>> ddsSnapshots;
-		std::vector<std::vector<DDSChannelSnapshot>> ddsChannelSnapshots;
-		std::vector<std::pair<double, std::vector<DDSCommand>>> timeOrganizer;
+		std::vector<std::vector<DdsCommand>> ddsCommandList;
+		std::vector<std::vector<DdsSnapshot>> ddsSnapshots;
+		std::vector<std::vector<DdsChannelSnapshot>> ddsChannelSnapshots;
+		std::vector<std::pair<double, std::vector<DdsCommand>>> timeOrganizer;
 
 
-		constexpr static double ddsFreqResolution = 500.0 / 0xffffffff; /*32bit, 500MHz clock freq*/
-		constexpr static double ddsAmplResolution = 10.0 / 0x3ff; /*10bit dac 0b1111111111, 10mA max dac current*/
-		const int numFreqDigits = static_cast<int>(abs(round(log10(ddsFreqResolution) - 0.49)));
-		const int numAmplDigits = static_cast<int>(abs(round(log10(ddsAmplResolution) - 0.49)));
+
 
 
 };

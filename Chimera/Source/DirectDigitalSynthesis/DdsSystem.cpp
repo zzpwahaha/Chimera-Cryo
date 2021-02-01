@@ -9,8 +9,13 @@
 #include <qmenu.h>
 #include <PrimaryWindows/QtMainWindow.h>
 
-DdsSystem::DdsSystem (IChimeraQtWindow* parent, bool ftSafemode) : core( ftSafemode )
-	, IChimeraSystem (parent) { }
+#include <qlayout.h>
+
+DdsSystem::DdsSystem (IChimeraQtWindow* parent, bool ftSafemode) 
+	: core( ftSafemode )
+	, IChimeraSystem (parent)
+	, roundToDdsPrecision(false)
+{ }
 
 void DdsSystem::handleContextMenu (const QPoint& pos)
 {
@@ -34,6 +39,69 @@ void DdsSystem::handleContextMenu (const QPoint& pos)
 	menu.addAction (newPerson);
 	menu.exec (rampListview->mapToGlobal (pos));
 }
+
+void DdsSystem::initialize(IChimeraQtWindow* parent)
+{
+	QVBoxLayout* layout = new QVBoxLayout(this);
+	this->setMaximumWidth(600);
+
+	ddsTitle = new QLabel("DDS OUTPUT", this);
+	layout->addWidget(ddsTitle, 0);
+
+	QHBoxLayout* layoutBtn = new QHBoxLayout();
+	layoutBtn->setContentsMargins(0, 0, 0, 0);
+	ddsSetButton = new CQPushButton("Set New DDS Values", parent);
+	ddsSetButton->setToolTip("Press this button to attempt force all DDS values to the values currently recorded in the"
+		" edits below.");
+	parent->connect(ddsSetButton, &QPushButton::released, [parent]() {parent->auxWin->SetDds(); });
+	zeroDdsButton = new CQPushButton("Zero DDSs", parent);
+	zeroDdsButton->setToolTip("Press this button to turn off all DDS");
+	parent->connect(zeroDdsButton, &QPushButton::released, [parent]() { parent->auxWin->zeroDds(); });
+	// 
+	quickChange = new CQCheckBox("Quick-Change", parent);
+	quickChange->setChecked(false);
+	quickChange->setToolTip("With this checked, you can quickly change a DAC's value by using the arrow keys while "
+		"having the cursor before the desired digit selected in the DAC's edit.");
+
+	layoutBtn->addWidget(ddsSetButton, 0);
+	layoutBtn->addWidget(zeroDdsButton, 0);
+	layoutBtn->addWidget(quickChange, 0);
+
+	layout->addLayout(layoutBtn);
+
+	QHBoxLayout* layout1 = new QHBoxLayout();
+	layout1->setContentsMargins(0, 0, 0, 0);
+	for (size_t i = 0; i < size_t(DDSGrid::numOFunit); i++)
+	{
+		QGridLayout* layoutGrid = new QGridLayout();
+		//layoutGrid->addWidget(new QLabel(QString("DDS %1").arg(i)), 0, 0, 1, 2);
+		layoutGrid->addWidget(new QLabel(QString("DDS %1: Freq").arg(i)), 1, 0, Qt::AlignLeft);
+		layoutGrid->addWidget(new QLabel("Ampl"), 1, 1,Qt::AlignLeft);
+		for (size_t j = 0; j < size_t(DDSGrid::numPERunit); j++)
+		{
+			auto& out = outputs[i * size_t(DDSGrid::numPERunit) + j];
+			out.initialize(parent, i * size_t(DDSGrid::numPERunit) + j);
+			layoutGrid->addLayout(out.getLayout(), 2 + j, 0, 1, 2);
+		}
+		layout1->addLayout(layoutGrid, 0);
+	}
+	layout->addLayout(layout1, 0);
+
+	resetDds();
+}
+
+
+bool DdsSystem::eventFilter(QObject* obj, QEvent* event) {
+	for (auto& out : outputs) {
+		if (out.eventFilter(obj, event) && quickChange->isChecked())
+		{
+			parentWin->auxWin->SetDds();
+			return true;
+		}
+	}
+	return false;
+}
+
 
 void DdsSystem::initialize ( IChimeraQtWindow* parent, std::string title ){
 	QVBoxLayout* layout = new QVBoxLayout(this);
@@ -140,6 +208,135 @@ std::string DdsSystem::getDelim ( ){
 DdsCore& DdsSystem::getCore ( ){
 	return core;
 }
+
+/******************************************************************************************************************/
+
+void DdsSystem::prepareForce()
+{
+	initializeDataObjects(1);
+}
+
+void DdsSystem::initializeDataObjects(unsigned cmdNum) 
+{
+	ddsCommandFormList = std::vector<DdsCommandForm>(cmdNum);
+
+	ddsCommandList.clear();
+	ddsSnapshots.clear();
+	ddsChannelSnapshots.clear();
+	//loadSkipDdsSnapshots.clear();
+	//finalFormatDdsData.clear();
+	//loadSkipDdsFinalFormat.clear();
+
+	ddsCommandList.resize(cmdNum);
+	ddsSnapshots.resize(cmdNum);
+	ddsChannelSnapshots.resize(cmdNum);
+	//loadSkipDdsSnapshots.resize(cmdNum);
+	//finalFormatDdsData.resize(cmdNum);
+	//loadSkipDdsFinalFormat.resize(cmdNum);
+
+}
+
+void DdsSystem::handleSetDdsButtonPress(bool useDefault)
+{
+	//ddsCommandFormList.clear();
+	//prepareForce();
+	updateDdsValues();
+	setDDSs();
+}
+
+//void DdsSystem::forceDds(DdsSnapshot initSnap)
+//{
+//	//resetDdsEvents();
+//	//prepareForce();
+//	//updateEdits();
+//	//setDDSs();
+//}
+
+void DdsSystem::zeroDds()
+{
+	for (auto& out : outputs)
+	{
+		//out.info.currFreq = 0.0;
+		out.info.currAmp = 0.0;
+	}
+	updateEdits();
+	updateDdsValues();
+	emit notification("Off'd DDS Outputs.\n", 2);
+	setDDSs();
+}
+
+void DdsSystem::resetDds()
+{
+	for (auto& out : outputs)
+	{
+		out.info.currFreq = out.info.defaultFreq;
+		out.info.currAmp = out.info.defaultAmp;
+	}
+	updateEdits();
+	emit notification("Default'd DDS Outputs.\n", 2);
+	setDDSs();
+}
+
+void DdsSystem::resetDdsEvents()
+{
+	initializeDataObjects(0);
+}
+
+void DdsSystem::setDDSs()
+{
+	int tcp_connect;
+	try
+	{
+		tcp_connect = zynq_tcp.connectTCP(ZYNQ_ADDRESS);
+	}
+	catch (ChimeraError& err)
+	{
+		tcp_connect = 1;
+		errBox(err.what());
+	}
+
+	if (tcp_connect == 0)
+	{
+		std::ostringstream stringStream;
+		std::string command;
+		for (int line = 0; line < ddsValues.size(); ++line) {
+			
+			stringStream.str("");
+			stringStream << "DDS_" << line 
+				<< "_" << std::fixed << std::setprecision(numFreqDigits) << ddsValues[line][0]
+				<< "_" << std::fixed << std::setprecision(numAmplDigits) << ddsValues[line][1];
+			command = stringStream.str();
+			zynq_tcp.writeCommand(command);
+			
+		}
+		zynq_tcp.disconnect();
+	}
+	else
+	{
+		errBox("connection to zynq failed. can't update DDS freq values\n"); 
+	}
+}
+
+void DdsSystem::updateEdits()
+{
+	for (auto& dds : outputs)
+	{
+		dds.updateEdit();
+	}
+}
+
+void DdsSystem::updateDdsValues()
+{
+	long dacInc = 0;
+	for (auto& dds : outputs)
+	{
+		dds.handleEdit();
+		ddsValues[dacInc][0] = dds.info.currFreq;
+		ddsValues[dacInc][1] = dds.info.currAmp;
+		dacInc++;
+	}
+}
+
 
 void DdsSystem::refreshCurrentRamps () {
 	currentRamps.resize (rampListview->rowCount ());

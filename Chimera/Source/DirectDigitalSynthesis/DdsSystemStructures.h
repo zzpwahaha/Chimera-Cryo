@@ -4,7 +4,35 @@
 #include "ParameterSystem/Expression.h"
 #include "GeneralObjects/CommonTypes.h"
 
-struct DDSCommandForm
+
+enum class DDSGrid : size_t
+{
+	numPERunit = 4,
+	numOFunit = 3,
+	total = numPERunit * numOFunit
+};
+
+
+struct DdsInfo
+{
+	std::string name = "";
+
+	double currFreq = 0;
+	double minFreq = 0;
+	double maxFreq = 500;
+	double defaultFreq = 80;
+
+	double currAmp = 0;
+	double minAmp = 0;
+	double maxAmp = 10;
+	double defaultAmp = 10;
+
+	std::string note = "";
+};
+
+
+
+struct DdsCommandForm
 {
 	// can either be "ddsamp", "ddsfreq", "ddslinspaceamp", "ddslinspacefreq", "ddsrampamp", or "ddsrampfreq"
 	std::string commandName;
@@ -18,7 +46,7 @@ struct DDSCommandForm
 	Expression numSteps;
 };
 
-struct DDSCommand
+struct DdsCommand
 {
 	unsigned short line;
 	double time;
@@ -30,7 +58,7 @@ struct DDSCommand
 };
 
 
-struct DDSSnapshot
+struct DdsSnapshot
 {
 	double time;
 	std::array<std::array<double, 2>, 12> ddsValues;
@@ -38,7 +66,8 @@ struct DDSSnapshot
 	std::array<double, 12> ddsRampTimes;
 };
 
-struct DDSChannelSnapshot
+
+struct DdsChannelSnapshot
 {
 	char ampOrFreq;
 	unsigned short channel;

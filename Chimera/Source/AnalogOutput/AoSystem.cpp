@@ -96,7 +96,7 @@ void AoSystem::zeroDacs( DoCore& ttls, DoSnapshot initSnap){
 std::array<AoInfo, size_t(AOGrid::total)> AoSystem::getDacInfo( ){
 	std::array<AoInfo, size_t(AOGrid::total)> info;
 	for ( auto dacNum : range(outputs.size()) ){
-		info[ dacNum ] = outputs[ dacNum ].info;
+		info[dacNum] = outputs[dacNum].info;
 	}
 	return info;
 }
@@ -179,17 +179,16 @@ bool AoSystem::isValidDACName(std::string name){
 	return false;
 }
 
-
-void AoSystem::setDefaultValue(unsigned dacNum, double val){
-	outputs[ dacNum ].info.defaultVal = val;
+void AoSystem::setDefaultValue(unsigned dacNum, double val) {
+	outputs[dacNum].info.defaultVal = val;
 }
+
 
 
 double AoSystem::getDefaultValue(unsigned dacNum){
 	return outputs[dacNum].info.defaultVal;
 }
 
-// this function returns the end location of the set of controls. This can be used for the location for the next control beneath it.
 void AoSystem::initialize( IChimeraQtWindow* parent )
 {
 	QVBoxLayout* layout = new QVBoxLayout(this);
@@ -232,7 +231,6 @@ void AoSystem::initialize( IChimeraQtWindow* parent )
 		runningCount++;
 	}
 	layout->addLayout(DOGridLayout);
-
 
 }
 
@@ -904,9 +902,10 @@ void AoSystem::setDACs()
 	{
 		std::ostringstream stringStream;
 		std::string command;
-		for (int line = 0; line < dacValues.size(); ++line) {
+		for (int line = 0; line < dacValues.size(); ++line) 
+		{
 			stringStream.str("");
-			stringStream << "DAC_" << line << "_" << std::fixed << std::setprecision(4) << dacValues[line];
+			stringStream << "DAC_" << line << "_" << std::fixed << std::setprecision(numDigits) << dacValues[line];
 			command = stringStream.str();
 			zynq_tcp.writeCommand(command);
 		}

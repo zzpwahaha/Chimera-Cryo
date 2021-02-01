@@ -87,10 +87,9 @@ void ParameterSystem::handleContextMenu (const QPoint& pos){
 	menu.exec (parametersView->mapToGlobal (pos));	
 }
 
-void ParameterSystem::initialize (IChimeraQtWindow* parent, std::string title, ParameterSysType type, 
-								  unsigned width, unsigned height )
+void ParameterSystem::initialize (IChimeraQtWindow* parent, std::string title, ParameterSysType type)
 {
-	this->setMaximumWidth(900);
+	this->setMaximumWidth(600);
 	QVBoxLayout* layout = new QVBoxLayout(this);
 	paramSysType = type;
 

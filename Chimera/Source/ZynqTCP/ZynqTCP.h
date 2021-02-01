@@ -38,7 +38,7 @@ public:
 	int connectTCP(const char ip_address[]);
 	int writeDIO(std::vector<std::array<char[DIO_LEN_BYTE_BUF], 1>> TtlSnapshots);
 	int writeDACs(std::vector<AoChannelSnapshot> dacSnapshots);
-	int writeDDSs(std::vector<DDSChannelSnapshot> ddsSnapshots);
+	int writeDDSs(std::vector<DdsChannelSnapshot> ddsSnapshots);
 	int writeCommand(std::string command);
 
 

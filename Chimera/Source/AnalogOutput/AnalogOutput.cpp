@@ -44,21 +44,24 @@ bool AnalogOutput::eventFilter (QObject* obj, QEvent* event) {
 				up = false;
 			}
 			else {
+				handleEdit();
 				return false;
 			}
 			auto txt = edit->text ();
 			// make sure value in edit matches current value, else unclear what this functionality should do.
-			double val;
-			try	{
-				val = boost::lexical_cast<double>(str(txt));
+			{
+				double val;
+				try {
+					val = boost::lexical_cast<double>(str(txt));
+				}
+				catch (boost::bad_lexical_cast) {
+					return true;
+				}
+				if (fabs(val - info.currVal) > 1e-12) {
+					handleEdit();
+					return true;
+				}
 			}
-			catch (boost::bad_lexical_cast)	{
-				return true;
-			}
-			if (fabs (val - info.currVal) > 1e-12){
-				return true;
-			}
-
 
 			auto decimalPos = txt.indexOf (".");
 			auto cursorPos = edit->cursorPosition ();
@@ -72,7 +75,9 @@ bool AnalogOutput::eventFilter (QObject* obj, QEvent* event) {
 			int editPlace = (cursorPos > decimalPos ? cursorPos - 1 : cursorPos);
 			double inc = size / pow(10, editPlace - 1);
 			info.currVal += up ? inc : -inc;
-			updateEdit (false);
+
+			updateEdit ();
+
 			auto newTxt = edit->text (); 
 			if (txt.indexOf ("-") == -1 && newTxt.indexOf("-") != -1){
 				// then need to shift cursor to account for the negative.
@@ -84,7 +89,9 @@ bool AnalogOutput::eventFilter (QObject* obj, QEvent* event) {
 			else {
 				edit->setCursorPosition (cursorPos);
 			}
-			updateEdit(false);
+
+			updateEdit();
+
 			return true;
 		}
 		return false;
@@ -92,7 +99,8 @@ bool AnalogOutput::eventFilter (QObject* obj, QEvent* event) {
 	return false;
 }
 
-double AnalogOutput::getVal ( bool useDefault ){
+double AnalogOutput::getVal ( bool useDefault )
+{
 	double val;
 	try	{
 		val = boost::lexical_cast<double>( str (edit->text () ) );
@@ -106,11 +114,13 @@ double AnalogOutput::getVal ( bool useDefault ){
 						  + ") failed to convert to a double!" );
 		}
 	}
+	val = checkBound(val);
 	return val;
 }
 
 
-void AnalogOutput::updateEdit ( bool roundToDacPrecision ){
+void AnalogOutput::updateEdit ( bool roundToDacPrecision )
+{
 	std::string valStr = roundToDacPrecision ? str ( roundToDacResolution ( info.currVal ), 13, true, false, true )
 		: str ( info.currVal, numDigits, false, false, false );
 	int pos = edit->cursorPosition ();
@@ -129,25 +139,14 @@ void AnalogOutput::setName ( std::string name ){
 }
 
 
-void AnalogOutput::handleEdit ( bool roundToDacPrecision ){
-	bool matches = false;
-	try{
-		if ( roundToDacPrecision ){
-			double roundNum = roundToDacResolution ( info.currVal );
-			if ( fabs ( roundToDacResolution ( info.currVal ) - boost::lexical_cast<double>( str(edit->text()) ) ) < 1e-8 )	{
-				matches = true; /*seems match is unused*/
-			}
-		}
-		else{
-			if ( fabs ( info.currVal - boost::lexical_cast<double>( str (edit->text ()) ) ) < 1e-8 ){
-				matches = true;
-			}
-		}
-	}
-	catch ( boost::bad_lexical_cast& ) { /* failed to convert to double. Effectively, doesn't match. */ }
+void AnalogOutput::handleEdit ( bool roundToDacPrecision )
+{
+	double val = getVal(true);
+	info.currVal = val;
 }
 
-double AnalogOutput::roundToDacResolution ( double num ){
+double AnalogOutput::roundToDacResolution ( double num )
+{
 	//double dacResolution = 10.0 / pow ( 2, 16 );
 	return long ( ( num + dacResolution / 2 ) / dacResolution ) * dacResolution;
 }
@@ -160,4 +159,20 @@ void AnalogOutput::setNote ( std::string note ){
 
 void AnalogOutput::disable ( ){
 	edit->setEnabled (false);
+}
+
+double AnalogOutput::checkBound(double dacVal)
+{
+	if (dacVal > info.maxVal)
+	{
+		return info.maxVal;
+	}
+	else if (dacVal < info.minVal)
+	{
+		return info.minVal;
+	}
+	else 
+	{
+		return dacVal;
+	}
 }

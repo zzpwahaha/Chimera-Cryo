@@ -79,7 +79,7 @@ class MachineOptimizer : public QWidget
 {
 	Q_OBJECT
 	public:
-		void initialize ( QPoint& pos, IChimeraQtWindow* parent );
+		void initialize ( IChimeraQtWindow* parent );
 		void reset ( );
 		void verifyOptInput ( AllExperimentInput& input );
 		void hillClimbingUpdate ( AllExperimentInput& input, dataPoint resultValue, DataLogger& logger);

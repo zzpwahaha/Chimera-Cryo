@@ -50,8 +50,7 @@ class ParameterSystem : public IChimeraSystem
 		ParameterSystem (const ParameterSystem&) = delete;
 		ParameterSystem (IChimeraQtWindow* parent, std::string configurationFileDelimiter );
 		void handleContextMenu (const QPoint& pos);
-		void initialize(IChimeraQtWindow* master, std::string title, ParameterSysType type, 
-						 unsigned width=480, unsigned height=200 );
+		void initialize(IChimeraQtWindow* master, std::string title, ParameterSysType type);
 		void adjustVariableValue ( std::string paramName, double value );
 		void addParameter( parameterType var );
 		void clearParameters ( );

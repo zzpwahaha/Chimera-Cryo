@@ -29,18 +29,17 @@ void MachineOptimizer::handleContextMenu (const QPoint& pos){
 	menu.exec (optParamsListview->mapToGlobal (pos));
 }
 
-void MachineOptimizer::initialize ( QPoint& pos, IChimeraQtWindow* parent ){
-	auto& px = pos.rx (), & py = pos.rx ();
-	this->setMaximumWidth(900);
+void MachineOptimizer::initialize ( IChimeraQtWindow* parent )
+{
+	this->setMaximumWidth(600);
 	QVBoxLayout* layout = new QVBoxLayout(this);
 
 	QHBoxLayout* layout1 = new QHBoxLayout();
 	layout1->setContentsMargins(0, 0, 0, 0);
 	header = new QLabel ("AUTO-OPTIMIZATION-CONTROL", parent);
-	//header->setGeometry (px, py, 300, 25);
 
 	optimizeButton = new QPushButton ("Optimize", parent);
-	//optimizeButton->setGeometry (px + 300, py, 180, 25);
+	
 	parent->connect (optimizeButton, &QPushButton::released, 
 		[this, parent]() {
 			try	{
@@ -66,24 +65,18 @@ void MachineOptimizer::initialize ( QPoint& pos, IChimeraQtWindow* parent ){
 	QHBoxLayout* layout2 = new QHBoxLayout();
 	layout2->setContentsMargins(0, 0, 0, 0);
 	maxRoundsTxt = new QLabel ("Max Rounds:", parent);
-	//maxRoundsTxt->setGeometry (px, py += 25, 120, 25);
 
 	maxRoundsEdit = new QLineEdit ("", parent);
-	//maxRoundsEdit->setGeometry (px + 120, py, 120, 25);
 
 	currRoundTxt = new QLabel ("Current Round:", parent);
-	//currRoundTxt->setGeometry (px+240, py, 160, 25);
 
 	currRoundDisp = new QLabel ("", parent);
-	//currRoundDisp->setGeometry (px + 400, py, 80, 25);
+	
 	layout2->addWidget(maxRoundsTxt, 0);
 	layout2->addWidget(maxRoundsEdit, 1);
 	layout2->addWidget(currRoundTxt, 0);
 	layout2->addWidget(currRoundDisp, 1);
 	layout->addLayout(layout2);
-
-
-
 
 
 	QHBoxLayout* layout3 = new QHBoxLayout();
@@ -107,7 +100,7 @@ void MachineOptimizer::initialize ( QPoint& pos, IChimeraQtWindow* parent ){
 	optParamsListview = new QTableWidget (parent);
 	//optParamsListview->setGeometry (px, py += 25, 480, 100);
 	layout->addWidget(optParamsListview, 1);
-	py += 160;
+
 	optParamsListview->horizontalHeader ()->setFixedHeight (30);
 	optParamsListview->verticalHeader ()->setFixedWidth (40);
 	optParamsListview->verticalHeader ()->setDefaultSectionSize (22);
