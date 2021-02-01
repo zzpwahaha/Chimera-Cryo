@@ -112,13 +112,16 @@ int ZynqTCP::writeCommand(std::string command)
 {
 	char buff[ZYNQ_MAX_BUFF];
 	memset(buff, 0, sizeof(buff));
-	if (command.length()!=0)
+	if (command.length() > ZYNQ_MAX_BUFF)
 	{
-		for (size_t i = 0; i < command.length(); i++)
-		{
-			buff[i] = command[i];
-		}
+		thrower("Command exceeding ZYNQ_MAX_BUFF: " + std::to_string(ZYNQ_MAX_BUFF));
+		return 1;
 	}
+	for (size_t i = 0; i < command.length(); i++)
+	{
+		buff[i] = command[i];
+	}
+
 
 	int BytesSent = 0;
 	//char commandc[ZYNQ_MAX_BUFF];

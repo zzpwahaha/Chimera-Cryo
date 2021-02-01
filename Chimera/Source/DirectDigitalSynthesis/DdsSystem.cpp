@@ -75,8 +75,8 @@ void DdsSystem::initialize(IChimeraQtWindow* parent)
 	{
 		QGridLayout* layoutGrid = new QGridLayout();
 		//layoutGrid->addWidget(new QLabel(QString("DDS %1").arg(i)), 0, 0, 1, 2);
-		layoutGrid->addWidget(new QLabel(QString("DDS %1: Freq").arg(i)), 1, 0, Qt::AlignLeft);
-		layoutGrid->addWidget(new QLabel("Ampl"), 1, 1,Qt::AlignLeft);
+		layoutGrid->addWidget(new QLabel(QString("DDS %1: Freq(MHz)").arg(i)), 1, 0, Qt::AlignLeft);
+		layoutGrid->addWidget(new QLabel("Ampl(mA)"), 1, 1,Qt::AlignLeft);
 		for (size_t j = 0; j < size_t(DDSGrid::numPERunit); j++)
 		{
 			auto& out = outputs[i * size_t(DDSGrid::numPERunit) + j];
@@ -273,6 +273,7 @@ void DdsSystem::resetDds()
 		out.info.currAmp = out.info.defaultAmp;
 	}
 	updateEdits();
+	updateDdsValues();
 	emit notification("Default'd DDS Outputs.\n", 2);
 	setDDSs();
 }
