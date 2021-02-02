@@ -19,6 +19,9 @@
 #include "RealTimeDataAnalysis/MachineOptimizer.h"
 #include "ExperimentThread/ExperimentThreadInput.h"
 
+#include <ExcessDialogs/doChannelInfoDialog.h>
+#include <ExcessDialogs/AoSettingsDialog.h>
+
 #include <QMainWindow>
 #include <QTimer>
 
@@ -84,6 +87,9 @@ class QtAuxiliaryWindow : public IChimeraQtWindow{
 		MachineOptimizer optimizer;
 		ParameterSystem configParamCtrl, globalParamCtrl;
 		DdsSystem dds;
+
+		doChannelInfoDialog* DOdialog;
+		AoSettingsDialog* AOdialog;
 
 		std::vector<PlotCtrl*> aoPlots;
 		std::vector<PlotCtrl*> ttlPlots;

@@ -34,7 +34,8 @@ std::pair<DoRows::which, unsigned> DigitalOutput::getPosition ( ){
 }
 
 
-void DigitalOutput::setName ( std::string nameStr ){
+void DigitalOutput::setName ( std::string nameStr )
+{
 	check->setToolTip ( nameStr.c_str());
 }
 
@@ -42,7 +43,8 @@ void DigitalOutput::setHoldStatus ( bool stat ){
 	holdStatus = stat;
 }
 
-void DigitalOutput::initialize ( IChimeraQtWindow* parent ){
+void DigitalOutput::initialize ( IChimeraQtWindow* parent )
+{
 	check = new CQCheckBox ("", parent);
 
 }

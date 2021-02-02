@@ -10,7 +10,7 @@ int main (int argc, char** argv) {
 
 	QPixmap pixmap ("C:\\Users\\Regal-Lab\\Code\\Chimera-Control\\Chimera\\Source\\Shades_Of_Infrared.bmp");
 	QSplashScreen splash (pixmap.scaledToHeight (qApp->screens ()[0]->geometry ().height ()));
-	splash.showFullScreen ();
+	//splash.showFullScreen ();
 
 	qRegisterMetaType<Matrix<long>> ();
 	qRegisterMetaType<QVector<double>> ();
@@ -29,6 +29,6 @@ int main (int argc, char** argv) {
 
 	QtMainWindow* mainWinQt = new QtMainWindow ();
 	mainWinQt->show ();
-	splash.finish (mainWinQt);
+	//splash.finish (mainWinQt);
 	return app.exec ();
 }

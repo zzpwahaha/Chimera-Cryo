@@ -4,7 +4,9 @@
 #include "DoRows.h"
 #include "qdebug.h"
 
-DoCore::DoCore (bool ftSafemode, bool serialSafemode) : ftFlume (ftSafemode), names(4, 16){
+DoCore::DoCore (bool ftSafemode, bool serialSafemode) 
+	: ftFlume (ftSafemode)
+	, names(size_t(DOGrid::numPERunit), size_t(DOGrid::numOFunit)){
 	try	{
 		connectType = ftdiConnectionOption::Async;
 		ftdi_connectasync ("FT2E722BB");
@@ -16,8 +18,9 @@ DoCore::DoCore (bool ftSafemode, bool serialSafemode) : ftFlume (ftSafemode), na
 
 DoCore::~DoCore () { ftdi_disconnect (); }
 
-void DoCore::setNames (Matrix<std::string> namesIn){
-	names = namesIn;
+void DoCore::setNames (Matrix<std::string> namesIn)
+{
+	names = std::move(namesIn);
 }
 
 void DoCore::ftdi_connectasync (const char devSerial[]){

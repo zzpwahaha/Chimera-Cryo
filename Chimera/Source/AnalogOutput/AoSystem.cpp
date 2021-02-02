@@ -225,6 +225,10 @@ void AoSystem::initialize( IChimeraQtWindow* parent )
 	for ( auto& out : outputs )	
 	{
 		out.initialize ( parent, runningCount);
+		out.setName(QString("DAC%1_%2").
+			arg(runningCount / size_t(AOGrid::numPERunit)).
+			arg(runningCount % size_t(AOGrid::numPERunit)).toStdString());
+
 		DOGridLayout->addLayout(out.getLayout(), 
 			runningCount % size_t(AOGrid::numPERunit), 
 			runningCount / size_t(AOGrid::numPERunit));

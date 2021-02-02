@@ -4,10 +4,11 @@
 #include <array>
 // as of now not yet used extensively in the actual dio system
 
-enum class DOGrid : size_t 
+enum class DOGrid : size_t
 {
 	numPERunit = 8,
-	numOFunit = 8
+	numOFunit = 8,
+	total = numPERunit * numOFunit
 };
 
 struct DoRows{

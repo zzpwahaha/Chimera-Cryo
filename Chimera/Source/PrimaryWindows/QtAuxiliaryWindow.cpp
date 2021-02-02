@@ -7,8 +7,7 @@
 #include <PrimaryWindows/QtMainWindow.h>
 #include <ExcessDialogs/saveWithExplorer.h>
 #include <ExcessDialogs/openWithExplorer.h>
-#include <ExcessDialogs/doChannelInfoDialog.h>
-#include <ExcessDialogs/AoSettingsDialog.h>
+
 
 #include <qlayout.h>
 
@@ -118,6 +117,10 @@ void QtAuxiliaryWindow::initializeWidgets (){
 		layout->addLayout(layout1);
 		layout->addLayout(layout3);
 		layout->addLayout(layout2);
+
+		DOdialog = new doChannelInfoDialog(&ttlBoard);
+		AOdialog = new AoSettingsDialog(&aoSys);
+
 	}
 	catch (ChimeraError& err){
 		errBox ("Failed to initialize auxiliary window properly! Trace: " + err.trace ());
@@ -467,21 +470,28 @@ void QtAuxiliaryWindow::SetDds() {
 
 void QtAuxiliaryWindow::ViewOrChangeTTLNames (){
 	mainWin->updateConfigurationSavedStatus (false);
-	ttlInputStruct input;
-	input.ttls = &ttlBoard;
-	doChannelInfoDialog* dialog = new doChannelInfoDialog (&input);
-	dialog->setStyleSheet (chimeraStyleSheets::stdStyleSheet());
-	dialog->exec ();
+	//ttlInputStruct input;
+	//input.ttls = &ttlBoard; 
+	/*if you use above, since ttlInputStruct input is a local variable, after show(), 
+	the pointer is destructed and you will have trouble in the setName function afterwards; 
+	previously the diag is shown with exce() which will block the function untill it ends, 
+	in which case, using local variable is fine*/
+	//DoSystem* ttls = &ttlBoard;
+	//doChannelInfoDialog* dialog = new doChannelInfoDialog (ttls);
+	DOdialog->updateAllEdits();
+	DOdialog->setStyleSheet (chimeraStyleSheets::stdStyleSheet());
+	DOdialog->show();
 }
 
 
 void QtAuxiliaryWindow::ViewOrChangeDACNames (){
 	mainWin->updateConfigurationSavedStatus (false);
-	aoInputStruct input;
-	input.aoSys = &aoSys;
-	AoSettingsDialog* dialog = new AoSettingsDialog (&input);
-	dialog->setStyleSheet (chimeraStyleSheets::stdStyleSheet ());
-	dialog->exec ();
+	//aoInputStruct input;
+	//input.aoSys = &aoSys;
+	//AoSettingsDialog* dialog = new AoSettingsDialog (&input);
+	AOdialog->updateAllEdits();
+	AOdialog->setStyleSheet (chimeraStyleSheets::stdStyleSheet ());
+	AOdialog->show();
 }
 
 std::string QtAuxiliaryWindow::getOtherSystemStatusMsg (){

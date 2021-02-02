@@ -87,7 +87,7 @@ void DdsSystem::initialize(IChimeraQtWindow* parent)
 	}
 	layout->addLayout(layout1, 0);
 
-	resetDds();
+	//resetDds();
 }
 
 

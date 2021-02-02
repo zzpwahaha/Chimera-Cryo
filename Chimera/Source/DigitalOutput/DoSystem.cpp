@@ -135,12 +135,19 @@ void DoSystem::initialize(IChimeraQtWindow* parent) {
 
 	QGridLayout* DOGridLayout = new QGridLayout();
 	unsigned runningCount = 0;
+	auto names = core.getAllNames();
+	
 	for (auto row : DoRows::allRows) {
 		runningCount++;
 		QHBoxLayout* DOsubGridLayout = new QHBoxLayout();
-		for (size_t number = 0; number < outputs.numColumns; number++) {
+		DOsubGridLayout->addWidget(new QLabel(QString::number(int(row) + 1)), 0, Qt::AlignRight);
+		for (size_t number = 0; number < outputs.numColumns; number++) 
+		{
 			auto& out = outputs(number, row);
 			out.initialize(parent);
+			names(unsigned(row), number) = QString("DO%1.%2").arg(int(row) + 1).arg(number).toStdString();
+			out.setName(names(unsigned(row), number));
+			
 			parent->connect(out.check, &QCheckBox::stateChanged, [this, &out, parent]() {
 				try {
 					handleTTLPress(out);
@@ -157,6 +164,7 @@ void DoSystem::initialize(IChimeraQtWindow* parent) {
 		DOsubGridLayout->setSpacing(8);
 		DOGridLayout->addLayout(DOsubGridLayout, runningCount % 3, 2 - runningCount / 3);
 	}
+	core.setNames(names);
 	DOGridLayout->setHorizontalSpacing(20);
 	DOGridLayout->setVerticalSpacing(12);
 	layout->addLayout(DOGridLayout);
@@ -216,14 +224,19 @@ void DoSystem::setName( DoRows::which row, unsigned number, std::string name){
 		// no empty names allowed.
 		return;
 	}
-	outputs ( number, row ).setName ( name );
+	auto& out = outputs(number, row);
+	outputs(number, row).setName(name);
 	auto names = core.getAllNames ();
-	names (unsigned(row), number) = name;
-	core.setNames (names);
+	names(unsigned(row), number) = name;
+	core.setNames(names);
 }
 
 std::string DoSystem::getName( DoRows::which row, unsigned number){
 	return core.getAllNames ()(unsigned (row), number);
+}
+
+std::string DoSystem::getName(unsigned row, unsigned number) {
+	return core.getAllNames()(row, number);
 }
 
 bool DoSystem::getTtlStatus(DoRows::which row, int number){

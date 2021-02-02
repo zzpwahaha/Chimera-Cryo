@@ -54,7 +54,7 @@ void SyntaxHighlighter::setTtlNames (Matrix<std::string> ttlNames) {
 	QVector<QString> doNamesRegex;
 	for (auto rowInc : range (ttlNames.getRows ())) {
 		for (auto num : range (ttlNames.getCols ())) {
-			auto rowStr = std::vector<std::string>{ "a", "b", "c", "d" }[rowInc];
+			auto rowStr = std::vector<std::string>{ "Do0.", "Do1.", "Do2.", "Do3.", "Do4.", "Do5.", "Do6.", "Do7." } [rowInc] ;
 			doNamesRegex.push_back (cstr (rowStr + str (num)));
 			doNamesRegex.push_back (cstr (ttlNames (rowInc, num)));
 		}

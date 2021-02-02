@@ -2,71 +2,94 @@
 #include "stdafx.h"
 #include "AoSettingsDialog.h"
 #include <boost/lexical_cast.hpp>
+#include <qlayout.h>
 
-AoSettingsDialog::AoSettingsDialog (aoInputStruct* inputPtr) {
+AoSettingsDialog::AoSettingsDialog (AoSystem* inputPtr) 
+{
 	input = inputPtr;
-	this->resize (1800, 800);
-	int px = 1, py = 1;
-	unsigned numWidth = 24;
-	unsigned columnNumber = 3;
-	int colWidth = (1800 - numWidth * columnNumber) / columnNumber;
-	colWidth = colWidth / 4 + colWidth / 8 + colWidth / 8 + colWidth / 2;
-	int rowHeight = 30;
-	// The header row
-	for (int columnInc = 0; columnInc < columnNumber; columnInc++) {
-		dacNumberHeaders[columnInc] = new QLabel ("#", this);
-		dacNumberHeaders[columnInc]->setGeometry (px, py, numWidth, 20);
-
-		dacNameHeaders[columnInc] = new QLabel ("Dac Name", this);
-		dacNameHeaders[columnInc]->setGeometry (px += numWidth, py, colWidth / 4, rowHeight + 5);
-
-		dacMinValHeaders[columnInc] = new QLabel ("Min", this);
-		dacMinValHeaders[columnInc]->setGeometry (px += colWidth / 4, py, colWidth / 8, rowHeight + 5);
-
-		dacMaxValHeaders[columnInc] = new QLabel ("Max", this);
-		dacMaxValHeaders[columnInc]->setGeometry (px += colWidth / 8, py, colWidth / 8, rowHeight + 5);
-
-		noteHeaders[columnInc] = new QLabel ("Notes", this);
-		noteHeaders[columnInc]->setGeometry (px += colWidth / 8, py, colWidth / 2, rowHeight + 5);
-		px += colWidth / 2;
-	}
-
-	py += rowHeight + 5;
-	px -= (colWidth + numWidth) * columnNumber;
-
-	for (unsigned dacInc = 0; dacInc < nameEdits.size (); dacInc++) {
-		if (dacInc == nameEdits.size () / columnNumber || dacInc == 2 * nameEdits.size () / columnNumber) {
-			// go to second or third collumn
-			px += colWidth + numWidth;
-			py -= rowHeight * nameEdits.size () / columnNumber;
+	//this->setStyleSheet("border: 2px solid  black;");
+	this->setModal(false);
+	QVBoxLayout* layoutWiget = new QVBoxLayout(this);
+	QHBoxLayout* layout = new QHBoxLayout();
+	auto daclayout = std::array<QGridLayout*,2>({ new QGridLayout(),new QGridLayout() });
+	short cnts = 0;
+	for (auto* lay : daclayout)
+	{
+		lay->setContentsMargins(0, 0, 0, 0);
+		lay->addWidget(new QLabel(QString("DAC %1").arg(cnts)), 0, 0, 1, 7, Qt::AlignHCenter);
+		{
+			lay->addWidget(new QLabel("#"), 1, 0, 1, 1, Qt::AlignRight);
+			lay->addWidget(new QLabel("DAC Name"), 1, 1, 1, 1);
+			lay->addWidget(new QLabel("Min value"), 1, 2, 1, 1);
+			lay->addWidget(new QLabel("Max value"), 1, 3, 1, 1);
+			lay->addWidget(new QLabel("Notes"), 1, 4, 1, 2);
 		}
-		// create label
-		numberLabels[dacInc] = new QLabel (qstr (dacInc), this);
-		numberLabels[dacInc]->setGeometry (px, py, numWidth, rowHeight);
+		auto layofst = 2;
+		auto ofst = cnts * size_t(AOGrid::numPERunit);
+		for (size_t i = 0; i < size_t(AOGrid::numPERunit); i++)
+		{
+			numberLabels[ofst + i] = new QLabel(QString("%1").arg(i, 2));
+			lay->addWidget(numberLabels[ofst + i], i + layofst, 0, 1, 1, Qt::AlignRight);
 
-		nameEdits[dacInc] = new QLineEdit (qstr (input->aoSys->getName (dacInc)), this);
-		nameEdits[dacInc]->setGeometry (px += numWidth, py, colWidth / 4, rowHeight);
+			nameEdits[ofst + i] = new QLineEdit("");
+			//nameEdits[ofst + i]->setText(input->aoSys->getName(ofst + i).c_str());
+			lay->addWidget(nameEdits[ofst + i], i + layofst, 1, 1, 1);
 
-		minValEdits[dacInc] = new QLineEdit (qstr (input->aoSys->getDacRange (dacInc).first,4), this);
-		minValEdits[dacInc]->setGeometry (px += colWidth / 4, py, colWidth / 8, rowHeight);
+			//auto [min, max] = input->aoSys->getDacRange(ofst + i);
+			minValEdits[ofst + i] = new QLineEdit("");
+			//minValEdits[ofst + i]->setText(QString::number(min));
+			maxValEdits[ofst + i] = new QLineEdit("");
+			//maxValEdits[ofst + i]->setText(QString::number(max));
+			lay->addWidget(minValEdits[ofst + i], i + layofst, 2, 1, 1);
+			lay->addWidget(maxValEdits[ofst + i], i + layofst, 3, 1, 1);
 
-		maxValEdits[dacInc] = new QLineEdit (qstr (input->aoSys->getDacRange (dacInc).second,4), this);
-		maxValEdits[dacInc]->setGeometry (px += colWidth / 8, py, colWidth / 8, rowHeight);
+			nameEdits[ofst + i]->setMaximumWidth(150);
+			minValEdits[ofst + i]->setMaximumWidth(100);
+			maxValEdits[ofst + i]->setMaximumWidth(100);
 
-		noteEdits[dacInc] = new QLineEdit (qstr (input->aoSys->getNote (dacInc)), this);
-		noteEdits[dacInc]->setGeometry (px += colWidth / 8, py, colWidth / 2, rowHeight);
-		py += rowHeight; 
-		px += colWidth / 2;
-		px -= colWidth + numWidth;
+
+			noteEdits[ofst + i] = new QLineEdit("");
+			//noteEdits[ofst + i]->setText(input->aoSys->getNote(ofst + i).c_str());
+			lay->addWidget(noteEdits[ofst + i], i + layofst, 4, 1, 2);
+	
+		}
+		layout->addLayout(lay, 1);
+		cnts++;
 	}
 
+	layout->insertSpacing(1, 30);
+	layoutWiget->addLayout(layout, 1);
+
+	QHBoxLayout* layoutbtns = new QHBoxLayout();
 	okBtn = new QPushButton ("OK", this);
-	okBtn->setGeometry (px, py, 100, rowHeight);
 	connect (okBtn, &QPushButton::released, this, &AoSettingsDialog::handleOk);
 	cancelBtn = new QPushButton ("Cancel", this);
-	cancelBtn->setGeometry (px + 100, py, 100, rowHeight);
 	connect (cancelBtn, &QPushButton::released, this, &AoSettingsDialog::handleCancel);
+	layoutbtns->addStretch(1);
+	layoutbtns->addWidget(okBtn);
+	layoutbtns->addWidget(cancelBtn);
+
+	layoutWiget->addStretch(1);
+	layoutWiget->addLayout(layoutbtns, 0);
+
+
 }
+
+void AoSettingsDialog::updateAllEdits()
+{
+	for (size_t i = 0; i < size_t(AOGrid::total); i++)
+	{
+		nameEdits[i]->setText(input->getName(i).c_str());
+		auto [min, max] = input->getDacRange(i);
+		minValEdits[i]->setText(QString::number(min));
+		maxValEdits[i]->setText(QString::number(max));
+		noteEdits[i]->setText(input->getNote(i).c_str());
+
+	}
+
+}
+
+
 
 void AoSettingsDialog::handleOk(){
 	for (unsigned dacInc = 0; dacInc < nameEdits.size(); dacInc++){
@@ -75,16 +98,16 @@ void AoSettingsDialog::handleOk(){
 			errBox("ERROR: " + str(text) + " is an invalid name; names cannot start with numbers.");
 			return;
 		}
-		input->aoSys->setName(dacInc, str(text));
+		input->setName(dacInc, str(text));
 		text = noteEdits[dacInc]->text ();
-		input->aoSys->setNote ( dacInc, str ( text ) );
+		input->setNote ( dacInc, str ( text ) );
 		double min, max;
 		try	{
 			text = minValEdits[dacInc]->text ();
 			min = boost::lexical_cast<double>(str(text));
 			text = maxValEdits[dacInc]->text ();
 			max = boost::lexical_cast<double>(str(text));
-			input->aoSys->setMinMax(dacInc, min, max);
+			input->setMinMax(dacInc, min, max);
 		}
 		catch ( boost::bad_lexical_cast& err) {
 			errBox(err.what());

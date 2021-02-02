@@ -6,23 +6,26 @@
 #include <QPushButton.h>
 #include <array>
 
-class DoSystem;
+#include <DigitalOutput/DoSystem.h>
+
 
 struct ttlInputStruct{
 	DoSystem* ttls;
 };
 
-class doChannelInfoDialog : public QDialog{
+class doChannelInfoDialog : public QDialog
+{
 	Q_OBJECT;
 	public:
-		doChannelInfoDialog (ttlInputStruct* inputPtr);
+		doChannelInfoDialog (DoSystem* inputPtr);
+		void updateAllEdits();
 	public Q_SLOTS:
 		void handleOk ();
 		void handleCancel ();
 	private:
-		ttlInputStruct* input;
-		std::array<QLabel*, 16> numberlabels;
-		std::array<QLabel*, 4> rowLabels;
-		std::array<std::array<QLineEdit*, 16>, 4> edits;
+		DoSystem* input;
+		std::array<QLabel*, size_t(DOGrid::total)> numberlabels;
+		std::array<QLabel*, size_t(DOGrid::numOFunit)> rowLabels;
+		std::array<std::array<QLineEdit*, size_t(DOGrid::numPERunit)>, size_t(DOGrid::numOFunit)> edits;
 		QPushButton * okBtn, * cancelBtn;
 };

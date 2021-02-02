@@ -15,25 +15,22 @@ struct aoInputStruct {
  * This control is an interface for extra Analog-Output settings. In particular, at the moment, the names of the 
  * different channels, and the min/max voltages allowed for each channel.
  */
-class AoSettingsDialog : public QDialog {
+class AoSettingsDialog : public QDialog 
+{
 	Q_OBJECT;
 	public:
-		AoSettingsDialog (aoInputStruct* inputPtr);
+		AoSettingsDialog (AoSystem* inputPtr);
+		void updateAllEdits();
 	public Q_SLOTS:
 		void handleOk ();
 		void handleCancel ();
 	private:
-		std::array<QLabel*, 24> numberLabels;
-		std::array<QLineEdit*, 24> nameEdits;
-		std::array < QLineEdit*, 24> noteEdits;
-		std::array<QLineEdit*, 24> minValEdits;
-		std::array<QLineEdit*, 24> maxValEdits;
-		std::array<QLabel*, 3> dacNumberHeaders;
-		std::array<QLabel*, 3> dacNameHeaders;
-		std::array<QLabel*, 3> dacMinValHeaders;
-		std::array<QLabel*, 3> dacMaxValHeaders;
-		std::array<QLabel*, 3> noteHeaders;
+		std::array<QLabel*, size_t(AOGrid::total)> numberLabels;
+		std::array<QLineEdit*, size_t(AOGrid::total)> nameEdits;
+		std::array < QLineEdit*, size_t(AOGrid::total)> noteEdits;
+		std::array<QLineEdit*, size_t(AOGrid::total)> minValEdits;
+		std::array<QLineEdit*, size_t(AOGrid::total)> maxValEdits;
 		QPushButton* okBtn;
 		QPushButton* cancelBtn;
-		aoInputStruct* input;
+		AoSystem* input;
 };

@@ -8,11 +8,12 @@
 
 AnalogOutput::AnalogOutput( ) {}
 
-void AnalogOutput::initialize ( IChimeraQtWindow* parent, int whichDac) {
+void AnalogOutput::initialize ( IChimeraQtWindow* parent, int whichDac) 
+{
 	layout = new QHBoxLayout();
 	layout->setContentsMargins(0, 0, 0, 0);
 	
-	label = new QLabel(QString("%1").arg(whichDac % size_t(AOGrid::numPERunit), 2), parent);
+	label = new QLabel(QString("%1").arg(QString::number(whichDac % size_t(AOGrid::numPERunit)),2), parent);
 	label->setToolTip ( (info.name + "\n" + info.note).c_str() );
 	
 	edit = new CQLineEdit ("0", parent);
@@ -24,8 +25,8 @@ void AnalogOutput::initialize ( IChimeraQtWindow* parent, int whichDac) {
 		});
 	//edit->setStyleSheet ("QLineEdit { border: none }");
 
-	layout->addWidget(label, 0);
-	layout->addWidget(edit, 1);
+	layout->addWidget(label, 0, Qt::AlignRight);
+	layout->addWidget(edit, 1, Qt::AlignLeft);
 	layout->addStretch(1);
 	edit->setMaximumWidth(150);
 	updateEdit(false);
