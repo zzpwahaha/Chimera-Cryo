@@ -20,49 +20,15 @@ Chimera/3rd_Party/Andor/Lib/*
 Chimera/3rd_Party/DM/Lib/*
 !Chimera/3rd_Party/DM/Lib/.gitkeep
 Chimera/*.dll
-#* ; 
-#!dir/ ; 
-#dir/* ; 
-#!dir/reincludefile
+
+*.obj
+*.log
+*.pyc
+tmpDataSave
+FromAlec
+Master-Configuration.txt
+
 
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/
-
-
-
-# Files built by Visual Studio
-*_i.c
-*_p.c
-*_h.h
-*.ilk
-*.meta
-*.obj
-*.iobj
-*.pch
-*.pdb
-*.ipdb
-*.pgc
-*.pgd
-*.rsp
-*.sbr
-*.tlb
-*.tli
-*.tlh
-*.tmp
-*.tmp_proj
-*_wpftmp.csproj
-*.log
-*.vspscc
-*.vssscc
-.builds
-*.pidb
-*.svclog
-*.scc
-
-
-
-
-# Python Tools for Visual Studio (PTVS)
-__pycache__/
-*.pyc

@@ -69,8 +69,11 @@ class QtAuxiliaryWindow : public IChimeraQtWindow{
 		std::pair<unsigned, unsigned> getTtlBoardSize ();
 		unsigned getNumberOfDacs ();
 		void setVariablesActiveState (bool active);
+
 		DoCore& getTtlCore ();
 		AoSystem& getAoSys ();
+		DdsSystem& getDdsSys();
+
 		ParameterSystem& getGlobals ();
 		std::vector<parameterType> getUsableConstants ();
 		void fillExpDeviceList (DeviceList& list);

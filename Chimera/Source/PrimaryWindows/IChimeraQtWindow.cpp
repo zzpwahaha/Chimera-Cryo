@@ -85,6 +85,8 @@ void IChimeraQtWindow::initializeMenu (){
 	runMenuM->addAction (runAll);
 
 	runMenuM->addAction ("Run Camera_X");
+
+	//QAction* runMaster = new QAction("Run Master");
 	runMenuM->addAction ("Run Master_X");
 	runMenuM->addAction ("Run Basler_X");
 	runMenuM->addAction ("Run Basler and Master_X");

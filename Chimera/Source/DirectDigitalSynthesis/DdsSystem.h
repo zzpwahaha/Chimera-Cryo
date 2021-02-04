@@ -79,17 +79,11 @@ class DdsSystem : public IChimeraSystem{
 		CQCheckBox* quickChange;
 
 		std::array<DdsOutput, size_t(DDSGrid::total)> outputs;
+		DdsCore core;/*seems useless*/
 
-		//std::array<Control<CStatic>, 12> ddsLabels;
-		//std::array<Control<CEdit>, 12> breakoutBoardFreqEdits;
 		std::array<std::array<double, 2>, size_t(DDSGrid::total)> ddsValues;
-		//std::array<std::string, size_t(DDSGrid::numOFunit)> ddsNames;
-		//std::array<double, size_t(DDSGrid::numOFunit)> ddsMinAmp;
-		//std::array<double, size_t(DDSGrid::numOFunit)> ddsMaxAmp;
-		//std::array<double, size_t(DDSGrid::numOFunit)> ddsMinFreq;
-		//std::array<double, size_t(DDSGrid::numOFunit)> ddsMaxFreq;
-		//std::array<std::array<double, 2>, size_t(DDSGrid::numOFunit)> defaultVals;
-		//std::array <const double, 2> ddsResolution;
+
+
 		std::vector<DdsCommandForm> ddsCommandFormList;
 		// the first vector is for each variation.
 		std::vector<std::vector<DdsCommand>> ddsCommandList;
@@ -101,12 +95,12 @@ class DdsSystem : public IChimeraSystem{
 		ZynqTCP zynq_tcp;
 		bool roundToDdsPrecision;
 
-		constexpr static double ddsFreqResolution = 500.0 / 0xffffffff; /*32bit, 500MHz clock freq*/
-		constexpr static double ddsAmplResolution = 10.0 / 0x3ff; /*10bit dac 0b1111111111, 10mA max dac current*/
+		constexpr static double ddsFreqResolution = DdsOutput::ddsFreqResolution; // 500.0 / 0xffffffff; /*32bit, 500MHz clock freq*/
+		constexpr static double ddsAmplResolution = DdsOutput::ddsAmplResolution; // 10.0 / 0x3ff; /*10bit dac 0b1111111111, 10mA max dac current*/
 		const int numFreqDigits = static_cast<int>(abs(round(log10(ddsFreqResolution) - 0.49)));
 		const int numAmplDigits = static_cast<int>(abs(round(log10(ddsAmplResolution) - 0.49)));
 
 
-		DdsCore core;/*seems useless*/
+		
 };
 

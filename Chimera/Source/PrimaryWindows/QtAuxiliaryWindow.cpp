@@ -283,6 +283,10 @@ AoSystem& QtAuxiliaryWindow::getAoSys () {
 	return aoSys;
 }
 
+DdsSystem& QtAuxiliaryWindow::getDdsSys() {
+	return dds;
+}
+
 void QtAuxiliaryWindow::handleAbort (){
 	if (optimizer.isInMiddleOfOptimizing ()){
 		auto answer = QMessageBox::question (nullptr, qstr ("Save Opt?"), qstr ("Save Optimization Data?"), 
@@ -430,10 +434,10 @@ void QtAuxiliaryWindow::SetDacs (){
 	reportStatus ("----------------------\r\nSetting Dacs... ");
 	try{
 		mainWin->updateConfigurationSavedStatus (false);
-		aoSys.resetDacEvents();
+		//aoSys.resetDacEvents();
 		//ttlBoard.resetTtlEvents();
 		reportStatus("Setting Dacs...\r\n");
-		aoSys.handleSetDacsButtonPress(ttlBoard.getCore(), true);
+		aoSys.handleSetDacsButtonPress(/*ttlBoard.getCore(),*/ true);
 		aoSys.setDACs();
 		//aoSys.forceDacs (ttlBoard.getCore (), { 0, ttlBoard.getCurrentStatus () });
 		reportStatus ("Finished Setting Dacs.\r\n");

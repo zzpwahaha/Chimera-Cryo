@@ -180,19 +180,19 @@ void DdsSystem::programNow ( std::vector<parameterType>& constants ){
 
 
 void DdsSystem::handleSaveConfig (ConfigStream& file ){
-	refreshCurrentRamps ();
-	file << getDelim() << "\n";
-	file << "/*Control?*/ " << controlCheck->isChecked () << "\n";
-	core.writeRampListToConfig ( currentRamps, file );
-	file << "\nEND_" + getDelim ( ) << "\n";
+	//refreshCurrentRamps ();
+	//file << getDelim() << "\n";
+	//file << "/*Control?*/ " << controlCheck->isChecked () << "\n";
+	//core.writeRampListToConfig ( currentRamps, file );
+	//file << "\nEND_" + getDelim ( ) << "\n";
 }
 
 
 void DdsSystem::handleOpenConfig ( ConfigStream& file ){
 	auto res = core.getSettingsFromConfig (file);
 	currentRamps = res.ramplist;
-	controlCheck->setChecked (res.control);
-	redrawListview ( );
+	//controlCheck->setChecked (res.control);
+	//redrawListview ( );
 }
 
 

@@ -61,7 +61,7 @@ class AoSystem : public IChimeraSystem
 
 
 		// processing to determine how dac's get set
-		void handleSetDacsButtonPress( DoCore& ttls, bool useDefault=false );
+		void handleSetDacsButtonPress( /*DoCore& ttls,*/ bool useDefault=false );
 		void setDacCommandForm( AoCommandForm command );
 		void setDacStatusNoForceOut(std::array<double, size_t(AOGrid::total)> status);
 		void prepareDacForceChange(int line, double voltage, DoCore& ttls);
@@ -122,6 +122,7 @@ class AoSystem : public IChimeraSystem
 		CQPushButton* dacSetButton;
 		CQPushButton* zeroDacsButton;
 		CQCheckBox* quickChange;
+
 		std::array<AnalogOutput, size_t(AOGrid::total)> outputs;
 
 		static constexpr double dacResolution = 20.0 / 0xffff; /*16bit dac*/

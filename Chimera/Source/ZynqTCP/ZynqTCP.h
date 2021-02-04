@@ -39,7 +39,8 @@ public:
 	int writeDIO(std::vector<std::array<char[DIO_LEN_BYTE_BUF], 1>> TtlSnapshots);
 	int writeDACs(std::vector<AoChannelSnapshot> dacSnapshots);
 	int writeDDSs(std::vector<DdsChannelSnapshot> ddsSnapshots);
-	int writeCommand(std::string command);
+	int sendCommand(std::string command);/*do connection inside*/
+	int writeCommand(std::string command);/*this is only for writing, requires conection already estabilished*/
 
 
 };

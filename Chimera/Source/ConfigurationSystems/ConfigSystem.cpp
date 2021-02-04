@@ -31,6 +31,7 @@ void ConfigSystem::initialize( IChimeraQtWindow* win)
 	configDisplay->setStyleSheet(" QLabel{ font: bold 8pt; }");
 	configurationSavedIndicator = new QCheckBox ("Saved?", win);	
 	configurationSavedIndicator->setChecked (true);
+	configurationSavedIndicator->setEnabled(false);
 	selectConfigButton = new QPushButton ("Open Config.", win);
 	win->connect (selectConfigButton, &QPushButton::released, [this, win]() {
 		try {
@@ -342,7 +343,7 @@ std::string ConfigSystem::getMasterAddressFromConfig(profileSettings profile){
 	std::string line, word, address;
 	getVersionFromFile(stream );
 	line = stream.getline (); 
-	line = stream.getline ();
+	//line = stream.getline ();
 	std::string newPath = stream.getline ();
 	return newPath;
 }

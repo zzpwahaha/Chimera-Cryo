@@ -3,6 +3,7 @@
 
 #include "DigitalOutput/DoSystem.h"
 #include "AnalogOutput/AoSystem.h"
+#include "DirectDigitalSynthesis/DdsSystem.h"
 #include "ParameterSystem/ParameterSystem.h"
 #include "MiscellaneousExperimentOptions/DebugOptionsControl.h"
 #include "MiscellaneousExperimentOptions/MainOptionsControl.h"
@@ -17,6 +18,8 @@
 #include "DeviceList.h"
 #include "DirectDigitalSynthesis/DdsCore.h"
 #include <AnalogOutput/calInfo.h>
+#include "ZynqTcp/ZynqTcp.h"
+
 
 #include <chrono>
 #include <vector>
@@ -35,6 +38,9 @@ struct ExperimentThreadInput{
 
 	DoCore& ttls;
 	AoSystem& aoSys;
+	//DdsSystem& dds;
+	DdsCore& dds;
+	ZynqTCP zynqExp;
 
 	DeviceList devices;
 	std::vector<calResult> calibrations;

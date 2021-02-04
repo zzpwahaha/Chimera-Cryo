@@ -72,7 +72,8 @@ class DoCore
 		Matrix<std::string> getAllNames ();
 		void standardExperimentPrep (unsigned variationInc, double currLoadSkipTime, std::vector<parameterType>& expParams);
 	
-
+		void DoCore::convertToFinalFormat(UINT variation);
+		std::pair<USHORT, USHORT> DoCore::calcDoubleShortTime(double time);
 		void DoCore::formatForFPGA(UINT variation);
 		void DoCore::writeTtlDataToFPGA(UINT variation, bool loadSkip);
 		DWORD FPGAForceOutput(std::array<std::array<bool, size_t(DOGrid::numPERunit)>, size_t(DOGrid::numOFunit)> status);

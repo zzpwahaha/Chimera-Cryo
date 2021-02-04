@@ -2,6 +2,9 @@
 
 
 #include "DdsSystemStructures.h"
+#include "DdsOutput.h"
+#include <GeneralObjects/Matrix.h>
+
 #include "GeneralObjects/ExpWrap.h"
 #include "GeneralObjects/IDeviceCore.h"
 #include "ConfigurationSystems/Version.h"
@@ -10,6 +13,8 @@
 #include "ConfigurationSystems/ConfigStream.h"
 #include <vector>
 #include <array>
+
+
 
 
 /*
@@ -97,25 +102,46 @@ class DdsCore : public IDeviceCore{
 		void writeDDS ( UINT8 device, UINT16 address, UINT8 dat1, UINT8 dat2, UINT8 dat3, UINT8 dat4 );
 
 
-		//std::array<Control<CStatic>, 12> ddsLabels;
-		//std::array<Control<CEdit>, 12> breakoutBoardFreqEdits;
-		std::array<std::array<double, 2>, size_t(DDSGrid::numOFunit)> ddsValues;
-		std::array<std::string, size_t(DDSGrid::numOFunit)> ddsNames;
-		std::array<double, size_t(DDSGrid::numOFunit)> ddsMinAmp;
-		std::array<double, size_t(DDSGrid::numOFunit)> ddsMaxAmp;
-		std::array<double, size_t(DDSGrid::numOFunit)> ddsMinFreq;
-		std::array<double, size_t(DDSGrid::numOFunit)> ddsMaxFreq;
-		std::array<std::array<double, 2>, size_t(DDSGrid::numOFunit)> defaultVals;
-		//std::array <const double, 2> ddsResolution;
-		std::vector<DdsCommandForm> ddsCommandFormList;
-		// the first vector is for each variation.
-		std::vector<std::vector<DdsCommand>> ddsCommandList;
-		std::vector<std::vector<DdsSnapshot>> ddsSnapshots;
-		std::vector<std::vector<DdsChannelSnapshot>> ddsChannelSnapshots;
-		std::vector<std::pair<double, std::vector<DdsCommand>>> timeOrganizer;
 
 
+public:
+	bool isValidDDSName(std::string name);
+	int getDDSIdentifier(std::string name);
+	std::string getName(int ddsNumber);
+	std::array<std::string, size_t(DDSGrid::total)> getName();
+	void setNames(std::array<std::string, size_t(DDSGrid::total)> namesIn);
 
 
+	void resetDDSEvents();
+	void initializeDataObjects(unsigned variationNum);
+	void setDDSCommandForm(DdsCommandForm command);
+	void handleDDSScriptCommand(DdsCommandForm command, std::string name, std::vector<parameterType>& vars);
+	void calculateVariations(std::vector<parameterType>& variables, ExpThreadWorker* threadworker, 
+		std::vector<calResult> calibrations);
+	void organizeDDSCommands(UINT variation);
+	void makeFinalDataFormat(UINT variation);
+	void standardExperimentPrep(UINT variation);
+
+
+private:
+	std::array<std::string, size_t(DDSGrid::total)> names;
+
+
+	//std::array <const double, 2> ddsResolution;
+	std::vector<DdsCommandForm> ddsCommandFormList;
+	// the first vector is for each variation.
+	std::vector<std::vector<DdsCommand>> ddsCommandList;
+	std::vector<std::vector<DdsSnapshot>> ddsSnapshots;
+	std::vector<std::vector<DdsChannelSnapshot>> ddsChannelSnapshots;
+	std::vector<std::pair<double, std::vector<DdsCommand>>> timeOrganizer;
+
+
+public:
+	constexpr static double ddsFreqResolution = DdsOutput::ddsFreqResolution; // 500.0 / 0xffffffff; /*32bit, 500MHz clock freq*/
+	constexpr static double ddsAmplResolution = DdsOutput::ddsAmplResolution; // 10.0 / 0x3ff; /*10bit dac 0b1111111111, 10mA max dac current*/
+	const int numFreqDigits = static_cast<int>(abs(round(log10(ddsFreqResolution) - 0.49)));
+	const int numAmplDigits = static_cast<int>(abs(round(log10(ddsAmplResolution) - 0.49)));
+
+	//constexpr static double DDS_TIME_RESOLUTION = 1.6;/*temporary, should be fixed after felix update the dac trigger*/
 
 };

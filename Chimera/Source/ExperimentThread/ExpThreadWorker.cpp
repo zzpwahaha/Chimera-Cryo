@@ -17,7 +17,14 @@ ExpThreadWorker::ExpThreadWorker (ExperimentThreadInput* input_, std::atomic<boo
 ExpThreadWorker::~ExpThreadWorker () {
 }
 
-void ExpThreadWorker::process (){
+/*this is called from commonFunctions::startExperimentThread, which further call mainWin->startExperimentThread, 
+where it create a new QThread object and a new ExpThreadWorker. Then move ExpThreadWorker to the new QThread with 
+QObject::moveToThread. The thread is started with QThread::start and the started signal from QThread is connected to
+ExpThreadWorker::process.
+The input content can be changed at the ExperimentThreadInput struct and remember to modefy the constructor to fill
+the correct initial value.*/
+void ExpThreadWorker::process ()
+{
 	experimentThreadProcedure();
 	emit mainProcessFinish ();
 }
@@ -45,7 +52,7 @@ void ExpThreadWorker::experimentThreadProcedure () {
 			input->logger.logMasterRuntime (expRuntime.repetitions, expRuntime.expParams);
 		}
 		for (auto& device : input->devices.list) {
-			deviceLoadExpSettings (device, cStream);
+			deviceLoadExpSettings (device, cStream);/*TODO: remove dds from device, and now device only has andor*/
 		}
 		/// The Variation Calculation Step.
 		emit notification ("Calculating All Variation Data...\r\n");
@@ -67,9 +74,9 @@ void ExpThreadWorker::experimentThreadProcedure () {
 		for (const auto& variationInc : range (determineVariationNumber (expRuntime.expParams))) {
 			initVariation (variationInc, expRuntime.expParams);
 			emit notification ("Programming Devices for Variation...\n");
-			for (auto& device : input->devices.list) {
-				deviceProgramVariation (device, expRuntime.expParams, variationInc);
-			}
+			//for (auto& device : input->devices.list) {
+			//	deviceProgramVariation (device, expRuntime.expParams, variationInc);
+			//}
 			emit notification ("Running Experiment.\n");
 			for (const auto& repInc : range (expRuntime.repetitions)) {
 				handlePause (isPaused, isAborting);
@@ -95,10 +102,12 @@ void ExpThreadWorker::experimentThreadProcedure () {
 }
 
 
-void ExpThreadWorker::analyzeMasterScript (DoCore& ttls, AoSystem& aoSys, std::vector<parameterType>& vars,
+void ExpThreadWorker::analyzeMasterScript (DoCore& ttls, AoSystem& aoSys, DdsCore& dds,
+	std::vector<parameterType>& vars,
 	ScriptStream& currentMasterScript, bool expectsLoadSkip,
 	std::string& warnings, timeType& operationTime,
-	timeType& loadSkipTime) {
+	timeType& loadSkipTime) 
+{
 	std::string currentMasterScriptText = currentMasterScript.str ();
 	loadSkipTime.first.clear ();
 	loadSkipTime.second = 0;
@@ -123,6 +132,7 @@ void ExpThreadWorker::analyzeMasterScript (DoCore& ttls, AoSystem& aoSys, std::v
 			else if (handleVariableDeclaration (word, currentMasterScript, vars, scope, warnings)) {}
 			else if (handleDoCommands (word, currentMasterScript, vars, ttls, scope, operationTime)) {}
 			else if (handleAoCommands (word, currentMasterScript, vars, aoSys, ttls, scope, operationTime)) {}
+			else if (handleDdsCommands(word, currentMasterScript, vars, dds, scope, operationTime)) {}
 			else if (word == "callcppcode") {
 				// and that's it... 
 				callCppCodeFunction ();
@@ -741,6 +751,137 @@ bool ExpThreadWorker::handleAoCommands (std::string word, ScriptStream& stream,	
 	return true;
 }
 
+/* returns true if handles word, false otherwise. */
+bool ExpThreadWorker::handleDdsCommands(std::string word, ScriptStream& stream, std::vector<parameterType>& vars,
+	DdsCore& ddss, std::string scope, timeType& operationTime)
+{
+	if (word == "ddsamp:") //ddsamp: name amp
+	{
+		DdsCommandForm command;
+		std::string name;
+		stream >> name >> command.initVal;
+		command.initVal.assertValid(vars, scope);
+		command.time = operationTime;
+		command.commandName = "ddsamp:";
+		command.finalVal.expressionStr = "__NONE__";
+		command.rampTime.expressionStr = "__NONE__";
+		command.numSteps.expressionStr = "__NONE__";
+		try
+		{
+			ddss.handleDDSScriptCommand(command, name, vars);
+		}
+		catch (ChimeraError& err)
+		{
+			throwNested("Error handling \"ddsamp:\" command inside main script");
+		}
+	}
+	else if (word == "ddsfreq:") //ddsfreq: name freq
+	{
+		DdsCommandForm command;
+		std::string name;
+		stream >> name >> command.initVal;
+		command.initVal.assertValid(vars, scope);
+		command.time = operationTime;
+		command.commandName = "ddsfreq:";
+		command.finalVal.expressionStr = "__NONE__";
+		command.rampTime.expressionStr = "__NONE__";
+		command.numSteps.expressionStr = "__NONE__";
+		try
+		{
+			ddss.handleDDSScriptCommand(command, name, vars);
+		}
+		catch (ChimeraError& err)
+		{
+			throwNested("Error handling \"ddsfreq:\" command inside main script");
+		}
+	}
+	else if (word == "ddslinspaceamp:") //ddslinspaceamp: name initAmp finalAmp rampTime numSteps
+	{
+		DdsCommandForm command;
+		std::string name;
+		stream >> name >> command.initVal >> command.finalVal >> command.rampTime >> command.numSteps;
+		command.initVal.assertValid(vars, scope);
+		command.finalVal.assertValid(vars, scope);
+		command.rampTime.assertValid(vars, scope);
+		command.numSteps.assertValid(vars, scope);
+		command.time = operationTime;
+		command.commandName = "ddslinspaceamp:";
+		try
+		{
+			ddss.handleDDSScriptCommand(command, name, vars);
+		}
+		catch (ChimeraError& err)
+		{
+			throwNested("Error handling \"ddslinspaceamp:\" command inside main script");
+		}
+	}
+	else if (word == "ddslinspacefreq:")  //ddslinspacefreq: name initFreq finalFreq rampTime numSteps
+	{
+		DdsCommandForm command;
+		std::string name;
+		stream >> name >> command.initVal >> command.finalVal >> command.rampTime >> command.numSteps;
+		command.initVal.assertValid(vars, scope);
+		command.finalVal.assertValid(vars, scope);
+		command.rampTime.assertValid(vars, scope);
+		command.numSteps.assertValid(vars, scope);
+		command.time = operationTime;
+		command.commandName = "ddslinspacefreq:";
+		try
+		{
+			ddss.handleDDSScriptCommand(command, name, vars);
+		}
+		catch (ChimeraError& err)
+		{
+			throwNested("Error handling \"ddslinspacefreq:\" command inside main script");
+		}
+	}
+	else if (word == "ddsrampamp:") // ddsrampamp: name intiAmp finalAmp rampTime
+	{
+		DdsCommandForm command;
+		std::string name;
+		stream >> name >> command.initVal >> command.finalVal >> command.rampTime;
+		command.initVal.assertValid(vars, scope);
+		command.finalVal.assertValid(vars, scope);
+		command.rampTime.assertValid(vars, scope);
+		command.time = operationTime;
+		command.commandName = "ddsrampamp:";
+		command.numSteps.expressionStr = "__NONE__";
+		try
+		{
+			ddss.handleDDSScriptCommand(command, name, vars);
+		}
+		catch (ChimeraError& err)
+		{
+			throwNested("Error handling \"ddsrampamp:\" command inside main script");
+		}
+	}
+	else if (word == "ddsrampfreq:") // ddsrampfreq: name intiFreq finalFreq rampTime
+	{
+		DdsCommandForm command;
+		std::string name;
+		stream >> name >> command.initVal >> command.finalVal >> command.rampTime;
+		command.initVal.assertValid(vars, scope);
+		command.finalVal.assertValid(vars, scope);
+		command.rampTime.assertValid(vars, scope);
+		command.time = operationTime;
+		command.commandName = "ddsrampfreq:";
+		command.numSteps.expressionStr = "__NONE__";
+		try
+		{
+			ddss.handleDDSScriptCommand(command, name, vars);
+		}
+		catch (ChimeraError& err)
+		{
+			throwNested("Error handling \"ddsrampfreq:\" command inside main script");
+		}
+	}
+	else
+	{
+		return false;
+	}
+	return true;
+}
+
 
 /*
 	this function can be called directly from scripts. Insert things inside the function to make it do something
@@ -846,18 +987,26 @@ void ExpThreadWorker::calculateAdoVariations (ExpRuntimeData& runtime) {
 		auto variations = determineVariationNumber (runtime.expParams);
 		input->aoSys.resetDacEvents ();
 		input->ttls.resetTtlEvents ();
+		input->dds.resetDDSEvents();
+
 		input->aoSys.initializeDataObjects (0);
 		input->ttls.initializeDataObjects (0);
+		input->dds.initializeDataObjects(0);
+
+		input->zynqExp.sendCommand("initExp");
+
 		loadSkipTimes = std::vector<double> (variations);
 		emit notification ("Analyzing Master Script...\n");
 		std::string warnings;
-		analyzeMasterScript (input->ttls, input->aoSys, runtime.expParams, runtime.masterScript,
+		analyzeMasterScript (input->ttls, input->aoSys,input->dds, runtime.expParams, runtime.masterScript,
 			runtime.mainOpts.atomSkipThreshold != UINT_MAX, warnings, operationTime, loadSkipTime);
 		emit warn (cstr (warnings));
 		emit notification ("Calcualting DO system variations...\n", 1);
 		input->ttls.calculateVariations (runtime.expParams, this);
 		emit notification ("Calcualting AO system variations...\n", 1);
 		input->aoSys.calculateVariations (runtime.expParams, this, input->calibrations);
+		emit notification("Calcualting DDS system variations...\n", 1);
+		input->dds.calculateVariations(runtime.expParams, this, input->calibrations);
 		emit notification ("Running final ado checks...\n");
 		for (auto variationInc : range (variations)) {
 			if (isAborting) { thrower (abortString); }
@@ -865,6 +1014,7 @@ void ExpThreadWorker::calculateAdoVariations (ExpRuntimeData& runtime) {
 			currLoadSkipTime = convertToTime (loadSkipTime, runtime.expParams, variationInc);
 			input->aoSys.standardExperimentPrep (variationInc, input->ttls, runtime.expParams, currLoadSkipTime);
 			input->ttls.standardExperimentPrep (variationInc, currLoadSkipTime, runtime.expParams);
+			input->dds.standardExperimentPrep(variationInc);
 			input->aoSys.checkTimingsWork (variationInc);
 		}
 		emit notification (("Programmed time per repetition: " + str (input->ttls.getTotalTime (0)) + "\r\n").c_str (), 1);
@@ -888,7 +1038,7 @@ void ExpThreadWorker::runConsistencyChecks (std::vector<parameterType> expParams
 			emit warn (cstr ("WARNING: Variable " + var.name + " is varied, but not being used?!?\r\n"));
 		}
 	}
-	checkTriggerNumbers (expParams);
+	//checkTriggerNumbers (expParams);
 }
 
 void ExpThreadWorker::handlePause (std::atomic<bool>& isPaused, std::atomic<bool>& isAborting) {
@@ -919,7 +1069,7 @@ void ExpThreadWorker::initVariation (unsigned variationInc,std::vector<parameter
 	waitForAndorFinish ();
 	bool skipOption = input->skipNext == nullptr ? false : input->skipNext->load ();
 	if (true /*runMaster*/) { input->ttls.ftdi_write (variationInc, skipOption); }
-	handleDebugPlots ( input->ttls, input->aoSys, variationInc );
+	//handleDebugPlots ( input->ttls, input->aoSys, variationInc ); deal it later zzp 20210203
 }
 
 void ExpThreadWorker::waitForAndorFinish () {
@@ -973,9 +1123,15 @@ void ExpThreadWorker::startRep (unsigned repInc, unsigned variationInc, bool ski
 	if (true /*runMaster*/) {
 		emit notification (qstr ("Starting Repetition #" + qstr (repInc) + "\n"), 2);
 		emit repUpdate (repInc + 1);
-		input->aoSys.resetDacs (variationInc, skip);
-		input->ttls.ftdi_trigger ();
-		input->ttls.FtdiWaitTillFinished (variationInc);
+		//input->aoSys.resetDacs (variationInc, skip);
+		//input->ttls.ftdi_trigger ();
+		//input->ttls.FtdiWaitTillFinished (variationInc);
+		input->aoSys.stopDacs();
+		input->aoSys.configureClocks(variationInc, skip);
+		input->aoSys.writeDacs(variationInc, skip);
+		//input->ddss->writeDDSs(variationInc, skip);
+		input->ttls.writeTtlDataToFPGA(variationInc, skip);
+
 	}
 }
 

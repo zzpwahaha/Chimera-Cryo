@@ -188,20 +188,27 @@ int ZynqTCP::writeDIO(std::vector<std::array<char[DIO_LEN_BYTE_BUF], 1>> TtlSnap
 int ZynqTCP::writeDACs(std::vector<AoChannelSnapshot> dacChannelSnapshots)
 {
 	char buff[ZYNQ_MAX_BUFF];
+	char buffCommand[ZYNQ_MAX_BUFF];
 	memset(buff, 0, sizeof(buff));
 
 	int snapIndex = 0;
 	unsigned int timeConv = 100000; // SEQ time given in multiples of 10 ns
 	unsigned int timeConvDAC = 1000; // DAC time given multiples of 1 us
-	unsigned int dacRes = 65536;
+	//unsigned int dacRes = 0xffff;
 	char byte_buf[DAC_LEN_BYTE_BUF];
+	//char command[DAC_LEN_BYTE_BUF];
 	unsigned int time, duration;
 	unsigned short channel;
 	double start, end;
 
 	int BytesSent = 0;
 
-	sprintf_s(buff, ZYNQ_MAX_BUFF, "DACseq_%u", dacChannelSnapshots.size());
+	sprintf_s(buffCommand, ZYNQ_MAX_BUFF, "DACseq_%u", dacChannelSnapshots.size());
+	for (size_t i = 0; i < strlen(buffCommand); i++)
+	{
+		buff[i] = buffCommand[i];
+	}
+
 
 	BytesSent = send(ConnectSocket, buff, sizeof(buff), 0);
 	if (BytesSent == SOCKET_ERROR)
@@ -224,6 +231,11 @@ int ZynqTCP::writeDACs(std::vector<AoChannelSnapshot> dacChannelSnapshots)
 			duration = (unsigned int)(snapshot.dacRampTime * timeConvDAC);
 
 			sprintf_s(byte_buf, DAC_LEN_BYTE_BUF, "t%08X_c%04X_s%06.3f_e%06.3f_d%08x", time, channel, start, end, duration);
+			//for (size_t i = 0; i < strlen(command); i++)
+			//{
+			//	byte_buf[i] = command[i];
+			//}
+
 			BytesSent = send(ConnectSocket, byte_buf, DAC_LEN_BYTE_BUF, 0);
 			if (BytesSent == SOCKET_ERROR)
 			{
@@ -241,6 +253,7 @@ int ZynqTCP::writeDACs(std::vector<AoChannelSnapshot> dacChannelSnapshots)
 int ZynqTCP::writeDDSs(std::vector<DdsChannelSnapshot> ddsChannelSnapshots)
 {
 	char buff[ZYNQ_MAX_BUFF];
+	char buffCommand[ZYNQ_MAX_BUFF];
 	memset(buff, 0, sizeof(buff));
 
 	int snapIndex = 0;
@@ -255,7 +268,12 @@ int ZynqTCP::writeDDSs(std::vector<DdsChannelSnapshot> ddsChannelSnapshots)
 
 	int BytesSent = 0;
 
-	sprintf_s(buff, ZYNQ_MAX_BUFF, "DDSseq_%u", ddsChannelSnapshots.size());
+	sprintf_s(buffCommand, ZYNQ_MAX_BUFF, "DDSseq_%u", ddsChannelSnapshots.size());
+	for (size_t i = 0; i < strlen(buffCommand); i++)
+	{
+		buff[i] = buffCommand[i];
+	}
+
 
 	BytesSent = send(ConnectSocket, buff, sizeof(buff), 0);
 	if (BytesSent == SOCKET_ERROR)
@@ -291,4 +309,32 @@ int ZynqTCP::writeDDSs(std::vector<DdsChannelSnapshot> ddsChannelSnapshots)
 		return 0;
 	}
 
+}
+
+int ZynqTCP::sendCommand(std::string command)
+{
+	int tcp_connect;
+	try
+	{
+		tcp_connect = connectTCP(ZYNQ_ADDRESS);
+	}
+	catch (ChimeraError& err)
+	{
+		tcp_connect = 1;
+		throwNested("Unable to connect to server during programming the experiment, Check if Zynq tcp server is started");
+		//errBox(err.what()); should not have gui stuff here since this function is used for sending 'init' in exp thread which can not handle gui (qt forbid thread other than main thread handle gui)
+	}
+
+	if (tcp_connect == 0)
+	{
+		int zynq_write = writeCommand(command);
+		if (zynq_write == 1) {
+			thrower("failed to write command {" + command + "} to Zynq.");
+		}
+		disconnect();
+	}
+	else
+	{
+		throwNested("Unable to connect to server during programming the experiment, Check if Zynq tcp server is started");
+	}
 }

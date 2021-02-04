@@ -10,6 +10,8 @@
 #include <AnalogOutput/AoSystem.h>
 #include <Scripts/Script.h>
 
+#include <filesystem>
+
 DataLogger::DataLogger(std::string systemLocation, IChimeraQtWindow* parent) : IChimeraSystem(parent){
 	// initialize this to false.
 	fileIsOpen = false;
@@ -69,7 +71,8 @@ void DataLogger::getDataLocation ( std::string base, std::string& todayFolder, s
 	struct stat info;
 	int resultStat = stat ( cstr ( base + finalSaveFolder ), &info );
 	if ( resultStat != 0 ){
-		result = CreateDirectory ( cstr ( base + finalSaveFolder ), 0 );
+		//result = CreateDirectory ( cstr ( base + finalSaveFolder ), 0 );
+		result = std::filesystem::create_directories((base + finalSaveFolder).c_str());
 	}
 	if ( !result ){
 		thrower ( "ERROR: Failed to create save location for data at location " + base + finalSaveFolder +

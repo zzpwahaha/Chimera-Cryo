@@ -4,9 +4,12 @@
 #include "DoRows.h"
 #include "qdebug.h"
 
+#include <bitset>
+
 DoCore::DoCore (bool ftSafemode, bool serialSafemode) 
 	: ftFlume (ftSafemode)
-	, names(size_t(DOGrid::numPERunit), size_t(DOGrid::numOFunit)){
+	, names(size_t(DOGrid::numPERunit), size_t(DOGrid::numOFunit))
+{
 	try	{
 		connectType = ftdiConnectionOption::Async;
 		ftdi_connectasync ("FT2E722BB");
@@ -92,6 +95,93 @@ void DoCore::fillFtdiDataBuffer (std::vector<unsigned char>& dataBuffer, unsigne
 	dataBuffer[offset + 19] = pt.pts[6];
 	dataBuffer[offset + 20] = pt.pts[7];
 }
+
+void DoCore::convertToFinalFormat(UINT variation)
+{
+	// excessive but just in case.
+	formattedTtlSnapshots[variation].clear();
+	loadSkipFormattedTtlSnapshots[variation].clear();
+	finalFormatTtlData[variation].clear();
+	loadSkipFinalFormatTtlData[variation].clear();
+	// do bit arithmetic.
+	for (auto& snapshot : ttlSnapshots[variation])
+	{
+		// each major index is a row, each minor index is a ttl state (0, 1) in that row.
+		std::array<std::bitset<8>, 8> ttlBits;
+		for (UINT rowInc : range(8))
+		{
+			for (UINT numberInc : range(8))
+			{
+				ttlBits[rowInc].set(numberInc, snapshot.ttlStatus[rowInc][numberInc]);
+			}
+		}
+		// I need to put it as an int (just because I'm not actually sure how the bitset gets stored... it'd probably 
+		// work just passing the address of the bitsets, but I'm sure this will work so whatever.)
+		std::array<USHORT, 6> tempCommand;
+		tempCommand[0] = calcDoubleShortTime(snapshot.time).first;
+		tempCommand[1] = calcDoubleShortTime(snapshot.time).second;
+		tempCommand[2] = static_cast <unsigned short>(ttlBits[0].to_ulong());
+		tempCommand[3] = static_cast <unsigned short>(ttlBits[1].to_ulong());
+		tempCommand[4] = static_cast <unsigned short>(ttlBits[2].to_ulong());
+		tempCommand[5] = static_cast <unsigned short>(ttlBits[3].to_ulong());
+		formattedTtlSnapshots[variation].push_back(tempCommand);
+	}
+	// same loop with the loadSkipSnapshots.
+	for (auto& snapshot : loadSkipTtlSnapshots[variation])
+	{
+		// each major index is a row, each minor index is a ttl state (0, 1) in that row.
+		std::array<std::bitset<8>, 8> ttlBits;
+		for (UINT rowInc : range(8))
+		{
+			for (UINT numberInc : range(8))
+			{
+				ttlBits[rowInc].set(numberInc, snapshot.ttlStatus[rowInc][numberInc]);
+			}
+		}
+		// I need to put it as an int (just because I'm not actually sure how the bitset gets stored... it'd probably 
+		// work just passing the address of the bitsets, but I'm sure this will work so whatever.)
+		std::array<USHORT, 6> tempCommand;
+		tempCommand[0] = calcDoubleShortTime(snapshot.time).first;
+		tempCommand[1] = calcDoubleShortTime(snapshot.time).second;
+		tempCommand[2] = static_cast <unsigned short>(ttlBits[0].to_ulong());
+		tempCommand[3] = static_cast <unsigned short>(ttlBits[1].to_ulong());
+		tempCommand[4] = static_cast <unsigned short>(ttlBits[2].to_ulong());
+		tempCommand[5] = static_cast <unsigned short>(ttlBits[3].to_ulong());
+		loadSkipFormattedTtlSnapshots[variation].push_back(tempCommand);
+	}
+
+	/// flatten the data.
+	finalFormatTtlData[variation].resize(formattedTtlSnapshots[variation].size() * 6);
+	int count = 0;
+	for (auto& element : finalFormatTtlData[variation])
+	{
+		// concatenate
+		element = formattedTtlSnapshots[variation][count / 6][count % 6];
+		count++;
+	}
+	// the arrays are usually not the same length and need to be dealt with separately.
+	loadSkipFinalFormatTtlData[variation].resize(loadSkipFormattedTtlSnapshots[variation].size() * 6);
+	count = 0;
+	for (auto& element : loadSkipFinalFormatTtlData[variation])
+	{
+		// concatenate
+		element = loadSkipFormattedTtlSnapshots[variation][count / 6][count % 6];
+		count++;
+	}
+}
+
+std::pair<USHORT, USHORT> DoCore::calcDoubleShortTime(double time)
+{
+	USHORT lowordTime, hiwordTime;
+	// convert to system clock ticks. Assume that the crate is running on a 10 MHz signal, so multiply by
+	// 10,000,000, but then my time is in milliseconds, so divide that by 1,000, ending with multiply by 10,000
+	lowordTime = ULONGLONG(time * 100000) % 65535;
+	USHORT temp = time * 100000;
+	hiwordTime = ULONGLONG(time * 100000) / 65535;
+	return { lowordTime, hiwordTime };
+}
+
+
 
 void DoCore::convertToFinalFtdiFormat (unsigned variation){
 	for (auto loadSkip : { false, true }){
@@ -655,7 +745,7 @@ void DoCore::organizeTtlCommands (unsigned variation, DoSnapshot initSnap)
 		// because the events are sorted by time, the time organizer will already be sorted by time, and therefore I 
 		// just need to check the back value's time. DIO64 uses a 10MHz clock, can do 100ns spacing, check diff 
 		// threshold to extra room. If dt<1ns, probably just some floating point issue. 
-		// If 1ns<dt<100ns I want to actually complain to the user since it seems likely that  this was intentional and 
+		// If 1ns<dt<100ns(Zynq is 10ns) I want to actually complain to the user since it seems likely that  this was intentional and 
 		// not a floating error.
 		if (commandInc == 0 || fabs (orderedCommandList[commandInc].time - timeOrganizer.back ().first) > 1e-6)
 		{
@@ -843,6 +933,8 @@ void DoCore::handleTtlScriptCommand (std::string command, timeType time, std::st
 void DoCore::standardExperimentPrep (unsigned variationInc, double currLoadSkipTime, std::vector<parameterType>& expParams){
 	organizeTtlCommands (variationInc);
 	findLoadSkipSnapshots (currLoadSkipTime, expParams, variationInc);
-	convertToFtdiSnaps (variationInc);
-	convertToFinalFtdiFormat (variationInc);
+	//convertToFtdiSnaps (variationInc);
+	//convertToFinalFtdiFormat (variationInc);
+	convertToFinalFormat(variationInc);/*seems useless*/
+	formatForFPGA(variationInc);
 }

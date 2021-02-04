@@ -68,10 +68,10 @@ void ParameterSystem::handleContextMenu (const QPoint& pos){
 		auto scanDim = paramModel.getParams ()[index.row ()].scanDimension;
 		paramModel.setVariationRangeNumber (rangeInfo.numRanges (scanDim) - 1, scanDim);
 		});
-	for (auto* action : {addRange, rmRange, deleteAction, toggleInclusivity, newParam}){
-		parametersView->connect (action, &QAction::triggered, 
-								 (IChimeraQtWindow*)parametersView->parentWidget(), &IChimeraQtWindow::configUpdated);
-	}
+	//for (auto* action : {addRange, rmRange, deleteAction, toggleInclusivity, newParam}){
+	//	parametersView->connect (action, &QAction::triggered, 
+	//							 (IChimeraQtWindow*)(parametersView->parentWidget()), &IChimeraQtWindow::configUpdated);
+	//}
 
 	if (index.row() < paramModel.getParams().size()) { 
 		menu.addAction (deleteAction);
@@ -110,8 +110,11 @@ void ParameterSystem::initialize (IChimeraQtWindow* parent, std::string title, P
 
 	parametersView->setContextMenuPolicy (Qt::CustomContextMenu);
 	parent->connect (parametersView, &QTableView::doubleClicked, parent, &IChimeraQtWindow::configUpdated);
-	parent->connect (parametersView, &QTableView::customContextMenuRequested,
-		[this](const QPoint& pos) {handleContextMenu (pos); });
+	parent->connect(parametersView, &QTableView::customContextMenuRequested,
+		[this, parent](const QPoint& pos) {
+			handleContextMenu(pos);
+			//parent->configUpdated(); 
+		});
 	parametersView->setShowGrid (true);
 
 	if ( paramSysType == ParameterSysType::global ){

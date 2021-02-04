@@ -4,6 +4,7 @@
 #include "PrimaryWindows/QtAuxiliaryWindow.h"
 #include "PrimaryWindows/QtMainWindow.h"
 #include "ConfigurationSystems/Version.h"
+
 // for other ni stuff
 #include "nidaqmx2.h"
 #include "GeneralUtilityFunctions/range.h"
@@ -62,8 +63,8 @@ AoSystem::AoSystem(IChimeraQtWindow* parent, bool aoSafemode)
 
 void AoSystem::standardNonExperiemntStartDacsSequence( ){
 	updateEdits( );
-	organizeDacCommands( 0 );
-	makeFinalDataFormat( 0 );
+	//organizeDacCommands( 0 );
+	//makeFinalDataFormat( 0 );
 	//resetDacs (0, false);
 	setDACs();
 }
@@ -72,7 +73,7 @@ void AoSystem::standardNonExperiemntStartDacsSequence( ){
 void AoSystem::forceDacs( DoCore& ttls, DoSnapshot initSnap ){
 	ttls.resetTtlEvents( );
 	resetDacEvents( );
-	handleSetDacsButtonPress( ttls );
+	handleSetDacsButtonPress( /*ttls*/ );
 	standardNonExperiemntStartDacsSequence( );
 	ttls.standardNonExperimentStartDoSequence(initSnap);
 	emit notification ("Forced Analog Output Values Complete.\n");
@@ -80,15 +81,19 @@ void AoSystem::forceDacs( DoCore& ttls, DoSnapshot initSnap ){
 
 
 void AoSystem::zeroDacs( DoCore& ttls, DoSnapshot initSnap){
-	resetDacEvents( );
-	ttls.resetTtlEvents( );
-	prepareForce( );
+	//resetDacEvents( );
+	//ttls.resetTtlEvents( );
+	//prepareForce( );
 	//ttls.prepareForce( );
 	for ( int dacInc : range(size_t(AOGrid::total)) ){
-		prepareDacForceChange( dacInc, 0, ttls );/*this zeros dacValue*/
+		outputs[dacInc].info.currVal = 0.0;
+		dacValues[dacInc] = 0.0;
+		//prepareDacForceChange( dacInc, 0, ttls );/*this zeros dacValue*/
 	}
-	standardNonExperiemntStartDacsSequence( );/*this output dacs*/
+	updateEdits();
+	//standardNonExperiemntStartDacsSequence( );/*this output dacs*/
 	//ttls.standardNonExperimentStartDoSequence( initSnap );
+	setDACs();
 	emit notification ("Zero'd Analog Outputs.\n", 2);
 }
 
@@ -119,17 +124,38 @@ void AoSystem::setSingleDac( unsigned dacNumber, double val, DoCore& ttls, DoSna
 }
 
 
-void AoSystem::handleOpenConfig(ConfigStream& openFile){
+void AoSystem::handleOpenConfig(ConfigStream& openFile)
+{
+	/*ProfileSystem::checkDelimiterLine(openFile, "DACS");
+	prepareForce();
+	std::vector<double> values(getNumberOfDacs());
 	unsigned dacInc = 0;
+	for (auto& dac : values)
+	{
+		std::string dacString;
+		openFile >> dacString;
+		try
+		{
+			double dacValue = std::stod(dacString);
+			prepareDacForceChange(dacInc, dacValue);
+		}
+		catch (std::invalid_argument&)
+		{
+			thrower("ERROR: failed to convert dac value to voltage. string was " + dacString);
+		}
+		dacInc++;
+	}
+	ProfileSystem::checkDelimiterLine(openFile, "END_DACS");*/
 	emit notification ("AO system finished opening config.\n", 2);
 }
 
 void AoSystem::standardExperimentPrep ( unsigned variationInc, DoCore& ttls, std::vector<parameterType>& expParams, 
 										double currLoadSkipTime ){
 	organizeDacCommands (variationInc);
-	setDacTriggerEvents (ttls, variationInc);
+	//setDacTriggerEvents (ttls, variationInc);
 	findLoadSkipSnapshots (currLoadSkipTime, expParams, variationInc);
 	makeFinalDataFormat (variationInc);
+	formatDacForFPGA(variationInc);
 }
 
 void AoSystem::handleSaveConfig(ConfigStream& saveFile){
@@ -236,6 +262,10 @@ void AoSystem::initialize( IChimeraQtWindow* parent )
 	}
 	layout->addLayout(DOGridLayout);
 
+	for (size_t i = 0; i < size_t(AOGrid::total); i++)
+	{
+		dacValues[i] = 0.0;
+	}
 }
 
 bool AoSystem::eventFilter (QObject* obj, QEvent* event){
@@ -268,24 +298,30 @@ void AoSystem::handleRoundToDac( )
  * get the text from every edit and prepare a change. If fails to get text from edit, if useDefalt this will set such
  * dacs to zero.
  */
-void AoSystem::handleSetDacsButtonPress(DoCore& ttls, bool useDefault ){
-	dacCommandFormList.clear( );
-	prepareForce( );
-	ttls.prepareForce( );
-	std::array<double, size_t(AOGrid::total)> vals;
+void AoSystem::handleSetDacsButtonPress(/*DoCore& ttls,*/ bool useDefault )
+{
+	//dacCommandFormList.clear( );
+	//prepareForce( );
+	//ttls.prepareForce( );
+	//std::array<double, size_t(AOGrid::total)> vals;
 	for (auto dacInc : range(outputs.size()) )
 	{
-		vals[ dacInc ] = outputs[ dacInc ].getVal ( useDefault );
-		prepareDacForceChange( dacInc, vals[dacInc], ttls ); /*mainly for the trigger, not need in zynq*/
+		//vals[ dacInc ] = outputs[ dacInc ].getVal ( useDefault );
+		//prepareDacForceChange( dacInc, vals[dacInc], ttls ); /*mainly for the trigger, not need in zynq*/
+		handleEditChange(dacInc);
 	}
 	// wait until after all this to actually do this to make sure things get through okay.
-	/*this is already done in prepareDacForceChange*/
-	for ( auto outputNum : range ( outputs.size() ) )
-	{
-		outputs[ outputNum ].info.currVal = vals[ outputNum ];
-	}
+	// /*this is already done in prepareDacForceChange*/
+	//for ( auto outputNum : range ( outputs.size() ) )
+	//{
+	//	outputs[ outputNum ].info.currVal = vals[ outputNum ];
+	//}
 
-	dacValues = std::move(vals);
+	//dacValues = std::move(vals);
+
+
+	
+
 }
 
 
@@ -335,12 +371,12 @@ void AoSystem::organizeDacCommands(unsigned variation)
 	auto& snap = dacSnapshots[variation];
 	snap.clear();
 	// first copy the initial settings so that things that weren't changed remain unchanged.
-	//std::array<double, size_t(AOGrid::total)> dacValues;
-	//for ( auto i : range ( outputs.size ( ) ) )
-	//{
-	//	dacValues[ i ] = outputs[ i ].info.currVal;
-	//}
-	snap.push_back({ 0, dacValues });
+	std::array<double, size_t(AOGrid::total)> dacValuestmp;
+	for ( auto i : range ( outputs.size ( ) ) )
+	{
+		dacValuestmp[ i ] = outputs[ i ].info.currVal;
+	}
+	snap.push_back({ 0, dacValuestmp });
 	for (auto& command : timeOrganizer)
 	{
 		// auto& command = timeOrganizer[commandInc];
@@ -408,13 +444,13 @@ void AoSystem::setDacStatusNoForceOut(std::array<double, size_t(AOGrid::total)> 
 
 
 void AoSystem::resetDacs (unsigned varInc, bool skipOption){
-	stopDacs ();/*not used zzp*/
+	//stopDacs ();/*not used zzp*/
 	// it's important to grab the skipoption from input->skipNext only once because in principle
 	// if the cruncher thread was running behind, it could change between writing and configuring the 
 	// aoSys and configuring the TTLs, resulting in some funny behavior;
-	configureClocks (varInc, skipOption);/*not used zzp*/
+	//configureClocks (varInc, skipOption);/*not used zzp*/
 	writeDacs (varInc, skipOption);
-	startDacs ();/*not used zzp*/
+	//startDacs ();/*not used zzp*/
 }
 
 std::vector<std::vector<plotDataVec>> AoSystem::getPlotData( unsigned var ){
@@ -459,11 +495,16 @@ void AoSystem::calculateVariations( std::vector<parameterType>& params, ExpThrea
 	loadSkipDacSnapshots.clear();
 	finalFormatDacData.clear();
 	loadSkipDacFinalFormat.clear();
+
+	finalDacSnapshots.clear();
+
 	dacCommandList.resize (  variations );
 	dacSnapshots.resize( variations );
 	loadSkipDacSnapshots.resize( variations );
 	finalFormatDacData.resize( variations );
 	loadSkipDacFinalFormat.resize( variations );
+
+	finalDacSnapshots.resize(variations);
 
 	bool resolutionWarningPosted = false;
 	bool nonIntegerWarningPosted = false;
@@ -659,7 +700,7 @@ void AoSystem::setDacCommandForm( AoCommandForm command){
 	// This is done later on interpretation of ramps etc.
 }
 
-
+/*not need this now, might need if want the ttl to triger the register zzp*/
 // add a ttl trigger command for every unique dac snapshot.
 // MUST interpret key for dac and organize dac commands before setting the trigger events.
 void AoSystem::setDacTriggerEvents(DoCore& ttls, unsigned variation){
@@ -669,7 +710,7 @@ void AoSystem::setDacTriggerEvents(DoCore& ttls, unsigned variation){
 	}
 }
 
-
+/*to be deleted*/
 std::string AoSystem::getSystemInfo( ){
 	return daqmx.getDacSystemInfo ({ board0Name, board1Name, board2Name } );
 }
@@ -775,7 +816,7 @@ void AoSystem::prepareForce( ){
 
 
 void AoSystem::initializeDataObjects( unsigned cmdNum ){
-	dacCommandFormList = vec<AoCommandForm>( cmdNum );
+	dacCommandFormList = std::vector<AoCommandForm>( cmdNum );
 
 	dacCommandList.clear();
 	dacSnapshots.clear();
@@ -792,7 +833,14 @@ void AoSystem::initializeDataObjects( unsigned cmdNum ){
 }
 
 
-void AoSystem::resetDacEvents(){
+void AoSystem::resetDacEvents()
+{
+	dacCommandFormList.clear();
+	dacCommandList.clear();
+	dacSnapshots.clear();
+	loadSkipDacSnapshots.clear();
+	loadSkipDacFinalFormat.clear();
+
 	initializeDataObjects( 0 );
 }
 
@@ -803,7 +851,7 @@ void AoSystem::stopDacs(){
 	daqmx.stopTask( analogOutTask2 );
 }
 
-
+/*need to replace for zynq*/
 void AoSystem::configureClocks(unsigned variation, bool loadSkip){
 	long sampleNumber;
 	if ( loadSkip ){
@@ -846,6 +894,33 @@ void AoSystem::writeDacs(unsigned variation, bool loadSkip){
 	}
 }
 
+void AoSystem::makeFinalDataFormat(unsigned variation) {
+	auto& finalNormal = finalFormatDacData[variation];
+	auto& finalLoadSkip = loadSkipDacFinalFormat[variation];
+	auto& normSnapshots = dacSnapshots[variation];
+	auto& loadSkipSnapshots = loadSkipDacSnapshots[variation];
+
+	for (auto& data : finalNormal) {
+		data.clear();
+	}
+	for (auto& data : finalLoadSkip) {
+		data.clear();
+	}
+	for (AoSnapshot snapshot : normSnapshots) {
+		for (auto dacInc : range(size_t(AOGrid::total))) {
+			finalNormal[dacInc / size_t(AOGrid::numPERunit)].push_back(snapshot.dacValues[dacInc]);
+		}
+	}
+	for (AoSnapshot snapshot : loadSkipSnapshots) {
+		for (auto dacInc : range(size_t(AOGrid::total))) {
+			finalLoadSkip[dacInc / size_t(AOGrid::numPERunit)].push_back(snapshot.dacValues[dacInc]);
+		}
+	}
+
+}
+
+
+
 void AoSystem::formatDacForFPGA(UINT variation)
 {
 	for (int i = 0; i < dacSnapshots[variation].size(); ++i)
@@ -859,7 +934,8 @@ void AoSystem::formatDacForFPGA(UINT variation)
 
 		if (i == 0) {
 			for (int j = 0; j < 32; ++j) {
-				if (snapshot.dacValues[j] != dacValues[j] || (snapshot.dacValues[j] == dacValues[j] && snapshot.dacRampTimes[j] != 0)) {
+				if (snapshot.dacValues[j] != dacValues[j] || 
+					(snapshot.dacValues[j] == dacValues[j] && snapshot.dacRampTimes[j] != 0)) {
 					channels.push_back(j);
 				}
 			}
@@ -868,7 +944,8 @@ void AoSystem::formatDacForFPGA(UINT variation)
 			snapshotPrev = dacSnapshots[variation][i - 1];
 			for (int j = 0; j < 32; ++j) {
 				if (snapshot.dacValues[j] != snapshotPrev.dacValues[j] ||
-					(snapshot.dacValues[j] == snapshotPrev.dacValues[j] && snapshot.dacRampTimes[j] != 0 && snapshotPrev.dacRampTimes[j] == 0)) {
+					(snapshot.dacValues[j] == snapshotPrev.dacValues[j] && 
+						snapshot.dacRampTimes[j] != 0 && snapshotPrev.dacRampTimes[j] == 0)) {
 					channels.push_back(j);
 				}
 			}
@@ -906,10 +983,11 @@ void AoSystem::setDACs()
 	{
 		std::ostringstream stringStream;
 		std::string command;
-		for (int line = 0; line < dacValues.size(); ++line) 
+		for (int line = 0; line < size_t(AOGrid::total); ++line) 
 		{
 			stringStream.str("");
-			stringStream << "DAC_" << line << "_" << std::fixed << std::setprecision(numDigits) << dacValues[line];
+			stringStream << "DAC_" << line << "_" << 
+				std::fixed << std::setprecision(numDigits) << outputs[line].info.currVal;
 			command = stringStream.str();
 			zynq_tcp.writeCommand(command);
 		}
@@ -928,37 +1006,18 @@ void AoSystem::startDacs(){
 }
 
 
-void AoSystem::makeFinalDataFormat(unsigned variation){
-	auto& finalNormal = finalFormatDacData[variation];
-	auto& finalLoadSkip = loadSkipDacFinalFormat[variation];
-	auto& normSnapshots = dacSnapshots[variation];
-	auto& loadSkipSnapshots = loadSkipDacSnapshots[variation];
-
-	for ( auto& data : finalNormal ){
-		data.clear( );
-	}
-	for ( auto& data : finalLoadSkip ){
-		data.clear( );
-	}
-	for (AoSnapshot snapshot : normSnapshots){
-		for ( auto dacInc : range(size_t(AOGrid::total)) ){
-			finalNormal[dacInc / size_t(AOGrid::numPERunit)].push_back(snapshot.dacValues[dacInc]);
-		}
-	}
-	for ( AoSnapshot snapshot : loadSkipSnapshots ){
-		for ( auto dacInc : range(size_t(AOGrid::total)) ){
-			finalLoadSkip[dacInc / size_t(AOGrid::numPERunit)].push_back(snapshot.dacValues[dacInc]);
-		}
-	}
-}
 
 
 void AoSystem::handleDacScriptCommand( AoCommandForm command, std::string name, std::vector<parameterType>& vars, 
 									   DoCore& ttls ){
-	if ( command.commandName != "dac:" && command.commandName != "dacarange:" && command.commandName != "daclinspace:" ){
+	if ( command.commandName != "dac:" && 
+		command.commandName != "dacarange:" && 
+		command.commandName != "daclinspace:" )
+	{
 		thrower ( "dac commandName not recognized!" );
 	}
-	if ( !isValidDACName( name ) ){
+	if ( !isValidDACName( name ) )
+	{
 		thrower ("the name " + name + " is not the name of a dac!");
 	}
 	// convert name to corresponding dac line.

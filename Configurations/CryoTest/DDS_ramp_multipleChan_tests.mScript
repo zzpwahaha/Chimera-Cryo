@@ -1,0 +1,8 @@
+t = 1
+dac: dac0_0 1
+t += 5
+pulseon: test 50
+t = 150
+dac: dac0_0 2
+t+= 100
+dac: dac0_0 1

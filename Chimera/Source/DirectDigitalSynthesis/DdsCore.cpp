@@ -2,9 +2,13 @@
 #include "ConfigurationSystems/ConfigSystem.h"
 #include "DdsCore.h"
 
-DdsCore::DdsCore ( bool safemode ) : ftFlume ( safemode ){
-	connectasync ( );
-	lockPLLs ( );
+#include "ZynqTcp/ZynqTcp.h" /*only for the DDS_TIME_RESOLUTION macro*/
+
+DdsCore::DdsCore ( bool safemode ) 
+	: ftFlume ( safemode )
+{
+	//connectasync ( );
+	//lockPLLs ( );
 }
 
 DdsCore::~DdsCore ( ){
@@ -23,11 +27,11 @@ void DdsCore::assertDdsValuesValid ( std::vector<parameterType>& params ){
 		ramp.rampTime.assertValid (params, GLOBAL_PARAMETER_SCOPE);
 	}
 }
-
+/*called from ExpThreadWorker::deviceCalculateVariations, ddscore is to be removed from device*/
 void DdsCore::calculateVariations (std::vector<parameterType>& params, ExpThreadWorker* threadworker){
-	evaluateDdsInfo (params);
-	unsigned variations = ((params.size ()) == 0) ? 1 : params.front ().keyValues.size ();
-	generateFullExpInfo (variations);
+	//evaluateDdsInfo (params);
+	//unsigned variations = ((params.size ()) == 0) ? 1 : params.front ().keyValues.size ();
+	//generateFullExpInfo (variations);
 }
 
 // this probably needs an overload with a default value for the empty parameters case...
@@ -388,8 +392,418 @@ void DdsCore::manualLoadExpRampList (std::vector< ddsIndvRampListInfo> ramplist)
 }
 
 void DdsCore::loadExpSettings (ConfigStream& stream){
-	ddsExpSettings settings;
-	ConfigSystem::stdGetFromConfig (stream, *this, settings);
-	expRampList = settings.ramplist;
-	experimentActive = settings.control;
+	//ddsExpSettings settings;
+	//ConfigSystem::stdGetFromConfig (stream, *this, settings);
+	//expRampList = settings.ramplist;
+	//experimentActive = settings.control;
+}
+
+
+
+
+
+/**********************************************************************************************************/
+bool DdsCore::isValidDDSName(std::string name)
+{
+	for (UINT ddsInc = 0; ddsInc < size_t(DDSGrid::total); ddsInc++)
+	{
+		if (name == "dds" + 
+			str(ddsInc / size_t(DDSGrid::numPERunit)) + "_" +
+			str(ddsInc % size_t(DDSGrid::numPERunit))) /*default name*/
+		{
+			return true;
+		}
+		else if (getDDSIdentifier(name) != -1)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+int DdsCore::getDDSIdentifier(std::string name)
+{
+	for (UINT ddsInc = 0; ddsInc < size_t(DDSGrid::total); ddsInc++)
+	{
+		// check names set by user.
+		std::transform(names[ddsInc].begin(), names[ddsInc].end(), names[ddsInc].begin(), ::tolower);
+		if (name == names[ddsInc])
+		{
+			return ddsInc;
+		}
+		// check standard names which are always acceptable.
+		if (name == "dac" "dds" +
+			str(ddsInc / size_t(DDSGrid::numPERunit)) + "_" +
+			str(ddsInc % size_t(DDSGrid::numPERunit)))
+		{
+			return ddsInc;
+		}
+	}
+	// not an identifier.
+	return -1;
+}
+
+void DdsCore::setNames(std::array<std::string, size_t(DDSGrid::total)> namesIn)
+{
+	names = std::move(namesIn);
+}
+
+std::string DdsCore::getName(int ddsNumber)
+{
+	return names[ddsNumber];
+}
+
+std::array<std::string, size_t(DDSGrid::total)> DdsCore::getName()
+{
+	return names;
+}
+
+
+/*******/
+void DdsCore::resetDDSEvents()
+{
+	ddsCommandFormList.clear();
+	ddsCommandList.clear();
+	ddsSnapshots.clear();
+}
+
+void DdsCore::initializeDataObjects(unsigned variationNum)
+{
+	ddsCommandFormList.clear();
+	ddsCommandList.clear();
+	ddsSnapshots.clear();
+
+	ddsCommandFormList.resize(variationNum);
+	ddsCommandList.resize(variationNum);
+	ddsSnapshots.resize(variationNum);
+}
+
+void DdsCore::setDDSCommandForm(DdsCommandForm command)
+{
+	ddsCommandFormList.push_back(command);
+	// you need to set up a corresponding trigger to tell the dacs to change the output at the correct time. 
+	// This is done later on interpretation of ramps etc.
+}
+
+void DdsCore::handleDDSScriptCommand(DdsCommandForm command, std::string name, std::vector<parameterType>& vars)
+{
+	if (command.commandName != "ddsfreq:" &&
+		command.commandName != "ddsamp:" &&
+		command.commandName != "ddsamplinspace:" &&
+		command.commandName != "ddsfreqlinspace:" &&
+		command.commandName != "ddsrampamp:" &&
+		command.commandName != "ddsrampfreq:")
+	{
+		thrower("ERROR: dds commandName not recognized!");
+	}
+	if (!isValidDDSName(name))
+	{
+		thrower("ERROR: the name " + name + " is not the name of a dds!");
+	}
+	// convert name to corresponding dac line.
+	command.line = getDDSIdentifier(name);
+	if (command.line == -1)
+	{
+		thrower("ERROR: the name " + name + " is not the name of a dds!");
+	}
+	setDDSCommandForm(command);
+}
+
+/*TODO: add calibration usuage*/
+void DdsCore::calculateVariations(std::vector<parameterType>& variables, ExpThreadWorker* threadworker, 
+	std::vector<calResult> calibrations)
+{
+	UINT variations;
+	variations = variables.front().keyValues.size();
+	if (variations == 0)
+	{
+		variations = 1;
+	}
+	/// imporantly, this sizes the relevant structures.
+	ddsCommandList = std::vector<std::vector<DdsCommand>>(variations);
+	ddsSnapshots = std::vector<std::vector<DdsSnapshot>>(variations);
+	ddsChannelSnapshots = std::vector<std::vector<DdsChannelSnapshot>>(variations);
+
+	bool resolutionWarningPosted = false;
+	bool nonIntegerWarningPosted = false;
+
+	for (UINT variationInc = 0; variationInc < variations; variationInc++)
+	{
+		for (UINT eventInc = 0; eventInc < ddsCommandFormList.size(); eventInc++)
+		{
+			DdsCommand tempEvent;
+			tempEvent.line = ddsCommandFormList[eventInc].line;
+			// Deal with time.
+			if (ddsCommandFormList[eventInc].time.first.size() == 0)
+			{
+				// no variable portion of the time.
+				tempEvent.time = ddsCommandFormList[eventInc].time.second;
+			}
+			else
+			{
+				double varTime = 0;
+				for (auto variableTimeString : ddsCommandFormList[eventInc].time.first)
+				{
+					varTime += variableTimeString.evaluate(variables, variationInc, calibrations);
+				}
+				tempEvent.time = varTime + ddsCommandFormList[eventInc].time.second;
+			}
+
+			if (ddsCommandFormList[eventInc].commandName == "ddsamp:")
+			{
+				/// single point.
+				////////////////
+				// deal with amp
+				tempEvent.amp = ddsCommandFormList[eventInc].initVal.evaluate(variables, variationInc, calibrations);
+				tempEvent.endAmp = tempEvent.amp;
+				tempEvent.rampTime = 0;
+				tempEvent.freq = 0;
+				ddsCommandList[variationInc].push_back(tempEvent);
+			}
+			else if (ddsCommandFormList[eventInc].commandName == "ddsfreq:")
+			{
+				/// single point.
+				////////////////
+				// deal with amp
+				tempEvent.freq = ddsCommandFormList[eventInc].initVal.evaluate(variables, variationInc, calibrations);
+				tempEvent.endFreq = tempEvent.freq;
+				tempEvent.rampTime = 0;
+				tempEvent.amp = 0;
+				ddsCommandList[variationInc].push_back(tempEvent);
+			}
+			else if (ddsCommandFormList[eventInc].commandName == "ddslinspaceamp:")
+			{
+				// interpret ramp time command. I need to know whether it's ramping or not.
+				double rampTime = ddsCommandFormList[eventInc].rampTime.evaluate(variables, variationInc, calibrations);
+				/// many points to be made.
+				// convert initValue and finalValue to doubles to be used 
+				double initValue, finalValue;
+				int numSteps;
+				initValue = ddsCommandFormList[eventInc].initVal.evaluate(variables, variationInc, calibrations);
+				// deal with final value;
+				finalValue = ddsCommandFormList[eventInc].finalVal.evaluate(variables, variationInc, calibrations);
+				// deal with numPoints
+				numSteps = ddsCommandFormList[eventInc].numSteps.evaluate(variables, variationInc, calibrations);
+				double rampInc = (finalValue - initValue) / double(numSteps);
+				if ((fabs(rampInc) < ddsAmplResolution/*DDS_MAX_AMP / pow(2, 10)*/) && !resolutionWarningPosted)
+				{
+					resolutionWarningPosted = true;
+					thrower("Warning: numPoints of " + str(numSteps) + " results in an amplitude ramp increment of "
+						+ str(rampInc) + " is below the resolution of the ddss (which is " + str(10/*DDS_MAX_AMP*/) + "/2^10 = "
+						+ str(ddsAmplResolution/*DDS_MAX_AMP / pow(2, 10)*/) + "). \r\n");
+				}
+				double timeInc = rampTime / double(numSteps);
+				double initTime = tempEvent.time;
+				double currentTime = tempEvent.time;
+				double val = initValue;
+
+				for (auto stepNum : range(numSteps))
+				{
+					tempEvent.amp = val;
+					tempEvent.time = currentTime;
+					tempEvent.endAmp = val;
+					tempEvent.rampTime = 0;
+					tempEvent.freq = 0;
+					ddsCommandList[variationInc].push_back(tempEvent);
+					currentTime += timeInc;
+					val += rampInc;
+				}
+				// and get the final amp.
+				tempEvent.amp = finalValue;
+				tempEvent.time = initTime + rampTime;
+				tempEvent.endAmp = finalValue;
+				tempEvent.rampTime = 0;
+				tempEvent.freq = 0;
+				ddsCommandList[variationInc].push_back(tempEvent);
+			}
+			else if (ddsCommandFormList[eventInc].commandName == "ddslinspacefreq:")
+			{
+				// interpret ramp time command. I need to know whether it's ramping or not.
+				double rampTime = ddsCommandFormList[eventInc].rampTime.evaluate(variables, variationInc, calibrations);
+				/// many points to be made.
+				// convert initValue and finalValue to doubles to be used 
+				double initValue, finalValue;
+				int numSteps;
+				initValue = ddsCommandFormList[eventInc].initVal.evaluate(variables, variationInc, calibrations);
+				// deal with final value;
+				finalValue = ddsCommandFormList[eventInc].finalVal.evaluate(variables, variationInc, calibrations);
+				// deal with numPoints
+				numSteps = ddsCommandFormList[eventInc].numSteps.evaluate(variables, variationInc, calibrations);
+				double rampInc = (finalValue - initValue) / double(numSteps);
+				if ((fabs(rampInc) < ddsFreqResolution) && !resolutionWarningPosted)
+				{
+					resolutionWarningPosted = true;
+					thrower("Warning: numPoints of " + str(numSteps) + " results in a ramp increment of "
+						+ str(rampInc) + " is below the frequency resolution of the ddss (which is 500/2^32 = "
+						+ str(ddsFreqResolution) + "). \r\n");
+				}
+				double timeInc = rampTime / double(numSteps);
+				double initTime = tempEvent.time;
+				double currentTime = tempEvent.time;
+				double val = initValue;
+
+				for (auto stepNum : range(numSteps))
+				{
+					tempEvent.freq = val;
+					tempEvent.time = currentTime;
+					tempEvent.endFreq = val;
+					tempEvent.rampTime = 0;
+					tempEvent.amp = 0;
+					ddsCommandList[variationInc].push_back(tempEvent);
+					currentTime += timeInc;
+					val += rampInc;
+				}
+				// and get the final amp.
+				tempEvent.freq = finalValue;
+				tempEvent.time = initTime + rampTime;
+				tempEvent.endFreq = finalValue;
+				tempEvent.rampTime = 0;
+				tempEvent.amp = 0;
+				ddsCommandList[variationInc].push_back(tempEvent);
+			}
+			else if (ddsCommandFormList[eventInc].commandName == "ddsrampamp:")
+			{
+				double rampTime = ddsCommandFormList[eventInc].rampTime.evaluate(variables, variationInc, calibrations);
+				// convert initValue and finalValue to doubles to be used 
+				double initValue, finalValue, numSteps;
+				initValue = ddsCommandFormList[eventInc].initVal.evaluate(variables, variationInc, calibrations);
+				// deal with final value;
+				finalValue = ddsCommandFormList[eventInc].finalVal.evaluate(variables, variationInc, calibrations);
+				// set votlage resolution to be maximum allowed by the ramp range and time
+				numSteps = rampTime / DDS_TIME_RESOLUTION;
+				double rampInc = (finalValue - initValue) / numSteps;
+				if ((fabs(rampInc) < ddsAmplResolution) && !resolutionWarningPosted)
+				{
+					resolutionWarningPosted = true;
+					thrower("Warning: numPoints of " + str(numSteps) + " results in a ramp increment of "
+						+ str(rampInc) + " is below the amplitude resolution of the dacs (which is " + str(10) + "/2^10 = "
+						+ str(ddsAmplResolution) + "). Ramp will not run.\r\n");
+				}
+				if (numSteps > 65535) {
+					thrower("Warning: numPoints of " + str(numSteps) + 
+						" is larger than the max time of the DDS ramps. Ramp will be truncated. \r\n");
+				}
+
+				double initTime = tempEvent.time;
+
+				// for ddsrampamp, pass the ramp points and time directly to a single ddsCommandList element
+				tempEvent.amp = initValue;
+				tempEvent.endAmp = finalValue;
+				tempEvent.time = initTime;
+				tempEvent.rampTime = rampTime;
+				tempEvent.freq = 0;
+				ddsCommandList[variationInc].push_back(tempEvent);
+			}
+			else if (ddsCommandFormList[eventInc].commandName == "ddsrampfreq:")
+			{
+				double rampTime = ddsCommandFormList[eventInc].rampTime.evaluate(variables, variationInc, calibrations);
+				// convert initValue and finalValue to doubles to be used 
+				double initValue, finalValue, numSteps;
+				initValue = ddsCommandFormList[eventInc].initVal.evaluate(variables, variationInc, calibrations);
+				// deal with final value;
+				finalValue = ddsCommandFormList[eventInc].finalVal.evaluate(variables, variationInc, calibrations);
+				// set votlage resolution to be maximum allowed by the ramp range and time
+				numSteps = rampTime / DDS_TIME_RESOLUTION;
+				double rampInc = (finalValue - initValue) / numSteps;
+				if ((fabs(rampInc) < ddsFreqResolution) && !resolutionWarningPosted)
+				{
+					resolutionWarningPosted = true;
+					thrower("Warning: numPoints of " + str(numSteps) + " results in a ramp increment of "
+						+ str(rampInc) + " is below the frequency resolution of the ddss (which is 500/2^32 = "
+						+ str(ddsFreqResolution) + "). Ramp will not run.\r\n");
+				}
+				if (numSteps > 65535) {
+					thrower("Warning: numPoints of " + str(numSteps) + 
+						" is larger than the max time of the DDS ramps. Ramp will be truncated. \r\n");
+				}
+
+				double initTime = tempEvent.time;
+
+				// for ddsrampfreq, pass the ramp points and time directly to a single ddsCommandList element
+				tempEvent.freq = initValue;
+				tempEvent.endFreq = finalValue;
+				tempEvent.time = initTime;
+				tempEvent.rampTime = rampTime;
+				tempEvent.amp = 0;
+				ddsCommandList[variationInc].push_back(tempEvent);
+			}
+			else
+			{
+				thrower("ERROR: Unrecognized dds command name: " + ddsCommandFormList[eventInc].commandName);
+			}
+		}
+	}
+}
+
+
+
+void DdsCore::organizeDDSCommands(UINT variation)
+{
+	// each element of this is a different time (the double), and associated with each time is a vector which locates 
+	// which commands were at this time, for
+	// ease of retrieving all of the values in a moment.
+	timeOrganizer.clear();
+
+	std::vector<DdsCommand> tempEvents(ddsCommandList[variation]);
+	// sort the events by time. using a lambda here.
+	std::sort(tempEvents.begin(), tempEvents.end(),
+		[](DdsCommand a, DdsCommand b) {return a.time < b.time; });
+	for (UINT commandInc = 0; commandInc < tempEvents.size(); commandInc++)
+	{
+		// because the events are sorted by time, the time organizer will already be sorted by time, and therefore I 
+		// just need to check the back value's time.
+		if (commandInc == 0 || fabs(tempEvents[commandInc].time - timeOrganizer.back().first) > 2 * DBL_EPSILON)
+		{
+			// new time
+			timeOrganizer.push_back({ tempEvents[commandInc].time,
+									std::vector<DdsCommand>({ tempEvents[commandInc] }) });
+		}
+		else
+		{
+			// old time
+			timeOrganizer.back().second.push_back(tempEvents[commandInc]);
+		}
+	}
+	/// make the snapshots
+	if (timeOrganizer.size() == 0)
+	{
+		// no commands, that's fine.
+		return;
+	}
+}
+
+
+void DdsCore::makeFinalDataFormat(UINT variation)
+{
+	DdsChannelSnapshot channelSnapshot;
+
+	//for each channel with a changed amp or freq add a ddsSnapshot to the final list
+	for (UINT commandInc = 0; commandInc < timeOrganizer.size(); commandInc++) {
+		for (UINT zeroInc = 0; zeroInc < timeOrganizer[commandInc].second.size(); zeroInc++)
+		{
+			if (timeOrganizer[commandInc].second[zeroInc].freq == 0) {
+				channelSnapshot.ampOrFreq = 'a'; // amp change
+				channelSnapshot.val = timeOrganizer[commandInc].second[zeroInc].amp;
+				channelSnapshot.endVal = timeOrganizer[commandInc].second[zeroInc].endAmp;
+			}
+			else
+			{
+				channelSnapshot.ampOrFreq = 'f'; //freq change
+				channelSnapshot.val = timeOrganizer[commandInc].second[zeroInc].freq;
+				channelSnapshot.endVal = timeOrganizer[commandInc].second[zeroInc].endFreq;
+			}
+			channelSnapshot.time = timeOrganizer[commandInc].first;
+			channelSnapshot.channel = timeOrganizer[commandInc].second[zeroInc].line;
+
+			channelSnapshot.rampTime = timeOrganizer[commandInc].second[zeroInc].rampTime;
+			ddsChannelSnapshots[variation].push_back(channelSnapshot);
+		}
+	}
+}
+
+
+void DdsCore::standardExperimentPrep(UINT variation)
+{
+	organizeDDSCommands(variation);
+	makeFinalDataFormat(variation);
 }
