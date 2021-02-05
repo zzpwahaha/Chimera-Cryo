@@ -133,10 +133,10 @@ void Script::initialize(IChimeraQtWindow* parent, std::string deviceTypeInput, s
 	edit->setAcceptRichText (false);
 	QFont font;
 	{
-		font.setFamily("Courier");
+		font.setFamily("Consolas");
 		font.setStyleHint(QFont::Monospace);
 		font.setFixedPitch(true);
-		font.setPointSize(10);
+		font.setPointSize(11);
 		edit->setFont(font);
 		edit->setTabStopDistance(40);
 	}

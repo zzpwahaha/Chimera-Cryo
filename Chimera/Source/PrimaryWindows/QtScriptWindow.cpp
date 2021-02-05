@@ -25,7 +25,6 @@ void QtScriptWindow::initializeWidgets (){
 	QHBoxLayout* layout = new QHBoxLayout(centralWidget);
 	//centralWidget->setStyleSheet("border: 2px solid  black; ");
 	masterScript.initialize(this, "Master", "Master Script");
-	
 	profileDisplay.initialize (this);
 	layout->addWidget(&profileDisplay, 1);
 	layout->addWidget(&masterScript, 1);

@@ -11,11 +11,11 @@ SyntaxHighlighter::SyntaxHighlighter (ScriptableDevice device, QTextDocument* pa
 	addRules ({ "[\\+\\=\\{\\}\\(\\)\\*\\-\\/]" }, QColor (42, 161, 152), true, false);
     multiLineCommentFormat.setForeground (QColor(23, 84, 81));
 
-	QTextCharFormat numberFormat;
-	numberFormat.setForeground (QColor (255, 255, 255));
-	rule.pattern = QRegularExpression (QStringLiteral ("[\.0-9]"));
-	rule.format = numberFormat;
-	mainRules.append (rule);
+	//QTextCharFormat numberFormat;
+	//numberFormat.setForeground (QColor (0, 0, 0));
+	//rule.pattern = QRegularExpression (QStringLiteral ("[\.0-9]"));
+	//rule.format = numberFormat;
+	//mainRules.append (rule);
 
 	QTextCharFormat functionFormat;
     functionFormat.setFontItalic (true);
@@ -28,12 +28,14 @@ SyntaxHighlighter::SyntaxHighlighter (ScriptableDevice device, QTextDocument* pa
     commentEndExpression = QRegularExpression (QStringLiteral ("\\*/"));
 
 	if (device == ScriptableDevice::Master) {
-		addRules ({ "on","off","pulseon","pulseoff" }, QColor (42, 161, 152), true, true);
-		addRules ({ "dac","dacarange","daclinspace", "repeat", "end", "callcppcode",
-					"loadskipentrypoint!" }, QColor (42, 161, 152), true, true);
+		addRules ({ "on","off","pulseon","pulseoff" }, QColor (153, 115, 0), true, true);
+		addRules ({ "dac","dacarange","daclinspace", "dacramp", "repeat", "end", "callcppcode",
+					"loadskipentrypoint!" }, QColor (204, 0, 82), true, true);
+		addRules({ "ddsamp","ddsfreq","ddslinspaceamp", "ddslinspacefreq", "ddsrampamp", "ddsrampfreq", "callcppcode",
+			"loadskipentrypoint!" }, QColor(0, 45, 179), true, true);
 		addRules ({ "call", "def" }, QColor (38, 139, 210), true, true);
-		addRules ({ "t" }, QColor (255, 255, 255), false, true);
-		addRules ({ ":" }, QColor (255, 255, 255), false, false);
+		addRules ({ "t" }, QColor (0, 0, 0), true, true);
+		addRules ({ ":" }, QColor (0, 0, 0), false, false);
 		addRules ({ "sin","cos","tan","exp","ln","var" }, QColor (42, 161, 152), true, true);
 	}
 	else if (device == ScriptableDevice::Agilent) {
@@ -54,7 +56,7 @@ void SyntaxHighlighter::setTtlNames (Matrix<std::string> ttlNames) {
 	QVector<QString> doNamesRegex;
 	for (auto rowInc : range (ttlNames.getRows ())) {
 		for (auto num : range (ttlNames.getCols ())) {
-			auto rowStr = std::vector<std::string>{ "Do0.", "Do1.", "Do2.", "Do3.", "Do4.", "Do5.", "Do6.", "Do7." } [rowInc] ;
+			auto rowStr = std::vector<std::string>{ "do1_", "do2_", "do3_", "do4_", "do5_", "do6_", "do7_", "do8_" } [rowInc] ;
 			doNamesRegex.push_back (cstr (rowStr + str (num)));
 			doNamesRegex.push_back (cstr (ttlNames (rowInc, num)));
 		}
@@ -66,7 +68,8 @@ void SyntaxHighlighter::setTtlNames (Matrix<std::string> ttlNames) {
 void SyntaxHighlighter::setDacNames (std::vector<std::string> dacNames) {
 	QVector<QString> aoNamesRegex;
 	for (auto dacInc : range (dacNames.size ())) {
-		aoNamesRegex.push_back (cstr ("dac" + str (dacInc)));
+		aoNamesRegex.push_back(cstr("dac" + str(dacInc / size_t(AOGrid::numPERunit)) + "_"
+			+ str(dacInc % size_t(AOGrid::numPERunit))));
 		aoNamesRegex.push_back (cstr (dacNames[dacInc]));
 	}
 	aoRules.clear ();

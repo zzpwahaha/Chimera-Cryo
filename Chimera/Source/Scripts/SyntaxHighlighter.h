@@ -6,6 +6,7 @@
 #include <GeneralObjects/Matrix.h>
 #include <string>
 #include <ParameterSystem/ParameterSystemStructures.h>
+#include <AnalogOutput/AoStructures.h>
 
 class SyntaxHighlighter : public QSyntaxHighlighter {
     Q_OBJECT 
