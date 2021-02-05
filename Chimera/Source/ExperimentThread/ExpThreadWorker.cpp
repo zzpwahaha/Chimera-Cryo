@@ -1138,7 +1138,6 @@ void ExpThreadWorker::startRep (unsigned repInc, unsigned variationInc, bool ski
 		//input->ddss->writeDDSs(variationInc, skip);
 		input->ttls.writeTtlDataToFPGA(variationInc, skip);
 		input->zynqExp.sendCommand("trigger");
-		Sleep(1);
 
 	}
 }

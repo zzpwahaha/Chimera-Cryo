@@ -383,6 +383,8 @@ void AoSystem::organizeDacCommands(unsigned variation)
 		{
 			// see description of this command above... update everything that changed at this time.
 			snap.back().dacValues[change.line] = change.value;
+			snap.back().dacEndValues[change.line] = change.endValue;
+			snap.back().dacRampTimes[change.line] = change.rampTime;
 		}
 	}
 }
@@ -533,11 +535,18 @@ void AoSystem::calculateVariations( std::vector<parameterType>& params, ExpThrea
 			if ( formList.commandName == "dac:" ){
 				/// single point.
 				tempEvent.value = formList.finalVal.evaluate( params, variationInc, calibrations);
-				if ( variationInc == 0 ){
+				tempEvent.endValue = tempEvent.value;
+				tempEvent.rampTime = 0;
+
+				if ( variationInc == 0 )/*for time tick, no effect for code*/
+				{
 					sTimer.tick ( "val-evaluated" );
 				}
+
 				cmdList.push_back( tempEvent );
-				if ( variationInc == 0 ){
+
+				if ( variationInc == 0 )/*for time tick, no effect for code*/
+				{
 					sTimer.tick ( "Dac:-Handled" );
 				}
 			}
@@ -576,11 +585,15 @@ void AoSystem::calculateVariations( std::vector<parameterType>& params, ExpThrea
 				// handle the two directions seperately.
 				if ( initValue < finalValue ){
 					for ( double dacValue = initValue; 
-						(dacValue - finalValue) < -steps * 2 * DBL_EPSILON; dacValue += rampInc ){
+						(dacValue - finalValue) < -steps * 2 * DBL_EPSILON; dacValue += rampInc )
+					{
 						tempEvent.value = dacValue;
+						tempEvent.endValue = dacValue;
+						tempEvent.rampTime = 0;
 						tempEvent.time = currentTime;
 						cmdList.push_back( tempEvent );
 						currentTime += timeInc;
+
 					}
 				}
 				else
@@ -588,6 +601,8 @@ void AoSystem::calculateVariations( std::vector<parameterType>& params, ExpThrea
 					for ( double dacValue = initValue; 
 						dacValue - finalValue > 100 * DBL_EPSILON; dacValue -= rampInc ){
 						tempEvent.value = dacValue;
+						tempEvent.endValue = dacValue;
+						tempEvent.rampTime = 0;
 						tempEvent.time = currentTime;
 						cmdList.push_back( tempEvent );
 						currentTime += timeInc;
@@ -595,6 +610,8 @@ void AoSystem::calculateVariations( std::vector<parameterType>& params, ExpThrea
 				}
 				// and get the final value.
 				tempEvent.value = finalValue;
+				tempEvent.endValue = finalValue;
+				tempEvent.rampTime = 0;
 				tempEvent.time = initTime + rampTime;
 				cmdList.push_back( tempEvent );
 				if ( variationInc == 0 ){
@@ -627,8 +644,11 @@ void AoSystem::calculateVariations( std::vector<parameterType>& params, ExpThrea
 				double currentTime = tempEvent.time;
 				double val = initValue;
 				// handle the two directions seperately.
-				for ( auto stepNum : range( numSteps ) ){
+				for ( auto stepNum : range( numSteps ) )
+				{
 					tempEvent.value = val;
+					tempEvent.endValue = val;
+					tempEvent.rampTime = 0;
 					tempEvent.time = currentTime;
 					cmdList.push_back( tempEvent );
 					currentTime += timeInc;
@@ -636,12 +656,48 @@ void AoSystem::calculateVariations( std::vector<parameterType>& params, ExpThrea
 				}
 				// and get the final value. Just use the nums explicitly to avoid rounding error I guess.
 				tempEvent.value = finalValue;
+				tempEvent.endValue = finalValue;
+				tempEvent.rampTime = 0;
 				tempEvent.time = initTime + rampTime;
 				cmdList.push_back( tempEvent );
 				if ( variationInc == 0 ){
 					sTimer.tick ( "daclinspace:-Handled" );
 				}
 			}
+			else if (formList.commandName == "dacramp:")
+			{
+				// interpret ramp time command. I need to know whether it's ramping or not.
+				double rampTime = formList.rampTime.evaluate(params, variationInc);
+				/// many points to be made.
+				// convert initValue and finalValue to doubles to be used 
+				double initValue, finalValue, numSteps;
+				initValue = formList.initVal.evaluate(params, variationInc);
+				// deal with final value;
+				finalValue = formList.finalVal.evaluate(params, variationInc);
+				// set votlage resolution to be maximum allowed by the ramp range and time
+				numSteps = rampTime / DAC_TIME_RESOLUTION;
+				double rampInc = (finalValue - initValue) / numSteps;
+				if ((fabs(rampInc) < dacResolution) && !resolutionWarningPosted)
+				{
+					resolutionWarningPosted = true;
+					thrower("Warning: numPoints of " + str(numSteps) + " results in a ramp increment of "
+						+ str(rampInc) + " is below the resolution of the dacs (which is 20/2^16 = "
+						+ str(dacResolution) + "). Ramp will not run.\r\n");
+				}
+				if (numSteps > DAC_RAMP_MAX_PTS) {
+					thrower("Warning: numPoints of " + str(numSteps) + " is larger than the max time of the DAC ramps. Ramp will be truncated. \r\n");
+				}
+
+				double initTime = tempEvent.time;
+
+				// for dacRamp, pass the ramp points and time directly to a single dacCommandList element
+				tempEvent.value = initValue;
+				tempEvent.endValue = finalValue;
+				tempEvent.time = initTime;
+				tempEvent.rampTime = rampTime;
+				cmdList.push_back(tempEvent);
+			}
+
 			else{
 				thrower ( "Unrecognized dac command name: " + formList.commandName );
 			}
@@ -949,8 +1005,10 @@ void AoSystem::formatDacForFPGA(UINT variation)
 			for (int j = 0; j < size_t(AOGrid::total); ++j) 
 			{
 				if (snapshot.dacValues[j] != snapshotPrev.dacValues[j] ||
-					(snapshot.dacValues[j] == snapshotPrev.dacValues[j] && 
-						snapshot.dacRampTimes[j] != 0 && snapshotPrev.dacRampTimes[j] == 0)) {
+					snapshot.dacValues[j] != snapshotPrev.dacEndValues[j] ||
+					(snapshot.dacValues[j] == snapshotPrev.dacValues[j] &&
+						snapshot.dacRampTimes[j] != 0 && snapshotPrev.dacRampTimes[j] == 0))
+				{
 					channels.push_back(j);
 				}
 			}

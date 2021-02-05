@@ -332,6 +332,7 @@ class sequencer:
 		  self.write_ftw_point(self.fifo_dds_ftw_seq, point)
 
 	def dio_seq_write_points(self, byte_len, byte_buf, num_snapshots):
+		print 'DIO points'
 		points=[]
 		for ii in range(num_snapshots):
 			[t, outA, outB] = self.dio_read_point(byte_buf[ii*byte_len: ii*byte_len + byte_len])
