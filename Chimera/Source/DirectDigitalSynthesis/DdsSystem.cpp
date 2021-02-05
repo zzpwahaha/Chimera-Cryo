@@ -83,6 +83,7 @@ void DdsSystem::initialize(IChimeraQtWindow* parent)
 			out.initialize(parent, i * size_t(DDSGrid::numPERunit) + j);
 			layoutGrid->addLayout(out.getLayout(), 2 + j, 0, 1, 2);
 		}
+		updateCoreNames();
 		layout1->addLayout(layoutGrid, 0);
 	}
 	layout->addLayout(layout1, 0);
@@ -92,7 +93,8 @@ void DdsSystem::initialize(IChimeraQtWindow* parent)
 
 
 bool DdsSystem::eventFilter(QObject* obj, QEvent* event) {
-	for (auto& out : outputs) {
+	for (auto& out : outputs) 
+	{/*by calling out.eventFilter(obj, event), the edit is evaluated no matter whether the event is up/down*/
 		if (out.eventFilter(obj, event) && quickChange->isChecked())
 		{
 			parentWin->auxWin->SetDds();
@@ -211,36 +213,38 @@ DdsCore& DdsSystem::getCore ( ){
 
 /******************************************************************************************************************/
 
-void DdsSystem::prepareForce()
-{
-	initializeDataObjects(1);
-}
+//void DdsSystem::prepareForce()
+//{
+//	initializeDataObjects(1);
+//}
 
-void DdsSystem::initializeDataObjects(unsigned cmdNum) 
-{
-	ddsCommandFormList = std::vector<DdsCommandForm>(cmdNum);
+//void DdsSystem::initializeDataObjects(unsigned cmdNum) 
+//{
+	//ddsCommandFormList = std::vector<DdsCommandForm>(cmdNum);
 
-	ddsCommandList.clear();
-	ddsSnapshots.clear();
-	ddsChannelSnapshots.clear();
+	//ddsCommandList.clear();
+	//ddsSnapshots.clear();
+	//ddsChannelSnapshots.clear();
+
 	//loadSkipDdsSnapshots.clear();
 	//finalFormatDdsData.clear();
 	//loadSkipDdsFinalFormat.clear();
 
-	ddsCommandList.resize(cmdNum);
-	ddsSnapshots.resize(cmdNum);
-	ddsChannelSnapshots.resize(cmdNum);
+	//ddsCommandList.resize(cmdNum);
+	//ddsSnapshots.resize(cmdNum);
+	//ddsChannelSnapshots.resize(cmdNum);
+
 	//loadSkipDdsSnapshots.resize(cmdNum);
 	//finalFormatDdsData.resize(cmdNum);
 	//loadSkipDdsFinalFormat.resize(cmdNum);
 
-}
+//}
 
 void DdsSystem::handleSetDdsButtonPress(bool useDefault)
 {
 	//ddsCommandFormList.clear();
 	//prepareForce();
-	updateDdsValues();
+	//updateDdsValues();
 	setDDSs();
 }
 
@@ -260,7 +264,7 @@ void DdsSystem::zeroDds()
 		out.info.currAmp = 0.0;
 	}
 	updateEdits();
-	updateDdsValues();
+	//updateDdsValues();
 	emit notification("Off'd DDS Outputs.\n", 2);
 	setDDSs();
 }
@@ -273,15 +277,15 @@ void DdsSystem::resetDds()
 		out.info.currAmp = out.info.defaultAmp;
 	}
 	updateEdits();
-	updateDdsValues();
+	//updateDdsValues();
 	emit notification("Default'd DDS Outputs.\n", 2);
 	setDDSs();
 }
 
-void DdsSystem::resetDdsEvents()
-{
-	initializeDataObjects(0);
-}
+//void DdsSystem::resetDdsEvents()
+//{
+//	initializeDataObjects(0);
+//}
 
 void DdsSystem::setDDSs()
 {
@@ -300,12 +304,12 @@ void DdsSystem::setDDSs()
 	{
 		std::ostringstream stringStream;
 		std::string command;
-		for (int line = 0; line < ddsValues.size(); ++line) {
+		for (int line = 0; line < size_t(DDSGrid::total); ++line) {
 			
 			stringStream.str("");
 			stringStream << "DDS_" << line 
-				<< "_" << std::fixed << std::setprecision(numFreqDigits) << ddsValues[line][0]
-				<< "_" << std::fixed << std::setprecision(numAmplDigits) << ddsValues[line][1];
+				<< "_" << std::fixed << std::setprecision(numFreqDigits) << outputs[line].info.currFreq
+				<< "_" << std::fixed << std::setprecision(numAmplDigits) << outputs[line].info.currAmp;
 			command = stringStream.str();
 			zynq_tcp.writeCommand(command);
 			
@@ -326,17 +330,59 @@ void DdsSystem::updateEdits()
 	}
 }
 
-void DdsSystem::updateDdsValues()
+std::string DdsSystem::getName(int ddsNumber)
 {
-	long dacInc = 0;
-	for (auto& dds : outputs)
-	{
-		dds.handleEdit();
-		ddsValues[dacInc][0] = dds.info.currFreq;
-		ddsValues[dacInc][1] = dds.info.currAmp;
-		dacInc++;
-	}
+	return outputs[ddsNumber].info.name;
 }
+std::string DdsSystem::getNote(int ddsNumber)
+{
+	return outputs[ddsNumber].info.note;
+}
+std::pair<double, double> DdsSystem::getAmplRange(int ddsNumber)
+{
+	return std::make_pair(outputs[ddsNumber].info.minAmp, outputs[ddsNumber].info.maxAmp);
+}
+void DdsSystem::setName(int ddsNumber, std::string name)
+{
+	outputs[ddsNumber].setName(name);
+}
+void DdsSystem::setNote(int ddsNumber, std::string note)
+{
+	outputs[ddsNumber].setNote(note);
+}
+void DdsSystem::setAmpMinMax(int ddsNumber, double min, double max)
+{
+	if (!(min <= max)) {
+		thrower("Min dac value must be less than max dac value.");
+	}
+	if (min < 0 || min > 10 || max < 0 || max > 10) {
+		thrower("Min and max dds amplitude values must be withing [0,10].");
+	}
+	outputs[ddsNumber].info.minAmp = min;
+	outputs[ddsNumber].info.maxAmp = max;
+}
+void DdsSystem::updateCoreNames()
+{
+	std::array<std::string, size_t(DDSGrid::total)> names_;
+	for (size_t i = 0; i < size_t(DDSGrid::total); i++)
+	{
+		names_[i] = outputs[i].info.name;
+	}
+	core.setNames(names_);
+}
+
+
+//void DdsSystem::updateDdsValues()
+//{
+//	long dacInc = 0;
+//	for (auto& dds : outputs)
+//	{
+//		dds.handleEdit();
+//		ddsValues[dacInc][0] = dds.info.currFreq;
+//		ddsValues[dacInc][1] = dds.info.currAmp;
+//		dacInc++;
+//	}
+//}
 
 
 void DdsSystem::refreshCurrentRamps () {

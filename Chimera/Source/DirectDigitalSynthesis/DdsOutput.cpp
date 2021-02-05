@@ -8,15 +8,19 @@
 
 DdsOutput::DdsOutput() {}
 
-void DdsOutput::initialize(IChimeraQtWindow* parent, int whichDDS) {
+void DdsOutput::initialize(IChimeraQtWindow* parent, int whichDDS) 
+{
+	info.name = "dds" +
+		str(whichDDS / size_t(DDSGrid::numPERunit)) + "_" +
+		str(whichDDS % size_t(DDSGrid::numPERunit)); /*default name, always accepted by script*/
 	layout = new QHBoxLayout();
 	layout->setContentsMargins(0, 0, 0, 0);
 
 	label = new QLabel(QString("%1").arg(whichDDS % size_t(DDSGrid::numPERunit), 1), parent);
-	label->setToolTip((info.name + "\n" + info.note).c_str());
+	label->setToolTip(cstr(info.name + ": Amp[" + str(info.minAmp, numAmplDigits, true) + "," + str(info.maxAmp, numAmplDigits, true) + "]" + "\r\n" + info.note));
 
 	editFreq = new CQLineEdit(QString("%1").arg(whichDDS % size_t(DDSGrid::numPERunit)), parent);
-	editFreq->setToolTip((info.name + "\r\n" + info.note).c_str());
+	editFreq->setToolTip(cstr(info.name + ": Amp[" + str(info.minAmp, numAmplDigits, true) + "," + str(info.maxAmp, numAmplDigits, true) + "]" + "\r\n" + info.note));
 	editFreq->installEventFilter(parent);
 	parent->connect(editFreq, &QLineEdit::textChanged,
 		[this, parent]() {
@@ -31,7 +35,7 @@ void DdsOutput::initialize(IChimeraQtWindow* parent, int whichDDS) {
 	editFreq->setMinimumWidth(90);
 
 	editAmp = new CQLineEdit("", parent);
-	editAmp->setToolTip((info.name + "\r\n" + info.note).c_str());
+	editAmp->setToolTip(cstr(info.name + ": Amp[" + str(info.minAmp, numAmplDigits, true) + "," + str(info.maxAmp, numAmplDigits, true) + "]" + "\r\n" + info.note));
 	editAmp->installEventFilter(parent);
 	parent->connect(editAmp, &QLineEdit::textChanged,
 		[this, parent]() {
@@ -61,6 +65,7 @@ bool DdsOutput::eventFilter(QObject* obj, QEvent* event) {
 				up = false;
 			}
 			else {
+				/*if not up or down, just update the stored value from text and the eventfileter is called in DdsSystem eventfilter*/
 				handleEdit();
 				return false;
 			}
@@ -223,8 +228,8 @@ void DdsOutput::setName(std::string name) {
 	}
 	std::transform(name.begin(), name.end(), name.begin(), ::tolower);
 	info.name = name;
-	editAmp->setToolTip(cstr(info.name + "\r\n" + info.note));
-	editFreq->setToolTip(cstr(info.name + "\r\n" + info.note));
+	editAmp->setToolTip(cstr(info.name + ": [" + str(info.minAmp, numAmplDigits,true) + "," + str(info.maxAmp, numAmplDigits,true) + "]" + "\r\n" + info.note));
+	editFreq->setToolTip((info.name + "\r\n" + info.note).c_str());
 }
 
 
@@ -284,7 +289,7 @@ double DdsOutput::roundToDdsResolution(double num, bool isFreq)
 
 void DdsOutput::setNote(std::string note) {
 	info.note = note;
-	editAmp->setToolTip((info.name + "\r\n" + info.note).c_str());
+	editAmp->setToolTip(cstr(info.name + ": [" + str(info.minAmp, numAmplDigits,true) +"," + str(info.maxAmp, numAmplDigits,true) + "]" + "\r\n" + info.note));
 	editFreq->setToolTip((info.name + "\r\n" + info.note).c_str());
 }
 

@@ -52,6 +52,8 @@ class DoSystem : public IChimeraSystem
 		void setName( DoRows::which row, unsigned number, std::string name);
 		std::string getName ( DoRows::which row, unsigned number );
 		std::string getName(unsigned row, unsigned number);
+
+
 		Matrix<std::string> getAllNames ();
 		bool getTtlStatus ( DoRows::which row, int number );
 		void updateDefaultTtl( DoRows::which row, unsigned column, bool state);

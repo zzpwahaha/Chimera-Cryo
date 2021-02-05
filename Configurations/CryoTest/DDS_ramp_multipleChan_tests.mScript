@@ -2,7 +2,7 @@ t = 1
 dac: dac0_0 1
 t += 5
 pulseon: test 50
-t = 150
-dac: dac0_0 2
-t+= 100
+t = 20
+dac: dac0_0 5
+t += 10
 dac: dac0_0 1

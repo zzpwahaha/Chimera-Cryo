@@ -145,7 +145,9 @@ void DoSystem::initialize(IChimeraQtWindow* parent) {
 		{
 			auto& out = outputs(number, row);
 			out.initialize(parent);
-			names(unsigned(row), number) = QString("DO%1.%2").arg(int(row) + 1).arg(number).toStdString();
+			names(unsigned(row), number) = "do" +
+				str((runningCount - 1) / size_t(DDSGrid::numPERunit) + 1) + "_" +
+				str(((runningCount - 1)) % size_t(DDSGrid::numPERunit)); /*default name, always accepted by script*/
 			out.setName(names(unsigned(row), number));
 			
 			parent->connect(out.check, &QCheckBox::stateChanged, [this, &out, parent]() {
@@ -246,6 +248,8 @@ bool DoSystem::getTtlStatus(DoRows::which row, int number){
 allDigitalOutputs& DoSystem::getDigitalOutputs ( ){
 	return outputs;
 }
+
+
 
 std::pair<unsigned short, unsigned short> DoSystem::calcDoubleShortTime( double time ){
 	unsigned short lowordTime, hiwordTime;

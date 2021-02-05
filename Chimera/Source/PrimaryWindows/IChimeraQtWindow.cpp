@@ -153,6 +153,9 @@ void IChimeraQtWindow::initializeMenu (){
 	connect (changeIndvAo, &QAction::triggered, [this, cmnMsg]() {auxWin->ViewOrChangeDACNames (); });
 	masterSystemsM->addAction (changeIndvAo);
 
+	auto* changeIndvDds = new QAction("View or Change Individual Direct Digital Synthesizer Settings", this);
+	connect(changeIndvDds, &QAction::triggered, [this, cmnMsg]() {auxWin->ViewOrChangeDDSNames(); });
+	masterSystemsM->addAction(changeIndvDds);
 	auto helpM = menubar->addMenu ("Help");
 	helpM->addAction ("General Information_X");
 	helpM->addAction ("About_X");

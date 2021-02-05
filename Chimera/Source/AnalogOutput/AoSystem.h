@@ -129,7 +129,7 @@ class AoSystem : public IChimeraSystem
 		const int numDigits = static_cast<int>(abs(round(log10(dacResolution) - 0.49)));
 
 
-		std::array<double, 32> dacValues;
+		//std::array<double, 32> dacValues;
 		//std::array<std::string, 32> dacNames;
 		//std::array<double, 32> dacMinVals;
 		//std::array<double, 32> dacMaxVals;

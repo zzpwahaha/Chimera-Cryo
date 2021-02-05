@@ -146,8 +146,7 @@ int ZynqTCP::writeDIO(std::vector<std::array<char[DIO_LEN_BYTE_BUF], 1>> TtlSnap
 	memset(buff, 0, sizeof(buff));
 
 	int BytesSent = 0;
-	//std::string command(ZYNQ_MAX_BUFF,0);
-	//sprintf_s(command.data(), ZYNQ_MAX_BUFF, "DIOseq_%u", TtlSnapshots.size());
+
 	char command[ZYNQ_MAX_BUFF];
 	sprintf_s(command, ZYNQ_MAX_BUFF, "DIOseq_%u", TtlSnapshots.size());
 	//sprintf_s(buff, ZYNQ_MAX_BUFF, "DIOseq_%u", TtlSnapshots.size());

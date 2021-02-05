@@ -1,32 +1,29 @@
-// created by Mark O. Brown
 #include "stdafx.h"
-#include "AoSettingsDialog.h"
-#include <boost/lexical_cast.hpp>
-#include <qlayout.h>
+#include "DdsSettingsDialog.h"
 
-AoSettingsDialog::AoSettingsDialog (AoSystem* inputPtr) 
+DdsSettingsDialog::DdsSettingsDialog(DdsSystem* inputPtr)
 {
 	input = inputPtr;
 	//this->setStyleSheet("border: 2px solid  black;");
 	this->setModal(false);
 	QVBoxLayout* layoutWiget = new QVBoxLayout(this);
 	QHBoxLayout* layout = new QHBoxLayout();
-	auto daclayout = std::array<QGridLayout*,2>({ new QGridLayout(),new QGridLayout() });
+	auto ddslayout = std::array<QGridLayout*, 3>({ new QGridLayout(), new QGridLayout(), new QGridLayout() });
 	short cnts = 0;
-	for (auto* lay : daclayout)
+	for (auto* lay : ddslayout)
 	{
 		lay->setContentsMargins(0, 0, 0, 0);
-		lay->addWidget(new QLabel(QString("DAC %1").arg(cnts)), 0, 0, 1, 7, Qt::AlignHCenter);
+		lay->addWidget(new QLabel(QString("DDS %1").arg(cnts)), 0, 0, 1, 7, Qt::AlignHCenter);
 		{
 			lay->addWidget(new QLabel("#"), 1, 0, 1, 1, Qt::AlignRight);
-			lay->addWidget(new QLabel("DAC Name"), 1, 1, 1, 1);
-			lay->addWidget(new QLabel("Min value"), 1, 2, 1, 1);
-			lay->addWidget(new QLabel("Max value"), 1, 3, 1, 1);
+			lay->addWidget(new QLabel("DDS Name"), 1, 1, 1, 1);
+			lay->addWidget(new QLabel("Min Amp"), 1, 2, 1, 1);
+			lay->addWidget(new QLabel("Max Amp"), 1, 3, 1, 1);
 			lay->addWidget(new QLabel("Notes"), 1, 4, 1, 2);
 		}
 		auto layofst = 2;
-		auto ofst = cnts * size_t(AOGrid::numPERunit);
-		for (size_t i = 0; i < size_t(AOGrid::numPERunit); i++)
+		auto ofst = cnts * size_t(DDSGrid::numPERunit);
+		for (size_t i = 0; i < size_t(DDSGrid::numPERunit); i++)
 		{
 			numberLabels[ofst + i] = new QLabel(QString("%1").arg(i, 2));
 			lay->addWidget(numberLabels[ofst + i], i + layofst, 0, 1, 1, Qt::AlignRight);
@@ -49,75 +46,76 @@ AoSettingsDialog::AoSettingsDialog (AoSystem* inputPtr)
 
 
 			noteEdits[ofst + i] = new QLineEdit("");
+			noteEdits[ofst + i]->setMinimumWidth(150);
 			//noteEdits[ofst + i]->setText(input->aoSys->getNote(ofst + i).c_str());
 			lay->addWidget(noteEdits[ofst + i], i + layofst, 4, 1, 2);
-	
+
 		}
 		layout->addLayout(lay, 1);
 		cnts++;
 	}
 
-	layout->insertSpacing(1, 30);
+	layout->insertSpacing(1, 50);
+	layout->insertSpacing(3, 50);
 	layoutWiget->addLayout(layout, 1);
 
 	QHBoxLayout* layoutbtns = new QHBoxLayout();
-	okBtn = new QPushButton ("OK", this);
-	connect (okBtn, &QPushButton::released, this, &AoSettingsDialog::handleOk);
-	cancelBtn = new QPushButton ("Cancel", this);
-	connect (cancelBtn, &QPushButton::released, this, &AoSettingsDialog::handleCancel);
+	okBtn = new QPushButton("OK", this);
+	connect(okBtn, &QPushButton::released, this, &DdsSettingsDialog::handleOk);
+	cancelBtn = new QPushButton("Cancel", this);
+	connect(cancelBtn, &QPushButton::released, this, &DdsSettingsDialog::handleCancel);
 	layoutbtns->addStretch(1);
 	layoutbtns->addWidget(okBtn);
 	layoutbtns->addWidget(cancelBtn);
 
 	layoutWiget->addStretch(1);
 	layoutWiget->addLayout(layoutbtns, 0);
-
-
 }
 
-void AoSettingsDialog::updateAllEdits()
+void DdsSettingsDialog::updateAllEdits()
 {
-	for (size_t i = 0; i < size_t(AOGrid::total); i++)
+	for (size_t i = 0; i < size_t(DDSGrid::total); i++)
 	{
 		nameEdits[i]->setText(input->getName(i).c_str());
-		auto [min, max] = input->getDacRange(i);
+		auto [min, max] = input->getAmplRange(i);
 		minValEdits[i]->setText(QString::number(min));
 		maxValEdits[i]->setText(QString::number(max));
 		noteEdits[i]->setText(input->getNote(i).c_str());
 
 	}
-
 }
 
-
-
-void AoSettingsDialog::handleOk(){
-	for (unsigned dacInc = 0; dacInc < nameEdits.size(); dacInc++){
-		auto text = nameEdits[dacInc]->text ();
-		if (text[0].isDigit()){
+void DdsSettingsDialog::handleOk() 
+{
+	for (unsigned ddsInc = 0; ddsInc < size_t(DDSGrid::total); ddsInc++) 
+	{
+		auto text = nameEdits[ddsInc]->text();
+		if (text[0].isDigit()) {
 			errBox("ERROR: " + str(text) + " is an invalid name; names cannot start with numbers.");
 			return;
 		}
-		input->setName(dacInc, str(text));
+		input->setName(ddsInc, str(text));
 		double min, max;
-		try	{
-			text = minValEdits[dacInc]->text ();
+		try {
+			text = minValEdits[ddsInc]->text();
 			min = boost::lexical_cast<double>(str(text));
-			text = maxValEdits[dacInc]->text ();
+			text = maxValEdits[ddsInc]->text();
 			max = boost::lexical_cast<double>(str(text));
-			input->setMinMax(dacInc, min, max);
+			input->setAmpMinMax(ddsInc, min, max);
 		}
-		catch ( boost::bad_lexical_cast& err) {
+		catch (boost::bad_lexical_cast& err) {
 			errBox(err.what());
 			return;
 		}
 		/*make sure set ampminmax is not the last one, relies on setname/setnote to update the tooltip*/
-		text = noteEdits[dacInc]->text();
-		input->setNote(dacInc, str(text));
+		text = noteEdits[ddsInc]->text();
+		input->setNote(ddsInc, str(text));
+
 	}
-	close ();
+	input->updateCoreNames();
+	close();
 }
 
-void AoSettingsDialog::handleCancel(){
+void DdsSettingsDialog::handleCancel() {
 	close();
 }

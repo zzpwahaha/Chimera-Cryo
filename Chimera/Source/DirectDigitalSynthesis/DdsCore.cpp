@@ -432,7 +432,7 @@ int DdsCore::getDDSIdentifier(std::string name)
 			return ddsInc;
 		}
 		// check standard names which are always acceptable.
-		if (name == "dac" "dds" +
+		if (name ==  "dds" +
 			str(ddsInc / size_t(DDSGrid::numPERunit)) + "_" +
 			str(ddsInc % size_t(DDSGrid::numPERunit)))
 		{

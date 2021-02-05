@@ -87,7 +87,7 @@ void AoSystem::zeroDacs( DoCore& ttls, DoSnapshot initSnap){
 	//ttls.prepareForce( );
 	for ( int dacInc : range(size_t(AOGrid::total)) ){
 		outputs[dacInc].info.currVal = 0.0;
-		dacValues[dacInc] = 0.0;
+		//dacValues[dacInc] = 0.0;
 		//prepareDacForceChange( dacInc, 0, ttls );/*this zeros dacValue*/
 	}
 	updateEdits();
@@ -246,26 +246,22 @@ void AoSystem::initialize( IChimeraQtWindow* parent )
 	layout->addLayout(layout1);
 	
 
-	QGridLayout* DOGridLayout = new QGridLayout();
+	QGridLayout* AOGridLayout = new QGridLayout();
 	unsigned runningCount = 0;
 	for ( auto& out : outputs )	
 	{
 		out.initialize ( parent, runningCount);
-		out.setName(QString("DAC%1_%2").
-			arg(runningCount / size_t(AOGrid::numPERunit)).
-			arg(runningCount % size_t(AOGrid::numPERunit)).toStdString());
-
-		DOGridLayout->addLayout(out.getLayout(), 
+		AOGridLayout->addLayout(out.getLayout(), 
 			runningCount % size_t(AOGrid::numPERunit), 
 			runningCount / size_t(AOGrid::numPERunit));
 		runningCount++;
 	}
-	layout->addLayout(DOGridLayout);
+	layout->addLayout(AOGridLayout);
 
-	for (size_t i = 0; i < size_t(AOGrid::total); i++)
-	{
-		dacValues[i] = 0.0;
-	}
+	//for (size_t i = 0; i < size_t(AOGrid::total); i++)
+	//{
+	//	dacValues[i] = 0.0;
+	//}
 }
 
 bool AoSystem::eventFilter (QObject* obj, QEvent* event){
@@ -725,8 +721,10 @@ void AoSystem::prepareDacForceChange(int line, double voltage, DoCore& ttls){
 	//	// then it's a double. kill extra zeros on the end.
 	//	valStr.erase(valStr.find_last_not_of('0') + 1, std::string::npos);
 	//}
+
+
 	outputs[ line ].info.currVal = voltage;
-	dacValues[line] = voltage;
+	//dacValues[line] = voltage;
 
 }
 
@@ -931,18 +929,25 @@ void AoSystem::formatDacForFPGA(UINT variation)
 		std::vector<int> channels;
 
 		snapshot = dacSnapshots[variation][i];
+		std::array<double, size_t(AOGrid::total)> dacValuestmp;
+		for (auto i : range(outputs.size()))
+		{
+			dacValuestmp[i] = outputs[i].info.currVal;
+		}
 
 		if (i == 0) {
-			for (int j = 0; j < 32; ++j) {
-				if (snapshot.dacValues[j] != dacValues[j] || 
-					(snapshot.dacValues[j] == dacValues[j] && snapshot.dacRampTimes[j] != 0)) {
+			for (int j = 0; j < size_t(AOGrid::total); ++j)
+			{
+				if (snapshot.dacValues[j] != dacValuestmp[j] ||
+					(snapshot.dacValues[j] == dacValuestmp[j] && snapshot.dacRampTimes[j] != 0)) {
 					channels.push_back(j);
 				}
 			}
 		}
 		else {
 			snapshotPrev = dacSnapshots[variation][i - 1];
-			for (int j = 0; j < 32; ++j) {
+			for (int j = 0; j < size_t(AOGrid::total); ++j) 
+			{
 				if (snapshot.dacValues[j] != snapshotPrev.dacValues[j] ||
 					(snapshot.dacValues[j] == snapshotPrev.dacValues[j] && 
 						snapshot.dacRampTimes[j] != 0 && snapshotPrev.dacRampTimes[j] == 0)) {
@@ -1030,10 +1035,13 @@ void AoSystem::handleDacScriptCommand( AoCommandForm command, std::string name, 
 
 
 int AoSystem::getDacIdentifier(std::string name){
-	for (auto dacInc : range(outputs.size())){
+	for (auto dacInc : range(outputs.size()))
+	{
 		auto& dacName = str(outputs[ dacInc ].info.name,13,false,true);
 		// check names set by user and check standard names which are always acceptable
-		if (name == dacName || name == "dac" + str ( dacInc ) ){
+		if (name == dacName || name == "dac" +
+			str(dacInc / size_t(DDSGrid::numPERunit)) + "_" +
+			str(dacInc % size_t(DDSGrid::numPERunit))/*"dac" + str ( dacInc )*/ ){
 			return dacInc;
 		}
 	}

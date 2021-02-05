@@ -394,10 +394,12 @@ void ExpThreadWorker::loadMasterScript (std::string scriptAddress, ScriptStream&
 	// dump the file into the stringstream.
 	std::stringstream buf (std::ios_base::app | std::ios_base::out | std::ios_base::in);
 	// IMPORTANT!
-	buf << "\r\n t = 0.01 \r\n pulseon: " + str (OSCILLOSCOPE_TRIGGER) + " 0.02\r\n t += 0.1\r\n";
+
+	//buf << "\r\n t = 0.01 \r\n pulseon: " + str (OSCILLOSCOPE_TRIGGER) + " 0.02\r\n t += 0.1\r\n";
 	buf << scriptFile.rdbuf ();
-	// this is used to more easily deal some of the analysis of the script.
+	//// this is used to more easily deal some of the analysis of the script.
 	buf << "\r\n\r\n__END__";
+
 	// for whatever reason, after loading rdbuf into a stringstream, the stream seems to not 
 	// want to >> into a string. tried resetting too using seekg, but whatever, this works.
 	currentMasterScript.str ("");
@@ -1105,6 +1107,10 @@ void ExpThreadWorker::errorFinish (std::atomic<bool>& isAborting, ChimeraError& 
 void ExpThreadWorker::normalFinish (ExperimentType& expType, bool runMaster,
 	std::chrono::time_point<chronoClock> startTime) {
 	auto exp_t = std::chrono::duration_cast<std::chrono::seconds>((chronoClock::now () - startTime)).count ();
+	
+	input->zynqExp.sendCommand("disableSeq"); 
+	//input->dds->setDDSs();
+
 	switch (expType) {
 	case ExperimentType::AutoCal:
 		emit calibrationFinish (("\r\nCalibration Finished Normally.\r\nExperiment took "
@@ -1126,11 +1132,13 @@ void ExpThreadWorker::startRep (unsigned repInc, unsigned variationInc, bool ski
 		//input->aoSys.resetDacs (variationInc, skip);
 		//input->ttls.ftdi_trigger ();
 		//input->ttls.FtdiWaitTillFinished (variationInc);
-		input->aoSys.stopDacs();
-		input->aoSys.configureClocks(variationInc, skip);
+		//input->aoSys.stopDacs();
+		//input->aoSys.configureClocks(variationInc, skip);
 		input->aoSys.writeDacs(variationInc, skip);
 		//input->ddss->writeDDSs(variationInc, skip);
 		input->ttls.writeTtlDataToFPGA(variationInc, skip);
+		input->zynqExp.sendCommand("trigger");
+		Sleep(1);
 
 	}
 }

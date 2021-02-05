@@ -21,6 +21,7 @@
 
 #include <ExcessDialogs/doChannelInfoDialog.h>
 #include <ExcessDialogs/AoSettingsDialog.h>
+#include <ExcessDialogs/DdsSettingsDialog.h>
 
 #include <QMainWindow>
 #include <QTimer>
@@ -42,8 +43,9 @@ class QtAuxiliaryWindow : public IChimeraQtWindow{
 		void handleMasterConfigSave (std::stringstream& configStream);
 		void handleMasterConfigOpen (ConfigStream& configStream);
 		/// Message Map Functions
-		void ViewOrChangeTTLNames ();
-		void ViewOrChangeDACNames ();
+		void ViewOrChangeTTLNames();
+		void ViewOrChangeDACNames();
+		void ViewOrChangeDDSNames();
 		void passRoundToDac ();
 		std::string getOtherSystemStatusMsg ();
 		Matrix<std::string> getTtlNames ();
@@ -93,6 +95,7 @@ class QtAuxiliaryWindow : public IChimeraQtWindow{
 
 		doChannelInfoDialog* DOdialog;
 		AoSettingsDialog* AOdialog;
+		DdsSettingsDialog* DDSdialog;
 
 		std::vector<PlotCtrl*> aoPlots;
 		std::vector<PlotCtrl*> ttlPlots;

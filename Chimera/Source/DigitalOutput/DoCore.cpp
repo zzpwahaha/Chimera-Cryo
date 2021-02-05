@@ -814,9 +814,9 @@ void DoCore::organizeTtlCommands (unsigned variation, DoSnapshot initSnap)
 		}
 	}
 	/* Test to see if adding 1ms to the starting time would solve the problem of the initial state of ttl*/
-	for (int i = 0; i < snaps.size (); i++) {
-		snaps[i].time = snaps[i].time + 0.001;
-	}
+	//for (int i = 0; i < snaps.size (); i++) {
+	//	snaps[i].time = snaps[i].time + 0.001;
+	//}
 }
 
 
@@ -875,11 +875,14 @@ bool DoCore::isValidTTLName (std::string name){
 Returns a single number which corresponds to the dio control with the name
 */
 int DoCore::getNameIdentifier (std::string name, DoRows::which& row, unsigned& number){
-	for (auto rowInc : range(names.getRows())){
-		for (auto numberInc : range (names.getCols())){
+	for (auto rowInc : range(names.getRows()))
+	{
+		for (auto numberInc : range (names.getCols()))
+		{
 			std::string DioName = str (names (rowInc, numberInc), 13, false, true);
 			// second of the || is standard name which is always acceptable.
-			if (DioName == name || name == DoRows::toStr (DoRows::which(rowInc)) + str (numberInc)){
+			if (DioName == name || name == "do" + str(int(rowInc) + 1) + "_" + str(numberInc))
+			{
 				row = DoRows::which(rowInc);
 				number = numberInc;
 				return int (rowInc) * names.getCols () + numberInc;

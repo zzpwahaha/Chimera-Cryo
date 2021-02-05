@@ -120,6 +120,7 @@ void QtAuxiliaryWindow::initializeWidgets (){
 
 		DOdialog = new doChannelInfoDialog(&ttlBoard);
 		AOdialog = new AoSettingsDialog(&aoSys);
+		DDSdialog = new DdsSettingsDialog(&dds);
 
 	}
 	catch (ChimeraError& err){
@@ -496,6 +497,13 @@ void QtAuxiliaryWindow::ViewOrChangeDACNames (){
 	AOdialog->updateAllEdits();
 	AOdialog->setStyleSheet (chimeraStyleSheets::stdStyleSheet ());
 	AOdialog->show();
+}
+
+void QtAuxiliaryWindow::ViewOrChangeDDSNames()
+{
+	DDSdialog->updateAllEdits();
+	DDSdialog->setStyleSheet(chimeraStyleSheets::stdStyleSheet());
+	DDSdialog->show();
 }
 
 std::string QtAuxiliaryWindow::getOtherSystemStatusMsg (){

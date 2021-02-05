@@ -82,6 +82,7 @@ class sequencer:
 		self.fifo_dio_seq = AXIS_FIFO(fifo_devices['GPIO_seq'])
 
 	def initExp(self):
+		print '******************************************************************************************************************************************************************'
 		print 'initializing experiment'
 		self.mod_disable()
 		reset()

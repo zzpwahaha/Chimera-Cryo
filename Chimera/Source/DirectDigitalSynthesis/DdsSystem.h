@@ -54,12 +54,24 @@ class DdsSystem : public IChimeraSystem{
 
 		void resetDds();
 
-		void prepareForce();
-		void initializeDataObjects(unsigned cmdNum);
+		//void prepareForce();
+		//void initializeDataObjects(unsigned cmdNum);
 		void setDDSs();
-		void resetDdsEvents();
+		//void resetDdsEvents();
 		void updateEdits();
-		void updateDdsValues();
+		std::string getName(int ddsNumber);
+		//std::pair<double, double> getFreqRange(int index);
+		std::pair<double, double> getAmplRange(int ddsNumber);
+		std::string getNote(int ddsNumber);
+
+
+		void setName(int ddsNumber, std::string name);
+		void setNote(int ddsNumber, std::string note);
+		void setAmpMinMax(int ddsNumber, double min, double max);
+		void updateCoreNames();
+		//void updateDdsValues();
+
+
 
 
 	private:
@@ -79,17 +91,18 @@ class DdsSystem : public IChimeraSystem{
 		CQCheckBox* quickChange;
 
 		std::array<DdsOutput, size_t(DDSGrid::total)> outputs;
-		DdsCore core;/*seems useless*/
+		
+		DdsCore core;
 
-		std::array<std::array<double, 2>, size_t(DDSGrid::total)> ddsValues;
+		//std::array<std::array<double, 2>, size_t(DDSGrid::total)> ddsValues;
 
 
-		std::vector<DdsCommandForm> ddsCommandFormList;
-		// the first vector is for each variation.
-		std::vector<std::vector<DdsCommand>> ddsCommandList;
-		std::vector<std::vector<DdsSnapshot>> ddsSnapshots;
-		std::vector<std::vector<DdsChannelSnapshot>> ddsChannelSnapshots;
-		std::vector<std::pair<double, std::vector<DdsCommand>>> timeOrganizer;
+		//std::vector<DdsCommandForm> ddsCommandFormList;
+		//// the first vector is for each variation.
+		//std::vector<std::vector<DdsCommand>> ddsCommandList;
+		//std::vector<std::vector<DdsSnapshot>> ddsSnapshots;
+		//std::vector<std::vector<DdsChannelSnapshot>> ddsChannelSnapshots;
+		//std::vector<std::pair<double, std::vector<DdsCommand>>> timeOrganizer;
 
 
 		ZynqTCP zynq_tcp;

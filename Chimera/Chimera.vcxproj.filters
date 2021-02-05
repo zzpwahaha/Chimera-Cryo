@@ -276,6 +276,9 @@
     <ClCompile Include="Source\DirectDigitalSynthesis\DdsOutput.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\ExcessDialogs\DdsSettingsDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\stdafx.h">
@@ -638,6 +641,9 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="Source\DigitalOutput\DoSystem.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\ExcessDialogs\DdsSettingsDialog.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>

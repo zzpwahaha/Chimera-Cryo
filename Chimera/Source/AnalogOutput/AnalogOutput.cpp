@@ -10,14 +10,18 @@ AnalogOutput::AnalogOutput( ) {}
 
 void AnalogOutput::initialize ( IChimeraQtWindow* parent, int whichDac) 
 {
+	info.name = "dac" +
+		str(whichDac / size_t(AOGrid::numPERunit)) + "_" +
+		str(whichDac % size_t(AOGrid::numPERunit)); /*default name, always accepted by script*/
+
 	layout = new QHBoxLayout();
 	layout->setContentsMargins(0, 0, 0, 0);
 	
 	label = new QLabel(QString("%1").arg(QString::number(whichDac % size_t(AOGrid::numPERunit)),2), parent);
-	label->setToolTip ( (info.name + "\n" + info.note).c_str() );
-	
+	label->setToolTip(cstr(info.name + ": [" + str(info.minVal, numDigits, true) + "," + str(info.maxVal, numDigits, true) + "]" + "\r\n" + info.note));
+
 	edit = new CQLineEdit ("0", parent);
-	edit->setToolTip ( (info.name + "\r\n" + info.note).c_str() );
+	edit->setToolTip(cstr(info.name + ": [" + str(info.minVal, numDigits, true) + "," + str(info.maxVal, numDigits, true) + "]" + "\r\n" + info.note));
 	edit->installEventFilter (parent);
 	parent->connect (edit, &QLineEdit::textChanged, 		
 		[this, parent]() {
@@ -136,7 +140,7 @@ void AnalogOutput::setName ( std::string name ){
 	}
 	std::transform ( name.begin ( ), name.end ( ), name.begin ( ), ::tolower );
 	info.name = name;
-	edit->setToolTip ( cstr(info.name + "\r\n" + info.note));
+	edit->setToolTip(cstr(info.name + ": [" + str(info.minVal, numDigits, true) + "," + str(info.maxVal, numDigits, true) + "]" + "\r\n" + info.note));
 }
 
 
@@ -155,7 +159,7 @@ double AnalogOutput::roundToDacResolution ( double num )
 
 void AnalogOutput::setNote ( std::string note ){
 	info.note = note;
-	edit->setToolTip ( (info.name + "\r\n" + info.note).c_str());
+	edit->setToolTip(cstr(info.name + ": [" + str(info.minVal, numDigits, true) + "," + str(info.maxVal, numDigits, true) + "]" + "\r\n" + info.note));
 }
 
 void AnalogOutput::disable ( ){
