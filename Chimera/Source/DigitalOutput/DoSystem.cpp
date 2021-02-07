@@ -45,7 +45,7 @@ void DoSystem::setTtlStatusNoForceOut(std::array< std::array<bool, size_t(DOGrid
 {
 	for ( auto rowInc : range(status.size()) ){
 		for ( auto numInc : range(status[rowInc].size()) ){
-			outputs(numInc, rowInc).set(status[rowInc][numInc]);
+			outputs(rowInc,numInc).set(status[rowInc][numInc]);
 		}
 	}
 }
@@ -55,7 +55,7 @@ Matrix<std::string> DoSystem::getAllNames(){
 }
 
 void DoSystem::updatePush(unsigned row, unsigned number ){
-	outputs ( number, row ).updateStatus ( );
+	outputs(row, number).updateStatus();
 }
 
 void DoSystem::handleInvert(){
@@ -67,11 +67,11 @@ void DoSystem::handleInvert(){
 }
 
 void DoSystem::updateDefaultTtl(unsigned row, unsigned column, bool state){
-	outputs ( column, row ).defaultStatus = state;
+	outputs(row, column).defaultStatus = state;
 }
 
 bool DoSystem::getDefaultTtl(unsigned row, unsigned column){
-	return outputs ( column, row ).defaultStatus;
+	return outputs(row, column).defaultStatus;
 }
 
 std::pair<unsigned, unsigned> DoSystem::getTtlBoardSize(){
@@ -133,7 +133,7 @@ void DoSystem::initialize(IChimeraQtWindow* parent) {
 		DOsubGridLayout->addWidget(new QLabel(QString::number(row + 1)), 0, Qt::AlignRight);
 		for (size_t number = 0; number < outputs.numColumns; number++) 
 		{
-			auto& out = outputs(number, row);
+			auto& out = outputs(row, number);
 			out.initialize(parent);
 			names(row, number) = "do" +
 				str((runningCount - 1) / size_t(DDSGrid::numPERunit) + 1) + "_" +
@@ -205,8 +205,9 @@ void DoSystem::handleHoldPress(){
 std::array< std::array<bool, size_t(DOGrid::numPERunit)>, size_t(DOGrid::numOFunit) > DoSystem::getCurrentStatus()
 {
 	std::array< std::array<bool, size_t(DOGrid::numPERunit)>, size_t(DOGrid::numOFunit) > currentStatus;
-	for ( auto& out : outputs ){
-		currentStatus[ int ( out.getPosition ( ).first ) ][ out.getPosition ( ).second ] = out.getStatus();
+	for ( auto& out : outputs )
+	{
+		currentStatus[  out.getPosition ( ).first  ][ out.getPosition ( ).second ] = out.getStatus();
 	}
 	return currentStatus;
 }
@@ -216,8 +217,7 @@ void DoSystem::setName(unsigned row, unsigned number, std::string name){
 		// no empty names allowed.
 		return;
 	}
-	auto& out = outputs(number, row);
-	outputs(number, row).setName(name);
+	outputs(row, number).setName(name);
 	auto names = core.getAllNames ();
 	names(unsigned(row), number) = name;
 	core.setNames(names);
@@ -229,7 +229,7 @@ std::string DoSystem::getName(unsigned row, unsigned number) {
 }
 
 bool DoSystem::getTtlStatus(unsigned row, int number){
-	return outputs ( number, row ).getStatus ( );
+	return outputs(row, number).getStatus ( );
 }
 
 allDigitalOutputs& DoSystem::getDigitalOutputs ( ){

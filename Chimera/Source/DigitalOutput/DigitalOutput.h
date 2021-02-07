@@ -36,7 +36,7 @@ class allDigitalOutputs
 {
 	public:
 		allDigitalOutputs ( );
-		DigitalOutput & operator()( unsigned num, unsigned row );
+		DigitalOutput & operator()(unsigned row, unsigned num  );
 		/*assume unit is a row and get stacked vertically*/
 		static const unsigned numRows = size_t(DOGrid::numOFunit);
 		static const unsigned numColumns = size_t(DOGrid::numPERunit);

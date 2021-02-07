@@ -55,8 +55,8 @@ void DigitalOutput::enable ( bool enabledStatus ){
 }
 
 
-DigitalOutput& allDigitalOutputs::operator()( unsigned num, unsigned row ){
-	return core[ unsigned ( row ) * size_t(DOGrid::numPERunit) + num ];
+DigitalOutput& allDigitalOutputs::operator()(  unsigned row, unsigned num ){
+	return core[  row  * size_t(DOGrid::numPERunit) + num ];
 }
 
 allDigitalOutputs::allDigitalOutputs ( ){
