@@ -942,24 +942,26 @@ unsigned ExpThreadWorker::determineVariationNumber (std::vector<parameterType> v
 void ExpThreadWorker::checkTriggerNumbers (std::vector<parameterType>& expParams) {
 	/// check all trigger numbers between the DO system and the individual subsystems. These should almost always match,
 	/// a mismatch is usually user error in writing the script.
-	bool rsgMismatch = false;
-	for (auto variationInc : range (determineVariationNumber (expParams))) {
-		if (true /*runMaster*/) {
-			unsigned actualTrigs = input->ttls.countTriggers ({ DoRows::which::D,15 }, variationInc);
-			unsigned dacExpectedTrigs = input->aoSys.getNumberSnapshots (variationInc);
-			std::string infoString = "Actual/Expected DAC Triggers: " + str (actualTrigs) + "/"
-				+ str (dacExpectedTrigs) + ".";
-			if (actualTrigs != dacExpectedTrigs) {
-				// this is a serious low level error. throw, don't warn.
-				thrower ("the number of dac triggers that the ttl system sends to the dac line does not "
-					"match the number of dac snapshots! " + infoString + ", seen in variation #"
-					+ str (variationInc) + "\r\n");
-			}
-			if (variationInc == 0) {
-				emit notification (qstr (infoString), 2);
-			}
-		}
-	}
+	/// 
+	
+	//bool rsgMismatch = false;
+	//for (auto variationInc : range (determineVariationNumber (expParams))) {
+	//	if (true /*runMaster*/) {
+	//		unsigned actualTrigs = input->ttls.countTriggers ({ DoRows::which::D,15 }, variationInc);
+	//		unsigned dacExpectedTrigs = input->aoSys.getNumberSnapshots (variationInc);
+	//		std::string infoString = "Actual/Expected DAC Triggers: " + str (actualTrigs) + "/"
+	//			+ str (dacExpectedTrigs) + ".";
+	//		if (actualTrigs != dacExpectedTrigs) {
+	//			// this is a serious low level error. throw, don't warn.
+	//			thrower ("the number of dac triggers that the ttl system sends to the dac line does not "
+	//				"match the number of dac snapshots! " + infoString + ", seen in variation #"
+	//				+ str (variationInc) + "\r\n");
+	//		}
+	//		if (variationInc == 0) {
+	//			emit notification (qstr (infoString), 2);
+	//		}
+	//	}
+	//}
 }
 
 bool ExpThreadWorker::handleFunctionCall (std::string word, ScriptStream& stream, std::vector<parameterType>& vars,

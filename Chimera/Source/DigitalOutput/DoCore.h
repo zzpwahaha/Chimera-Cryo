@@ -45,11 +45,11 @@ class DoCore
 		std::vector<std::vector<plotDataVec>> getPlotData (unsigned variation );
 		std::string getTtlSequenceMessage (unsigned variation);
 		std::vector<double> getFinalTimes ();
-		unsigned countTriggers (std::pair<DoRows::which, unsigned> which, unsigned variation);
-		DWORD ftdi_ForceOutput (DoRows::which row, int number, int state, std::array<std::array<bool, size_t(DOGrid::numPERunit)>, size_t(DOGrid::numOFunit)> status);
+		unsigned countTriggers (std::pair<unsigned, unsigned> which, unsigned variation);
+		DWORD ftdi_ForceOutput (unsigned row, unsigned number, int state, std::array<std::array<bool, size_t(DOGrid::numPERunit)>, size_t(DOGrid::numOFunit)> status);
 		// returns -1 if not a name.
 		bool isValidTTLName (std::string name);
-		int getNameIdentifier (std::string name, DoRows::which& row, unsigned& number);
+		int getNameIdentifier (std::string name, unsigned& row, unsigned& number);
 		void organizeTtlCommands (unsigned variation, DoSnapshot initSnap = { 0,0 });
 		bool getFtFlumeSafemode ();
 		unsigned long getNumberEvents (unsigned variation);

@@ -1,7 +1,6 @@
 #pragma once
 #include <string>
 #include <vector>
-#include <DigitalOutput/DoRows.h>
 #include <QString>
 #include <GeneralUtilityFunctions/my_str.h>
 
@@ -44,7 +43,7 @@ struct calSettings : public calBase {
 	// in % from old value
 	bool calibrated = false;
 	unsigned polynomialOrder = 6;
-	std::vector<std::pair<DoRows::which, unsigned> > ttlConfig;
+	std::vector<std::pair<unsigned, unsigned> > ttlConfig;
 	std::vector<std::pair<unsigned, double>> aoConfig;
 	bool currentlyCalibrating = false;
 	unsigned int avgNum = 100;

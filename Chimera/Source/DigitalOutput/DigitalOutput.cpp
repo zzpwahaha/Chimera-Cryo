@@ -12,7 +12,7 @@ void DigitalOutput::updateStatus ( ){
 }
 
 
-void DigitalOutput::initLoc ( unsigned numIn, DoRows::which rowIn ){
+void DigitalOutput::initLoc ( unsigned numIn, unsigned rowIn ){
 	row = rowIn;
 	num = numIn;
 }
@@ -29,7 +29,7 @@ bool DigitalOutput::getStatus ( ){
 }
 
 
-std::pair<DoRows::which, unsigned> DigitalOutput::getPosition ( ){
+std::pair<unsigned, unsigned> DigitalOutput::getPosition ( ){
 	return { row, num };
 }
 
@@ -55,12 +55,12 @@ void DigitalOutput::enable ( bool enabledStatus ){
 }
 
 
-DigitalOutput& allDigitalOutputs::operator()( unsigned num, DoRows::which row ){
-	return core[ unsigned long ( row ) * size_t(DOGrid::numPERunit) + num ];
+DigitalOutput& allDigitalOutputs::operator()( unsigned num, unsigned row ){
+	return core[ unsigned ( row ) * size_t(DOGrid::numPERunit) + num ];
 }
 
 allDigitalOutputs::allDigitalOutputs ( ){
-	for ( auto row : DoRows::allRows )
+	for ( auto row : range(numRows))
 	{
 		for ( auto num : range ( numColumns ) )
 		{

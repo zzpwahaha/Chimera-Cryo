@@ -267,9 +267,6 @@
     <ClCompile Include="Source\DigitalOutput\DoCore.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\DigitalOutput\DoRows.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Source\DigitalOutput\DoSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -537,9 +534,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\DigitalOutput\DoCore.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\DigitalOutput\DoRows.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\DigitalOutput\DoStructures.h">

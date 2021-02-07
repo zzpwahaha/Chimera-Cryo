@@ -314,11 +314,12 @@ void QtAuxiliaryWindow::handleAbort (){
 
 void QtAuxiliaryWindow::handleMasterConfigSave (std::stringstream& configStream){
 	/// ttls
-	for (auto row : DoRows::allRows){
+	for (auto row : range(size_t(DOGrid::numOFunit))){
 		for (unsigned ttlNumberInc = 0; ttlNumberInc < ttlBoard.getTtlBoardSize ().second; ttlNumberInc++){
-			std::string name = ttlBoard.getName (row, ttlNumberInc);
-			if (name == ""){
-				name = DoRows::toStr (row) + str (ttlNumberInc);
+			std::string name = ttlBoard.getName(row, ttlNumberInc);
+			if (name == "")
+			{
+				name = str(row) + "_" + str (ttlNumberInc);
 			}
 			configStream << name << "\n";
 			configStream << ttlBoard.getDefaultTtl (row, ttlNumberInc) << "\n";
@@ -364,7 +365,8 @@ void QtAuxiliaryWindow::handleMasterConfigOpen (ConfigStream& configStream){
 	ttlBoard.getCore ().prepareForce ();
 	aoSys.resetDacEvents ();
 	aoSys.prepareForce ();
-	for (auto row : DoRows::allRows){
+	for (auto row : range(size_t(DOGrid::numOFunit)))
+	{
 		for (unsigned ttlNumberInc : range (ttlBoard.getTtlBoardSize ().second)){
 			std::string name;
 			std::string defaultStatusString;

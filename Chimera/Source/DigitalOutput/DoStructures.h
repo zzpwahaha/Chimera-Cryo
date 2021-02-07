@@ -2,7 +2,16 @@
 #pragma once
 #include <array>
 #include "GeneralObjects/commonTypes.h"
-#include "DigitalOutput/DoRows.h"
+//#include "DigitalOutput/DoRows.h"
+
+enum class DOGrid : size_t
+{
+	numPERunit = 8,
+	numOFunit = 8,
+	total = numPERunit * numOFunit
+};
+
+
 
 // this struct keeps variable names.
 struct DoCommandForm

@@ -1,7 +1,7 @@
 ﻿#pragma once
-#include "DoRows.h"
 #include "Control.h"
 #include <array>
+#include "DoStructures.h"
 #include "PrimaryWindows/IChimeraQtWindow.h"
 #include <CustomQtControls/AutoNotifyCtrls.h>
 
@@ -9,14 +9,14 @@ class DigitalOutput
 {
 	public:
 		void initialize ( IChimeraQtWindow* parent );
-		void initLoc ( unsigned num, DoRows::which row);
+		void initLoc ( unsigned num, unsigned row);
 		
 		void enable ( bool enabledStatus );
 		void updateStatus (  );
 
 		bool defaultStatus;
 		bool getStatus ( );
-		std::pair<DoRows::which, unsigned> getPosition ( );
+		std::pair<unsigned, unsigned> getPosition ( );
 
 		void set ( bool status );
 		void setName ( std::string nameStr );
@@ -26,7 +26,7 @@ class DigitalOutput
 		CQCheckBox* check = nullptr;
 
 	private:
-		DoRows::which row;
+		unsigned row;
 		unsigned num;
 		bool status;
 };
@@ -36,7 +36,7 @@ class allDigitalOutputs
 {
 	public:
 		allDigitalOutputs ( );
-		DigitalOutput & operator()( unsigned num, DoRows::which row );
+		DigitalOutput & operator()( unsigned num, unsigned row );
 		/*assume unit is a row and get stacked vertically*/
 		static const unsigned numRows = size_t(DOGrid::numOFunit);
 		static const unsigned numColumns = size_t(DOGrid::numPERunit);

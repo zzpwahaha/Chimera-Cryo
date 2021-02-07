@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "DoCore.h"
 #include "DoStructures.h"
-#include "DoRows.h"
 #include "qdebug.h"
 
 #include <bitset>
@@ -477,7 +476,7 @@ std::string DoCore::getTtlSequenceMessage (unsigned variation)
 
 // counts the number of triggers on a given line.
 // which.first = row, which.second = number.
-unsigned DoCore::countTriggers (std::pair<DoRows::which, unsigned> which, unsigned variation)
+unsigned DoCore::countTriggers (std::pair<unsigned, unsigned> which, unsigned variation)
 {
 	auto& snaps = ttlSnapshots [variation];
 	unsigned count = 0;
@@ -501,7 +500,7 @@ unsigned DoCore::countTriggers (std::pair<DoRows::which, unsigned> which, unsign
 }
 
 
-DWORD DoCore::ftdi_ForceOutput (DoRows::which row, int number, int state, 
+DWORD DoCore::ftdi_ForceOutput (unsigned row, unsigned number, int state,
 	std::array<std::array<bool, size_t(DOGrid::numPERunit)>, size_t(DOGrid::numOFunit)> status)
 {
 	//outputs (number, row).set (state);
@@ -867,7 +866,7 @@ void DoCore::FtdiWaitTillFinished (unsigned variation){
 }
 
 bool DoCore::isValidTTLName (std::string name){
-	DoRows::which row;
+	unsigned row;
 	unsigned number;
 	return getNameIdentifier (name, row, number) != -1;
 }
@@ -875,7 +874,7 @@ bool DoCore::isValidTTLName (std::string name){
 /*
 Returns a single number which corresponds to the dio control with the name
 */
-int DoCore::getNameIdentifier (std::string name, DoRows::which& row, unsigned& number){
+int DoCore::getNameIdentifier (std::string name, unsigned& row, unsigned& number){
 	for (auto rowInc : range(names.getRows()))
 	{
 		for (auto numberInc : range (names.getCols()))
@@ -884,7 +883,7 @@ int DoCore::getNameIdentifier (std::string name, DoRows::which& row, unsigned& n
 			// second of the || is standard name which is always acceptable.
 			if (DioName == name || name == "do" + str(int(rowInc) + 1) + "_" + str(numberInc))
 			{
-				row = DoRows::which(rowInc);
+				row = rowInc;
 				number = numberInc;
 				return int (rowInc) * names.getCols () + numberInc;
 			}
@@ -901,7 +900,7 @@ void DoCore::handleTtlScriptCommand (std::string command, timeType time, std::st
 	}
 	timeType pulseEndTime = time;
 	unsigned collumn;
-	DoRows::which row;
+	unsigned row;
 	getNameIdentifier (name, row, collumn);
 	if (command == "on:"){
 		ttlOn (int (row), collumn, time);

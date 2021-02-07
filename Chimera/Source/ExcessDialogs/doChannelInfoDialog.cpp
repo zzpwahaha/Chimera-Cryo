@@ -64,17 +64,17 @@ void doChannelInfoDialog::updateAllEdits()
 void doChannelInfoDialog::handleOk ()
 {
 	Matrix<std::string> names;
-	for (auto row : DoRows::allRows)
+	for (auto row : range(size_t(DOGrid::numOFunit)))
 	{
-		for (unsigned numberInc = 0; numberInc < edits[int (row)].size (); numberInc++)	
+		for (unsigned numberInc = 0; numberInc < edits[row].size (); numberInc++)	
 		{
-			QString name = edits[int(row)][numberInc]->text();
+			QString name = edits[row][numberInc]->text();
 			if (name[0].isDigit ())
 			{
 				errBox ("ERROR: " + str (name) + " is an invalid name; names cannot start with numbers.");
 				return;
 			}
-			names(int(row), numberInc) = name.toStdString();
+			names(row, numberInc) = name.toStdString();
 			input->setName(row, numberInc, name.toStdString());
 		}
 	}

@@ -49,18 +49,18 @@ class DoSystem : public IChimeraSystem
 
 		std::pair<unsigned, unsigned> getTtlBoardSize();
 
-		void setName( DoRows::which row, unsigned number, std::string name);
-		std::string getName ( DoRows::which row, unsigned number );
+		void setName(unsigned row, unsigned number, std::string name);
+
 		std::string getName(unsigned row, unsigned number);
 
 
 		Matrix<std::string> getAllNames ();
-		bool getTtlStatus ( DoRows::which row, int number );
-		void updateDefaultTtl( DoRows::which row, unsigned column, bool state);
-		bool getDefaultTtl( DoRows::which row, unsigned column);
+		bool getTtlStatus (unsigned row, int number );
+		void updateDefaultTtl(unsigned row, unsigned column, bool state);
+		bool getDefaultTtl(unsigned row, unsigned column);
 		std::pair<unsigned short, unsigned short> calcDoubleShortTime( double time );
 		std::array< std::array<bool, size_t(DOGrid::numPERunit)>, size_t(DOGrid::numOFunit) > getCurrentStatus( );
-		void updatePush( DoRows::which row, unsigned col );
+		void updatePush(unsigned row, unsigned col );
 		allDigitalOutputs& getDigitalOutputs();
 		DoCore& getCore ();
 

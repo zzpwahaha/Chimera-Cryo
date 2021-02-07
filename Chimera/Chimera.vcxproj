@@ -140,7 +140,6 @@
     <ClCompile Include="Source\DataLogging\DataLogger.cpp" />
     <ClCompile Include="Source\DigitalOutput\DigitalOutput.cpp" />
     <ClCompile Include="Source\DigitalOutput\DoCore.cpp" />
-    <ClCompile Include="Source\DigitalOutput\DoRows.cpp" />
     <ClCompile Include="Source\DigitalOutput\DoSystem.cpp" />
     <ClCompile Include="Source\DirectDigitalSynthesis\DdsCore.cpp" />
     <ClCompile Include="Source\DirectDigitalSynthesis\DdsSystem.cpp" />
@@ -206,7 +205,6 @@
     <ClInclude Include="Source\DirectDigitalSynthesis\DdsOutput.h" />
     <ClInclude Include="Source\DigitalOutput\DigitalOutput.h" />
     <ClInclude Include="Source\DigitalOutput\DoCore.h" />
-    <ClInclude Include="Source\DigitalOutput\DoRows.h" />
     <ClInclude Include="Source\DigitalOutput\DoStructures.h" />
     <QtMoc Include="Source\DigitalOutput\DoSystem.h" />
     <ClInclude Include="Source\ZynqTCP\ZynqTCP.h" />
