@@ -526,16 +526,17 @@ std::string QtAuxiliaryWindow::getOtherSystemStatusMsg (){
 	// controls are done. Report the initialization defaultStatus...
 	std::string msg;
 	msg += "DO System:\n";
-	if (!ttlBoard.getFtFlumeSafemode ()){
-		msg += "\tDO System is active!\n";
-		msg += "\t" + ttlBoard.getDoSystemInfo () + "\n";
-		//ttlBoard.ftdi_disconnect();
-		msg += "\t Bites Written \n";
+	//if (!ttlBoard.getFtFlumeSafemode ()){
+	//	msg += "\tDO System is active!\n";
+	//	msg += "\t" + ttlBoard.getDoSystemInfo () + "\n";
+	//	//ttlBoard.ftdi_disconnect();
+	//	msg += "\t Bites Written \n";
 
-	}
-	else{
-		msg += "\tCode System is disabled! Enable in \"constants.h\"\n";
-	}
+	//}
+	//else{
+	//	msg += "\tCode System is disabled! Enable in \"constants.h\"\n";
+	//}
+	msg += "\t Zynq placeholder \n";
 
 	msg += "Analog Out System:\n";
 	if (!ANALOG_OUT_SAFEMODE){

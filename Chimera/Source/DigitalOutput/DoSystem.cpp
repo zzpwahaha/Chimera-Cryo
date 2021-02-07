@@ -20,7 +20,7 @@
 // I don't use this because I manually import dll functions.
 // #include "Dio64.h"
 DoSystem::DoSystem( IChimeraQtWindow* parent, bool ftSafemode, bool serialSafemode ) 
-	: core(ftSafemode, serialSafemode)
+	: core()
 	, IChimeraSystem(parent)
 	, holdStatus(false)
 {
@@ -58,13 +58,6 @@ void DoSystem::updatePush(unsigned row, unsigned number ){
 	outputs(row, number).updateStatus();
 }
 
-void DoSystem::handleInvert(){
-	for ( auto& out : outputs ){
-		// seems like I need a ! here...
-		out.set (out.getStatus ()); 
-		core.ftdi_ForceOutput (out.getPosition ().first, out.getPosition ().second, out.getStatus (), getCurrentStatus ());
-	}
-}
 
 void DoSystem::updateDefaultTtl(unsigned row, unsigned column, bool state){
 	outputs(row, column).defaultStatus = state;
@@ -207,7 +200,7 @@ std::array< std::array<bool, size_t(DOGrid::numPERunit)>, size_t(DOGrid::numOFun
 	std::array< std::array<bool, size_t(DOGrid::numPERunit)>, size_t(DOGrid::numOFunit) > currentStatus;
 	for ( auto& out : outputs )
 	{
-		currentStatus[  out.getPosition ( ).first  ][ out.getPosition ( ).second ] = out.getStatus();
+		currentStatus[out.getPosition().first][out.getPosition().second] = out.getStatus();
 	}
 	return currentStatus;
 }
@@ -250,8 +243,7 @@ std::pair<unsigned short, unsigned short> DoSystem::calcDoubleShortTime( double 
 	return { lowordTime, hiwordTime };
 }
 
-std::string DoSystem::getDoSystemInfo () {	return core.getDoSystemInfo (); }
-bool DoSystem::getFtFlumeSafemode () { return core.getFtFlumeSafemode (); }
+
 
 void DoSystem::zeroBoard( ){
 	for ( auto& out : outputs ){
@@ -269,6 +261,6 @@ void DoSystem::standardExperimentPrep(unsigned variationInc, double currLoadSkip
 	core.findLoadSkipSnapshots(currLoadSkipTime, expParams, variationInc);
 	//convertToFtdiSnaps (variationInc);
 	//convertToFinalFtdiFormat (variationInc);
-	core.convertToFinalFormat(variationInc);/*seems useless*/
+	//core.convertToFinalFormat(variationInc);/*seems useless*/
 	core.formatForFPGA(variationInc);
 }

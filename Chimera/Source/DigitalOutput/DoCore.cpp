@@ -5,169 +5,168 @@
 
 #include <bitset>
 
-DoCore::DoCore (bool ftSafemode, bool serialSafemode) 
-	: ftFlume (ftSafemode)
-	, names(size_t(DOGrid::numPERunit), size_t(DOGrid::numOFunit))
+DoCore::DoCore()
+	: names(size_t(DOGrid::numPERunit), size_t(DOGrid::numOFunit), "")
 {
-	try	{
-		connectType = ftdiConnectionOption::Async;
-		ftdi_connectasync ("FT2E722BB");
-	}
-	catch (ChimeraError &)	{
-		throwNested ("Failed to initialize DO Core!?!");
-	}
+	//try	{
+	//	connectType = ftdiConnectionOption::Async;
+	//	ftdi_connectasync ("FT2E722BB");
+	//}
+	//catch (ChimeraError &)	{
+	//	throwNested ("Failed to initialize DO Core!?!");
+	//}
 }
 
-DoCore::~DoCore () { ftdi_disconnect (); }
+DoCore::~DoCore () { /*ftdi_disconnect ();*/ }
 
 void DoCore::setNames (Matrix<std::string> namesIn)
 {
 	names = std::move(namesIn);
 }
 
-void DoCore::ftdi_connectasync (const char devSerial[]){
-	if (ftFlume.getNumDevices () <= 0){
-		thrower ("No devices found.");
-	}
-	ftFlume.open (devSerial);
-	ftFlume.setUsbParams ();
-	connectType = ftdiConnectionOption::Async;
-}
+//void DoCore::ftdi_connectasync (const char devSerial[]){
+//	if (ftFlume.getNumDevices () <= 0){
+//		thrower ("No devices found.");
+//	}
+//	ftFlume.open (devSerial);
+//	ftFlume.setUsbParams ();
+//	connectType = ftdiConnectionOption::Async;
+//}
+//
+//void DoCore::ftdi_disconnect (){
+//	ftFlume.close ();
+//	connectType = ftdiConnectionOption::None;
+//}
+//
+//DWORD DoCore::ftdi_trigger (){
+//	return ftFlume.trigger ();
+//}
+//
+///*
+//* Takes data from "mem" structure and writes to the dio board.
+//*/
+//DWORD DoCore::ftdi_write (unsigned variation, bool loadSkip){
+//	if (connectType == ftdiConnectionOption::Serial || connectType == ftdiConnectionOption::Async){
+//		auto& buf = loadSkip ? finFtdiBuffers_loadSkip (variation) : finFtdiBuffers (variation);
+//		// please note that Serial mode has not been thoroughly tested (by me, MOB at least)!
+//		bool proceed = true;
+//		int count = 0;
+//		int idx = 0;
+//		unsigned int totalBytes = 0;
+//		unsigned int number = 0;
+//		unsigned long dwNumberOfBytesSent = 0;
+//		totalBytes += ftFlume.write (buf.pts, buf.bytesToWrite);
+//		return totalBytes;
+//	}
+//	else{
+//		thrower ("No ftdi connection exists! Can't write without a connection.");
+//	}
+//	return 0;
+//}
+//
+//void DoCore::fillFtdiDataBuffer (std::vector<unsigned char>& dataBuffer, unsigned offset, unsigned count, ftdiPt pt){
+//	if (offset + 20 >= dataBuffer.size ()){
+//		thrower ("tried to write data buffer out of bounds!");
+//	}
+//
+//	dataBuffer[offset] = WBWRITE;
+//	dataBuffer[offset + 1] = (((TIMEOFFS + count) >> 8) & 0xFF);
+//	dataBuffer[offset + 2] = ((TIMEOFFS + count) & 0xFF);
+//	dataBuffer[offset + 3] = (((pt.time) >> 24) & 0xFF);
+//	dataBuffer[offset + 4] = (((pt.time) >> 16) & 0xFF);
+//	dataBuffer[offset + 5] = (((pt.time) >> 8) & 0xFF);
+//	dataBuffer[offset + 6] = ((pt.time) & 0xFF);
+//
+//	dataBuffer[offset + 7] = WBWRITE;
+//	dataBuffer[offset + 8] = (((BANKAOFFS + count) >> 8) & 0xFF);
+//	dataBuffer[offset + 9] = ((BANKAOFFS + count) & 0xFF);
+//	dataBuffer[offset + 10] = pt.pts[0];
+//	dataBuffer[offset + 11] = pt.pts[1];
+//	dataBuffer[offset + 12] = pt.pts[2];
+//	dataBuffer[offset + 13] = pt.pts[3];
+//
+//	dataBuffer[offset + 14] = WBWRITE;
+//	dataBuffer[offset + 15] = (((BANKBOFFS + count) >> 8) & 0xFF);
+//	dataBuffer[offset + 16] = ((BANKBOFFS + count) & 0xFF);
+//	dataBuffer[offset + 17] = pt.pts[4];
+//	dataBuffer[offset + 18] = pt.pts[5];
+//	dataBuffer[offset + 19] = pt.pts[6];
+//	dataBuffer[offset + 20] = pt.pts[7];
+//}
 
-void DoCore::ftdi_disconnect (){
-	ftFlume.close ();
-	connectType = ftdiConnectionOption::None;
-}
-
-DWORD DoCore::ftdi_trigger (){
-	return ftFlume.trigger ();
-}
-
-/*
-* Takes data from "mem" structure and writes to the dio board.
-*/
-DWORD DoCore::ftdi_write (unsigned variation, bool loadSkip){
-	if (connectType == ftdiConnectionOption::Serial || connectType == ftdiConnectionOption::Async){
-		auto& buf = loadSkip ? finFtdiBuffers_loadSkip (variation) : finFtdiBuffers (variation);
-		// please note that Serial mode has not been thoroughly tested (by me, MOB at least)!
-		bool proceed = true;
-		int count = 0;
-		int idx = 0;
-		unsigned int totalBytes = 0;
-		unsigned int number = 0;
-		unsigned long dwNumberOfBytesSent = 0;
-		totalBytes += ftFlume.write (buf.pts, buf.bytesToWrite);
-		return totalBytes;
-	}
-	else{
-		thrower ("No ftdi connection exists! Can't write without a connection.");
-	}
-	return 0;
-}
-
-void DoCore::fillFtdiDataBuffer (std::vector<unsigned char>& dataBuffer, unsigned offset, unsigned count, ftdiPt pt){
-	if (offset + 20 >= dataBuffer.size ()){
-		thrower ("tried to write data buffer out of bounds!");
-	}
-
-	dataBuffer[offset] = WBWRITE;
-	dataBuffer[offset + 1] = (((TIMEOFFS + count) >> 8) & 0xFF);
-	dataBuffer[offset + 2] = ((TIMEOFFS + count) & 0xFF);
-	dataBuffer[offset + 3] = (((pt.time) >> 24) & 0xFF);
-	dataBuffer[offset + 4] = (((pt.time) >> 16) & 0xFF);
-	dataBuffer[offset + 5] = (((pt.time) >> 8) & 0xFF);
-	dataBuffer[offset + 6] = ((pt.time) & 0xFF);
-
-	dataBuffer[offset + 7] = WBWRITE;
-	dataBuffer[offset + 8] = (((BANKAOFFS + count) >> 8) & 0xFF);
-	dataBuffer[offset + 9] = ((BANKAOFFS + count) & 0xFF);
-	dataBuffer[offset + 10] = pt.pts[0];
-	dataBuffer[offset + 11] = pt.pts[1];
-	dataBuffer[offset + 12] = pt.pts[2];
-	dataBuffer[offset + 13] = pt.pts[3];
-
-	dataBuffer[offset + 14] = WBWRITE;
-	dataBuffer[offset + 15] = (((BANKBOFFS + count) >> 8) & 0xFF);
-	dataBuffer[offset + 16] = ((BANKBOFFS + count) & 0xFF);
-	dataBuffer[offset + 17] = pt.pts[4];
-	dataBuffer[offset + 18] = pt.pts[5];
-	dataBuffer[offset + 19] = pt.pts[6];
-	dataBuffer[offset + 20] = pt.pts[7];
-}
-
-void DoCore::convertToFinalFormat(UINT variation)
-{
-	// excessive but just in case.
-	formattedTtlSnapshots[variation].clear();
-	loadSkipFormattedTtlSnapshots[variation].clear();
-	finalFormatTtlData[variation].clear();
-	loadSkipFinalFormatTtlData[variation].clear();
-	// do bit arithmetic.
-	for (auto& snapshot : ttlSnapshots[variation])
-	{
-		// each major index is a row, each minor index is a ttl state (0, 1) in that row.
-		std::array<std::bitset<8>, 8> ttlBits;
-		for (UINT rowInc : range(8))
-		{
-			for (UINT numberInc : range(8))
-			{
-				ttlBits[rowInc].set(numberInc, snapshot.ttlStatus[rowInc][numberInc]);
-			}
-		}
-		// I need to put it as an int (just because I'm not actually sure how the bitset gets stored... it'd probably 
-		// work just passing the address of the bitsets, but I'm sure this will work so whatever.)
-		std::array<USHORT, 6> tempCommand;
-		tempCommand[0] = calcDoubleShortTime(snapshot.time).first;
-		tempCommand[1] = calcDoubleShortTime(snapshot.time).second;
-		tempCommand[2] = static_cast <unsigned short>(ttlBits[0].to_ulong());
-		tempCommand[3] = static_cast <unsigned short>(ttlBits[1].to_ulong());
-		tempCommand[4] = static_cast <unsigned short>(ttlBits[2].to_ulong());
-		tempCommand[5] = static_cast <unsigned short>(ttlBits[3].to_ulong());
-		formattedTtlSnapshots[variation].push_back(tempCommand);
-	}
-	// same loop with the loadSkipSnapshots.
-	for (auto& snapshot : loadSkipTtlSnapshots[variation])
-	{
-		// each major index is a row, each minor index is a ttl state (0, 1) in that row.
-		std::array<std::bitset<8>, 8> ttlBits;
-		for (UINT rowInc : range(8))
-		{
-			for (UINT numberInc : range(8))
-			{
-				ttlBits[rowInc].set(numberInc, snapshot.ttlStatus[rowInc][numberInc]);
-			}
-		}
-		// I need to put it as an int (just because I'm not actually sure how the bitset gets stored... it'd probably 
-		// work just passing the address of the bitsets, but I'm sure this will work so whatever.)
-		std::array<USHORT, 6> tempCommand;
-		tempCommand[0] = calcDoubleShortTime(snapshot.time).first;
-		tempCommand[1] = calcDoubleShortTime(snapshot.time).second;
-		tempCommand[2] = static_cast <unsigned short>(ttlBits[0].to_ulong());
-		tempCommand[3] = static_cast <unsigned short>(ttlBits[1].to_ulong());
-		tempCommand[4] = static_cast <unsigned short>(ttlBits[2].to_ulong());
-		tempCommand[5] = static_cast <unsigned short>(ttlBits[3].to_ulong());
-		loadSkipFormattedTtlSnapshots[variation].push_back(tempCommand);
-	}
-
-	/// flatten the data.
-	finalFormatTtlData[variation].resize(formattedTtlSnapshots[variation].size() * 6);
-	int count = 0;
-	for (auto& element : finalFormatTtlData[variation])
-	{
-		// concatenate
-		element = formattedTtlSnapshots[variation][count / 6][count % 6];
-		count++;
-	}
-	// the arrays are usually not the same length and need to be dealt with separately.
-	loadSkipFinalFormatTtlData[variation].resize(loadSkipFormattedTtlSnapshots[variation].size() * 6);
-	count = 0;
-	for (auto& element : loadSkipFinalFormatTtlData[variation])
-	{
-		// concatenate
-		element = loadSkipFormattedTtlSnapshots[variation][count / 6][count % 6];
-		count++;
-	}
-}
+//void DoCore::convertToFinalFormat(UINT variation)
+//{
+//	// excessive but just in case.
+//	formattedTtlSnapshots[variation].clear();
+//	loadSkipFormattedTtlSnapshots[variation].clear();
+//	finalFormatTtlData[variation].clear();
+//	loadSkipFinalFormatTtlData[variation].clear();
+//	// do bit arithmetic.
+//	for (auto& snapshot : ttlSnapshots[variation])
+//	{
+//		// each major index is a row, each minor index is a ttl state (0, 1) in that row.
+//		std::array<std::bitset<8>, 8> ttlBits;
+//		for (UINT rowInc : range(8))
+//		{
+//			for (UINT numberInc : range(8))
+//			{
+//				ttlBits[rowInc].set(numberInc, snapshot.ttlStatus[rowInc][numberInc]);
+//			}
+//		}
+//		// I need to put it as an int (just because I'm not actually sure how the bitset gets stored... it'd probably 
+//		// work just passing the address of the bitsets, but I'm sure this will work so whatever.)
+//		std::array<USHORT, 6> tempCommand;
+//		tempCommand[0] = calcDoubleShortTime(snapshot.time).first;
+//		tempCommand[1] = calcDoubleShortTime(snapshot.time).second;
+//		tempCommand[2] = static_cast <unsigned short>(ttlBits[0].to_ulong());
+//		tempCommand[3] = static_cast <unsigned short>(ttlBits[1].to_ulong());
+//		tempCommand[4] = static_cast <unsigned short>(ttlBits[2].to_ulong());
+//		tempCommand[5] = static_cast <unsigned short>(ttlBits[3].to_ulong());
+//		formattedTtlSnapshots[variation].push_back(tempCommand);
+//	}
+//	// same loop with the loadSkipSnapshots.
+//	for (auto& snapshot : loadSkipTtlSnapshots[variation])
+//	{
+//		// each major index is a row, each minor index is a ttl state (0, 1) in that row.
+//		std::array<std::bitset<8>, 8> ttlBits;
+//		for (UINT rowInc : range(8))
+//		{
+//			for (UINT numberInc : range(8))
+//			{
+//				ttlBits[rowInc].set(numberInc, snapshot.ttlStatus[rowInc][numberInc]);
+//			}
+//		}
+//		// I need to put it as an int (just because I'm not actually sure how the bitset gets stored... it'd probably 
+//		// work just passing the address of the bitsets, but I'm sure this will work so whatever.)
+//		std::array<USHORT, 6> tempCommand;
+//		tempCommand[0] = calcDoubleShortTime(snapshot.time).first;
+//		tempCommand[1] = calcDoubleShortTime(snapshot.time).second;
+//		tempCommand[2] = static_cast <unsigned short>(ttlBits[0].to_ulong());
+//		tempCommand[3] = static_cast <unsigned short>(ttlBits[1].to_ulong());
+//		tempCommand[4] = static_cast <unsigned short>(ttlBits[2].to_ulong());
+//		tempCommand[5] = static_cast <unsigned short>(ttlBits[3].to_ulong());
+//		loadSkipFormattedTtlSnapshots[variation].push_back(tempCommand);
+//	}
+//
+//	/// flatten the data.
+//	finalFormatTtlData[variation].resize(formattedTtlSnapshots[variation].size() * 6);
+//	int count = 0;
+//	for (auto& element : finalFormatTtlData[variation])
+//	{
+//		// concatenate
+//		element = formattedTtlSnapshots[variation][count / 6][count % 6];
+//		count++;
+//	}
+//	// the arrays are usually not the same length and need to be dealt with separately.
+//	loadSkipFinalFormatTtlData[variation].resize(loadSkipFormattedTtlSnapshots[variation].size() * 6);
+//	count = 0;
+//	for (auto& element : loadSkipFinalFormatTtlData[variation])
+//	{
+//		// concatenate
+//		element = loadSkipFormattedTtlSnapshots[variation][count / 6][count % 6];
+//		count++;
+//	}
+//}
 
 std::pair<USHORT, USHORT> DoCore::calcDoubleShortTime(double time)
 {
@@ -182,35 +181,35 @@ std::pair<USHORT, USHORT> DoCore::calcDoubleShortTime(double time)
 
 
 
-void DoCore::convertToFinalFtdiFormat (unsigned variation){
-	for (auto loadSkip : { false, true }){
-		// first convert from diosnapshot to ftdi snapshot
-		auto& snaps = loadSkip ? ftdiSnaps_loadSkip (variation) : ftdiSnaps (variation);
-		auto& buf = loadSkip ? finFtdiBuffers_loadSkip (variation) : finFtdiBuffers (variation);
-		// please note that Serial mode has not been thoroughly tested (by me, MOB at least)!
-		auto bufSize = (connectType == ftdiConnectionOption::Serial ? DIO_BUFFERSIZESER : DIO_BUFFERSIZEASYNC);
-		buf.pts = std::vector<unsigned char> (bufSize * DIO_MSGLENGTH * DIO_WRITESPERDATAPT, 0);
-		bool proceed = true;
-		int count = 0;
-		unsigned int totalBytes = 0;
-		buf.bytesToWrite = 0;
-		unsigned int number = 0;
-		while ((number < bufSize) && proceed){
-			unsigned offset = DIO_WRITESPERDATAPT * number * DIO_MSGLENGTH;
-			fillFtdiDataBuffer (buf.pts, offset, count, snaps[count]);
-			if (snaps[count] == ftdiPt ({ 0,0,0,0,0,0,0,0,0 }) && number != 0){
-				proceed = false;//this is never false since we reach 43008 size?
-			}
-			if (count == NUMPOINTS){
-				thrower ("Non-Terminated table, data was filled all the way to end of data array... "
-					"Unit will not work right..., last element of data should be all zeros.");
-			}
-			number++;
-			count++;
-			buf.bytesToWrite += DIO_WRITESPERDATAPT * DIO_MSGLENGTH;
-		}
-	}
-}
+//void DoCore::convertToFinalFtdiFormat (unsigned variation){
+//	for (auto loadSkip : { false, true }){
+//		// first convert from diosnapshot to ftdi snapshot
+//		auto& snaps = loadSkip ? ftdiSnaps_loadSkip (variation) : ftdiSnaps (variation);
+//		auto& buf = loadSkip ? finFtdiBuffers_loadSkip (variation) : finFtdiBuffers (variation);
+//		// please note that Serial mode has not been thoroughly tested (by me, MOB at least)!
+//		auto bufSize = (connectType == ftdiConnectionOption::Serial ? DIO_BUFFERSIZESER : DIO_BUFFERSIZEASYNC);
+//		buf.pts = std::vector<unsigned char> (bufSize * DIO_MSGLENGTH * DIO_WRITESPERDATAPT, 0);
+//		bool proceed = true;
+//		int count = 0;
+//		unsigned int totalBytes = 0;
+//		buf.bytesToWrite = 0;
+//		unsigned int number = 0;
+//		while ((number < bufSize) && proceed){
+//			unsigned offset = DIO_WRITESPERDATAPT * number * DIO_MSGLENGTH;
+//			fillFtdiDataBuffer (buf.pts, offset, count, snaps[count]);
+//			if (snaps[count] == ftdiPt ({ 0,0,0,0,0,0,0,0,0 }) && number != 0){
+//				proceed = false;//this is never false since we reach 43008 size?
+//			}
+//			if (count == NUMPOINTS){
+//				thrower ("Non-Terminated table, data was filled all the way to end of data array... "
+//					"Unit will not work right..., last element of data should be all zeros.");
+//			}
+//			number++;
+//			count++;
+//			buf.bytesToWrite += DIO_WRITESPERDATAPT * DIO_MSGLENGTH;
+//		}
+//	}
+//}
 
 
 std::array< std::array<bool, size_t(DOGrid::numPERunit)>, size_t(DOGrid::numOFunit) > DoCore::getFinalSnapshot ()
@@ -225,29 +224,27 @@ std::array< std::array<bool, size_t(DOGrid::numPERunit)>, size_t(DOGrid::numOFun
 }
 
 
-std::string DoCore::getDoSystemInfo (){
-	unsigned numDev;
-	std::string msg = "";
-	try{
-		numDev = ftFlume.getNumDevices ();
-		msg += "Number ft devices: " + str (numDev) + "\n";
-	}
-	catch (ChimeraError & err){
-		msg += "Failed to Get number ft Devices! Error was: " + err.trace ();
-	}
-	msg += ftFlume.getDeviceInfoList ();
-	return msg;
-}
+//std::string DoCore::getDoSystemInfo (){
+//	unsigned numDev;
+//	std::string msg = "";
+//	try{
+//		numDev = ftFlume.getNumDevices ();
+//		msg += "Number ft devices: " + str (numDev) + "\n";
+//	}
+//	catch (ChimeraError & err){
+//		msg += "Failed to Get number ft Devices! Error was: " + err.trace ();
+//	}
+//	msg += ftFlume.getDeviceInfoList ();
+//	return msg;
+//}
 
 /* mostly if not entirely used for setting dacs */
 void DoCore::standardNonExperimentStartDoSequence (DoSnapshot initSnap){
 	organizeTtlCommands (0, initSnap);
 	findLoadSkipSnapshots (0, std::vector<parameterType> (), 0);
-	convertToFtdiSnaps (0);
-	convertToFinalFtdiFormat (0);
-	ftdi_write (0, false);
-	ftdi_trigger ();
-	FtdiWaitTillFinished (0);
+	//convertToFtdiSnaps (0);
+	//convertToFinalFtdiFormat (0);
+
 }
 
 void DoCore::initializeDataObjects (unsigned variationNum){
@@ -278,11 +275,6 @@ void DoCore::initializeDataObjects (unsigned variationNum){
 	loadSkipFinalFormatTtlData.resize(variationNum);
 
 
-	/* deprecated */
-	ftdiSnaps.uniformSizeReset (variationNum);
-	ftdiSnaps_loadSkip.uniformSizeReset (variationNum);
-	finFtdiBuffers.uniformSizeReset (variationNum);
-	finFtdiBuffers_loadSkip.uniformSizeReset (variationNum);
 }
 
 
@@ -360,11 +352,6 @@ void DoCore::sizeDataStructures (unsigned variations){
 	loadSkipFinalFormatTtlData.clear();
 	loadSkipFinalFormatTtlData.resize(variations);
 
-	/* deprecated */
-	ftdiSnaps.uniformSizeReset (variations);
-	finFtdiBuffers.uniformSizeReset (variations);
-	ftdiSnaps_loadSkip.uniformSizeReset (variations);
-	finFtdiBuffers_loadSkip.uniformSizeReset (variations);
 }
 
 
@@ -488,9 +475,9 @@ unsigned DoCore::countTriggers (std::pair<unsigned, unsigned> which, unsigned va
 	for (auto snapshotInc : range (ttlSnapshots [variation].size () - 1))
 	{
 		// count each rising edge. Also count if the first snapshot is high. 
-		if ((snaps[snapshotInc].ttlStatus[int (which.first)][which.second] == false
-			&& snaps[snapshotInc + 1].ttlStatus[int (which.first)][which.second] == true)
-			|| (snaps[snapshotInc].ttlStatus[int (which.first)][which.second] == true
+		if ((snaps[snapshotInc].ttlStatus[which.first][which.second] == false
+			&& snaps[snapshotInc + 1].ttlStatus[which.first][which.second] == true)
+			|| (snaps[snapshotInc].ttlStatus[which.first][which.second] == true
 				&& snapshotInc == 0))
 		{
 			count++;
@@ -500,41 +487,6 @@ unsigned DoCore::countTriggers (std::pair<unsigned, unsigned> which, unsigned va
 }
 
 
-DWORD DoCore::ftdi_ForceOutput (unsigned row, unsigned number, int state,
-	std::array<std::array<bool, size_t(DOGrid::numPERunit)>, size_t(DOGrid::numOFunit)> status)
-{
-	//outputs (number, row).set (state);
-	resetTtlEvents ();
-	//initializeDataObjects (0);
-	sizeDataStructures (1);
-	ttlSnapshots [0].push_back ({ 1, status });
-	formatForFPGA(0);
-	writeTtlDataToFPGA(0, false);
-
-	int tcp_connect;
-	try
-	{
-		tcp_connect = zynq_tcp.connectTCP(ZYNQ_ADDRESS);
-	}
-	catch (ChimeraError& err)
-	{
-		tcp_connect = 1;
-		errBox(err.what());
-	}
-
-	if (tcp_connect == 0)
-	{
-		zynq_tcp.writeCommand("trigger");
-		zynq_tcp.writeCommand("disableMod");
-		zynq_tcp.disconnect();
-	}
-	else
-	{
-		errBox("connection to zynq failed. can't write DAC data\n");
-	}
-
-	return 0;
-}
 
 DWORD DoCore::FPGAForceOutput(std::array<std::array<bool, size_t(DOGrid::numPERunit)>, size_t(DOGrid::numOFunit)> status)
 {
@@ -594,7 +546,7 @@ void DoCore::formatForFPGA(UINT variation)
 		outputB = 0;
 		//outputAtest = 0;
 		//outputBtest = 0;
-		for (int i = 0; i < 4; i++)
+		for (unsigned i = 0; i < 4; i++)
 		{
 			bankA = snapshot.ttlStatus[i]; //bank here is set of 8 booleans
 			bankB = snapshot.ttlStatus[i + 4]; //bank here is set of 8 booleans
@@ -668,65 +620,12 @@ void DoCore::findLoadSkipSnapshots (double time, std::vector<parameterType>& var
 }
 
 
-void DoCore::convertToFtdiSnaps (unsigned variation)
-{
-	// formatting of these snaps is similar to the word formatting of the viewpoint dio64 card; the ttl on/off 
-	int snapIndex = 0;
-	int val1, val2, fpgaBankCtr;
-	unsigned long timeConv = 100000;
-	for (auto loadSkip : { false, true })
-	{
-		auto ttlSnaps = loadSkip ? loadSkipTtlSnapshots [variation] : ttlSnapshots [variation];
-		auto& ftSnaps = loadSkip ? ftdiSnaps_loadSkip (variation) : ftdiSnaps (variation);
-		for (auto snapshot : ttlSnaps)
-		{
-			ftdiPt pt;
-			fpgaBankCtr = 0;
-			for (auto rowOfTtls : snapshot.ttlStatus)
-			{
-				// currently this is split an awkward because the viewpoint organization was organized in sets of 16, not 8.
-				// convert first 8 of snap shot to int
-				val1 = 0;
-				for (auto i : range (8))
-				{
-					val1 = val1 + pow (2, i) * rowOfTtls[i];
-				}
-				// convert next 8 of snap shot to int
-				val2 = 0;
-				for (auto j : range (8))
-				{
-					val2 = val2 + pow (2, j) * rowOfTtls[j + 8];
-				}
-				pt.pts[fpgaBankCtr++] = val1;
-				pt.pts[fpgaBankCtr++] = val2;
-			}
-			pt.time = snapshot.time * timeConv;
-			if (snapIndex > ftSnaps.size ())
-			{
-				thrower ("More than 2048 Variations attempted to write to ftdi snapshots object!");
-			}
-			ftSnaps[snapIndex] = pt;
-			snapIndex++;
-		}
-		ftSnaps[snapIndex] = { 0,0,0,0,0,0,0,0,0 };
-	}
-}
-
 std::vector<std::vector<DoSnapshot>> DoCore::getTtlSnapshots ()
 {
 	/* used in the unit testing suite */
 	return ttlSnapshots;
 }
 
-ExpWrap<finBufInfo> DoCore::getFinalFtdiData ()
-{
-	return finFtdiBuffers;
-}
-
-ExpWrap<std::array<ftdiPt, 2048>> DoCore::getFtdiSnaps ()
-{
-	return ftdiSnaps;
-}
 
 
 void DoCore::organizeTtlCommands (unsigned variation, DoSnapshot initSnap)
@@ -820,50 +719,17 @@ void DoCore::organizeTtlCommands (unsigned variation, DoSnapshot initSnap)
 }
 
 
-double DoCore::getFtdiTotalTime (unsigned variation)
-{
-	double time = -1;
-	bool proceed = true;
-	int counter = 0;
-	for (auto snap : ftdiSnaps (variation))
-	{
-		if (snap == ftdiPt ({ 0, 0, 0, 0, 0, 0, 0, 0, 0 }) && time != -1 && counter >= 0 && proceed)
-		{
-			return (double (ftdiSnaps (variation)[--counter].time) / 100000);
-			proceed = false;
-		}
-		time = snap.time;
-		counter++;
-	}
-	return 0;
-}
-
-
-double DoCore::getTotalTime (unsigned variation)
-{
-	// ??? there used to be a +1 at the end of this...
-	if (ftdiSnaps (variation).empty ()) { thrower ("nothing in ftdi snaps vector"); }
-	else {
-		return (ftdiSnaps (variation).back ().time
-			+ 65535 * ftdiSnaps (variation).back ().time) / 10000.0 + 1;
-	}
-}
 
 unsigned long DoCore::getNumberEvents (unsigned variation)
 {
 	return ttlSnapshots [variation].size ();
 }
 
-bool DoCore::getFtFlumeSafemode () { return ftFlume.getSafemodeSetting (); }
 Matrix<std::string> DoCore::getAllNames () { return names; }
 void DoCore::resetTtlEvents () { initializeDataObjects (0); }
 void DoCore::wait2 (double time) { Sleep (time + 10); }
 void DoCore::prepareForce () { initializeDataObjects (1); }
 
-void DoCore::FtdiWaitTillFinished (unsigned variation){
-	auto time = getFtdiTotalTime (variation);
-	wait2 (time);
-}
 
 bool DoCore::isValidTTLName (std::string name){
 	unsigned row;

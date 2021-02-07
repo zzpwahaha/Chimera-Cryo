@@ -1043,10 +1043,13 @@ void ExpThreadWorker::calculateAdoVariations (ExpRuntimeData& runtime) {
 			input->dds.standardExperimentPrep(variationInc);
 			input->aoSys.checkTimingsWork (variationInc);
 		}
-		emit notification (("Programmed time per repetition: " + str (input->ttls.getTotalTime (0)) + "\r\n").c_str (), 1);
 		unsigned __int64 totalTime = 0;
+		std::vector<double> finaltimes = input->ttls.getFinalTimes();
+		double sum = std::accumulate(finaltimes.begin(), finaltimes.end(), 0.0);
+		double mean = sum / finaltimes.size();
+		emit notification (("Programmed average time per repetition: " + str (mean) + "\r\n").c_str (), 1);
 		for (auto variationNumber : range (variations)) {
-			totalTime += unsigned __int64 (input->ttls.getTotalTime (variationNumber) * runtime.repetitions);
+			totalTime += unsigned __int64 (finaltimes[variationNumber] * runtime.repetitions);
 		}
 		emit notification (("Programmed Total Experiment time: " + str (totalTime) + "\r\n").c_str (), 1);
 		emit notification (("Number of TTL Events in experiment: " + str (input->ttls.getNumberEvents (0)) + "\r\n").c_str (), 1);
@@ -1094,7 +1097,7 @@ void ExpThreadWorker::initVariation (unsigned variationInc,std::vector<parameter
 	}
 	waitForAndorFinish ();
 	bool skipOption = input->skipNext == nullptr ? false : input->skipNext->load ();
-	if (true /*runMaster*/) { input->ttls.ftdi_write (variationInc, skipOption); }
+	if (true /*runMaster*/) { /*input->ttls.ftdi_write (variationInc, skipOption);*/ }
 	//handleDebugPlots ( input->ttls, input->aoSys, variationInc ); deal it later zzp 20210203
 }
 
