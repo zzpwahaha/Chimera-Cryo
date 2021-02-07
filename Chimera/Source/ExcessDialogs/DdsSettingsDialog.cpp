@@ -113,6 +113,7 @@ void DdsSettingsDialog::handleOk()
 
 	}
 	input->updateCoreNames();
+	emit updateSyntaxHighLight();
 	close();
 }
 

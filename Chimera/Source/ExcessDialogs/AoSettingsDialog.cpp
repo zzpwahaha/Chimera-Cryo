@@ -115,6 +115,7 @@ void AoSettingsDialog::handleOk(){
 		text = noteEdits[dacInc]->text();
 		input->setNote(dacInc, str(text));
 	}
+	emit updateSyntaxHighLight();
 	close ();
 }
 

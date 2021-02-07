@@ -21,7 +21,12 @@ class NoteSystem : public QWidget
 		void setConfigurationNotes(std::string notes);
 		void initialize( IChimeraQtWindow* parent );
 		std::string getConfigurationNotes();
+		bool eventFilter(QObject* obj, QEvent* event);
+
+	protected:
+		//void mouseDoubleClickEvent(QMouseEvent* event) override;
 	private:
 		QLabel* header;
 		CQTextEdit* edit;
+		int editZoom;
 };

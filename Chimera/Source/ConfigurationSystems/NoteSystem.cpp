@@ -45,6 +45,8 @@ void NoteSystem::initialize(IChimeraQtWindow* win)
 	edit = new CQTextEdit (win);
 	layout->addWidget(header, 0);
 	layout->addWidget(edit, 1);
+	edit->installEventFilter(this);
+	editZoom = 0;
 }
 
 void NoteSystem::setConfigurationNotes(std::string notes){
@@ -55,4 +57,71 @@ std::string NoteSystem::getConfigurationNotes(){
 	std::string text = str(edit->toPlainText());
 	return text;
 }
+
+bool NoteSystem::eventFilter(QObject* obj, QEvent* event)
+{
+	auto aa = event->type();
+	if (obj == edit && event->type() == QEvent::Wheel)
+	{
+		QWheelEvent* wheel = static_cast<QWheelEvent*>(event);
+		if (wheel->modifiers() == Qt::ControlModifier)
+		{
+			if (wheel->delta() > 0)
+			{
+				edit->zoomIn();
+				editZoom++;
+			}
+
+			else
+			{
+				if (edit->currentFont().pointSize() != 1) { editZoom--; }
+				edit->zoomOut();
+			}
+
+			return true;
+		}
+	}
+	else if (obj == edit && event->type() == QEvent::KeyPress)
+	{
+		QKeyEvent* key = static_cast<QKeyEvent*>(event);
+		if (key->modifiers() == Qt::ControlModifier)
+		{
+			if (key->key() == Qt::Key_0)
+			{
+				edit->zoomOut(editZoom);
+				//editZoom > 0 ? edit->zoomOut(editZoom) : edit->zoomIn(abs(editZoom));
+				editZoom = 0;
+				return true;
+			}
+			else if (key->key() == Qt::Key_Equal)
+			{
+				edit->zoomIn();
+				editZoom++;
+				return true;
+			}
+			else if (key->key() == Qt::Key_Minus)
+			{
+				if (edit->currentFont().pointSize() != 1) { editZoom--; }
+				edit->zoomOut();
+				return true;
+			}
+
+		}
+
+	}
+
+	return false;
+}
+
+//void NoteSystem::mouseDoubleClickEvent(QMouseEvent* event)
+//{
+//	if (event->modifiers() == Qt::ControlModifier)
+//	{
+//		editZoom > 0 ? edit->zoomOut(editZoom) : edit->zoomIn(editZoom);
+//		editZoom = 0;
+//	}
+//	else {
+//		QWidget::mouseDoubleClickEvent(event);
+//	}
+//}
 

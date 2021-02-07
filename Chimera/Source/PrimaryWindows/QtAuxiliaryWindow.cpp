@@ -121,6 +121,9 @@ void QtAuxiliaryWindow::initializeWidgets (){
 		DOdialog = new doChannelInfoDialog(&ttlBoard);
 		AOdialog = new AoSettingsDialog(&aoSys);
 		DDSdialog = new DdsSettingsDialog(&dds);
+		connect(DOdialog, &doChannelInfoDialog::updateSyntaxHighLight, [this]() {this->scriptWin->updateDoAoDdsNames(); });
+		connect(AOdialog, &AoSettingsDialog::updateSyntaxHighLight, [this]() {this->scriptWin->updateDoAoDdsNames(); });
+		connect(DDSdialog, &DdsSettingsDialog::updateSyntaxHighLight, [this]() {this->scriptWin->updateDoAoDdsNames(); });
 
 	}
 	catch (ChimeraError& err){

@@ -64,20 +64,26 @@ void Script::initialize(IChimeraQtWindow* parent, std::string deviceTypeInput, s
 	layout1->addWidget(fileNameText, 1);
 	layout1->addWidget(help, 0);
 	layout1->setContentsMargins(0, 0, 0, 0);
-
 	if (deviceType == "Master"){
 		help->setToolTip ("This is a script for programming master timing for TTLs, DACs, the RSG, and the raman outputs.\n"
 							"Acceptable Commands:\n"
 							"-      t++\n"
-							"-      t+= [number] (space between = and number required)\n"
-							"-      t= [number] (space between = and number required)\n"
+							"-      t += [number] (space between = and number required)\n"
+							"-      t = [number] (space between = and number required)\n"
 							"-      on: [ttlName]\n"
 							"-      off: [ttlName]\n"
 							"-      pulseon: [ttlName] [pulseLength]\n"
 							"-      pulseoff: [ttlName] [pulseLength]\n"
 							"-      dac: [dacName] [voltage]\n"
+							"-      dacramp: [dacName] [initValue] [finalValue] [rampTime]\n"
 							"-      dacarange: [dacName] [initValue] [finalValue] [rampTime] [rampInc]\n"
 							"-      daclinspace: [dacName] [initValue] [finalValue] [rampTime] [numberOfSteps]\n"
+							"-      ddsamp: [ddsName] [ampValue]\n"
+							"-      ddsfreq: [ddsName] [freqValue]\n"
+							"-      ddslinspaceamp: [dacName] [initValue] [finalValue] [rampTime] [numberOfSteps]\n"
+							"-      ddslinspacefreq: [dacName] [initValue] [finalValue] [rampTime] [numberOfSteps]\n"
+							"-      ddsrampamp: [dacName] [initValue] [finalValue] [rampTime]\n"
+							"-      ddsrampfreq: [dacName] [initValue] [finalValue] [rampTime]\n"
 							"-      def [functionName]([functionArguments]):\n"
 							"-      call [functionName(argument1, argument2, etc...)]\n"
 							"-      repeat: [numberOfTimesToRepeat]\n"
@@ -130,6 +136,8 @@ void Script::initialize(IChimeraQtWindow* parent, std::string deviceTypeInput, s
 		}});
 
 	edit = new CQTextEdit ("", parent);
+	editZoom = 0;
+	edit->installEventFilter(this);
 	edit->setAcceptRichText (false);
 	QFont font;
 	{
@@ -624,6 +632,62 @@ void Script::setEnabled ( bool enabled, bool functionsEnabled ){
 	}
 	edit->setReadOnly (!enabled);
 	availableFunctionsCombo.combo->setEnabled( functionsEnabled );
+}
+
+
+bool Script::eventFilter(QObject* obj, QEvent* event)
+{
+	auto aa = event->type();
+	if (obj == edit && event->type() == QEvent::Wheel)
+	{
+		QWheelEvent* wheel = static_cast<QWheelEvent*>(event);
+		if (wheel->modifiers() == Qt::ControlModifier)
+		{
+			if (wheel->delta() > 0)
+			{
+				edit->zoomIn();
+				editZoom++;
+			}
+
+			else
+			{
+				if (edit->currentFont().pointSize() != 1) { editZoom--; }
+				edit->zoomOut();
+			}
+
+			return true;
+		}
+	}
+	else if (obj == edit && event->type() == QEvent::KeyPress)
+	{
+		QKeyEvent* key = static_cast<QKeyEvent*>(event);
+		if (key->modifiers() == Qt::ControlModifier)
+		{
+			if (key->key() == Qt::Key_0)
+			{
+				edit->zoomOut(editZoom);
+				//editZoom > 0 ? edit->zoomOut(editZoom) : edit->zoomIn(abs(editZoom));
+				editZoom = 0;
+				return true;
+			}
+			else if (key->key() == Qt::Key_Equal)
+			{
+				edit->zoomIn();
+				editZoom++;
+				return true;
+			}
+			else if (key->key() == Qt::Key_Minus)
+			{
+				if (edit->currentFont().pointSize() != 1) { editZoom--; }
+				edit->zoomOut();
+				return true;
+			}
+
+		}
+
+	}
+
+	return false;
 }
 
 void Script::loadFunctions(){

@@ -52,6 +52,7 @@ void QtScriptWindow::updateDoAoDdsNames () {
 	masterScript.highlighter->setTtlNames(doNames);
 	masterScript.highlighter->setDacNames(aoNames);
 	masterScript.highlighter->setDdsNames(ddsNames);
+	masterScript.highlighter->rehighlight();
 }
 
 

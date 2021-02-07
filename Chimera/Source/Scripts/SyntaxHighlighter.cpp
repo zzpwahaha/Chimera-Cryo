@@ -87,7 +87,7 @@ void SyntaxHighlighter::setDdsNames(std::vector<std::string> ddsNames)
 		ddsNamesRegex.push_back(cstr(ddsNames[ddsInc]));
 	}
 	ddsRules.clear();
-	addRules(ddsNamesRegex, QColor(203, 75, 22), false, true, ddsRules);
+	addRules(ddsNamesRegex, QColor(94, 148, 247), false, true, ddsRules);
 }
 
 
@@ -145,6 +145,13 @@ void SyntaxHighlighter::highlightBlock (const QString& text){
 		while (matchIterator.hasNext ()) {
 			auto match = matchIterator.next ();
 			setFormat (match.capturedStart (), match.capturedLength (), rule.format);
+		}
+	}
+	for (const HighlightingRule& rule : qAsConst(ddsRules)) {
+		auto matchIterator = rule.pattern.globalMatch(text);
+		while (matchIterator.hasNext()) {
+			auto match = matchIterator.next();
+			setFormat(match.capturedStart(), match.capturedLength(), rule.format);
 		}
 	}
 	for (const HighlightingRule& rule : qAsConst (localParamRules)) {

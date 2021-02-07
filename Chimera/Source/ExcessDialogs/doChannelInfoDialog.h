@@ -22,6 +22,8 @@ class doChannelInfoDialog : public QDialog
 	public Q_SLOTS:
 		void handleOk ();
 		void handleCancel ();
+	signals:
+		void updateSyntaxHighLight();
 	private:
 		DoSystem* input;
 		std::array<QLabel*, size_t(DOGrid::total)> numberlabels;

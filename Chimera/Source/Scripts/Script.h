@@ -72,6 +72,8 @@ class Script : public IChimeraSystem
 		void setEnabled ( bool enabled, bool functionsEnabled );
 		SyntaxHighlighter* highlighter;
 
+		bool eventFilter(QObject* obj, QEvent* event);
+
 	private:
 		CQTextEdit* edit;
 		QLabel* title;
@@ -89,5 +91,6 @@ class Script : public IChimeraSystem
 
 		unsigned long editChangeBegin;
 		unsigned long editChangeEnd;
+		int editZoom;
 		bool syntaxColoringIsCurrent;
 };

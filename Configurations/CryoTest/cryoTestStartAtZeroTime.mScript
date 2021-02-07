@@ -1,12 +1,16 @@
 %%%%%%%%%%%%%%%%% Start With 1ms %%%%%%%%%%%%%%%%% 
 t = 1
-pulseon: do1_0 1
+%pulseon: do1_0 1
 dac: dac0_0 1
-ddsamp: dds0_1 x
-ddsrampamp: dds0_1 1.25 0 5 
+%ddsamp: dds0_1 x
+%ddsrampamp: dds0_1 1.25 0 5 
 ddsfreq: dds0_1 80
-%ddsrampfreq: dds0_1 0 1 5
-t += 10
+ddsamp: dds0_1 1.25
+t += 5
 pulseon: do1_0 1
+%ddsrampamp: dds0_1 0.5 1.25 5 
+ddsrampfreq: dds0_1 10 1 2
+t += 10
+%pulseon: do1_0 1
 dac: dac0_0 0
 ddsamp: dds0_1 0

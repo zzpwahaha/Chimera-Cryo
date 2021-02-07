@@ -13,6 +13,8 @@ public:
 public Q_SLOTS:
 	void handleOk();
 	void handleCancel();
+signals:
+	void updateSyntaxHighLight();
 private:
 	std::array<QLabel*, size_t(AOGrid::total)> numberLabels;
 	std::array<QLineEdit*, size_t(AOGrid::total)> nameEdits;

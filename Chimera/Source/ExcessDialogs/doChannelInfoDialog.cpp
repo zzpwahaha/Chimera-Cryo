@@ -32,35 +32,7 @@ doChannelInfoDialog::doChannelInfoDialog (DoSystem* inputPtr)
 	layout->addLayout(DOGridLayout, 1);
 	layout->addStretch(1);
 
-	//long columnWidth = 120;
-	//long labelSize = 65;
-	//long rowSize = 30;
-	//int px=labelSize, py = 0;
-	//for (unsigned numInc : range (edits.front ().size ())) 
-	//{
-	//	numberlabels[numInc] = new QLabel (qstr (numInc), this);
-	//	numberlabels[numInc]->setGeometry (px, py, columnWidth, rowSize);
-	//	numberlabels[numInc]->setAlignment (Qt::AlignCenter);
-	//	px += columnWidth;
-	//}
-	//for (auto row : DoRows::allRows)
-	//{
-	//	py += rowSize;
-	//	px = 0;
-	//	rowLabels[int (row)] = new QLabel (qstr (DoRows::toStr (row)), this); 
-	//	rowLabels[int (row)]->setGeometry (px, py, labelSize, rowSize);
-	//	rowLabels[int (row)]->setAlignment (Qt::AlignCenter);
-	//	px += labelSize;
-	//	for (unsigned numberInc : range( edits[int (row)].size ())){
-	//		edits[int (row)][numberInc] = new QLineEdit (this);
-	//		edits[int (row)][numberInc]->setGeometry (px, py, columnWidth, rowSize);
-	//		edits[int (row)][numberInc]->setText (qstr (input->ttls->getName (row, numberInc)));
-	//		edits[int (row)][numberInc]->setToolTip("Original: " + qstr (input->ttls->getName (row, numberInc)));
-	//		px += columnWidth;
-	//	}
-	//}
-	//px = 0;
-	//py += rowSize;
+
 	QHBoxLayout* layoutBtns = new QHBoxLayout();
 	okBtn = new QPushButton ("OK", this);
 	connect (okBtn, &QPushButton::released, this, &doChannelInfoDialog::handleOk);
@@ -89,8 +61,11 @@ void doChannelInfoDialog::updateAllEdits()
 	
 }
 
-void doChannelInfoDialog::handleOk (){
-	for (auto row : DoRows::allRows){
+void doChannelInfoDialog::handleOk ()
+{
+	Matrix<std::string> names;
+	for (auto row : DoRows::allRows)
+	{
 		for (unsigned numberInc = 0; numberInc < edits[int (row)].size (); numberInc++)	
 		{
 			QString name = edits[int(row)][numberInc]->text();
@@ -99,9 +74,12 @@ void doChannelInfoDialog::handleOk (){
 				errBox ("ERROR: " + str (name) + " is an invalid name; names cannot start with numbers.");
 				return;
 			}
+			names(int(row), numberInc) = name.toStdString();
 			input->setName(row, numberInc, name.toStdString());
 		}
 	}
+	input->getCore().setNames(names);
+	emit updateSyntaxHighLight();
 	close ();
 }
 
