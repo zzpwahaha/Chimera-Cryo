@@ -49,8 +49,9 @@ class QtAuxiliaryWindow : public IChimeraQtWindow{
 		void passRoundToDac ();
 		std::string getOtherSystemStatusMsg ();
 		Matrix<std::string> getTtlNames ();
-		DoSystem* getTtlSystem ();
+		DoSystem& getTtlSystem ();
 		std::array<AoInfo, size_t(AOGrid::total)> getDacInfo ();
+		std::array<std::string, size_t(DDSGrid::total)> getDdsNames();
 		std::string getVisaDeviceStatus ();
 
 		void fillMasterThreadInput (ExperimentThreadInput* input);

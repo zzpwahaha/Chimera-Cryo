@@ -70,7 +70,7 @@ class DoCore
 			std::vector<parameterType>& vars, std::string scope);
 		void setNames (Matrix<std::string> namesIn);
 		Matrix<std::string> getAllNames ();
-		void standardExperimentPrep (unsigned variationInc, double currLoadSkipTime, std::vector<parameterType>& expParams);
+		//void standardExperimentPrep (unsigned variationInc, double currLoadSkipTime, std::vector<parameterType>& expParams);
 	
 		void DoCore::convertToFinalFormat(UINT variation);
 		std::pair<USHORT, USHORT> DoCore::calcDoubleShortTime(double time);

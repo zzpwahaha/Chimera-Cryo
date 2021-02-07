@@ -277,3 +277,11 @@ DoCore& DoSystem::getCore (){
 	return core;
 }
 
+void DoSystem::standardExperimentPrep(unsigned variationInc, double currLoadSkipTime, std::vector<parameterType>& expParams) {
+	core.organizeTtlCommands(variationInc, { ZYNQ_DEADTIME,getCurrentStatus() });
+	core.findLoadSkipSnapshots(currLoadSkipTime, expParams, variationInc);
+	//convertToFtdiSnaps (variationInc);
+	//convertToFinalFtdiFormat (variationInc);
+	core.convertToFinalFormat(variationInc);/*seems useless*/
+	core.formatForFPGA(variationInc);
+}

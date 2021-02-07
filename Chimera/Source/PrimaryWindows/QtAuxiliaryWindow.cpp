@@ -209,6 +209,17 @@ std::array<AoInfo, size_t(AOGrid::total)> QtAuxiliaryWindow::getDacInfo (){
 	return aoSys.getDacInfo ();
 }
 
+std::array<std::string, size_t(DDSGrid::total)> QtAuxiliaryWindow::getDdsNames()
+{
+	std::array<std::string, size_t(DDSGrid::total)> names;
+	for (size_t i = 0; i < size_t(DDSGrid::total); i++)
+	{
+		names[i] = dds.getName(i);
+	}
+	return names;
+}
+
+
 std::vector<parameterType> QtAuxiliaryWindow::getAllParams (){
 	std::vector<parameterType> vars = configParamCtrl.getAllParams ();
 	std::vector<parameterType> vars2 = globalParamCtrl.getAllParams ();
@@ -263,8 +274,8 @@ void QtAuxiliaryWindow::zeroDds() {
 	}
 }
 
-DoSystem* QtAuxiliaryWindow::getTtlSystem (){
-	return &ttlBoard;
+DoSystem& QtAuxiliaryWindow::getTtlSystem (){
+	return ttlBoard;
 }
 
 DoCore& QtAuxiliaryWindow::getTtlCore (){

@@ -257,7 +257,8 @@ void Script::saveScript(std::string configPath){
 }
 
 //
-void Script::saveScriptAs(std::string location){
+void Script::saveScriptAs(std::string location)
+{
 	if (location == ""){
 		return;
 	}
@@ -412,7 +413,8 @@ void Script::newScript(){
 		tempName += "DEFAULT_MASTER_SCRIPT.mScript";
 	}	
 	reset();
-	loadFile(tempName);
+	loadFile(tempName, std::ios::_Openmode(std::ios::out | std::ios::trunc));
+	edit->setText("%%%%%%%%%%%%%%%%% Start With 1ms %%%%%%%%%%%%%%%%% \r\nt = 1");
 }
 
 
@@ -472,9 +474,10 @@ void Script::openParentScript(std::string parentScriptFileAndPath, std::string c
 		It's used bare when just changing the
 ]-		view of the edit, while it's used with some surrounding changes for loading a new parent.
  */
-void Script::loadFile(std::string pathToFile){
+void Script::loadFile(std::string pathToFile, std::ios::_Openmode flags)
+{
 	std::fstream openFile;
-	openFile.open(pathToFile, std::ios::in);
+	openFile.open(pathToFile, std::ios::in | flags); /*default is open for reading*/
 	if (!openFile.is_open()){
 		reset();
 		thrower ("Failed to open script file: " + pathToFile + ".");

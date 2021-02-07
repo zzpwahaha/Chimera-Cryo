@@ -366,18 +366,31 @@ void AoSystem::organizeDacCommands(unsigned variation)
 	}
 	auto& snap = dacSnapshots[variation];
 	snap.clear();
-	// first copy the initial settings so that things that weren't changed remain unchanged.
+
 	std::array<double, size_t(AOGrid::total)> dacValuestmp;
-	for ( auto i : range ( outputs.size ( ) ) )
+	for (auto i : range(outputs.size()))
 	{
-		dacValuestmp[ i ] = outputs[ i ].info.currVal;
+		dacValuestmp[i] = outputs[i].info.currVal;
 	}
-	snap.push_back({ 0, dacValuestmp });
+	snap.push_back({ ZYNQ_DEADTIME,dacValuestmp });
+	if (timeOrganizer[0].first != 0)
+	{
+		// then there were no commands at time 0, so just set the initial state to be exactly the original state before
+		// the experiment started. I don't need to modify the first snapshot in this case, it's already set. Add a snapshot
+		// here so that the thing modified is the second snapshot not the first. 
+		snap.push_back({ ZYNQ_DEADTIME,dacValuestmp });
+	}
+	
+	unsigned cnts = 0;
 	for (auto& command : timeOrganizer)
 	{
-		// auto& command = timeOrganizer[commandInc];
-		// first copy the last set so that things that weren't changed remain unchanged.
-		snap.push_back(snap.back());
+		if (cnts != 0)
+		{
+			// handle the zero case specially. This may or may not be the literal first snapshot.
+			// first copy the last set so that things that weren't changed remain unchanged.
+			snap.push_back(snap.back());
+		}
+
 		snap.back().time = command.first;
 		for ( auto& change : command.second )
 		{
@@ -386,6 +399,7 @@ void AoSystem::organizeDacCommands(unsigned variation)
 			snap.back().dacEndValues[change.line] = change.endValue;
 			snap.back().dacRampTimes[change.line] = change.rampTime;
 		}
+		cnts++;
 	}
 }
 
@@ -977,6 +991,11 @@ void AoSystem::makeFinalDataFormat(unsigned variation) {
 
 void AoSystem::formatDacForFPGA(UINT variation)
 {
+	std::array<double, size_t(AOGrid::total)> dacValuestmp;
+	for (auto i : range(outputs.size()))
+	{
+		dacValuestmp[i] = outputs[i].info.currVal;
+	}
 	for (int i = 0; i < dacSnapshots[variation].size(); ++i)
 	{
 		AoSnapshot snapshotPrev;
@@ -985,13 +1004,9 @@ void AoSystem::formatDacForFPGA(UINT variation)
 		std::vector<int> channels;
 
 		snapshot = dacSnapshots[variation][i];
-		std::array<double, size_t(AOGrid::total)> dacValuestmp;
-		for (auto i : range(outputs.size()))
-		{
-			dacValuestmp[i] = outputs[i].info.currVal;
-		}
 
-		if (i == 0) {
+		if (i == 0) 
+		{
 			for (int j = 0; j < size_t(AOGrid::total); ++j)
 			{
 				if (snapshot.dacValues[j] != dacValuestmp[j] ||
@@ -1075,7 +1090,8 @@ void AoSystem::handleDacScriptCommand( AoCommandForm command, std::string name, 
 									   DoCore& ttls ){
 	if ( command.commandName != "dac:" && 
 		command.commandName != "dacarange:" && 
-		command.commandName != "daclinspace:" )
+		command.commandName != "daclinspace:" &&
+		command.commandName != "dacramp:")
 	{
 		thrower ( "dac commandName not recognized!" );
 	}

@@ -65,7 +65,8 @@ void SyntaxHighlighter::setTtlNames (Matrix<std::string> ttlNames) {
 	addRules (doNamesRegex, QColor (200, 200, 0), false, true, doRules);
 }
 
-void SyntaxHighlighter::setDacNames (std::vector<std::string> dacNames) {
+void SyntaxHighlighter::setDacNames (std::vector<std::string> dacNames) 
+{
 	QVector<QString> aoNamesRegex;
 	for (auto dacInc : range (dacNames.size ())) {
 		aoNamesRegex.push_back(cstr("dac" + str(dacInc / size_t(AOGrid::numPERunit)) + "_"
@@ -75,6 +76,20 @@ void SyntaxHighlighter::setDacNames (std::vector<std::string> dacNames) {
 	aoRules.clear ();
 	addRules (aoNamesRegex, QColor (203, 75, 22), false, true, aoRules);
 }
+
+void SyntaxHighlighter::setDdsNames(std::vector<std::string> ddsNames) 
+{
+	QVector<QString> ddsNamesRegex;
+	for (auto ddsInc : range(ddsNames.size())) 
+	{
+		ddsNamesRegex.push_back(cstr("dds" + str(ddsInc / size_t(DDSGrid::numPERunit)) + "_"
+			+ str(ddsInc % size_t(DDSGrid::numPERunit))));
+		ddsNamesRegex.push_back(cstr(ddsNames[ddsInc]));
+	}
+	ddsRules.clear();
+	addRules(ddsNamesRegex, QColor(203, 75, 22), false, true, ddsRules);
+}
+
 
 void SyntaxHighlighter::addRules (QVector<QString> regexStrings, QColor color, bool bold, bool addWordReq) {
 	addRules (regexStrings, color, bold, addWordReq, mainRules);

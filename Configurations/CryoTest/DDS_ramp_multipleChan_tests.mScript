@@ -1,8 +1,16 @@
-t = 1
-dac: dac0_0 1
+t = 0
+t ++
+pulseon: test 1
+t ++
+dac: dac0_0 0.5
+t += 5
+pulseon: test 1
+dacramp: dac0_0 0 8 20
 t += 5
 pulseon: test 50
-t = 20
+t += 30
 dac: dac0_0 5
 t += 10
+dac: dac0_0 1
+t ++
 dac: dac0_0 1

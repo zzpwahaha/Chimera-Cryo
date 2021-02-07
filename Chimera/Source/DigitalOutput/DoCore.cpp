@@ -583,8 +583,8 @@ void DoCore::formatForFPGA(UINT variation)
 	unsigned int time;
 	unsigned int outputA;
 	unsigned int outputB;
-	int outputAtest;
-	int outputBtest;
+	//int outputAtest;
+	//int outputBtest;
 
 	for (auto snapshot : ttlSnapshots[variation])
 	{
@@ -593,8 +593,8 @@ void DoCore::formatForFPGA(UINT variation)
 		//for each DIO bank convert the boolean array to a byte
 		outputA = 0;
 		outputB = 0;
-		outputAtest = 0;
-		outputBtest = 0;
+		//outputAtest = 0;
+		//outputBtest = 0;
 		for (int i = 0; i < 4; i++)
 		{
 			bankA = snapshot.ttlStatus[i]; //bank here is set of 8 booleans
@@ -604,10 +604,10 @@ void DoCore::formatForFPGA(UINT variation)
 				outputA |= (unsigned int)(bankA[j]) << 8 * i << j;
 				outputB |= (unsigned int)(bankB[j]) << 8 * i << j;
 
-				outputAtest += pow(256, i) * pow(2, j) * bankA[j];
-				outputBtest += pow(256, i) * pow(2, j) * bankB[j];
-				if (outputA != outputAtest || outputB != outputBtest)
-					qDebug() << "not equal!!!!";
+				//outputAtest += pow(256, i) * pow(2, j) * bankA[j];
+				//outputBtest += pow(256, i) * pow(2, j) * bankB[j];
+				//if (outputA != outputAtest || outputB != outputBtest)
+				//	qDebug() << "not equal!!!!";
 			}
 		}
 		
@@ -813,9 +813,10 @@ void DoCore::organizeTtlCommands (unsigned variation, DoSnapshot initSnap)
 				" Aborting.");
 		}
 	}
-	/* Test to see if adding 1ms to the starting time would solve the problem of the initial state of ttl*/
-	//for (int i = 0; i < snaps.size (); i++) {
-	//	snaps[i].time = snaps[i].time + 0.001;
+	/* adding 10ns to the starting time would solve the problem of the initial state of ttl*/
+	//for (int i = 0; i < snaps.size (); i++) 
+	//{
+	//	snaps[i].time = snaps[i].time + 1e-5;
 	//}
 }
 
@@ -933,11 +934,11 @@ void DoCore::handleTtlScriptCommand (std::string command, timeType time, std::st
 	handleTtlScriptCommand (command, time, name, Expression (), vars, scope);
 }
 
-void DoCore::standardExperimentPrep (unsigned variationInc, double currLoadSkipTime, std::vector<parameterType>& expParams){
-	organizeTtlCommands (variationInc);
-	findLoadSkipSnapshots (currLoadSkipTime, expParams, variationInc);
-	//convertToFtdiSnaps (variationInc);
-	//convertToFinalFtdiFormat (variationInc);
-	convertToFinalFormat(variationInc);/*seems useless*/
-	formatForFPGA(variationInc);
-}
+//void DoCore::standardExperimentPrep (unsigned variationInc, double currLoadSkipTime, std::vector<parameterType>& expParams){
+//	organizeTtlCommands (variationInc);
+//	findLoadSkipSnapshots (currLoadSkipTime, expParams, variationInc);
+//	//convertToFtdiSnaps (variationInc);
+//	//convertToFinalFtdiFormat (variationInc);
+//	convertToFinalFormat(variationInc);/*seems useless*/
+//	formatForFPGA(variationInc);
+//}

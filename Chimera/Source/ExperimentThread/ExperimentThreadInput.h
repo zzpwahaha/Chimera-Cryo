@@ -36,9 +36,10 @@ struct ExperimentThreadInput{
 	realTimePlotterInput* plotterInput;
 	profileSettings profile;
 
+	DoSystem& ttlSys;
 	DoCore& ttls;
 	AoSystem& aoSys;
-	//DdsSystem& dds;
+	DdsSystem& ddsSys;
 	DdsCore& dds;
 	ZynqTCP zynqExp;
 

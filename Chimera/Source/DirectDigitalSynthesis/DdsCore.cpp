@@ -807,3 +807,29 @@ void DdsCore::standardExperimentPrep(UINT variation)
 	organizeDDSCommands(variation);
 	makeFinalDataFormat(variation);
 }
+
+void DdsCore::writeDDSs(UINT variation, bool loadSkip)
+{
+
+	//dioFPGA[variation].write();
+	int tcp_connect;
+	try
+	{
+		tcp_connect = zynq_tcp.connectTCP(ZYNQ_ADDRESS);
+	}
+	catch (ChimeraError& err)
+	{
+		tcp_connect = 1;
+		errBox(err.what());
+	}
+
+	if (tcp_connect == 0)
+	{
+		zynq_tcp.writeDDSs(ddsChannelSnapshots[variation]);
+		zynq_tcp.disconnect();
+	}
+	else
+	{
+		throw("connection to zynq failed. can't write DDS data\n");
+	}
+}

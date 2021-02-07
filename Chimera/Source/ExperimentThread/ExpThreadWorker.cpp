@@ -110,7 +110,7 @@ void ExpThreadWorker::analyzeMasterScript (DoCore& ttls, AoSystem& aoSys, DdsCor
 {
 	std::string currentMasterScriptText = currentMasterScript.str ();
 	loadSkipTime.first.clear ();
-	loadSkipTime.second = 0;
+	loadSkipTime.second = 0.0;
 	// starts at 0.1 if not initialized by the user.
 	operationTime.second = 0.1;
 	operationTime.first.clear ();
@@ -746,6 +746,28 @@ bool ExpThreadWorker::handleAoCommands (std::string word, ScriptStream& stream,	
 			throwNested ("Error handling \"dacArange:\" command.");
 		}
 	}
+	else if (word == "dacramp:")
+	{
+		AoCommandForm command;
+		std::string name;
+		stream >> name >> command.initVal >> command.finalVal >> command.rampTime;
+		command.initVal.assertValid(params, scope);
+		command.finalVal.assertValid(params, scope);
+		command.rampTime.assertValid(params, scope);
+		command.time = operationTime;
+		command.commandName = "dacramp:";
+		// not used here. 
+		command.numSteps.expressionStr = "__NONE__";
+		command.rampInc.expressionStr = "__NONE__";
+		try
+		{
+			aoSys.handleDacScriptCommand(command, name, params, ttls);
+		}
+		catch (ChimeraError& err)
+		{
+			throwNested("Error handling in \"dacramp:\" command inside main script");
+		}
+	}
 	else
 	{
 		return false;
@@ -896,7 +918,7 @@ void ExpThreadWorker::callCppCodeFunction () {
 
 bool ExpThreadWorker::isValidWord (std::string word) {
 	if (word == "t" || word == "t++" || word == "t+=" || word == "t=" || word == "on:" || word == "off:"
-		|| word == "dac:" || word == "dacarange:" || word == "daclinspace:" || word == "call"
+		|| word == "dac:" || word == "dacarange:" || word == "daclinspace:" || word == "dacramp:" || word == "call"
 		|| word == "repeat:" || word == "end" || word == "pulseon:" || word == "pulseoff:" || word == "callcppcode") {
 		return true;
 	}
@@ -1015,7 +1037,7 @@ void ExpThreadWorker::calculateAdoVariations (ExpRuntimeData& runtime) {
 			double& currLoadSkipTime = loadSkipTimes[variationInc];
 			currLoadSkipTime = convertToTime (loadSkipTime, runtime.expParams, variationInc);
 			input->aoSys.standardExperimentPrep (variationInc, input->ttls, runtime.expParams, currLoadSkipTime);
-			input->ttls.standardExperimentPrep (variationInc, currLoadSkipTime, runtime.expParams);
+			input->ttlSys.standardExperimentPrep (variationInc, currLoadSkipTime, runtime.expParams);
 			input->dds.standardExperimentPrep(variationInc);
 			input->aoSys.checkTimingsWork (variationInc);
 		}
@@ -1135,7 +1157,7 @@ void ExpThreadWorker::startRep (unsigned repInc, unsigned variationInc, bool ski
 		//input->aoSys.stopDacs();
 		//input->aoSys.configureClocks(variationInc, skip);
 		input->aoSys.writeDacs(variationInc, skip);
-		//input->ddss->writeDDSs(variationInc, skip);
+		input->dds.writeDDSs(variationInc, skip);
 		input->ttls.writeTtlDataToFPGA(variationInc, skip);
 		input->zynqExp.sendCommand("trigger");
 

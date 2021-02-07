@@ -14,7 +14,7 @@
 #include <vector>
 #include <array>
 
-
+#include "ZynqTCP/ZynqTCP.h"
 
 
 /*
@@ -121,7 +121,7 @@ public:
 	void organizeDDSCommands(UINT variation);
 	void makeFinalDataFormat(UINT variation);
 	void standardExperimentPrep(UINT variation);
-
+	void writeDDSs(UINT variation, bool loadSkip);
 
 private:
 	std::array<std::string, size_t(DDSGrid::total)> names;
@@ -135,6 +135,7 @@ private:
 	std::vector<std::vector<DdsChannelSnapshot>> ddsChannelSnapshots;
 	std::vector<std::pair<double, std::vector<DdsCommand>>> timeOrganizer;
 
+	ZynqTCP zynq_tcp;
 
 public:
 	constexpr static double ddsFreqResolution = DdsOutput::ddsFreqResolution; // 500.0 / 0xffffffff; /*32bit, 500MHz clock freq*/

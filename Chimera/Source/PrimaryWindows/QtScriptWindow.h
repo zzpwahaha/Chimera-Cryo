@@ -35,7 +35,7 @@ class QtScriptWindow : public IChimeraQtWindow{
 
 		profileSettings getProfileSettings ();
 		std::string getSystemStatusString ();
-		void updateDoAoNames ();
+		void updateDoAoDdsNames ();
 		void checkMasterSave ();
 		
 		void windowSaveConfig (ConfigStream& saveFile);

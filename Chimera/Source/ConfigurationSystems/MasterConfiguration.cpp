@@ -66,7 +66,7 @@ void MasterConfiguration::load(QtMainWindow* mainWin, QtAuxiliaryWindow* auxWin,
 		auxWin->handleMasterConfigOpen (configFile);
 		mainWin->handleMasterConfigOpen (configFile);
 		camWin->handleMasterConfigOpen (configFile);
-		mainWin->scriptWin->updateDoAoNames ();
+		mainWin->scriptWin->updateDoAoDdsNames ();
 	}
 	catch (ChimeraError & err) {
 		mainWin->reportErr (err.qtrace ());

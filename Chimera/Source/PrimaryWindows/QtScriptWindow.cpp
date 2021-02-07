@@ -29,7 +29,7 @@ void QtScriptWindow::initializeWidgets (){
 	layout->addWidget(&profileDisplay, 1);
 	layout->addWidget(&masterScript, 1);
 	
-	updateDoAoNames ();
+	updateDoAoDdsNames ();
 	updateVarNames ();
 }
 
@@ -39,15 +39,19 @@ void QtScriptWindow::updateVarNames() {
 	masterScript.highlighter->setLocalParams (masterScript.getLocalParams ());
 }
 
-void QtScriptWindow::updateDoAoNames () {
+void QtScriptWindow::updateDoAoDdsNames () {
 	auto doNames = auxWin->getTtlNames ();
 	auto aoInfo = auxWin->getDacInfo ();
+	auto ddsNamesArr = auxWin->getDdsNames();
+	auto ddsNames = std::vector<std::string>(ddsNamesArr.begin(), ddsNamesArr.end());
 	std::vector<std::string> aoNames;
 	for (auto dacInfo : aoInfo) {
 		aoNames.push_back (dacInfo.name);
 	}
-	masterScript.highlighter->setTtlNames (doNames);
-	masterScript.highlighter->setDacNames (aoNames);
+	
+	masterScript.highlighter->setTtlNames(doNames);
+	masterScript.highlighter->setDacNames(aoNames);
+	masterScript.highlighter->setDdsNames(ddsNames);
 }
 
 

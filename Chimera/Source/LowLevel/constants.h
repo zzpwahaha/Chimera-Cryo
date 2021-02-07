@@ -43,6 +43,12 @@
 	const std::string CAMERA_CAL_ROUTINE_ADDRESS = PROFILES_PATH + "Hotkey Experiments\\Camera";
 	const std::string MOT_ROUTINES_ADDRESS = PROFILES_PATH + "Hotkey Experiments\\MOT";
 	// location where wave data can be outputted for analyzing with another computer.
+
+
+	// Zynq realated
+	const double ZYNQ_DEADTIME = 0.1; // give zynq 0.1ms to avoid sending zero at t=0 for ttl
+
+
 #endif
 /// Random other Constants
 constexpr double PI = 3.14159265358979323846264338327950288;

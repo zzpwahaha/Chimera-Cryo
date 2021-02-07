@@ -64,6 +64,9 @@ class DoSystem : public IChimeraSystem
 		allDigitalOutputs& getDigitalOutputs();
 		DoCore& getCore ();
 
+		void standardExperimentPrep(unsigned variationInc, double currLoadSkipTime, std::vector<parameterType>& expParams);
+
+
 	private:
 		DoCore core;
 		/// other.

@@ -7,6 +7,7 @@
 #include <string>
 #include <ParameterSystem/ParameterSystemStructures.h>
 #include <AnalogOutput/AoStructures.h>
+#include <DirectDigitalSynthesis/DdsSystemStructures.h>
 
 class SyntaxHighlighter : public QSyntaxHighlighter {
     Q_OBJECT 
@@ -17,7 +18,7 @@ class SyntaxHighlighter : public QSyntaxHighlighter {
         void setOtherParams (std::vector<parameterType> otherParams);
         void setTtlNames (Matrix<std::string> ttlNames);
         void setDacNames (std::vector<std::string> dacNames);
-
+        void setDdsNames(std::vector<std::string> ddsNames);
     protected:
         void highlightBlock (const QString& text) override;
         
@@ -33,6 +34,7 @@ class SyntaxHighlighter : public QSyntaxHighlighter {
         QVector<HighlightingRule> mainRules;
         QVector<HighlightingRule> aoRules;
         QVector<HighlightingRule> doRules;
+        QVector<HighlightingRule> ddsRules;
         QVector<HighlightingRule> localParamRules;
         QVector<HighlightingRule> otherParamRules;
 

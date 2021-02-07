@@ -258,8 +258,11 @@ int ZynqTCP::writeDDSs(std::vector<DdsChannelSnapshot> ddsChannelSnapshots)
 	int snapIndex = 0;
 	unsigned int timeConv = 100000; // SEQ time given in multiples of 10 ns
 	unsigned int timeConvDAC = 1000; // DDS time given multiples of 1 us
-	unsigned int dacRes = 65536;
-	char byte_buf[DAC_LEN_BYTE_BUF];
+	unsigned int dacRes = 0xffff;
+
+	char byte_buf[DDS_LEN_BYTE_BUF];
+	char byte_bufCommand[DDS_LEN_BYTE_BUF];
+	memset(byte_buf, 0, sizeof(byte_buf));
 	unsigned int time, duration;
 	unsigned short channel;
 	char type;
@@ -295,7 +298,12 @@ int ZynqTCP::writeDDSs(std::vector<DdsChannelSnapshot> ddsChannelSnapshots)
 			end = snapshot.endVal;
 			duration = (unsigned int)(snapshot.rampTime * timeConvDAC);
 
-			sprintf_s(byte_buf, DDS_LEN_BYTE_BUF, "t%08X_c%04X_%c_s%07.3f_e%07.3f_d%08x", time, channel, type, start, end, duration);
+			sprintf_s(byte_bufCommand, DDS_LEN_BYTE_BUF, "t%08X_c%04X_%c_s%07.3f_e%07.3f_d%08x", 
+				time, channel, type, start, end, duration);
+			for (size_t i = 0; i < strlen(byte_bufCommand); i++)
+			{
+				byte_buf[i] = byte_bufCommand[i];
+			}
 			BytesSent = send(ConnectSocket, byte_buf, DDS_LEN_BYTE_BUF, 0);
 			if (BytesSent == SOCKET_ERROR)
 			{

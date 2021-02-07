@@ -7,8 +7,10 @@
 #include "PrimaryWindows/IChimeraQtWindow.h"
 
 ExperimentThreadInput::ExperimentThreadInput(IChimeraQtWindow* win) :
+	ttlSys(win->auxWin->getTtlSystem()),
 	ttls(win->auxWin->getTtlCore()),
 	aoSys(win->auxWin->getAoSys()),
+	ddsSys(win->auxWin->getDdsSys()),
 	dds(win->auxWin->getDdsSys().getCore()),
 	logger(win->andorWin->getLogger())
 {

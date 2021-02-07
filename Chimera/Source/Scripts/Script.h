@@ -55,7 +55,7 @@ class Script : public IChimeraSystem
 		std::string getScriptName();
 		std::string getExtension();
 
-		void loadFile( std::string pathToFile );
+		void loadFile( std::string pathToFile, std::ios::_Openmode flags = std::ios::in);
 		void openParentScript( std::string parentScriptFileAndPath, std::string configPath );
 		void considerCurrentLocation( std::string configPath );
 		void checkSave( std::string configPath );

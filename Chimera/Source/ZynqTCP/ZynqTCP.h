@@ -19,7 +19,7 @@
 #define ZYNQ_MAX_BUFF 64
 #define DIO_LEN_BYTE_BUF 28
 #define DAC_LEN_BYTE_BUF 42
-#define DDS_LEN_BYTE_BUF 47
+#define DDS_LEN_BYTE_BUF 46
 #define DAC_TIME_RESOLUTION 1.6 // in ms
 #define DAC_RAMP_MAX_PTS 0xffff // 65535 ???
 #define DDS_TIME_RESOLUTION 1.6 // in ms
