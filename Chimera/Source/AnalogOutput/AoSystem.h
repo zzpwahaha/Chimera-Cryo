@@ -5,7 +5,7 @@
 #include <unordered_map>
 
 #include "ParameterSystem/ParameterSystem.h"
-#include "AnalogOutput/DaqMxFlume.h"
+//#include "AnalogOutput/DaqMxFlume.h"
 #include "AnalogOutput/AoStructures.h"
 #include "AnalogOutput/AnalogOutput.h"
 #include "AnalogOutput/AoCore.h"
@@ -91,8 +91,6 @@ class AoSystem : public IChimeraSystem
 
 		double dacTriggerTime;
 		bool roundToDacPrecision;
-
-
 
 
 		//Zynq tcp connection

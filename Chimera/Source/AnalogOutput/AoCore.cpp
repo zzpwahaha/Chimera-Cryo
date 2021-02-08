@@ -17,6 +17,11 @@ void AoCore::setNames(std::array<std::string, size_t(AOGrid::total)> namesIn)
 	names = std::move(namesIn);
 }
 
+std::array<std::string, size_t(AOGrid::total)> AoCore::getNames()
+{
+	return names;
+}
+
 
 
 unsigned AoCore::getNumberSnapshots(unsigned variation) 

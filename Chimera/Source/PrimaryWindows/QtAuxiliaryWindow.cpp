@@ -209,6 +209,9 @@ std::array<std::string, size_t(DOGrid::total)> QtAuxiliaryWindow::getTtlNames ()
 	return ttlBoard.getCore ().getAllNames ();
 }
 
+std::array<std::string, size_t(AOGrid::total)> QtAuxiliaryWindow::getDacNames() {
+	return aoSys.getCore().getNames();
+}
 
 std::array<AoInfo, size_t(AOGrid::total)> QtAuxiliaryWindow::getDacInfo (){
 	return aoSys.getDacInfo ();
@@ -538,6 +541,7 @@ std::string QtAuxiliaryWindow::getOtherSystemStatusMsg (){
 	//	msg += "\tCode System is disabled! Enable in \"constants.h\"\n";
 	//}
 	msg += "\t Zynq placeholder \n";
+	msg += "\t" + std::string(__FILE__) + ", line: " + std::to_string(__LINE__) + "\n";
 
 	msg += "Analog Out System:\n";
 	if (!ANALOG_OUT_SAFEMODE){

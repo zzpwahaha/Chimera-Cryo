@@ -6,9 +6,8 @@
 #include "ConfigurationSystems/Version.h"
 
 // for other ni stuff
-#include "nidaqmx2.h"
+//#include "nidaqmx2.h"
 #include "GeneralUtilityFunctions/range.h"
-#include "GeneralObjects/CodeTimer.h"
 #include <boost/lexical_cast.hpp>
 #include <ExperimentThread/ExpThreadWorker.h>
 #include "calInfo.h"
@@ -73,6 +72,11 @@ void AoSystem::handleOpenConfig(ConfigStream& openFile)
 
 }
 
+void AoSystem::handleSaveConfig(ConfigStream& saveFile) 
+{
+	saveFile << "DACS\nEND_DACS\n";
+}
+
 void AoSystem::standardExperimentPrep ( unsigned variationInc, std::vector<parameterType>& expParams, 
 										double currLoadSkipTime ){
 	core.organizeDacCommands(variationInc, { ZYNQ_DEADTIME,getDacValues() });
@@ -81,9 +85,7 @@ void AoSystem::standardExperimentPrep ( unsigned variationInc, std::vector<param
 	core.formatDacForFPGA(variationInc, { ZYNQ_DEADTIME,getDacValues() });
 }
 
-void AoSystem::handleSaveConfig(ConfigStream& saveFile){
-	saveFile << "DACS\nEND_DACS\n";
-}
+
 
 
 
@@ -211,14 +213,6 @@ void AoSystem::updateEdits( )
 
 
 
-
-
-
-
-
-
-
-
 /*
  * IMPORTANT: this does not actually change any of the outputs of the board. It is meant to be called when things have
  * happened such that the control doesn't know what it's own status is, e.g. at the end of an experiment, since the 
@@ -238,14 +232,13 @@ void AoSystem::setDacStatusNoForceOut(std::array<double, size_t(AOGrid::total)> 
 
 
 
-
-
 // an "alias template". effectively a local "using std::vector;" declaration. Better not use in case confusion
 //template<class T> using vec = std::vector<T>;
 
 
 
-/*TODO get it a better name*/
+/*TODO get it a better name, the functioning is overlapped with setDacStatusNoForceOut*/
+/// used in AuxWindow->handleMasterConfigOpen, address it later
 // this is a function called in preparation for forcing a dac change. Remember, you need to call ___ to actually change things.
 /*mainly for preparing the trigger which is not needed in zynq*/
 void AoSystem::prepareDacForceChange(int line, double voltage)
@@ -262,19 +255,6 @@ void AoSystem::prepareDacForceChange(int line, double voltage)
 	//dacValues[line] = voltage;
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -310,14 +290,6 @@ void AoSystem::setDACs()
 		errBox("connection to zynq failed. can't trigger the sequence or new settings\n");
 	}
 }
-
-
-
-
-
-
-
-
 
 
 void AoSystem::setMinMax(int dacNumber, double minv, double maxv){

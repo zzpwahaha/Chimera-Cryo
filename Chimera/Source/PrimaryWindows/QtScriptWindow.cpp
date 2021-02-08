@@ -42,13 +42,11 @@ void QtScriptWindow::updateVarNames() {
 void QtScriptWindow::updateDoAoDdsNames () {
 	auto doNamesArr = auxWin->getTtlNames ();
 	auto doNames = std::vector<std::string>(doNamesArr.begin(), doNamesArr.end());
-	auto aoInfo = auxWin->getDacInfo ();
+	auto aoNamesArr = auxWin->getDacNames();
+	auto aoNames = std::vector<std::string>(aoNamesArr.begin(), aoNamesArr.end());
 	auto ddsNamesArr = auxWin->getDdsNames();
 	auto ddsNames = std::vector<std::string>(ddsNamesArr.begin(), ddsNamesArr.end());
-	std::vector<std::string> aoNames;
-	for (auto dacInfo : aoInfo) {
-		aoNames.push_back (dacInfo.name);
-	}
+
 	
 	masterScript.highlighter->setTtlNames(doNames);
 	masterScript.highlighter->setDacNames(aoNames);

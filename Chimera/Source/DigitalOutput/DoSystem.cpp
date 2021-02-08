@@ -116,22 +116,22 @@ void DoSystem::initialize(IChimeraQtWindow* parent) {
 	unsigned runningCount = 0;
 	auto names = core.getAllNames();
 	
-	for (auto row : range(size_t(DOGrid::numPERunit))) 
+	for (auto row : range(size_t(DOGrid::numOFunit))) 
 	{
 		runningCount++;
 		QHBoxLayout* DOsubGridLayout = new QHBoxLayout();
 		DOsubGridLayout->addWidget(new QLabel(QString::number(row + 1)), 0, Qt::AlignRight);
-		for (size_t number = 0; number < size_t(DOGrid::numOFunit); number++)
+		for (size_t number = 0; number < size_t(DOGrid::numPERunit); number++)
 		{
 			auto& out = outputs(row, number);
 			out.initialize(parent);
-			names[row * size_t(DOGrid::numOFunit) + number] = "do" + str(row + 1) + "_" + str(number); /*default name, always accepted by script*/
-			out.setName(names[row * size_t(DOGrid::numOFunit) + number]);
+			names[row * size_t(DOGrid::numPERunit) + number] = "do" + str(row + 1) + "_" + str(number); /*default name, always accepted by script*/
+			out.setName(names[row * size_t(DOGrid::numPERunit) + number]);
 			
 			parent->connect(out.check, &QCheckBox::stateChanged, [this, &out, parent]() {
 				try {
 					handleTTLPress(out);
-					emit notification("Handled DO " + qstr(out.getPosition().first) + ","
+					emit notification("Handled DO " + qstr(out.getPosition().first + 1) + ","
 						+ qstr(out.getPosition().second) + " State Change.\n", 2);
 					parent->configUpdated();
 				}

@@ -20,6 +20,7 @@ public:
 	AoCore();
 
 	void setNames(std::array<std::string, size_t(AOGrid::total)> namesIn);
+	std::array<std::string, size_t(AOGrid::total)> getNames();
 
 	unsigned getNumberSnapshots(unsigned variation);
 	std::vector<std::vector<AoSnapshot>> getSnapshots();

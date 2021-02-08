@@ -84,14 +84,15 @@ void AoSettingsDialog::updateAllEdits()
 		minValEdits[i]->setText(QString::number(min));
 		maxValEdits[i]->setText(QString::number(max));
 		noteEdits[i]->setText(input->getNote(i).c_str());
-
 	}
 
 }
 
 
 
-void AoSettingsDialog::handleOk(){
+void AoSettingsDialog::handleOk()
+{
+	std::array<std::string, size_t(AOGrid::total)> namesIn;
 	for (unsigned dacInc = 0; dacInc < nameEdits.size(); dacInc++){
 		auto text = nameEdits[dacInc]->text ();
 		if (text[0].isDigit()){
@@ -99,6 +100,7 @@ void AoSettingsDialog::handleOk(){
 			return;
 		}
 		input->setName(dacInc, str(text));
+		namesIn[dacInc] = str(text);
 		double min, max;
 		try	{
 			text = minValEdits[dacInc]->text ();
@@ -115,6 +117,7 @@ void AoSettingsDialog::handleOk(){
 		text = noteEdits[dacInc]->text();
 		input->setNote(dacInc, str(text));
 	}
+	input->getCore().setNames(namesIn);
 	emit updateSyntaxHighLight();
 	close ();
 }

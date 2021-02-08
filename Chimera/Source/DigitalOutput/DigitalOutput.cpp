@@ -64,7 +64,7 @@ allDigitalOutputs::allDigitalOutputs ( ){
 	{
 		for ( auto num : range ( numColumns ) )
 		{
-			(*this)( num, row ).initLoc ( num, row );
+			(*this)(row, num).initLoc(num, row);
 		}
 	}
 }
