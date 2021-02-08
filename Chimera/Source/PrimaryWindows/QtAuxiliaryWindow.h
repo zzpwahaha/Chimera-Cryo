@@ -48,7 +48,7 @@ class QtAuxiliaryWindow : public IChimeraQtWindow{
 		void ViewOrChangeDDSNames();
 		void passRoundToDac ();
 		std::string getOtherSystemStatusMsg ();
-		Matrix<std::string> getTtlNames ();
+		std::array<std::string, size_t(DOGrid::total)> getTtlNames ();
 		DoSystem& getTtlSystem ();
 		std::array<AoInfo, size_t(AOGrid::total)> getDacInfo ();
 		std::array<std::string, size_t(DDSGrid::total)> getDdsNames();

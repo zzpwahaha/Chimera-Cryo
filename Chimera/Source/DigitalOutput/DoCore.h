@@ -64,11 +64,10 @@ class DoCore
 			std::vector<parameterType>& vars, std::string scope);
 		void handleTtlScriptCommand (std::string command, timeType time, std::string name,
 			std::vector<parameterType>& vars, std::string scope);
-		void setNames (Matrix<std::string> namesIn);
-		Matrix<std::string> getAllNames ();
+		void setNames (std::array<std::string, size_t(DOGrid::total)> namesIn);
+		std::array<std::string, size_t(DOGrid::total)> getAllNames ();
 		//void standardExperimentPrep (unsigned variationInc, double currLoadSkipTime, std::vector<parameterType>& expParams);
 
-		std::pair<USHORT, USHORT> DoCore::calcDoubleShortTime(double time);
 		void DoCore::formatForFPGA(UINT variation);
 		void DoCore::writeTtlDataToFPGA(UINT variation, bool loadSkip);
 		DWORD FPGAForceOutput(std::array<std::array<bool, size_t(DOGrid::numPERunit)>, size_t(DOGrid::numOFunit)> status);
@@ -76,7 +75,8 @@ class DoCore
 
 
 	private:
-		Matrix<std::string> names;
+		std::array<std::string, size_t(DOGrid::total)> names;
+		//Matrix<std::string> names;
 
 		//Zynq tcp connection
 		ZynqTCP zynq_tcp;

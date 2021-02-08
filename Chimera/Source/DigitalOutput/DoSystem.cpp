@@ -50,13 +50,10 @@ void DoSystem::setTtlStatusNoForceOut(std::array< std::array<bool, size_t(DOGrid
 	}
 }
 
-Matrix<std::string> DoSystem::getAllNames(){
+std::array<std::string, size_t(DOGrid::total)> DoSystem::getAllNames(){
 	return core.getAllNames ();
 }
 
-void DoSystem::updatePush(unsigned row, unsigned number ){
-	outputs(row, number).updateStatus();
-}
 
 
 void DoSystem::updateDefaultTtl(unsigned row, unsigned column, bool state){
@@ -119,19 +116,17 @@ void DoSystem::initialize(IChimeraQtWindow* parent) {
 	unsigned runningCount = 0;
 	auto names = core.getAllNames();
 	
-	for (auto row : range(size_t(DOGrid::numOFunit))) 
+	for (auto row : range(size_t(DOGrid::numPERunit))) 
 	{
 		runningCount++;
 		QHBoxLayout* DOsubGridLayout = new QHBoxLayout();
 		DOsubGridLayout->addWidget(new QLabel(QString::number(row + 1)), 0, Qt::AlignRight);
-		for (size_t number = 0; number < outputs.numColumns; number++) 
+		for (size_t number = 0; number < size_t(DOGrid::numOFunit); number++)
 		{
 			auto& out = outputs(row, number);
 			out.initialize(parent);
-			names(row, number) = "do" +
-				str((runningCount - 1) / size_t(DDSGrid::numPERunit) + 1) + "_" +
-				str(((runningCount - 1)) % size_t(DDSGrid::numPERunit)); /*default name, always accepted by script*/
-			out.setName(names(row, number));
+			names[row * size_t(DOGrid::numOFunit) + number] = "do" + str(row + 1) + "_" + str(number); /*default name, always accepted by script*/
+			out.setName(names[row * size_t(DOGrid::numOFunit) + number]);
 			
 			parent->connect(out.check, &QCheckBox::stateChanged, [this, &out, parent]() {
 				try {
@@ -212,13 +207,13 @@ void DoSystem::setName(unsigned row, unsigned number, std::string name){
 	}
 	outputs(row, number).setName(name);
 	auto names = core.getAllNames ();
-	names(unsigned(row), number) = name;
+	names[row * size_t(DOGrid::numPERunit) + number] = name;
 	core.setNames(names);
 }
 
 
 std::string DoSystem::getName(unsigned row, unsigned number) {
-	return core.getAllNames()(row, number);
+	return core.getAllNames()[row * size_t(DOGrid::numPERunit) + number];
 }
 
 bool DoSystem::getTtlStatus(unsigned row, int number){
@@ -227,20 +222,6 @@ bool DoSystem::getTtlStatus(unsigned row, int number){
 
 allDigitalOutputs& DoSystem::getDigitalOutputs ( ){
 	return outputs;
-}
-
-
-
-std::pair<unsigned short, unsigned short> DoSystem::calcDoubleShortTime( double time ){
-	unsigned short lowordTime, hiwordTime;
-	// convert to system clock ticks. Assume that the crate is running on a 10 MHz signal, so multiply by
-	// 10,000,000, but then my time is in milliseconds, so divide that by 1,000, ending with multiply by 10,000
-	lowordTime = unsigned __int64( time * 10000 ) % 65535;
-	hiwordTime = unsigned __int64( time * 10000 ) / 65535;
-	if ( unsigned __int64( time * 10000 ) / 65535 > 65535 ){
-		thrower ( "DIO system was asked to calculate a time that was too long! this is limited by the card." );
-	}
-	return { lowordTime, hiwordTime };
 }
 
 

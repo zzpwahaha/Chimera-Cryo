@@ -276,6 +276,9 @@
     <ClCompile Include="Source\ExcessDialogs\DdsSettingsDialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\AnalogOutput\AoCore.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\stdafx.h">
@@ -543,6 +546,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\DirectDigitalSynthesis\DdsOutput.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\AnalogOutput\AoCore.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

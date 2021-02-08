@@ -203,7 +203,7 @@ unsigned QtAuxiliaryWindow::getNumberOfDacs (){
 }
 
 
-Matrix<std::string> QtAuxiliaryWindow::getTtlNames (){
+std::array<std::string, size_t(DOGrid::total)> QtAuxiliaryWindow::getTtlNames (){
 	return ttlBoard.getCore ().getAllNames ();
 }
 

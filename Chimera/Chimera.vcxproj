@@ -112,6 +112,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Source\AnalogOutput\AoCore.cpp" />
     <ClCompile Include="Source\ExcessDialogs\DdsSettingsDialog.cpp" />
     <ClCompile Include="Source\DirectDigitalSynthesis\DdsOutput.cpp" />
     <ClCompile Include="main.cpp" />
@@ -202,6 +203,7 @@
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="Source\ExcessDialogs\DdsSettingsDialog.h" />
+    <ClInclude Include="Source\AnalogOutput\AoCore.h" />
     <ClInclude Include="Source\DirectDigitalSynthesis\DdsOutput.h" />
     <ClInclude Include="Source\DigitalOutput\DigitalOutput.h" />
     <ClInclude Include="Source\DigitalOutput\DoCore.h" />

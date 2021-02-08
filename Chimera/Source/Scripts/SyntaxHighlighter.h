@@ -7,6 +7,7 @@
 #include <string>
 #include <ParameterSystem/ParameterSystemStructures.h>
 #include <AnalogOutput/AoStructures.h>
+#include <DigitalOutput/DoStructures.h>
 #include <DirectDigitalSynthesis/DdsSystemStructures.h>
 
 class SyntaxHighlighter : public QSyntaxHighlighter {
@@ -16,7 +17,7 @@ class SyntaxHighlighter : public QSyntaxHighlighter {
         SyntaxHighlighter (ScriptableDevice device, QTextDocument* parent = 0);
         void setLocalParams (std::vector<parameterType> localParams);
         void setOtherParams (std::vector<parameterType> otherParams);
-        void setTtlNames (Matrix<std::string> ttlNames);
+        void setTtlNames (std::vector<std::string> ttlNames);
         void setDacNames (std::vector<std::string> dacNames);
         void setDdsNames(std::vector<std::string> ddsNames);
     protected:

@@ -35,7 +35,6 @@ class DoSystem : public IChimeraSystem
 		DoSystem (IChimeraQtWindow* parent, bool ftSafemode, bool serialSafemode );
 		~DoSystem();
 		/// config handling
-		std::string getDoSystemInfo ();
 		void handleSaveConfig(ConfigStream& saveFile);
 		void handleOpenConfig(ConfigStream& openFile);
 		void initialize( IChimeraQtWindow* master );
@@ -54,13 +53,13 @@ class DoSystem : public IChimeraSystem
 		std::string getName(unsigned row, unsigned number);
 
 
-		Matrix<std::string> getAllNames ();
+		std::array<std::string, size_t(DOGrid::total)> getAllNames ();
 		bool getTtlStatus (unsigned row, int number );
 		void updateDefaultTtl(unsigned row, unsigned column, bool state);
 		bool getDefaultTtl(unsigned row, unsigned column);
-		std::pair<unsigned short, unsigned short> calcDoubleShortTime( double time );
+
 		std::array< std::array<bool, size_t(DOGrid::numPERunit)>, size_t(DOGrid::numOFunit) > getCurrentStatus( );
-		void updatePush(unsigned row, unsigned col );
+
 		allDigitalOutputs& getDigitalOutputs();
 		DoCore& getCore ();
 
@@ -70,13 +69,10 @@ class DoSystem : public IChimeraSystem
 	private:
 		DoCore core;
 		/// other.
-		void handleInvert( );
 		// one control for each TTL
 		QLabel* ttlTitle;
 		CQPushButton* ttlHold;
 		CQPushButton* zeroTtls;
-		//std::array< QLabel*, 16 > ttlNumberLabels;
-		//std::array< QLabel*, 16 > ttlRowLabels;
 		allDigitalOutputs outputs;
 
 		// tells whether the hold button is down or not.

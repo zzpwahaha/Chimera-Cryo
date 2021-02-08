@@ -20,7 +20,6 @@ doChannelInfoDialog::doChannelInfoDialog (DoSystem* inputPtr)
 		for (size_t number = 0; number < size_t(DOGrid::numPERunit); number++) 
 		{
 			edits[row][number] = new QLineEdit("");
-			//edits[row][number]->setText(names(row, number).c_str());
 			DOsubGridLayout->addWidget(edits[row][number]);
 		}
 		//DOsubGridLayout->setSpacing(8);
@@ -51,11 +50,13 @@ doChannelInfoDialog::doChannelInfoDialog (DoSystem* inputPtr)
 void doChannelInfoDialog::updateAllEdits()
 {
 	auto names = input->getAllNames();
+	unsigned cnts = 0;
 	for (auto row : range(size_t(DOGrid::numOFunit)))
 	{
 		for (size_t number = 0; number < size_t(DOGrid::numPERunit); number++)
 		{
-			edits[row][number]->setText(names(row, number).c_str());
+			edits[row][number]->setText(names[cnts].c_str());
+			cnts++;
 		}
 	}
 	
@@ -63,10 +64,11 @@ void doChannelInfoDialog::updateAllEdits()
 
 void doChannelInfoDialog::handleOk ()
 {
-	Matrix<std::string> names;
-	for (auto row : range(size_t(DOGrid::numOFunit)))
+	std::array<std::string, size_t(DOGrid::total)> names;
+	unsigned cnts = 0;
+	for (unsigned row = 0; row < size_t(DOGrid::numOFunit); row++)
 	{
-		for (unsigned numberInc = 0; numberInc < edits[row].size (); numberInc++)	
+		for (unsigned numberInc = 0; numberInc < size_t(DOGrid::numPERunit); numberInc++)
 		{
 			QString name = edits[row][numberInc]->text();
 			if (name[0].isDigit ())
@@ -74,7 +76,7 @@ void doChannelInfoDialog::handleOk ()
 				errBox ("ERROR: " + str (name) + " is an invalid name; names cannot start with numbers.");
 				return;
 			}
-			names(row, numberInc) = name.toStdString();
+			names[cnts] = name.toStdString();
 			input->setName(row, numberInc, name.toStdString());
 		}
 	}

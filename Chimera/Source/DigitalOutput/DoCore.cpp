@@ -6,7 +6,7 @@
 #include <bitset>
 
 DoCore::DoCore()
-	: names(size_t(DOGrid::numPERunit), size_t(DOGrid::numOFunit), "")
+	//: names(size_t(DOGrid::numPERunit), size_t(DOGrid::numOFunit), "")
 {
 	//try	{
 	//	connectType = ftdiConnectionOption::Async;
@@ -19,8 +19,11 @@ DoCore::DoCore()
 
 DoCore::~DoCore () { /*ftdi_disconnect ();*/ }
 
-void DoCore::setNames (Matrix<std::string> namesIn)
+void DoCore::setNames (std::array<std::string, size_t(DOGrid::total)> namesIn)
 {
+	std::for_each(namesIn.begin(), namesIn.end(), [&](auto& name) {
+		std::transform(name.begin(), name.end(), name.begin(), ::tolower); });
+	//std::transform(names[doInc].begin(), names[doInc].end(), names[doInc].begin(), ::tolower);
 	names = std::move(namesIn);
 }
 
@@ -168,16 +171,6 @@ void DoCore::setNames (Matrix<std::string> namesIn)
 //	}
 //}
 
-std::pair<USHORT, USHORT> DoCore::calcDoubleShortTime(double time)
-{
-	USHORT lowordTime, hiwordTime;
-	// convert to system clock ticks. Assume that the crate is running on a 10 MHz signal, so multiply by
-	// 10,000,000, but then my time is in milliseconds, so divide that by 1,000, ending with multiply by 10,000
-	lowordTime = ULONGLONG(time * 100000) % 65535;
-	USHORT temp = time * 100000;
-	hiwordTime = ULONGLONG(time * 100000) / 65535;
-	return { lowordTime, hiwordTime };
-}
 
 
 
@@ -725,7 +718,7 @@ unsigned long DoCore::getNumberEvents (unsigned variation)
 	return ttlSnapshots [variation].size ();
 }
 
-Matrix<std::string> DoCore::getAllNames () { return names; }
+std::array<std::string, size_t(DOGrid::total)> DoCore::getAllNames () { return names; }
 void DoCore::resetTtlEvents () { initializeDataObjects (0); }
 void DoCore::wait2 (double time) { Sleep (time + 10); }
 void DoCore::prepareForce () { initializeDataObjects (1); }
@@ -740,23 +733,25 @@ bool DoCore::isValidTTLName (std::string name){
 /*
 Returns a single number which corresponds to the dio control with the name
 */
-int DoCore::getNameIdentifier (std::string name, unsigned& row, unsigned& number){
-	for (auto rowInc : range(names.getRows()))
+int DoCore::getNameIdentifier (std::string name, unsigned& row, unsigned& number)
+{
+	for (UINT doInc = 0; doInc < size_t(DOGrid::total); doInc++)
 	{
-		for (auto numberInc : range (names.getCols()))
+		// check names set by user.
+
+		//std::string DioName = str(names, 13, false, true); /*4th arg is toLower*/ /*this is not supported by str, do NOT use macro!!!Hard to debug!!!*/
+		if (name == names[doInc] || name == "do" +
+			str(doInc / size_t(DOGrid::numPERunit)) + "_" +
+			str(doInc % size_t(DOGrid::numPERunit)) ) // check standard names which are always acceptable.
 		{
-			std::string DioName = str (names (rowInc, numberInc), 13, false, true);
-			// second of the || is standard name which is always acceptable.
-			if (DioName == name || name == "do" + str(int(rowInc) + 1) + "_" + str(numberInc))
-			{
-				row = rowInc;
-				number = numberInc;
-				return int (rowInc) * names.getCols () + numberInc;
-			}
+			row = doInc / size_t(DOGrid::numPERunit);
+			number = doInc % size_t(DOGrid::numPERunit);
+			return doInc;
 		}
 	}
-	// else not a name.
+	// not an identifier.
 	return -1;
+
 }
 
 void DoCore::handleTtlScriptCommand (std::string command, timeType time, std::string name, Expression pulseLength,

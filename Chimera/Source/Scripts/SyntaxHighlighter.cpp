@@ -52,14 +52,14 @@ SyntaxHighlighter::SyntaxHighlighter (ScriptableDevice device, QTextDocument* pa
 	mainRules.append (rule);
 }
 
-void SyntaxHighlighter::setTtlNames (Matrix<std::string> ttlNames) {
+void SyntaxHighlighter::setTtlNames (std::vector<std::string> ttlNames) 
+{
 	QVector<QString> doNamesRegex;
-	for (auto rowInc : range (ttlNames.getRows ())) {
-		for (auto num : range (ttlNames.getCols ())) {
-			auto rowStr = std::vector<std::string>{ "do1_", "do2_", "do3_", "do4_", "do5_", "do6_", "do7_", "do8_" } [rowInc] ;
-			doNamesRegex.push_back (cstr (rowStr + str (num)));
-			doNamesRegex.push_back (cstr (ttlNames (rowInc, num)));
-		}
+	for (auto doInc : range(ttlNames.size())) 
+	{
+		doNamesRegex.push_back(cstr("do" + str(doInc / size_t(DOGrid::numPERunit) + 1) + "_"
+			+ str(doInc % size_t(DOGrid::numPERunit))));
+		doNamesRegex.push_back(cstr(ttlNames[doInc]));
 	}
 	doRules.clear ();
 	addRules (doNamesRegex, QColor (200, 200, 0), false, true, doRules);
