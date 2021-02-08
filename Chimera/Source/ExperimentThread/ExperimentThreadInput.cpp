@@ -10,6 +10,7 @@ ExperimentThreadInput::ExperimentThreadInput(IChimeraQtWindow* win) :
 	ttlSys(win->auxWin->getTtlSystem()),
 	ttls(win->auxWin->getTtlCore()),
 	aoSys(win->auxWin->getAoSys()),
+	ao(win->auxWin->getAoSys().getCore()),
 	ddsSys(win->auxWin->getDdsSys()),
 	dds(win->auxWin->getDdsSys().getCore()),
 	logger(win->andorWin->getLogger())

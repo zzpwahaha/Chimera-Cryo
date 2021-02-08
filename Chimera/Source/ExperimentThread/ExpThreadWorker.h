@@ -30,7 +30,7 @@ class ExpThreadWorker : public QObject
 		void loadMasterScript (std::string scriptAddress, ScriptStream& script);
 		static void loadAgilentScript (std::string scriptAddress, ScriptStream& agilentScript);
 		void checkTriggerNumbers (std::vector<parameterType>& expParams);
-		void analyzeMasterScript (DoCore& ttls, AoSystem& aoSys, DdsCore& dds,
+		void analyzeMasterScript (DoCore& ttls, AoCore& ao, DdsCore& dds,
 			std::vector<parameterType>& vars,
 			ScriptStream& currentMasterScript, bool expectsLoadSkip,
 			std::string& warnings, timeType& operationTime,
@@ -47,12 +47,12 @@ class ExpThreadWorker : public QObject
 		bool handleDoCommands (std::string word, ScriptStream& stream, std::vector<parameterType>& params,
 			DoCore& ttls, std::string scope, timeType& operationTime);
 		bool handleAoCommands (std::string word, ScriptStream& stream, std::vector<parameterType>& params,
-			AoSystem& aoSys, DoCore& ttls, std::string scope,
+			AoCore& ao, DoCore& ttls, std::string scope,
 			timeType& operationTime);
 		bool handleDdsCommands(std::string word, ScriptStream& stream, std::vector<parameterType>& params,
 			DdsCore& dds, std::string scope, timeType& operationTime);
 		bool handleFunctionCall (std::string word, ScriptStream& stream, std::vector<parameterType>& params,
-			DoCore& ttls, AoSystem& aoSys, std::string& warnings, std::string callingFunction, timeType& operationTime);
+			DoCore& ttls, AoCore& ao, std::string& warnings, std::string callingFunction, timeType& operationTime);
 		static bool handleVariableDeclaration (std::string word, ScriptStream& stream, std::vector<parameterType>& params,
 			std::string scope, std::string& warnings);
 		static bool handleVectorizedValsDeclaration (std::string word, ScriptStream& stream,
@@ -89,7 +89,7 @@ class ExpThreadWorker : public QObject
 		// the master script file contents get dumped into this.
 		const std::string functionsFolderLocation = FUNCTIONS_FOLDER_LOCATION;
 		// called by analyzeMasterScript functions only.
-		void analyzeFunction (std::string function, std::vector<std::string> args, DoCore& ttls, AoSystem& aoSys,
+		void analyzeFunction (std::string function, std::vector<std::string> args, DoCore& ttls, AoCore& ao,
 			std::vector<parameterType>& vars, std::string& warnings, timeType& operationTime, std::string callingScope);
 		timeType operationTime;
 		HANDLE runningThread;

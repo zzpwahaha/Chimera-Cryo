@@ -5,10 +5,10 @@
 #include <unordered_map>
 
 #include "ParameterSystem/ParameterSystem.h"
-#include "DigitalOutput/DoCore.h"
 #include "AnalogOutput/DaqMxFlume.h"
 #include "AnalogOutput/AoStructures.h"
 #include "AnalogOutput/AnalogOutput.h"
+#include "AnalogOutput/AoCore.h"
 #include <GeneralObjects/IChimeraSystem.h>
 #include "ConfigurationSystems/Version.h"
 #include "PrimaryWindows/IChimeraQtWindow.h"
@@ -34,89 +34,52 @@ class AoSystem : public IChimeraSystem
 		// THIS CLASS IS NOT COPYABLE.
 		AoSystem& operator=(const AoSystem&) = delete;
 		AoSystem (const AoSystem&) = delete;
-		AoSystem(IChimeraQtWindow* parent, bool aoSafemode );
+		AoSystem(IChimeraQtWindow* parent);
 
 		// standard functions for gui elements
 		void initialize( IChimeraQtWindow* master);
-		void standardExperimentPrep (unsigned variationInc, DoCore& ttls, std::vector<parameterType>& expParams,
+		void standardExperimentPrep (unsigned variationInc, std::vector<parameterType>& expParams,
 									 double currLoadSkipTime);
 		bool eventFilter (QObject* obj, QEvent* event);
 		// configs
 		void handleSaveConfig(ConfigStream& saveFile);
 		void handleOpenConfig(ConfigStream& openFile);
 
-		void forceDacs( DoCore& ttls, DoSnapshot initSnap);
-		void zeroDacs( DoCore& ttls, DoSnapshot initSnap);
+		
 
-		void resetDacs (unsigned varInc, bool skipOption);
 		void handleRoundToDac( );
 		void updateEdits( );
 		void setDefaultValue( unsigned dacNum, double val );
 		void setName( int dacNumber, std::string name );
 		void setNote ( int dacNumber, std::string note );
-		bool isValidDACName( std::string name );
 		void setMinMax( int dacNumber, double min, double max );
-		std::vector<std::vector<plotDataVec>> getPlotData (unsigned variation);
 		void handleEditChange( unsigned dacNumber );
 
 
 		// processing to determine how dac's get set
-		void handleSetDacsButtonPress( /*DoCore& ttls,*/ bool useDefault=false );
-		void setDacCommandForm( AoCommandForm command );
+		void handleSetDacsButtonPress( bool useDefault=false );
+		void zeroDacs();
 		void setDacStatusNoForceOut(std::array<double, size_t(AOGrid::total)> status);
-		void prepareDacForceChange(int line, double voltage, DoCore& ttls);
-		void setDacTriggerEvents( DoCore& ttls, unsigned variation );
-		void calculateVariations( std::vector<parameterType>& variables, ExpThreadWorker* threadworker, 
-								  std::vector<calResult> calibrations);
-		void organizeDacCommands( unsigned variation );
-		void handleDacScriptCommand( AoCommandForm command, std::string name, std::vector<parameterType>& vars, 
-									 DoCore& ttls );
-		void findLoadSkipSnapshots( double time, std::vector<parameterType>& variables, unsigned variation );
-		
-		
-		// formatting data and communicating with the underlying daqmx api for actual communicaition with the cards.
-		void makeFinalDataFormat( unsigned variation);
-		void writeDacs( unsigned variation, bool loadSkip );
-		void startDacs( );
-		void configureClocks( unsigned variation, bool loadSkip );
-		void stopDacs();
-		void resetDacEvents( );
-		void initializeDataObjects( unsigned cmdNum );
-		void prepareForce( );
-		void standardNonExperiemntStartDacsSequence( );		
-		void setSingleDac( unsigned dacNumber, double val, DoCore& ttls, DoSnapshot initSnap);
-		// checks
-		void checkTimingsWork( unsigned variation );
-		void checkValuesAgainstLimits(unsigned variation );
-		// ask for info
-		std::string getSystemInfo( );
-		std::string getDacSequenceMessage( unsigned variation );
+		void prepareDacForceChange(int line, double voltage);
+	
+
 		// getters
 		double getDefaultValue( unsigned dacNum );
-		unsigned int getNumberSnapshots( unsigned variation );
 		std::string getName( int dacNumber );
 		std::string getNote ( int dacNumber );
-		unsigned long getNumberEvents( unsigned variation );
-		int getDacIdentifier( std::string name );
-		static int getBasicDacIdentifier (std::string name);
 		double getDacValue( int dacNumber );
+		std::array<double,size_t(AOGrid::total)> getDacValues();
 		unsigned int getNumberOfDacs( );
 		std::pair<double, double> getDacRange( int dacNumber );
-
 		std::array<AoInfo, size_t(AOGrid::total)> getDacInfo ( );
-		std::array<double, size_t(AOGrid::total)> getFinalSnapshot( );
 
+		AoCore& getCore() { return core; }
 
-		std::vector<std::vector<AoSnapshot>> getSnapshots ( );
-		std::vector<std::array<std::vector<double>, size_t(AOGrid::numOFunit)>> getFinData ( );
-
-
+		//zynq
 		void setDACs();
-		void formatDacForFPGA(UINT variation);
-
 		bool IsquickChange() { return quickChange->isChecked(); }
 	private:
-		void setForceDacEvent (int line, double val, DoCore& ttls, unsigned variation);
+
 
 		QLabel* dacTitle;
 		CQPushButton* dacSetButton;
@@ -124,54 +87,20 @@ class AoSystem : public IChimeraSystem
 		CQCheckBox* quickChange;
 
 		std::array<AnalogOutput, size_t(AOGrid::total)> outputs;
-
-		static constexpr double dacResolution = 20.0 / 0xffff; /*16bit dac*/
-		const int numDigits = static_cast<int>(abs(round(log10(dacResolution) - 0.49)));
-
-
-		//std::array<double, 32> dacValues;
-		//std::array<std::string, 32> dacNames;
-		//std::array<double, 32> dacMinVals;
-		//std::array<double, 32> dacMaxVals;
-		//std::array<double, 32> defaultVals;
-
-
-		std::vector<AoCommandForm> dacCommandFormList;
-		std::vector<std::vector<AoCommand>> dacCommandList;
-		std::vector<std::vector<AoSnapshot>> dacSnapshots, loadSkipDacSnapshots;
-		std::vector<std::array<std::vector<double>, size_t(AOGrid::numOFunit)>> finalFormatDacData, loadSkipDacFinalFormat;
-		std::pair<unsigned short, unsigned short> dacTriggerLine;
+		AoCore core;
 
 		double dacTriggerTime;
 		bool roundToDacPrecision;
 
 
-		std::vector<std::vector<AoChannelSnapshot>> finalDacSnapshots;
+
+
 		//Zynq tcp connection
 		ZynqTCP zynq_tcp;
 
+		static constexpr double dacResolution = 20.0 / 0xffff; /*16bit dac*/
+		const int numDigits = static_cast<int>(abs(round(log10(dacResolution) - 0.49)));
 
-
-
-
-
-
-
-		// For DACboard0 (tasks are a national instruments DAQmx thing)
-		TaskHandle analogOutTask0 = nullptr;
-		const std::string board0Name = "dev5";
-		// task for DACboard1
-		TaskHandle analogOutTask1 = nullptr;
-		const std::string board1Name = "dev4";
-		// task for DACboard2
-		TaskHandle analogOutTask2 = nullptr;
-		const std::string board2Name = "dev6";
-
-		/// digital in lines not used at the moment.
-		TaskHandle digitalDac_0_00 = nullptr;
-		TaskHandle digitalDac_0_01 = nullptr;
-
-		DaqMxFlume daqmx;
 };
 
 

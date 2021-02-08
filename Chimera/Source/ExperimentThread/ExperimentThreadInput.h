@@ -39,6 +39,7 @@ struct ExperimentThreadInput{
 	DoSystem& ttlSys;
 	DoCore& ttls;
 	AoSystem& aoSys;
+	AoCore& ao;
 	DdsSystem& ddsSys;
 	DdsCore& dds;
 	ZynqTCP zynqExp;

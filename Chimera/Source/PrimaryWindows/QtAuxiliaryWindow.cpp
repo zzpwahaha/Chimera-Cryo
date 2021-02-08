@@ -12,8 +12,8 @@
 #include <qlayout.h>
 
 QtAuxiliaryWindow::QtAuxiliaryWindow (QWidget* parent) : IChimeraQtWindow (parent), 
-	ttlBoard (this, DOFTDI_SAFEMODE, true),
-	aoSys (this, ANALOG_OUT_SAFEMODE), configParamCtrl (this, "CONFIG_PARAMETERS"),
+	ttlBoard (this),
+	aoSys (this), configParamCtrl (this, "CONFIG_PARAMETERS"),
 	globalParamCtrl (this, "GLOBAL_PARAMETERS"), dds (this, DDS_SAFEMODE){	
 	
 	setWindowTitle ("Auxiliary Window");
@@ -22,9 +22,11 @@ QtAuxiliaryWindow::QtAuxiliaryWindow (QWidget* parent) : IChimeraQtWindow (paren
 QtAuxiliaryWindow::~QtAuxiliaryWindow () {}
 
 bool QtAuxiliaryWindow::eventFilter (QObject* obj, QEvent* event){
+	//this will trigger the quickChange in Ao/DDS to perform
 	if (aoSys.eventFilter(obj, event) | dds.eventFilter(obj, event)/* && aoSys.IsquickChange()*/)
 	{
-		try {
+		try 
+		{
 			//aoSys.forceDacs(ttlBoard.getCore(), { 0, ttlBoard.getCurrentStatus() });
 		}
 		catch (ChimeraError& err) {
@@ -256,7 +258,7 @@ unsigned QtAuxiliaryWindow::getTotalVariationNumber (){
 void QtAuxiliaryWindow::zeroDacs (){
 	try{
 		mainWin->updateConfigurationSavedStatus (false);
-		aoSys.zeroDacs (ttlBoard.getCore (), { 0, ttlBoard.getCurrentStatus () });
+		aoSys.zeroDacs ();
 		reportStatus ("Zero'd DACs.\n");
 	}
 	catch (ChimeraError& exception){
@@ -352,8 +354,8 @@ void QtAuxiliaryWindow::handleMasterConfigSave (std::stringstream& configStream)
 
 void QtAuxiliaryWindow::handleNormalFin () {
 	try {
-		aoSys.stopDacs ();
-		aoSys.setDacStatusNoForceOut (aoSys.getFinalSnapshot ());
+		/*TODO add dds*/
+		aoSys.setDacStatusNoForceOut (aoSys.getCore().getFinalSnapshot ());
 		ttlBoard.setTtlStatusNoForceOut (ttlBoard.getCore().getFinalSnapshot ());
 	}
 	catch (ChimeraError&) { /* this gets thrown if no dac events. just continue.*/ }
@@ -363,8 +365,8 @@ void QtAuxiliaryWindow::handleNormalFin () {
 void QtAuxiliaryWindow::handleMasterConfigOpen (ConfigStream& configStream){
 	ttlBoard.getCore ().resetTtlEvents ();
 	ttlBoard.getCore ().prepareForce ();
-	aoSys.resetDacEvents ();
-	aoSys.prepareForce ();
+	aoSys.getCore().resetDacEvents ();
+	//aoSys.prepareForce ();
 	for (auto row : range(size_t(DOGrid::numOFunit)))
 	{
 		for (unsigned ttlNumberInc : range (ttlBoard.getTtlBoardSize ().second)){
@@ -409,7 +411,7 @@ void QtAuxiliaryWindow::handleMasterConfigOpen (ConfigStream& configStream){
 		aoSys.setName (dacInc, name);
 		aoSys.setNote (dacInc, noteString);
 		aoSys.setMinMax (dacInc, min, max);
-		aoSys.prepareDacForceChange (dacInc, defaultValue, ttlBoard.getCore ());
+		aoSys.prepareDacForceChange (dacInc, defaultValue);
 		aoSys.updateEdits ();
 		aoSys.setDefaultValue (dacInc, defaultValue);
 	}
@@ -454,8 +456,7 @@ void QtAuxiliaryWindow::SetDacs (){
 		//aoSys.resetDacEvents();
 		//ttlBoard.resetTtlEvents();
 		reportStatus("Setting Dacs...\r\n");
-		aoSys.handleSetDacsButtonPress(/*ttlBoard.getCore(),*/ true);
-		aoSys.setDACs();
+		aoSys.handleSetDacsButtonPress(true);
 		//aoSys.forceDacs (ttlBoard.getCore (), { 0, ttlBoard.getCurrentStatus () });
 		reportStatus ("Finished Setting Dacs.\r\n");
 	}
@@ -541,7 +542,7 @@ std::string QtAuxiliaryWindow::getOtherSystemStatusMsg (){
 	msg += "Analog Out System:\n";
 	if (!ANALOG_OUT_SAFEMODE){
 		msg += "\tCode System is Active!\n";
-		msg += "\t" + aoSys.getSystemInfo () + "\n";
+		msg += "\t" + std::string(__FILE__) + "line: " + std::to_string(__LINE__) + "\n";
 	}
 	else{
 		msg += "\tCode System is disabled! Enable in \"constants.h\"\n";

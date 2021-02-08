@@ -102,7 +102,7 @@ void ExpThreadWorker::experimentThreadProcedure () {
 }
 
 
-void ExpThreadWorker::analyzeMasterScript (DoCore& ttls, AoSystem& aoSys, DdsCore& dds,
+void ExpThreadWorker::analyzeMasterScript (DoCore& ttls, AoCore& ao, DdsCore& dds,
 	std::vector<parameterType>& vars,
 	ScriptStream& currentMasterScript, bool expectsLoadSkip,
 	std::string& warnings, timeType& operationTime,
@@ -131,7 +131,7 @@ void ExpThreadWorker::analyzeMasterScript (DoCore& ttls, AoSystem& aoSys, DdsCor
 			}
 			else if (handleVariableDeclaration (word, currentMasterScript, vars, scope, warnings)) {}
 			else if (handleDoCommands (word, currentMasterScript, vars, ttls, scope, operationTime)) {}
-			else if (handleAoCommands (word, currentMasterScript, vars, aoSys, ttls, scope, operationTime)) {}
+			else if (handleAoCommands (word, currentMasterScript, vars, ao, ttls, scope, operationTime)) {}
 			else if (handleDdsCommands(word, currentMasterScript, vars, dds, scope, operationTime)) {}
 			else if (word == "callcppcode") {
 				// and that's it... 
@@ -145,7 +145,7 @@ void ExpThreadWorker::analyzeMasterScript (DoCore& ttls, AoSystem& aoSys, DdsCor
 			else if (word == "rsg:") {
 				thrower ("\"rsg:\" command is deprecated! Please use the microwave system listview instead.");
 			}
-			else if (handleFunctionCall (word, currentMasterScript, vars, ttls, aoSys, warnings,
+			else if (handleFunctionCall (word, currentMasterScript, vars, ttls, ao, warnings,
 				PARENT_PARAMETER_SCOPE, operationTime)) {
 			}
 			else if (word == "repeat:") {
@@ -194,7 +194,7 @@ void ExpThreadWorker::analyzeMasterScript (DoCore& ttls, AoSystem& aoSys, DdsCor
 
 
 void ExpThreadWorker::analyzeFunction (std::string function, std::vector<std::string> args, DoCore& ttls,
-	AoSystem& aoSys, std::vector<parameterType>& params, std::string& warnings, timeType& operationTime,
+	AoCore& ao, std::vector<parameterType>& params, std::string& warnings, timeType& operationTime,
 	std::string callingScope) {
 	/// load the file
 	std::fstream functionFile;
@@ -257,7 +257,7 @@ void ExpThreadWorker::analyzeFunction (std::string function, std::vector<std::st
 			if (handleTimeCommands (word, functionStream, params, scope, operationTime)) { /* got handled*/ }
 			else if (handleVariableDeclaration (word, functionStream, params, scope, warnings)) {}
 			else if (handleDoCommands (word, functionStream, params, ttls, scope, operationTime)) {}
-			else if (handleAoCommands (word, functionStream, params, aoSys, ttls, scope, operationTime)) {}
+			else if (handleAoCommands (word, functionStream, params, ao, ttls, scope, operationTime)) {}
 			else if (word == "callcppcode") {
 				// and that's it... 
 				callCppCodeFunction ();
@@ -267,7 +267,7 @@ void ExpThreadWorker::analyzeFunction (std::string function, std::vector<std::st
 				thrower ("\"rsg:\" command is deprecated! Please use the microwave system listview instead.");
 			}
 			/// deal with function calls.
-			else if (handleFunctionCall (word, functionStream, params, ttls, aoSys, warnings, function, operationTime)) {}
+			else if (handleFunctionCall (word, functionStream, params, ttls, ao, warnings, function, operationTime)) {}
 			else if (word == "repeat:") {
 				std::string repeatStr;
 				functionStream >> repeatStr;
@@ -326,9 +326,9 @@ double ExpThreadWorker::convertToTime (timeType time, std::vector<parameterType>
 }
 
 void ExpThreadWorker::handleDebugPlots (DoCore& ttls, AoSystem& aoSys, unsigned variation) {
-	emit doAoData (ttls.getPlotData (variation), aoSys.getPlotData (variation));
+	emit doAoData (ttls.getPlotData (variation), aoSys.getCore().getPlotData (variation));
 	emit notification (qstr (ttls.getTtlSequenceMessage (variation)), 2);
-	emit notification (qstr (aoSys.getDacSequenceMessage (variation)), 2);
+	emit notification (qstr (aoSys.getCore().getDacSequenceMessage (variation)), 2);
 }
 
 bool ExpThreadWorker::runningStatus () {
@@ -669,7 +669,7 @@ bool ExpThreadWorker::handleDoCommands (std::string word, ScriptStream& stream, 
 }
 
 /* returns true if handles word, false otherwise. */
-bool ExpThreadWorker::handleAoCommands (std::string word, ScriptStream& stream,	std::vector<parameterType>& params, AoSystem& aoSys, DoCore& ttls,
+bool ExpThreadWorker::handleAoCommands (std::string word, ScriptStream& stream,	std::vector<parameterType>& params, AoCore& ao, DoCore& ttls,
 	std::string scope, timeType& operationTime) {
 	if (word == "cao:") {
 		// calibrated analog out. Right now, the code doesn't having a variable calibration setting, as this would
@@ -684,7 +684,7 @@ bool ExpThreadWorker::handleAoCommands (std::string word, ScriptStream& stream,	
 		command.numSteps.expressionStr = command.initVal.expressionStr = "__NONE__";
 		command.rampTime.expressionStr = command.rampInc.expressionStr = "__NONE__";
 		try {
-			aoSys.handleDacScriptCommand (command, dacName, params, ttls);
+			ao.handleDacScriptCommand (command, dacName, params);
 		}
 		catch (ChimeraError&) {
 			throwNested ("Error handling \"cao:\" command.");
@@ -700,7 +700,7 @@ bool ExpThreadWorker::handleAoCommands (std::string word, ScriptStream& stream,	
 		command.numSteps.expressionStr = command.initVal.expressionStr = "__NONE__";
 		command.rampTime.expressionStr = command.rampInc.expressionStr = "__NONE__";
 		try {
-			aoSys.handleDacScriptCommand (command, name, params, ttls);
+			ao.handleDacScriptCommand (command, name, params);
 		}
 		catch (ChimeraError&) {
 			throwNested ("Error handling \"dac:\" command.");
@@ -720,7 +720,7 @@ bool ExpThreadWorker::handleAoCommands (std::string word, ScriptStream& stream,	
 		command.rampInc.expressionStr = "__NONE__";
 		//
 		try {
-			aoSys.handleDacScriptCommand (command, name, params, ttls);
+			ao.handleDacScriptCommand (command, name, params);
 		}
 		catch (ChimeraError&) {
 			throwNested ("Error handling \"dacLinSpace:\" command.");
@@ -740,7 +740,7 @@ bool ExpThreadWorker::handleAoCommands (std::string word, ScriptStream& stream,	
 		// not used here.
 		command.numSteps.expressionStr = "__NONE__";
 		try {
-			aoSys.handleDacScriptCommand (command, name, params, ttls);
+			ao.handleDacScriptCommand (command, name, params);
 		}
 		catch (ChimeraError&) {
 			throwNested ("Error handling \"dacArange:\" command.");
@@ -761,7 +761,7 @@ bool ExpThreadWorker::handleAoCommands (std::string word, ScriptStream& stream,	
 		command.rampInc.expressionStr = "__NONE__";
 		try
 		{
-			aoSys.handleDacScriptCommand(command, name, params, ttls);
+			ao.handleDacScriptCommand(command, name, params);
 		}
 		catch (ChimeraError& err)
 		{
@@ -965,7 +965,7 @@ void ExpThreadWorker::checkTriggerNumbers (std::vector<parameterType>& expParams
 }
 
 bool ExpThreadWorker::handleFunctionCall (std::string word, ScriptStream& stream, std::vector<parameterType>& vars,
-	DoCore& ttls, AoSystem& aoSys, std::string& warnings,
+	DoCore& ttls, AoCore& ao, std::string& warnings,
 	std::string callingFunction, timeType& operationTime) {
 	if (word != "call") {
 		return false;
@@ -1000,7 +1000,7 @@ bool ExpThreadWorker::handleFunctionCall (std::string word, ScriptStream& stream
 			" infinite recursion\r\n");
 	}
 	try {
-		analyzeFunction (functionName, args, ttls, aoSys, vars, warnings, operationTime, callingFunction);
+		analyzeFunction (functionName, args, ttls, ao, vars, warnings, operationTime, callingFunction);
 	}
 	catch (ChimeraError&) {
 		throwNested ("Error handling Function call to function " + functionName + ".");
@@ -1011,11 +1011,11 @@ bool ExpThreadWorker::handleFunctionCall (std::string word, ScriptStream& stream
 void ExpThreadWorker::calculateAdoVariations (ExpRuntimeData& runtime) {
 	if (true /*runMaster*/) {
 		auto variations = determineVariationNumber (runtime.expParams);
-		input->aoSys.resetDacEvents ();
+		input->ao.resetDacEvents ();
 		input->ttls.resetTtlEvents ();
 		input->dds.resetDDSEvents();
 
-		input->aoSys.initializeDataObjects (0);
+		input->ao.initializeDataObjects (0);
 		input->ttls.initializeDataObjects (0);
 		input->dds.initializeDataObjects(0);
 
@@ -1024,13 +1024,13 @@ void ExpThreadWorker::calculateAdoVariations (ExpRuntimeData& runtime) {
 		loadSkipTimes = std::vector<double> (variations);
 		emit notification ("Analyzing Master Script...\n");
 		std::string warnings;
-		analyzeMasterScript (input->ttls, input->aoSys,input->dds, runtime.expParams, runtime.masterScript,
+		analyzeMasterScript (input->ttls, input->ao,input->dds, runtime.expParams, runtime.masterScript,
 			runtime.mainOpts.atomSkipThreshold != UINT_MAX, warnings, operationTime, loadSkipTime);
 		emit warn (cstr (warnings));
 		emit notification ("Calcualting DO system variations...\n", 1);
 		input->ttls.calculateVariations (runtime.expParams, this);
 		emit notification ("Calcualting AO system variations...\n", 1);
-		input->aoSys.calculateVariations (runtime.expParams, this, input->calibrations);
+		input->ao.calculateVariations (runtime.expParams, this, input->calibrations);
 		emit notification("Calcualting DDS system variations...\n", 1);
 		input->dds.calculateVariations(runtime.expParams, this, input->calibrations);
 		emit notification ("Running final ado checks...\n");
@@ -1038,10 +1038,10 @@ void ExpThreadWorker::calculateAdoVariations (ExpRuntimeData& runtime) {
 			if (isAborting) { thrower (abortString); }
 			double& currLoadSkipTime = loadSkipTimes[variationInc];
 			currLoadSkipTime = convertToTime (loadSkipTime, runtime.expParams, variationInc);
-			input->aoSys.standardExperimentPrep (variationInc, input->ttls, runtime.expParams, currLoadSkipTime);
+			input->aoSys.standardExperimentPrep (variationInc, runtime.expParams, currLoadSkipTime);
 			input->ttlSys.standardExperimentPrep (variationInc, currLoadSkipTime, runtime.expParams);
 			input->dds.standardExperimentPrep(variationInc);
-			input->aoSys.checkTimingsWork (variationInc);
+			input->ao.checkTimingsWork (variationInc);
 		}
 		unsigned __int64 totalTime = 0;
 		std::vector<double> finaltimes = input->ttls.getFinalTimes();
@@ -1053,7 +1053,7 @@ void ExpThreadWorker::calculateAdoVariations (ExpRuntimeData& runtime) {
 		}
 		emit notification (("Programmed Total Experiment time: " + str (totalTime) + "\r\n").c_str (), 1);
 		emit notification (("Number of TTL Events in experiment: " + str (input->ttls.getNumberEvents (0)) + "\r\n").c_str (), 1);
-		emit notification (("Number of DAC Events in experiment: " + str (input->aoSys.getNumberEvents (0)) + "\r\n").c_str (), 1);
+		emit notification (("Number of DAC Events in experiment: " + str (input->ao.getNumberEvents (0)) + "\r\n").c_str (), 1);
 	}
 }
 
@@ -1161,7 +1161,7 @@ void ExpThreadWorker::startRep (unsigned repInc, unsigned variationInc, bool ski
 		//input->ttls.FtdiWaitTillFinished (variationInc);
 		//input->aoSys.stopDacs();
 		//input->aoSys.configureClocks(variationInc, skip);
-		input->aoSys.writeDacs(variationInc, skip);
+		input->ao.writeDacs(variationInc, skip);
 		input->dds.writeDDSs(variationInc, skip);
 		input->ttls.writeTtlDataToFPGA(variationInc, skip);
 		input->zynqExp.sendCommand("trigger");

@@ -94,16 +94,6 @@ class DdsSystem : public IChimeraSystem{
 		
 		DdsCore core;
 
-		//std::array<std::array<double, 2>, size_t(DDSGrid::total)> ddsValues;
-
-
-		//std::vector<DdsCommandForm> ddsCommandFormList;
-		//// the first vector is for each variation.
-		//std::vector<std::vector<DdsCommand>> ddsCommandList;
-		//std::vector<std::vector<DdsSnapshot>> ddsSnapshots;
-		//std::vector<std::vector<DdsChannelSnapshot>> ddsChannelSnapshots;
-		//std::vector<std::pair<double, std::vector<DdsCommand>>> timeOrganizer;
-
 
 		ZynqTCP zynq_tcp;
 		bool roundToDdsPrecision;

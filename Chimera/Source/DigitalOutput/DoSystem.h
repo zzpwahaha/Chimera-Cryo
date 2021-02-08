@@ -32,7 +32,7 @@ class DoSystem : public IChimeraSystem
 		DoSystem& operator=(const DoSystem&) = delete;
 		DoSystem (const DoSystem&) = delete;
 
-		DoSystem (IChimeraQtWindow* parent, bool ftSafemode, bool serialSafemode );
+		DoSystem (IChimeraQtWindow* parent);
 		~DoSystem();
 		/// config handling
 		void handleSaveConfig(ConfigStream& saveFile);
