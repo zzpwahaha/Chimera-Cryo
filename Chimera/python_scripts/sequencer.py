@@ -59,7 +59,7 @@ class sequencer:
 		self.ddsFreqRange = [0, 500]
 		self.ddsFreqRangeConv = 8589930 # (2^32 - 1)/500 MHz
 		self.ddsAmpRangeConv = 818.4 # (2^10 - 1)/1.25 mW
-		self.ddsTimeRes = 1.6e3 # in us
+		self.ddsTimeRes = 1.0e3 # in us
 		# initialize DACs
 		self.dac0 = DAC81416(fifo_devices['DAC81416_0'])
 		self.dac1 = DAC81416(fifo_devices['DAC81416_1'])
@@ -135,10 +135,6 @@ class sequencer:
 		fifo.write_axis_fifo(struct.pack('>I', point.start * 256 * 256 + point.steps))
 		fifo.write_axis_fifo(struct.pack('>I', point.incr * 16 + point.chan))
 
-		# self.fifo_dds_atw_seq.write_axis_fifo("\x01\x00" + struct.pack('>H', point.address))
-		# self.fifo_dds_atw_seq.write_axis_fifo(struct.pack('>I', point.time))
-		# self.fifo_dds_atw_seq.write_axis_fifo(struct.pack('>I', point.start*256*256 + point.steps))
-		# self.fifo_dds_atw_seq.write_axis_fifo(struct.pack('>I', point.incr*16+point.chan))
 
 	def write_ftw_point(self, fifo, point):
 		#01XXAAAA TTTTTTTT DDDDDDDD DDDDDDDD DDDDDDDD
@@ -148,20 +144,17 @@ class sequencer:
 		#acc_incr    <= gpio_in(47 downto  4);
 		#acc_chan    <= to_integer(unsigned(gpio_in( 3 downto  0)));
 
-		incr_hi = int(math.floor(point.incr*1.0/2**28))
-		incr_lo = point.incr - incr_hi * 2**28
-		print point.steps * 256 * 256, incr_hi, point.steps * 256 * 256 + incr_hi
+		incr_hi = point.incr & (0xffff << 28)  # acc_incr_hi    <= gpio_in(47 downto  32)
+		incr_lo = point.incr & ((1 << 28) - 1)  # acc_incr_lo    <= gpio_in(31 downto  4)
+		print point.steps * 256 * 256, incr_hi,incr_lo, point.incr, point.steps * 256 * 256 + incr_hi
+		print point.incr & (0xffff<<28), point.incr & ((1<<28)-1), (point.steps << 16) + incr_hi, (incr_lo << 4) + point.chan
+		print incr_hi, incr_lo, point.steps * 256 * 256 + incr_hi, incr_lo * 16 + point.chan
 		fifo.write_axis_fifo("\x01\x00" + struct.pack('>H', point.address))
 		fifo.write_axis_fifo(struct.pack('>I', point.time))
 		fifo.write_axis_fifo(struct.pack('>I', point.start))
-		fifo.write_axis_fifo(struct.pack('>I', point.steps * 256 * 256 + incr_hi))
-		fifo.write_axis_fifo(struct.pack('>I', incr_lo * 16 + point.chan))
+		fifo.write_axis_fifo(struct.pack('>I', (point.steps << 16) + incr_hi))
+		fifo.write_axis_fifo(struct.pack('>I', (incr_lo << 4) + point.chan))
 
-		# self.fifo_dds_ftw_seq.write_axis_fifo("\x01\x00" + struct.pack('>H', point.address))
-		# self.fifo_dds_ftw_seq.write_axis_fifo(struct.pack('>I', point.time))
-		# self.fifo_dds_ftw_seq.write_axis_fifo(struct.pack('>I', point.start))
-		# self.fifo_dds_ftw_seq.write_axis_fifo(struct.pack('>I', point.steps*256*256 + incr_hi))
-		# self.fifo_dds_ftw_seq.write_axis_fifo(struct.pack('>I', incr_lo*16+point.chan))
 
 	def reset_DAC(self):
 		self.dac = DAC81416(device) # initialize DAC
@@ -260,11 +253,11 @@ class sequencer:
 		for ii in range(num_snapshots):
 			[t, channel, aorf, s, end, duration] = self.dds_read_point(byte_buf[ii*byte_len: ii*byte_len + byte_len])
 			print 'time',t,'channel', channel, aorf,'start', s,'end', end,'duration', duration
-			num_steps = (duration/self.ddsTimeRes)-1
+			num_steps = (duration/self.ddsTimeRes)
 			if (num_steps == 0):
 				ramp_inc = 0
 			else:
-				ramp_inc = int((end-s)/num_steps)
+				ramp_inc = int((end-s)/num_steps) * 4 #somehow setting ddsTimeRes to 1.0e3 and add *4 works for freq ramp final value
 			if (aorf == 'f'):
 				if (ramp_inc < 0):
 					ramp_inc = int(self.ddsFreqRangeConv + ramp_inc)
