@@ -5,10 +5,12 @@ ddsfreq: dds0_1 50
 
 %pulseon: do8_2 2
 t += 5
-
-ddsrampfreq: dds0_1 1 220 60
-t += 30
+pulseon: do1_1 1
+ddsrampfreq: dds0_1 1 120 60
 pulseon: do1_0 1
+t += 60
+pulseon: do1_0 1
+ddsamp: dds0_1 0
 %dacramp: dac0_0 0 3 20
 %daclinspace: dac0_0 0 3 10 5 %ramptime numofstep
 dacarange: dac0_0 0 3 10 0.5 %ramptime rampInc
