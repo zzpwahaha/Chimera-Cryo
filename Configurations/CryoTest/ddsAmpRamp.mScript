@@ -1,0 +1,12 @@
+%%%%%%%%%%%%%%%%% Start With 1ms %%%%%%%%%%%%%%%%% 
+t = 1
+pulseon: do1_0 1
+ddsfreq: dds0_1 80
+ddsamp: dds0_1 1.25
+
+t += 1
+ddsrampamp: dds0_1 1.25 0 15
+
+t += 20
+pulseon: do1_0 1
+ddsamp: dds0_1 0 

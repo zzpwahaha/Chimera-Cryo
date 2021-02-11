@@ -2,20 +2,26 @@
 t = 1
 ddsamp: dds0_1 1.25
 ddsfreq: dds0_1 50
-
+dac: dac0_0 0
 %pulseon: do8_2 2
 t += 5
-pulseon: do1_1 1
-ddsrampfreq: dds0_1 1 120 60
-pulseon: do1_0 1
-t += 60
-pulseon: do1_0 1
+%pulseon: do1_1 1
+%ddsrampfreq: dds0_1 100 10 20
+%ddsrampamp: dds0_1 1.25 0 50
+dacramp: dac0_0 9 0 20
+%pulseon: do1_0 1
+t += 0.1
+pulseon: do1_0 0.1
+t += 22
 ddsamp: dds0_1 0
+pulseon: do1_0 0.1
+dac: dac0_0 0
 %dacramp: dac0_0 0 3 20
 %daclinspace: dac0_0 0 3 10 5 %ramptime numofstep
-dacarange: dac0_0 0 3 10 0.5 %ramptime rampInc
+%dacarange: dac0_0 0 3 10 0.5 %ramptime rampInc
 t += 51
 dac: dac0_0 0
 ddsamp: dds0_1 0
+
 %pulseon: do1_0 1
 %pulseon: do8_2 2
