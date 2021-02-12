@@ -22,6 +22,7 @@
 
 #include <qDebug>
 
+
 Script::Script(IChimeraQtWindow* parent) : IChimeraSystem(parent) 
 {
 	isSaved = true;

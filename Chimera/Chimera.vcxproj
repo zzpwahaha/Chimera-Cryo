@@ -67,6 +67,7 @@
     <ClCompile>
       <PreprocessorDefinitions>_WINSOCKAPI_;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <WarningLevel>Level3</WarningLevel>
     </ClCompile>
     <Link>
       <AdditionalDependencies>ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -74,12 +75,12 @@
   </ItemDefinitionGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="QtSettings">
     <QtInstall>msvc2019_64</QtInstall>
-    <QtModules>core;gui;uitools;widgets;charts</QtModules>
+    <QtModules>charts;core;gui;printsupport;uitools;widgets</QtModules>
     <QtBuildConfig>debug</QtBuildConfig>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="QtSettings">
     <QtInstall>msvc2019_64</QtInstall>
-    <QtModules>core;gui;uitools;widgets;charts</QtModules>
+    <QtModules>charts;core;gui;printsupport;uitools;widgets</QtModules>
     <QtBuildConfig>release</QtBuildConfig>
   </PropertyGroup>
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.props')">
@@ -112,6 +113,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="3rd_Party\qcustomplot\qcustomplot.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="Source\AnalogOutput\AoCore.cpp" />
     <ClCompile Include="Source\ExcessDialogs\DdsSettingsDialog.cpp" />
     <ClCompile Include="Source\DirectDigitalSynthesis\DdsOutput.cpp" />
@@ -203,6 +208,7 @@
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="Source\ExcessDialogs\DdsSettingsDialog.h" />
+    <QtMoc Include="3rd_Party\qcustomplot\qcustomplot.h" />
     <ClInclude Include="Source\AnalogOutput\AoCore.h" />
     <ClInclude Include="Source\DirectDigitalSynthesis\DdsOutput.h" />
     <ClInclude Include="Source\DigitalOutput\DigitalOutput.h" />
