@@ -20,6 +20,8 @@
 #include <qcombobox.h>
 #include <QInputDialog.h>
 
+#include <qDebug>
+
 Script::Script(IChimeraQtWindow* parent) : IChimeraSystem(parent) 
 {
 	isSaved = true;
@@ -681,6 +683,45 @@ bool Script::eventFilter(QObject* obj, QEvent* event)
 				if (edit->currentFont().pointSize() != 1) { editZoom--; }
 				edit->zoomOut();
 				return true;
+			}
+			else if (key->key() == Qt::Key_Slash)
+			{
+				QTextCursor cur = edit->textCursor();
+				const int curp = cur.position();
+				const int ancp = cur.anchor();
+				cur.setPosition(curp > ancp ? ancp : curp);
+				cur.movePosition(QTextCursor::StartOfLine);
+				cur.setPosition(curp > ancp ? curp : ancp, QTextCursor::KeepAnchor);
+				cur.movePosition(QTextCursor::EndOfLine, QTextCursor::KeepAnchor);
+
+				QString stext = cur.selection().toPlainText();
+				QStringList stextlist = stext.split('\n');
+				int numofComment = stextlist.length();
+				bool comment = false;
+				for (auto s : stextlist) {
+					if (s[0] != '%') { comment = true; break; }
+				}
+				if (comment) {
+					for (auto& s : stextlist) {
+						s.insert(0, '%');
+					}
+				}
+				else {
+					for (auto& s : stextlist) {
+						s = s.remove(0, 1);
+					}
+				}
+				cur.insertText(stextlist.join('\n'));
+
+				cur.setPosition(ancp + (ancp > curp ? (comment ? numofComment : -numofComment) : (comment ? 1 : -1)));
+				cur.setPosition(curp + (ancp > curp ? (comment ? 1 : -1) : (comment ? numofComment : -numofComment)), QTextCursor::KeepAnchor);
+
+
+				edit->setTextCursor(cur);
+			}
+			else
+			{
+				qDebug() << key->key();
 			}
 
 		}
