@@ -34,19 +34,23 @@ class AD9959:
     else:
       self.fifo = AXIS_FIFO(device)
 
-  def set_DDS(self, channel, freq, amp = None):
+  def set_DDS(self, channel, freq, amp = None, DACScale = None):
     assert channel>=0 and channel<=3, 'Invalid channel for AD9959 in set_DDS'
     with open(self.device, "r+b") as character:
       # ~ writeWords(character)
       freqConv = int((2**32 - 1)*freq/500)
       if amp is None:
         amp=10
+      if DACScale is None:
+        DACScale = 3 #0b11
       ampConv  = (1<<(12+8)) | (int((2**10-1)*amp/10)<<8)
+      dacScaleConv = DACScale << (8 + 8)
       # chanConv = int(2**channel)
       chanConv = 1<<channel<<28 #(2**channel)*268435456
       writeToDDS(character,0,chanConv)
       writeToDDS(character,4,freqConv)
       writeToDDS(character,6,ampConv)
+      writeToDDS(character,3,dacScaleConv)
       writeToDDS(character,0,0x00000000)
 
 

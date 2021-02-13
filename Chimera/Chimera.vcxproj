@@ -117,6 +117,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Source\Scripts\CQCodeEdit.cpp" />
     <ClCompile Include="Source\AnalogOutput\AoCore.cpp" />
     <ClCompile Include="Source\ExcessDialogs\DdsSettingsDialog.cpp" />
     <ClCompile Include="Source\DirectDigitalSynthesis\DdsOutput.cpp" />
@@ -209,6 +210,7 @@
   <ItemGroup>
     <QtMoc Include="Source\ExcessDialogs\DdsSettingsDialog.h" />
     <QtMoc Include="3rd_Party\qcustomplot\qcustomplot.h" />
+    <QtMoc Include="Source\Scripts\CQCodeEdit.h" />
     <ClInclude Include="Source\AnalogOutput\AoCore.h" />
     <ClInclude Include="Source\DirectDigitalSynthesis\DdsOutput.h" />
     <ClInclude Include="Source\DigitalOutput\DigitalOutput.h" />

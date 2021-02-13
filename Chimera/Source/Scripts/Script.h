@@ -4,6 +4,7 @@
 #include "GeneralObjects/RunInfo.h"
 #include "ParameterSystem/ParameterSystemStructures.h"
 #include "AnalogOutput/AoStructures.h"
+#include <Scripts/CQCodeEdit.h>
 #include <Scripts/SyntaxHighlighter.h>
 #include <Scripts/ScriptableDevices.h>
 #include "CustomQtControls/functionCombo.h"
@@ -75,7 +76,8 @@ class Script : public IChimeraSystem
 		bool eventFilter(QObject* obj, QEvent* event);
 
 	private:
-		CQTextEdit* edit;
+		//CQTextEdit* edit;
+		CQCodeEdit* edit;
 		QLabel* title;
 		CQCheckBox*  savedIndicator;
 		QLabel* fileNameText;

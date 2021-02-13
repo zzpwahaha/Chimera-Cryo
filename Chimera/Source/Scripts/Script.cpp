@@ -138,7 +138,8 @@ void Script::initialize(IChimeraQtWindow* parent, std::string deviceTypeInput, s
 			parent->reportErr (err.qtrace ());
 		}});
 
-	edit = new CQTextEdit ("", parent);
+	//edit = new CQTextEdit ("", parent);
+	edit = new CQCodeEdit(parent);
 	editZoom = 0;
 	edit->installEventFilter(this);
 	edit->setAcceptRichText (false);
@@ -691,9 +692,9 @@ bool Script::eventFilter(QObject* obj, QEvent* event)
 				const int curp = cur.position();
 				const int ancp = cur.anchor();
 				cur.setPosition(curp > ancp ? ancp : curp);
-				cur.movePosition(QTextCursor::StartOfLine);
+				cur.movePosition(QTextCursor::StartOfBlock);
 				cur.setPosition(curp > ancp ? curp : ancp, QTextCursor::KeepAnchor);
-				cur.movePosition(QTextCursor::EndOfLine, QTextCursor::KeepAnchor);
+				cur.movePosition(QTextCursor::EndOfBlock, QTextCursor::KeepAnchor);
 
 				QString stext = cur.selection().toPlainText();
 				QStringList stextlist = stext.split('\n');
