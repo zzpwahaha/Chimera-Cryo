@@ -24,6 +24,7 @@ class ftdiFlume
 		bool getSafemodeSetting();
 		void open(const char devSerial[]);
 		void setUsbParams();
+
 	private:
 		const bool safemode;
 		FT_HANDLE ftAsyncHandle;

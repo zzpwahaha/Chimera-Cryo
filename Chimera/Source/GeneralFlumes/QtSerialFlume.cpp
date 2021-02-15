@@ -1,6 +1,6 @@
 #include <stdafx.h>
 #include <GeneralFlumes/QtSerialFlume.h>
-/*
+
 QtSerialFlume::QtSerialFlume (bool safemode_option, std::string portAddress_) : safemode(safemode_option){
 	portAddress = portAddress_;
 	open (portAddress);
@@ -37,4 +37,3 @@ std::string QtSerialFlume::query (std::string msg) {
 	write (msg);
 	return read ();
 }
-*/

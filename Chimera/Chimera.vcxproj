@@ -75,12 +75,12 @@
   </ItemDefinitionGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="QtSettings">
     <QtInstall>msvc2019_64</QtInstall>
-    <QtModules>charts;core;gui;printsupport;uitools;widgets</QtModules>
+    <QtModules>charts;core;gui;printsupport;serialport;uitools;widgets</QtModules>
     <QtBuildConfig>debug</QtBuildConfig>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="QtSettings">
     <QtInstall>msvc2019_64</QtInstall>
-    <QtModules>charts;core;gui;printsupport;uitools;widgets</QtModules>
+    <QtModules>charts;core;gui;printsupport;serialport;uitools;widgets</QtModules>
     <QtBuildConfig>release</QtBuildConfig>
   </PropertyGroup>
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.props')">
@@ -217,6 +217,7 @@
     <ClInclude Include="Source\DigitalOutput\DoCore.h" />
     <ClInclude Include="Source\DigitalOutput\DoStructures.h" />
     <QtMoc Include="Source\DigitalOutput\DoSystem.h" />
+    <ClInclude Include="Source\GeneralFlumes\QtSerialFlume.h" />
     <ClInclude Include="Source\ZynqTCP\ZynqTCP.h" />
     <QtMoc Include="Source\Scripts\Script.h" />
     <ClInclude Include="Source\AnalogOutput\AnalogOutput.h" />
@@ -269,7 +270,6 @@
     <QtMoc Include="Source\ExperimentThread\ExpThreadWorker.h" />
     <ClInclude Include="Source\GeneralFlumes\ftdiFlume.h" />
     <ClInclude Include="Source\GeneralFlumes\ftdiStructures.h" />
-    <ClInclude Include="Source\GeneralFlumes\QtSerialFlume.h" />
     <ClInclude Include="Source\GeneralFlumes\VisaFlume.h" />
     <QtMoc Include="Source\GeneralImaging\ImageLabel.h" />
     <ClInclude Include="Source\GeneralImaging\imageParameters.h" />

@@ -47,6 +47,20 @@
 
 	// Zynq realated
 	const double ZYNQ_DEADTIME = 0.1; // give zynq 0.1ms to avoid sending zero at t=0 for ttl
+	
+	const bool ZNYQ_SAFEMODE = false;
+	const auto ZYNQ_ADDRESS = "10.10.0.2";
+	const auto ZYNQ_PORT = "8080";
+	const int ZYNQ_MAX_BUFF = 64;
+	const int DIO_LEN_BYTE_BUF = 28;
+	const int DAC_LEN_BYTE_BUF = 42;
+	const int DDS_LEN_BYTE_BUF = 46;
+	const double DAC_TIME_RESOLUTION = 1.6; // in ms
+	const int DAC_RAMP_MAX_PTS = 0xffff; // 65535 ???
+	const double DDS_TIME_RESOLUTION = 1.6; // in ms
+	const double DDS_MAX_AMP = 1.25; // in mW
+	//#define DDS_FPGA_ADDRESS "FT1I6IBSB"; //Device Serial: FT1I6IBS, Use FT1I6IBSB in C++ to select Channel B
+
 
 
 #endif

@@ -419,9 +419,6 @@
     <ClInclude Include="Source\GeneralFlumes\ftdiStructures.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\GeneralFlumes\QtSerialFlume.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Source\GeneralFlumes\VisaFlume.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -555,6 +552,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\AnalogOutput\AoCore.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\GeneralFlumes\QtSerialFlume.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

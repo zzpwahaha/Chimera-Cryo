@@ -1,5 +1,5 @@
 #pragma once
-/*
+
 #include <QSerialPort>
 
 class QtSerialFlume {
@@ -21,4 +21,3 @@ private:
 	QSerialPort port;
 	std::string portAddress;
 };
-*/
