@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QSerialPort>
+#include <QSerialPortInfo>
 
 class QtSerialFlume {
 public:
@@ -16,8 +17,11 @@ public:
 	std::string read ();
 	std::string query (std::string msg);
 
+	QSerialPort& getPort() { return port; }
+
 private:
 	const bool safemode;
 	QSerialPort port;
+	QSerialPortInfo info;
 	std::string portAddress;
 };

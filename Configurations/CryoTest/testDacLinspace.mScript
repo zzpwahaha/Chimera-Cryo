@@ -1,0 +1,4 @@
+%%%%%%%%%%%%%%%%% Start With 1ms %%%%%%%%%%%%%%%%% 
+t = 1
+pulseon: do1_0 1
+daclinspace: dac0_0 0 9 20 5

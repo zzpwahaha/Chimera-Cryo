@@ -407,14 +407,7 @@ bool DdsCore::isValidDDSName(std::string name)
 {
 	for (UINT ddsInc = 0; ddsInc < size_t(DDSGrid::total); ddsInc++)
 	{
-		if (name == "dds" + 
-			str(ddsInc / size_t(DDSGrid::numPERunit)) + "_" +
-			str(ddsInc % size_t(DDSGrid::numPERunit))) /*default name*/
-		{
-			return true;
-		}
-		else if (getDDSIdentifier(name) != -1)
-		{
+		if (getDDSIdentifier(name) != -1) {
 			return true;
 		}
 	}

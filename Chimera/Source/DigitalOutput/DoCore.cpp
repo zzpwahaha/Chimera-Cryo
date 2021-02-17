@@ -205,7 +205,7 @@ void DoCore::setNames (std::array<std::string, size_t(DOGrid::total)> namesIn)
 //}
 
 
-std::array< std::array<bool, size_t(DOGrid::numPERunit)>, size_t(DOGrid::numOFunit) > DoCore::getFinalSnapshot ()
+DOStatus DoCore::getFinalSnapshot ()
 {
 	auto numVar = ttlSnapshots.size();
 	if (numVar > 0){
@@ -296,6 +296,16 @@ void DoCore::ttlOffDirect (unsigned row, unsigned column, double timev, unsigned
 	command.time = timev;
 	command.value = false;
 	ttlCommandList [variation].push_back (command);
+}
+
+void DoCore::ttlPulseDirect(unsigned row, unsigned column, double timev, double dur, unsigned variation)
+{
+	if (dur < DIO_TIME_RESOLUTION) {
+		thrower("The duration for ttl direct pulse: " + str(dur) + " is smaller than Zynq resolution 10ns! \r\n");
+		return;
+	}
+	ttlOnDirect(row, column, timev, variation);
+	ttlOffDirect(row, column, timev + dur, variation);
 }
 
 
@@ -481,7 +491,7 @@ unsigned DoCore::countTriggers (std::pair<unsigned, unsigned> which, unsigned va
 
 
 
-DWORD DoCore::FPGAForceOutput(std::array<std::array<bool, size_t(DOGrid::numPERunit)>, size_t(DOGrid::numOFunit)> status)
+void DoCore::FPGAForceOutput(DOStatus status)
 {
 
 	resetTtlEvents();
@@ -512,9 +522,42 @@ DWORD DoCore::FPGAForceOutput(std::array<std::array<bool, size_t(DOGrid::numPERu
 		errBox("connection to zynq failed. can't write DAC data\n");
 	}
 
-	return 0;
 }
 
+void DoCore::FPGAForcePulse(DOStatus status, unsigned row, unsigned col, double dur)
+{
+	resetTtlEvents();
+	sizeDataStructures(2);
+	status[row][col] = !status[row][col];
+	ttlSnapshots[0].push_back({ 0.1, status });
+	status[row][col] = !status[row][col];
+	ttlSnapshots[0].push_back({ 0.1 + dur, status });
+	formatForFPGA(0);
+	writeTtlDataToFPGA(0, false);
+
+	int tcp_connect;
+	try
+	{
+		tcp_connect = zynq_tcp.connectTCP(ZYNQ_ADDRESS);
+	}
+	catch (ChimeraError& err)
+	{
+		tcp_connect = 1;
+		errBox(err.what());
+	}
+
+	if (tcp_connect == 0)
+	{
+		zynq_tcp.writeCommand("trigger");
+		zynq_tcp.writeCommand("disableMod");
+		zynq_tcp.disconnect();
+	}
+	else
+	{
+		errBox("connection to zynq failed. can't write DAC data\n");
+	}
+
+}
 
 void DoCore::formatForFPGA(UINT variation)
 {
@@ -638,7 +681,7 @@ void DoCore::organizeTtlCommands (unsigned variation, DoSnapshot initSnap)
 		// threshold to extra room. If dt<1ns, probably just some floating point issue. 
 		// If 1ns<dt<100ns(Zynq is 10ns) I want to actually complain to the user since it seems likely that  this was intentional and 
 		// not a floating error.
-		if (commandInc == 0 || fabs (orderedCommandList[commandInc].time - timeOrganizer.back ().first) > 1e-6)
+		if (commandInc == 0 || fabs (orderedCommandList[commandInc].time - timeOrganizer.back ().first) > DIO_TIME_RESOLUTION)
 		{
 			// new time
 			std::vector<unsigned short> testVec = { unsigned short (commandInc) };
@@ -648,6 +691,11 @@ void DoCore::organizeTtlCommands (unsigned variation, DoSnapshot initSnap)
 		{
 			// old time
 			timeOrganizer.back ().second.push_back (commandInc);
+			if (commandInc != 0) {
+				//then it must be that the time interval is <10ns, complain it
+				//emit thrower("The time spacing between two ttl change is" + str(fabs(orderedCommandList[commandInc].time - timeOrganizer.back().first)) +
+				//	"ms, which is smaller than 10ns. Aborted \r\n");
+			}
 		}
 	}
 	if (timeOrganizer.size () == 0)
@@ -696,7 +744,7 @@ void DoCore::organizeTtlCommands (unsigned variation, DoSnapshot initSnap)
 		}
 	}
 	// phew. Check for good input by user:
-	for (auto snapshot : snaps)
+	for (auto& snapshot : snaps)
 	{
 		if (snapshot.time < 0)
 		{

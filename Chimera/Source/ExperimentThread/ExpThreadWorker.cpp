@@ -1019,7 +1019,7 @@ void ExpThreadWorker::calculateAdoVariations (ExpRuntimeData& runtime) {
 		input->ttls.initializeDataObjects (0);
 		input->dds.initializeDataObjects(0);
 
-		input->zynqExp.sendCommand("initExp");
+		//input->zynqExp.sendCommand("initExp");
 
 		loadSkipTimes = std::vector<double> (variations);
 		emit notification ("Analyzing Master Script...\n");

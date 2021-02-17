@@ -6,8 +6,12 @@
 #include "IChimeraQtWindow.h"
 
 #include "LowLevel/constants.h"
+
 #include "DigitalOutput/DoSystem.h"
 #include "AnalogOutput/AoSystem.h"
+#include "DirectDigitalSynthesis/DdsSystem.h"
+#include "OffsetLock/OlSystem.h"
+
 #include "ParameterSystem/ParameterSystem.h"
 #include "Scripts/Script.h"
 #include "GeneralObjects/RunInfo.h"
@@ -15,7 +19,7 @@
 #include "ConfigurationSystems/MasterConfiguration.h"
 #include "GeneralObjects/commonTypes.h"
 #include "ExperimentMonitoringAndStatus/StatusControl.h"
-#include "DirectDigitalSynthesis/DdsSystem.h"
+
 #include "RealTimeDataAnalysis/MachineOptimizer.h"
 #include "ExperimentThread/ExperimentThreadInput.h"
 
@@ -48,20 +52,29 @@ class QtAuxiliaryWindow : public IChimeraQtWindow{
 		void ViewOrChangeDDSNames();
 		void passRoundToDac ();
 		std::string getOtherSystemStatusMsg ();
+
 		std::array<std::string, size_t(DOGrid::total)> getTtlNames ();
-		DoSystem& getTtlSystem ();
 		std::array<AoInfo, size_t(AOGrid::total)> getDacInfo ();
 		std::array<std::string, size_t(AOGrid::total)> getDacNames();
 		std::array<std::string, size_t(DDSGrid::total)> getDdsNames();
+
+		DoSystem& getTtlSystem();
+		DoCore& getTtlCore();
+		AoSystem& getAoSys();
+		DdsSystem& getDdsSys();
+		OlSystem& getOlSys();
+
 		std::string getVisaDeviceStatus ();
 
 		void fillMasterThreadInput (ExperimentThreadInput* input);
 		void SetDacs ();
 		void SetDds();
+		void SetOls();
 
 		void handleAbort ();
 		void zeroDacs ();
 		void zeroDds();
+		void zeroOls();
 	 
 		std::vector<parameterType> getAllParams ();
 
@@ -74,9 +87,7 @@ class QtAuxiliaryWindow : public IChimeraQtWindow{
 		unsigned getNumberOfDacs ();
 		void setVariablesActiveState (bool active);
 
-		DoCore& getTtlCore ();
-		AoSystem& getAoSys ();
-		DdsSystem& getDdsSys();
+
 
 		ParameterSystem& getGlobals ();
 		std::vector<parameterType> getUsableConstants ();
@@ -90,10 +101,13 @@ class QtAuxiliaryWindow : public IChimeraQtWindow{
 		/// control system classes
 		DoSystem ttlBoard;
 		AoSystem aoSys;
+		DdsSystem dds;
+		OlSystem olSys;
+
 		MasterConfiguration masterConfig{ MASTER_CONFIGURATION_FILE_ADDRESS };
 		MachineOptimizer optimizer;
 		ParameterSystem configParamCtrl, globalParamCtrl;
-		DdsSystem dds;
+		
 
 		doChannelInfoDialog* DOdialog;
 		AoSettingsDialog* AOdialog;

@@ -42,7 +42,7 @@ class DdsCore : public IDeviceCore{
 		~DdsCore ( );
 		ddsExpSettings getSettingsFromConfig (ConfigStream& file );
 		void writeRampListToConfig ( std::vector<ddsIndvRampListInfo> list, ConfigStream& file );
-		void programVariation ( unsigned variationNum, std::vector<parameterType>& params, ExpThreadWorker* threadworker);
+		void programVariation ( unsigned variationNum, std::vector<parameterType>& params, ExpThreadWorker* threadworker) override;
 		void connectasync ( );
 		void disconnect ( );
 		void writeOneRamp ( ddsRampFinFullInfo boxRamp, UINT8 rampIndex );
@@ -51,16 +51,16 @@ class DdsCore : public IDeviceCore{
 		void assertDdsValuesValid ( std::vector<parameterType>& params );
 		void evaluateDdsInfo ( std::vector<parameterType> params= std::vector<parameterType>());
 		void forceRampsConsistent ( );
-		void calculateVariations (std::vector<parameterType>& params, ExpThreadWorker* threadworker);
+		void calculateVariations (std::vector<parameterType>& params, ExpThreadWorker* threadworker) override;
 		std::string getSystemInfo ( );
 		void clearDdsRampMemory ( );
 		void manualLoadExpRampList (std::vector< ddsIndvRampListInfo> ramplist);
 		const std::string configDelim = "DDS_SYSTEM";
-		std::string getDelim () { return configDelim; }
-		void logSettings (DataLogger& log, ExpThreadWorker* threadworker);
-		void loadExpSettings (ConfigStream& stream);
-		void normalFinish () {};
-		void errorFinish () {};
+		std::string getDelim () override { return configDelim; }
+		void logSettings (DataLogger& log, ExpThreadWorker* threadworker) override;
+		void loadExpSettings (ConfigStream& stream) override;
+		void normalFinish () override {};
+		void errorFinish () override {};
 		
 	private:
 		std::vector<ddsIndvRampListInfo> expRampList;

@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <array>
+#include <utility>
 
 // running in safemode means that the program doesn't actually try to connect to physical devices. Generally, it will 
 // follow the exact coding logic, but at the exact point where it would normally communicate with a device, it will 
@@ -18,6 +19,7 @@
 	constexpr bool DOFTDI_SAFEMODE = true;
 	constexpr bool DDS_SAFEMODE = true;
 	constexpr bool ANDOR_SAFEMODE = true;
+	constexpr bool OFFSETLOCK_SAFEMODE = false;
 	#ifdef _DEBUG
 		constexpr bool PYTHON_SAFEMODE = true;
 	#else
@@ -55,10 +57,17 @@
 	const int DIO_LEN_BYTE_BUF = 28;
 	const int DAC_LEN_BYTE_BUF = 42;
 	const int DDS_LEN_BYTE_BUF = 46;
+
+	const double DIO_TIME_RESOLUTION = 1e-5;
 	const double DAC_TIME_RESOLUTION = 1.6; // in ms
 	const int DAC_RAMP_MAX_PTS = 0xffff; // 65535 ???
 	const double DDS_TIME_RESOLUTION = 1.6; // in ms
 	const double DDS_MAX_AMP = 1.25; // in mW
+
+	const double OL_TIME_RESOLUTION = 0.02; //in ms
+	const std::pair<unsigned, unsigned> OL_TRIGGER_LINE = { 6,0 }; /*the first is the label on the box, minus 1 when use*/
+	const double OL_TRIGGER_TIME = 0.01; //in ms i.e. 10us
+
 	//#define DDS_FPGA_ADDRESS "FT1I6IBSB"; //Device Serial: FT1I6IBS, Use FT1I6IBSB in C++ to select Channel B
 
 

@@ -117,6 +117,9 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Source\OffsetLock\OlSystem.cpp" />
+    <ClCompile Include="Source\OffsetLock\OffsetLockOutput.cpp" />
+    <ClCompile Include="Source\OffsetLock\OlCore.cpp" />
     <ClCompile Include="Source\Scripts\CQCodeEdit.cpp" />
     <ClCompile Include="Source\AnalogOutput\AoCore.cpp" />
     <ClCompile Include="Source\ExcessDialogs\DdsSettingsDialog.cpp" />
@@ -211,6 +214,9 @@
     <QtMoc Include="Source\ExcessDialogs\DdsSettingsDialog.h" />
     <QtMoc Include="3rd_Party\qcustomplot\qcustomplot.h" />
     <QtMoc Include="Source\Scripts\CQCodeEdit.h" />
+    <ClInclude Include="Source\OffsetLock\OlSystem.h" />
+    <ClInclude Include="Source\OffsetLock\OffsetLockOutput.h" />
+    <ClInclude Include="Source\OffsetLock\OlCore.h" />
     <ClInclude Include="Source\AnalogOutput\AoCore.h" />
     <ClInclude Include="Source\DirectDigitalSynthesis\DdsOutput.h" />
     <ClInclude Include="Source\DigitalOutput\DigitalOutput.h" />
@@ -218,6 +224,7 @@
     <ClInclude Include="Source\DigitalOutput\DoStructures.h" />
     <QtMoc Include="Source\DigitalOutput\DoSystem.h" />
     <ClInclude Include="Source\GeneralFlumes\QtSerialFlume.h" />
+    <ClInclude Include="Source\OffsetLock\OlStructure.h" />
     <ClInclude Include="Source\ZynqTCP\ZynqTCP.h" />
     <QtMoc Include="Source\Scripts\Script.h" />
     <ClInclude Include="Source\AnalogOutput\AnalogOutput.h" />

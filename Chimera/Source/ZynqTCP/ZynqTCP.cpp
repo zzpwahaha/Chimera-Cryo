@@ -300,9 +300,9 @@ int ZynqTCP::writeDDSs(std::vector<DdsChannelSnapshot> ddsChannelSnapshots)
 
 			sprintf_s(byte_bufCommand, DDS_LEN_BYTE_BUF, "t%08X_c%04X_%c_s%07.3f_e%07.3f_d%08x", 
 				time, channel, type, start, end, duration);
-			for (size_t i = 0; i < strlen(byte_bufCommand); i++)
+			for (size_t inc = 0; inc < strlen(byte_bufCommand); inc++)
 			{
-				byte_buf[i] = byte_bufCommand[i];
+				byte_buf[inc] = byte_bufCommand[inc];
 			}
 			BytesSent = send(ConnectSocket, byte_buf, DDS_LEN_BYTE_BUF, 0);
 			if (BytesSent == SOCKET_ERROR)

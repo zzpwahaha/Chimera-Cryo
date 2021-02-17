@@ -37,12 +37,14 @@ struct DoCommand
 	bool value;
 };
 
+
+typedef std::array<std::array<bool, size_t(DOGrid::numPERunit)>, size_t(DOGrid::numOFunit)> DOStatus;
 // an object constructed for having all info the ttls for a single time
 struct DoSnapshot
 {
 	// the time of the snapshot in the unit of ms
 	double time;
 	// all values at this time.
-	std::array< std::array<bool, size_t(DOGrid::numPERunit)>, size_t(DOGrid::numOFunit) > ttlStatus;
+	DOStatus ttlStatus;
 };
 

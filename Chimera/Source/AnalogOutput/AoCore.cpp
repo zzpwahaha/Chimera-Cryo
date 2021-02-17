@@ -607,8 +607,8 @@ int AoCore::getDacIdentifier(std::string name)
 		auto& dacName = str(names[dacInc]/*outputs[dacInc].info.name*/, 13, false, true);
 		// check names set by user and check standard names which are always acceptable
 		if (name == dacName || name == "dac" +
-			str(dacInc / size_t(DDSGrid::numPERunit)) + "_" +
-			str(dacInc % size_t(DDSGrid::numPERunit))/*"dac" + str ( dacInc )*/) {
+			str(dacInc / size_t(AOGrid::numPERunit)) + "_" +
+			str(dacInc % size_t(AOGrid::numPERunit))/*"dac" + str ( dacInc )*/) {
 			return dacInc;
 		}
 	}

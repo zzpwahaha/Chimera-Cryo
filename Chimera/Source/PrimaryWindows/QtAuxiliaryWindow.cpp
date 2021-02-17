@@ -11,10 +11,15 @@
 
 #include <qlayout.h>
 
-QtAuxiliaryWindow::QtAuxiliaryWindow (QWidget* parent) : IChimeraQtWindow (parent), 
-	ttlBoard (this),
-	aoSys (this), configParamCtrl (this, "CONFIG_PARAMETERS"),
-	globalParamCtrl (this, "GLOBAL_PARAMETERS"), dds (this, DDS_SAFEMODE){	
+QtAuxiliaryWindow::QtAuxiliaryWindow (QWidget* parent) 
+	: IChimeraQtWindow (parent)
+	, ttlBoard (this)
+	, aoSys (this)
+	, configParamCtrl (this, "CONFIG_PARAMETERS")
+	, globalParamCtrl (this, "GLOBAL_PARAMETERS")
+	, dds (this, DDS_SAFEMODE)
+	, olSys(this)
+{	
 	
 	setWindowTitle ("Auxiliary Window");
 }
@@ -23,7 +28,7 @@ QtAuxiliaryWindow::~QtAuxiliaryWindow () {}
 
 bool QtAuxiliaryWindow::eventFilter (QObject* obj, QEvent* event){
 	//this will trigger the quickChange in Ao/DDS to perform
-	if (aoSys.eventFilter(obj, event) | dds.eventFilter(obj, event)/* && aoSys.IsquickChange()*/)
+	if (aoSys.eventFilter(obj, event) || dds.eventFilter(obj, event) || olSys.eventFilter(obj, event))
 	{
 		try 
 		{
@@ -51,6 +56,10 @@ void QtAuxiliaryWindow::initializeWidgets (){
 		
 		aoSys.initialize (this);
 		layout1->addWidget(&aoSys, 0);
+
+		olSys.initialize(this);
+		layout1->addWidget(&olSys, 0);
+
 		layout1->addStretch(1);
 
 		QVBoxLayout* layout3 = new QVBoxLayout();
@@ -265,6 +274,7 @@ void QtAuxiliaryWindow::zeroDacs (){
 		reportStatus ("Zero'd DACs.\n");
 	}
 	catch (ChimeraError& exception){
+		errBox(exception.trace());
 		reportStatus ("Failed to Zero DACs!!!\n");
 		reportErr (exception.qtrace ());
 	}
@@ -277,7 +287,21 @@ void QtAuxiliaryWindow::zeroDds() {
 		reportStatus("Zero'd DDSs.\n");
 	}
 	catch (ChimeraError& exception) {
+		errBox(exception.trace());
 		reportStatus("Failed to Zero DDSs!!!\n");
+		reportErr(exception.qtrace());
+	}
+}
+
+void QtAuxiliaryWindow::zeroOls() {
+	try {
+		mainWin->updateConfigurationSavedStatus(false);
+		olSys.zeroOffsetLock(ttlBoard.getCore(), ttlBoard.getCurrentStatus());
+		reportStatus("Default'd Offsetlocks.\n");
+	}
+	catch (ChimeraError& exception) {
+		errBox(exception.trace());
+		reportStatus("Failed to Zero OffsetLocks!!!\n");
 		reportErr(exception.qtrace());
 	}
 }
@@ -305,6 +329,10 @@ AoSystem& QtAuxiliaryWindow::getAoSys () {
 
 DdsSystem& QtAuxiliaryWindow::getDdsSys() {
 	return dds;
+}
+
+OlSystem& QtAuxiliaryWindow::getOlSys() {
+	return olSys;
 }
 
 void QtAuxiliaryWindow::handleAbort (){
@@ -472,7 +500,8 @@ void QtAuxiliaryWindow::SetDacs (){
 }
 
 
-void QtAuxiliaryWindow::SetDds() {
+void QtAuxiliaryWindow::SetDds() 
+{
 	reportStatus("----------------------\r\nSetting DDSs... ");
 	try {
 		mainWin->updateConfigurationSavedStatus(false);
@@ -483,6 +512,22 @@ void QtAuxiliaryWindow::SetDds() {
 		//dds.setDDSs();
 		//aoSys.forceDacs (ttlBoard.getCore (), { 0, ttlBoard.getCurrentStatus () });
 		reportStatus("Finished Setting DDSs.\r\n");
+	}
+	catch (ChimeraError& exception) {
+		errBox(exception.trace());
+		reportStatus(": " + exception.qtrace() + "\r\n");
+		reportErr(exception.qtrace());
+	}
+	mainWin->updateConfigurationSavedStatus(false);
+}
+
+void QtAuxiliaryWindow::SetOls()
+{
+	reportStatus("----------------------\r\nSetting Offsetlocks... ");
+	try {
+		mainWin->updateConfigurationSavedStatus(false);
+		olSys.handleSetOlsButtonPress(ttlBoard.getCore(), ttlBoard.getCurrentStatus());
+		reportStatus("Finished Setting Offsetlocks.\r\n");
 	}
 	catch (ChimeraError& exception) {
 		errBox(exception.trace());

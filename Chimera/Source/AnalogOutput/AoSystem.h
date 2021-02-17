@@ -14,7 +14,7 @@
 #include "PrimaryWindows/IChimeraQtWindow.h"
 #include "ZynqTCP/ZynqTCP.h"
 
-#include "Qlabel.h"
+#include "qlabel.h"
 #include <qpushbutton.h>
 #include <qcheckbox.h>
 #include <qlineedit.h>
@@ -59,6 +59,7 @@ class AoSystem : public IChimeraSystem
 		// processing to determine how dac's get set
 		void handleSetDacsButtonPress( bool useDefault=false );
 		void zeroDacs();
+		/*below two seems need to be delete 2/16/2021 zzp*/
 		void setDacStatusNoForceOut(std::array<double, size_t(AOGrid::total)> status);
 		void prepareDacForceChange(int line, double voltage);
 	

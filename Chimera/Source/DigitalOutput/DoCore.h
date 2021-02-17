@@ -9,8 +9,6 @@
 #include "ZynqTCP/ZynqTCP.h"
 
 
-#define DIO_LEN_BYTE_BUF 28
-#define ZYNQ_ADDRESS "10.10.0.2"
 
 /*
 	(Stands for DigitalOutput Core)
@@ -28,16 +26,17 @@ class DoCore
 		//void ftdi_disconnect ();
 		//DWORD ftdi_write (unsigned variation, bool loadSkipf);
 		//DWORD ftdi_trigger ();
-		std::array< std::array<bool, size_t(DOGrid::numPERunit)>, size_t(DOGrid::numOFunit) > getFinalSnapshot ();
-
+		
 		void standardNonExperimentStartDoSequence (DoSnapshot initSnap);
 		void restructureCommands ();
-
 		void initializeDataObjects (unsigned variationNum);
+
 		void ttlOn (unsigned row, unsigned column, timeType time);
 		void ttlOff (unsigned row, unsigned column, timeType time);
 		void ttlOnDirect (unsigned row, unsigned column, double timev, unsigned variation);
 		void ttlOffDirect (unsigned row, unsigned column, double timev, unsigned variation);
+		void ttlPulseDirect(unsigned row, unsigned column, double timev, double dur, unsigned variation);
+		
 		void sizeDataStructures (unsigned variations);
 		void calculateVariations (std::vector<parameterType>& params, ExpThreadWorker* threadworker);
 		std::vector<std::vector<plotDataVec>> getPlotData (unsigned variation );
@@ -70,9 +69,10 @@ class DoCore
 
 		void DoCore::formatForFPGA(UINT variation);
 		void DoCore::writeTtlDataToFPGA(UINT variation, bool loadSkip);
-		DWORD FPGAForceOutput(std::array<std::array<bool, size_t(DOGrid::numPERunit)>, size_t(DOGrid::numOFunit)> status);
+		void FPGAForceOutput(DOStatus status);
+		void FPGAForcePulse(DOStatus status, unsigned row, unsigned col, double dur);
 
-
+		DOStatus getFinalSnapshot();
 
 	private:
 		std::array<std::string, size_t(DOGrid::total)> names;
@@ -91,7 +91,7 @@ class DoCore
 		std::vector<std::vector<std::array<WORD, 6>>> formattedTtlSnapshots, loadSkipFormattedTtlSnapshots;
 		// this is just a flattened version of the above snapshots. This is what gets directly sent to the dio64 card.
 		std::vector<std::vector<WORD>> finalFormatTtlData, loadSkipFinalFormatTtlData;
-		std::array<std::array<bool, size_t(DOGrid::numPERunit)>, size_t(DOGrid::numOFunit)> defaultTtlState;
+		DOStatus defaultTtlState;
 
 
 

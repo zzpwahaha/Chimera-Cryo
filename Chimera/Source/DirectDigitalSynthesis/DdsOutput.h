@@ -12,7 +12,7 @@ class DdsOutput
 {
 public:
 	DdsOutput();
-	void initialize(IChimeraQtWindow* parent, int whichDac);
+	void initialize(IChimeraQtWindow* parent, int whichDDS);
 	void handleEdit(bool roundToDacPrecision = false);
 	void updateEdit(bool roundToDacPrecision = false);
 	static double roundToDdsResolution(double num, bool isFreq);

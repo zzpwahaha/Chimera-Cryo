@@ -1,0 +1,22 @@
+%%%%%%%%%%%%%%%%% Start With 1ms %%%%%%%%%%%%%%%%% 
+t = 1
+%pulseon: do0_0 0.1
+dac: dac0_0 0
+dac: dac0_10 0
+dac: dac1_12 0
+dac: dac1_15 0
+
+t += 10
+
+pulseon: do0_0 0.1
+dac: dac0_0 9.9
+dac: dac0_10 9.9
+dac: dac1_12 9.9
+dac: dac1_15 9.9
+
+t += 10
+pulseon: do0_0 0.1
+dac: dac0_0 0
+dac: dac0_10 0
+dac: dac1_12 0
+dac: dac1_15 0

@@ -285,6 +285,15 @@
     <ClCompile Include="Source\Scripts\CQCodeEdit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\OffsetLock\OlCore.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\OffsetLock\OffsetLockOutput.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\OffsetLock\OlSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\stdafx.h">
@@ -555,6 +564,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\GeneralFlumes\QtSerialFlume.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\OffsetLock\OlStructure.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\OffsetLock\OlCore.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\OffsetLock\OffsetLockOutput.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\OffsetLock\OlSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

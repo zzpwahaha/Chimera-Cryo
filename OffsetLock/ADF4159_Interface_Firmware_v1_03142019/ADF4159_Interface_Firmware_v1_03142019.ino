@@ -25,13 +25,13 @@
 #include <EEPROMex.h>
 
 //Variable declaration
-int cs0 = 14;  //slave select pin for ch0
-int cs1 = 15;  //slave select pin for ch1
+const int cs0 = 14;  //slave select pin for ch0
+const int cs1 = 15;  //slave select pin for ch1
 
-int Trig0 = 7;  //ch0 ramp trigger pin
-int Trig1 = 8;  //ch1 ramp trigger pin
+const int Trig0 = 7;  //ch0 ramp trigger pin
+const int Trig1 = 8;  //ch1 ramp trigger pin
 
-uint32_t fPFD = 50000;  //PFD frequency in kHz
+const uint32_t fPFD = 50000;  //PFD frequency in kHz
 
 int32_t ramp0[40][6];  //ramp parameters for ch0 (Fs,Fe,R#,Rleng,dF,dt)
 int32_t ramp1[40][6];  //ramp parameters for ch1 (Fs,Fe,R#,Rleng,dF,dt)
@@ -53,9 +53,14 @@ uint32_t rampflg1;  //ramp start/stop flag
 uint32_t rampCounter0;  //number of uploaded ramp in ch0
 uint32_t rampCounter1;  //number of uploaded ramp in ch1
 
+const char startMarker = '(';  //start marker for each set of data
+const char endMarker = ')';  //end marker for each set of data
+const char endendMarker = 'e';  //end marker for the whole frame of data
+
+
 //initialization of hardware
 void setup() {
-  // Initializing USB serial to 12Mbit/sec. Teensy ignores the 9600 baud rate.
+  // Initializing USB serial to 12Mbit/sec. Teensy ignores the 9600 baud rate. see https://www.pjrc.com/teensy/td_serial.html
   Serial.begin(9600);
   //Initializing SPI to 1Mbit/sec
   SPI.begin();
@@ -123,11 +128,11 @@ void loop() {
 //ch1: R=2, cp=0.625mA
 void pfdInit(){
   char INI[28] = {0,0,0,7,
-                  0,0,0,6,
+                  0,0x00,0,6,
                   0,0x80,0,6,
-                  0,0,0,5,
+                  0,0x00,0,5,
                   0,0x80,0,5,
-                  0,0x18,0x01,4,
+                  0,0x18,1,0x04,
                   0,0x18,1,0x44};
   char ch0R23[8] = {0x01,0x03,0x00,0x83,0x00,0x01,0x00,0x0A};
   char ch1R23[8] = {0x00,0x83,0x00,0xC3,0x01,0x01,0x00,0x0A};
@@ -175,7 +180,7 @@ uint32_t calcFTW(uint32_t freq){
   float Frac;
   uint32_t FTW;
   N = freq/fPFD;
-  Frac = (float)(freq%fPFD)/fPFD*33554432;
+  Frac = (float)(freq%fPFD)/fPFD*0x2000000; //2**25//33554432;
   FTW = (N << 25)+ (uint32_t)Frac;
   return FTW;
 }
@@ -220,9 +225,7 @@ void processData(){
   uint32_t paraint1[40][5];
   uint32_t rampCount0 = 0;
   uint32_t rampCount1 = 0;
-  char startMarker = '(';  //start marker for each set of data
-  char endMarker = ')';  //end marker for each set of data
-  char endendMarker = 'e';  //end marker for the whole frame of data
+
   char rc = 0;
   bool error = true;   //error flag for input parameter
   elapsedMillis serialTimeout;  //timeout for serial receive in case of faliur
