@@ -321,7 +321,7 @@ void OlCore::makeFinalDataFormat(unsigned variation, DoCore& doCore)
 			olChannelSnapshots[variation].push_back(channelSnapshot);
 		}
 		/*within timeOrganizer[i], the time are the same*/
-		doCore.ttlPulseDirect(OL_TRIGGER_LINE.first, OL_TRIGGER_LINE.second, channelSnapshot.time, OL_TRIGGER_TIME, variation);
+		doCore.ttlPulseDirect(OL_TRIGGER_LINE.first - 1, OL_TRIGGER_LINE.second, channelSnapshot.time, OL_TRIGGER_TIME, variation);
 	}
 }
 
@@ -344,12 +344,14 @@ void OlCore::writeOLs(unsigned variation)
 			+ str(channelSnap.rampTime, numTimeDigits) + ")";
 	}
 	buffCmd += "e";
+
 	qtFlume.write(buffCmd);
-	Sleep(3);
-	qDebug() << qstr(buffCmd);
+	auto rr = qtFlume.getPort().waitForReadyRead(3);
 	std::string recv = qtFlume.read();
+	
+	qDebug() << qstr(buffCmd);
 	if (recv.empty()) {
-		thrower("Nothing feeded back from Teensy after 3ms, something might be wrong with it.");
+		thrower("Nothing feeded back from Teensy after writing, something might be wrong with it." + recv);
 	}
 	else {
 		qDebug() << qstr(recv);
