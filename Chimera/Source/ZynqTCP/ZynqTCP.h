@@ -13,8 +13,6 @@
 class ZynqTCP 
 {
 
-private:
-	SOCKET ConnectSocket;
 public:
 	ZynqTCP();
 	~ZynqTCP();
@@ -25,6 +23,18 @@ public:
 	int writeDDSs(std::vector<DdsChannelSnapshot> ddsSnapshots);
 	int sendCommand(std::string command);/*do connection inside*/
 	int writeCommand(std::string command);/*this is only for writing, requires conection already estabilished*/
+	
+private:
+	int sendWithCatch(const SOCKET& socket, const char* byte_buf, int buffLen, int flags = 0);
 
+
+private:
+	const bool ZNYQ_SAFEMODE = true;
+
+	SOCKET ConnectSocket;
+
+	const unsigned int timeConv = 100000; // SEQ time given in multiples of 10 ns
+	const unsigned int timeConvDAC = 1000; // DDS time given multiples of 1 us
+	const unsigned int dacRes = 0xffff; //16 bit dac resolution
 
 };
