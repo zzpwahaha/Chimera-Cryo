@@ -344,13 +344,31 @@ void OlCore::writeOLs(unsigned variation)
 			+ str(channelSnap.rampTime, numTimeDigits) + ")";
 	}
 	buffCmd += "e";
-
-	qtFlume.write(buffCmd);
-	auto rr = qtFlume.getPort().waitForReadyRead(3);
-	std::string recv = qtFlume.read();
+	auto clear = qtFlume.getPort().clear();
+	qtFlume.getPort().clearError();
+	auto flow = qtFlume.getPort().flowControl();
+	//qtFlume.getPort().setReadBufferSize(1064);
+	QByteArray ba = QString::fromStdString(buffCmd).toUtf8();
+	int tt = qtFlume.getPort().write(ba);
+	//qtFlume.write(buffCmd);
+	//Sleep(3);
+	auto tmp1 = qtFlume.getPort().parity();
+	auto tmp2 = qtFlume.getPort().dataBits();
+	auto tmp3 = qtFlume.getPort().stopBits();
+	auto tmp4 = qtFlume.getPort().baudRate();
 	
+	int bsize = qtFlume.getPort().readBufferSize();
+
+	auto seq = qtFlume.getPort().isSequential();
+	auto err = qtFlume.getPort().errorString();
+	auto byteavail = qtFlume.getPort().bytesAvailable();
+	bool readready = qtFlume.getPort().waitForReadyRead(500);
+	char aa[1064];
+	auto res = qtFlume.getPort().read(aa, 1064);
+	std::string recv = qtFlume.read();
 	qDebug() << qstr(buffCmd);
 	if (recv.empty()) {
+		std::string recv = qtFlume.read();
 		thrower("Nothing feeded back from Teensy after writing, something might be wrong with it." + recv);
 	}
 	else {
