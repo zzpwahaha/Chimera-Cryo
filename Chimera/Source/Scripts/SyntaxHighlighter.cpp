@@ -31,8 +31,8 @@ SyntaxHighlighter::SyntaxHighlighter (ScriptableDevice device, QTextDocument* pa
 		addRules ({ "on","off","pulseon","pulseoff" }, QColor (153, 115, 0), true, true);
 		addRules ({ "dac","dacarange","daclinspace", "dacramp", "repeat", "end", "callcppcode",
 					"loadskipentrypoint!" }, QColor (204, 0, 82), true, true);
-		addRules({ "ddsamp","ddsfreq","ddslinspaceamp", "ddslinspacefreq", "ddsrampamp", "ddsrampfreq", "callcppcode",
-			"loadskipentrypoint!" }, QColor(0, 45, 179), true, true);
+		addRules({ "ddsamp","ddsfreq","ddslinspaceamp", "ddslinspacefreq", "ddsrampamp", "ddsrampfreq"}, QColor(0, 45, 179), true, true);
+		addRules({ "ol", "olramp", "ollinspace" }, QColor(120, 46, 4), true, true);
 		addRules ({ "call", "def" }, QColor (38, 139, 210), true, true);
 		addRules ({ "t" }, QColor (0, 0, 0), true, true);
 		addRules ({ ":" }, QColor (0, 0, 0), false, false);
@@ -89,6 +89,20 @@ void SyntaxHighlighter::setDdsNames(std::vector<std::string> ddsNames)
 	ddsRules.clear();
 	addRules(ddsNamesRegex, QColor(94, 148, 247), false, true, ddsRules);
 }
+
+void SyntaxHighlighter::setOlNames(std::vector<std::string> olNames)
+{
+	QVector<QString> olNamesRegex;
+	for (auto olInc : range(olNames.size()))
+	{
+		olNamesRegex.push_back(cstr("ol" + str(olInc / size_t(OLGrid::numPERunit)) + "_"
+			+ str(olInc % size_t(OLGrid::numPERunit))));
+		olNamesRegex.push_back(cstr(olNames[olInc]));
+	}
+	olRules.clear();
+	addRules(olNamesRegex, QColor(47, 193, 225), false, true, olRules);
+}
+
 
 
 void SyntaxHighlighter::addRules (QVector<QString> regexStrings, QColor color, bool bold, bool addWordReq) {
@@ -148,6 +162,13 @@ void SyntaxHighlighter::highlightBlock (const QString& text){
 		}
 	}
 	for (const HighlightingRule& rule : qAsConst(ddsRules)) {
+		auto matchIterator = rule.pattern.globalMatch(text);
+		while (matchIterator.hasNext()) {
+			auto match = matchIterator.next();
+			setFormat(match.capturedStart(), match.capturedLength(), rule.format);
+		}
+	}
+	for (const HighlightingRule& rule : qAsConst(olRules)) {
 		auto matchIterator = rule.pattern.globalMatch(text);
 		while (matchIterator.hasNext()) {
 			auto match = matchIterator.next();

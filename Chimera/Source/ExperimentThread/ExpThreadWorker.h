@@ -30,7 +30,7 @@ class ExpThreadWorker : public QObject
 		void loadMasterScript (std::string scriptAddress, ScriptStream& script);
 		static void loadAgilentScript (std::string scriptAddress, ScriptStream& agilentScript);
 		void checkTriggerNumbers (std::vector<parameterType>& expParams);
-		void analyzeMasterScript (DoCore& ttls, AoCore& ao, DdsCore& dds,
+		void analyzeMasterScript (DoCore& ttls, AoCore& ao, DdsCore& dds, OlCore& ol,
 			std::vector<parameterType>& vars,
 			ScriptStream& currentMasterScript, bool expectsLoadSkip,
 			std::string& warnings, timeType& operationTime,
@@ -51,6 +51,8 @@ class ExpThreadWorker : public QObject
 			timeType& operationTime);
 		bool handleDdsCommands(std::string word, ScriptStream& stream, std::vector<parameterType>& params,
 			DdsCore& dds, std::string scope, timeType& operationTime);
+		bool handleOlCommands(std::string word, ScriptStream& stream, std::vector<parameterType>& params,
+			OlCore& ol, std::string scope, timeType& operationTime);
 		bool handleFunctionCall (std::string word, ScriptStream& stream, std::vector<parameterType>& params,
 			DoCore& ttls, AoCore& ao, std::string& warnings, std::string callingFunction, timeType& operationTime);
 		static bool handleVariableDeclaration (std::string word, ScriptStream& stream, std::vector<parameterType>& params,

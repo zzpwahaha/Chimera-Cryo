@@ -813,7 +813,7 @@ void DdsCore::writeDDSs(UINT variation, bool loadSkip)
 	catch (ChimeraError& err)
 	{
 		tcp_connect = 1;
-		errBox(err.what());
+		thrower(err.what());
 	}
 
 	if (tcp_connect == 0)

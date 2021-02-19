@@ -4,6 +4,8 @@
 #include "DigitalOutput/DoSystem.h"
 #include "AnalogOutput/AoSystem.h"
 #include "DirectDigitalSynthesis/DdsSystem.h"
+#include "OffsetLock/OlSystem.h"
+
 #include "ParameterSystem/ParameterSystem.h"
 #include "MiscellaneousExperimentOptions/DebugOptionsControl.h"
 #include "MiscellaneousExperimentOptions/MainOptionsControl.h"
@@ -16,7 +18,7 @@
 #include "RealTimeDataAnalysis/realTimePlotterInput.h"
 #include "ExperimentType.h"
 #include "DeviceList.h"
-#include "DirectDigitalSynthesis/DdsCore.h"
+
 #include <AnalogOutput/calInfo.h>
 #include "ZynqTcp/ZynqTcp.h"
 
@@ -42,6 +44,9 @@ struct ExperimentThreadInput{
 	AoCore& ao;
 	DdsSystem& ddsSys;
 	DdsCore& dds;
+	OlSystem& olSys;
+	OlCore& ol;
+
 	ZynqTCP zynqExp;
 
 	DeviceList devices;

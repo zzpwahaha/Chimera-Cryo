@@ -46,11 +46,14 @@ void QtScriptWindow::updateDoAoDdsNames () {
 	auto aoNames = std::vector<std::string>(aoNamesArr.begin(), aoNamesArr.end());
 	auto ddsNamesArr = auxWin->getDdsNames();
 	auto ddsNames = std::vector<std::string>(ddsNamesArr.begin(), ddsNamesArr.end());
+	auto olNamesArr = auxWin->getOlNames();
+	auto olNames = std::vector<std::string>(olNamesArr.begin(), olNamesArr.end());
 
 	
 	masterScript.highlighter->setTtlNames(doNames);
 	masterScript.highlighter->setDacNames(aoNames);
 	masterScript.highlighter->setDdsNames(ddsNames);
+	masterScript.highlighter->setOlNames(olNames);
 	masterScript.highlighter->rehighlight();
 }
 

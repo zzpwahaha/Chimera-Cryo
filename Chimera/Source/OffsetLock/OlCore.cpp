@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "OlCore.h"
+
 #include <qDebug>
+#include <qelapsedtimer.h>
 
 OlCore::OlCore(bool safemode)
 	: qtFlume(safemode, "COM3")
@@ -307,6 +309,9 @@ void OlCore::makeFinalDataFormat(unsigned variation, DoCore& doCore)
 	//for each channel with a changed freq add a olSnapshot to the final list
 	for (unsigned commandInc = 0; commandInc < timeOrganizer.size(); commandInc++) 
 	{
+		if (timeOrganizer[commandInc].second.size() == 0) {
+			thrower("There is no value in time organizer, a low level bug.");
+		}
 		for (unsigned zeroInc = 0; zeroInc < timeOrganizer[commandInc].second.size(); zeroInc++)
 		{
 			channelSnapshot.val = timeOrganizer[commandInc].second[zeroInc].value;
@@ -334,6 +339,7 @@ void OlCore::standardExperimentPrep(unsigned variation, DoCore& doCore)
 
 void OlCore::writeOLs(unsigned variation)
 {
+	qtFlume.getPort().clear();
 	//unsigned channel, steps;
 	//double time, start, stop, ramptime;
 	std::string buffCmd;
@@ -344,41 +350,22 @@ void OlCore::writeOLs(unsigned variation)
 			+ str(channelSnap.rampTime, numTimeDigits) + ")";
 	}
 	buffCmd += "e";
-	auto clear = qtFlume.getPort().clear();
-	qtFlume.getPort().clearError();
-	auto flow = qtFlume.getPort().flowControl();
-	//qtFlume.getPort().setReadBufferSize(1064);
-	QByteArray ba = QString::fromStdString(buffCmd).toUtf8();
-	int tt = qtFlume.getPort().write(ba);
-	//qtFlume.write(buffCmd);
-	//Sleep(3);
-	auto tmp1 = qtFlume.getPort().parity();
-	auto tmp2 = qtFlume.getPort().dataBits();
-	auto tmp3 = qtFlume.getPort().stopBits();
-	auto tmp4 = qtFlume.getPort().baudRate();
-	
-	int bsize = qtFlume.getPort().readBufferSize();
-
-	auto seq = qtFlume.getPort().isSequential();
-	auto err = qtFlume.getPort().errorString();
-	auto byteavail = qtFlume.getPort().bytesAvailable();
-	bool readready = qtFlume.getPort().waitForReadyRead(500);
-	char aa[1064];
-	auto res = qtFlume.getPort().read(aa, 1064);
-	std::string recv = qtFlume.read();
-	qDebug() << qstr(buffCmd);
+	QElapsedTimer timer;
+	timer.start();
+	std::string recv = qtFlume.query(buffCmd);
+	qDebug() << tmp << qstr(buffCmd) << "Total time:" << timer.elapsed()/**/ <<"ms";
 	if (recv.empty()) {
-		std::string recv = qtFlume.read();
 		thrower("Nothing feeded back from Teensy after writing, something might be wrong with it." + recv);
+		qDebug() << tmp << qstr("Empty return");
 	}
 	else {
-		qDebug() << qstr(recv);
+		qDebug() << tmp << qstr(recv);
 		std::transform(recv.begin(), recv.end(), recv.begin(), ::tolower); /*:: without namespace select from global namespce, see https://stackoverflow.com/questions/5539249/why-cant-transforms-begin-s-end-s-begin-tolower-be-complied-successfu*/
 		if (recv.find("Error") != std::string::npos) {
 			thrower("Error in offset lock programming, from Teensy: " + recv + "\r\nNote each number can only be of 13 chars long");
 		}
 	}
-	
+	tmp++;
 }
 
 void OlCore::OLForceOutput(std::array<double,size_t(OLGrid::total)> status, DoCore& doCore, DOStatus dostatus)

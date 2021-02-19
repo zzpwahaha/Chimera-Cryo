@@ -194,6 +194,18 @@ std::array<OlInfo, size_t(OLGrid::total)> OlSystem::getOlInfo() {
 	return info;
 }
 
+void OlSystem::updateCoreNames()
+{
+	std::array<std::string, size_t(OLGrid::total)> names_;
+	for (size_t i = 0; i < size_t(OLGrid::total); i++)
+	{
+		names_[i] = outputs[i].info.name;
+	}
+	core.setNames(names_);
+}
+
+
+
 void OlSystem::handleEditChange(unsigned olNumber) {
 	if (olNumber >= outputs.size()) {
 		thrower("attempted to handle offsetlock edit change, but the offsetlock number reported doesn't exist!");

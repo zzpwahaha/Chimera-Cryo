@@ -13,6 +13,11 @@ QtSerialFlume::QtSerialFlume(bool safemode_option, std::string portAddress_)
 
 void QtSerialFlume::open(std::string fileAddr) {
 	port.setPortName(qstr(portAddress));
+	port.setBaudRate(QSerialPort::Baud9600);
+	port.setDataBits(QSerialPort::Data8);
+	port.setParity(QSerialPort::NoParity);
+	port.setStopBits(QSerialPort::OneStop);
+	port.setFlowControl(QSerialPort::NoFlowControl);
 	if (!safemode) 
 	{
 		if (!port.open(QIODevice::ReadWrite)) 
@@ -23,6 +28,8 @@ void QtSerialFlume::open(std::string fileAddr) {
 				+ str(port.portName()) + ", error" + str(port.errorString()) +
 				". Available ports are: " + str(ava_names.join(", ")));
 		}
+		port.clear();
+		port.clearError();
 	}
 
 }
@@ -35,7 +42,7 @@ void QtSerialFlume::close ()
 void QtSerialFlume::write(std::string msg) 
 {
 	if (!safemode) {
-		auto ba = qstr(msg).toUtf8();
+		QByteArray ba = QString::fromStdString(msg).toUtf8();
 		int err = port.write(ba);
 		if (err == -1) {
 			thrower("Failed to write to port "
@@ -57,9 +64,26 @@ void QtSerialFlume::resetConnection()
 
 std::string QtSerialFlume::read () 
 {
-	auto ba = port.read (1064);
-	QString qs = QString::fromUtf8 (ba);
-	return str(qs);
+	/*have to use this funny way to get the feedback properly. May be don't have to have the feedback*/
+	bool ready = port.waitForReadyRead(35);
+	bool ready2 = port.waitForReadyRead(10);
+	//bool ready3 = port.waitForReadyRead(5);
+	int numbyte = port.bytesAvailable();
+	if (ready || ready2 || /*ready3 ||*/ numbyte != 0)
+	{
+		QByteArray ba = port.readAll();
+		QString qs = QString::fromUtf8(ba);
+		if (!qs.isEmpty()) {
+			port.clear();
+			return str(qs); 
+		}
+		thrower("No data to read in serial COM: " + str(portAddress) + " after 45 ms.");
+		return std::string("");
+	}
+	else {
+		thrower("No data to read in serial COM: " + str(portAddress) + " after 45 ms.");
+		return std::string("");
+	}
 }
 
 std::string QtSerialFlume::query(std::string msg) 

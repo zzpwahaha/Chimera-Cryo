@@ -294,6 +294,9 @@
     <ClCompile Include="Source\OffsetLock\OlSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\ExcessDialogs\OlSettingsDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\stdafx.h">
@@ -677,6 +680,9 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="Source\Scripts\CQCodeEdit.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\ExcessDialogs\OlSettingsDialog.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>

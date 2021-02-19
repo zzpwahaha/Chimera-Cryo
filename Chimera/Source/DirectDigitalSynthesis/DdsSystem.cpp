@@ -297,7 +297,7 @@ void DdsSystem::setDDSs()
 	catch (ChimeraError& err)
 	{
 		tcp_connect = 1;
-		errBox(err.what());
+		thrower(err.what());
 	}
 
 	if (tcp_connect == 0)
@@ -318,7 +318,7 @@ void DdsSystem::setDDSs()
 	}
 	else
 	{
-		errBox("connection to zynq failed. can't update DDS freq values\n"); 
+		thrower("connection to zynq failed. can't update DDS freq values\n");
 	}
 }
 

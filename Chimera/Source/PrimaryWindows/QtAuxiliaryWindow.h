@@ -23,9 +23,10 @@
 #include "RealTimeDataAnalysis/MachineOptimizer.h"
 #include "ExperimentThread/ExperimentThreadInput.h"
 
-#include <ExcessDialogs/doChannelInfoDialog.h>
-#include <ExcessDialogs/AoSettingsDialog.h>
-#include <ExcessDialogs/DdsSettingsDialog.h>
+#include "ExcessDialogs/doChannelInfoDialog.h"
+#include "ExcessDialogs/AoSettingsDialog.h"
+#include "ExcessDialogs/DdsSettingsDialog.h"
+#include "ExcessDialogs/OlSettingsDialog.h"
 
 #include <QMainWindow>
 #include <QTimer>
@@ -50,6 +51,7 @@ class QtAuxiliaryWindow : public IChimeraQtWindow{
 		void ViewOrChangeTTLNames();
 		void ViewOrChangeDACNames();
 		void ViewOrChangeDDSNames();
+		void ViewOrChangeOLNames();
 		void passRoundToDac ();
 		std::string getOtherSystemStatusMsg ();
 
@@ -57,6 +59,7 @@ class QtAuxiliaryWindow : public IChimeraQtWindow{
 		std::array<AoInfo, size_t(AOGrid::total)> getDacInfo ();
 		std::array<std::string, size_t(AOGrid::total)> getDacNames();
 		std::array<std::string, size_t(DDSGrid::total)> getDdsNames();
+		std::array<std::string, size_t(OLGrid::total)> getOlNames();
 
 		DoSystem& getTtlSystem();
 		DoCore& getTtlCore();
@@ -112,6 +115,7 @@ class QtAuxiliaryWindow : public IChimeraQtWindow{
 		doChannelInfoDialog* DOdialog;
 		AoSettingsDialog* AOdialog;
 		DdsSettingsDialog* DDSdialog;
+		OlSettingsDialog* OLdialog;
 
 		std::vector<PlotCtrl*> aoPlots;
 		std::vector<PlotCtrl*> ttlPlots;

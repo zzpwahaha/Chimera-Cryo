@@ -9,6 +9,7 @@
 #include <AnalogOutput/AoStructures.h>
 #include <DigitalOutput/DoStructures.h>
 #include <DirectDigitalSynthesis/DdsSystemStructures.h>
+#include <OffsetLock/OlStructure.h>
 
 class SyntaxHighlighter : public QSyntaxHighlighter {
     Q_OBJECT 
@@ -20,6 +21,7 @@ class SyntaxHighlighter : public QSyntaxHighlighter {
         void setTtlNames (std::vector<std::string> ttlNames);
         void setDacNames (std::vector<std::string> dacNames);
         void setDdsNames(std::vector<std::string> ddsNames);
+        void setOlNames(std::vector<std::string> olNames);
     protected:
         void highlightBlock (const QString& text) override;
         
@@ -36,6 +38,7 @@ class SyntaxHighlighter : public QSyntaxHighlighter {
         QVector<HighlightingRule> aoRules;
         QVector<HighlightingRule> doRules;
         QVector<HighlightingRule> ddsRules;
+        QVector<HighlightingRule> olRules;
         QVector<HighlightingRule> localParamRules;
         QVector<HighlightingRule> otherParamRules;
 

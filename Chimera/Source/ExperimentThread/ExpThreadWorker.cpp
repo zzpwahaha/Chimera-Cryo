@@ -102,7 +102,7 @@ void ExpThreadWorker::experimentThreadProcedure () {
 }
 
 
-void ExpThreadWorker::analyzeMasterScript (DoCore& ttls, AoCore& ao, DdsCore& dds,
+void ExpThreadWorker::analyzeMasterScript (DoCore& ttls, AoCore& ao, DdsCore& dds, OlCore& ol,
 	std::vector<parameterType>& vars,
 	ScriptStream& currentMasterScript, bool expectsLoadSkip,
 	std::string& warnings, timeType& operationTime,
@@ -133,6 +133,7 @@ void ExpThreadWorker::analyzeMasterScript (DoCore& ttls, AoCore& ao, DdsCore& dd
 			else if (handleDoCommands (word, currentMasterScript, vars, ttls, scope, operationTime)) {}
 			else if (handleAoCommands (word, currentMasterScript, vars, ao, ttls, scope, operationTime)) {}
 			else if (handleDdsCommands(word, currentMasterScript, vars, dds, scope, operationTime)) {}
+			else if (handleOlCommands(word, currentMasterScript, vars, ol, scope, operationTime)) {}
 			else if (word == "callcppcode") {
 				// and that's it... 
 				callCppCodeFunction ();
@@ -706,7 +707,8 @@ bool ExpThreadWorker::handleAoCommands (std::string word, ScriptStream& stream,	
 			throwNested ("Error handling \"dac:\" command.");
 		}
 	}
-	else if (word == "daclinspace:") {
+	else if (word == "daclinspace:") 
+	{
 		AoCommandForm command;
 		std::string name;
 		stream >> name >> command.initVal >> command.finalVal >> command.rampTime >> command.numSteps;
@@ -906,6 +908,78 @@ bool ExpThreadWorker::handleDdsCommands(std::string word, ScriptStream& stream, 
 	return true;
 }
 
+/* returns true if handles word, false otherwise. */
+bool ExpThreadWorker::handleOlCommands(std::string word, ScriptStream& stream, std::vector<parameterType>& vars,
+	OlCore& ols, std::string scope, timeType& operationTime)
+{
+	if (word == "ol:") //ddsamp: name amp
+	{
+		OlCommandForm command;
+		std::string name;
+		stream >> name >> command.initVal;
+		command.initVal.assertValid(vars, scope);
+		command.time = operationTime;
+		command.commandName = "ol:";
+		command.finalVal.expressionStr = "__NONE__";
+		command.rampTime.expressionStr = "__NONE__";
+		command.numSteps.expressionStr = "__NONE__";
+		try
+		{
+			ols.handleOLScriptCommand(command, name, vars);
+		}
+		catch (ChimeraError& err)
+		{
+			throwNested("Error handling \"ol:\" command inside main script");
+		}
+	}
+	else if (word == "olramp:")  //ddslinspacefreq: name initFreq finalFreq rampTime numSteps
+	{
+		OlCommandForm command;
+		std::string name;
+		stream >> name >> command.initVal >> command.finalVal >> command.rampTime >> command.numSteps;
+		command.initVal.assertValid(vars, scope);
+		command.finalVal.assertValid(vars, scope);
+		command.rampTime.assertValid(vars, scope);
+		command.numSteps.assertValid(vars, scope);
+		command.time = operationTime;
+		command.commandName = "olramp:";
+		try
+		{
+			ols.handleOLScriptCommand(command, name, vars);
+		}
+		catch (ChimeraError& err)
+		{
+			throwNested("Error handling \"olramp:\" command inside main script");
+		}
+	}
+	else if (word == "ollinspace:") {
+		OlCommandForm command;
+		std::string name;
+		stream >> name >> command.initVal >> command.finalVal >> command.rampTime >> command.numSteps;
+		command.initVal.assertValid(vars, scope);
+		command.finalVal.assertValid(vars, scope);
+		command.rampTime.assertValid(vars, scope);
+		command.numSteps.assertValid(vars, scope);
+		command.time = operationTime;
+		command.commandName = "ollinspace:";
+		// not used here.
+		command.rampInc.expressionStr = "__NONE__";
+		//
+		try {
+			ols.handleOLScriptCommand(command, name, vars);
+		}
+		catch (ChimeraError&) {
+			throwNested("Error handling \"ollinspace:\" command.");
+		}
+	}
+	else
+	{
+		return false;
+	}
+	return true;
+}
+
+
 
 /*
 	this function can be called directly from scripts. Insert things inside the function to make it do something
@@ -1014,17 +1088,19 @@ void ExpThreadWorker::calculateAdoVariations (ExpRuntimeData& runtime) {
 		input->ao.resetDacEvents ();
 		input->ttls.resetTtlEvents ();
 		input->dds.resetDDSEvents();
+		input->ol.resetOLEvents();
 
 		input->ao.initializeDataObjects (0);
 		input->ttls.initializeDataObjects (0);
 		input->dds.initializeDataObjects(0);
+		input->ol.initializeDataObjects(0);
 
 		//input->zynqExp.sendCommand("initExp");
 
 		loadSkipTimes = std::vector<double> (variations);
 		emit notification ("Analyzing Master Script...\n");
 		std::string warnings;
-		analyzeMasterScript (input->ttls, input->ao,input->dds, runtime.expParams, runtime.masterScript,
+		analyzeMasterScript (input->ttls, input->ao,input->dds, input->ol, runtime.expParams, runtime.masterScript,
 			runtime.mainOpts.atomSkipThreshold != UINT_MAX, warnings, operationTime, loadSkipTime);
 		emit warn (cstr (warnings));
 		emit notification ("Calcualting DO system variations...\n", 1);
@@ -1033,15 +1109,20 @@ void ExpThreadWorker::calculateAdoVariations (ExpRuntimeData& runtime) {
 		input->ao.calculateVariations (runtime.expParams, this, input->calibrations);
 		emit notification("Calcualting DDS system variations...\n", 1);
 		input->dds.calculateVariations(runtime.expParams, this, input->calibrations);
+		emit notification("Calcualting OL system variations...\n", 1);
+		input->ol.calculateVariations(runtime.expParams, this);
+
 		emit notification ("Running final ado checks...\n");
 		for (auto variationInc : range (variations)) {
 			if (isAborting) { thrower (abortString); }
 			double& currLoadSkipTime = loadSkipTimes[variationInc];
 			currLoadSkipTime = convertToTime (loadSkipTime, runtime.expParams, variationInc);
 			input->aoSys.standardExperimentPrep (variationInc, runtime.expParams, currLoadSkipTime);
-			input->ttlSys.standardExperimentPrep (variationInc, currLoadSkipTime, runtime.expParams);
 			input->dds.standardExperimentPrep(variationInc);
-			input->ao.checkTimingsWork (variationInc);
+			input->ol.standardExperimentPrep(variationInc, input->ttls);
+			input->ttlSys.standardExperimentPrep(variationInc, currLoadSkipTime, runtime.expParams);
+			
+			input->ao.checkTimingsWork(variationInc);
 		}
 		unsigned __int64 totalTime = 0;
 		std::vector<double> finaltimes = input->ttls.getFinalTimes();
@@ -1163,7 +1244,9 @@ void ExpThreadWorker::startRep (unsigned repInc, unsigned variationInc, bool ski
 		//input->aoSys.configureClocks(variationInc, skip);
 		input->ao.writeDacs(variationInc, skip);
 		input->dds.writeDDSs(variationInc, skip);
+		input->ol.writeOLs(variationInc);
 		input->ttls.writeTtlDataToFPGA(variationInc, skip);
+
 		input->zynqExp.sendCommand("trigger");
 
 	}

@@ -13,6 +13,8 @@ ExperimentThreadInput::ExperimentThreadInput(IChimeraQtWindow* win) :
 	ao(win->auxWin->getAoSys().getCore()),
 	ddsSys(win->auxWin->getDdsSys()),
 	dds(win->auxWin->getDdsSys().getCore()),
+	olSys(win->auxWin->getOlSys()),
+	ol(win->auxWin->getOlSys().getCore()),
 	logger(win->andorWin->getLogger())
 {
 	devices = win->mainWin->getDevices ();

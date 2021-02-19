@@ -42,7 +42,7 @@ public:
 	void OLForceOutput(std::array<double, size_t(OLGrid::total)> status, DoCore& doCore, DOStatus dostatus);
 
 private:
-
+	int tmp = 0;
 	std::array<std::string, size_t(OLGrid::total)> names;
 
 	//std::array <const double, 2> olResolution;

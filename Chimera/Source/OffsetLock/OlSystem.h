@@ -33,6 +33,7 @@ public:
 	void setName(int olNumber, std::string name);
 	void setNote(int olNumber, std::string note);
 	void setMinMax(int olNumber, double min, double max);
+	void updateCoreNames();
 
 	void handleEditChange(unsigned olNumber);
 

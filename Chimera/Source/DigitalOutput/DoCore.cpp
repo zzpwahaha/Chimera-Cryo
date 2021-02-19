@@ -508,7 +508,7 @@ void DoCore::FPGAForceOutput(DOStatus status)
 	catch (ChimeraError& err)
 	{
 		tcp_connect = 1;
-		errBox(err.what());
+		thrower(err.what());
 	}
 
 	if (tcp_connect == 0)
@@ -519,7 +519,7 @@ void DoCore::FPGAForceOutput(DOStatus status)
 	}
 	else
 	{
-		errBox("connection to zynq failed. can't write DAC data\n");
+		thrower("connection to zynq failed. can't write DAC data\n");
 	}
 
 }
@@ -543,7 +543,7 @@ void DoCore::FPGAForcePulse(DOStatus status, unsigned row, unsigned col, double 
 	catch (ChimeraError& err)
 	{
 		tcp_connect = 1;
-		errBox(err.what());
+		thrower(err.what());
 	}
 
 	if (tcp_connect == 0)
@@ -554,7 +554,7 @@ void DoCore::FPGAForcePulse(DOStatus status, unsigned row, unsigned col, double 
 	}
 	else
 	{
-		errBox("connection to zynq failed. can't write DAC data\n");
+		thrower("connection to zynq failed. can't write DAC data\n");
 	}
 
 }
@@ -618,7 +618,7 @@ void DoCore::writeTtlDataToFPGA(UINT variation, bool loadSkip) //arguments unuse
 	catch (ChimeraError& err)
 	{
 		tcp_connect = 1;
-		errBox(err.what());
+		thrower(err.what());
 	}
 
 	if (tcp_connect == 0)
@@ -628,7 +628,7 @@ void DoCore::writeTtlDataToFPGA(UINT variation, bool loadSkip) //arguments unuse
 	}
 	else
 	{
-		throw("connection to zynq failed. can't write Ttl data\n");
+		thrower("connection to zynq failed. can't write Ttl data\n");
 	}
 
 

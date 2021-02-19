@@ -524,7 +524,7 @@ void AoCore::writeDacs(unsigned variation, bool loadSkip)
 		catch (ChimeraError& err)
 		{
 			tcp_connect = 1;
-			errBox(err.what());
+			thrower(err.what());
 		}
 
 		if (tcp_connect == 0)
@@ -534,7 +534,7 @@ void AoCore::writeDacs(unsigned variation, bool loadSkip)
 		}
 		else
 		{
-			errBox("connection to zynq failed. can't write DAC data\n");
+			thrower("connection to zynq failed. can't write DAC data\n");
 		}
 	}
 }

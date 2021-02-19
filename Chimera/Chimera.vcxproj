@@ -117,6 +117,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Source\ExcessDialogs\OlSettingsDialog.cpp" />
     <ClCompile Include="Source\OffsetLock\OlSystem.cpp" />
     <ClCompile Include="Source\OffsetLock\OffsetLockOutput.cpp" />
     <ClCompile Include="Source\OffsetLock\OlCore.cpp" />
@@ -214,6 +215,7 @@
     <QtMoc Include="Source\ExcessDialogs\DdsSettingsDialog.h" />
     <QtMoc Include="3rd_Party\qcustomplot\qcustomplot.h" />
     <QtMoc Include="Source\Scripts\CQCodeEdit.h" />
+    <QtMoc Include="Source\ExcessDialogs\OlSettingsDialog.h" />
     <ClInclude Include="Source\OffsetLock\OlSystem.h" />
     <ClInclude Include="Source\OffsetLock\OffsetLockOutput.h" />
     <ClInclude Include="Source\OffsetLock\OlCore.h" />

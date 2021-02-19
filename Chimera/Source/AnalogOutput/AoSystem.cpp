@@ -268,7 +268,7 @@ void AoSystem::setDACs()
 	catch (ChimeraError& err)
 	{
 		tcp_connect = 1;
-		errBox(err.what());
+		thrower(err.what());
 	}
 
 	if (tcp_connect == 0)
@@ -287,7 +287,7 @@ void AoSystem::setDACs()
 	}
 	else
 	{
-		errBox("connection to zynq failed. can't trigger the sequence or new settings\n");
+		thrower("connection to zynq failed. can't trigger the sequence or new settings\n");
 	}
 }
 

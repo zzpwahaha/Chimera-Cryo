@@ -156,6 +156,11 @@ void IChimeraQtWindow::initializeMenu (){
 	auto* changeIndvDds = new QAction("View or Change Individual Direct Digital Synthesizer Settings", this);
 	connect(changeIndvDds, &QAction::triggered, [this, cmnMsg]() {auxWin->ViewOrChangeDDSNames(); });
 	masterSystemsM->addAction(changeIndvDds);
+	
+	auto* changeIndvOl = new QAction("View or Change Individual OffsetLock Settings", this);
+	connect(changeIndvOl, &QAction::triggered, [this, cmnMsg]() {auxWin->ViewOrChangeOLNames(); });
+	masterSystemsM->addAction(changeIndvOl);
+	
 	auto helpM = menubar->addMenu ("Help");
 	helpM->addAction ("General Information_X");
 	helpM->addAction ("About_X");

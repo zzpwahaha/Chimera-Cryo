@@ -132,9 +132,11 @@ void QtAuxiliaryWindow::initializeWidgets (){
 		DOdialog = new doChannelInfoDialog(&ttlBoard);
 		AOdialog = new AoSettingsDialog(&aoSys);
 		DDSdialog = new DdsSettingsDialog(&dds);
+		OLdialog = new OlSettingsDialog(&olSys);
 		connect(DOdialog, &doChannelInfoDialog::updateSyntaxHighLight, [this]() {this->scriptWin->updateDoAoDdsNames(); });
 		connect(AOdialog, &AoSettingsDialog::updateSyntaxHighLight, [this]() {this->scriptWin->updateDoAoDdsNames(); });
 		connect(DDSdialog, &DdsSettingsDialog::updateSyntaxHighLight, [this]() {this->scriptWin->updateDoAoDdsNames(); });
+		connect(OLdialog, &OlSettingsDialog::updateSyntaxHighLight, [this]() {this->scriptWin->updateDoAoDdsNames(); });
 
 	}
 	catch (ChimeraError& err){
@@ -236,6 +238,15 @@ std::array<std::string, size_t(DDSGrid::total)> QtAuxiliaryWindow::getDdsNames()
 	return names;
 }
 
+std::array<std::string, size_t(OLGrid::total)> QtAuxiliaryWindow::getOlNames()
+{
+	std::array<std::string, size_t(OLGrid::total)> names;
+	for (size_t i = 0; i < size_t(OLGrid::total); i++)
+	{
+		names[i] = olSys.getName(i);
+	}
+	return names;
+}
 
 std::vector<parameterType> QtAuxiliaryWindow::getAllParams (){
 	std::vector<parameterType> vars = configParamCtrl.getAllParams ();
@@ -571,6 +582,13 @@ void QtAuxiliaryWindow::ViewOrChangeDDSNames()
 	DDSdialog->show();
 }
 
+void QtAuxiliaryWindow::ViewOrChangeOLNames()
+{
+	OLdialog->updateAllEdits();
+	OLdialog->setStyleSheet(chimeraStyleSheets::stdStyleSheet());
+	OLdialog->show();
+}
+
 std::string QtAuxiliaryWindow::getOtherSystemStatusMsg (){
 	// controls are done. Report the initialization defaultStatus...
 	std::string msg;
@@ -614,6 +632,7 @@ std::string QtAuxiliaryWindow::getVisaDeviceStatus (){
 }
 
 void QtAuxiliaryWindow::fillExpDeviceList (DeviceList& list){
-	list.list.push_back (dds.getCore ());
+	//list.list.push_back (dds.getCore ());
+	//list.list.push_back(olSys.getCore());
 }
 
