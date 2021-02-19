@@ -1,3 +1,9 @@
 {
-    "C_Cpp.intelliSenseEngineFallback": "Disabled"
+    "C_Cpp.intelliSenseEngineFallback": "Disabled",
+    "files.associations": {
+        "eepromex.h": "c",
+        "stdio.h": "c",
+        "spi.h": "c",
+        "arduino.h": "c"
+    }
 }
