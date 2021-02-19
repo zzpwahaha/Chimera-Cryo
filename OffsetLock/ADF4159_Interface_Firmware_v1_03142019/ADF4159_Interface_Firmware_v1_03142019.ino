@@ -23,6 +23,7 @@
 //Including necessary libraries 
 #include <SPI.h>
 #include <EEPROMex.h>
+#include <stdio.h>
 
 //Variable declaration
 const int cs0 = 14;  //slave select pin for ch0
@@ -289,14 +290,17 @@ void processData(){
     updatePFD(calcFTW(EEPROM.readLong(address)),cs0);
     //write ch1 R1,R0
     updatePFD(calcFTW(EEPROM.readLong(address+5)),cs1);
-    Serial.print("Parameter programmed in :");
-    Serial.print(serialTimeout);
-    Serial.println(" ms");
-    Serial.print("f");
+    char buff[1064];
+    sprintf(buff, "Parameter programmed in :%.2f ms. f", serialTimeout);
+    Serial.println(buff);
+    // Serial.print("Parameter programmed in :");
+    // Serial.print(serialTimeout);
+    // Serial.println(" ms");
+    // Serial.print("f");
   }
   else{
-    Serial.println("Error in paramter!! Nothing changed.");
-    Serial.print("f");
+    Serial.println("Error in paramter!! Nothing changed. f");
+    // Serial.print("f");
   }
 }
 
