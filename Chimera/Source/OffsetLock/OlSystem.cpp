@@ -245,3 +245,8 @@ void OlSystem::setOlStatusNoForceOut(std::array<double, size_t(OLGrid::total)> s
 	updateEdits();
 }
 
+void OlSystem::standardExperimentPrep(unsigned variation, DoCore& doCore, std::string& warning)
+{
+	core.organizeOLCommands(variation, warning);
+	core.makeFinalDataFormat(variation, doCore);
+}

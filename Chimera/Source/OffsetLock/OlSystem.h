@@ -42,8 +42,7 @@ public:
 	void zeroOffsetLock(DoCore& doCore, DOStatus doStatus);
 	void setOLs(DoCore& doCore, DOStatus doStatus);
 	void setOlStatusNoForceOut(std::array<double, size_t(OLGrid::total)> status);
-	//void standardExperimentPrep(unsigned variationInc, std::vector<parameterType>& expParams,
-	//	double currLoadSkipTime);
+	void standardExperimentPrep(unsigned variation, DoCore& doCore, std::string& warning);
 
 	// getters
 	double getDefaultValue(unsigned olNum);

@@ -179,7 +179,7 @@ void OlCore::calculateVariations(std::vector<parameterType>& variables, ExpThrea
 				tempEvent.value = olCommandFormList[eventInc].initVal.evaluate(variables, variationInc);
 				tempEvent.endValue = tempEvent.value;
 				tempEvent.numSteps = 1;
-				tempEvent.rampTime = 1;
+				tempEvent.rampTime = OL_TIME_RESOLUTION;
 				olCommandList[variationInc].push_back(tempEvent);
 			}
 			else if (olCommandFormList[eventInc].commandName == "ollinspace:")
@@ -213,7 +213,8 @@ void OlCore::calculateVariations(std::vector<parameterType>& variables, ExpThrea
 					tempEvent.value = val;
 					tempEvent.time = currentTime;
 					tempEvent.endValue = val;
-					tempEvent.rampTime = 0;
+					tempEvent.rampTime = OL_TIME_RESOLUTION;
+					tempEvent.numSteps = 1;
 					olCommandList[variationInc].push_back(tempEvent);
 					currentTime += timeInc;
 					val += rampInc;
@@ -222,7 +223,8 @@ void OlCore::calculateVariations(std::vector<parameterType>& variables, ExpThrea
 				tempEvent.value = finalValue;
 				tempEvent.time = initTime + rampTime;
 				tempEvent.endValue = finalValue;
-				tempEvent.rampTime = 0;
+				tempEvent.rampTime = OL_TIME_RESOLUTION;
+				tempEvent.numSteps = 1;
 				olCommandList[variationInc].push_back(tempEvent);
 			}
 			else if (olCommandFormList[eventInc].commandName == "olramp:")
@@ -255,7 +257,7 @@ void OlCore::calculateVariations(std::vector<parameterType>& variables, ExpThrea
 				tempEvent.endValue = finalValue;
 				tempEvent.time = initTime;
 				tempEvent.rampTime = rampTime;
-				tempEvent.numSteps = numSteps;
+				tempEvent.numSteps = unsigned int(numSteps);
 				olCommandList[variationInc].push_back(tempEvent);
 			}
 			else
@@ -267,74 +269,157 @@ void OlCore::calculateVariations(std::vector<parameterType>& variables, ExpThrea
 }
 
 
-void OlCore::organizeOLCommands(unsigned variation)
+void OlCore::organizeOLCommands(unsigned variation, std::string& warning)
 {
-	// each element of this is a different time (the double), and associated with each time is a vector which locates 
-// which commands were at this time, for
-// ease of retrieving all of the values in a moment.
-	timeOrganizer.clear();
-
+	// timeOrganizer: each element of this is a different time (the double), and associated with each time is a vector which locates 
+	// which commands were at this time, for ease of retrieving all of the values in a moment.
+	
 	std::vector<OlCommand> tempEvents(olCommandList[variation]);
 	// sort the events by time. using a lambda here.
 	std::sort(tempEvents.begin(), tempEvents.end(),
 		[](OlCommand a, OlCommand b) {return a.time < b.time; });
-	for (unsigned commandInc = 0; commandInc < tempEvents.size(); commandInc++)
+	//timeOrganizer.clear();
+	//timeOrganizer.push_back({ ZYNQ_DEADTIME, std::vector<OlCommand>{} });
+	//for (unsigned short i = 0; i < size_t(OLGrid::total); i++) {
+	//	timeOrganizer.back().second.push_back( OlCommand{ i,ZYNQ_DEADTIME,status[i],status[i],0,-1 } );
+	//}
+
+
+	for (unsigned short channel = 0; channel < size_t(OLGrid::total); channel++)
 	{
-		// because the events are sorted by time, the time organizer will already be sorted by time, and therefore I 
-		// just need to check the back value's time.
-		if (commandInc == 0 || fabs(tempEvents[commandInc].time - timeOrganizer.back().first) > 2 * DBL_EPSILON)
+		auto& timeOgzer = timeOrganizer[channel];
+		timeOgzer.clear();
+		//timeOgzer.push_back({ ZYNQ_DEADTIME, OlCommand{channel,ZYNQ_DEADTIME,status[channel],status[channel],1,OL_TIME_RESOLUTION} });
+
+		for (unsigned commandInc = 0; commandInc < tempEvents.size(); commandInc++)
 		{
-			// new time
-			timeOrganizer.push_back({ tempEvents[commandInc].time,
-									std::vector<OlCommand>({ tempEvents[commandInc] }) });
-		}
-		else
-		{
-			// old time
-			timeOrganizer.back().second.push_back(tempEvents[commandInc]);
+			if (tempEvents[commandInc].line != channel) { continue; }
+			// for each channel with a freq gap, bridge it by adding command at the end of last command
+			const auto& tE = tempEvents[commandInc];
+			if (timeOgzer.empty()) {
+				timeOgzer.push_back({ tE.time, tE });
+			}
+			else {
+				if (fabs(timeOgzer.back().second.endValue - tE.value) > 2 * DBL_EPSILON)
+				{
+					
+					warning += "Warning from OffsetLock: output(" + OlCore::getName(tE.line)
+						+ "), the frequency between two consecutive event point t=" + str(timeOgzer.back().first, 3)
+						+ ", endfreq=" + str(timeOgzer.back().second.endValue, 3) + " and t=" + str(tE.time, 6) + ", startfreq="
+						+ str(tE.value, 3) + " are not the same. Have bridged it with a command inserted at t="
+						+ str(tE.time + OL_TIME_RESOLUTION, 3) + "\r\n";
+
+					timeOgzer.push_back({ tE.time,
+						OlCommand{channel,tE.time,timeOgzer.back().second.endValue,tE.value,1,OL_TIME_RESOLUTION} });
+				}
+				// because the events are sorted by time, the time organizer will already be sorted by time, and therefore I 
+				// just need to check the back value's time.
+				double timediff = (tE.time - timeOgzer.back().first); //had better be positive, otherwise indicating a bridge is inserted perviously
+				if (timediff >= OL_TIME_RESOLUTION - 2 * DBL_EPSILON)
+				{
+					timeOgzer.push_back({ tE.time, tE });
+				}
+				else
+				{
+					if (timediff < -OL_TIME_RESOLUTION - 2 * DBL_EPSILON) {
+						thrower("Error in timeOrganizer, the time seems not sorted. A low level bug.");
+					}
+					// time that cannot be resolved by offset lock, complain it if it is of the same line
+					warning += "Warning from OffsetLock: output(" + OlCore::getName(tE.line)
+						+ "), the time between two consecutive event point t=" + str(timeOgzer.back().first, 3) + " and t="
+						+ str(tE.time, 3) + " is below the offset lock resolution: " + str(OL_TIME_RESOLUTION, 3)
+						+ "ms. Have make the later time exact " + str(OL_TIME_RESOLUTION, 3) + "ms away\r\n";
+					timeOgzer.push_back({ timeOgzer.back().first + OL_TIME_RESOLUTION, tE });
+				}
+			}
+
 		}
 	}
-	/// make the snapshots
-	if (timeOrganizer.size() == 0)
-	{
-		// no commands, that's fine.
-		return;
-	}
+	//for (unsigned commandInc = 0; commandInc < tempEvents.size(); commandInc++)
+	//{
+	//	// because the events are sorted by time, the time organizer will already be sorted by time, and therefore I 
+	//	// just need to check the back value's time.
+	//	double timediff = fabs(tempEvents[commandInc].time - timeOrganizer.back().first);
+	//	if (commandInc == 0 || timediff >= OL_TIME_RESOLUTION/*2 * DBL_EPSILON*/)
+	//	{
+	//		timeOrganizer.push_back({ tempEvents[commandInc].time,
+	//								std::vector<OlCommand>({ tempEvents[commandInc] }) });
+	//	}
+	//	else if (timediff < OL_TIME_RESOLUTION)
+	//	{
+	//		// time that cannot be resolved by offset lock, complain it if it is of the same line
+	//		bool exist = false;
+	//		for (auto& cmd : timeOrganizer.back().second) {
+	//			if (tempEvents[commandInc].line == cmd.line) {
+	//				exist = true;
+	//			}
+	//		}
+	//		if (exist) {
+	//			timeOrganizer.push_back({ timeOrganizer.back().first + OL_TIME_RESOLUTION,
+	//								std::vector<OlCommand>({ tempEvents[commandInc] }) });
+	//			warning += "Warning from OffsetLock: output(" + OlCore::getName(tempEvents[commandInc].line)
+	//				+ "), the time between two consecutive event point t=" + str(timeOrganizer.back().first, 3) + "and t="
+	//				+ str(tempEvents[commandInc].time, 3) + " is below the offset lock resolution: " + str(OL_TIME_RESOLUTION, 3) 
+	//				+ "ms. Have make the later time exact " + str(OL_TIME_RESOLUTION, 3) + "away";
+	//		}
+	//		else {
+	//			// really is a new time for that line
+	//			if (timediff < 2 * DBL_EPSILON) {
+	//				// old time
+	//				timeOrganizer.back().second.push_back(tempEvents[commandInc]);
+	//			}
+	//			else {
+	//				//new time
+	//				timeOrganizer.push_back({ tempEvents[commandInc].time,
+	//								std::vector<OlCommand>({ tempEvents[commandInc] }) });
+	//			}
+	//		}
+	//	}
+	//}
+
+	///// make the snapshots
+	//if (timeOrganizer.size() == 0)
+	//{
+	//	// no commands, that's fine.
+	//	return;
+	//}
+
+
 }
 
 void OlCore::makeFinalDataFormat(unsigned variation, DoCore& doCore)
 {
 	OlChannelSnapshot channelSnapshot;
-
-	//for each channel with a changed freq add a olSnapshot to the final list
-	for (unsigned commandInc = 0; commandInc < timeOrganizer.size(); commandInc++) 
+	//for each channel with a changed freq, bridge it by adding command at the end of last command
+	for (unsigned short channel = 0; channel < size_t(OLGrid::total); channel++)
 	{
-		if (timeOrganizer[commandInc].second.size() == 0) {
-			thrower("There is no value in time organizer, a low level bug.");
-		}
-		for (unsigned zeroInc = 0; zeroInc < timeOrganizer[commandInc].second.size(); zeroInc++)
+		auto& timeOgzer = timeOrganizer[channel];
+		for (unsigned commandInc = 0; commandInc < timeOgzer.size(); commandInc++)
 		{
-			channelSnapshot.val = timeOrganizer[commandInc].second[zeroInc].value;
-			channelSnapshot.endVal = timeOrganizer[commandInc].second[zeroInc].endValue;
-			channelSnapshot.rampTime = timeOrganizer[commandInc].second[zeroInc].rampTime;
-			channelSnapshot.numSteps = timeOrganizer[commandInc].second[zeroInc].numSteps;
+			auto& to = timeOgzer[commandInc];
+			channelSnapshot.val = to.second.value;
+			channelSnapshot.endVal = to.second.endValue;
+			channelSnapshot.rampTime = to.second.rampTime;
+			channelSnapshot.numSteps = to.second.numSteps;
 
-			channelSnapshot.time = timeOrganizer[commandInc].first;
-			channelSnapshot.channel = timeOrganizer[commandInc].second[zeroInc].line;
+			channelSnapshot.time = to.first;
+			channelSnapshot.channel = to.second.line;
 
-			channelSnapshot.rampTime = timeOrganizer[commandInc].second[zeroInc].rampTime;
 			olChannelSnapshots[variation].push_back(channelSnapshot);
+
+			/*within timeOrganizer[i], the time are the same*/
+			doCore.ttlPulseDirect(OL_TRIGGER_LINE[channel].first , OL_TRIGGER_LINE[channel].second, 
+				channelSnapshot.time, OL_TRIGGER_TIME, variation);
 		}
-		/*within timeOrganizer[i], the time are the same*/
-		doCore.ttlPulseDirect(OL_TRIGGER_LINE.first - 1, OL_TRIGGER_LINE.second, channelSnapshot.time, OL_TRIGGER_TIME, variation);
 	}
+
 }
 
-void OlCore::standardExperimentPrep(unsigned variation, DoCore& doCore)
-{
-	organizeOLCommands(variation);
-	makeFinalDataFormat(variation, doCore);
-}
+//void OlCore::standardExperimentPrep(unsigned variation, DoCore& doCore, std::string& warning)
+//{
+//	organizeOLCommands(variation, warning);
+//	makeFinalDataFormat(variation, doCore);
+//}
 
 
 void OlCore::writeOLs(unsigned variation)
@@ -377,6 +462,6 @@ void OlCore::OLForceOutput(std::array<double,size_t(OLGrid::total)> status, DoCo
 		olChannelSnapshots[0].push_back({ inc,0.1,status[inc],status[inc],1,1 });
 	}
 	writeOLs(0);
-	doCore.FPGAForcePulse(dostatus, OL_TRIGGER_LINE.first - 1, OL_TRIGGER_LINE.second, OL_TRIGGER_TIME);
+	doCore.FPGAForcePulse(dostatus, OL_TRIGGER_LINE, OL_TRIGGER_TIME);
 	
 }

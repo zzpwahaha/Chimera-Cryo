@@ -1,16 +1,19 @@
 %%%%%%%%%%%%%%%%% Start With 1ms %%%%%%%%%%%%%%%%% 
 t = 1
 pulseon: do1_0 1
-ol: ol0_0 1500
-ol: ol0_1 1500
+ol: ol0_0 1200
+ol: ol0_1 2000
 
 
-t += 10
+t += 3
 pulseon: do1_0 1
-olramp: ol0_1 1500 2000 20 20
-%ol: ol0_1 3250
+olramp: ol0_1 1000 2000 20 
+t += 0.2
+ol: ol0_1 3250
 
 t += 10
 pulseon: do1_0 1
 %olramp: ol0_0 1500 3500 12 6
 %ol: ol0_1 3250
+t += 500
+dac: dac0_10 1

@@ -524,13 +524,20 @@ void DoCore::FPGAForceOutput(DOStatus status)
 
 }
 
-void DoCore::FPGAForcePulse(DOStatus status, unsigned row, unsigned col, double dur)
+void DoCore::FPGAForcePulse(DOStatus status, std::vector<std::pair<unsigned, unsigned>> rowcol, double dur)
 {
 	resetTtlEvents();
 	sizeDataStructures(2);
-	status[row][col] = !status[row][col];
-	ttlSnapshots[0].push_back({ 0.1, status });
-	status[row][col] = !status[row][col];
+	for (auto& rc : rowcol)
+	{
+		status[rc.first][rc.second] = !status[rc.first][rc.second];
+		ttlSnapshots[0].push_back({ 0.1, status });
+		status[rc.first][rc.second] = !status[rc.first][rc.second];
+	}
+	for (size_t i = 0; i < rowcol.size(); i++)
+	{
+
+	}
 	ttlSnapshots[0].push_back({ 0.1 + dur, status });
 	formatForFPGA(0);
 	writeTtlDataToFPGA(0, false);

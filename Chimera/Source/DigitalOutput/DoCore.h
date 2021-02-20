@@ -70,7 +70,7 @@ class DoCore
 		void DoCore::formatForFPGA(UINT variation);
 		void DoCore::writeTtlDataToFPGA(UINT variation, bool loadSkip);
 		void FPGAForceOutput(DOStatus status);
-		void FPGAForcePulse(DOStatus status, unsigned row, unsigned col, double dur);
+		void FPGAForcePulse(DOStatus status, std::vector<std::pair<unsigned, unsigned>> rowcol, double dur);
 
 		DOStatus getFinalSnapshot();
 

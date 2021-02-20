@@ -936,11 +936,11 @@ bool ExpThreadWorker::handleOlCommands(std::string word, ScriptStream& stream, s
 	{
 		OlCommandForm command;
 		std::string name;
-		stream >> name >> command.initVal >> command.finalVal >> command.rampTime >> command.numSteps;
+		stream >> name >> command.initVal >> command.finalVal >> command.rampTime /*>> command.numSteps*/;
 		command.initVal.assertValid(vars, scope);
 		command.finalVal.assertValid(vars, scope);
 		command.rampTime.assertValid(vars, scope);
-		command.numSteps.assertValid(vars, scope);
+		//command.numSteps.assertValid(vars, scope);
 		command.time = operationTime;
 		command.commandName = "olramp:";
 		try
@@ -1095,14 +1095,14 @@ void ExpThreadWorker::calculateAdoVariations (ExpRuntimeData& runtime) {
 		input->dds.initializeDataObjects(0);
 		input->ol.initializeDataObjects(0);
 
-		//input->zynqExp.sendCommand("initExp");
+		input->zynqExp.sendCommand("initExp");
 
 		loadSkipTimes = std::vector<double> (variations);
 		emit notification ("Analyzing Master Script...\n");
 		std::string warnings;
 		analyzeMasterScript (input->ttls, input->ao,input->dds, input->ol, runtime.expParams, runtime.masterScript,
 			runtime.mainOpts.atomSkipThreshold != UINT_MAX, warnings, operationTime, loadSkipTime);
-		emit warn (cstr (warnings));
+		
 		emit notification ("Calcualting DO system variations...\n", 1);
 		input->ttls.calculateVariations (runtime.expParams, this);
 		emit notification ("Calcualting AO system variations...\n", 1);
@@ -1119,11 +1119,12 @@ void ExpThreadWorker::calculateAdoVariations (ExpRuntimeData& runtime) {
 			currLoadSkipTime = convertToTime (loadSkipTime, runtime.expParams, variationInc);
 			input->aoSys.standardExperimentPrep (variationInc, runtime.expParams, currLoadSkipTime);
 			input->dds.standardExperimentPrep(variationInc);
-			input->ol.standardExperimentPrep(variationInc, input->ttls);
+			input->olSys.standardExperimentPrep(variationInc, input->ttls, warnings);
 			input->ttlSys.standardExperimentPrep(variationInc, currLoadSkipTime, runtime.expParams);
 			
 			input->ao.checkTimingsWork(variationInc);
 		}
+		emit warn(cstr(warnings));
 		unsigned __int64 totalTime = 0;
 		std::vector<double> finaltimes = input->ttls.getFinalTimes();
 		double sum = std::accumulate(finaltimes.begin(), finaltimes.end(), 0.0);

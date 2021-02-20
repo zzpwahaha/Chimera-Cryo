@@ -34,9 +34,9 @@ public:
 	void initializeDataObjects(unsigned variationNum);
 	void setOLCommandForm(OlCommandForm command);
 	void handleOLScriptCommand(OlCommandForm command, std::string name, std::vector<parameterType>& vars);
-	void organizeOLCommands(unsigned variation);
+	void organizeOLCommands(unsigned variation, std::string& warning);
 	void makeFinalDataFormat(unsigned variation, DoCore& doCore);
-	void standardExperimentPrep(unsigned variation, DoCore& doCore);
+	//void standardExperimentPrep(unsigned variation, DoCore& doCore, std::string& warning);
 	void writeOLs(unsigned variation);
 
 	void OLForceOutput(std::array<double, size_t(OLGrid::total)> status, DoCore& doCore, DOStatus dostatus);
@@ -51,7 +51,8 @@ private:
 	std::vector<std::vector<OlCommand>> olCommandList;
 	std::vector<std::vector<OlSnapshot>> olSnapshots;/*do not need snapshot, can just record the changed channel rather than all of the output*/
 	std::vector<std::vector<OlChannelSnapshot>> olChannelSnapshots;
-	std::vector<std::pair<double, std::vector<OlCommand>>> timeOrganizer;
+	//std::vector<std::pair<double, std::vector<OlCommand>>> timeOrganizer;
+	std::array<std::vector<std::pair<double, OlCommand>>, size_t(OLGrid::total)> timeOrganizer;
 
 	QtSerialFlume qtFlume;
 

@@ -29,7 +29,7 @@ private:
 
 
 private:
-	const bool ZNYQ_SAFEMODE = true;
+	const bool ZNYQ_SAFEMODE = false;
 
 	SOCKET ConnectSocket;
 
