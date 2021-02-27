@@ -1,6 +1,6 @@
 %%%%%%%%%%%%%%%%% Start With 1ms %%%%%%%%%%%%%%%%% 
 t = 1
-pulseon: do1_0 1
+pulseon: do1_0 tt
 dac: dac0_0 0
 t += tt
 dac: dac0_0 1
@@ -12,3 +12,6 @@ t += tt
 dac: dac0_0 4
 t += tt
 dac: dac0_0 0
+
+t += 500
+pulseon: do1_1 1

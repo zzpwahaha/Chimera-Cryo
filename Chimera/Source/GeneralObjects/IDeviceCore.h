@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ParameterSystem/ParameterSystemStructures.h"
+//#include "ExperimentMonitoringAndStatus/statusMsg.h"
 #include <string>
 #include <vector>
 #include <qobject.h>
@@ -23,5 +24,7 @@ class IDeviceCore : public QObject{
 		virtual void errorFinish () = 0;
 		virtual std::string getDelim()=0;
 		bool experimentActive;
+
+		void notify(statusMsg msg, ExpThreadWorker* threadworker);
 };
 

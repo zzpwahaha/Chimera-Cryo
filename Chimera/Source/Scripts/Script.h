@@ -44,8 +44,8 @@ class Script : public IChimeraSystem
 		void setScriptText( std::string text );
 		void functionChangeHandler( std::string configPath );
 		void changeView( std::string viewName, bool isFunction, std::string configPath);
-		void saveScript( std::string location );
-		void saveScriptAs( std::string location );
+		void saveScript(std::string location, RunInfo info);
+		void saveScriptAs( std::string location, RunInfo info);
 		void renameScript( std::string configPath);
 		void deleteScript( std::string configPath);
 		void newScript( );
@@ -57,9 +57,9 @@ class Script : public IChimeraSystem
 		std::string getExtension();
 
 		void loadFile( std::string pathToFile, std::ios::_Openmode flags = std::ios::in);
-		void openParentScript( std::string parentScriptFileAndPath, std::string configPath );
-		void considerCurrentLocation( std::string configPath );
-		void checkSave( std::string configPath );
+		void openParentScript( std::string parentScriptFileAndPath, std::string configPath, RunInfo info);
+		void considerCurrentLocation( std::string configPath, RunInfo info);
+		void checkSave(std::string configPath, RunInfo info);
 		void updateSavedStatus( bool isSaved );
 		void updateScriptNameText( std::string path );
 		void reset();

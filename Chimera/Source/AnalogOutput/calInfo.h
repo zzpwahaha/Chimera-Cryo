@@ -16,12 +16,13 @@ struct calBase {
 
 struct calResult : public calBase {
 	std::string calibrationName = "";
+	unsigned polynomialOrder = 0;
 	std::vector<double> ctrlVals;
 	std::vector<double> resVals;
 	std::vector<double> calibrationCoefficients;
 	bool includesSqrt = true;
-	double minval = 0;
-	double maxval = 0;
+	double calmin = 0;
+	double calmax = 0;
 	std::string stringRepr () const {
 		return calibrationName + " Calibration:"
 			+ "\n================================"
@@ -29,7 +30,7 @@ struct calResult : public calBase {
 			+ "\nResult Values: " + dblVecToString (resVals)
 			+ "\nCalibration Coefficients: " + dblVecToString (calibrationCoefficients)
 			+ "\nIncludes Sqrt: " + (includesSqrt ? "True" : "False")
-			+ "\nMin/Max: " + str (minval) + "/" + str (maxval);
+			+ "\nMin/Max: " + str (calmin) + "/" + str (calmax);
 	}
 };
 
@@ -42,7 +43,7 @@ struct calSettings : public calBase {
 	QString ctrlPtString;
 	// in % from old value
 	bool calibrated = false;
-	unsigned polynomialOrder = 6;
+	//unsigned polynomialOrder = 6;
 	std::vector<std::pair<unsigned, unsigned> > ttlConfig;
 	std::vector<std::pair<unsigned, double>> aoConfig;
 	bool currentlyCalibrating = false;
@@ -51,6 +52,7 @@ struct calSettings : public calBase {
 	// refers to whether that particular result includes the sqrt. 
 	bool includeSqrt = true;
 	calResult result;
+	calResult historicalResult;
 };
 
 Q_DECLARE_METATYPE (calSettings)

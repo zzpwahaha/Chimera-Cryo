@@ -270,6 +270,7 @@ void QtMainWindow::fillMotInput (ExperimentThreadInput* input){
 }
 
 bool QtMainWindow::masterIsRunning () { return experimentIsRunning; }
+RunInfo QtMainWindow::getRunInfo() { return systemRunningInfo; }
 profileSettings QtMainWindow::getProfileSettings () { return profile.getProfileSettings (); }
 std::string QtMainWindow::getNotes () { return notes.getConfigurationNotes (); }
 void QtMainWindow::setNotes (std::string newNotes) { notes.setConfigurationNotes (newNotes); }

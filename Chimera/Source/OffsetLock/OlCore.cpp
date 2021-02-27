@@ -408,7 +408,7 @@ void OlCore::makeFinalDataFormat(unsigned variation, DoCore& doCore)
 			olChannelSnapshots[variation].push_back(channelSnapshot);
 
 			/*within timeOrganizer[i], the time are the same*/
-			doCore.ttlPulseDirect(OL_TRIGGER_LINE[channel].first , OL_TRIGGER_LINE[channel].second, 
+			doCore.ttlPulseDirect(OL_TRIGGER_LINE[channel].first, OL_TRIGGER_LINE[channel].second, 
 				channelSnapshot.time, OL_TRIGGER_TIME, variation);
 		}
 	}

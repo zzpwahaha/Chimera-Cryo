@@ -17,6 +17,7 @@
 #include "ConfigurationSystems/NoteSystem.h"
 #include "ConfigurationSystems/profileSettings.h"
 #include "GeneralUtilityFunctions/commonFunctions.h"
+#include "GeneralObjects/RunInfo.h"
 #include "CustomMessages.h"
 #include <AnalogOutput/calInfo.h>
 #include <string>
@@ -70,6 +71,7 @@ class QtMainWindow : public IChimeraQtWindow{
 		void abortMasterThread ();
 		std::string getSystemStatusString ();
 		bool masterIsRunning ();
+		RunInfo getRunInfo();
 		void handleFinishText ();
 		unsigned getRepNumber ();
 		void logParams (DataLogger* logger, ExperimentThreadInput* input);
@@ -111,6 +113,8 @@ class QtMainWindow : public IChimeraQtWindow{
 		ExpThreadWorker* expWorker;
 		QThread* expThread;
 		std::atomic<bool> experimentIsRunning = false;
+
+		RunInfo systemRunningInfo;
 		//
 		friend void commonFunctions::handleCommonMessage (int msgID, IChimeraQtWindow* win);
 		unsigned autoCalNum = 0;

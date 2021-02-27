@@ -68,7 +68,7 @@ void AoSystem::handleOpenConfig(ConfigStream& openFile)
 	}
 	ProfileSystem::checkDelimiterLine(openFile, "END_DACS");*/
 	emit notification ("AO system finished opening config, which is not yet added.\n" 
-		+ QString(__FILE__) +"line: "+ QString::number(__LINE__), 2);
+		+ QString(__FILE__) +"line: "+ QString::number(__LINE__)+ "\r\n", 2) ;
 
 }
 

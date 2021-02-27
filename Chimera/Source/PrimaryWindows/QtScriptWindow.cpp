@@ -9,8 +9,9 @@
 #include <ExcessDialogs/saveWithExplorer.h>
 #include <ExcessDialogs/openWithExplorer.h>
 
-QtScriptWindow::QtScriptWindow (QWidget* parent) : IChimeraQtWindow (parent)
-	, masterScript(this) 
+QtScriptWindow::QtScriptWindow(QWidget* parent) : IChimeraQtWindow(parent)
+	, masterScript(this)
+	, intensityAgilent(UWAVE_AGILENT_SETTINGS, this)
 {
 	setWindowTitle ("Script Window");
 }
@@ -24,11 +25,22 @@ void QtScriptWindow::initializeWidgets (){
 	setCentralWidget(centralWidget);
 	QHBoxLayout* layout = new QHBoxLayout(centralWidget);
 	//centralWidget->setStyleSheet("border: 2px solid  black; ");
+	intensityAgilent.initialize("Tweezer Intensity Agilent", this);
 	masterScript.initialize(this, "Master", "Master Script");
 	profileDisplay.initialize (this);
 	layout->addWidget(&profileDisplay, 1);
+	layout->addWidget(&intensityAgilent, 1);
 	layout->addWidget(&masterScript, 1);
 	
+	try {
+		// I only do this for the intensity agilent at the moment.
+		intensityAgilent.setDefault(1);
+	}
+	catch (ChimeraError& err) {
+		errBox("ERROR: Failed to initialize intensity agilent: " + err.trace());
+	}
+
+
 	updateDoAoDdsNames ();
 	updateVarNames ();
 }
@@ -37,6 +49,11 @@ void QtScriptWindow::updateVarNames() {
 	auto params = auxWin->getAllParams ();
 	masterScript.highlighter->setOtherParams (params);
 	masterScript.highlighter->setLocalParams (masterScript.getLocalParams ());
+	masterScript.highlighter->rehighlight();
+
+	intensityAgilent.agilentScript.highlighter->setOtherParams(params);
+	intensityAgilent.agilentScript.highlighter->setLocalParams(intensityAgilent.agilentScript.getLocalParams());
+	intensityAgilent.agilentScript.highlighter->rehighlight();
 }
 
 void QtScriptWindow::updateDoAoDdsNames () {
@@ -55,6 +72,12 @@ void QtScriptWindow::updateDoAoDdsNames () {
 	masterScript.highlighter->setDdsNames(ddsNames);
 	masterScript.highlighter->setOlNames(olNames);
 	masterScript.highlighter->rehighlight();
+
+	intensityAgilent.agilentScript.highlighter->setTtlNames(doNames);
+	intensityAgilent.agilentScript.highlighter->setDacNames(aoNames);
+	intensityAgilent.agilentScript.highlighter->setDdsNames(doNames);
+	intensityAgilent.agilentScript.highlighter->setOlNames(aoNames);
+	masterScript.highlighter->rehighlight();
 }
 
 
@@ -68,12 +91,21 @@ void QtScriptWindow::handleMasterFunctionChange (){
 	}
 }
 
+void QtScriptWindow::handleIntensityCombo() {
+	intensityAgilent.checkSave(mainWin->getProfileSettings().configLocation, mainWin->getRunInfo());
+	intensityAgilent.readGuiSettings();
+	intensityAgilent.handleModeCombo();
+	intensityAgilent.updateSettingsDisplay(mainWin->getProfileSettings().configLocation, mainWin->getRunInfo());
+}
+
+
 void QtScriptWindow::checkScriptSaves (){
-	masterScript.checkSave (getProfile ().configLocation);
+	masterScript.checkSave (getProfile ().configLocation, mainWin->getRunInfo());
+	intensityAgilent.checkSave(getProfile().configLocation, mainWin->getRunInfo());
 }
 
 std::string QtScriptWindow::getSystemStatusString (){
-	std::string status;
+	std::string status = "Intensity Agilent:\n\t" + intensityAgilent.getDeviceIdentity();
 	return status;
 }
 
@@ -83,6 +115,7 @@ std::string QtScriptWindow::getSystemStatusString (){
 scriptInfo<std::string> QtScriptWindow::getScriptNames (){
 	scriptInfo<std::string> names;
 	names.master = masterScript.getScriptName ();
+	names.intensityAgilent = intensityAgilent.agilentScript.getScriptName();
 	return names;
 }
 
@@ -91,6 +124,7 @@ scriptInfo<std::string> QtScriptWindow::getScriptNames (){
 */
 scriptInfo<bool> QtScriptWindow::getScriptSavedStatuses (){
 	scriptInfo<bool> status;
+	status.intensityAgilent = intensityAgilent.agilentScript.savedStatus();
 	status.master = masterScript.savedStatus ();
 	return status;
 }
@@ -100,8 +134,19 @@ scriptInfo<bool> QtScriptWindow::getScriptSavedStatuses (){
 */
 scriptInfo<std::string> QtScriptWindow::getScriptAddresses (){
 	scriptInfo<std::string> addresses;
+	addresses.intensityAgilent = intensityAgilent.agilentScript.getScriptPathAndName();
 	addresses.master = masterScript.getScriptPathAndName ();
 	return addresses;
+}
+
+void QtScriptWindow::setIntensityDefault() 
+{
+	try {
+		intensityAgilent.setDefault(1);
+	}
+	catch (ChimeraError& err) {
+		reportErr(err.qtrace());
+	}
 }
 
 /// Commonly Called Functions
@@ -109,6 +154,74 @@ scriptInfo<std::string> QtScriptWindow::getScriptAddresses (){
 	The following set of functions, mostly revolving around saving etc. of the script files, are called by all of the
 	window objects because they are associated with the menu at the top of each screen
 */
+
+void QtScriptWindow::newIntensityScript() {
+	try {
+		intensityAgilent.verifyScriptable();
+		intensityAgilent.checkSave(getProfile().configLocation, mainWin->getRunInfo());
+		intensityAgilent.agilentScript.newScript();
+		updateConfigurationSavedStatus(false);
+		intensityAgilent.agilentScript.updateScriptNameText(mainWin->getProfileSettings().configLocation);
+	}
+	catch (ChimeraError& err) {
+		reportErr(err.qtrace());
+	}
+}
+
+void QtScriptWindow::openIntensityScript(IChimeraQtWindow* parent) {
+	try {
+		intensityAgilent.verifyScriptable();
+		intensityAgilent.checkSave(getProfile().configLocation, mainWin->getRunInfo());
+		std::string intensityOpenName = openWithExplorer(parent, Script::AGILENT_SCRIPT_EXTENSION);
+		intensityAgilent.agilentScript.openParentScript(intensityOpenName, getProfile().configLocation,
+			mainWin->getRunInfo());
+		updateConfigurationSavedStatus(false);
+		intensityAgilent.agilentScript.updateScriptNameText(getProfile().configLocation);
+	}
+	catch (ChimeraError& err) {
+		reportErr(err.qtrace());
+	}
+}
+
+void QtScriptWindow::openIntensityScript(std::string name) {
+	intensityAgilent.agilentScript.openParentScript(name, getProfile().configLocation, mainWin->getRunInfo());
+}
+
+void QtScriptWindow::saveIntensityScript() {
+	try {
+		// channel 0 is the intensity channel, the 4th option is the scripting option.
+		if (intensityAgilent.getOutputInfo().channel[0].option == AgilentChannelMode::which::Script) {
+			intensityAgilent.agilentScript.saveScript(getProfile().configLocation, mainWin->getRunInfo());
+			intensityAgilent.agilentScript.updateScriptNameText(getProfile().configLocation);
+		}
+	}
+	catch (ChimeraError& err) {
+		reportErr(err.qtrace());
+	}
+}
+
+void QtScriptWindow::saveIntensityScriptAs(IChimeraQtWindow* parent) {
+	try {
+		intensityAgilent.verifyScriptable();
+		std::string extensionNoPeriod = intensityAgilent.agilentScript.getExtension();
+		if (extensionNoPeriod.size() == 0) {
+			return;
+		}
+		extensionNoPeriod = extensionNoPeriod.substr(1, extensionNoPeriod.size());
+		std::string newScriptAddress = saveWithExplorer(parent, extensionNoPeriod, getProfileSettings());
+		intensityAgilent.agilentScript.saveScriptAs(newScriptAddress, mainWin->getRunInfo());
+		updateConfigurationSavedStatus(false);
+		intensityAgilent.agilentScript.updateScriptNameText(getProfile().configLocation);
+	}
+	catch (ChimeraError& err) {
+		reportErr(err.qtrace());
+	}
+}
+
+
+
+
+
 
 // just a quick shortcut.
 profileSettings QtScriptWindow::getProfile (){
@@ -129,6 +242,12 @@ void QtScriptWindow::windowOpenConfig (ConfigStream& configFile){
 		std::string masterName;
 		getlineFunc (configFile, masterName);
 		ConfigSystem::checkDelimiterLine (configFile, "END_SCRIPTS");
+
+		deviceOutputInfo info;
+		ConfigSystem::stdGetFromConfig(configFile, intensityAgilent.getCore(), info, Version("1.0"));
+		intensityAgilent.setOutputSettings(info);
+		intensityAgilent.updateSettingsDisplay(mainWin->getProfileSettings().configLocation, mainWin->getRunInfo());
+
 		try{
 			openMasterScript (masterName);
 		}
@@ -139,6 +258,7 @@ void QtScriptWindow::windowOpenConfig (ConfigStream& configFile){
 				openMasterScript (openWithExplorer (nullptr, "mScript"));
 			}
 		}
+		considerScriptLocations();
 	}
 	catch (ChimeraError& err)	{
 		reportErr ("Scripting Window failed to read parameters from the configuration file.\n\n" + err.qtrace ());
@@ -147,7 +267,7 @@ void QtScriptWindow::windowOpenConfig (ConfigStream& configFile){
 
 void QtScriptWindow::newMasterScript (){
 	try {
-		masterScript.checkSave (getProfile ().configLocation);
+		masterScript.checkSave (getProfile ().configLocation, mainWin->getRunInfo());
 		masterScript.newScript ();
 		updateConfigurationSavedStatus (false);
 		masterScript.updateScriptNameText (getProfile ().configLocation);
@@ -159,9 +279,9 @@ void QtScriptWindow::newMasterScript (){
 
 void QtScriptWindow::openMasterScript (IChimeraQtWindow* parent){
 	try	{
-		masterScript.checkSave (getProfile ().configLocation);
+		masterScript.checkSave (getProfile ().configLocation, mainWin->getRunInfo());
 		std::string openName = openWithExplorer (parent, Script::MASTER_SCRIPT_EXTENSION);
-		masterScript.openParentScript (openName, getProfile ().configLocation);
+		masterScript.openParentScript (openName, getProfile ().configLocation, mainWin->getRunInfo());
 		updateConfigurationSavedStatus (false);
 		masterScript.updateScriptNameText (getProfile ().configLocation);
 	}
@@ -175,7 +295,7 @@ void QtScriptWindow::saveMasterScript (){
 		masterScript.saveAsFunction ();
 		return;
 	}
-	masterScript.saveScript (getProfile ().configLocation);
+	masterScript.saveScript (getProfile ().configLocation, mainWin->getRunInfo());
 	masterScript.updateScriptNameText (getProfile ().configLocation);
 }
 
@@ -186,7 +306,7 @@ void QtScriptWindow::saveMasterScriptAs (IChimeraQtWindow* parent){
 	}
 	extensionNoPeriod = extensionNoPeriod.substr (1, extensionNoPeriod.size ());
 	std::string newScriptAddress = saveWithExplorer (parent, extensionNoPeriod, getProfileSettings ());
-	masterScript.saveScriptAs (newScriptAddress);
+	masterScript.saveScriptAs (newScriptAddress, mainWin->getRunInfo());
 	updateConfigurationSavedStatus (false);
 	masterScript.updateScriptNameText (getProfile ().configLocation);
 }
@@ -219,14 +339,20 @@ void QtScriptWindow::windowSaveConfig (ConfigStream& saveFile){
 	saveFile << "SCRIPTS\n";
 	saveFile << "/*Master Script Address:*/ " << addresses.master << "\n";
 	saveFile << "END_SCRIPTS\n";
+
+	intensityAgilent.handleSavingConfig(saveFile, mainWin->getProfileSettings().configLocation, mainWin->getRunInfo());
 }
 
 void QtScriptWindow::checkMasterSave (){
-	masterScript.checkSave (getProfile ().configLocation);
+	masterScript.checkSave (getProfile ().configLocation, mainWin->getRunInfo());
 }
 
 void QtScriptWindow::openMasterScript (std::string name){
-	masterScript.openParentScript (name, getProfile ().configLocation);
+	masterScript.openParentScript (name, getProfile ().configLocation, mainWin->getRunInfo());
+}
+
+void QtScriptWindow::considerScriptLocations() {
+	intensityAgilent.agilentScript.considerCurrentLocation(getProfile().configLocation, mainWin->getRunInfo());
 }
 
 void QtScriptWindow::updateProfile (std::string text){
@@ -242,4 +368,5 @@ void QtScriptWindow::updateConfigurationSavedStatus (bool status){
 }
 
 void QtScriptWindow::fillExpDeviceList (DeviceList& list) {
+	list.list.push_back(intensityAgilent.getCore());
 }

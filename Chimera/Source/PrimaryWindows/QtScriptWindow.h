@@ -4,6 +4,7 @@
 #include <QTimer>
 #include "ConfigurationSystems/ProfileIndicator.h"
 #include <Scripts/Script.h>
+#include "Agilent/Agilent.h"
 #include "ConfigurationSystems/profileSettings.h"
 #include "ExperimentThread/ExperimentThreadInput.h"
 #include "IChimeraQtWindow.h"
@@ -42,7 +43,15 @@ class QtScriptWindow : public IChimeraQtWindow{
 		void windowOpenConfig (ConfigStream& configFile);
 
 		void updateProfile (std::string text);
-		
+		void considerScriptLocations();
+
+		void newIntensityScript();
+		void openIntensityScript(IChimeraQtWindow* parent);
+		void openIntensityScript(std::string name);
+		void saveIntensityScript();
+		void saveIntensityScriptAs(IChimeraQtWindow* parent);
+
+
 		void newMasterScript ();
 		void openMasterScript (IChimeraQtWindow* parent);
 		void openMasterScript (std::string name);
@@ -54,13 +63,22 @@ class QtScriptWindow : public IChimeraQtWindow{
 
 		void updateConfigurationSavedStatus (bool status);
 
+		/*these two seems not in use -zzp2021/02/25*/
 		void handleMasterFunctionChange ();
+		void handleIntensityCombo();
 
 		profileSettings getProfile ();
+
+		/* for normal/abort finish add it later, QtMainWindow::onNormalFinish,QtMainWindow::onFatalError -zzp 20210225*/
+		void setIntensityDefault();
+
     private:
         Ui::QtScriptWindow* ui;
         Script masterScript;
         ProfileIndicator profileDisplay;
+
+		Agilent intensityAgilent;
+
 	public Q_SLOTS:
 		void updateVarNames ();
 };

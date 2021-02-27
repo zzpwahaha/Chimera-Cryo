@@ -127,7 +127,8 @@ void IChimeraQtWindow::initializeMenu (){
 	/// SCRIPTS
 	auto scriptsM = menubar->addMenu ("&Scripts");
 	auto masterSc = scriptsM->addMenu ("M&aster Script");
-		
+	auto intM = scriptsM->addMenu("Int&ensity Script");
+
 	auto* newMaster = new QAction ("Ne&w Master Script", this);
 	connect (newMaster, &QAction::triggered, [this, cmnMsg]() {cmnMsg (ID_MASTERSCRIPT_NEW, this); });
 	masterSc->addAction (newMaster);
@@ -142,7 +143,23 @@ void IChimeraQtWindow::initializeMenu (){
 	masterSc->addAction (saveMasterAs);
 	
 	/// 
-	auto* newInt = new QAction ("Ne&w Intensity Agilent Script", this);
+	auto* newInt = new QAction("Ne&w Intensity Agilent Script", this);
+	connect(newInt, &QAction::triggered, [this, cmnMsg]() {cmnMsg(ID_FILE_MY_INTENSITY_NEW, this); });
+	intM->addAction(newInt);
+	auto* openInt = new QAction("Op&en Intensity Agilent Script", this);
+	connect(openInt, &QAction::triggered, [this, cmnMsg]() {cmnMsg(ID_FILE_MY_INTENSITY_OPEN, this); });
+	intM->addAction(openInt);
+	auto* saveInt = new QAction("&Save Intensity Agilent Script", this);
+	connect(saveInt, &QAction::triggered, [this, cmnMsg]() {cmnMsg(ID_FILE_MY_INTENSITY_SAVE, this); });
+	intM->addAction(saveInt);
+	auto* saveasInt = new QAction("Save Intensity Agilent Script &As", this);
+	connect(saveasInt, &QAction::triggered, [this, cmnMsg]() {cmnMsg(ID_FILE_MY_INTENSITY_SAVEAS, this); });
+	intM->addAction(saveasInt);
+
+
+
+
+
 
 	auto masterSystemsM = menubar->addMenu ("Master Systems");
 	auto* changeIndvDo = new QAction ("View or Change Individual Digital Output Settings", this);

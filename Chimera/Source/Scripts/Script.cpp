@@ -34,7 +34,7 @@ Script::Script(IChimeraQtWindow* parent) : IChimeraSystem(parent)
 void Script::initialize(IChimeraQtWindow* parent, std::string deviceTypeInput, std::string scriptHeader)
 {
 	QVBoxLayout* layout = new QVBoxLayout(this);
-
+	layout->setContentsMargins(0, 0, 0, 0);
 	deviceType = deviceTypeInput;
 	ScriptableDevice devenum;
 	if (deviceTypeInput == "Agilent") {
@@ -83,10 +83,13 @@ void Script::initialize(IChimeraQtWindow* parent, std::string deviceTypeInput, s
 							"-      daclinspace: [dacName] [initValue] [finalValue] [rampTime] [numberOfSteps]\n"
 							"-      ddsamp: [ddsName] [ampValue]\n"
 							"-      ddsfreq: [ddsName] [freqValue]\n"
-							"-      ddslinspaceamp: [dacName] [initValue] [finalValue] [rampTime] [numberOfSteps]\n"
-							"-      ddslinspacefreq: [dacName] [initValue] [finalValue] [rampTime] [numberOfSteps]\n"
-							"-      ddsrampamp: [dacName] [initValue] [finalValue] [rampTime]\n"
-							"-      ddsrampfreq: [dacName] [initValue] [finalValue] [rampTime]\n"
+							"-      ddslinspaceamp: [ddsName] [initValue] [finalValue] [rampTime] [numberOfSteps]\n"
+							"-      ddslinspacefreq: [ddsName] [initValue] [finalValue] [rampTime] [numberOfSteps]\n"
+							"-      ddsrampamp: [ddsName] [initValue] [finalValue] [rampTime]\n"
+							"-      ddsrampfreq: [ddsName] [initValue] [finalValue] [rampTime]\n"
+							"-      ol: [olName] [lockfreqValue]\n"
+							"-      ollinspace: [olName] [initValue] [finalValue] [rampTime] [numberOfSteps]\n"
+							"-      olramp: [olName] [initValue] [finalValue] [rampTime] \n"
 							"-      def [functionName]([functionArguments]):\n"
 							"-      call [functionName(argument1, argument2, etc...)]\n"
 							"-      repeat: [numberOfTimesToRepeat]\n"
@@ -160,7 +163,7 @@ void Script::initialize(IChimeraQtWindow* parent, std::string deviceTypeInput, s
 	layout->addLayout(layout1);
 	layout->addWidget(availableFunctionsCombo.combo, 0);
 	layout->addWidget(edit, 1);
-	layout->setContentsMargins(0, 0, 0, 0);
+	
 }
 
 void Script::functionChangeHandler(std::string configPath){
@@ -231,7 +234,8 @@ bool Script::isFunction ( ){
 }
 
 //
-void Script::saveScript(std::string configPath){
+void Script::saveScript(std::string configPath, RunInfo info)
+{
 	if (configPath == ""){
 		thrower (": Please select a configuration before trying to save a script!\r\n");
 	}
@@ -253,7 +257,15 @@ void Script::saveScript(std::string configPath){
 			return;
 		}
 		std::string path = configPath + newName + extension;
-		saveScriptAs(path);
+		saveScriptAs(path, info);
+	}
+	if (info.running) {
+		for (unsigned scriptInc = 0; scriptInc < info.currentlyRunningScripts.size(); scriptInc++) {
+			if (scriptName == info.currentlyRunningScripts[scriptInc]) {
+				thrower("System is currently running. You can't save over any files in use by the system while"
+					" it runs, which includes the NIAWG scripts and the intensity script.");
+			}
+		}
 	}
 	auto text = edit->toPlainText();
 	std::fstream saveFile(configPath + scriptName + extension, std::fstream::out);
@@ -269,10 +281,18 @@ void Script::saveScript(std::string configPath){
 }
 
 //
-void Script::saveScriptAs(std::string location)
+void Script::saveScriptAs(std::string location, RunInfo info)
 {
 	if (location == ""){
 		return;
+	}
+	if (info.running) {
+		for (unsigned scriptInc = 0; scriptInc < info.currentlyRunningScripts.size(); scriptInc++) {
+			if (scriptName == info.currentlyRunningScripts[scriptInc]) {
+				thrower("System is currently running. You can't save over any files in use by the system while "
+					"it runs, which includes the horizontal and vertical AOM scripts and the intensity script.");
+			}
+		}
 	}
 	auto text = edit->toPlainText();
 	std::fstream saveFile(location, std::fstream::out);
@@ -294,7 +314,8 @@ void Script::saveScriptAs(std::string location)
 }
 
 //
-void Script::checkSave(std::string configPath){
+void Script::checkSave(std::string configPath, RunInfo info)
+{
 	if (isSaved){
 		// don't need to do anything
 		return;
@@ -334,7 +355,7 @@ void Script::checkSave(std::string configPath){
 			newName = str (QInputDialog::getText (edit, "New Script Name", ("Please enter new name for the " + deviceType + " script " + scriptName + ".",
 				scriptName).c_str ()));
 			std::string path = configPath + newName + extension;
-			saveScriptAs(path);
+			saveScriptAs(path, info);
 			return;
 		}
 	}
@@ -347,7 +368,7 @@ void Script::checkSave(std::string configPath){
 		}
 		if (answer == QMessageBox::No) {}
 		if (answer == QMessageBox::Yes) {
-			saveScript(configPath);
+			saveScript(configPath, info);
 		}
 	}
 }
@@ -430,7 +451,8 @@ void Script::newScript(){
 }
 
 
-void Script::openParentScript(std::string parentScriptFileAndPath, std::string configPath){
+void Script::openParentScript(std::string parentScriptFileAndPath, std::string configPath, RunInfo info)
+{
 	if (parentScriptFileAndPath == "" || parentScriptFileAndPath == "NONE"){
 		return;
 	}
@@ -471,7 +493,7 @@ void Script::openParentScript(std::string parentScriptFileAndPath, std::string c
 		if (answer == QMessageBox::Yes){
 			std::string scriptName = parentScriptFileAndPath.substr(sPos+1, parentScriptFileAndPath.size());
 			std::string path = configPath + scriptName;
-			saveScriptAs(path);
+			saveScriptAs(path, info);
 		}
 	}
 	updateScriptNameText( configPath );
@@ -535,7 +557,8 @@ std::string Script::getScriptName(){
 	return scriptName;
 }
 
-void Script::considerCurrentLocation(std::string configPath){
+void Script::considerCurrentLocation(std::string configPath, RunInfo info)
+{
 	if (scriptFullAddress.size() > 0){
 		std::string scriptLocation = scriptFullAddress;
 		std::replace (scriptLocation.begin (), scriptLocation.end (), '\\', '/');
@@ -552,7 +575,7 @@ void Script::considerCurrentLocation(std::string configPath){
 				std::string scriptName = scriptFullAddress.substr(sPos, scriptFullAddress.size());
 				scriptFullAddress = configPath + scriptName;
 				scriptPath = configPath;
-				saveScriptAs(scriptFullAddress);
+				saveScriptAs(scriptFullAddress, info);
 			}
 		}
 	}

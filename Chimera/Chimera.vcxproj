@@ -117,7 +117,15 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Source\Agilent\Agilent.cpp" />
+    <ClCompile Include="Source\Agilent\AgilentChannelMode.cpp" />
+    <ClCompile Include="Source\Agilent\AgilentCore.cpp" />
+    <ClCompile Include="Source\Agilent\scriptedAgilentWaveform.cpp" />
+    <ClCompile Include="Source\Agilent\Segment.cpp" />
+    <ClCompile Include="Source\Agilent\SegmentEnd.cpp" />
+    <ClCompile Include="Source\Agilent\whichAg.cpp" />
     <ClCompile Include="Source\ExcessDialogs\OlSettingsDialog.cpp" />
+    <ClCompile Include="Source\GeneralObjects\IDeviceCore.cpp" />
     <ClCompile Include="Source\OffsetLock\OlSystem.cpp" />
     <ClCompile Include="Source\OffsetLock\OffsetLockOutput.cpp" />
     <ClCompile Include="Source\OffsetLock\OlCore.cpp" />
@@ -216,6 +224,17 @@
     <QtMoc Include="3rd_Party\qcustomplot\qcustomplot.h" />
     <QtMoc Include="Source\Scripts\CQCodeEdit.h" />
     <QtMoc Include="Source\ExcessDialogs\OlSettingsDialog.h" />
+    <ClInclude Include="Source\Agilent\Agilent.h" />
+    <ClInclude Include="Source\Agilent\AgilentChannelMode.h" />
+    <ClInclude Include="Source\Agilent\AgilentCore.h" />
+    <ClInclude Include="Source\Agilent\AgilentSettings.h" />
+    <ClInclude Include="Source\Agilent\agilentStructures.h" />
+    <ClInclude Include="Source\Agilent\scriptedAgilentWaveform.h" />
+    <ClInclude Include="Source\Agilent\Segment.h" />
+    <ClInclude Include="Source\Agilent\SegmentEnd.h" />
+    <ClInclude Include="Source\Agilent\segmentStructs.h" />
+    <ClInclude Include="Source\Agilent\whichAg.h" />
+    <ClInclude Include="Source\ExperimentMonitoringAndStatus\statusMsg.h" />
     <ClInclude Include="Source\OffsetLock\OlSystem.h" />
     <ClInclude Include="Source\OffsetLock\OffsetLockOutput.h" />
     <ClInclude Include="Source\OffsetLock\OlCore.h" />

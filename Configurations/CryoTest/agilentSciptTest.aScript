@@ -1,0 +1,8 @@
+ramp lin 0 0 1 oncewaittrig #
+ramp lin 0 -5 20 oncewaittrig #
+ramp lin -5 5 10 oncewaittrig #
+ramp lin 5 3 5 oncewaittrig #
+ramp lin 3 0 5 oncewaittrig #
+
+
+%hold 0 10 repeatuntiltrig #
