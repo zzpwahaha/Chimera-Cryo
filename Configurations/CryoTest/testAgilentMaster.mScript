@@ -18,5 +18,9 @@ t += 6
 pulseon: do7_0 1
 pulseon: do7_1 1
 
+t += 6
+pulseon: do7_0 1
+pulseon: do7_1 1
+
 t += 500
 pulseon: do1_0 1
