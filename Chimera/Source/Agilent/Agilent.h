@@ -4,7 +4,7 @@
 #include "Scripts/ScriptStream.h"
 #include "ConfigurationSystems/ConfigStream.h"
 #include "GeneralFlumes/VisaFlume.h"
-#include "Agilent/agilentStructures.h"
+#include "Agilent/ArbGenStructures.h"
 #include "Scripts/Script.h"
 //#include "DigitalOutput/DoRows.h"
 #include <vector>
@@ -23,7 +23,7 @@ class Agilent : public IChimeraSystem
 		Agilent& operator=(const Agilent&) = delete;
 		Agilent (const Agilent&) = delete;
 
-		Agilent( const agilentSettings & settings, IChimeraQtWindow* parent );
+		Agilent( const arbGenSettings& settings, IChimeraQtWindow* parent );
 		void initialize(std::string headerText, IChimeraQtWindow* win);
 		void updateButtonDisplay( int chan );
 		void checkSave( std::string configPath, RunInfo info );
@@ -56,7 +56,7 @@ class Agilent : public IChimeraSystem
 	private:
 		AgilentCore core;
 		minMaxDoublet chan2Range;
-		const agilentSettings initSettings;
+		const arbGenSettings initSettings;
 		// since currently all visaFlume communication is done to communicate with agilent machines, my visaFlume wrappers exist
 		// in this class.
 		int currentChannel=1;

@@ -190,7 +190,7 @@ void QtScriptWindow::openIntensityScript(std::string name) {
 void QtScriptWindow::saveIntensityScript() {
 	try {
 		// channel 0 is the intensity channel, the 4th option is the scripting option.
-		if (intensityAgilent.getOutputInfo().channel[0].option == AgilentChannelMode::which::Script) {
+		if (intensityAgilent.getOutputInfo().channel[0].option == ArbGenChannelMode::which::Script) {
 			intensityAgilent.agilentScript.saveScript(getProfile().configLocation, mainWin->getRunInfo());
 			intensityAgilent.agilentScript.updateScriptNameText(getProfile().configLocation);
 		}

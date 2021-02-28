@@ -1,16 +1,17 @@
 // created by Mark O. Brown
 #pragma once
 
-#include "scriptedAgilentWaveform.h"
-#include "AgilentChannelMode.h"
+#include "ScriptedArbGenWaveform.h"
+//#include "ScriptedAgilentWaveform.h"
+#include "ArbGenChannelMode.h"
 #include "ParameterSystem/Expression.h"
 //#include "DigitalOutput/DoRows.h"
 #include <string>
 #include <array>
 
-class Agilent;
+//class Agilent;
 
-struct agilentSettings{
+struct arbGenSettings{
 	bool safemode;
 	std::string address;
 	unsigned long sampleRate;
@@ -32,23 +33,22 @@ struct minMaxDoublet{
 };
 
 
-struct generalAgilentOutputInfo{
+struct generalArbGenOutputInfo{
 	bool useCal = false;
 };
 
+struct scriptedArbInfo : public generalArbGenOutputInfo {
+	Expression fileAddress = "";
+	ScriptedArbGenWaveform wave;
+};
 
-struct dcInfo : public generalAgilentOutputInfo{
+
+struct dcInfo : public generalArbGenOutputInfo {
 	Expression dcLevel;
 };
 
 
-struct scriptedArbInfo : public generalAgilentOutputInfo{
-	Expression fileAddress = "";
-	ScriptedAgilentWaveform wave;
-};
-
-
-struct squareInfo : public generalAgilentOutputInfo{
+struct squareInfo : public generalArbGenOutputInfo {
 	Expression frequency;
 	Expression amplitude;
 	Expression offset;
@@ -58,13 +58,13 @@ struct squareInfo : public generalAgilentOutputInfo{
 };
 
 
-struct sineInfo : public generalAgilentOutputInfo{
+struct sineInfo : public generalArbGenOutputInfo {
 	Expression frequency;
 	Expression amplitude;
 };
 
 
-struct preloadedArbInfo : public generalAgilentOutputInfo{
+struct preloadedArbInfo : public generalArbGenOutputInfo {
 	// The only reason at this time to make this an expression instead of a normal string is to make sure it gets 
 	// outputted to the config file correctly in case it's empty. 
 	Expression address = "";
@@ -73,7 +73,7 @@ struct preloadedArbInfo : public generalAgilentOutputInfo{
 
 
 struct channelInfo{
-	AgilentChannelMode::which option = AgilentChannelMode::which::No_Control;
+	ArbGenChannelMode::which option = ArbGenChannelMode::which::No_Control;
 	dcInfo dc;
 	sineInfo sine;
 	squareInfo square;

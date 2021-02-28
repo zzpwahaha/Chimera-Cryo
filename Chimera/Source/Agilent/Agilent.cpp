@@ -15,7 +15,7 @@
 #include <qbuttongroup.h>
 #include <qlayout.h>
 
-Agilent::Agilent( const agilentSettings& settings, IChimeraQtWindow* parent ) 
+Agilent::Agilent( const arbGenSettings& settings, IChimeraQtWindow* parent )
 	: IChimeraSystem(parent)
 	, core(settings)
 	, initSettings(settings)
@@ -26,16 +26,16 @@ void Agilent::programAgilentNow (std::vector<parameterType> constants){
 	readGuiSettings ();
 	std::string warnings_;
 	if (currentGuiInfo.channel[0].scriptedArb.fileAddress.expressionStr != ""){
-		currentGuiInfo.channel[0].scriptedArb.wave = ScriptedAgilentWaveform ();
-		core.analyzeAgilentScript (currentGuiInfo.channel[0].scriptedArb, constants, warnings_);
+		currentGuiInfo.channel[0].scriptedArb.wave = ScriptedArbGenWaveform();
+		core.analyzeArbGenScript (currentGuiInfo.channel[0].scriptedArb, constants, warnings_);
 	}
 	if (currentGuiInfo.channel[1].scriptedArb.fileAddress.expressionStr != ""){
-		currentGuiInfo.channel[1].scriptedArb.wave = ScriptedAgilentWaveform ();
-		core.analyzeAgilentScript (currentGuiInfo.channel[1].scriptedArb, constants, warnings_);
+		currentGuiInfo.channel[1].scriptedArb.wave = ScriptedArbGenWaveform();
+		core.analyzeArbGenScript (currentGuiInfo.channel[1].scriptedArb, constants, warnings_);
 	}
 	core.convertInputToFinalSettings (0, currentGuiInfo, constants);
 	core.convertInputToFinalSettings (1, currentGuiInfo, constants);
-	core.setAgilent (0, constants, currentGuiInfo, nullptr);
+	core.setArbGen (0, constants, currentGuiInfo, nullptr);
 }
 
 std::string Agilent::getDeviceIdentity (){
@@ -162,8 +162,8 @@ void Agilent::initialize(std::string headerText, IChimeraQtWindow* win)
 
 	agilentScript.initialize(win, "Agilent", "" );
 
-	currentGuiInfo.channel[0].option = AgilentChannelMode::which::No_Control;
-	currentGuiInfo.channel[1].option = AgilentChannelMode::which::No_Control;
+	currentGuiInfo.channel[0].option = ArbGenChannelMode::which::No_Control;
+	currentGuiInfo.channel[1].option = ArbGenChannelMode::which::No_Control;
 	agilentScript.setEnabled ( false, false );
 	try {
 		core.programSetupCommands ();
@@ -181,14 +181,14 @@ AgilentCore& Agilent::getCore (){
 
 
 void Agilent::checkSave( std::string configPath, RunInfo info ){
-	if ( currentGuiInfo.channel[currentChannel-1].option == AgilentChannelMode::which::Script ){
+	if ( currentGuiInfo.channel[currentChannel-1].option == ArbGenChannelMode::which::Script ){
 		agilentScript.checkSave( configPath, info );
 	}
 }
 
 
 void Agilent::verifyScriptable ( ){
-	if ( currentGuiInfo.channel[ currentChannel-1 ].option != AgilentChannelMode::which::Script ){
+	if ( currentGuiInfo.channel[ currentChannel-1 ].option != ArbGenChannelMode::which::Script ){
 		thrower ( "Agilent is not in scripting mode!" );
 	}
 }
@@ -210,30 +210,30 @@ void Agilent::readGuiSettings(int chan ){
 	stream << textStr;
 	stream.seekg( 0 );
 	switch (currentGuiInfo.channel[chani].option){
-		case AgilentChannelMode::which::No_Control:
-		case AgilentChannelMode::which::Output_Off:
+		case ArbGenChannelMode::which::No_Control:
+		case ArbGenChannelMode::which::Output_Off:
 			break;
-		case AgilentChannelMode::which::DC:
+		case ArbGenChannelMode::which::DC:
 			stream >> currentGuiInfo.channel[chani].dc.dcLevel;
 			currentGuiInfo.channel[chani].dc.useCal = calibratedButton->isChecked ( );
 			break;
-		case AgilentChannelMode::which::Sine:
+		case ArbGenChannelMode::which::Sine:
 			stream >> currentGuiInfo.channel[chani].sine.frequency;
 			stream >> currentGuiInfo.channel[chani].sine.amplitude;
 			currentGuiInfo.channel[chani].sine.useCal = calibratedButton->isChecked ( );
 			break;
-		case AgilentChannelMode::which::Square:
+		case ArbGenChannelMode::which::Square:
 			stream >> currentGuiInfo.channel[chani].square.frequency;
 			stream >> currentGuiInfo.channel[chani].square.amplitude;
 			stream >> currentGuiInfo.channel[chani].square.offset;
 			currentGuiInfo.channel[chani].square.useCal = calibratedButton->isChecked ( );
 			break;
-		case AgilentChannelMode::which::Preloaded:
+		case ArbGenChannelMode::which::Preloaded:
 			stream >> currentGuiInfo.channel[chani].preloadedArb.address;
 			currentGuiInfo.channel[chani].preloadedArb.useCal = calibratedButton->isChecked ( );
 			currentGuiInfo.channel[chani].preloadedArb.burstMode = burstButton->isChecked ();
 			break;
-		case AgilentChannelMode::which::Script:
+		case ArbGenChannelMode::which::Script:
 			currentGuiInfo.channel[chani].scriptedArb.fileAddress = agilentScript.getScriptPathAndName();
 			currentGuiInfo.channel[chani].scriptedArb.useCal = calibratedButton->isChecked ( );
 			break;
@@ -259,7 +259,7 @@ void Agilent::updateSettingsDisplay( std::string configPath, RunInfo currentRunI
 void Agilent::updateButtonDisplay( int chan ){
 	std::string channelText;
 	channelText = chan == 1 ? "Channel 1 - " : "Channel 2 - ";
-	channelText += AgilentChannelMode::toStr ( currentGuiInfo.channel[ chan - 1 ].option );
+	channelText += ArbGenChannelMode::toStr ( currentGuiInfo.channel[ chan - 1 ].option );
 	if ( chan == 1 ){
 		channel1Button->setText ( cstr(channelText) );
 	}
@@ -274,26 +274,26 @@ void Agilent::updateSettingsDisplay(int chan, std::string configPath, RunInfo cu
 	// convert to zero-indexed.
 	chan -= 1;
 	switch ( currentGuiInfo.channel[chan].option ){
-		case AgilentChannelMode::which::No_Control:
+		case ArbGenChannelMode::which::No_Control:
 			agilentScript.reset ( );
 			agilentScript.setScriptText("");
 			agilentScript.setEnabled ( false, false );
 			settingCombo->setCurrentIndex( 0 );
 			break;
-		case AgilentChannelMode::which::Output_Off:
+		case ArbGenChannelMode::which::Output_Off:
 			agilentScript.reset ( );
 			agilentScript.setScriptText("");
 			agilentScript.setEnabled ( false, false );
 			settingCombo->setCurrentIndex ( 1 );
 			break;
-		case AgilentChannelMode::which::DC:
+		case ArbGenChannelMode::which::DC:
 			agilentScript.reset ( );
 			agilentScript.setScriptText(currentGuiInfo.channel[chan].dc.dcLevel.expressionStr);
 			settingCombo->setCurrentIndex ( 2 );
 			calibratedButton->setChecked( currentGuiInfo.channel[chan].dc.useCal );
 			agilentScript.setEnabled ( true, false );
 			break;
-		case AgilentChannelMode::which::Sine:
+		case ArbGenChannelMode::which::Sine:
 			agilentScript.reset ( );
 			agilentScript.setScriptText(currentGuiInfo.channel[chan].sine.frequency.expressionStr + " " 
 										 + currentGuiInfo.channel[chan].sine.amplitude.expressionStr);
@@ -301,7 +301,7 @@ void Agilent::updateSettingsDisplay(int chan, std::string configPath, RunInfo cu
 			calibratedButton->setChecked( currentGuiInfo.channel[chan].sine.useCal );
 			agilentScript.setEnabled ( true, false );
 			break;
-		case AgilentChannelMode::which::Square:
+		case ArbGenChannelMode::which::Square:
 			agilentScript.reset ( );
 			agilentScript.setScriptText( currentGuiInfo.channel[chan].square.frequency.expressionStr + " " 
 										 + currentGuiInfo.channel[chan].square.amplitude.expressionStr + " " 
@@ -310,7 +310,7 @@ void Agilent::updateSettingsDisplay(int chan, std::string configPath, RunInfo cu
 			agilentScript.setEnabled ( true, false );
 			settingCombo->setCurrentIndex (4);
 			break;
-		case AgilentChannelMode::which::Preloaded:
+		case ArbGenChannelMode::which::Preloaded:
 			agilentScript.reset ( );
 			agilentScript.setScriptText(currentGuiInfo.channel[chan].preloadedArb.address.expressionStr);
 			calibratedButton->setChecked( currentGuiInfo.channel[chan].preloadedArb.useCal );
@@ -318,7 +318,7 @@ void Agilent::updateSettingsDisplay(int chan, std::string configPath, RunInfo cu
 			agilentScript.setEnabled ( true, false );
 			settingCombo->setCurrentIndex (5);
 			break;
-		case AgilentChannelMode::which::Script:
+		case ArbGenChannelMode::which::Script:
 			// clear it in case the file fails to open.
 			agilentScript.setScriptText( "" );
 			agilentScript.openParentScript( currentGuiInfo.channel[chan].scriptedArb.fileAddress.expressionStr, configPath,
@@ -328,7 +328,7 @@ void Agilent::updateSettingsDisplay(int chan, std::string configPath, RunInfo cu
 			settingCombo->setCurrentIndex (6);
 			break;
 		default:
-			thrower ( "unrecognized agilent setting: " + AgilentChannelMode::toStr(currentGuiInfo.channel[chan].option));
+			thrower ( "unrecognized agilent setting: " + ArbGenChannelMode::toStr(currentGuiInfo.channel[chan].option));
 	}
 	currentChannel = chan+1;
 }
@@ -351,37 +351,37 @@ void Agilent::handleModeCombo(){
 	switch (selection) {
 		case 0:
 			optionsFormat->setText( "---" );
-			currentGuiInfo.channel[selectedChannel].option = AgilentChannelMode::which::No_Control;
+			currentGuiInfo.channel[selectedChannel].option = ArbGenChannelMode::which::No_Control;
 			agilentScript.setEnabled ( false, false );
 			break;
 		case 1:
 			optionsFormat->setText ( "---" );
-			currentGuiInfo.channel[selectedChannel].option = AgilentChannelMode::which::Output_Off;
+			currentGuiInfo.channel[selectedChannel].option = ArbGenChannelMode::which::Output_Off;
 			agilentScript.setEnabled ( false, false );
 			break;
 		case 2:
 			optionsFormat->setText ( "[DC Level]" );
-			currentGuiInfo.channel[selectedChannel].option = AgilentChannelMode::which::DC;
+			currentGuiInfo.channel[selectedChannel].option = ArbGenChannelMode::which::DC;
 			agilentScript.setEnabled ( true, false );
 			break;
 		case 3:
 			optionsFormat->setText ( "[Frequency(kHz)] [Amplitude(Vpp)]" );
-			currentGuiInfo.channel[selectedChannel].option = AgilentChannelMode::which::Sine;
+			currentGuiInfo.channel[selectedChannel].option = ArbGenChannelMode::which::Sine;
 			agilentScript.setEnabled ( true, false );
 			break;
 		case 4:
 			optionsFormat->setText ( "[Frequency(kHz)] [Amplitude(Vpp)] [Offset(V)]" );
-			currentGuiInfo.channel[selectedChannel].option = AgilentChannelMode::which::Square;
+			currentGuiInfo.channel[selectedChannel].option = ArbGenChannelMode::which::Square;
 			agilentScript.setEnabled ( true, false );
 			break;
 		case 5:
 			optionsFormat->setText ( "[File Address]" );
-			currentGuiInfo.channel[selectedChannel].option = AgilentChannelMode::which::Preloaded;
+			currentGuiInfo.channel[selectedChannel].option = ArbGenChannelMode::which::Preloaded;
 			agilentScript.setEnabled ( true, false );
 			break;
 		case 6:
 			optionsFormat->setText ( "Hover over \"?\"" );
-			currentGuiInfo.channel[selectedChannel].option = AgilentChannelMode::which::Script;
+			currentGuiInfo.channel[selectedChannel].option = ArbGenChannelMode::which::Script;
 			agilentScript.setEnabled ( true, false );
 			break;
 	}
@@ -405,7 +405,7 @@ void Agilent::handleSavingConfig(ConfigStream& saveFile, std::string configPath,
 	for (auto chanInc : range (2)){
 		auto& channel = currentGuiInfo.channel[chanInc];
 		saveFile << channelStrings[chanInc];
-		saveFile << "\n/*Channel Mode:*/\t\t\t\t" << AgilentChannelMode::toStr (channel.option);
+		saveFile << "\n/*Channel Mode:*/\t\t\t\t" << ArbGenChannelMode::toStr (channel.option);
 		saveFile << "\n/*DC Level:*/\t\t\t\t\t" << channel.dc.dcLevel;
 		saveFile << "\n/*DC Calibrated:*/\t\t\t\t" << channel.dc.useCal;
 		saveFile << "\n/*Sine Amplitude:*/\t\t\t\t" << channel.sine.amplitude;
@@ -437,5 +437,5 @@ void Agilent::handleOpenConfig( ConfigStream& file ){
 
 
 bool Agilent::scriptingModeIsSelected (){
-	return currentGuiInfo.channel[currentChannel - 1].option == AgilentChannelMode::which::Script;
+	return currentGuiInfo.channel[currentChannel - 1].option == ArbGenChannelMode::which::Script;
 }

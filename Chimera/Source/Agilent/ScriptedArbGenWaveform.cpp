@@ -1,17 +1,17 @@
 // created by Mark O. Brown
 #include "stdafx.h"
 #include "Agilent/Agilent.h"
-#include "scriptedAgilentWaveform.h"
+#include "ScriptedArbGenWaveform.h"
 #include "Scripts/ScriptStream.h"
 #include <ExperimentThread/ExpThreadWorker.h>
 
-ScriptedAgilentWaveform::ScriptedAgilentWaveform(){
+ScriptedArbGenWaveform::ScriptedArbGenWaveform(){
 	segmentNum = 0;
 	totalSequence = "";
 };
 
 
-void ScriptedAgilentWaveform::resetNumberOfTriggers( ){
+void ScriptedArbGenWaveform::resetNumberOfTriggers( ){
 	numberOfTriggers = 0;
 }
 
@@ -20,7 +20,7 @@ void ScriptedAgilentWaveform::resetNumberOfTriggers( ){
 * segNum: This tells the function what the next segment # is.
 * script: this is the object to be readbtn from.
 */
-bool ScriptedAgilentWaveform::analyzeAgilentScriptCommand( int segNum, ScriptStream& script, 
+bool ScriptedArbGenWaveform::analyzeAgilentScriptCommand( int segNum, ScriptStream& script, 
 														   std::vector<parameterType>& params,
 															std::string& warnings ){
 	std::string scope = AGILENT_PARAMETER_SCOPE;
@@ -135,25 +135,25 @@ bool ScriptedAgilentWaveform::analyzeAgilentScriptCommand( int segNum, ScriptStr
  * varNum: This is the variation number for this segment (matters for naming the segments)
  * totalSegNum: This is the number of segments in the waveform (also matters for naming)
  */
-std::string ScriptedAgilentWaveform::compileAndReturnDataSendString( int segNum, int varNum, int totalSegNum, unsigned chan ){
-	// must get called after data conversion
-	std::string tempSendString;
-	tempSendString = "SOURce" + str( chan ) + ":DATA:ARB segment" + str( segNum + totalSegNum * varNum ) + ",";
-	// need to handle last one separately so that I can /not/ put a comma after it.
-	unsigned numData = waveformSegments[segNum].returnDataSize( ) - 1;
-	for (unsigned sendDataInc = 0; sendDataInc < numData; sendDataInc++){
-		tempSendString += str( waveformSegments[segNum].returnDataVal( sendDataInc ) );
-		tempSendString += ", ";
-	}
-	tempSendString += str( waveformSegments[segNum].returnDataVal( waveformSegments[segNum].returnDataSize() - 1 ) );
-	return tempSendString;
-}
+//std::string ScriptedArbGenWaveform::compileAndReturnDataSendString( int segNum, int varNum, int totalSegNum, unsigned chan ){
+//	// must get called after data conversion
+//	std::string tempSendString;
+//	tempSendString = "SOURce" + str( chan ) + ":DATA:ARB segment" + str( segNum + totalSegNum * varNum ) + ",";
+//	// need to handle last one separately so that I can /not/ put a comma after it.
+//	unsigned numData = waveformSegments[segNum].returnDataSize( ) - 1;
+//	for (unsigned sendDataInc = 0; sendDataInc < numData; sendDataInc++){
+//		tempSendString += str( waveformSegments[segNum].returnDataVal( sendDataInc ) );
+//		tempSendString += ", ";
+//	}
+//	tempSendString += str( waveformSegments[segNum].returnDataVal( waveformSegments[segNum].returnDataSize() - 1 ) );
+//	return tempSendString;
+//}
 
-void ScriptedAgilentWaveform::calSegmentData( int segNum, unsigned long sampleRate, unsigned varNum ){
+void ScriptedArbGenWaveform::calSegmentData( int segNum, unsigned long sampleRate, unsigned varNum ){
 	waveformSegments[segNum].calcData(sampleRate, varNum);
 }
 
-unsigned long ScriptedAgilentWaveform::getSegmentNumber(){
+unsigned long ScriptedArbGenWaveform::getSegmentNumber(){
 	return waveformSegments.size();
 }
 
@@ -162,33 +162,33 @@ unsigned long ScriptedAgilentWaveform::getSegmentNumber(){
 * This function compiles the sequence string which tells the agilent what waveforms to output when and with what trigger control. The sequence is stored
 * as a part of the class.
 */
-void ScriptedAgilentWaveform::compileSequenceString( int totalSegNum, int sequenceNum, unsigned channel, unsigned varNum ){
-	std::string tempSequenceString, tempSegmentInfoString;
-	// Total format is  #<n><n digits><sequence name>,<arb name1>,<repeat count1>,<play control1>,<marker mode1>,<marker point1>,<arb name2>,<repeat count2>,
-	// <play control2>, <marker mode2>, <marker point2>, and so on.
-	tempSequenceString = "SOURce" + str( channel) + ":DATA:SEQ #";
-	tempSegmentInfoString = "sequence" + str( sequenceNum ) + ",";
-	if (totalSegNum == 0){
-		thrower ("No segments in agilent waveform???\r\n");
-	}
-	for (int segNumInc = 0; segNumInc < totalSegNum; segNumInc++){
-		tempSegmentInfoString += "segment" + str ( segNumInc + totalSegNum * sequenceNum ) + ",";
-		tempSegmentInfoString += str ( waveformSegments[ segNumInc ].getInput ( ).repeatNum.getValue(varNum) ) + ",";
-		tempSegmentInfoString += SegmentEnd::toStr ( waveformSegments[ segNumInc ].getInput( ).continuationType ) + ",";
-		tempSegmentInfoString += "highAtStart,4,";
-	}
-	// remove final comma.
-	tempSegmentInfoString.pop_back ( );
-	totalSequence = tempSequenceString + str( (str( tempSegmentInfoString.size( ) )).size( ) ) 
-		+ str( tempSegmentInfoString.size( ) ) + tempSegmentInfoString;
-}
+//void ScriptedArbGenWaveform::compileSequenceString( int totalSegNum, int sequenceNum, unsigned channel, unsigned varNum ){
+//	std::string tempSequenceString, tempSegmentInfoString;
+//	// Total format is  #<n><n digits><sequence name>,<arb name1>,<repeat count1>,<play control1>,<marker mode1>,<marker point1>,<arb name2>,<repeat count2>,
+//	// <play control2>, <marker mode2>, <marker point2>, and so on.
+//	tempSequenceString = "SOURce" + str( channel) + ":DATA:SEQ #";
+//	tempSegmentInfoString = "sequence" + str( sequenceNum ) + ",";
+//	if (totalSegNum == 0){
+//		thrower ("No segments in agilent waveform???\r\n");
+//	}
+//	for (int segNumInc = 0; segNumInc < totalSegNum; segNumInc++){
+//		tempSegmentInfoString += "segment" + str ( segNumInc + totalSegNum * sequenceNum ) + ",";
+//		tempSegmentInfoString += str ( waveformSegments[ segNumInc ].getInput ( ).repeatNum.getValue(varNum) ) + ",";
+//		tempSegmentInfoString += SegmentEnd::toStr ( waveformSegments[ segNumInc ].getInput( ).continuationType ) + ",";
+//		tempSegmentInfoString += "highAtStart,4,";
+//	}
+//	// remove final comma.
+//	tempSegmentInfoString.pop_back ( );
+//	totalSequence = tempSequenceString + str( (str( tempSegmentInfoString.size( ) )).size( ) ) 
+//		+ str( tempSegmentInfoString.size( ) ) + tempSegmentInfoString;
+//}
 
 
 /*
  * This function just returns the sequence string. It should already have been compiled using compileSequenceString 
  * when this is called.
  */
-std::string ScriptedAgilentWaveform::returnSequenceString( ){
+std::string ScriptedArbGenWaveform::returnSequenceString( ){
 	return totalSequence;
 }
 
@@ -197,7 +197,7 @@ std::string ScriptedAgilentWaveform::returnSequenceString( ){
  * This function returns the truth of whether this sequence is being varied or not. This gets determined during the 
  * reading process.
  */
-bool ScriptedAgilentWaveform::isVaried( ){
+bool ScriptedArbGenWaveform::isVaried( ){
 	for ( auto& seg : waveformSegments ){
 		auto& input = seg.getInput( );
 		if ( input.time.varies( ) ){
@@ -233,14 +233,14 @@ bool ScriptedAgilentWaveform::isVaried( ){
 /*
 * This waveform loops through all of the segments to find places where a variable value needs to be changed, and changes it.
 */
-void ScriptedAgilentWaveform::calculateAllSegmentVariations( unsigned totalNumVariations, std::vector<parameterType>& variables ){
+void ScriptedArbGenWaveform::calculateAllSegmentVariations( unsigned totalNumVariations, std::vector<parameterType>& variables ){
 	for (unsigned segNumInc = 0; segNumInc < waveformSegments.size(); segNumInc++){
 		waveformSegments[segNumInc].calculateSegVariations(totalNumVariations, variables );
 	}
 }
 
 
-unsigned long ScriptedAgilentWaveform::getNumTrigs( ){
+unsigned long ScriptedArbGenWaveform::getNumTrigs( ){
 	return numberOfTriggers;
 }
 
@@ -249,7 +249,7 @@ unsigned long ScriptedAgilentWaveform::getNumTrigs( ){
  * that the agilent needs to output in order to reach those powers. The calibration is currently hard-coded. This needs to be run before compiling the
  * data string.
  */
-void ScriptedAgilentWaveform::convertPowersToVoltages(bool useCal, calResult calibration){
+void ScriptedArbGenWaveform::convertPowersToVoltages(bool useCal, calResult calibration){
 	// for each part of the waveform returnDataSize
 	for (unsigned segmentInc = 0; segmentInc < waveformSegments.size(); segmentInc++){
 		// for each data point in that part
@@ -259,7 +259,7 @@ void ScriptedAgilentWaveform::convertPowersToVoltages(bool useCal, calResult cal
 			double power = waveformSegments[segmentInc].returnDataVal( dataConvertInc );
 			// setPoint = a * power + b
 			//double newValue = -a * log(y * b);
-			double setPointinVolts = AgilentCore::convertPowerToSetPoint(power, useCal, calibration);
+			double setPointinVolts = ArbGenCore::convertPowerToSetPoint(power, useCal, calibration);
 			waveformSegments[segmentInc].assignDataVal( dataConvertInc, setPointinVolts);
 		}
 	}
@@ -269,7 +269,7 @@ void ScriptedAgilentWaveform::convertPowersToVoltages(bool useCal, calResult cal
 /*
 * This wavefunction loops through all the data values and figures out which ones are min and max.
 */
-void ScriptedAgilentWaveform::calcMinMax(){
+void ScriptedArbGenWaveform::calcMinMax(){
 	// NOT DBL_MIN, which is a really small number, not a large negative number. I need a large negative number.
 	maxVolt = -DBL_MAX;
 	minVolt = DBL_MAX;
@@ -293,7 +293,7 @@ void ScriptedAgilentWaveform::calcMinMax(){
 * This function normalizes all of the data points to lie within the -1 to 1 range that I need to send to the agilent. The actual values outputted
 * by the agilent are determined jointly by these values and the output range. you therefore need to use calcMinMax before this function.
 */
-void ScriptedAgilentWaveform::normalizeVoltages(){
+void ScriptedArbGenWaveform::normalizeVoltages(){
 	double scaleFactor = 2.0 / (maxVolt - minVolt);
 	for (unsigned normSegInc = 0; normSegInc < waveformSegments.size(); normSegInc++){
 		for (unsigned normDataInc = 0; normDataInc < waveformSegments[normSegInc].returnDataSize(); normDataInc++){
@@ -308,14 +308,14 @@ void ScriptedAgilentWaveform::normalizeVoltages(){
 /**
  * Returns the maximum voltage level currently in data structures.
  */
-double ScriptedAgilentWaveform::getMaxVolt(){
+double ScriptedArbGenWaveform::getMaxVolt(){
 	return maxVolt;
 }
 
 /**
  * Returns the minimum voltage level currently in data structures.
  */
-double ScriptedAgilentWaveform::getMinVolt(){
+double ScriptedArbGenWaveform::getMinVolt(){
 	return minVolt;
 }
 

@@ -3,7 +3,7 @@
 #include <string>
 // as of now not yet used extensively in the actual dio system
 
-struct AgilentChannelMode
+struct ArbGenChannelMode
 {
 	enum class which
 	{

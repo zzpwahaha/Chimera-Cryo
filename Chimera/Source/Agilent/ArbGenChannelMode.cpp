@@ -1,6 +1,6 @@
 ﻿// created by Mark O. Brown
 #include "stdafx.h"
-#include "AgilentChannelMode.h"
+#include "ArbGenChannelMode.h"
 
 /*
 A constant array which can be used to iterate through all values of DoRows. For example:
@@ -9,14 +9,14 @@ for (auto row : DoRows::allRows)
 // ...
 }
 */
-const std::array<AgilentChannelMode::which, 7> AgilentChannelMode::allModes = { which::No_Control,which::Output_Off,
+const std::array<ArbGenChannelMode::which, 7> ArbGenChannelMode::allModes = { which::No_Control,which::Output_Off,
 	which::DC,which::Sine, which::Square, which::Preloaded, which::Script };
 
 
 /*
 Note that this function is not case-sensitive - it will always convert the input string to lowercase before testing.
 */
-AgilentChannelMode::which AgilentChannelMode::fromStr ( std::string rowStr )
+ArbGenChannelMode::which ArbGenChannelMode::fromStr ( std::string rowStr )
 {
 	for ( auto w : allModes )
 	{
@@ -30,7 +30,7 @@ AgilentChannelMode::which AgilentChannelMode::fromStr ( std::string rowStr )
 }
 
 
-std::string AgilentChannelMode::toStr ( which m )
+std::string ArbGenChannelMode::toStr ( which m )
 {
 	switch ( m )
 	{

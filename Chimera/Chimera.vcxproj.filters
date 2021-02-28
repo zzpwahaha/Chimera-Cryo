@@ -300,13 +300,7 @@
     <ClCompile Include="Source\Agilent\Agilent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Agilent\AgilentChannelMode.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Source\Agilent\AgilentCore.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Agilent\scriptedAgilentWaveform.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\Agilent\Segment.cpp">
@@ -319,6 +313,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\GeneralObjects\IDeviceCore.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Agilent\ArbGenCore.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Agilent\ScriptedArbGenWaveform.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Agilent\ArbGenChannelMode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -608,19 +611,7 @@
     <ClInclude Include="Source\Agilent\Agilent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Agilent\AgilentChannelMode.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Source\Agilent\AgilentCore.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Agilent\AgilentSettings.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Agilent\agilentStructures.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Agilent\scriptedAgilentWaveform.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\Agilent\Segment.h">
@@ -636,6 +627,21 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\ExperimentMonitoringAndStatus\statusMsg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Agilent\ArbGenCore.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Agilent\ScriptedArbGenWaveform.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Agilent\ArbGenChannelMode.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Agilent\ArbGenStructures.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Agilent\ArbGenSettings.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

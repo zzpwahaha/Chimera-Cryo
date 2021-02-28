@@ -1,9 +1,9 @@
 ﻿#pragma once
 #include "LowLevel/constants.h"
-#include "agilentStructures.h"
+#include "ArbGenStructures.h"
 
 // NOT IN USE AT THE MOMENT (Nov 27th, 2020)
-const agilentSettings UWAVE_AGILENT_SETTINGS = {
+const arbGenSettings UWAVE_AGILENT_SETTINGS = {
 	// safemode option											
 	UWAVE_SAFEMODE,
 	// usb/tcpip address
