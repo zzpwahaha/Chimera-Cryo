@@ -35,18 +35,8 @@ public:
 
 	const std::vector<Segment>& getWaveformSegments() { return waveformSegments; }
 	std::string& getTotalSequence() { return totalSequence; }
-	/*
-	 * This function takes the data points (that have already been converted and normalized) and puts them into a string
-	 * for the agilent to readbtn. segNum: this is the segment number that this data is for
-	 * varNum: This is the variation number for this segment (matters for naming the segments)
-	 * totalSegNum: This is the number of segments in the waveform (also matters for naming)
-	 */
+
 	//virtual std::string compileAndReturnDataSendString(int segNum, int varNum, int totalSegNum, unsigned chan) = 0;
-	
-	/*
-	 * This function compiles the sequence string which tells the agilent what waveforms to output when and with what trigger control. The sequence is stored
-	 * as a part of the class.
-	 */
 	//virtual void compileSequenceString(int totalSegNum, int sequenceNum, unsigned channel, unsigned varNum) = 0;
 	
 protected:

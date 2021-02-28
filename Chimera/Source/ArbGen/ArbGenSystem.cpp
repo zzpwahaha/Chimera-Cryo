@@ -1,7 +1,7 @@
 // created by Mark O. Brown
 #include "stdafx.h"
 
-#include "Agilent/Agilent.h"
+#include "ArbGenSystem.h"
 #include "ParameterSystem/ParameterSystem.h"
 #include "ConfigurationSystems/ConfigSystem.h"
 #include "boost/cast.hpp"
@@ -15,52 +15,60 @@
 #include <qbuttongroup.h>
 #include <qlayout.h>
 
-Agilent::Agilent( const arbGenSettings& settings, IChimeraQtWindow* parent )
+ArbGenSystem::ArbGenSystem( const arbGenSettings& settings, ArbGenType type, IChimeraQtWindow* parent )
 	: IChimeraSystem(parent)
-	, core(settings)
+	//, core(*pCore)
 	, initSettings(settings)
 	, agilentScript(parent)
-{}
+{
+	switch (type) {
+	case ArbGenType::Agilent:
+		pCore = new AgilentCore(settings);
+		break;
+	case ArbGenType::Siglent:
+		break;
+	}
+}
 
-void Agilent::programAgilentNow (std::vector<parameterType> constants){
+void ArbGenSystem::programAgilentNow (std::vector<parameterType> constants){
 	readGuiSettings ();
 	std::string warnings_;
 	if (currentGuiInfo.channel[0].scriptedArb.fileAddress.expressionStr != ""){
 		currentGuiInfo.channel[0].scriptedArb.wave = ScriptedArbGenWaveform();
-		core.analyzeArbGenScript (currentGuiInfo.channel[0].scriptedArb, constants, warnings_);
+		pCore->analyzeArbGenScript (currentGuiInfo.channel[0].scriptedArb, constants, warnings_);
 	}
 	if (currentGuiInfo.channel[1].scriptedArb.fileAddress.expressionStr != ""){
 		currentGuiInfo.channel[1].scriptedArb.wave = ScriptedArbGenWaveform();
-		core.analyzeArbGenScript (currentGuiInfo.channel[1].scriptedArb, constants, warnings_);
+		pCore->analyzeArbGenScript (currentGuiInfo.channel[1].scriptedArb, constants, warnings_);
 	}
-	core.convertInputToFinalSettings (0, currentGuiInfo, constants);
-	core.convertInputToFinalSettings (1, currentGuiInfo, constants);
-	core.setArbGen (0, constants, currentGuiInfo, nullptr);
+	pCore->convertInputToFinalSettings (0, currentGuiInfo, constants);
+	pCore->convertInputToFinalSettings (1, currentGuiInfo, constants);
+	pCore->setArbGen (0, constants, currentGuiInfo, nullptr);
 }
 
-std::string Agilent::getDeviceIdentity (){
-	return core.getDeviceIdentity ();
+std::string ArbGenSystem::getDeviceIdentity (){
+	return pCore->getDeviceIdentity ();
 }
 
-std::string Agilent::getConfigDelim (){
-	return core.configDelim;
+std::string ArbGenSystem::getConfigDelim (){
+	return pCore->configDelim;
 }
 
-bool Agilent::getSavedStatus (){
+bool ArbGenSystem::getSavedStatus (){
 	return agilentScript.savedStatus ();
 }
 
-void Agilent::updateSavedStatus (bool isSaved){
+void ArbGenSystem::updateSavedStatus (bool isSaved){
 	agilentScript.updateSavedStatus (isSaved);
 }
 
-void Agilent::initialize(std::string headerText, IChimeraQtWindow* win)
+void ArbGenSystem::initialize(std::string headerText, IChimeraQtWindow* win)
 {
 	QVBoxLayout* layout = new QVBoxLayout(this);
 	layout->setContentsMargins(0, 0, 0, 0);
-	core.initialize ();
+	pCore->initialize ();
 	header = new QLabel (cstr (headerText), win);
-	auto deviceInfo = core.getDeviceInfo ();
+	auto deviceInfo = pCore->getDeviceInfo ();
 	if (deviceInfo.size () > 1) {// deal with trailing newline
 		deviceInfo.erase (deviceInfo.size ()-1, 1);
 	}
@@ -166,7 +174,7 @@ void Agilent::initialize(std::string headerText, IChimeraQtWindow* win)
 	currentGuiInfo.channel[1].option = ArbGenChannelMode::which::No_Control;
 	agilentScript.setEnabled ( false, false );
 	try {
-		core.programSetupCommands ();
+		pCore->programSetupCommands ();
 	}
 	catch (ChimeraError & error) {
 		errBox ("Failed to program agilent " + getConfigDelim () + " initial settings: " + error.trace ());
@@ -175,32 +183,32 @@ void Agilent::initialize(std::string headerText, IChimeraQtWindow* win)
 }
 
 
-AgilentCore& Agilent::getCore (){
-	return core;
+ArbGenCore& ArbGenSystem::getCore (){
+	return *pCore;
 }
 
 
-void Agilent::checkSave( std::string configPath, RunInfo info ){
+void ArbGenSystem::checkSave( std::string configPath, RunInfo info ){
 	if ( currentGuiInfo.channel[currentChannel-1].option == ArbGenChannelMode::which::Script ){
 		agilentScript.checkSave( configPath, info );
 	}
 }
 
 
-void Agilent::verifyScriptable ( ){
+void ArbGenSystem::verifyScriptable ( ){
 	if ( currentGuiInfo.channel[ currentChannel-1 ].option != ArbGenChannelMode::which::Script ){
 		thrower ( "Agilent is not in scripting mode!" );
 	}
 }
 
-void Agilent::setDefault (unsigned chan){
-	core.setDefault (chan);
+void ArbGenSystem::setDefault (unsigned chan){
+	pCore->setDefault (chan);
 }
 
 
-void Agilent::readGuiSettings(int chan ){
+void ArbGenSystem::readGuiSettings(int chan ){
 	if (chan != 1 && chan != 2){
-		thrower ( "Bad argument for agilent channel in Agilent::handleInput(...)!" );
+		thrower ( "Bad argument for agilent channel in ArbGenSystem::handleInput(...)!" );
 	}
 	// convert to zero-indexed
 	auto chani = chan - 1;
@@ -244,19 +252,19 @@ void Agilent::readGuiSettings(int chan ){
 
 
 // overload for handling whichever channel is currently selected.
-void Agilent::readGuiSettings(  ){
+void ArbGenSystem::readGuiSettings(  ){
 	// true -> 0 + 1 = 1
 	// false -> 1 + 1 = 2
 	readGuiSettings( (!channel1Button->isChecked ()) + 1 );
 }
 
 
-void Agilent::updateSettingsDisplay( std::string configPath, RunInfo currentRunInfo ){
+void ArbGenSystem::updateSettingsDisplay( std::string configPath, RunInfo currentRunInfo ){
 	updateSettingsDisplay( (!channel1Button->isChecked ()) + 1, configPath, currentRunInfo );
 }
 
 
-void Agilent::updateButtonDisplay( int chan ){
+void ArbGenSystem::updateButtonDisplay( int chan ){
 	std::string channelText;
 	channelText = chan == 1 ? "Channel 1 - " : "Channel 2 - ";
 	channelText += ArbGenChannelMode::toStr ( currentGuiInfo.channel[ chan - 1 ].option );
@@ -269,7 +277,7 @@ void Agilent::updateButtonDisplay( int chan ){
 }
 
 
-void Agilent::updateSettingsDisplay(int chan, std::string configPath, RunInfo currentRunInfo){
+void ArbGenSystem::updateSettingsDisplay(int chan, std::string configPath, RunInfo currentRunInfo){
 	updateButtonDisplay( chan ); 
 	// convert to zero-indexed.
 	chan -= 1;
@@ -334,7 +342,7 @@ void Agilent::updateSettingsDisplay(int chan, std::string configPath, RunInfo cu
 }
 
 
-void Agilent::handleChannelPress( int chan, std::string configPath, RunInfo currentRunInfo ){
+void ArbGenSystem::handleChannelPress( int chan, std::string configPath, RunInfo currentRunInfo ){
 	// convert from channel 1/2 to 0/1 to access the right array entr
 	readGuiSettings( currentChannel );
 	updateSettingsDisplay( chan, configPath, currentRunInfo );
@@ -342,7 +350,7 @@ void Agilent::handleChannelPress( int chan, std::string configPath, RunInfo curr
 }
 
 
-void Agilent::handleModeCombo(){
+void ArbGenSystem::handleModeCombo(){
 	if (!optionsFormat) {
 		return;
 	}
@@ -388,18 +396,18 @@ void Agilent::handleModeCombo(){
 }
 
 
-deviceOutputInfo Agilent::getOutputInfo(){
+deviceOutputInfo ArbGenSystem::getOutputInfo(){
 	return currentGuiInfo;
 }
 
 /*
 This function outputs a string that contains all of the information that is set by the user for a given configuration. 
 */
-void Agilent::handleSavingConfig(ConfigStream& saveFile, std::string configPath, RunInfo info){	
+void ArbGenSystem::handleSavingConfig(ConfigStream& saveFile, std::string configPath, RunInfo info){	
 	// make sure data is up to date.
 	readGuiSettings (currentChannel);
 	// start outputting.
-	saveFile << core.configDelim+"\n";
+	saveFile << pCore->configDelim+"\n";
 	saveFile << "/*Synced Option:*/ " << str (currentGuiInfo.synced);
 	std::vector<std::string> channelStrings = { "\nCHANNEL_1", "\nCHANNEL_2" };
 	for (auto chanInc : range (2)){
@@ -421,21 +429,21 @@ void Agilent::handleSavingConfig(ConfigStream& saveFile, std::string configPath,
 		saveFile << "\n/*Scripted Arb Address:*/\t\t" << channel.scriptedArb.fileAddress;
 		saveFile << "\n/*Scripted Arb Calibrated:*/\t" << channel.scriptedArb.useCal;
 	}
-	saveFile << "\nEND_" + core.configDelim + "\n";
+	saveFile << "\nEND_" + pCore->configDelim + "\n";
 }
 
-void Agilent::setOutputSettings (deviceOutputInfo info){
+void ArbGenSystem::setOutputSettings (deviceOutputInfo info){
 	currentGuiInfo = info;
 	updateButtonDisplay (1);
 	updateButtonDisplay (2);
 }
 
 
-void Agilent::handleOpenConfig( ConfigStream& file ){
-	setOutputSettings (core.getSettingsFromConfig (file));
+void ArbGenSystem::handleOpenConfig( ConfigStream& file ){
+	setOutputSettings (pCore->getSettingsFromConfig (file));
 }
 
 
-bool Agilent::scriptingModeIsSelected (){
+bool ArbGenSystem::scriptingModeIsSelected (){
 	return currentGuiInfo.channel[currentChannel - 1].option == ArbGenChannelMode::which::Script;
 }

@@ -3,8 +3,8 @@
 #include <QMainWindow>
 #include <QTimer>
 #include "ConfigurationSystems/ProfileIndicator.h"
-#include <Scripts/Script.h>
-#include "Agilent/Agilent.h"
+#include "Scripts/Script.h"
+#include "ArbGen/ArbGenSystem.h"
 #include "ConfigurationSystems/profileSettings.h"
 #include "ExperimentThread/ExperimentThreadInput.h"
 #include "IChimeraQtWindow.h"
@@ -77,7 +77,7 @@ class QtScriptWindow : public IChimeraQtWindow{
         Script masterScript;
         ProfileIndicator profileDisplay;
 
-		Agilent intensityAgilent;
+		ArbGenSystem intensityAgilent;
 
 	public Q_SLOTS:
 		void updateVarNames ();

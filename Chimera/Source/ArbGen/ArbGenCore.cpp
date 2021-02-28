@@ -215,7 +215,6 @@ void ArbGenCore::setArbGen(unsigned var, std::vector<parameterType>& params, dev
 //	}
 //}
 
-
 //void ArbGenCore::outputOff(int channel) {
 //	if (channel != 1 && channel != 2) {
 //		thrower("bad value for channel inside outputOff! Channel shoulde be 1 or 2.");
@@ -243,7 +242,6 @@ bool ArbGenCore::connected() {
 //	}
 //}
 
-
 //void ArbGenCore::setExistingWaveform(int channel, preloadedArbInfo info) {
 //	if (channel != 1 && channel != 2) {
 //		thrower("Bad value for channel in setExistingWaveform! Channel shoulde be 1 or 2.");
@@ -260,7 +258,6 @@ bool ArbGenCore::connected() {
 //	visaFlume.write("OUTPUT" + str(channel) + " ON");
 //}
 
-
 //void ArbGenCore::programBurstMode(int channel, bool burstOption) {
 //	auto sStr = "SOURCE" + str(channel);
 //	if (burstOption) {
@@ -274,7 +271,6 @@ bool ArbGenCore::connected() {
 //		visaFlume.write(sStr + ":BURST::STATE OFF");
 //	}
 //}
-
 
 // set the agilent to output a square wave.
 //void ArbGenCore::setSquare(int channel, squareInfo info, unsigned var) {
@@ -290,7 +286,6 @@ bool ArbGenCore::connected() {
 //		throwNested("Seen while programming Square Wave for channel " + str(channel) + " (1-indexed).");
 //	}
 //}
-
 
 //void ArbGenCore::setSine(int channel, sineInfo info, unsigned var) {
 //	if (channel != 1 && channel != 2) {

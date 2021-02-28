@@ -1,10 +1,12 @@
 // created by Mark O. Brown
 #pragma once
 #include "AgilentCore.h"
+#include "ArbGenCore.h"
 #include "Scripts/ScriptStream.h"
 #include "ConfigurationSystems/ConfigStream.h"
 #include "GeneralFlumes/VisaFlume.h"
-#include "Agilent/ArbGenStructures.h"
+#include "ArbGenStructures.h"
+#include "whichAg.h"
 #include "Scripts/Script.h"
 //#include "DigitalOutput/DoRows.h"
 #include <vector>
@@ -16,14 +18,14 @@ class IChimeraQtWindow;
 
 // A class for programming agilent arbitrary waveform generators.
 // in essense this includes a wrapper around agilent's implementation of the VISA protocol. 
-class Agilent : public IChimeraSystem 
+class ArbGenSystem : public IChimeraSystem 
 {
 	public:
 		// THIS CLASS IS NOT COPYABLE.
-		Agilent& operator=(const Agilent&) = delete;
-		Agilent (const Agilent&) = delete;
+		ArbGenSystem& operator=(const ArbGenSystem&) = delete;
+		ArbGenSystem(const ArbGenSystem&) = delete;
 
-		Agilent( const arbGenSettings& settings, IChimeraQtWindow* parent );
+		ArbGenSystem( const arbGenSettings& settings, ArbGenType type, IChimeraQtWindow* parent );
 		void initialize(std::string headerText, IChimeraQtWindow* win);
 		void updateButtonDisplay( int chan );
 		void checkSave( std::string configPath, RunInfo info );
@@ -51,10 +53,11 @@ class Agilent : public IChimeraSystem
 		
 		void setOutputSettings (deviceOutputInfo info);
 		void verifyScriptable ( );
-		AgilentCore& getCore ();
+		ArbGenCore& getCore ();
 		void setDefault (unsigned chan);
 	private:
-		AgilentCore core;
+		ArbGenCore* pCore;
+		//ArbGenCore& core;
 		minMaxDoublet chan2Range;
 		const arbGenSettings initSettings;
 		// since currently all visaFlume communication is done to communicate with agilent machines, my visaFlume wrappers exist

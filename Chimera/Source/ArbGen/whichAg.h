@@ -1,5 +1,12 @@
 #pragma once
 
+
+enum class ArbGenType {
+	Agilent, Siglent
+};
+
+
+
 struct AgilentEnum {
 	enum class name {
 		TopBottom, Axial, Flashing, Microwave

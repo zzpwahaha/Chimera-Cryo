@@ -297,31 +297,31 @@
     <ClCompile Include="Source\ExcessDialogs\OlSettingsDialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Agilent\Agilent.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Agilent\AgilentCore.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Agilent\Segment.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Agilent\SegmentEnd.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Agilent\whichAg.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Source\GeneralObjects\IDeviceCore.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Agilent\ArbGenCore.cpp">
+    <ClCompile Include="Source\ArbGen\AgilentCore.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Agilent\ScriptedArbGenWaveform.cpp">
+    <ClCompile Include="Source\ArbGen\ArbGenChannelMode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Agilent\ArbGenChannelMode.cpp">
+    <ClCompile Include="Source\ArbGen\ArbGenCore.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ArbGen\ArbGenSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ArbGen\ScriptedArbGenWaveform.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ArbGen\Segment.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ArbGen\SegmentEnd.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ArbGen\whichAg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -608,40 +608,40 @@
     <ClInclude Include="Source\OffsetLock\OlSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Agilent\Agilent.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Agilent\AgilentCore.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Agilent\Segment.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Agilent\SegmentEnd.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Agilent\segmentStructs.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Agilent\whichAg.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Source\ExperimentMonitoringAndStatus\statusMsg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Agilent\ArbGenCore.h">
+    <ClInclude Include="Source\ArbGen\AgilentCore.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Agilent\ScriptedArbGenWaveform.h">
+    <ClInclude Include="Source\ArbGen\ArbGenChannelMode.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Agilent\ArbGenChannelMode.h">
+    <ClInclude Include="Source\ArbGen\ArbGenCore.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Agilent\ArbGenStructures.h">
+    <ClInclude Include="Source\ArbGen\ArbGenSettings.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Agilent\ArbGenSettings.h">
+    <ClInclude Include="Source\ArbGen\ArbGenStructures.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ArbGen\ArbGenSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ArbGen\ScriptedArbGenWaveform.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ArbGen\Segment.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ArbGen\SegmentEnd.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ArbGen\segmentStructs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ArbGen\whichAg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

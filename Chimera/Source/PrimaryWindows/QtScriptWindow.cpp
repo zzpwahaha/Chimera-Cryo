@@ -11,7 +11,7 @@
 
 QtScriptWindow::QtScriptWindow(QWidget* parent) : IChimeraQtWindow(parent)
 	, masterScript(this)
-	, intensityAgilent(UWAVE_AGILENT_SETTINGS, this)
+	, intensityAgilent(UWAVE_AGILENT_SETTINGS, ArbGenType::Agilent, this)
 {
 	setWindowTitle ("Script Window");
 }

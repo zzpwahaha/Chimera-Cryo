@@ -1,6 +1,6 @@
 // created by Mark O. Brown
 #include "stdafx.h"
-#include "Agilent/Agilent.h"
+#include "ArbGenCore.h"
 #include "ScriptedArbGenWaveform.h"
 #include "Scripts/ScriptStream.h"
 #include <ExperimentThread/ExpThreadWorker.h>
@@ -128,26 +128,50 @@ bool ScriptedArbGenWaveform::analyzeAgilentScriptCommand( int segNum, ScriptStre
 	return false;
 }
 
-
 /*
  * This function takes the data points (that have already been converted and normalized) and puts them into a string
  * for the agilent to readbtn. segNum: this is the segment number that this data is for
  * varNum: This is the variation number for this segment (matters for naming the segments)
  * totalSegNum: This is the number of segments in the waveform (also matters for naming)
  */
-//std::string ScriptedArbGenWaveform::compileAndReturnDataSendString( int segNum, int varNum, int totalSegNum, unsigned chan ){
-//	// must get called after data conversion
-//	std::string tempSendString;
-//	tempSendString = "SOURce" + str( chan ) + ":DATA:ARB segment" + str( segNum + totalSegNum * varNum ) + ",";
-//	// need to handle last one separately so that I can /not/ put a comma after it.
-//	unsigned numData = waveformSegments[segNum].returnDataSize( ) - 1;
-//	for (unsigned sendDataInc = 0; sendDataInc < numData; sendDataInc++){
-//		tempSendString += str( waveformSegments[segNum].returnDataVal( sendDataInc ) );
-//		tempSendString += ", ";
-//	}
-//	tempSendString += str( waveformSegments[segNum].returnDataVal( waveformSegments[segNum].returnDataSize() - 1 ) );
-//	return tempSendString;
-//}
+ //std::string ScriptedArbGenWaveform::compileAndReturnDataSendString( int segNum, int varNum, int totalSegNum, unsigned chan ){
+ //	// must get called after data conversion
+ //	std::string tempSendString;
+ //	tempSendString = "SOURce" + str( chan ) + ":DATA:ARB segment" + str( segNum + totalSegNum * varNum ) + ",";
+ //	// need to handle last one separately so that I can /not/ put a comma after it.
+ //	unsigned numData = waveformSegments[segNum].returnDataSize( ) - 1;
+ //	for (unsigned sendDataInc = 0; sendDataInc < numData; sendDataInc++){
+ //		tempSendString += str( waveformSegments[segNum].returnDataVal( sendDataInc ) );
+ //		tempSendString += ", ";
+ //	}
+ //	tempSendString += str( waveformSegments[segNum].returnDataVal( waveformSegments[segNum].returnDataSize() - 1 ) );
+ //	return tempSendString;
+ //}
+
+ /*
+ * This function compiles the sequence string which tells the agilent what waveforms to output when and with what trigger control. The sequence is stored
+ * as a part of the class.
+ */
+ //void ScriptedArbGenWaveform::compileSequenceString( int totalSegNum, int sequenceNum, unsigned channel, unsigned varNum ){
+ //	std::string tempSequenceString, tempSegmentInfoString;
+ //	// Total format is  #<n><n digits><sequence name>,<arb name1>,<repeat count1>,<play control1>,<marker mode1>,<marker point1>,<arb name2>,<repeat count2>,
+ //	// <play control2>, <marker mode2>, <marker point2>, and so on.
+ //	tempSequenceString = "SOURce" + str( channel) + ":DATA:SEQ #";
+ //	tempSegmentInfoString = "sequence" + str( sequenceNum ) + ",";
+ //	if (totalSegNum == 0){
+ //		thrower ("No segments in agilent waveform???\r\n");
+ //	}
+ //	for (int segNumInc = 0; segNumInc < totalSegNum; segNumInc++){
+ //		tempSegmentInfoString += "segment" + str ( segNumInc + totalSegNum * sequenceNum ) + ",";
+ //		tempSegmentInfoString += str ( waveformSegments[ segNumInc ].getInput ( ).repeatNum.getValue(varNum) ) + ",";
+ //		tempSegmentInfoString += SegmentEnd::toStr ( waveformSegments[ segNumInc ].getInput( ).continuationType ) + ",";
+ //		tempSegmentInfoString += "highAtStart,4,";
+ //	}
+ //	// remove final comma.
+ //	tempSegmentInfoString.pop_back ( );
+ //	totalSequence = tempSequenceString + str( (str( tempSegmentInfoString.size( ) )).size( ) ) 
+ //		+ str( tempSegmentInfoString.size( ) ) + tempSegmentInfoString;
+ //}
 
 void ScriptedArbGenWaveform::calSegmentData( int segNum, unsigned long sampleRate, unsigned varNum ){
 	waveformSegments[segNum].calcData(sampleRate, varNum);
@@ -156,32 +180,6 @@ void ScriptedArbGenWaveform::calSegmentData( int segNum, unsigned long sampleRat
 unsigned long ScriptedArbGenWaveform::getSegmentNumber(){
 	return waveformSegments.size();
 }
-
-
-/*
-* This function compiles the sequence string which tells the agilent what waveforms to output when and with what trigger control. The sequence is stored
-* as a part of the class.
-*/
-//void ScriptedArbGenWaveform::compileSequenceString( int totalSegNum, int sequenceNum, unsigned channel, unsigned varNum ){
-//	std::string tempSequenceString, tempSegmentInfoString;
-//	// Total format is  #<n><n digits><sequence name>,<arb name1>,<repeat count1>,<play control1>,<marker mode1>,<marker point1>,<arb name2>,<repeat count2>,
-//	// <play control2>, <marker mode2>, <marker point2>, and so on.
-//	tempSequenceString = "SOURce" + str( channel) + ":DATA:SEQ #";
-//	tempSegmentInfoString = "sequence" + str( sequenceNum ) + ",";
-//	if (totalSegNum == 0){
-//		thrower ("No segments in agilent waveform???\r\n");
-//	}
-//	for (int segNumInc = 0; segNumInc < totalSegNum; segNumInc++){
-//		tempSegmentInfoString += "segment" + str ( segNumInc + totalSegNum * sequenceNum ) + ",";
-//		tempSegmentInfoString += str ( waveformSegments[ segNumInc ].getInput ( ).repeatNum.getValue(varNum) ) + ",";
-//		tempSegmentInfoString += SegmentEnd::toStr ( waveformSegments[ segNumInc ].getInput( ).continuationType ) + ",";
-//		tempSegmentInfoString += "highAtStart,4,";
-//	}
-//	// remove final comma.
-//	tempSegmentInfoString.pop_back ( );
-//	totalSequence = tempSequenceString + str( (str( tempSegmentInfoString.size( ) )).size( ) ) 
-//		+ str( tempSegmentInfoString.size( ) ) + tempSegmentInfoString;
-//}
 
 
 /*

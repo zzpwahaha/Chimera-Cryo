@@ -1,7 +1,7 @@
 ﻿// created by Mark O. Brown
 #pragma once
 #include "ParameterSystem/Expression.h"
-#include "Agilent/SegmentEnd.h"
+#include "SegmentEnd.h"
 #include <string>
 
 struct rampInfo{
