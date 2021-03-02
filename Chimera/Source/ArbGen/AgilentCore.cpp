@@ -43,7 +43,7 @@ AgilentCore::AgilentCore (const arbGenSettings& settings) :
 }
 
 AgilentCore::~AgilentCore (){
-	//visaFlume.close ();
+	visaFlume.close ();
 }
 
 //void AgilentCore::initialize (){
@@ -168,7 +168,7 @@ AgilentCore::~AgilentCore (){
 
 
 // stuff that only has to be done once.
-void AgilentCore::prepAgilentSettings (unsigned channel){
+void AgilentCore::prepArbGenSettings(unsigned channel){
 	if (channel != 1 && channel != 2){
 		thrower ("Bad value for channel in prepAgilentSettings! Channel shoulde be 1 or 2.");
 	}
@@ -183,7 +183,7 @@ void AgilentCore::prepAgilentSettings (unsigned channel){
  */
 void AgilentCore::setScriptOutput (unsigned varNum, scriptedArbInfo scriptInfo, unsigned chan){
 	if (scriptInfo.wave.isVaried () || varNum == 0){
-		prepAgilentSettings (chan);
+		prepArbGenSettings(chan);
 		// check if effectively dc
 		if (scriptInfo.wave.minsAndMaxes.size () == 0){
 			thrower ("script wave min max size is zero???");
@@ -402,7 +402,7 @@ void AgilentCore::setDefault (int channel){
 
 void AgilentCore::handleScriptVariation (unsigned variation, scriptedArbInfo& scriptInfo, unsigned channel,
 	std::vector<parameterType>& params) {
-	prepAgilentSettings (channel);
+	prepArbGenSettings(channel);
 	programSetupCommands ();
 	if (scriptInfo.wave.isVaried () || variation == 0) {
 		unsigned totalSegmentNumber = scriptInfo.wave.getSegmentNumber ();
@@ -426,7 +426,7 @@ void AgilentCore::handleScriptVariation (unsigned variation, scriptedArbInfo& sc
 		scriptInfo.wave.minsAndMaxes[variation].first = scriptInfo.wave.getMinVolt ();
 		scriptInfo.wave.normalizeVoltages ();
 		visaFlume.write ("SOURCE" + str (channel) + ":DATA:VOL:CLEAR");
-		prepAgilentSettings (channel);
+		prepArbGenSettings(channel);
 		for (unsigned segNumInc : range (totalSegmentNumber)) {
 			//visaFlume.write (scriptInfo.wave.compileAndReturnDataSendString (segNumInc, variation,
 			//	totalSegmentNumber, channel));
@@ -479,7 +479,7 @@ std::string AgilentCore::compileAndReturnDataSendString(scriptedArbInfo& scriptI
 */
 void AgilentCore::compileSequenceString(scriptedArbInfo& scriptInfo, int totalSegNum, int sequenceNum, unsigned channel, unsigned varNum) {
 	std::vector<Segment> waveformSegments = scriptInfo.wave.getWaveformSegments();
-	std::string totalSequence = scriptInfo.wave.getTotalSequence();
+	std::string& totalSequence = scriptInfo.wave.getTotalSequence();
 
 	std::string tempSequenceString, tempSegmentInfoString;
 	// Total format is  #<n><n digits><sequence name>,<arb name1>,<repeat count1>,<play control1>,<marker mode1>,<marker point1>,<arb name2>,<repeat count2>,

@@ -7,7 +7,7 @@ const arbGenSettings UWAVE_AGILENT_SETTINGS = {
 	// safemode option											
 	UWAVE_SAFEMODE,
 	// usb/tcpip address
-	/*UWAVE_SIGILENT_ADDRESS*/UWAVE_AGILENT_ADDRESS,
+	/*UWAVE_SIGLENT_ADDRESS*/UWAVE_AGILENT_ADDRESS,
 	// sample rate in hertz
 	1e6,
 	// Memory location, whether the device will save waveforms to 
@@ -28,6 +28,32 @@ const arbGenSettings UWAVE_AGILENT_SETTINGS = {
 	"Source1:burst:state off",  "Source2:burst:state off",
 	"output1:load INF", "output2:load INF", 
 	"SOURCE1:FUNC:ARB:FILTER Normal", "SOURCE2:FUNC:ARB:FILTER Normal" }
+};
+
+const arbGenSettings UWAVE_SIGLENT_SETTINGS = {
+	// safemode option											
+	UWAVE_SAFEMODE,
+	// usb/tcpip address
+	UWAVE_SIGLENT_ADDRESS/*UWAVE_AGILENT_ADDRESS*/,
+	// sample rate in hertz
+	20e6,
+	// Memory location, whether the device will save waveforms to 
+	// the internal 64MB Memory buffer or to an external USB drive, which
+	// can (obviously) have much more space.
+	"INT",
+	// device name (just a convenience, so that the class instance knows 
+	// which device it is
+	"UWave",
+	7 - 1, 2,
+	// Configuration file delimiter, used for saving settings for this 
+	// agilent.
+	"MICROWAVE_SIGLENT_AWG",
+	// Calibration coefficients (arb length)
+	{ },
+	{ "C1:OUTPUT OFF", "C2:OUTPUT OFF",
+	"C1:BTWV STATE,ON", "C1:BTWV TRSR,EXT,GATE_NCYC,NCYC,EDGE,RISE,TIME,1,STPS,0","C1:BTWV STATE,OFF",
+	"C2:BTWV STATE,ON", "C2:BTWV TRSR,EXT,GATE_NCYC,NCYC,EDGE,RISE,TIME,1,STPS,0","C2:BTWV STATE,OFF",
+	"C1:OUTPUT LOAD, HZ", "C2:OUTPUT LOAD, HZ" }
 };
 
 //const agilentSettings TOP_BOTTOM_AGILENT_SETTINGS = { TOP_BOTTOM_AGILENT_SAFEMODE, TOP_BOTTOM_AGILENT_USB_ADDRESS,

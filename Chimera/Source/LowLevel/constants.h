@@ -75,7 +75,7 @@
 	//Agilent
 	const bool UWAVE_SAFEMODE = false;
 	const std::string UWAVE_AGILENT_ADDRESS = "TCPIP0::10.10.0.5::inst0::INSTR";
-	const std::string UWAVE_SIGILENT_ADDRESS = "TCPIP0::10.10.0.4::inst0::INSTR";
+	const std::string UWAVE_SIGLENT_ADDRESS = "TCPIP0::10.10.0.4::inst0::INSTR";
 	const std::string RAMP_LOCATION = str(CODE_ROOT) + "\\Ramp_Files\\";
 
 

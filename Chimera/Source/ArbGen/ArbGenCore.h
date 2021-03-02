@@ -54,7 +54,7 @@ public:
 	virtual void setSquare(int channel, squareInfo info, unsigned variation) = 0;
 	virtual void setSine(int channel, sineInfo info, unsigned variation) = 0;
 	virtual void outputOff(int channel) = 0;
-	virtual void prepAgilentSettings(unsigned channel) = 0;
+	virtual void prepArbGenSettings(unsigned channel) = 0;
 	virtual void setScriptOutput(unsigned varNum, scriptedArbInfo scriptInfo, unsigned channel) = 0;
 	virtual void programBurstMode(int channel, bool burstOption) = 0;
 	virtual void setDefault(int channel) = 0;

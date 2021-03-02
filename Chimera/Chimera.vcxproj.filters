@@ -324,6 +324,9 @@
     <ClCompile Include="Source\ArbGen\whichAg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\ArbGen\SiglentCore.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\stdafx.h">
@@ -642,6 +645,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\ArbGen\whichAg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ArbGen\SiglentCore.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

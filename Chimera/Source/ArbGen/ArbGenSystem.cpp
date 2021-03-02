@@ -26,8 +26,14 @@ ArbGenSystem::ArbGenSystem( const arbGenSettings& settings, ArbGenType type, ICh
 		pCore = new AgilentCore(settings);
 		break;
 	case ArbGenType::Siglent:
+		pCore = new SiglentCore(settings);
 		break;
 	}
+}
+
+ArbGenSystem::~ArbGenSystem()
+{
+	delete pCore;
 }
 
 void ArbGenSystem::programAgilentNow (std::vector<parameterType> constants){
@@ -44,6 +50,9 @@ void ArbGenSystem::programAgilentNow (std::vector<parameterType> constants){
 	pCore->convertInputToFinalSettings (0, currentGuiInfo, constants);
 	pCore->convertInputToFinalSettings (1, currentGuiInfo, constants);
 	pCore->setArbGen (0, constants, currentGuiInfo, nullptr);
+	if (dynamic_cast<SiglentCore*>(pCore)) {
+		burstButton->setChecked(true);
+	}
 }
 
 std::string ArbGenSystem::getDeviceIdentity (){

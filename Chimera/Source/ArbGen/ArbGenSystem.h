@@ -1,7 +1,8 @@
 // created by Mark O. Brown
 #pragma once
-#include "AgilentCore.h"
 #include "ArbGenCore.h"
+#include "AgilentCore.h"
+#include "SiglentCore.h"
 #include "Scripts/ScriptStream.h"
 #include "ConfigurationSystems/ConfigStream.h"
 #include "GeneralFlumes/VisaFlume.h"
@@ -26,6 +27,7 @@ class ArbGenSystem : public IChimeraSystem
 		ArbGenSystem(const ArbGenSystem&) = delete;
 
 		ArbGenSystem( const arbGenSettings& settings, ArbGenType type, IChimeraQtWindow* parent );
+		~ArbGenSystem();
 		void initialize(std::string headerText, IChimeraQtWindow* win);
 		void updateButtonDisplay( int chan );
 		void checkSave( std::string configPath, RunInfo info );

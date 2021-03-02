@@ -282,8 +282,8 @@ void ScriptedArbGenWaveform::calcMinMax(){
 		}
 	}
 	// TODO: Test if these are really necessary.
-	maxVolt += 1e-6;
-	minVolt -= 1e-6;
+	//maxVolt += 1e-6;
+	//minVolt -= 1e-6;
 }
 
 
