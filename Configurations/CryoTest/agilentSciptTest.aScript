@@ -1,11 +1,11 @@
 %ramp lin 0 0 1 oncewaittrig #
-%ramp lin 0 -5 20 oncewaittrig #
-%ramp lin -5 5 10 oncewaittrig #
-%ramp lin 5 3 5 oncewaittrig #
-%ramp lin 3 0 5 oncewaittrig #
+ramp lin 0 -5 20 oncewaittrig #
+ramp lin -5 5 10 oncewaittrig #
+ramp lin 5 3 5 oncewaittrig #
+ramp lin 3 0 5 oncewaittrig #
 %ramp lin 0 1 0.001 oncewaittrig #
 %pulse gaussian 0 1 5 5 10 oncewaittrig #
 
-modpulse gaussian 0 5 10 5 0.01 0 10 oncewaittrig #
+%modpulse gaussian 0 5 10 5 0.01 0 10 oncewaittrig #
 
 %hold 0 10 repeatuntiltrig #

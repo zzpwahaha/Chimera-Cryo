@@ -19,10 +19,9 @@ void SiglentCore::prepArbGenSettings(unsigned channel) {
 	}
 	// Set timout, sample rate, filter parameters, trigger settings.
 	visaFlume.setAttribute(VI_ATTR_TMO_VALUE, 40000);
-	visaFlume.write("C1:SRATE MODE,TARB");
-	visaFlume.write("C2:SRATE MODE,TARB");
-	visaFlume.write("C1:SRATE VALUE," + str(sampleRate));
-	visaFlume.write("C2:SRATE VALUE," + str(sampleRate));
+	/*once write this command, cannot set SWEEP or BURST anymore, have to turn to DDS and set them and then turn it back to TARB*/
+	visaFlume.write("C1:SRATE MODE,TARB,VALUE," + str(sampleRate));
+	visaFlume.write("C2:SRATE MODE,TARB,VALUE," + str(sampleRate));
 }
 
 /*
@@ -86,7 +85,7 @@ void SiglentCore::setDC(int channel, dcInfo info, unsigned var) {
 		thrower("Bad value for channel inside setDC! Channel shoulde be 1 or 2.");
 	}
 	try {
-		visaFlume.write("C" + str(channel) + ":BSWV WVTP,DC,OFST"
+		visaFlume.write("C" + str(channel) + ":BSWV WVTP,DC,OFST,"
 			+ str(convertPowerToSetPoint(info.dcLevel.getValue(var), info.useCal, calibrations[channel - 1])) 
 			+ "V");
 	}
@@ -111,13 +110,26 @@ void SiglentCore::programBurstMode(int channel, bool burstOption)
 	std::string sStr = "C" + str(channel);
 	if (burstOption) 
 	{
-		// not really bursting... but this allows us to reapeat on triggers. Might be another way to do this.
+		std::string arbMode;
+		visaFlume.query(sStr + ":SRATE?", arbMode, "%t");
+		bool TARB = false;
+		if (arbMode.find("TARB") != std::string::npos) {
+			TARB = true;
+		}
+		/*must change to DDS mode to be able to change burst state*/
+		visaFlume.write(sStr + ":SRATE MODE,DDS");
+		
 		visaFlume.write(sStr + ":BTWV STATE,ON");
 		visaFlume.write(sStr + ":BTWV TRSR,EXT");
 		visaFlume.write(sStr + ":BTWV GATE_NCYC,NCYC");
 		visaFlume.write(sStr + ":BTWV EDGE,RISE");
 		visaFlume.write(sStr + ":BTWV TIME,1"); /*Value of Ncycle number*/
 		visaFlume.write(sStr + ":BTWV STPS,0");
+
+		if (TARB) {
+			visaFlume.write(sStr + ":SRATE MODE,TARB");
+		}
+
 	}
 	else {
 		visaFlume.write(sStr + ":BTWV STATE,OFF");
@@ -164,7 +176,7 @@ void SiglentCore::setDefault(int channel) {
 	try {
 		// turn it to the default voltage...
 		std::string setPointString = str(convertPowerToSetPoint(SIGLENT_DEFAULT_POWER, true, calibrations[channel - 1]));
-		visaFlume.write("C" + str(channel) + ":BSWV WVTP,DC,OFST" + setPointString + "V");
+		visaFlume.write("C" + str(channel) + ":BSWV WVTP,DC,OFST," + setPointString + "V");
 	}
 	catch (ChimeraError&) {
 		throwNested("Seen while programming default voltage.");
@@ -174,6 +186,7 @@ void SiglentCore::setDefault(int channel) {
 void SiglentCore::handleScriptVariation(unsigned variation, scriptedArbInfo& scriptInfo, unsigned channel,
 	std::vector<parameterType>& params) {
 	prepArbGenSettings(channel);
+	/**********make sure be in DDS mode to change burst and sweep***********/
 	programSetupCommands();
 	if (scriptInfo.wave.isVaried() || variation == 0) 
 	{
@@ -207,15 +220,11 @@ void SiglentCore::handleScriptVariation(unsigned variation, scriptedArbInfo& scr
 				totalSegmentNumber, channel);
 		}
 		//compileSequenceString(scriptInfo, totalSegmentNumber, variation, channel, variation);
-		//totalSeq.pop_back();
 		// submit the sequence
 		visaFlume.write(totalSeq/*scriptInfo.wave.returnSequenceString()*/);
 
-		//visaFlume.write("WVDT? USER,wave0");
 		//std::string tmp;
 		//visaFlume.query("WVDT? USER,wave0", tmp);
-		//std::string tmpasd;
-		//tmpasd.push_back('0');
 	}
 }
 
@@ -258,23 +267,23 @@ void SiglentCore::compileSequenceString(scriptedArbInfo& scriptInfo, int totalSe
 	std::vector<Segment> waveformSegments = scriptInfo.wave.getWaveformSegments();
 	std::string& totalSequence = scriptInfo.wave.getTotalSequence();
 
-	std::string tempSequenceString, tempSegmentInfoString;
-	// Total format is  #<n><n digits><sequence name>,<arb name1>,<repeat count1>,<play control1>,<marker mode1>,<marker point1>,<arb name2>,<repeat count2>,
-	// <play control2>, <marker mode2>, <marker point2>, and so on.
-	tempSequenceString = "SOURce" + str(channel) + ":DATA:SEQ #";
-	tempSegmentInfoString = "sequence" + str(sequenceNum) + ",";
-	if (totalSegNum == 0) {
-		thrower("No segments in agilent waveform???\r\n");
-	}
-	for (int segNumInc = 0; segNumInc < totalSegNum; segNumInc++) {
-		tempSegmentInfoString += "segment" + str(segNumInc + totalSegNum * sequenceNum) + ",";
-		tempSegmentInfoString += str(waveformSegments[segNumInc].getInput().repeatNum.getValue(varNum)) + ",";
-		tempSegmentInfoString += SegmentEnd::toStr(waveformSegments[segNumInc].getInput().continuationType) + ",";
-		tempSegmentInfoString += "highAtStart,4,";
-	}
-	// remove final comma.
-	tempSegmentInfoString.pop_back();
-	totalSequence = tempSequenceString + str((str(tempSegmentInfoString.size())).size())
-		+ str(tempSegmentInfoString.size()) + tempSegmentInfoString;
+	//std::string tempSequenceString, tempSegmentInfoString;
+	//// Total format is  #<n><n digits><sequence name>,<arb name1>,<repeat count1>,<play control1>,<marker mode1>,<marker point1>,<arb name2>,<repeat count2>,
+	//// <play control2>, <marker mode2>, <marker point2>, and so on.
+	//tempSequenceString = "SOURce" + str(channel) + ":DATA:SEQ #";
+	//tempSegmentInfoString = "sequence" + str(sequenceNum) + ",";
+	//if (totalSegNum == 0) {
+	//	thrower("No segments in agilent waveform???\r\n");
+	//}
+	//for (int segNumInc = 0; segNumInc < totalSegNum; segNumInc++) {
+	//	tempSegmentInfoString += "segment" + str(segNumInc + totalSegNum * sequenceNum) + ",";
+	//	tempSegmentInfoString += str(waveformSegments[segNumInc].getInput().repeatNum.getValue(varNum)) + ",";
+	//	tempSegmentInfoString += SegmentEnd::toStr(waveformSegments[segNumInc].getInput().continuationType) + ",";
+	//	tempSegmentInfoString += "highAtStart,4,";
+	//}
+	//// remove final comma.
+	//tempSegmentInfoString.pop_back();
+	//totalSequence = tempSequenceString + str((str(tempSegmentInfoString.size())).size())
+	//	+ str(tempSegmentInfoString.size()) + tempSegmentInfoString;
 }
 

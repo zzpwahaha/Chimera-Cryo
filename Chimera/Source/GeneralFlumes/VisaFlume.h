@@ -47,7 +47,7 @@ class VisaFlume{
 		void flush( );
 		void query( std::string msg, long& data );
 		void query( std::string msg, float& data );
-		void query( std::string msg, std::string& data );
+		void query(std::string msg, std::string& data, std::string fmt = "%#b");
 		char readchar( );
 		void errCheck( long status );		
 		void errCheck( long status, std::string msg );

@@ -102,11 +102,11 @@ void VisaFlume::query( std::string msg, float& data ){
 	}
 }
 
-void VisaFlume::query( std::string msg, std::string& data ){
-	char datac[10000];
+void VisaFlume::query( std::string msg, std::string& data, std::string fmt){
+	char datac[10000] = {0};
 	ViInt32 totalPoints = 10000;
 	if ( !deviceSafemode ){
-		errCheck( viQueryf( instrument, (ViString)msg.c_str( ), "%#b", &totalPoints, datac ), msg);
+		errCheck( viQueryf(instrument, (ViString)msg.c_str(), fmt.c_str(), /*&totalPoints, */datac) , msg);
 		//errCheck( viQueryf( instrument, (ViString)msg.c_str( ), "%100000T", datac ) );
 	}
 	else {
