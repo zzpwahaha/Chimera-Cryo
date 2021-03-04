@@ -437,7 +437,14 @@ void OlCore::writeOLs(unsigned variation)
 	buffCmd += "e";
 	QElapsedTimer timer;
 	timer.start();
-	std::string recv = qtFlume.query(buffCmd);
+	std::string recv;
+	if (buffCmd != "e") {
+		recv = qtFlume.query(buffCmd);
+	}
+	else {
+		recv = "Nothing programmed in OffsetLock in variation" + str(variation);
+	}
+
 	qDebug() << tmp << qstr(buffCmd) << "Total time:" << timer.elapsed()/**/ <<"ms";
 	if (recv.empty()) {
 		thrower("Nothing feeded back from Teensy after writing, something might be wrong with it." + recv);

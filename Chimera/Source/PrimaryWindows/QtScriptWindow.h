@@ -5,13 +5,13 @@
 #include "ConfigurationSystems/ProfileIndicator.h"
 #include "Scripts/Script.h"
 #include "ArbGen/ArbGenSystem.h"
+#include <ArbGen/whichAg.h>
 #include "ConfigurationSystems/profileSettings.h"
 #include "ExperimentThread/ExperimentThreadInput.h"
 #include "IChimeraQtWindow.h"
  
 // a convenient structure for containing one object for each script. For example, the address of each script.
 template <typename type> struct scriptInfo{
-	type intensityAgilent;
 	type master;
 };
 
@@ -35,6 +35,8 @@ class QtScriptWindow : public IChimeraQtWindow{
 		scriptInfo<std::string> getScriptAddresses ();
 
 		profileSettings getProfileSettings ();
+		profileSettings getProfile();
+
 		std::string getSystemStatusString ();
 		void updateDoAoDdsNames ();
 		void checkMasterSave ();
@@ -42,14 +44,14 @@ class QtScriptWindow : public IChimeraQtWindow{
 		void windowSaveConfig (ConfigStream& saveFile);
 		void windowOpenConfig (ConfigStream& configFile);
 
-		void updateProfile (std::string text);
+		//void updateProfile (std::string text);
 		void considerScriptLocations();
 
-		void newIntensityScript();
-		void openIntensityScript(IChimeraQtWindow* parent);
-		void openIntensityScript(std::string name);
-		void saveIntensityScript();
-		void saveIntensityScriptAs(IChimeraQtWindow* parent);
+		void updateArbGen(ArbGenEnum::name name);
+		void newArbGenScript(ArbGenEnum::name name);
+		void openArbGenScript(ArbGenEnum::name name, IChimeraQtWindow* parent);
+		void saveArbGenScript(ArbGenEnum::name name);
+		void saveArbGenScriptAs(ArbGenEnum::name name, IChimeraQtWindow* parent);
 
 
 		void newMasterScript ();
@@ -65,19 +67,19 @@ class QtScriptWindow : public IChimeraQtWindow{
 
 		/*these two seems not in use -zzp2021/02/25*/
 		void handleMasterFunctionChange ();
-		void handleIntensityCombo();
-
-		profileSettings getProfile ();
+		//void handleIntensityCombo();
 
 		/* for normal/abort finish add it later, QtMainWindow::onNormalFinish,QtMainWindow::onFatalError -zzp 20210225*/
 		void setIntensityDefault();
 
+		std::vector<std::reference_wrapper<ArbGenSystem>> getArbGenSystem();
+
     private:
         Ui::QtScriptWindow* ui;
         Script masterScript;
-        ProfileIndicator profileDisplay;
+        //ProfileIndicator profileDisplay;
 
-		ArbGenSystem intensityAgilent;
+		std::array<ArbGenSystem, numArbGen> arbGens;
 
 	public Q_SLOTS:
 		void updateVarNames ();

@@ -1,27 +1,27 @@
 #pragma once
-
+#include "ArbGenSettings.h"
 
 enum class ArbGenType {
 	Agilent, Siglent
 };
 
 
-
-struct AgilentEnum {
+/*this name is only for assisting the coding, not related to script at all*/
+struct ArbGenEnum {
 	enum class name {
-		TopBottom, Axial, Flashing, Microwave
+		Siglent0, Agilent0/*, Flashing, Microwave*/
 	};
-	static const std::array<name, 4> allAgs;
+	static const std::array<name, numArbGen> allAgs;
 	static std::string toStr (name m_) {
 		switch (m_) {
-		case name::TopBottom:
-			return "TopBottom";
-		case name::Axial:
-			return "Axial";
-		case name::Flashing:
-			return "Flashing";
-		case name::Microwave:
-			return "Microwave";
+		case name::Siglent0:
+			return UWAVE_SIGLENT_SETTINGS.deviceName;
+		case name::Agilent0:
+			return UWAVE_AGILENT_SETTINGS.deviceName;
+		//case name::Flashing:
+		//	return "Flashing";
+		//case name::Microwave:
+		//	return "Microwave";
 		}
 		return "";
 	}
@@ -31,7 +31,7 @@ struct AgilentEnum {
 				return opt;
 			}
 		}
-		thrower ("Failed to convert string to Which Agilent option!");
-		return name::TopBottom;
+		thrower ("Failed to convert string to Which ArbGen option!");
+		return name::Siglent0;
 	}
 };

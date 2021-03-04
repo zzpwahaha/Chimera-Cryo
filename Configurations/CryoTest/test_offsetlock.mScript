@@ -15,5 +15,7 @@ t += 10
 pulseon: do1_0 1
 %olramp: ol0_0 1500 3500 12 6
 %ol: ol0_1 3250
-t += 500
-dac: dac0_10 1
+
+
+%t += 500
+%dac: dac0_10 1

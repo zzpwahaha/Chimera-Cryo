@@ -284,14 +284,14 @@ void processData(){
     rampCounter1 = rampCount1;
     rampflg0 = 0;
     rampflg1 = 0;
-    EEPROM.updateLong(address,ramp0[0][0]);
-    EEPROM.updateLong(address+5,ramp1[0][0]);
+    // EEPROM.updateLong(address,ramp0[0][0]);
+    // EEPROM.updateLong(address+5,ramp1[0][0]);
     //write ch0 R1,R0
     updatePFD(calcFTW(EEPROM.readLong(address)),cs0);
     //write ch1 R1,R0
     updatePFD(calcFTW(EEPROM.readLong(address+5)),cs1);
-    char buff[1064];
-    sprintf(buff, "Parameter programmed in :%.2f ms. f", serialTimeout);
+    char buff[64];
+    sprintf(buff, "Parameter programmed in :%.2f ms.", serialTimeout);
     Serial.println(buff);
     // Serial.print("Parameter programmed in :");
     // Serial.print(serialTimeout);
@@ -299,7 +299,7 @@ void processData(){
     // Serial.print("f");
   }
   else{
-    Serial.println("Error in paramter!! Nothing changed. f");
+    Serial.println("Error in paramter!! Nothing changed.");
     // Serial.print("f");
   }
 }

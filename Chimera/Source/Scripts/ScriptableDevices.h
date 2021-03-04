@@ -1,6 +1,6 @@
 #pragma once
 
 enum class ScriptableDevice {
-	Agilent,
+	ArbGen,
 	Master
 };

@@ -37,9 +37,9 @@ void Script::initialize(IChimeraQtWindow* parent, std::string deviceTypeInput, s
 	layout->setContentsMargins(0, 0, 0, 0);
 	deviceType = deviceTypeInput;
 	ScriptableDevice devenum;
-	if (deviceTypeInput == "Agilent") {
-		devenum = ScriptableDevice::Agilent;
-		extension = str (".") + AGILENT_SCRIPT_EXTENSION;
+	if (deviceTypeInput == "ArbGen") {
+		devenum = ScriptableDevice::ArbGen;
+		extension = str (".") + ARBGEN_SCRIPT_EXTENSION;
 	}
 	else if (deviceTypeInput == "Master") {
 		devenum = ScriptableDevice::Master;
@@ -102,7 +102,7 @@ void Script::initialize(IChimeraQtWindow* parent, std::string deviceTypeInput, s
 							"-      Simple Math (+-/*) is supported in the scripts as well. To insert a mathematical expresion, just \n"
 							"-      add parenthesis () around the full expression");
 	}
-	else if (deviceType == "Agilent"){
+	else if (deviceType == "ArbGen"){
 		help->setToolTip (">>> Scripted Agilent Waveform Help <<<\n"
 						"Accepted Commands (syntax for command is encased in <>)\n"
 						"- hold <val> <time(ms)> <Continuation Type> <Possibly Repeat #> <#>\n"
@@ -439,10 +439,10 @@ void Script::newFunction(){
 void Script::newScript(){
 	std::string tempName;
 	tempName = DEFAULT_SCRIPT_FOLDER_PATH;
-	if (deviceType == "Agilent"){
-		tempName += "DEFAULT_INTENSITY_SCRIPT.aScript";
+	if (deviceType == "ArbGen"){
+		tempName += "DEFAULT_ARBGEN_SCRIPT.aScript";
 	}
-	else if (deviceType == "Master"){
+	else if (deviceType == "ArbGen"){
 		tempName += "DEFAULT_MASTER_SCRIPT.mScript";
 	}	
 	reset();
@@ -463,8 +463,8 @@ void Script::openParentScript(std::string parentScriptFileAndPath, std::string c
 	int myError = _splitpath_s(cstr(parentScriptFileAndPath), dirChars, _MAX_FNAME, pathChars, _MAX_FNAME, fileChars, 
 								_MAX_FNAME, extChars, _MAX_EXT);
 	std::string extStr(extChars);
-	if (deviceType == "Agilent"){
-		if (extStr != str( "." ) + AGILENT_SCRIPT_EXTENSION){
+	if (deviceType == "ArbGen"){
+		if (extStr != str( "." ) + ARBGEN_SCRIPT_EXTENSION){
 			thrower ("Attempted to open non-agilent script from agilent script control.");
 		}
 	}

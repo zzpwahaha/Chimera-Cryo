@@ -78,7 +78,7 @@ void ArbGenCore::analyzeArbGenScript(scriptedArbInfo& infoObj, std::vector<param
 			leaveTest = infoObj.wave.analyzeAgilentScriptCommand(currentSegmentNumber, stream, variables, warnings);
 		}
 		catch (ChimeraError&) {
-			throwNested("Error seen while analyzing agilent script command for agilent " + this->configDelim);
+			throwNested("Error seen while analyzing ArbGen script command for ArbGen " + this->configDelim);
 		}
 		if (leaveTest < 0) {
 			thrower("IntensityWaveform.analyzeAgilentScriptCommand threw an error! Error occurred in segment #"
@@ -153,7 +153,7 @@ void ArbGenCore::setArbGen(unsigned var, std::vector<parameterType>& params, dev
 			}
 		}
 		catch (ChimeraError& err) {
-			throwNested("Error seen while programming agilent output for " + configDelim + " agilent channel "
+			throwNested("Error seen while programming agilent output for " + configDelim + " ArbGen channel "
 				+ str(chan + 1) + ": " + err.whatBare());
 		}
 	}
@@ -329,7 +329,7 @@ void ArbGenCore::convertInputToFinalSettings(unsigned chan, deviceOutputInfo& in
 			channel.scriptedArb.wave.calculateAllSegmentVariations(totalVariations, params);
 			break;
 		default:
-			thrower("Unrecognized Agilent Setting: " + ArbGenChannelMode::toStr(channel.option));
+			thrower("Unrecognized ArbGen Setting: " + ArbGenChannelMode::toStr(channel.option));
 		}
 	}
 	catch (std::out_of_range&) {
@@ -494,19 +494,19 @@ deviceOutputInfo ArbGenCore::getSettingsFromConfig(ConfigStream& file) {
 
 void ArbGenCore::logSettings(DataLogger& log, ExpThreadWorker* threadworker) {
 	try {
-		H5::Group agilentsGroup;
+		H5::Group arbGensGroup;
 		try {
-			agilentsGroup = log.file.createGroup("/ArbGens");
+			arbGensGroup = log.file.createGroup("/ArbGens");
 		}
 		catch (H5::Exception&) {
-			agilentsGroup = log.file.openGroup("/ArbGens");
+			arbGensGroup = log.file.openGroup("/ArbGens");
 		}
 
-		H5::Group singleAgilent(agilentsGroup.createGroup(getDelim()));
+		H5::Group singleArbGen(arbGensGroup.createGroup(getDelim()));
 		unsigned channelCount = 1;
-		log.writeDataSet(getStartupCommands(), "Startup-Commands", singleAgilent);
+		log.writeDataSet(getStartupCommands(), "Startup-Commands", singleArbGen);
 		for (auto& channel : expRunSettings.channel) {
-			H5::Group channelGroup(singleAgilent.createGroup("Channel-" + str(channelCount)));
+			H5::Group channelGroup(singleArbGen.createGroup("Channel-" + str(channelCount)));
 			std::string outputModeName = ArbGenChannelMode::toStr(channel.option);
 			log.writeDataSet(outputModeName, "Output-Mode", channelGroup);
 			H5::Group dcGroup(channelGroup.createGroup("DC-Settings"));
@@ -526,18 +526,18 @@ void ArbGenCore::logSettings(DataLogger& log, ExpThreadWorker* threadworker) {
 			ScriptStream stream;
 			try {
 				ExpThreadWorker::loadAgilentScript(channel.scriptedArb.fileAddress.expressionStr, stream);
-				log.writeDataSet(stream.str(), "Agilent-Script-Script", scriptedArbSettings);
+				log.writeDataSet(stream.str(), "ArbGen-Script-Script", scriptedArbSettings);
 			}
 			catch (ChimeraError&) {
 				// failed to open, that's probably fine, 
-				log.writeDataSet("Script Failed to load.", "Agilent-Script-Script", scriptedArbSettings);
+				log.writeDataSet("Script Failed to load.", "ArbGen-Script-Script", scriptedArbSettings);
 			}
 			channelCount++;
 		}
 	}
 	catch (H5::Exception err) {
 		log.logError(err);
-		throwNested("ERROR: Failed to log Agilent parameters in HDF5 file: " + err.getDetailMsg());
+		throwNested("ERROR: Failed to log ArbGen parameters in HDF5 file: " + err.getDetailMsg());
 	}
 }
 
@@ -575,10 +575,10 @@ void ArbGenCore::checkTriggers(unsigned variationInc, DoCore& ttls, ExpThreadWor
 			continue;
 		}
 		unsigned actualTrigs = experimentActive ? ttls.countTriggers(getTriggerLine(), variationInc) : 0;
-		unsigned agilentExpectedTrigs = agChan.scriptedArb.wave.getNumTrigs();
+		unsigned arbGenExpectedTrigs = agChan.scriptedArb.wave.getNumTrigs();
 		std::string infoString = "Actual/Expected " + getDelim() + " Triggers: "
-			+ str(actualTrigs) + "/" + str(agilentExpectedTrigs) + ".";
-		if (actualTrigs != agilentExpectedTrigs) {
+			+ str(actualTrigs) + "/" + str(arbGenExpectedTrigs) + ".";
+		if (actualTrigs != arbGenExpectedTrigs) {
 			emit threadWorker->warn(qstr(
 				"WARNING: ArbGen " + getDelim() + " is not getting triggered by the ttl system the same "
 				"number of times a trigger command appears in the ArbGen channel " + str(chan + 1) + " script. "

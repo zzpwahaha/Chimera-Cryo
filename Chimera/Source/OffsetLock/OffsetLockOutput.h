@@ -34,7 +34,7 @@ private:
 
 public:
 	constexpr static double olFreqResolution = 50.0 / 0x1ffffff; /*12 bit N + 25bit FRAC, 50MHz phase-freq detector frequency*/
-	const int numFreqDigits = static_cast<int>(abs(round(log10(olFreqResolution) - 0.49)));
+	const int numFreqDigits = 4/*static_cast<int>(abs(round(log10(olFreqResolution) - 0.49)))*/;
 
 };
 

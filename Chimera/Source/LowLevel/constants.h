@@ -72,8 +72,9 @@
 	//#define DDS_FPGA_ADDRESS "FT1I6IBSB"; //Device Serial: FT1I6IBS, Use FT1I6IBSB in C++ to select Channel B
 
 
-	//Agilent
+	//ArbGens
 	const bool UWAVE_SAFEMODE = false;
+	const int numArbGen = 2;
 	const std::string UWAVE_AGILENT_ADDRESS = "TCPIP0::10.10.0.5::inst0::INSTR";
 	const std::string UWAVE_SIGLENT_ADDRESS = "TCPIP0::10.10.0.4::inst0::INSTR";
 	const std::string RAMP_LOCATION = str(CODE_ROOT) + "\\Ramp_Files\\";

@@ -17,9 +17,8 @@
 
 ArbGenSystem::ArbGenSystem( const arbGenSettings& settings, ArbGenType type, IChimeraQtWindow* parent )
 	: IChimeraSystem(parent)
-	//, core(*pCore)
 	, initSettings(settings)
-	, agilentScript(parent)
+	, arbGenScript(parent)
 {
 	switch (type) {
 	case ArbGenType::Agilent:
@@ -64,11 +63,11 @@ std::string ArbGenSystem::getConfigDelim (){
 }
 
 bool ArbGenSystem::getSavedStatus (){
-	return agilentScript.savedStatus ();
+	return arbGenScript.savedStatus ();
 }
 
 void ArbGenSystem::updateSavedStatus (bool isSaved){
-	agilentScript.updateSavedStatus (isSaved);
+	arbGenScript.updateSavedStatus (isSaved);
 }
 
 void ArbGenSystem::initialize(std::string headerText, IChimeraQtWindow* win)
@@ -177,18 +176,18 @@ void ArbGenSystem::initialize(std::string headerText, IChimeraQtWindow* win)
 	layout3->addWidget(optionsFormat, 1);
 	layout->addLayout(layout3, 0);
 
-	agilentScript.initialize(win, "Agilent", "" );
+	arbGenScript.initialize(win, "ArbGen", "" );
 
 	currentGuiInfo.channel[0].option = ArbGenChannelMode::which::No_Control;
 	currentGuiInfo.channel[1].option = ArbGenChannelMode::which::No_Control;
-	agilentScript.setEnabled ( false, false );
+	arbGenScript.setEnabled ( false, false );
 	try {
 		pCore->programSetupCommands ();
 	}
 	catch (ChimeraError & error) {
 		errBox ("Failed to program agilent " + getConfigDelim () + " initial settings: " + error.trace ());
 	}
-	layout->addWidget(&agilentScript, 1);
+	layout->addWidget(&arbGenScript, 1);
 }
 
 
@@ -199,7 +198,7 @@ ArbGenCore& ArbGenSystem::getCore (){
 
 void ArbGenSystem::checkSave( std::string configPath, RunInfo info ){
 	if ( currentGuiInfo.channel[currentChannel-1].option == ArbGenChannelMode::which::Script ){
-		agilentScript.checkSave( configPath, info );
+		arbGenScript.checkSave( configPath, info );
 	}
 }
 
@@ -222,7 +221,7 @@ void ArbGenSystem::readGuiSettings(int chan ){
 	// convert to zero-indexed
 	auto chani = chan - 1;
 	currentGuiInfo.synced = syncedButton->isChecked( );
-	std::string textStr( agilentScript.getScriptText() );
+	std::string textStr(arbGenScript.getScriptText() );
 	ConfigStream stream;
 	stream << textStr;
 	stream.seekg( 0 );
@@ -251,7 +250,7 @@ void ArbGenSystem::readGuiSettings(int chan ){
 			currentGuiInfo.channel[chani].preloadedArb.burstMode = burstButton->isChecked ();
 			break;
 		case ArbGenChannelMode::which::Script:
-			currentGuiInfo.channel[chani].scriptedArb.fileAddress = agilentScript.getScriptPathAndName();
+			currentGuiInfo.channel[chani].scriptedArb.fileAddress = arbGenScript.getScriptPathAndName();
 			currentGuiInfo.channel[chani].scriptedArb.useCal = calibratedButton->isChecked ( );
 			break;
 		default:
@@ -292,56 +291,56 @@ void ArbGenSystem::updateSettingsDisplay(int chan, std::string configPath, RunIn
 	chan -= 1;
 	switch ( currentGuiInfo.channel[chan].option ){
 		case ArbGenChannelMode::which::No_Control:
-			agilentScript.reset ( );
-			agilentScript.setScriptText("");
-			agilentScript.setEnabled ( false, false );
+			arbGenScript.reset ( );
+			arbGenScript.setScriptText("");
+			arbGenScript.setEnabled ( false, false );
 			settingCombo->setCurrentIndex( 0 );
 			break;
 		case ArbGenChannelMode::which::Output_Off:
-			agilentScript.reset ( );
-			agilentScript.setScriptText("");
-			agilentScript.setEnabled ( false, false );
+			arbGenScript.reset ( );
+			arbGenScript.setScriptText("");
+			arbGenScript.setEnabled ( false, false );
 			settingCombo->setCurrentIndex ( 1 );
 			break;
 		case ArbGenChannelMode::which::DC:
-			agilentScript.reset ( );
-			agilentScript.setScriptText(currentGuiInfo.channel[chan].dc.dcLevel.expressionStr);
+			arbGenScript.reset ( );
+			arbGenScript.setScriptText(currentGuiInfo.channel[chan].dc.dcLevel.expressionStr);
 			settingCombo->setCurrentIndex ( 2 );
 			calibratedButton->setChecked( currentGuiInfo.channel[chan].dc.useCal );
-			agilentScript.setEnabled ( true, false );
+			arbGenScript.setEnabled ( true, false );
 			break;
 		case ArbGenChannelMode::which::Sine:
-			agilentScript.reset ( );
-			agilentScript.setScriptText(currentGuiInfo.channel[chan].sine.frequency.expressionStr + " " 
+			arbGenScript.reset ( );
+			arbGenScript.setScriptText(currentGuiInfo.channel[chan].sine.frequency.expressionStr + " "
 										 + currentGuiInfo.channel[chan].sine.amplitude.expressionStr);
 			settingCombo->setCurrentIndex ( 3 );
 			calibratedButton->setChecked( currentGuiInfo.channel[chan].sine.useCal );
-			agilentScript.setEnabled ( true, false );
+			arbGenScript.setEnabled ( true, false );
 			break;
 		case ArbGenChannelMode::which::Square:
-			agilentScript.reset ( );
-			agilentScript.setScriptText( currentGuiInfo.channel[chan].square.frequency.expressionStr + " " 
+			arbGenScript.reset ( );
+			arbGenScript.setScriptText( currentGuiInfo.channel[chan].square.frequency.expressionStr + " "
 										 + currentGuiInfo.channel[chan].square.amplitude.expressionStr + " " 
 										 + currentGuiInfo.channel[chan].square.offset.expressionStr );
 			calibratedButton->setChecked( currentGuiInfo.channel[chan].square.useCal );
-			agilentScript.setEnabled ( true, false );
+			arbGenScript.setEnabled ( true, false );
 			settingCombo->setCurrentIndex (4);
 			break;
 		case ArbGenChannelMode::which::Preloaded:
-			agilentScript.reset ( );
-			agilentScript.setScriptText(currentGuiInfo.channel[chan].preloadedArb.address.expressionStr);
+			arbGenScript.reset ( );
+			arbGenScript.setScriptText(currentGuiInfo.channel[chan].preloadedArb.address.expressionStr);
 			calibratedButton->setChecked( currentGuiInfo.channel[chan].preloadedArb.useCal );
 			burstButton->setChecked (currentGuiInfo.channel[chan].preloadedArb.burstMode);
-			agilentScript.setEnabled ( true, false );
+			arbGenScript.setEnabled ( true, false );
 			settingCombo->setCurrentIndex (5);
 			break;
 		case ArbGenChannelMode::which::Script:
 			// clear it in case the file fails to open.
-			agilentScript.setScriptText( "" );
-			agilentScript.openParentScript( currentGuiInfo.channel[chan].scriptedArb.fileAddress.expressionStr, configPath,
+			arbGenScript.setScriptText( "" );
+			arbGenScript.openParentScript( currentGuiInfo.channel[chan].scriptedArb.fileAddress.expressionStr, configPath,
 											currentRunInfo );
 			calibratedButton->setChecked( currentGuiInfo.channel[chan].scriptedArb.useCal );
-			agilentScript.setEnabled ( true, false );
+			arbGenScript.setEnabled ( true, false );
 			settingCombo->setCurrentIndex (6);
 			break;
 		default:
@@ -369,37 +368,37 @@ void ArbGenSystem::handleModeCombo(){
 		case 0:
 			optionsFormat->setText( "---" );
 			currentGuiInfo.channel[selectedChannel].option = ArbGenChannelMode::which::No_Control;
-			agilentScript.setEnabled ( false, false );
+			arbGenScript.setEnabled ( false, false );
 			break;
 		case 1:
 			optionsFormat->setText ( "---" );
 			currentGuiInfo.channel[selectedChannel].option = ArbGenChannelMode::which::Output_Off;
-			agilentScript.setEnabled ( false, false );
+			arbGenScript.setEnabled ( false, false );
 			break;
 		case 2:
 			optionsFormat->setText ( "[DC Level]" );
 			currentGuiInfo.channel[selectedChannel].option = ArbGenChannelMode::which::DC;
-			agilentScript.setEnabled ( true, false );
+			arbGenScript.setEnabled ( true, false );
 			break;
 		case 3:
 			optionsFormat->setText ( "[Frequency(kHz)] [Amplitude(Vpp)]" );
 			currentGuiInfo.channel[selectedChannel].option = ArbGenChannelMode::which::Sine;
-			agilentScript.setEnabled ( true, false );
+			arbGenScript.setEnabled ( true, false );
 			break;
 		case 4:
 			optionsFormat->setText ( "[Frequency(kHz)] [Amplitude(Vpp)] [Offset(V)]" );
 			currentGuiInfo.channel[selectedChannel].option = ArbGenChannelMode::which::Square;
-			agilentScript.setEnabled ( true, false );
+			arbGenScript.setEnabled ( true, false );
 			break;
 		case 5:
 			optionsFormat->setText ( "[File Address]" );
 			currentGuiInfo.channel[selectedChannel].option = ArbGenChannelMode::which::Preloaded;
-			agilentScript.setEnabled ( true, false );
+			arbGenScript.setEnabled ( true, false );
 			break;
 		case 6:
 			optionsFormat->setText ( "Hover over \"?\"" );
 			currentGuiInfo.channel[selectedChannel].option = ArbGenChannelMode::which::Script;
-			agilentScript.setEnabled ( true, false );
+			arbGenScript.setEnabled ( true, false );
 			break;
 	}
 }

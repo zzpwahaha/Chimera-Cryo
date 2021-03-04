@@ -16,7 +16,7 @@ const arbGenSettings UWAVE_AGILENT_SETTINGS = {
 	"INT",
 	// device name (just a convenience, so that the class instance knows 
 	// which device it is
-	"UWave",
+	"Cryo Agilent",
 	7 - 1, 1,
 	// Configuration file delimiter, used for saving settings for this 
 	// agilent.
@@ -43,7 +43,7 @@ const arbGenSettings UWAVE_SIGLENT_SETTINGS = {
 	"INT",
 	// device name (just a convenience, so that the class instance knows 
 	// which device it is
-	"UWave",
+	"Cryo Siglent",
 	7 - 1, 2,
 	// Configuration file delimiter, used for saving settings for this 
 	// agilent.

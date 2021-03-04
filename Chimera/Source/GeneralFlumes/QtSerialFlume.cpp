@@ -65,11 +65,20 @@ void QtSerialFlume::resetConnection()
 std::string QtSerialFlume::read () 
 {
 	/*have to use this funny way to get the feedback properly. May be don't have to have the feedback*/
-	bool ready = port.waitForReadyRead(35);
-	bool ready2 = port.waitForReadyRead(10);
-	//bool ready3 = port.waitForReadyRead(5);
-	int numbyte = port.bytesAvailable();
-	if (ready || ready2 || /*ready3 ||*/ numbyte != 0)
+	bool dataready = false;
+	for (size_t i = 0; i < 50; i++) {
+		if (port.waitForReadyRead(10) || port.bytesAvailable() != 0) {
+			dataready = true;
+			break;
+		}
+	}
+
+	//bool ready = port.waitForReadyRead(50);
+	//bool ready2 = port.waitForReadyRead(30);
+	//bool ready3 = port.waitForReadyRead(20);
+	//bool ready4 = port.waitForReadyRead(150);
+	//int numbyte = port.bytesAvailable();
+	if (dataready)
 	{
 		QByteArray ba = port.readAll();
 		QString qs = QString::fromUtf8(ba);

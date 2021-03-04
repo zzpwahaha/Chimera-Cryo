@@ -48,7 +48,7 @@ class ArbGenSystem : public IChimeraSystem
 /*		void handleScriptVariation( unsigned variation, scriptedArbInfo& scriptInfo, unsigned channel, 
 									std::vector<parameterType>& variables );*/
 		// making the script public greatly simplifies opening, saving, etc. files from this script.
-		Script agilentScript;
+		
 		//std::pair<unsigned, unsigned> getTriggerLine( );
 		std::string getConfigDelim ();
 		void programAgilentNow (std::vector<parameterType> constants);
@@ -57,11 +57,15 @@ class ArbGenSystem : public IChimeraSystem
 		void verifyScriptable ( );
 		ArbGenCore& getCore ();
 		void setDefault (unsigned chan);
+
+	public:
+		Script arbGenScript;
+		const arbGenSettings initSettings;
 	private:
 		ArbGenCore* pCore;
 		//ArbGenCore& core;
 		minMaxDoublet chan2Range;
-		const arbGenSettings initSettings;
+
 		// since currently all visaFlume communication is done to communicate with agilent machines, my visaFlume wrappers exist
 		// in this class.
 		int currentChannel=1;

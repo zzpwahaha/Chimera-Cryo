@@ -58,7 +58,7 @@ private:
 
 public:
 	constexpr static double olFreqResolution = OffsetLockOutput::olFreqResolution; /*12 bit N + 25bit FRAC, 50MHz phase-freq detector frequency*/
-	const int numFreqDigits = static_cast<int>(abs(round(log10(olFreqResolution) - 0.49)));
+	const int numFreqDigits = 4/*static_cast<int>(abs(round(log10(olFreqResolution) - 0.49)))*/;
 	const int numTimeDigits= static_cast<int>(abs(round(log10(OL_TIME_RESOLUTION) - 0.49)));
 
 	

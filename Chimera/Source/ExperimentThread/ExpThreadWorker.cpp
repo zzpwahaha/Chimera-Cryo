@@ -81,7 +81,7 @@ void ExpThreadWorker::experimentThreadProcedure () {
 			for (const auto& repInc : range (expRuntime.repetitions)) {
 				handlePause (isPaused, isAborting);
 				startRep (repInc, variationInc, input->skipNext == nullptr ? false : input->skipNext->load ());
-				Sleep(500);//wait 500ms between rep, added temporarily by zzp 20210225
+				Sleep(10);//wait 500ms between rep, added temporarily by zzp 20210225
 			}
 		}
 		waitForAndorFinish ();

@@ -11,7 +11,8 @@
 
 QtScriptWindow::QtScriptWindow(QWidget* parent) : IChimeraQtWindow(parent)
 	, masterScript(this)
-	, intensityAgilent(UWAVE_SIGLENT_SETTINGS/*UWAVE_AGILENT_SETTINGS*/, ArbGenType::Siglent/*Agilent*/, this)
+	, arbGens{ {ArbGenSystem(UWAVE_SIGLENT_SETTINGS, ArbGenType::Siglent, this),
+		ArbGenSystem(UWAVE_AGILENT_SETTINGS, ArbGenType::Agilent, this) } }
 {
 	setWindowTitle ("Script Window");
 }
@@ -25,19 +26,27 @@ void QtScriptWindow::initializeWidgets (){
 	setCentralWidget(centralWidget);
 	QHBoxLayout* layout = new QHBoxLayout(centralWidget);
 	//centralWidget->setStyleSheet("border: 2px solid  black; ");
-	intensityAgilent.initialize("Tweezer Intensity Agilent", this);
+	for (auto name : ArbGenEnum::allAgs) {
+		arbGens[(int)name].initialize(arbGens[(int)name].initSettings.deviceName, this);
+	}
+
+	
+
 	masterScript.initialize(this, "Master", "Master Script");
-	profileDisplay.initialize (this);
-	layout->addWidget(&profileDisplay, 1);
-	layout->addWidget(&intensityAgilent, 1);
+	//profileDisplay.initialize (this);
+	layout->addWidget(&arbGens[0], 1);
+	layout->addWidget(&arbGens[1], 1);
 	layout->addWidget(&masterScript, 1);
 	
 	try {
-		// I only do this for the intensity agilent at the moment.
-		intensityAgilent.setDefault(1);
+		for (auto name : ArbGenEnum::allAgs) {
+			arbGens[(int)name].setDefault(1);
+			arbGens[(int)name].setDefault(2);
+		}
+		//intensityAgilent.setDefault(1);
 	}
 	catch (ChimeraError& err) {
-		errBox("ERROR: Failed to initialize intensity agilent: " + err.trace());
+		errBox("ERROR: Failed to initialize ArbGens: " + err.trace());
 	}
 
 
@@ -51,9 +60,11 @@ void QtScriptWindow::updateVarNames() {
 	masterScript.highlighter->setLocalParams (masterScript.getLocalParams ());
 	masterScript.highlighter->rehighlight();
 
-	intensityAgilent.agilentScript.highlighter->setOtherParams(params);
-	intensityAgilent.agilentScript.highlighter->setLocalParams(intensityAgilent.agilentScript.getLocalParams());
-	intensityAgilent.agilentScript.highlighter->rehighlight();
+	for (auto name : ArbGenEnum::allAgs) {
+		arbGens[(int)name].arbGenScript.highlighter->setOtherParams(params);
+		arbGens[(int)name].arbGenScript.highlighter->setLocalParams(arbGens[(int)name].arbGenScript.getLocalParams());
+		arbGens[(int)name].arbGenScript.highlighter->rehighlight();
+	}
 }
 
 void QtScriptWindow::updateDoAoDdsNames () {
@@ -73,11 +84,14 @@ void QtScriptWindow::updateDoAoDdsNames () {
 	masterScript.highlighter->setOlNames(olNames);
 	masterScript.highlighter->rehighlight();
 
-	intensityAgilent.agilentScript.highlighter->setTtlNames(doNames);
-	intensityAgilent.agilentScript.highlighter->setDacNames(aoNames);
-	intensityAgilent.agilentScript.highlighter->setDdsNames(doNames);
-	intensityAgilent.agilentScript.highlighter->setOlNames(aoNames);
-	masterScript.highlighter->rehighlight();
+	for (auto name : ArbGenEnum::allAgs) {
+		arbGens[(int)name].arbGenScript.highlighter->setTtlNames(doNames);
+		arbGens[(int)name].arbGenScript.highlighter->setDacNames(aoNames);
+		arbGens[(int)name].arbGenScript.highlighter->setDdsNames(ddsNames);
+		arbGens[(int)name].arbGenScript.highlighter->setOlNames(olNames);
+		arbGens[(int)name].arbGenScript.highlighter->rehighlight();
+	}
+
 }
 
 
@@ -91,21 +105,20 @@ void QtScriptWindow::handleMasterFunctionChange (){
 	}
 }
 
-void QtScriptWindow::handleIntensityCombo() {
-	intensityAgilent.checkSave(mainWin->getProfileSettings().configLocation, mainWin->getRunInfo());
-	intensityAgilent.readGuiSettings();
-	intensityAgilent.handleModeCombo();
-	intensityAgilent.updateSettingsDisplay(mainWin->getProfileSettings().configLocation, mainWin->getRunInfo());
-}
-
-
 void QtScriptWindow::checkScriptSaves (){
 	masterScript.checkSave (getProfile ().configLocation, mainWin->getRunInfo());
-	intensityAgilent.checkSave(getProfile().configLocation, mainWin->getRunInfo());
+	for (auto name : ArbGenEnum::allAgs) {
+		arbGens[(int)name].checkSave(getProfile().configLocation, mainWin->getRunInfo());
+	}
+	//intensityAgilent.checkSave(getProfile().configLocation, mainWin->getRunInfo());
 }
 
 std::string QtScriptWindow::getSystemStatusString (){
-	std::string status = "Intensity Agilent:\n\t" + intensityAgilent.getDeviceIdentity();
+	//std::string status = "Intensity Agilent:\n\t" + intensityAgilent.getDeviceIdentity();
+	std::string status;
+	for (auto name : ArbGenEnum::allAgs) {
+		status += arbGens[(int)name].initSettings.deviceName + ":\n\t" + arbGens[(int)name].getDeviceIdentity();
+	}
 	return status;
 }
 
@@ -115,7 +128,7 @@ std::string QtScriptWindow::getSystemStatusString (){
 scriptInfo<std::string> QtScriptWindow::getScriptNames (){
 	scriptInfo<std::string> names;
 	names.master = masterScript.getScriptName ();
-	names.intensityAgilent = intensityAgilent.agilentScript.getScriptName();
+	//names.intensityAgilent = intensityAgilent.arbGenScript.getScriptName();
 	return names;
 }
 
@@ -124,7 +137,7 @@ scriptInfo<std::string> QtScriptWindow::getScriptNames (){
 */
 scriptInfo<bool> QtScriptWindow::getScriptSavedStatuses (){
 	scriptInfo<bool> status;
-	status.intensityAgilent = intensityAgilent.agilentScript.savedStatus();
+	//status.intensityAgilent = intensityAgilent.arbGenScript.savedStatus();
 	status.master = masterScript.savedStatus ();
 	return status;
 }
@@ -134,7 +147,7 @@ scriptInfo<bool> QtScriptWindow::getScriptSavedStatuses (){
 */
 scriptInfo<std::string> QtScriptWindow::getScriptAddresses (){
 	scriptInfo<std::string> addresses;
-	addresses.intensityAgilent = intensityAgilent.agilentScript.getScriptPathAndName();
+	//addresses.intensityAgilent = intensityAgilent.arbGenScript.getScriptPathAndName();
 	addresses.master = masterScript.getScriptPathAndName ();
 	return addresses;
 }
@@ -142,7 +155,10 @@ scriptInfo<std::string> QtScriptWindow::getScriptAddresses (){
 void QtScriptWindow::setIntensityDefault() 
 {
 	try {
-		intensityAgilent.setDefault(1);
+		for (auto name : ArbGenEnum::allAgs) {
+			arbGens[(int)name].setDefault(1);
+			arbGens[(int)name].setDefault(2);
+		}
 	}
 	catch (ChimeraError& err) {
 		reportErr(err.qtrace());
@@ -155,70 +171,76 @@ void QtScriptWindow::setIntensityDefault()
 	window objects because they are associated with the menu at the top of each screen
 */
 
-void QtScriptWindow::newIntensityScript() {
+void QtScriptWindow::updateArbGen(ArbGenEnum::name name) {
 	try {
-		intensityAgilent.verifyScriptable();
-		intensityAgilent.checkSave(getProfile().configLocation, mainWin->getRunInfo());
-		intensityAgilent.agilentScript.newScript();
 		updateConfigurationSavedStatus(false);
-		intensityAgilent.agilentScript.updateScriptNameText(mainWin->getProfileSettings().configLocation);
+		arbGens[(int)name].checkSave(getProfile().configLocation, mainWin->getRunInfo());
+		arbGens[(int)name].readGuiSettings();
+	}
+	catch (ChimeraError&) {
+		throwNested("Failed to update arbGens.");
+	}
+}
+
+
+void QtScriptWindow::newArbGenScript(ArbGenEnum::name name) 
+{
+	try {
+		arbGens[(int)name].verifyScriptable();
+		mainWin->updateConfigurationSavedStatus(false);
+		arbGens[(int)name].checkSave(mainWin->getProfileSettings().configLocation, mainWin->getRunInfo());
+		arbGens[(int)name].arbGenScript.newScript();
+		arbGens[(int)name].arbGenScript.updateScriptNameText(mainWin->getProfileSettings().configLocation);
 	}
 	catch (ChimeraError& err) {
 		reportErr(err.qtrace());
 	}
 }
 
-void QtScriptWindow::openIntensityScript(IChimeraQtWindow* parent) {
+void QtScriptWindow::openArbGenScript(ArbGenEnum::name name, IChimeraQtWindow* parent)
+{
 	try {
-		intensityAgilent.verifyScriptable();
-		intensityAgilent.checkSave(getProfile().configLocation, mainWin->getRunInfo());
-		std::string intensityOpenName = openWithExplorer(parent, Script::AGILENT_SCRIPT_EXTENSION);
-		intensityAgilent.agilentScript.openParentScript(intensityOpenName, getProfile().configLocation,
+		arbGens[(int)name].verifyScriptable();
+		updateConfigurationSavedStatus(false);
+		arbGens[(int)name].checkSave(getProfile().configLocation, mainWin->getRunInfo());
+		std::string openFileName = openWithExplorer(parent, Script::ARBGEN_SCRIPT_EXTENSION);
+		arbGens[(int)name].arbGenScript.openParentScript(openFileName, getProfile().configLocation, 
 			mainWin->getRunInfo());
+		arbGens[(int)name].arbGenScript.updateScriptNameText(getProfile().configLocation);
+	}
+	catch (ChimeraError& err) {
+		reportErr(err.qtrace());
+	}
+}
+
+void QtScriptWindow::saveArbGenScript(ArbGenEnum::name name) {
+	try {
+		arbGens[(int)name].verifyScriptable();
+		arbGens[(int)name].arbGenScript.saveScript(getProfile().configLocation, mainWin->getRunInfo());
+		arbGens[(int)name].arbGenScript.updateScriptNameText(getProfile().configLocation);
+	}
+	catch (ChimeraError& err) {
+		reportErr(err.qtrace());
+	}
+}
+
+void QtScriptWindow::saveArbGenScriptAs(ArbGenEnum::name name, IChimeraQtWindow* parent) {
+	try {
+		arbGens[(int)name].verifyScriptable();
 		updateConfigurationSavedStatus(false);
-		intensityAgilent.agilentScript.updateScriptNameText(getProfile().configLocation);
-	}
-	catch (ChimeraError& err) {
-		reportErr(err.qtrace());
-	}
-}
-
-void QtScriptWindow::openIntensityScript(std::string name) {
-	intensityAgilent.agilentScript.openParentScript(name, getProfile().configLocation, mainWin->getRunInfo());
-}
-
-void QtScriptWindow::saveIntensityScript() {
-	try {
-		// channel 0 is the intensity channel, the 4th option is the scripting option.
-		if (intensityAgilent.getOutputInfo().channel[0].option == ArbGenChannelMode::which::Script) {
-			intensityAgilent.agilentScript.saveScript(getProfile().configLocation, mainWin->getRunInfo());
-			intensityAgilent.agilentScript.updateScriptNameText(getProfile().configLocation);
-		}
-	}
-	catch (ChimeraError& err) {
-		reportErr(err.qtrace());
-	}
-}
-
-void QtScriptWindow::saveIntensityScriptAs(IChimeraQtWindow* parent) {
-	try {
-		intensityAgilent.verifyScriptable();
-		std::string extensionNoPeriod = intensityAgilent.agilentScript.getExtension();
+		std::string extensionNoPeriod = arbGens[(int)name].arbGenScript.getExtension();
 		if (extensionNoPeriod.size() == 0) {
 			return;
 		}
 		extensionNoPeriod = extensionNoPeriod.substr(1, extensionNoPeriod.size());
 		std::string newScriptAddress = saveWithExplorer(parent, extensionNoPeriod, getProfileSettings());
-		intensityAgilent.agilentScript.saveScriptAs(newScriptAddress, mainWin->getRunInfo());
-		updateConfigurationSavedStatus(false);
-		intensityAgilent.agilentScript.updateScriptNameText(getProfile().configLocation);
+		arbGens[(int)name].arbGenScript.saveScriptAs(newScriptAddress, mainWin->getRunInfo());
+		arbGens[(int)name].arbGenScript.updateScriptNameText(getProfile().configLocation);
 	}
 	catch (ChimeraError& err) {
 		reportErr(err.qtrace());
 	}
 }
-
-
 
 
 
@@ -242,11 +264,12 @@ void QtScriptWindow::windowOpenConfig (ConfigStream& configFile){
 		std::string masterName;
 		getlineFunc (configFile, masterName);
 		ConfigSystem::checkDelimiterLine (configFile, "END_SCRIPTS");
-
-		deviceOutputInfo info;
-		ConfigSystem::stdGetFromConfig(configFile, intensityAgilent.getCore(), info, Version("1.0"));
-		intensityAgilent.setOutputSettings(info);
-		intensityAgilent.updateSettingsDisplay(mainWin->getProfileSettings().configLocation, mainWin->getRunInfo());
+		for (auto name : ArbGenEnum::allAgs) {
+			deviceOutputInfo info;
+			ConfigSystem::stdGetFromConfig(configFile, arbGens[(int)name].getCore(), info, Version("1.0"));
+			arbGens[(int)name].setOutputSettings(info);
+			arbGens[(int)name].updateSettingsDisplay(getProfileSettings().configLocation, mainWin->getRunInfo());
+		}
 
 		try{
 			openMasterScript (masterName);
@@ -339,8 +362,9 @@ void QtScriptWindow::windowSaveConfig (ConfigStream& saveFile){
 	saveFile << "SCRIPTS\n";
 	saveFile << "/*Master Script Address:*/ " << addresses.master << "\n";
 	saveFile << "END_SCRIPTS\n";
-
-	intensityAgilent.handleSavingConfig(saveFile, mainWin->getProfileSettings().configLocation, mainWin->getRunInfo());
+	for (auto name : ArbGenEnum::allAgs) {
+		arbGens[(int)name].handleSavingConfig(saveFile, getProfileSettings().configLocation, mainWin->getRunInfo());
+	}
 }
 
 void QtScriptWindow::checkMasterSave (){
@@ -352,12 +376,14 @@ void QtScriptWindow::openMasterScript (std::string name){
 }
 
 void QtScriptWindow::considerScriptLocations() {
-	intensityAgilent.agilentScript.considerCurrentLocation(getProfile().configLocation, mainWin->getRunInfo());
+	for (auto name : ArbGenEnum::allAgs) {
+		arbGens[(int)name].arbGenScript.considerCurrentLocation(getProfile().configLocation, mainWin->getRunInfo());
+	}
 }
 
-void QtScriptWindow::updateProfile (std::string text){
-	profileDisplay.update (text);
-}
+//void QtScriptWindow::updateProfile (std::string text){
+//	//profileDisplay.update (text);
+//}
 
 profileSettings QtScriptWindow::getProfileSettings (){
 	return mainWin->getProfileSettings ();
@@ -368,5 +394,16 @@ void QtScriptWindow::updateConfigurationSavedStatus (bool status){
 }
 
 void QtScriptWindow::fillExpDeviceList (DeviceList& list) {
-	list.list.push_back(intensityAgilent.getCore());
+	for (auto name : ArbGenEnum::allAgs) {
+		list.list.push_back(arbGens[(int)name].getCore());
+	}
+}
+
+std::vector<std::reference_wrapper<ArbGenSystem>> QtScriptWindow::getArbGenSystem()
+{
+	std::vector<std::reference_wrapper<ArbGenSystem>> ags;
+	for (ArbGenSystem& ag : arbGens) {
+		ags.push_back(ag);
+	}
+	return ags;
 }

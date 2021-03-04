@@ -126,9 +126,8 @@ void IChimeraQtWindow::initializeMenu (){
 	profileM->addAction ("Save Entire Profile_X");
 	/// SCRIPTS
 	auto scriptsM = menubar->addMenu ("&Scripts");
-	auto masterSc = scriptsM->addMenu ("M&aster Script");
-	auto intM = scriptsM->addMenu("Int&ensity Script");
 
+	auto masterSc = scriptsM->addMenu ("M&aster Script");
 	auto* newMaster = new QAction ("Ne&w Master Script", this);
 	connect (newMaster, &QAction::triggered, [this, cmnMsg]() {cmnMsg (ID_MASTERSCRIPT_NEW, this); });
 	masterSc->addAction (newMaster);
@@ -142,22 +141,27 @@ void IChimeraQtWindow::initializeMenu (){
 	connect (saveMasterAs, &QAction::triggered, [this, cmnMsg]() {cmnMsg (ID_MASTERSCRIPT_SAVEAS, this); });
 	masterSc->addAction (saveMasterAs);
 	
-	/// 
-	auto* newInt = new QAction("Ne&w Intensity Agilent Script", this);
-	connect(newInt, &QAction::triggered, [this, cmnMsg]() {cmnMsg(ID_FILE_MY_INTENSITY_NEW, this); });
-	intM->addAction(newInt);
-	auto* openInt = new QAction("Op&en Intensity Agilent Script", this);
-	connect(openInt, &QAction::triggered, [this, cmnMsg]() {cmnMsg(ID_FILE_MY_INTENSITY_OPEN, this); });
-	intM->addAction(openInt);
-	auto* saveInt = new QAction("&Save Intensity Agilent Script", this);
-	connect(saveInt, &QAction::triggered, [this, cmnMsg]() {cmnMsg(ID_FILE_MY_INTENSITY_SAVE, this); });
-	intM->addAction(saveInt);
-	auto* saveasInt = new QAction("Save Intensity Agilent Script &As", this);
-	connect(saveasInt, &QAction::triggered, [this, cmnMsg]() {cmnMsg(ID_FILE_MY_INTENSITY_SAVEAS, this); });
-	intM->addAction(saveasInt);
-
-
-
+	///
+	scriptsM->addSeparator();
+	if (scriptWin != nullptr) {
+		auto arbGensRefs = scriptWin->getArbGenSystem();
+		for (auto arbGensRef : arbGensRefs) {
+			QString deviceName = qstr(arbGensRef.get().initSettings.deviceName);
+			QMenu* arbM = scriptsM->addMenu(deviceName + " Script");
+			QAction* newS = new QAction("Ne&w " + deviceName + " Sctript", this);
+			connect(newS, &QAction::triggered, [this, deviceName]() { scriptWin->newArbGenScript( ArbGenEnum::fromStr( deviceName.toStdString() ) ); });
+			arbM->addAction(newS);
+			QAction* openS = new QAction("Op&en " + deviceName + " Script", this);
+			connect(openS, &QAction::triggered, [this, deviceName]() {scriptWin->openArbGenScript( ArbGenEnum::fromStr( deviceName.toStdString() ), scriptWin); });
+			arbM->addAction(openS);
+			QAction* saveS = new QAction("&Save " + deviceName + " Script", this);
+			connect(saveS, &QAction::triggered, [this, deviceName]() {scriptWin->saveArbGenScript( ArbGenEnum::fromStr( deviceName.toStdString() ) ); });
+			arbM->addAction(saveS);
+			QAction* saveasS = new QAction("Save " + deviceName + " Script &As", this);
+			connect(saveasS, &QAction::triggered, [this, deviceName]() {scriptWin->saveArbGenScriptAs( ArbGenEnum::fromStr( deviceName.toStdString() ), scriptWin); });
+			arbM->addAction(saveasS);
+		}
+	}
 
 
 
