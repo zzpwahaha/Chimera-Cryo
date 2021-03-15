@@ -4,7 +4,9 @@
 #include "ParameterSystem/ParameterSystemStructures.h"
 #include <string>
 #include <vector>
-#include <AnalogOutput/calInfo.h>
+#include <AnalogInput/calInfo.h>
+
+
 class Expression {
 	public:
 		Expression( );

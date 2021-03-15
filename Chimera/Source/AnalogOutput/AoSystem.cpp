@@ -10,7 +10,7 @@
 #include "GeneralUtilityFunctions/range.h"
 #include <boost/lexical_cast.hpp>
 #include <ExperimentThread/ExpThreadWorker.h>
-#include "calInfo.h"
+#include <AnalogInput/calInfo.h>
 
 #include <qlayout.h>
 
@@ -289,6 +289,39 @@ void AoSystem::setDACs()
 	{
 		thrower("connection to zynq failed. can't trigger the sequence or new settings\n");
 	}
+}
+
+void AoSystem::setSingleDac(unsigned dacNumber, double val)
+{
+	int tcp_connect;
+	try
+	{
+		tcp_connect = zynq_tcp.connectTCP(ZYNQ_ADDRESS);
+	}
+	catch (ChimeraError& err)
+	{
+		tcp_connect = 1;
+		thrower(err.what());
+	}
+	/*update outputs first and do a standard, single dac command*/
+	outputs[dacNumber].info.currVal = val;
+	outputs[dacNumber].updateEdit();
+	if (tcp_connect == 0)
+	{
+		std::ostringstream stringStream;
+		std::string command;
+		stringStream.str("");
+		stringStream << "DAC_" << dacNumber << "_" <<
+			std::fixed << std::setprecision(numDigits) << outputs[dacNumber].info.currVal;
+		command = stringStream.str();
+		zynq_tcp.writeCommand(command);
+		zynq_tcp.disconnect();
+	}
+	else
+	{
+		thrower("connection to zynq failed. can't trigger the sequence or new settings\n");
+	}
+
 }
 
 

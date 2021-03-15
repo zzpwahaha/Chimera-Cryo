@@ -59,6 +59,7 @@ class AoSystem : public IChimeraSystem
 		// processing to determine how dac's get set
 		void handleSetDacsButtonPress( bool useDefault=false );
 		void zeroDacs();
+
 		/*below two seems need to be delete 2/16/2021 zzp*/
 		void setDacStatusNoForceOut(std::array<double, size_t(AOGrid::total)> status);
 		void prepareDacForceChange(int line, double voltage);
@@ -78,6 +79,7 @@ class AoSystem : public IChimeraSystem
 
 		//zynq
 		void setDACs();
+		void setSingleDac(unsigned dacNumber, double val); // used for calibration
 		bool IsquickChange() { return quickChange->isChecked(); }
 	private:
 

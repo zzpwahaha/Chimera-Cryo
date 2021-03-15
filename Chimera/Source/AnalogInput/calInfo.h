@@ -1,14 +1,13 @@
 #pragma once
 #include <string>
 #include <vector>
-#include <QString>
-#include <GeneralUtilityFunctions/my_str.h>
+#include <ArbGen/whichAg.h>
 
 struct calBase {
-	std::string dblVecToString (std::vector<double> ctrls) const {
+	static std::string dblVecToString (std::vector<double> ctrls) {
 		std::string ctrlString;
 		for (auto val : ctrls) {
-			ctrlString += str (val, 4, true) + " ";
+			ctrlString += str (val, 8, true) + " ";
 		}
 		return ctrlString;
 	}
@@ -20,16 +19,16 @@ struct calResult : public calBase {
 	std::vector<double> ctrlVals;
 	std::vector<double> resVals;
 	std::vector<double> calibrationCoefficients;
-	bool includesSqrt = true;
+	bool includesSqrt=true;
 	double calmin = 0;
 	double calmax = 0;
 	std::string stringRepr () const {
 		return calibrationName + " Calibration:"
 			+ "\n================================"
-			+ "\nControl Values: " + dblVecToString (ctrlVals)
-			+ "\nResult Values: " + dblVecToString (resVals)
-			+ "\nCalibration Coefficients: " + dblVecToString (calibrationCoefficients)
-			+ "\nIncludes Sqrt: " + (includesSqrt ? "True" : "False")
+			+ "\nControl Values: " + dblVecToString(ctrlVals) 
+			+ "\nResult Values: " + dblVecToString(resVals) 
+			+ "\nCalibration Coefficients: " + dblVecToString (calibrationCoefficients) 
+			+ "\nIncludes Sqrt: " + ( includesSqrt ? "True" : "False" )
 			+ "\nMin/Max: " + str (calmin) + "/" + str (calmax);
 	}
 };
@@ -39,11 +38,11 @@ struct calSettings : public calBase {
 	unsigned int aiInChan = 0;
 	unsigned int aoControlChannel = 0;
 	bool useAg = false;
+	ArbGenEnum::name whichAg;
 	unsigned agChannel;
 	QString ctrlPtString;
 	// in % from old value
 	bool calibrated = false;
-	//unsigned polynomialOrder = 6;
 	std::vector<std::pair<unsigned, unsigned> > ttlConfig;
 	std::vector<std::pair<unsigned, double>> aoConfig;
 	bool currentlyCalibrating = false;

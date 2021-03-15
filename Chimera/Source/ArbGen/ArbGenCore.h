@@ -1,15 +1,14 @@
 #pragma once
 
-#include "ArbGenSettings.h"
+#include "ArbGenStructures.h"
 #include "ParameterSystem/ParameterSystemStructures.h"
 #include "GeneralFlumes/VisaFlume.h"
-//#include "DigitalOutput/DoRows.h"
 #include "GeneralObjects/IDeviceCore.h"
 #include "ConfigurationSystems/ConfigStream.h"
 #include <vector>
 #include <string>
-//#include <AnalogInput/calInfo.h>
-#include <AnalogOutput/calInfo.h>
+#include <AnalogInput/calInfo.h>
+//#include <AnalogOutput/calInfo.h>
 
 class DoCore;
 class ArbGenCore : public IDeviceCore {

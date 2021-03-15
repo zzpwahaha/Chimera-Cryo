@@ -1,6 +1,23 @@
 ﻿#pragma once
 #include "LowLevel/constants.h"
-#include "ArbGenStructures.h"
+//#include "ArbGenStructures.h"
+
+struct arbGenSettings {
+	bool safemode;
+	std::string address;
+	unsigned long sampleRate;
+	// "INT" or "USB"
+	std::string memoryLocation;
+	std::string deviceName;
+
+	unsigned /*long*/ triggerRow;
+	unsigned /*long*/ triggerNumber;
+	std::string configurationFileDelimiter;
+
+	std::vector<double> calibrationCoeff;
+	std::vector<std::string> setupCommands;
+};
+
 
 // NOT IN USE AT THE MOMENT (Nov 27th, 2020)
 const arbGenSettings UWAVE_AGILENT_SETTINGS = {

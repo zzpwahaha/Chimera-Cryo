@@ -4,8 +4,8 @@
 #include "SegmentEnd.h"
 #include <string>
 #include <vector>
-//#include <AnalogInput/calInfo.h>
-#include <AnalogOutput/calInfo.h>
+#include <AnalogInput/calInfo.h>
+//#include <AnalogOutput/calInfo.h>
 
 class ScriptStream;
 /**

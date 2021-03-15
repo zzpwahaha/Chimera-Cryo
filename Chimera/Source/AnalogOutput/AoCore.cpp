@@ -616,7 +616,20 @@ int AoCore::getDacIdentifier(std::string name)
 	return -1;
 }
 
-
+int AoCore::getBasicDacIdentifier(std::string name)
+{
+	for (auto dacInc : range(size_t(AOGrid::total)))
+	{
+		// check names set by user and check standard names which are always acceptable
+		if (name == "dac" +
+			str(dacInc / size_t(AOGrid::numPERunit)) + "_" +
+			str(dacInc % size_t(AOGrid::numPERunit))/*"dac" + str ( dacInc )*/) {
+			return dacInc;
+		}
+	}
+	// not an identifier.
+	return -1;
+}
 
 
 

@@ -670,7 +670,7 @@ bool Script::eventFilter(QObject* obj, QEvent* event)
 		QWheelEvent* wheel = static_cast<QWheelEvent*>(event);
 		if (wheel->modifiers() == Qt::ControlModifier)
 		{
-			if (wheel->delta() > 0)
+			if (wheel->angleDelta().y() > 0)
 			{
 				edit->zoomIn();
 				editZoom++;

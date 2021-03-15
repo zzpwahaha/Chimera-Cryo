@@ -2,30 +2,13 @@
 #pragma once
 
 #include "ScriptedArbGenWaveform.h"
-//#include "ScriptedAgilentWaveform.h"
 #include "ArbGenChannelMode.h"
+#include "ArbGenSettings.h"
 #include "ParameterSystem/Expression.h"
-//#include "DigitalOutput/DoRows.h"
 #include <string>
 #include <array>
 
 //class Agilent;
-
-struct arbGenSettings{
-	bool safemode;
-	std::string address;
-	unsigned long sampleRate;
-	// "INT" or "USB"
-	std::string memoryLocation;
-	std::string deviceName;
-
-	unsigned /*long*/ triggerRow;
-	unsigned /*long*/ triggerNumber;
-	std::string configurationFileDelimiter;
-
-	std::vector<double> calibrationCoeff;
-	std::vector<std::string> setupCommands;
-};
 
 struct minMaxDoublet{
 	double min;

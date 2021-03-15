@@ -19,7 +19,8 @@
 	constexpr bool DOFTDI_SAFEMODE = true;
 	constexpr bool DDS_SAFEMODE = true;
 	constexpr bool ANDOR_SAFEMODE = true;
-	constexpr bool OFFSETLOCK_SAFEMODE = false;
+	constexpr bool OFFSETLOCK_SAFEMODE = true/*false*/;
+	constexpr bool ANALOG_IN_SAFEMODE = true;
 	#ifdef _DEBUG
 		constexpr bool PYTHON_SAFEMODE = true;
 	#else

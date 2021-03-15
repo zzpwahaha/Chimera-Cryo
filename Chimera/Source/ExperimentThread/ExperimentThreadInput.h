@@ -19,7 +19,7 @@
 #include "ExperimentType.h"
 #include "DeviceList.h"
 
-#include <AnalogOutput/calInfo.h>
+#include <AnalogInput/calInfo.h>
 #include "ZynqTcp/ZynqTcp.h"
 
 

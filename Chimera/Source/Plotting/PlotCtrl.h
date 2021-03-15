@@ -16,12 +16,14 @@
 #include <memory>
 
 enum class plotStyle{
+	PicturePlot,
 	// ttl and dac plot use steps.
 	TtlPlot,
 	DacPlot,
 	// uses circs and error bars to represent data and errors
 	BinomialDataPlot,
 	GeneralErrorPlot,
+	CalibrationPlot,
 	// uses bars for histograms
 	HistPlot,
 	VertHist,

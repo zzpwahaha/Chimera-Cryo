@@ -27,16 +27,25 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Scripts\Script.cpp">
+    <ClCompile Include="3rd_Party\qcustomplot\qcustomplot.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Scripts\ScriptStream.cpp">
+    <ClCompile Include="Source\AnalogInput\AiSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Scripts\SyntaxHighlighter.cpp">
+    <ClCompile Include="Source\AnalogInput\AiUnits.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\AnalogInput\CalibrationManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\AnalogInput\CalibrationThreadWorker.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\AnalogOutput\AnalogOutput.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\AnalogOutput\AoCore.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\AnalogOutput\AoSystem.cpp">
@@ -75,6 +84,33 @@
     <ClCompile Include="Source\Andor\PictureSettingsControl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\ArbGen\AgilentCore.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ArbGen\ArbGenChannelMode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ArbGen\ArbGenCore.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ArbGen\ArbGenSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ArbGen\ScriptedArbGenWaveform.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ArbGen\Segment.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ArbGen\SegmentEnd.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ArbGen\SiglentCore.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ArbGen\whichAg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="Source\ConfigurationSystems\ConfigStream.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -105,7 +141,19 @@
     <ClCompile Include="Source\DataLogging\DataLogger.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\DigitalOutput\DigitalOutput.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\DigitalOutput\DoCore.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\DigitalOutput\DoSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="Source\DirectDigitalSynthesis\DdsCore.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\DirectDigitalSynthesis\DdsOutput.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\DirectDigitalSynthesis\DdsSystem.cpp">
@@ -117,7 +165,13 @@
     <ClCompile Include="Source\ExcessDialogs\AoSettingsDialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\ExcessDialogs\DdsSettingsDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="Source\ExcessDialogs\doChannelInfoDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ExcessDialogs\OlSettingsDialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\ExcessDialogs\openWithExplorer.cpp">
@@ -177,6 +231,9 @@
     <ClCompile Include="Source\GeneralObjects\IChimeraSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\GeneralObjects\IDeviceCore.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="Source\GeneralUtilityFunctions\cleanString.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -204,6 +261,15 @@
     <ClCompile Include="Source\MiscellaneousExperimentOptions\Repetitions.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\OffsetLock\OffsetLockOutput.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\OffsetLock\OlCore.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\OffsetLock\OlSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="Source\ParameterSystem\Expression.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -220,6 +286,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\Plotting\PlottingInfo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Plotting\QCustomPlotCtrl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\PrimaryWindows\IChimeraQtWindow.cpp">
@@ -258,96 +327,161 @@
     <ClCompile Include="Source\RealTimeDataAnalysis\QtPlotDesignerDlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\ZynqTCP\ZynqTCP.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\DigitalOutput\DigitalOutput.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\DigitalOutput\DoCore.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\DigitalOutput\DoSystem.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\DirectDigitalSynthesis\DdsOutput.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\ExcessDialogs\DdsSettingsDialog.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\AnalogOutput\AoCore.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="3rd_Party\qcustomplot\qcustomplot.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Source\Scripts\CQCodeEdit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\OffsetLock\OlCore.cpp">
+    <ClCompile Include="Source\Scripts\Script.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\OffsetLock\OffsetLockOutput.cpp">
+    <ClCompile Include="Source\Scripts\ScriptStream.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\OffsetLock\OlSystem.cpp">
+    <ClCompile Include="Source\Scripts\SyntaxHighlighter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\ExcessDialogs\OlSettingsDialog.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\GeneralObjects\IDeviceCore.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\ArbGen\AgilentCore.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\ArbGen\ArbGenChannelMode.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\ArbGen\ArbGenCore.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\ArbGen\ArbGenSystem.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\ArbGen\ScriptedArbGenWaveform.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\ArbGen\Segment.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\ArbGen\SegmentEnd.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\ArbGen\whichAg.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\ArbGen\SiglentCore.cpp">
+    <ClCompile Include="Source\ZynqTCP\ZynqTCP.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Source\stdafx.h">
+    <QtMoc Include="3rd_Party\qcustomplot\qcustomplot.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\AnalogInput\CalibrationThreadWorker.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\Andor\AndorCameraThreadWorker.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\ConfigurationSystems\ConfigSystem.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\ConfigurationSystems\NoteSystem.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\ConfigurationSystems\ProfileIndicator.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\DigitalOutput\DoSystem.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\ExcessDialogs\AoSettingsDialog.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\ExcessDialogs\DdsSettingsDialog.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\ExcessDialogs\doChannelInfoDialog.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\ExcessDialogs\OlSettingsDialog.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\ExperimentMonitoringAndStatus\ColorBox.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\ExperimentMonitoringAndStatus\StatusControl.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\ExperimentThread\ExpThreadWorker.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\GeneralImaging\ImageLabel.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\GeneralImaging\PictureControl.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\GeneralObjects\IChimeraSystem.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\MiscellaneousExperimentOptions\DebugOptionsControl.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\MiscellaneousExperimentOptions\MainOptionsControl.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\MiscellaneousExperimentOptions\Repetitions.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\ParameterSystem\ParameterModel.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\ParameterSystem\ParameterSystem.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\Plotting\PlotCtrl.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\Plotting\QCustomPlotCtrl.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\PrimaryWindows\IChimeraQtWindow.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\PrimaryWindows\QtAndorWindow.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\PrimaryWindows\QtAuxiliaryWindow.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\PrimaryWindows\QtMainWindow.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\PrimaryWindows\QtScriptWindow.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\RealTimeDataAnalysis\AnalysisThreadWorker.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\RealTimeDataAnalysis\AtomCruncherWorker.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\RealTimeDataAnalysis\MachineOptimizer.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\RealTimeDataAnalysis\QtPlotDesignerDlg.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\Scripts\CQCodeEdit.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\Scripts\Script.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\Scripts\SyntaxHighlighter.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Source\AnalogInput\AiSettings.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Scripts\ScriptableDevices.h">
+    <ClInclude Include="Source\AnalogInput\AiSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Scripts\ScriptStream.h">
+    <ClInclude Include="Source\AnalogInput\AiUnits.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\AnalogInput\CalibrationManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\AnalogInput\PhotodetectorCalibration.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\AnalogInput\servoInfo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\AnalogOutput\AnalogOutput.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\AnalogOutput\AoCore.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\AnalogOutput\AoStructures.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\AnalogOutput\AoSystem.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\AnalogOutput\calInfo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\AnalogOutput\DaqMxFlume.h">
@@ -389,6 +523,42 @@
     <ClInclude Include="Source\Andor\PictureSettingsControl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Source\ArbGen\AgilentCore.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ArbGen\ArbGenChannelMode.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ArbGen\ArbGenCore.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ArbGen\ArbGenSettings.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ArbGen\ArbGenStructures.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ArbGen\ArbGenSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ArbGen\ScriptedArbGenWaveform.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ArbGen\Segment.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ArbGen\SegmentEnd.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ArbGen\segmentStructs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ArbGen\SiglentCore.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ArbGen\whichAg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="Source\ConfigurationSystems\ConfigStream.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -413,7 +583,19 @@
     <ClInclude Include="Source\DataLogging\DataLogger.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Source\DigitalOutput\DigitalOutput.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\DigitalOutput\DoCore.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\DigitalOutput\DoStructures.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="Source\DirectDigitalSynthesis\DdsCore.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\DirectDigitalSynthesis\DdsOutput.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\DirectDigitalSynthesis\DdsSystem.h">
@@ -435,6 +617,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\ExperimentMonitoringAndStatus\StatusIndicator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ExperimentMonitoringAndStatus\statusMsg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\ExperimentThread\AllExperimentInput.h">
@@ -459,6 +644,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\GeneralFlumes\ftdiStructures.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\GeneralFlumes\QtSerialFlume.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\GeneralFlumes\VisaFlume.h">
@@ -536,6 +724,18 @@
     <ClInclude Include="Source\MiscellaneousExperimentOptions\debugInfo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Source\OffsetLock\OffsetLockOutput.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\OffsetLock\OlCore.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\OffsetLock\OlStructure.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\OffsetLock\OlSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="Source\ParameterSystem\Expression.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -578,181 +778,20 @@
     <ClInclude Include="Source\RealTimeDataAnalysis\realTimePlotterInput.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\DigitalOutput\DigitalOutput.h">
+    <ClInclude Include="Source\Scripts\ScriptableDevices.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\DigitalOutput\DoCore.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\DigitalOutput\DoStructures.h">
+    <ClInclude Include="Source\Scripts\ScriptStream.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\ZynqTCP\ZynqTCP.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\DirectDigitalSynthesis\DdsOutput.h">
+    <ClInclude Include="Source\stdafx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\AnalogOutput\AoCore.h">
+    <ClInclude Include="Source\AnalogInput\calInfo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\GeneralFlumes\QtSerialFlume.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\OffsetLock\OlStructure.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\OffsetLock\OlCore.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\OffsetLock\OffsetLockOutput.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\OffsetLock\OlSystem.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\ExperimentMonitoringAndStatus\statusMsg.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\ArbGen\AgilentCore.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\ArbGen\ArbGenChannelMode.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\ArbGen\ArbGenCore.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\ArbGen\ArbGenSettings.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\ArbGen\ArbGenStructures.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\ArbGen\ArbGenSystem.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\ArbGen\ScriptedArbGenWaveform.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\ArbGen\Segment.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\ArbGen\SegmentEnd.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\ArbGen\segmentStructs.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\ArbGen\whichAg.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\ArbGen\SiglentCore.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <QtMoc Include="Source\Scripts\Script.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="Source\Scripts\SyntaxHighlighter.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="Source\Andor\AndorCameraThreadWorker.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="Source\ConfigurationSystems\ConfigSystem.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="Source\ConfigurationSystems\NoteSystem.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="Source\ConfigurationSystems\ProfileIndicator.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="Source\ExcessDialogs\AoSettingsDialog.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="Source\ExcessDialogs\doChannelInfoDialog.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="Source\ExperimentMonitoringAndStatus\ColorBox.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="Source\ExperimentMonitoringAndStatus\StatusControl.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="Source\ExperimentThread\ExpThreadWorker.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="Source\GeneralImaging\ImageLabel.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="Source\GeneralImaging\PictureControl.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="Source\GeneralObjects\IChimeraSystem.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="Source\MiscellaneousExperimentOptions\DebugOptionsControl.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="Source\MiscellaneousExperimentOptions\MainOptionsControl.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="Source\MiscellaneousExperimentOptions\Repetitions.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="Source\ParameterSystem\ParameterModel.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="Source\ParameterSystem\ParameterSystem.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="Source\Plotting\PlotCtrl.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="Source\PrimaryWindows\IChimeraQtWindow.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="Source\PrimaryWindows\QtAndorWindow.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="Source\PrimaryWindows\QtAuxiliaryWindow.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="Source\PrimaryWindows\QtMainWindow.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="Source\PrimaryWindows\QtScriptWindow.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="Source\RealTimeDataAnalysis\AnalysisThreadWorker.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="Source\RealTimeDataAnalysis\AtomCruncherWorker.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="Source\RealTimeDataAnalysis\QtPlotDesignerDlg.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="Source\RealTimeDataAnalysis\MachineOptimizer.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="Source\DigitalOutput\DoSystem.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="Source\ExcessDialogs\DdsSettingsDialog.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="3rd_Party\qcustomplot\qcustomplot.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="Source\Scripts\CQCodeEdit.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="Source\ExcessDialogs\OlSettingsDialog.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
   </ItemGroup>
 </Project>

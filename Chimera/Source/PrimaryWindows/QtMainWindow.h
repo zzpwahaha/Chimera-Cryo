@@ -19,7 +19,7 @@
 #include "GeneralUtilityFunctions/commonFunctions.h"
 #include "GeneralObjects/RunInfo.h"
 #include "CustomMessages.h"
-#include <AnalogOutput/calInfo.h>
+#include <AnalogInput/calInfo.h>
 #include <string>
 #include <vector>
 #include <future>

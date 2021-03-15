@@ -129,7 +129,7 @@ void AnalogOutput::updateEdit ( bool roundToDacPrecision )
 	std::string valStr = roundToDacPrecision ? str ( roundToDacResolution ( info.currVal ), 13, true, false, true )
 		: str ( info.currVal, numDigits, false, false, false );
 	int pos = edit->cursorPosition ();
-	edit->setText (cstr (valStr));
+	edit->setText(valStr.c_str());
 	edit->setCursorPosition (pos);
 }
 

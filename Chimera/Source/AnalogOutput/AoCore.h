@@ -46,6 +46,7 @@ public:
 
 	void handleDacScriptCommand(AoCommandForm command, std::string name, std::vector<parameterType>& vars);
 	int getDacIdentifier(std::string name);
+	static int getBasicDacIdentifier(std::string name);
 	bool isValidDACName(std::string name);
 	
 

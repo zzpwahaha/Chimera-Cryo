@@ -2,7 +2,7 @@
 #include <string>
 #include <GeneralObjects/coordinate.h>
 #include <RealTimeDataAnalysis/atomGrid.h>
-#include <AnalogOutput/calInfo.h>
+#include <AnalogInput/calInfo.h>
 // this class is just for conveniently grouping any python handling together. 
 class NewPythonHandler {
 	public:
