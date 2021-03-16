@@ -2,8 +2,14 @@
 #include "stdafx.h"
 #include "AiSystem.h"
 #include <qtimer.h>
+#include <qlayout.h>
 
-AiSystem::AiSystem( ) : daqmx( ANALOG_IN_SAFEMODE ) {
+AiSystem::AiSystem(IChimeraQtWindow* parent)
+	: IChimeraSystem(parent)
+	, socket(AI_SAFEMODE, AI_SOCKET_ADDRESS, AI_SOCKET_PORT)
+	, daqmx( ANALOG_IN_SAFEMODE ) {
+	socket.write("mac", terminator);
+	socket.read();
 }
 
 /*
@@ -24,68 +30,63 @@ std::string AiSystem::getSystemStatus( ){
 
 void AiSystem::refreshDisplays( ){
 	for ( auto dispInc : range(voltDisplays.size())){
-		voltDisplays[dispInc]->setText( str(currentValues[dispInc], 4).c_str() );
+		voltDisplays[dispInc]->setText( str(currentValues[dispInc], numDigits).c_str() );
 	}
 }
 
 
-void AiSystem::initialize (QPoint& loc, IChimeraQtWindow* parent) {
-	auto& px = loc.rx (), & py = loc.ry ();
-	initDaqmx ();
-	title = new QLabel ("ANALOG-INPUT", parent);
-	title->setGeometry ({ QPoint{px, py}, QPoint{px + 480, py += 25} });
+void AiSystem::initialize (IChimeraQtWindow* parent) 
+{
+	//initDaqmx ();
+	QVBoxLayout* layout = new QVBoxLayout(this);
+	layout->setContentsMargins(0, 0, 0, 0);
+	this->setMaximumWidth(1000);
+	QLabel* title = new QLabel ("ANALOG-INPUT", parent);
+	layout->addWidget(title, 0);
+
+	QHBoxLayout* layout1 = new QHBoxLayout();
+	layout1->setContentsMargins(0, 0, 0, 0);
 
 	getValuesButton = new CQPushButton ("Get Values", parent);
-	getValuesButton->setGeometry (px, py, 160, 25);
 	parent->connect (getValuesButton, &QPushButton::released, [this]() { refreshCurrentValues (); refreshDisplays (); });
-	px += 160;
 	continuousQueryCheck = new CQCheckBox ("Qry Cont.", parent);
-	continuousQueryCheck->setGeometry (px, py, 160, 25);
-	px += 160;
 	queryBetweenVariations = new CQCheckBox ("Qry Btwn Vars", parent);
-	queryBetweenVariations->setGeometry (px, py, 160, 25);
-	py += 25;
-	px -= 320; 
+	layout1->addWidget(getValuesButton, 0);
+	layout1->addWidget(continuousQueryCheck, 0);
+	layout1->addWidget(queryBetweenVariations, 0);
+	layout1->addStretch(1);
+	layout->addLayout(layout1, 0);
+
+	QHBoxLayout* layout2 = new QHBoxLayout();
+	layout2->setContentsMargins(0, 0, 0, 0);
+
 	continuousIntervalLabel = new QLabel ("Cont. Interval:", parent);
-	continuousIntervalLabel->setGeometry (px, py, 160, 20);
 	continuousInterval = new CQLineEdit (qstr (AiSettings ().continuousModeInterval), parent);
-	continuousInterval->setGeometry (px + 160, py, 80, 20);
+	
 	QTimer::singleShot (1000, this, &AiSystem::handleTimer);
 	avgNumberLabel = new QLabel ("# To Avg:", parent);
-	avgNumberLabel->setGeometry (px + 240, py, 160, 20);
-
 	avgNumberEdit = new CQLineEdit (qstr (AiSettings ().numberMeasurementsToAverage), parent);
-	avgNumberEdit->setGeometry (px + 400, py, 80, 20);
-	py += 20;
-	// there's a single label first, hence the +1.
-	long dacInc = 0, collumnInc = 0, numCols=4;
-	long colSize = long(480 / numCols);
-	for ( auto& disp : voltDisplays ){
-		if ( dacInc == (collumnInc + 1) * NUMBER_AI_CHANNELS / numCols ){	// then next column. 
-			collumnInc++;
-			py -= 20 * NUMBER_AI_CHANNELS / numCols;
-		}
-		disp = new QLabel ("0", parent);
-		disp->setGeometry (px + 20 + collumnInc * colSize, py, colSize-20, 20);
-		py += 20;
-		dacInc++;
-	}
-	collumnInc = 0;
-	py -= long(20 * voltDisplays.size( ) / numCols);
+	layout2->addWidget(continuousIntervalLabel, 0);
+	layout2->addWidget(continuousInterval, 1);
+	layout2->addWidget(avgNumberLabel, 0);
+	layout2->addWidget(avgNumberEdit, 1);
+	layout2->addStretch(1);
+	layout->addLayout(layout2, 0);
 
-	for ( auto dacInc : range( NUMBER_AI_CHANNELS ) ){
-		auto& label = dacLabels[dacInc];
-		if ( dacInc == (collumnInc + 1) * NUMBER_AI_CHANNELS / numCols)	{	// then next column
-			collumnInc++;
-			py -= 20 * NUMBER_AI_CHANNELS / numCols;
-		}
-		label = new QLabel (cstr (dacInc), parent);
-		label->setGeometry (px + collumnInc * colSize, py, 20, 20);
-		QFont font = label->font ();
-		font.setUnderline (true);
-		label->setFont (font);
-		py += 20;
+	QGridLayout* AIGridLayout = new QGridLayout();
+	std::array<std::string, 2> chnlStr = { "A","B" };
+	for (size_t i = 0; i < NUMBER_AI_CHANNELS; i++)
+	{
+		QHBoxLayout* lay = new QHBoxLayout();
+		lay->setContentsMargins(0, 0, 0, 0);
+		lay->addWidget(new QLabel(qstr(chnlStr[i % AI_NumOfUnit] + str(i / AI_NumOfUnit))),0);
+		voltDisplays[AI_NumPerUnit * (i % AI_NumOfUnit) + (i / AI_NumOfUnit)] = new QLabel("0", parent);
+		lay->addWidget(voltDisplays[AI_NumPerUnit * (i % AI_NumOfUnit) + (i / AI_NumOfUnit)], 0);
+		lay->addStretch(1);
+		AIGridLayout->addLayout(lay, i / AI_NumPerUnit, i % AI_NumPerUnit);
 	}
+	layout->addLayout(AIGridLayout);
+
 }
 
 void AiSystem::handleTimer () {

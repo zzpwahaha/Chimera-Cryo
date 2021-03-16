@@ -80,7 +80,10 @@
 	const std::string UWAVE_SIGLENT_ADDRESS = "TCPIP0::10.10.0.4::inst0::INSTR";
 	const std::string RAMP_LOCATION = str(CODE_ROOT) + "\\Ramp_Files\\";
 
-
+	//Analog in 
+	const bool AI_SAFEMODE = false;
+	const std::string AI_SOCKET_ADDRESS = "10.10.0.10";
+	const unsigned short AI_SOCKET_PORT = 80;
 
 #endif
 /// Random other Constants

@@ -9,6 +9,7 @@
 
 #include "DigitalOutput/DoSystem.h"
 #include "AnalogOutput/AoSystem.h"
+#include "AnalogInput/AiSystem.h"
 #include "DirectDigitalSynthesis/DdsSystem.h"
 #include "OffsetLock/OlSystem.h"
 
@@ -104,6 +105,7 @@ class QtAuxiliaryWindow : public IChimeraQtWindow{
 		/// control system classes
 		DoSystem ttlBoard;
 		AoSystem aoSys;
+		AiSystem aiSys;
 		DdsSystem dds;
 		OlSystem olSys;
 

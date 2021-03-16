@@ -2,7 +2,7 @@
 #pragma once
 #include "LowLevel/constants.h"
 #include "AnalogInput/AiSettings.h"
-#include "GeneralObjects/IDeviceCore.h"
+#include "GeneralObjects/IChimeraSystem.h"
 #include "ConfigurationSystems/Version.h"
 #include "Scripts/ScriptStream.h"
 #include "AnalogOutput/DaqMxFlume.h"
@@ -11,6 +11,7 @@
 #include <QLabel.h>
 #include <CustomQtControls/AutoNotifyCtrls.h>
 
+#include <GeneralFlumes/QtSocketFlume.h>
 #include "nidaqmx2.h"
 #include <array>
 
@@ -19,19 +20,21 @@
  * This is a interface for taking analog input data through an NI card that uses DAQmx. These cards are generally 
  * somewhat flexible, but right now I only use it to readbtn and record voltage values from Analog inputs.
  */
-class AiSystem : public IDeviceCore{
+class AiSystem : public IChimeraSystem{
 	public:
-		static constexpr auto NUMBER_AI_CHANNELS = 8;
+		static constexpr unsigned AI_NumPerUnit = 8;
+		static constexpr unsigned AI_NumOfUnit = 2;
+		static constexpr unsigned NUMBER_AI_CHANNELS = AI_NumPerUnit * AI_NumOfUnit;
 
 		// THIS CLASS IS NOT COPYABLE.
 		AiSystem& operator=(const AiSystem&) = delete;
 		AiSystem (const AiSystem&) = delete;
 
-		AiSystem( );
+		AiSystem(IChimeraQtWindow* parent);
 		AiSettings getAiSettings ();
 		void handleTimer ();
 		void initDaqmx( );
-		void initialize( QPoint& loc, IChimeraQtWindow* parent );
+		void initialize(IChimeraQtWindow* parent );
 		void refreshDisplays( );
 		void refreshCurrentValues( );
 		std::array<float64, NUMBER_AI_CHANNELS> getSingleSnapArray( unsigned n_to_avg );
@@ -56,9 +59,8 @@ class AiSystem : public IDeviceCore{
 		void normalFinish () {};
 		void errorFinish () {};
 	private:
-		QLabel* title;
 		std::array<QLabel*, NUMBER_AI_CHANNELS> voltDisplays;
-		std::array<QLabel*, NUMBER_AI_CHANNELS> dacLabels;
+
 		CQPushButton* getValuesButton;
 		CQCheckBox* continuousQueryCheck;
 		CQCheckBox* queryBetweenVariations;
@@ -68,12 +70,19 @@ class AiSystem : public IDeviceCore{
 
 		CQLineEdit* avgNumberEdit;
 		QLabel* avgNumberLabel;
+
+		QtSocketFlume socket;
+		const QByteArray terminator = QByteArray("#\0", 2);
+
 		// float64 should just be a double type.
 		std::array<float64, NUMBER_AI_CHANNELS> currentValues;
 		std::vector<float64> aquisitionData;
 		TaskHandle analogInTask0 = nullptr;
 		DaqMxFlume daqmx;
 		const std::string boardName = "dev2";
+
+		static constexpr double adcResolution = 20.0 / 0xffff; /*16bit adc*/
+		const int numDigits = static_cast<int>(abs(round(log10(adcResolution) - 0.49)));
 };
 
 

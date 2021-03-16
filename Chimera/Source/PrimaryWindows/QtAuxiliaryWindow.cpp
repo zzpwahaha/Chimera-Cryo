@@ -15,6 +15,7 @@ QtAuxiliaryWindow::QtAuxiliaryWindow (QWidget* parent)
 	: IChimeraQtWindow (parent)
 	, ttlBoard (this)
 	, aoSys (this)
+	, aiSys(this)
 	, configParamCtrl (this, "CONFIG_PARAMETERS")
 	, globalParamCtrl (this, "GLOBAL_PARAMETERS")
 	, dds (this, DDS_SAFEMODE)
@@ -59,7 +60,6 @@ void QtAuxiliaryWindow::initializeWidgets (){
 
 		olSys.initialize(this);
 		layout1->addWidget(&olSys, 0);
-
 		layout1->addStretch(1);
 
 		QVBoxLayout* layout3 = new QVBoxLayout();
@@ -79,49 +79,53 @@ void QtAuxiliaryWindow::initializeWidgets (){
 		layout3->addWidget(&optimizer, 1);
 		
 		QVBoxLayout* layout2 = new QVBoxLayout();
-		
-		aoPlots.resize (NUM_DAC_PLTS);
-		// initialize plot controls.
-		for (auto dacPltCount : range (aoPlots.size ())){
-			std::string titleTxt;
-			switch (dacPltCount){
-			case 0:
-				titleTxt = "DACs: 0-7";
-				break;
-			case 1:
-				titleTxt = "DACs: 8-15";
-				break;
-			case 2:
-				titleTxt = "DACs: 16-23";
-				break;
-			}
-			aoPlots[dacPltCount] = new PlotCtrl (8, plotStyle::DacPlot, std::vector<int> (), titleTxt);
-			aoPlots[dacPltCount]->init ( this);
-			layout2->addWidget(aoPlots[dacPltCount]->getView(), 1);
-		}
-		// ttl plots are similar to aoSys.
-		ttlPlots.resize (NUM_TTL_PLTS);
-		for (auto ttlPltCount : range (ttlPlots.size ())){
-			// currently assuming 4 ttl plots...
-			std::string titleTxt;
-			switch (ttlPltCount){
-			case 0:
-				titleTxt = "Ttls: Row A";
-				break;
-			case 1:
-				titleTxt = "Ttls: Row B";
-				break;
-			case 2:
-				titleTxt = "Ttls: Row C";
-				break;
-			case 3:
-				titleTxt = "Ttls: Row D";
-				break;
-			}
-			ttlPlots[ttlPltCount] = new PlotCtrl (16, plotStyle::TtlPlot, std::vector<int> (), titleTxt);
-			ttlPlots[ttlPltCount]->init (this);
-			layout2->addWidget(ttlPlots[ttlPltCount]->getView(), 1);
-		}
+
+		/* initialize plot controls.*/
+		//aoPlots.resize (NUM_DAC_PLTS);
+		//for (auto dacPltCount : range (aoPlots.size ())){
+		//	std::string titleTxt;
+		//	switch (dacPltCount){
+		//	case 0:
+		//		titleTxt = "DACs: 0-7";
+		//		break;
+		//	case 1:
+		//		titleTxt = "DACs: 8-15";
+		//		break;
+		//	case 2:
+		//		titleTxt = "DACs: 16-23";
+		//		break;
+		//	}
+		//	aoPlots[dacPltCount] = new PlotCtrl (8, plotStyle::DacPlot, std::vector<int> (), titleTxt);
+		//	aoPlots[dacPltCount]->init ( this);
+		//	layout2->addWidget(aoPlots[dacPltCount]->getView(), 1);
+		//}
+		//// ttl plots are similar to aoSys.
+		//ttlPlots.resize (NUM_TTL_PLTS);
+		//for (auto ttlPltCount : range (ttlPlots.size ())){
+		//	// currently assuming 4 ttl plots...
+		//	std::string titleTxt;
+		//	switch (ttlPltCount){
+		//	case 0:
+		//		titleTxt = "Ttls: Row A";
+		//		break;
+		//	case 1:
+		//		titleTxt = "Ttls: Row B";
+		//		break;
+		//	case 2:
+		//		titleTxt = "Ttls: Row C";
+		//		break;
+		//	case 3:
+		//		titleTxt = "Ttls: Row D";
+		//		break;
+		//	}
+		//	ttlPlots[ttlPltCount] = new PlotCtrl (16, plotStyle::TtlPlot, std::vector<int> (), titleTxt);
+		//	ttlPlots[ttlPltCount]->init (this);
+		//	layout2->addWidget(ttlPlots[ttlPltCount]->getView(), 1);
+		//}
+		aiSys.initialize(this);
+		layout2->addWidget(&aiSys);
+		layout2->addStretch(1);
+
 		layout1->setContentsMargins(0, 0, 0, 0);
 		layout2->setContentsMargins(0, 0, 0, 0);
 		layout3->setContentsMargins(0, 0, 0, 0);

@@ -86,11 +86,11 @@ std::string QtSerialFlume::read ()
 			port.clear();
 			return str(qs); 
 		}
-		thrower("No data to read in serial COM: " + str(portAddress) + " after 45 ms.");
+		thrower("No data to read in serial COM: " + str(portAddress) + " after 500 ms.");
 		return std::string("");
 	}
 	else {
-		thrower("No data to read in serial COM: " + str(portAddress) + " after 45 ms.");
+		thrower("No data to read in serial COM: " + str(portAddress) + " after 500 ms.");
 		return std::string("");
 	}
 }
