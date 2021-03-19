@@ -199,6 +199,7 @@ void QtAuxiliaryWindow::windowSaveConfig (ConfigStream& saveFile){
 	ttlBoard.handleSaveConfig (saveFile);
 	aoSys.handleSaveConfig (saveFile);
 	dds.handleSaveConfig (saveFile);
+	aiSys.handleSaveConfig(saveFile);
 }
 
 void QtAuxiliaryWindow::windowOpenConfig (ConfigStream& configFile){
@@ -208,6 +209,7 @@ void QtAuxiliaryWindow::windowOpenConfig (ConfigStream& configFile){
 		ConfigSystem::standardOpenConfig (configFile, "DACS", &aoSys);
 		aoSys.updateEdits ();
 		ConfigSystem::standardOpenConfig (configFile, dds.getDelim (), &dds);
+		ConfigSystem::standardOpenConfig(configFile, aiSys.getDelim(), &aiSys);
 	}
 	catch (ChimeraError&){
 		throwNested ("Auxiliary Window failed to read parameters from the configuration file.");

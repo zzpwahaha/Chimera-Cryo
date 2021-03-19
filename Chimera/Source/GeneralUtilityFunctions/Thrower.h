@@ -17,7 +17,7 @@ class ChimeraError : public std::runtime_error{
 	ChimeraError ( const std::string &arg, const char *file, int line ) : std::runtime_error ( arg )	{
 		loc = std::string ( file ) + "; line " + std::to_string ( line );
 		std::ostringstream out;
-		out << arg << "\n@ Location:" << loc;
+		out << arg << "\n@ Location:" << loc << '\n';
 		msg = out.str ( );
 		bareMsg = arg;
 	}

@@ -4,6 +4,7 @@
 #include <Windows.h> 
 
 
+
 QtSocketFlume::QtSocketFlume(bool safemode_option, std::string hostAddress_, unsigned short hostPort_)
 	: safemode(safemode_option)
 	, hostAddress(hostAddress_)
@@ -32,10 +33,9 @@ void QtSocketFlume::close()
 	socket.disconnectFromHost(); /*same as socket.close()*/
 }
 
-void QtSocketFlume::write(std::string msg, QByteArray terminator)
+void QtSocketFlume::write(QByteArray ba, QByteArray terminator)
 {
 	if (!safemode) {
-		QByteArray ba = QString::fromStdString(msg).toUtf8();
 		ba.append(terminator);
 		int err = socket.write(ba);
 		bool written = socket.waitForBytesWritten(100);
@@ -56,7 +56,18 @@ void QtSocketFlume::write(std::string msg, QByteArray terminator)
 				+ ", error" + str(socket.errorString()));
 		}
 	}
+}
 
+void QtSocketFlume::write(std::string msg, QByteArray terminator)
+{
+	QByteArray ba = QByteArray::fromStdString(msg);
+	write(ba, terminator);
+
+}
+
+void QtSocketFlume::write(const char* msg, QByteArray terminator)
+{
+	write(QByteArray(msg), terminator);
 }
 
 void QtSocketFlume::resetConnection()
@@ -65,11 +76,13 @@ void QtSocketFlume::resetConnection()
 	open();
 }
 
-std::string QtSocketFlume::read()
+//this is here for the raw binary data which I thought for string would be truncated if there there is a zero in 
+//the qbytearray, but it turns out that the zero in the array does not truncate the std::string, so can just read out as string
+QByteArray QtSocketFlume::readRaw()
 {
 	/*have to use this funny way to get the feedback properly. May be don't have to have the feedback*/
 	bool dataready = false;
-	for (size_t i = 0; i < 50; i++) {
+	for (size_t i = 0; i < 100; i++) {
 		if (socket.waitForReadyRead(10) || socket.bytesAvailable() != 0) {
 			dataready = true;
 			break;
@@ -78,19 +91,56 @@ std::string QtSocketFlume::read()
 	if (dataready)
 	{
 		QByteArray ba = socket.readAll();
-		QString qs = QString::fromUtf8(ba);
-		if (!qs.isEmpty()) {
-			return str(qs);
+		if (!ba.isEmpty()) {
+			return ba;
 		}
 		thrower("No data to read in socket "
-			+ str(socket.peerAddress().toString()) + "port, " + str(socket.peerPort()) + " after 500 ms.");
-		return std::string("");
+			+ str(socket.peerAddress().toString()) + "port, " + str(socket.peerPort()) + " after 1000 ms.");
+		return QByteArray();
 	}
 	else {
 		thrower("No data to read in socket "
-			+ str(socket.peerAddress().toString()) + "port, " + str(socket.peerPort()) + " after 500 ms.");
-		return std::string("");
+			+ str(socket.peerAddress().toString()) + "port, " + str(socket.peerPort()) + " after 1000 ms.");
+		return QByteArray();
 	}
+
+}
+
+/*read untill the buffer is filled in with the expected number of data. Used when reading numerial data
+  with deterministic size. Clear buffer before write and read */
+QByteArray QtSocketFlume::readTillFull(unsigned size)
+{
+	unsigned bytesRemaining = size;
+	QByteArray rc;
+	int aa = socket.bytesAvailable();
+	while (socket.bytesAvailable() < bytesRemaining) {
+		bool dataready = false;
+		for (size_t i = 0; i < 100; i++) {
+			aa = socket.bytesAvailable();
+			if (socket.waitForReadyRead(10) || aa != 0) {
+				dataready = true;
+				break;
+			}
+		}
+		if (!dataready) {
+			thrower("No data to read in socket "
+				+ str(socket.peerAddress().toString()) + "port, " + str(socket.peerPort()) + " after 1000 ms.");
+			return rc;
+		}
+		//aa = socket.bytesAvailable();
+		// calling read() with the bytesRemaining argument will not guarantee
+		// that you will receive all the data. It only means that you will 
+		// receive AT MOST bytesRemaining bytes.
+		rc.append(socket.read(bytesRemaining));
+		//aa=socket.bytesAvailable();
+		bytesRemaining = size - rc.size();
+	}
+	return rc;
+}
+
+std::string QtSocketFlume::read()
+{
+	return readRaw().toStdString();
 }
 
 std::string QtSocketFlume::query(std::string msg, QByteArray terminator)

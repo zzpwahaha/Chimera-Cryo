@@ -118,12 +118,15 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Source\AnalogInput\AiCore.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Source\AnalogInput\AiSettings.cpp" />
     <ClCompile Include="Source\GeneralFlumes\QtSocketFlume.cpp" />
     <ClCompile Include="Source\AnalogInput\AiSystem.cpp" />
     <ClCompile Include="Source\AnalogInput\AiUnits.cpp" />
     <ClCompile Include="Source\AnalogInput\CalibrationManager.cpp" />
     <ClCompile Include="Source\AnalogInput\CalibrationThreadWorker.cpp" />
+    <ClInclude Include="Source\AnalogInput\AiCore.h" />
     <ClInclude Include="Source\GeneralFlumes\QtSocketFlume.h" />
     <ClInclude Include="Source\AnalogInput\calInfo.h" />
     <ClCompile Include="Source\AnalogOutput\AnalogOutput.cpp" />

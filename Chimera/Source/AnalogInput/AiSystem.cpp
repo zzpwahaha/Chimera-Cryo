@@ -3,44 +3,36 @@
 #include "AiSystem.h"
 #include <qtimer.h>
 #include <qlayout.h>
+#include <QtConcurrent/qtconcurrentrun.h>
+#include <Windows.h>
 
 AiSystem::AiSystem(IChimeraQtWindow* parent)
 	: IChimeraSystem(parent)
-	, socket(AI_SAFEMODE, AI_SOCKET_ADDRESS, AI_SOCKET_PORT)
-	, daqmx( ANALOG_IN_SAFEMODE ) {
-	socket.write("mac", terminator);
-	socket.read();
-}
-
-/*
- *	We use a PCI card for analog input currently.
- */
-void AiSystem::initDaqmx( ){
-	daqmx.createTask( "Analog-Input", analogInTask0 );
-	daqmx.createAiVoltageChan( analogInTask0, cstr(boardName + "/ai0:7"), "", DAQmx_Val_Diff, -10.0, 10.0, DAQmx_Val_Volts, nullptr );
+	, core()
+{
 }
 
 
 std::string AiSystem::getSystemStatus( ){
-	long answer = daqmx.getProductCategory( cstr(boardName) );
-	std::string answerStr = "AI System: Connected... device category = " + str( answer );
+	std::string answerStr = "AI System: Connected through: " + AI_SOCKET_ADDRESS + "at port: " + str(AI_SOCKET_PORT);
 	return answerStr;
 }
 
-
 void AiSystem::refreshDisplays( ){
 	for ( auto dispInc : range(voltDisplays.size())){
-		voltDisplays[dispInc]->setText( str(currentValues[dispInc], numDigits).c_str() );
+		voltDisplays[dispInc]->setText(qstr(core.getAiVals()[dispInc].mean, numDigits)
+			+ "(" + qstr(core.getAiVals()[dispInc].std * pow(10.0, numDigits), 0) + ")");
+		aiCombox[dispInc]->setCurrentIndex(int(core.getAiVals()[dispInc].status.range));
 	}
-}
 
+}
 
 void AiSystem::initialize (IChimeraQtWindow* parent) 
 {
 	//initDaqmx ();
 	QVBoxLayout* layout = new QVBoxLayout(this);
 	layout->setContentsMargins(0, 0, 0, 0);
-	this->setMaximumWidth(1000);
+	this->setMaximumWidth(1300);
 	QLabel* title = new QLabel ("ANALOG-INPUT", parent);
 	layout->addWidget(title, 0);
 
@@ -48,7 +40,9 @@ void AiSystem::initialize (IChimeraQtWindow* parent)
 	layout1->setContentsMargins(0, 0, 0, 0);
 
 	getValuesButton = new CQPushButton ("Get Values", parent);
-	parent->connect (getValuesButton, &QPushButton::released, [this]() { refreshCurrentValues (); refreshDisplays (); });
+	parent->connect (getValuesButton, &QPushButton::released, [this]() { 
+		refreshCurrentValues (); 
+		refreshDisplays (); });
 	continuousQueryCheck = new CQCheckBox ("Qry Cont.", parent);
 	queryBetweenVariations = new CQCheckBox ("Qry Btwn Vars", parent);
 	layout1->addWidget(getValuesButton, 0);
@@ -75,17 +69,40 @@ void AiSystem::initialize (IChimeraQtWindow* parent)
 
 	QGridLayout* AIGridLayout = new QGridLayout();
 	std::array<std::string, 2> chnlStr = { "A","B" };
-	for (size_t i = 0; i < NUMBER_AI_CHANNELS; i++)
+	unsigned x = 4, y =4;
+	for (size_t i = 0; i < size_t(AIGrid::total); i++)
 	{
+		auto& cbox = aiCombox[i];
 		QHBoxLayout* lay = new QHBoxLayout();
 		lay->setContentsMargins(0, 0, 0, 0);
-		lay->addWidget(new QLabel(qstr(chnlStr[i % AI_NumOfUnit] + str(i / AI_NumOfUnit))),0);
-		voltDisplays[AI_NumPerUnit * (i % AI_NumOfUnit) + (i / AI_NumOfUnit)] = new QLabel("0", parent);
-		lay->addWidget(voltDisplays[AI_NumPerUnit * (i % AI_NumOfUnit) + (i / AI_NumOfUnit)], 0);
+		cbox = new CQComboBox(parent);
+		cbox->setMaximumWidth(50);
+		parent->connect(cbox, qOverload<int>(&QComboBox::activated), [parent, this, i, cbox](int) {
+			int selection = cbox->currentIndex();
+			core.setAiRange(i, AiChannelRange::which(selection));
+			try { core.updateChannelRange(); }
+			catch (ChimeraError& e) { emit error(e.what()); }
+			 });
+
+		for (auto& whichR : AiChannelRange::allRanges) {
+			cbox->addItem(AiChannelRange::toStr(whichR).c_str());
+		}
+		lay->addWidget(cbox, 0);
+
+		QLabel* label = new QLabel(qstr(chnlStr[i / size_t(AIGrid::numPERunit)] + str(i % size_t(AIGrid::numPERunit))));
+		QFont font = label->font();
+		font.setUnderline(true);
+		label->setFont(font);
+		lay->addWidget(label, 0);
+
+		voltDisplays[i] = new QLabel(qstr(0.0, numDigits), parent);
+		lay->addWidget(voltDisplays[i], 0);
 		lay->addStretch(1);
-		AIGridLayout->addLayout(lay, i / AI_NumPerUnit, i % AI_NumPerUnit);
+		AIGridLayout->addLayout(lay, 2 * (i % size_t(AIGrid::numPERunit)) / x, (2 * i + i / size_t(AIGrid::numPERunit)) % x);
 	}
+	//this->setStyleSheet("border: 2px solid  black;");
 	layout->addLayout(AIGridLayout);
+	refreshDisplays();
 
 }
 
@@ -133,17 +150,26 @@ AiSettings AiSystem::getSettingsFromConfig (ConfigStream& file){
 	file >> settings.queryContinuously;
 	file >> settings.numberMeasurementsToAverage;
 	file >> settings.continuousModeInterval;
+	core.getSettingsFromConfig(file);
+	
 	return settings;
 }
 
 void AiSystem::handleSaveConfig (ConfigStream& file){
 	auto settings = getAiSettings ();
-	file << configDelim 
-		<< "\n/*Query Between Variations?*/ " << settings.queryBtwnVariations 
-		<< "\n/*Query Continuously?*/ " << settings.queryContinuously 
-		<< "\n/*Average Number:*/ " << settings.numberMeasurementsToAverage 
-		<< "\n/*Contiuous Mode Interval:*/ " << settings.continuousModeInterval 
-		<< "\nEND_" + configDelim + "\n";
+	file << core.configDelim
+		<< "\n/*Query Between Variations?*/ " << settings.queryBtwnVariations
+		<< "\n/*Query Continuously?*/ " << settings.queryContinuously
+		<< "\n/*Average Number:*/ " << settings.numberMeasurementsToAverage
+		<< "\n/*Contiuous Mode Interval:*/ " << settings.continuousModeInterval;
+	core.saveSettingsToConfig(file);
+	file << "\nEND_" + core.configDelim + "\n";
+}
+
+void AiSystem::handleOpenConfig(ConfigStream& file)
+{
+	setAiSettings(getSettingsFromConfig(file));
+	refreshDisplays();
 }
 
 void AiSystem::setAiSettings (AiSettings settings){
@@ -160,70 +186,36 @@ bool AiSystem::wantsContinuousQuery( ){
 
 
 void AiSystem::refreshCurrentValues( ){
-	currentValues = getSingleSnapArray( getAiSettings().numberMeasurementsToAverage );
+	try {
+		//QFuture<void> future = QtConcurrent::run(&core, &AiCore::getSingleSnap, getAiSettings().numberMeasurementsToAverage);
+		core.getSingleSnap(getAiSettings().numberMeasurementsToAverage);
+	}
+	catch (ChimeraError& e) {
+		emit error(e.what());
+	}
 }
 
 
-void AiSystem::armAquisition( unsigned numSnapshots ){
-	// may need to use numSnapshots X NUM_AI_CHANNELS?
-	daqmx.configSampleClkTiming( analogInTask0, "", 10000.0, DAQmx_Val_Rising, DAQmx_Val_FiniteSamps, numSnapshots );
-	daqmx.startTask( analogInTask0 );
-	aquisitionData = std::vector<float64>( NUMBER_AI_CHANNELS * numSnapshots );
-}
-
-std::vector<float64> AiSystem::getCurrentValues( ){
-	return { currentValues.begin( ), currentValues.end( ) };
-}
-
-void AiSystem::getAquisitionData( ){
-	int32 sampsRead;
-	daqmx.readAnalogF64( analogInTask0, aquisitionData, sampsRead );
-}
+//void AiSystem::getAquisitionData( ){
+//	int32 sampsRead;
+//	daqmx.readAnalogF64( analogInTask0, aquisitionData, sampsRead );
+//}
 
 bool AiSystem::wantsQueryBetweenVariations( ){
 	return queryBetweenVariations->isChecked( );
 }
 
-std::vector<float64> AiSystem::getSingleSnap( unsigned n_to_avg ){
-	try{
-		daqmx.configSampleClkTiming( analogInTask0, "", 10000.0, DAQmx_Val_Rising, DAQmx_Val_FiniteSamps, n_to_avg );
-		daqmx.startTask( analogInTask0 );
-		// don't understand why but need 2 samples min???
-		std::vector<float64> tmpdata( NUMBER_AI_CHANNELS*n_to_avg );
-		int32 sampsRead;
-		daqmx.readAnalogF64( analogInTask0, tmpdata, sampsRead );
-		daqmx.stopTask( analogInTask0 );
-		std::vector<float64> data( NUMBER_AI_CHANNELS );
-		unsigned count = 0;
-		for ( auto& d : data ){
-			d = 0;
-			for ( auto i : range( n_to_avg ) ){
-				d += tmpdata[count++];
-			}
-			d /= n_to_avg;
-		}
-		return data;
-	}
-	catch (ChimeraError &){
-		throwNested ("Error exception thrown while getting Ai system single snap!");
-	}
-}
 
 
 double AiSystem::getSingleChannelValue( unsigned chan, unsigned n_to_avg ){
-	auto all = getSingleSnap( n_to_avg );
-	return all[chan];
+	core.getSingleSnap( n_to_avg );
+	return core.getCurrentValues()[chan];
 }
 
 
-std::array<float64, AiSystem::NUMBER_AI_CHANNELS> AiSystem::getSingleSnapArray( unsigned n_to_avg ){
-	std::vector<float64> data = getSingleSnap( n_to_avg );
-	std::array<float64, NUMBER_AI_CHANNELS> retData;
-	for ( auto dataInc : range( NUMBER_AI_CHANNELS ) ){
-		retData[dataInc] = data[dataInc];
-	}
-	return retData;
+std::array<double, size_t(AIGrid::total)> AiSystem::getSingleSnapArray( unsigned n_to_avg ){
+	core.getSingleSnap( n_to_avg );
+	return core.getCurrentValues();
 }
 
-void AiSystem::logSettings (DataLogger& log, ExpThreadWorker* threadworker){
-}
+

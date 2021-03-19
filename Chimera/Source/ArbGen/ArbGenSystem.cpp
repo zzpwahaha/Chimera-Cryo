@@ -185,7 +185,7 @@ void ArbGenSystem::initialize(std::string headerText, IChimeraQtWindow* win)
 		pCore->programSetupCommands ();
 	}
 	catch (ChimeraError & error) {
-		errBox ("Failed to program agilent " + getConfigDelim () + " initial settings: " + error.trace ());
+		errBox ("Failed to program ArbGen " + getConfigDelim () + " initial settings: " + error.trace ());
 	}
 	layout->addWidget(&arbGenScript, 1);
 }
