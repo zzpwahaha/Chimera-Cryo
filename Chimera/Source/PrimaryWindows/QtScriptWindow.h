@@ -73,6 +73,7 @@ class QtScriptWindow : public IChimeraQtWindow{
 		void setIntensityDefault();
 
 		std::vector<std::reference_wrapper<ArbGenSystem>> getArbGenSystem();
+		std::vector<std::reference_wrapper<ArbGenCore>> getArbGenCore();
 
     private:
         Ui::QtScriptWindow* ui;

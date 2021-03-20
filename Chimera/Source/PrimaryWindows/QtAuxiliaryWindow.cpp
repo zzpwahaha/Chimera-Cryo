@@ -20,6 +20,7 @@ QtAuxiliaryWindow::QtAuxiliaryWindow (QWidget* parent)
 	, globalParamCtrl (this, "GLOBAL_PARAMETERS")
 	, dds (this, DDS_SAFEMODE)
 	, olSys(this)
+	, calManager(this)
 {	
 	
 	setWindowTitle ("Auxiliary Window");
@@ -123,7 +124,10 @@ void QtAuxiliaryWindow::initializeWidgets (){
 		//	layout2->addWidget(ttlPlots[ttlPltCount]->getView(), 1);
 		//}
 		aiSys.initialize(this);
+		calManager.initialize(this, &aiSys, &aoSys, &ttlBoard,
+			scriptWin->getArbGenCore(), andorWin->getPython());
 		layout2->addWidget(&aiSys);
+		layout2->addWidget(&calManager);
 		layout2->addStretch(1);
 
 		layout1->setContentsMargins(0, 0, 0, 0);

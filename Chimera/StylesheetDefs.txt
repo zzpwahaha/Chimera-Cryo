@@ -23,17 +23,17 @@ $green:     #859900;
 % @MainTextColor rgba( 191, 97, 106, 255 )
 /*
 @MainTextColor rgba( 0, 200, 0, 255 )
-@NeutralTextColor rgba( 200, 200, 200, 255 )
+@NeutralTextColor rgba( 0, 0, 0, 255 )
 @DefaultFontSize 11pt
-@StaticBackground rgb( 25, 25, 25 )
+@StaticBackground rgb( 255, 255, 255 )
 @InteractableBackground rgb( 40, 40, 40 )
 */
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Dark Solarized
 
 @MainTextColor #6c71c4
-@NeutralTextColor #c8c8c8
+@NeutralTextColor #000000
 @DefaultFontSize 11pt
-@StaticBackground #073642
+@StaticBackground #f9f9f9
 @InteractableBackground #002b36
 @DarkBackground #002024
 

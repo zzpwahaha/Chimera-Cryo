@@ -23,6 +23,7 @@
 
 #include "RealTimeDataAnalysis/MachineOptimizer.h"
 #include "ExperimentThread/ExperimentThreadInput.h"
+#include "AnalogInput/CalibrationManager.h"
 
 #include "ExcessDialogs/doChannelInfoDialog.h"
 #include "ExcessDialogs/AoSettingsDialog.h"
@@ -112,7 +113,7 @@ class QtAuxiliaryWindow : public IChimeraQtWindow{
 		MasterConfiguration masterConfig{ MASTER_CONFIGURATION_FILE_ADDRESS };
 		MachineOptimizer optimizer;
 		ParameterSystem configParamCtrl, globalParamCtrl;
-		
+		CalibrationManager calManager;
 
 		doChannelInfoDialog* DOdialog;
 		AoSettingsDialog* AOdialog;

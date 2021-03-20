@@ -29,7 +29,7 @@ class CalibrationManager : public IChimeraSystem {
 		void handleContextMenu (const QPoint& pos);
 		static std::string calTtlConfigToString (std::vector<std::pair<unsigned, unsigned> > ttlConfig);
 		static std::string calDacConfigToString (std::vector<std::pair<unsigned, double>> aoConfig);
-		void initialize (QPoint& pos, IChimeraQtWindow* parent, AiSystem* ai, AoSystem* ao, DoSystem* ttls_in,
+		void initialize (IChimeraQtWindow* parent, AiSystem* ai, AoSystem* ao, DoSystem* ttls_in,
 			std::vector<std::reference_wrapper<ArbGenCore>> arbGensIn, NewPythonHandler* python_in);
 		void runAllThreaded ();
 		void calibrateThreaded (calSettings& cal, unsigned which);

@@ -15,7 +15,7 @@ void AiCore::getSettingsFromConfig(ConfigStream& file)
 	std::string tmp;
 	for (auto& av : aiValues) {
 		file >> tmp;
-		av.status.fromStr(tmp);
+		av.status.range = av.status.fromStr(tmp);
 	}
 }
 
@@ -82,10 +82,10 @@ void AiCore::getSingleSnap(unsigned n_to_avg)
 	QByteArray rc;
 	Sleep(20);
 	try {
-		//QByteArray rcd = socket.readRaw();
-		//rc = std::move(rcd);
+		//rc = socket.readAll();
+		//rc = socket.readAll();
 		//rc = std::move(socket.readRaw());
-		rc = std::move(socket.readRaw(/*n_chnl * n_to_avg * 2*/));
+		rc = std::move(socket.readTillFull(n_chnl * n_to_avg * 2));
 	}
 	catch (ChimeraError& e) {
 		throwNested(e.what());
@@ -128,7 +128,8 @@ void AiCore::getSingleSnap(unsigned n_to_avg)
 
 
 	if (rc.size() != n_chnl * n_to_avg * 2/*byte*/) {
-		thrower("Error in Analog in: the data size is not as expected, data might correupted.\r\n");
+		thrower("Error in Analog in: the data size is " + str(rc.size()) + " and is not as expected to be"
+			+ str(n_chnl * n_to_avg * 2) + ", data might correupted.\r\n");
 		return;
 	}
 	std::vector<std::vector<double>> data(n_chnl);

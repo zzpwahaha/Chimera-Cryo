@@ -407,3 +407,12 @@ std::vector<std::reference_wrapper<ArbGenSystem>> QtScriptWindow::getArbGenSyste
 	}
 	return ags;
 }
+
+std::vector<std::reference_wrapper<ArbGenCore>> QtScriptWindow::getArbGenCore()
+{
+	std::vector<std::reference_wrapper<ArbGenCore>> agCores;
+	for (ArbGenSystem& ag : arbGens) {
+		agCores.push_back(ag.getCore());
+	}
+	return agCores;
+}

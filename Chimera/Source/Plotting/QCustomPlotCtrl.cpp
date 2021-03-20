@@ -58,7 +58,7 @@ void QCustomPlotCtrl::initializeCalData(calSettings cal) {
 	if (plot->graphCount() == 0) {
 		plot->addGraph();
 	}
-	plot->graph(0)->setPen(QColor(Qt::white));
+	plot->graph(0)->setPen(QColor(Qt::blue));
 	plot->graph(0)->setLineStyle(QCPGraph::lsNone);
 	plot->graph(0)->setScatterStyle(QCPScatterStyle::ssCircle);
 	plot->graph(0)->setData({}, {});
@@ -93,7 +93,7 @@ void QCustomPlotCtrl::setData(std::vector<plotDataVec> newData) {
 		plot->addGraph();
 		plot->graph(0)->setName("Data");
 		plot->graph(0)->setLineStyle(QCPGraph::lsNone);
-		plot->graph(0)->setPen(QColor(Qt::white));
+		plot->graph(0)->setPen(QColor(Qt::blue));
 		plot->graph(0)->setScatterStyle(QCPScatterStyle::ssCircle);
 		plot->graph(0)->setData(calXdata, calYdata);
 		// second line
@@ -138,8 +138,8 @@ void QCustomPlotCtrl::setData(std::vector<plotDataVec> newData) {
 			errorBars->setDataPlottable(plot->graph());
 			if (traceNum == newData.size() - 1) {
 				plot->graph()->setName("Avg.");
-				plot->graph()->setPen(QColor(Qt::white));
-				errorBars->setPen(QColor(Qt::white));
+				plot->graph()->setPen(QColor(Qt::blue));
+				errorBars->setPen(QColor(Qt::blue));
 				plot->graph()->setScatterStyle(QCPScatterStyle::ssDisc);
 			}
 			else {
@@ -285,9 +285,8 @@ void QCustomPlotCtrl::resetChart() {
 	title->setTextColor(defs["@NeutralTextColor"]);
 }
 
-void QCustomPlotCtrl::init(QPoint& pos, long width, long height, IChimeraQtWindow* parent, QString titleIn) {
-	
-	auto& px = pos.rx(), & py = pos.ry();
+void QCustomPlotCtrl::init(IChimeraQtWindow* parent, QString titleIn) 
+{
 	plot = new QCustomPlot(parent);
 	plot->setContextMenuPolicy(Qt::CustomContextMenu);
 	parent->connect(plot, &QtCharts::QChartView::customContextMenuRequested,
@@ -302,9 +301,9 @@ void QCustomPlotCtrl::init(QPoint& pos, long width, long height, IChimeraQtWindo
 	title = new QCPTextElement(plot, titleIn);
 	plot->plotLayout()->insertRow(0);
 	plot->plotLayout()->addElement(0, 0, title);
+	plot->setMinimumSize(400, 400);
 	resetChart();
-	plot->setGeometry(px, py, width, height);
-	py += height;
+
 }
 
 void QCustomPlotCtrl::setControlLocation(QRect loc) {

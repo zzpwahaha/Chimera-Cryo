@@ -8,24 +8,24 @@
 #include "GeneralObjects/ChimeraStyleSheets.h"
 #include <PrimaryWindows/QtMainWindow.h>
 #include <qapplication.h>
+#include <qlayout.h>
 
 CalibrationManager::CalibrationManager (IChimeraQtWindow* parent) : IChimeraSystem (parent), 
 calibrationViewer(1, plotStyle::CalibrationPlot,std::vector<int>(),false,false) {}
 
-void CalibrationManager::initialize (QPoint& pos, IChimeraQtWindow* parent, AiSystem* ai_in, AoSystem* ao_in,
+void CalibrationManager::initialize (IChimeraQtWindow* parent, AiSystem* ai_in, AoSystem* ao_in,
 									 DoSystem* ttls_in, std::vector<std::reference_wrapper<ArbGenCore>> arbGens_in,
-									 NewPythonHandler* python_in) {
-	auto& px = pos.rx (), & py = pos.ry ();
-	px += 480;
-	py -= 300;
-	calibrationViewer.init (pos, 480, 300, parent, "Calibration View");
-	calibrationViewer.plot->xAxis->setLabel("Control Voltage (V)");
-	calibrationViewer.plot->yAxis->setLabel("Photodetector Result Voltage (V)");
-	px += -480;
+									 NewPythonHandler* python_in) 
+{
+	QVBoxLayout* layout = new QVBoxLayout(this);
+	layout->setContentsMargins(0, 0, 0, 0);
+	this->setMaximumWidth(1300);
+	
 	calsHeader = new QLabel ("CALIBRATION MANAGER", parent);
-	calsHeader->setGeometry (px, py, 280, 20);
+	layout->addWidget(calsHeader, 0);
+
+	QHBoxLayout* layout1 = new QHBoxLayout(this);
 	calibrateAllButton = new CQPushButton ("Calibrate All", parent);
-	calibrateAllButton->setGeometry (px + 280, py, 175, 20);
 	calibrateAllButton->setToolTip ("Force the recalibration.");
 	parent->connect (calibrateAllButton, &QPushButton::released, [this, parent]() {
 		if (!parent->mainWin->expIsRunning ()) {
@@ -33,30 +33,35 @@ void CalibrationManager::initialize (QPoint& pos, IChimeraQtWindow* parent, AiSy
 		}});
 
 	expAutoCalButton = new CQCheckBox ("Exp. Auto-Cal?", parent);
-	expAutoCalButton->setGeometry (px + 380 + 175, py, 175, 20);
 	expAutoCalButton->setToolTip ("Automatically calibrate all calibrations before doing any experiment?");
 
 	cancelCalButton = new QPushButton ("Cancel Calibration?", parent);
-	cancelCalButton->setGeometry (px + 730, py, 150, 20);
 	cancelCalButton->setToolTip ("Hold this button down to cancel a \"Run All\" Calibration.");
-	py += 20;
+
+	layout1->addWidget(calibrateAllButton, 0);
+	layout1->addWidget(cancelCalButton, 0);
+	layout1->addWidget(expAutoCalButton, 0);
+	layout1->addStretch(1);
+
+	layout->addLayout(layout1);
+
 	calibrationTable = new QTableWidget (parent);
 	calibrationTable->setContextMenuPolicy (Qt::CustomContextMenu);
 	parent->connect (calibrationTable, &QTableWidget::customContextMenuRequested,
 		[this](const QPoint& pos) {handleContextMenu (pos); });
 	QStringList labels;
-	labels << " Name " << " Ctrl Pts (V) " << " Ai " << " Ao " << "Agilent" << "Ag. Channel" 
+	labels << " Name " << " Ctrl Pts (V) " << " Ai " << " Ao " << "ArbGen" << "Ag. Channel" 
 		<< " DO-Config " << " AO-Config " << " Avgs " << "Use Sqrt" << "Poly Order";
 	calibrationTable->setColumnCount (labels.size ());
 	calibrationTable->setHorizontalHeaderLabels (labels);
 	calibrationTable->horizontalHeader ()->setFixedHeight (25);
 	calibrationTable->horizontalHeader ()->setSectionResizeMode (QHeaderView::Interactive);
-	calibrationTable->setGeometry (px, py, 960, 350);
-	py += 350;
 	calibrationTable->setToolTip ("");
 	calibrationTable->verticalHeader ()->setSectionResizeMode (QHeaderView::Fixed);
 	calibrationTable->verticalHeader ()->setDefaultSectionSize (25);
 	calibrationTable->verticalHeader ()->setFixedWidth (50);
+	layout->addWidget(calibrationTable);
+
 	calibrationTable->connect (calibrationTable, &QTableWidget::cellDoubleClicked, [this](int clRow, int clCol) {
 		if (clCol == 9) {
 			auto* item = new QTableWidgetItem (calibrationTable->item (clRow, clCol)->text () == "No" ? "Yes" : "No");
@@ -180,6 +185,13 @@ void CalibrationManager::initialize (QPoint& pos, IChimeraQtWindow* parent, AiSy
 		}
 	);
 	calibrationTable->resizeColumnsToContents ();
+
+	calibrationViewer.init(parent, "Calibration View");
+	calibrationViewer.plot->xAxis->setLabel("Control Voltage (V)");
+	calibrationViewer.plot->yAxis->setLabel("Photodetector Result Voltage (V)");
+
+	layout->addWidget(calibrationViewer.plot);
+
 	ai = ai_in;
 	ao = ao_in;
 	arbGens = arbGens_in;

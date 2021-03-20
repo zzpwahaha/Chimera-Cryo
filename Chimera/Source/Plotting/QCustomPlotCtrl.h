@@ -33,7 +33,7 @@ public:
 	void initializeCalData(calSettings cal);
 	void removeData();
 	QCPGraph* getCalData();
-	void init(QPoint& topLeftLoc, long width, long height, IChimeraQtWindow* parent, QString titleIn);
+	void init(IChimeraQtWindow* parent, QString titleIn);
 	dataPoint getMainAnalysisResult();
 	void resetChart();
 	void setStyle(plotStyle newStyle);

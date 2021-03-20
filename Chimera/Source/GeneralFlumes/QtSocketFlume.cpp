@@ -111,29 +111,34 @@ QByteArray QtSocketFlume::readRaw()
 QByteArray QtSocketFlume::readTillFull(unsigned size)
 {
 	unsigned bytesRemaining = size;
+	unsigned counter = 0;
 	QByteArray rc;
-	int aa = socket.bytesAvailable();
-	while (socket.bytesAvailable() < bytesRemaining) {
+	int aa;
+	while (bytesRemaining>0) {
 		bool dataready = false;
-		for (size_t i = 0; i < 100; i++) {
+		for (size_t i = 0; i < 500; i++) {
 			aa = socket.bytesAvailable();
-			if (socket.waitForReadyRead(10) || aa != 0) {
+			if (socket.waitForReadyRead(1) || aa != 0) {
 				dataready = true;
 				break;
 			}
 		}
 		if (!dataready) {
 			thrower("No data to read in socket "
-				+ str(socket.peerAddress().toString()) + "port, " + str(socket.peerPort()) + " after 1000 ms.");
+				+ str(socket.peerAddress().toString()) + "port, " + str(socket.peerPort()) + " after 500 ms.");
 			return rc;
 		}
-		//aa = socket.bytesAvailable();
+		if (counter > 10) {
+			thrower("Looped for 10 times without filling all the data in socket "
+				+ str(socket.peerAddress().toString()) + "port, " + str(socket.peerPort()));
+			return rc;
+		}
 		// calling read() with the bytesRemaining argument will not guarantee
 		// that you will receive all the data. It only means that you will 
 		// receive AT MOST bytesRemaining bytes.
 		rc.append(socket.read(bytesRemaining));
-		//aa=socket.bytesAvailable();
 		bytesRemaining = size - rc.size();
+		counter++;
 	}
 	return rc;
 }
