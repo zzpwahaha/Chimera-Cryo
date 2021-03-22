@@ -208,6 +208,10 @@ bool AiSystem::wantsQueryBetweenVariations( ){
 
 
 double AiSystem::getSingleChannelValue( unsigned chan, unsigned n_to_avg ){
+	if (core.getAiVals()[chan].status.range == AiChannelRange::which::off) {
+		core.setAiRange(chan, AiChannelRange::which::full);
+		core.updateChannelRange();
+	}
 	core.getSingleSnap( n_to_avg );
 	return core.getCurrentValues()[chan];
 }

@@ -3,7 +3,7 @@
 
 ZynqTCP::ZynqTCP()
 {
-	if (!ZNYQ_SAFEMODE) {
+	if (!ZYNQ_SAFEMODE) {
 		ConnectSocket = INVALID_SOCKET;
 	}
 
@@ -15,7 +15,7 @@ ZynqTCP::~ZynqTCP() {
 
 int ZynqTCP::sendWithCatch(const SOCKET& socket, const char* byte_buf, int buffLen, int flags)
 {
-	if (ZNYQ_SAFEMODE) {
+	if (ZYNQ_SAFEMODE) {
 		return 0;
 	}
 	int BytesSent;
@@ -29,7 +29,7 @@ int ZynqTCP::sendWithCatch(const SOCKET& socket, const char* byte_buf, int buffL
 }
 
 void ZynqTCP::disconnect() {
-	if (ZNYQ_SAFEMODE) {
+	if (ZYNQ_SAFEMODE) {
 		return;
 	}
 
@@ -50,7 +50,7 @@ void ZynqTCP::disconnect() {
 
 int ZynqTCP::connectTCP(const char ip_address[])
 {
-	if (ZNYQ_SAFEMODE) {
+	if (ZYNQ_SAFEMODE) {
 		return 0;
 	}
 

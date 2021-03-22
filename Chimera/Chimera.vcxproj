@@ -126,6 +126,7 @@
     <ClCompile Include="Source\AnalogInput\AiUnits.cpp" />
     <ClCompile Include="Source\AnalogInput\CalibrationManager.cpp" />
     <ClCompile Include="Source\AnalogInput\CalibrationThreadWorker.cpp" />
+    <ClCompile Include="Source\GeneralFlumes\WinSockFlume.cpp" />
     <ClInclude Include="Source\AnalogInput\AiCore.h" />
     <ClInclude Include="Source\GeneralFlumes\QtSocketFlume.h" />
     <ClInclude Include="Source\AnalogInput\calInfo.h" />
@@ -232,6 +233,7 @@
     <ClCompile Include="Source\Scripts\ScriptStream.cpp" />
     <ClCompile Include="Source\Scripts\SyntaxHighlighter.cpp" />
     <ClCompile Include="Source\ZynqTCP\ZynqTCP.cpp" />
+    <ClInclude Include="Source\GeneralFlumes\WinSockFlume.h" />
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="3rd_Party\qcustomplot\qcustomplot.h" />

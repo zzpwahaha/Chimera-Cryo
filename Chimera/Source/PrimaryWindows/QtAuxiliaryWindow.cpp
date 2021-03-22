@@ -292,6 +292,7 @@ void QtAuxiliaryWindow::zeroDacs (){
 	try{
 		mainWin->updateConfigurationSavedStatus (false);
 		aoSys.zeroDacs ();
+		aoSys.updateEdits();
 		reportStatus ("Zero'd DACs.\n");
 	}
 	catch (ChimeraError& exception){
@@ -602,36 +603,38 @@ void QtAuxiliaryWindow::ViewOrChangeOLNames()
 std::string QtAuxiliaryWindow::getOtherSystemStatusMsg (){
 	// controls are done. Report the initialization defaultStatus...
 	std::string msg;
-	msg += "DO System:\n";
-	//if (!ttlBoard.getFtFlumeSafemode ()){
-	//	msg += "\tDO System is active!\n";
-	//	msg += "\t" + ttlBoard.getDoSystemInfo () + "\n";
-	//	//ttlBoard.ftdi_disconnect();
-	//	msg += "\t Bites Written \n";
-
-	//}
-	//else{
-	//	msg += "\tCode System is disabled! Enable in \"constants.h\"\n";
-	//}
-	msg += "\t Zynq placeholder \n";
-	msg += "\t" + std::string(__FILE__) + ", line: " + std::to_string(__LINE__) + "\n";
-
-	msg += "Analog Out System:\n";
-	if (!ANALOG_OUT_SAFEMODE){
-		msg += "\tCode System is Active!\n";
-		msg += "\t" + std::string(__FILE__) + "line: " + std::to_string(__LINE__) + "\n";
+	msg += "Zynq System:\n";
+	if (!ZYNQ_SAFEMODE){
+		msg += str("\tZynq System is Active at ") + ZYNQ_ADDRESS + ", at port " + ZYNQ_PORT + "\n";
+		msg += "\tAnalog out, Digital out, Direct Digital Synthesizer are Active\n";
 	}
 	else{
-		msg += "\tCode System is disabled! Enable in \"constants.h\"\n";
+		msg += "\tZynq System is disabled! Enable in \"constants.h\" as well as \"ZynqTcp.h\"\n";
 	}
-	msg += "DDS System:\n";
-	if (!DDS_SAFEMODE){
-		msg += "\tDDS System is Active!\n";
-		msg += "\t" + dds.getSystemInfo () + "\n";
-		msg += "\t" + dds.getSystemInfo ();
+	//msg += "\t Zynq placeholder \n";
+	//msg += "\t" + std::string(__FILE__) + ", line: " + std::to_string(__LINE__) + "\n";
+
+	msg += "Offset Lock:\n";
+	if (!OFFSETLOCK_SAFEMODE) {
+		msg += str("\tOffset Lock System is Active at COMxx\n");
+		msg += "\tAttached trigger line is \n\t\t";
+		for (const auto& oltrig : OL_TRIGGER_LINE)
+		{
+			msg += "(" + str(oltrig.first) + "," + str(oltrig.second) + ") ";
+		}
+		msg += "\n";
+	}
+	else {
+		msg += "\tOffset Lock System is disabled! Enable in \"constants.h\" \n";
+	}
+
+
+	msg += "AI System:\n";
+	if (!AI_SAFEMODE){
+		msg += str("\tAnalog In System is Active at ") + AI_SOCKET_ADDRESS + ", at port " + str(AI_SOCKET_PORT) + "\n";
 	}
 	else{
-		msg += "\tDDS System is disabled! Enable in \"constants.h\"\n";
+		msg += "\tAnalog In System is disabled! Enable in \"constants.h\" \n";
 	}
 	return msg;
 }

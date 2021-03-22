@@ -1,0 +1,159 @@
+#include "stdafx.h"
+#include "WinSockFlume.h"
+
+
+WinSockFlume::WinSockFlume(bool safemode_option, std::string hostAddress_, std::string hostPort_)
+	: safemode(safemode_option)
+	, hostAddress(hostAddress_)
+	, hostPort(hostPort_)
+	, Winsocket(INVALID_SOCKET)
+{
+	//open();
+	//Sleep(1);
+	//close();
+}
+
+WinSockFlume::~WinSockFlume()
+{
+	close();
+}
+
+
+int WinSockFlume::open()
+{
+	if (safemode) {
+		return 0;
+	}
+
+	WSADATA wsaData;
+	int iResult;
+	// Initialize Winsock
+	iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
+	if (iResult != 0) {
+		thrower("WSAStartup failed");
+		return 1;
+	}
+
+	struct addrinfo* result = NULL, * ptr = NULL, hints;
+
+	ZeroMemory(&hints, sizeof(hints));
+	hints.ai_family = AF_UNSPEC;
+	hints.ai_socktype = SOCK_STREAM;
+	hints.ai_protocol = IPPROTO_TCP;
+
+	// Resolve the server address and port
+	iResult = getaddrinfo(hostAddress.c_str(), hostPort.c_str(), &hints, &result);
+	if (iResult != 0) {
+		thrower("getaddrinfo failed");
+		WSACleanup();
+		return 1;
+	}
+
+	Winsocket = INVALID_SOCKET;
+	// Attempt to connect to the first address returned by the call to getaddrinfo
+	ptr = result;
+	// Create a SOCKET for connecting to server
+	Winsocket = socket(ptr->ai_family, ptr->ai_socktype, ptr->ai_protocol);
+	if (Winsocket == INVALID_SOCKET) {
+		thrower("Error at socket()");
+		freeaddrinfo(result);
+		WSACleanup();
+		return 1;
+	}
+
+	// Connect to server.
+	iResult = ::connect(Winsocket, ptr->ai_addr, (int)ptr->ai_addrlen);
+	if (iResult == SOCKET_ERROR) {
+		closesocket(Winsocket);
+		Winsocket = INVALID_SOCKET;
+	}
+	freeaddrinfo(result);
+	if (Winsocket == INVALID_SOCKET) {
+		thrower("Unable to connect to server!");
+		WSACleanup();
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
+
+}
+
+void WinSockFlume::close()
+{
+	closesocket(Winsocket);
+	WSACleanup();
+}
+
+void WinSockFlume::resetConnection()
+{
+	close();
+	open();
+}
+
+int WinSockFlume::sendWithCatch(const SOCKET& socket, const char* byte_buf, int buffLen, int flags)
+{
+	if (safemode) {
+		return 0;
+	}
+	int BytesSent;
+	BytesSent = send(socket, byte_buf, buffLen, flags);
+	if (BytesSent == SOCKET_ERROR)
+	{
+		thrower("Unable to send message:" + str(byte_buf) + ", with prescribed length:" + str(buffLen) + " to server!");
+		return 1; /*bad*/
+	}
+	return 0; /*good*/
+}
+
+void WinSockFlume::write(const char* msg, unsigned len, QByteArray terminator)
+{
+	//char* buff = (char*)malloc(len + terminator.size());
+	//memmove(buff, msg, len);
+	//memmove(buff + len, (const char*)terminator, terminator.size());
+	try {
+		QByteArray buff = QByteArray(msg, len);
+		buff.append(terminator);
+		int err = sendWithCatch(Winsocket, (const char*)buff, len + terminator.size());
+	}
+	catch (ChimeraError& e) {
+		throwNested(str("Error in winSockFlume write:\n") + e.what());
+	}
+
+	//free(buff);
+}
+
+void WinSockFlume::write(QByteArray ba, QByteArray terminator)
+{
+	write(ba, ba.size(), terminator);
+}
+
+QByteArray WinSockFlume::readTillFull(unsigned size)
+{
+	QByteArray rc;
+	//unsigned bytesRemaining = size;
+	for (size_t i = 0; i < 200; i++)
+	{
+		QByteArray tmp(size, Qt::Initialization::Uninitialized);
+		int recvLen = recv(Winsocket, tmp.data(), size, 0);
+		rc.append((const char*)tmp, recvLen);
+		if (rc.size() >= size) {
+			break;
+		}
+		Sleep(1);
+	}
+	if (rc.size() != size) {
+		thrower("Data size " + str(rc.size()) + " is not expected as " + str(size) 
+			+ " in socket " +  hostAddress + "port, " + hostPort+ " after 500 ms.");
+	}
+	return rc;
+}
+
+QByteArray WinSockFlume::read(unsigned size)
+{
+	QByteArray tmp(size, Qt::Initialization::Uninitialized);
+	int recvLen = recv(Winsocket, tmp.data(), size, 0);
+	tmp.truncate(recvLen);
+	return tmp;
+}

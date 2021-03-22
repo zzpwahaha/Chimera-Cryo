@@ -16,18 +16,18 @@
 #define MASTER_COMPUTER
 
 #ifdef MASTER_COMPUTER
-	constexpr bool DOFTDI_SAFEMODE = true;
+	//constexpr bool DOFTDI_SAFEMODE = true;
 	constexpr bool DDS_SAFEMODE = true;
 	constexpr bool ANDOR_SAFEMODE = true;
 	constexpr bool OFFSETLOCK_SAFEMODE = true/*false*/;
-	constexpr bool ANALOG_IN_SAFEMODE = true;
+	//constexpr bool ANALOG_IN_SAFEMODE = true;
 	#ifdef _DEBUG
 		constexpr bool PYTHON_SAFEMODE = true;
 	#else
 		constexpr bool  PYTHON_SAFEMODE = true;
 	#endif
 	constexpr bool DAQMX_SAFEMODE = true;
-	constexpr bool ANALOG_OUT_SAFEMODE = true;
+	//constexpr bool ANALOG_OUT_SAFEMODE = true;
 
 	constexpr auto CODE_ROOT = "D:\\Chimera\\Chimera-Cryo";
 
@@ -51,7 +51,7 @@
 	// Zynq realated
 	const double ZYNQ_DEADTIME = 0.1; // give zynq 0.1ms to avoid sending zero at t=0 for ttl
 	
-	const bool ZNYQ_SAFEMODE = false;
+	const bool ZYNQ_SAFEMODE = false;
 	const auto ZYNQ_ADDRESS = "10.10.0.2";
 	const auto ZYNQ_PORT = "8080";
 	const int ZYNQ_MAX_BUFF = 64;
@@ -83,7 +83,7 @@
 	//Analog in 
 	const bool AI_SAFEMODE = false;
 	const std::string AI_SOCKET_ADDRESS = "10.10.0.10";
-	const unsigned short AI_SOCKET_PORT = 80;
+	const std::string AI_SOCKET_PORT = "80";
 
 #endif
 /// Random other Constants

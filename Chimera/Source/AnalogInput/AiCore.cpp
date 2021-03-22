@@ -6,8 +6,8 @@
 AiCore::AiCore() 
 	: socket(AI_SAFEMODE, AI_SOCKET_ADDRESS, AI_SOCKET_PORT)
 {
-	socket.write("mac", terminator);
-	QByteArray tmp = socket.readRaw();
+	//socket.write("mac", terminator);
+	//QByteArray tmp = socket.read();
 }
 
 void AiCore::getSettingsFromConfig(ConfigStream& file)
@@ -39,8 +39,10 @@ void AiCore::updateChannelRange()
 		}
 	}
 	try {
-		socket.resetConnection();
-		std::string rc = socket.query(std::string("(rng,") + (char*)buff + ")", terminator);
+		socket.open();
+		socket.write(QByteArray::fromStdString(std::string("(rng,") + (char*)buff + ")"), terminator);
+		std::string rc = socket.read();
+		socket.close();
 		if (str(rc, 13, false, true).find("Error") != std::string::npos) {
 			thrower("Error in updating range in Analoge in. \r\n" + rc);
 		}
@@ -73,7 +75,8 @@ void AiCore::getSingleSnap(unsigned n_to_avg)
 	unsigned n_chnl = onChannel.size() + (epty[0] || epty[1]);
 	if (epty[0] || epty[1]) { epty[0] ? onChannel.insert(onChannel.begin(), 0) : onChannel.push_back(size_t(AIGrid::numPERunit) - 1); }
 
-	socket.resetConnection();
+	//socket.resetConnection();
+	socket.open();
 	socket.write(QByteArray("(") + placeholder + QByteArray(buff, 2) + QByteArray(",")
 		+ QByteArray::fromStdString(str(n_to_avg)) + QByteArray(")"), terminator);
 	Sleep(5);
@@ -86,6 +89,7 @@ void AiCore::getSingleSnap(unsigned n_to_avg)
 		//rc = socket.readAll();
 		//rc = std::move(socket.readRaw());
 		rc = std::move(socket.readTillFull(n_chnl * n_to_avg * 2));
+		socket.close();
 	}
 	catch (ChimeraError& e) {
 		throwNested(e.what());

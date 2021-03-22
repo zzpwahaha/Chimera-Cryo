@@ -28,7 +28,7 @@ void AoSystem::zeroDacs()
 	{
 		outputs[dacInc].info.currVal = 0.0;
 	}
-	updateEdits();
+	//updateEdits();
 	setDACs();
 	emit notification ("Zero'd Analog Outputs.\n", 2);
 }
@@ -291,6 +291,7 @@ void AoSystem::setDACs()
 	}
 }
 
+/*used only in the calibrationThread, so don't need gui update*/
 void AoSystem::setSingleDac(unsigned dacNumber, double val)
 {
 	int tcp_connect;
@@ -305,7 +306,7 @@ void AoSystem::setSingleDac(unsigned dacNumber, double val)
 	}
 	/*update outputs first and do a standard, single dac command*/
 	outputs[dacNumber].info.currVal = val;
-	outputs[dacNumber].updateEdit();
+	//outputs[dacNumber].updateEdit();
 	if (tcp_connect == 0)
 	{
 		std::ostringstream stringStream;

@@ -2,7 +2,8 @@
 #include "GeneralObjects/IDeviceCore.h"
 #include "LowLevel/constants.h"
 #include "AnalogInput/AiSettings.h"
-#include <GeneralFlumes/QtSocketFlume.h>
+//#include <GeneralFlumes/QtSocketFlume.h>
+#include <GeneralFlumes/WinSockFlume.h>
 #include "ConfigurationSystems/ConfigStream.h"
 #include <array>
 
@@ -42,7 +43,7 @@ public:
 private:
 	std::array<AiValue, size_t(AIGrid::total)> aiValues;
 
-	QtSocketFlume socket;
+	WinSockFlume socket;
 
 	static constexpr double adcResolution = 20.0 / 0xffff; /*16bit adc*/
 	const int numDigits = static_cast<int>(abs(round(log10(adcResolution) - 0.49)));
