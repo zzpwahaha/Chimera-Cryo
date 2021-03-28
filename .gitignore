@@ -21,6 +21,8 @@ Chimera/3rd_Party/DM/Lib/*
 !Chimera/3rd_Party/DM/Lib/.gitkeep
 Chimera/*.dll
 
+!Chimera/3rd_Party/GSL_MSVC/dll/**
+
 *.obj
 *.log
 *.pyc
