@@ -86,9 +86,9 @@ void CalibrationThreadWorker::calibrate (calSettings& cal, unsigned which) {
 	CalibrationManager::determineCalMinMax (cal.result);
 
 	cal.currentlyCalibrating = false;
-	std::ofstream file ("C:\\Users\\Regal-Lab\\Code\\Data-Analysis-Code\\CalibrationValuesFile.txt");
+	std::ofstream file (str(CODE_ROOT)+"\\Data-Analysis-Code\\CalibrationValuesFile.txt");
 	if (!file.is_open ()) {
-		errBox ("Failed to Write Calibration Results!");
+		thrower ("Failed to Write Calibration Results!");
 	}
 	for (auto num : range (result.resVals.size ())) {
 		file << result.ctrlVals[num] << " " << result.resVals[num] << "\n";

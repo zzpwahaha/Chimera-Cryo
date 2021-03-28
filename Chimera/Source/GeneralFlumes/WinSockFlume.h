@@ -19,6 +19,7 @@ public:
 
 private:
 	int sendWithCatch(const SOCKET& socket, const char* byte_buf, int buffLen, int flags = 0);
+	int recvTimeOutTCP(SOCKET socket, unsigned sec, unsigned usec);
 
 public:
 	const std::string hostAddress;

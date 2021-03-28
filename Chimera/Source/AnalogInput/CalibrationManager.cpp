@@ -530,7 +530,12 @@ void CalibrationManager::standardStartThread (std::vector<std::reference_wrapper
 	connect (threadWorker, &CalibrationThreadWorker::error, this, &IChimeraSystem::error);
 	connect (threadWorker, &CalibrationThreadWorker::calibrationChanged, this, [this]() { refreshListview (); });
 	connect (threadWorker, &CalibrationThreadWorker::startingNewCalibration, this, [this](calSettings cal) {
-		updateCalibrationView(cal);
+		try {
+			updateCalibrationView(cal);
+		}
+		catch (ChimeraError& e) {
+			emit warning("Warning in staring new calibration\n\t"+qstr(e.what()));
+		}
 		calibrationViewer.initializeCalData (cal);
 		});
 	connect (threadWorker, &CalibrationThreadWorker::newCalibrationDataPoint, this, [this](QPointF pt) {

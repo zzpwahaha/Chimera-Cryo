@@ -129,6 +129,27 @@ void WinSockFlume::write(QByteArray ba, QByteArray terminator)
 	write(ba, ba.size(), terminator);
 }
 
+int WinSockFlume::recvTimeOutTCP(SOCKET socket, unsigned sec, unsigned usec)
+
+{
+	// Setup timeval variable
+	struct timeval timeout;
+	struct fd_set fds;
+	// assign the second and microsecond variables
+	timeout.tv_sec = sec;
+	timeout.tv_usec = usec;
+
+	// Setup fd_set structure
+	FD_ZERO(&fds);
+	FD_SET(socket, &fds);
+	// Possible return values:
+	// -1: error occurred
+	// 0: timed out
+	// > 0: data ready to be read
+	return select(0, &fds, 0, 0, &timeout);
+
+}
+
 QByteArray WinSockFlume::readTillFull(unsigned size)
 {
 	QByteArray rc;
@@ -136,7 +157,28 @@ QByteArray WinSockFlume::readTillFull(unsigned size)
 	for (size_t i = 0; i < 200; i++)
 	{
 		QByteArray tmp(size, Qt::Initialization::Uninitialized);
+
+		int SelectTiming = recvTimeOutTCP(Winsocket, 5, 10);
+		switch (SelectTiming)
+		{
+		case 0:
+			close();
+			thrower("Timeout in winsock TCP reading after 5ms");
+			break;
+		case 1:
+			break;
+		default:
+			break;
+		}
+		// set timeout and see if socket is valid after recv, it will be invalid if revc is timed out
+		//int timeout_ms = 20;
+		//setsockopt(Winsocket, SOL_SOCKET, SO_RCVTIMEO, (const char*)&timeout_ms, sizeof(timeout_ms));
 		int recvLen = recv(Winsocket, tmp.data(), size, 0);
+		//int err = WSAGetLastError();
+		//if (err != 0) {
+		//	close();
+		//	thrower("Error in TCP receiving data with error code" + str(err));
+		//}
 		rc.append((const char*)tmp, recvLen);
 		if (rc.size() >= size) {
 			break;
@@ -153,7 +195,14 @@ QByteArray WinSockFlume::readTillFull(unsigned size)
 QByteArray WinSockFlume::read(unsigned size)
 {
 	QByteArray tmp(size, Qt::Initialization::Uninitialized);
+	int timeout_ms = 2;
+	setsockopt(Winsocket, SOL_SOCKET, SO_RCVTIMEO, (const char*)&timeout_ms, sizeof(timeout_ms));
 	int recvLen = recv(Winsocket, tmp.data(), size, 0);
+	int test;
+	if (SOCKET_ERROR == getsockopt(Winsocket, SOL_SOCKET, SO_RCVTIMEO, (char*)&timeout_ms, &test)) {
+		close();
+		thrower("Error in TCP receiving data with error code" + str(WSAGetLastError()));
+	}
 	tmp.truncate(recvLen);
 	return tmp;
 }
