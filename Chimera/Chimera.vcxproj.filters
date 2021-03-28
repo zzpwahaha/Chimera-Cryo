@@ -354,6 +354,9 @@
     <ClCompile Include="Source\GeneralFlumes\WinSockFlume.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\CMOSCamera\CameraWrapper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="3rd_Party\qcustomplot\qcustomplot.h">
@@ -814,5 +817,11 @@
     <ClInclude Include="Source\GeneralFlumes\WinSockFlume.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Source\CMOSCamera\CameraWrapper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ClassDiagram.cd" />
   </ItemGroup>
 </Project>
