@@ -4,6 +4,7 @@
 #include <AnalogInput/calInfo.h>
 #include "AnalogInput/AiSystem.h"
 #include <AnalogInput/CalibrationThreadWorker.h>
+#include <AnalogInput/PolynomialFit.h>
 #include "AnalogOutput/AoSystem.h"
 #include "DigitalOutput/DoSystem.h"
 #include "ParameterSystem/ParameterSystem.h"
@@ -79,7 +80,20 @@ void CalibrationThreadWorker::calibrate (calSettings& cal, unsigned which) {
 		catch (ChimeraError & err) {
 			emit error (err.qtrace ());
 		}
-		result.resVals.push_back (input.ai->getSingleChannelValue (aiNum, cal.avgNum));
+
+		int count = 0;
+		int maxTries = 3;
+		while (true) {
+			try {
+				result.resVals.push_back(input.ai->getSingleChannelValue(aiNum, cal.avgNum));
+				break;
+			}
+			catch (ChimeraError& e) {
+				if (++count == maxTries) throw e;
+			}
+		}
+
+
 		emit newCalibrationDataPoint (QPointF (calPoint, result.resVals.back ()));
 		Sleep (20);
 	}
@@ -94,7 +108,17 @@ void CalibrationThreadWorker::calibrate (calSettings& cal, unsigned which) {
 		file << result.ctrlVals[num] << " " << result.resVals[num] << "\n";
 	}
 	file.close ();
-	result.calibrationCoefficients = input.pythonHandler->runCalibrationFits (cal, input.parentWin);
+	//result.calibrationCoefficients = input.pythonHandler->runCalibrationFits (cal, input.parentWin);
+	//PolynomialFit<cal.includeSqrt, 5> fitworker;
+	std::vector<double> initP(result.polynomialOrder + 2 * result.includesSqrt, 0.0);
+	initP[0] = result.calmin;
+	if (result.includesSqrt) {
+		initP[result.polynomialOrder + 2 * result.includesSqrt - 1] = result.ctrlVals[0];
+	}
+	PolynomialFit fitWorker(result.ctrlVals.size(), result.ctrlVals.data(), result.resVals.data(),
+		result.polynomialOrder, result.includesSqrt,initP);
+	fitWorker.solve_system();
+	result.calibrationCoefficients = fitWorker.fittedPara();
 	result.includesSqrt = cal.includeSqrt;
 	//calibrationTable->repaint ();
 	cal.calibrated = true;

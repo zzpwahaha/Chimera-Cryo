@@ -357,6 +357,9 @@
     <ClCompile Include="Source\CMOSCamera\CameraWrapper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\AnalogInput\PolynomialFit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="3rd_Party\qcustomplot\qcustomplot.h">
@@ -818,6 +821,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\CMOSCamera\CameraWrapper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\AnalogInput\PolynomialFit.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

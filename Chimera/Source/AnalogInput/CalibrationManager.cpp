@@ -600,14 +600,20 @@ void CalibrationManager::updateCalibrationView (calSettings& cal) {
 
 	numfitpts = 30;
 	plotData[2].resize (numfitpts);
-	determineCalMinMax (cal.historicalResult);
-	runningVal = cal.historicalResult.calmin;
-	for (auto pnum : range (plotData[2].size ())) {
-		plotData[2][pnum].y = runningVal;
-		plotData[2][pnum].x = calibrationFunction (plotData[2][pnum].y, cal.historicalResult, this);
-		runningVal += (cal.historicalResult.calmax - cal.historicalResult.calmin) / (numfitpts - 1);
+	if (cal.historicalResult.calibrationName.empty() || cal.historicalResult.ctrlVals.size() == 0) {
+		// looks like there is no history calibration, then just copy the current result
+		plotData[2] = plotDataVec(plotData[1]);
 	}
-	
+	else {
+		determineCalMinMax(cal.historicalResult);
+		runningVal = cal.historicalResult.calmin;
+		for (auto pnum : range(plotData[2].size())) {
+			plotData[2][pnum].y = runningVal;
+			plotData[2][pnum].x = calibrationFunction(plotData[2][pnum].y, cal.historicalResult, this);
+			runningVal += (cal.historicalResult.calmax - cal.historicalResult.calmin) / (numfitpts - 1);
+		}
+	}
+
 	calibrationViewer.resetChart ();
 	calibrationViewer.setTitle ("Calibration View: " + cal.result.calibrationName);
 	calibrationViewer.setData (plotData);

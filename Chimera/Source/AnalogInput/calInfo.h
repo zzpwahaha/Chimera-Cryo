@@ -3,6 +3,7 @@
 #include <vector>
 #include <ArbGen/whichAg.h>
 
+
 struct calBase {
 	static std::string dblVecToString (std::vector<double> ctrls) {
 		std::string ctrlString;
