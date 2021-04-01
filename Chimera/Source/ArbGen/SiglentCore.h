@@ -46,6 +46,7 @@ public:
 	void setSquare(int channel, squareInfo info, unsigned variation) override;
 	void setSine(int channel, sineInfo info, unsigned variation) override;
 	void outputOff(int channel) override;
+	void outputOn(int channel) override;
 	void prepArbGenSettings(unsigned channel) override;
 	void setScriptOutput(unsigned varNum, scriptedArbInfo scriptInfo, unsigned channel) override;
 	void programBurstMode(int channel, bool burstOption) override;

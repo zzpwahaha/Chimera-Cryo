@@ -212,6 +212,7 @@ double AiSystem::getSingleChannelValue( unsigned chan, unsigned n_to_avg ){
 		core.setAiRange(chan, AiChannelRange::which::full);
 		core.updateChannelRange();
 	}
+	Sleep(1);
 	core.getSingleSnap( n_to_avg );
 	return core.getCurrentValues()[chan];
 }

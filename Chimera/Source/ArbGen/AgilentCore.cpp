@@ -9,37 +9,8 @@
 
 AgilentCore::AgilentCore (const arbGenSettings& settings) :
 	ArbGenCore(settings)
-	//ArbGenCore::isConnected(false)
-	//visaFlume (settings.safemode, settings.address),
-	//sampleRate (settings.sampleRate),
-	//initSettings (settings),
-	//triggerRow (settings.triggerRow),
-	//triggerNumber (settings.triggerNumber),
-	//memoryLoc (settings.memoryLocation),
-	//configDelim (settings.configurationFileDelimiter),
-	//agilentName (settings.deviceName),
-	//setupCommands (settings.setupCommands)
 {
-	//calibrations[0].includesSqrt = false;
-	//calibrations[0].calibrationCoefficients = settings.calibrationCoeff;
-	//calibrations[0].polynomialOrder = settings.calibrationCoeff.size();
-	//// could probably set these properly but in general wasn't doing this when was doing manual calibrations.
-	//calibrations[0].calmax = 1e6;
-	//calibrations[0].calmin = -1e6;
 
-	//calibrations[1].includesSqrt = false;
-	//calibrations[1].calibrationCoefficients = settings.calibrationCoeff;
-	//calibrations[1].polynomialOrder = settings.calibrationCoeff.size ();
-	//calibrations[1].calmax = 1e6;
-	//calibrations[1].calmin = -1e6;
-
-
-	//try{
-	//	visaFlume.open ();
-	//}
-	//catch (ChimeraError& err){
-	//	errBox("Error seen while opening connection to " + agilentName + " Agilent:" + err.trace());
-	//}
 }
 
 AgilentCore::~AgilentCore (){
@@ -207,7 +178,8 @@ void AgilentCore::setScriptOutput (unsigned varNum, scriptedArbInfo scriptInfo, 
 			visaFlume.write (schan + ":VOLT:OFFSET " + str ((minMaxs.first + minMaxs.second) / 2) + " V");
 			visaFlume.write (schan + ":VOLT:LOW " + str (minMaxs.first) + " V");
 			visaFlume.write (schan + ":VOLT:HIGH " + str (minMaxs.second) + " V");
-			visaFlume.write ("OUTPUT" + str (chan) + " ON");
+			//visaFlume.write ("OUTPUT" + str (chan) + " ON");
+			outputOn(chan);
 		}
 	}
 }
@@ -217,8 +189,17 @@ void AgilentCore::outputOff (int channel){
 	if (channel != 1 && channel != 2){
 		thrower ("bad value for channel inside outputOff! Channel shoulde be 1 or 2.");
 	}
-	channel++;
+	//channel++;
 	visaFlume.write ("OUTPUT" + str (channel) + " OFF");
+}
+
+void AgilentCore::outputOn(int channel)
+{
+	if (channel != 1 && channel != 2) {
+		thrower("bad value for channel inside outputOn! Channel shoulde be 1 or 2.");
+	}
+	//channel++;
+	visaFlume.write("OUTPUT" + str(channel) + " ON");
 }
 
 
@@ -265,7 +246,8 @@ void AgilentCore::setExistingWaveform (int channel, preloadedArbInfo info){
 	// tell it what arb it's outputting.
 	visaFlume.write (sStr + ":FUNC:ARB \"" + memoryLoc + ":\\" + info.address.expressionStr + "\"");
 	programBurstMode (channel, info.burstMode);
-	visaFlume.write ("OUTPUT" + str (channel) + " ON");
+	//visaFlume.write ("OUTPUT" + str (channel) + " ON");
+	outputOn(channel);
 }
 
 

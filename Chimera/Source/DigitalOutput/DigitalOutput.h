@@ -18,7 +18,7 @@ class DigitalOutput
 		bool getStatus ( );
 		std::pair<unsigned, unsigned> getPosition ( );
 
-		void set ( bool status );
+		void set ( bool status, bool updateDisplay=true );
 		void setName ( std::string nameStr );
 		
 		bool holdStatus;

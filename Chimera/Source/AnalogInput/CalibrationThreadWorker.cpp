@@ -17,6 +17,7 @@
 
 
 CalibrationThreadWorker::CalibrationThreadWorker (CalibrationThreadInput input_) {
+	
 	input = input_;
 }
 
@@ -26,6 +27,7 @@ CalibrationThreadWorker::~CalibrationThreadWorker () {
 void CalibrationThreadWorker::runAll () {
 	unsigned count = 0;
 	// made this asynchronous to facilitate updating gui while 
+	emit updateBoxColor("Green", "AI-SYSTEM");
 	for (auto& cal : input.calibrations) {
 		try {
 			calibrate (cal, count);
@@ -39,6 +41,7 @@ void CalibrationThreadWorker::runAll () {
 	}
 	input.ttls->zeroBoard ();
 	input.ao->zeroDacs (/*input.ttls->getCore (), { 0, input.ttls->getCurrentStatus () }*/);
+	emit updateBoxColor("Gray", "AI-SYSTEM");
 }
 
 void CalibrationThreadWorker::calibrate (calSettings& cal, unsigned which) {
@@ -49,6 +52,7 @@ void CalibrationThreadWorker::calibrate (calSettings& cal, unsigned which) {
 	emit startingNewCalibration (cal);
 	emit notification(qstr("Running Calibration " + result.calibrationName + ".\n"));
 	cal.currentlyCalibrating = true;
+	//cal.result.includesSqrt = cal.includeSqrt;
 	input.ttls->zeroBoard ();
 	input.ao->zeroDacs ();
 	for (auto dac : cal.aoConfig) {
@@ -56,7 +60,7 @@ void CalibrationThreadWorker::calibrate (calSettings& cal, unsigned which) {
 	}
 	for (auto ttl : cal.ttlConfig) {
 		auto& outputs = input.ttls->getDigitalOutputs();
-		outputs(ttl.first, ttl.second).set(true); //TODO: check compatibility for row and col
+		outputs(ttl.first, ttl.second).set(true, false); //TODO: check compatibility for row and col
 	}
 	input.ttls->getCore().FPGAForceOutput(input.ttls->getCurrentStatus());
 	Sleep (100); // give some time for the lasers to settle..
@@ -72,6 +76,7 @@ void CalibrationThreadWorker::calibrate (calSettings& cal, unsigned which) {
 				tempInfo.dcLevel = str (calPoint);
 				tempInfo.dcLevel.internalEvaluate (std::vector<parameterType> (), 1);
 				ag.setDC (cal.agChannel, tempInfo, 0);
+				ag.outputOn(cal.agChannel);
 			}
 			else {
 				input.ao->setSingleDac (aoNum, calPoint);
@@ -80,7 +85,8 @@ void CalibrationThreadWorker::calibrate (calSettings& cal, unsigned which) {
 		catch (ChimeraError & err) {
 			emit error (err.qtrace ());
 		}
-
+		Sleep(100); // give some time for the analog output to change and settle..
+		// try maxTries to read before yell out error
 		int count = 0;
 		int maxTries = 3;
 		while (true) {
@@ -93,12 +99,21 @@ void CalibrationThreadWorker::calibrate (calSettings& cal, unsigned which) {
 			}
 		}
 
-
 		emit newCalibrationDataPoint (QPointF (calPoint, result.resVals.back ()));
 		Sleep (20);
 	}
-	CalibrationManager::determineCalMinMax (cal.result);
 
+	try {
+		if (cal.useAg) {
+			auto& ag = input.arbGens[int(cal.whichAg)].get();
+			ag.outputOn(cal.agChannel);
+		}
+	}
+	catch (ChimeraError& err) {
+		emit error(err.qtrace());
+	}
+
+	CalibrationManager::determineCalMinMax (cal.result);
 	cal.currentlyCalibrating = false;
 	std::ofstream file (str(CODE_ROOT)+"\\Data-Analysis-Code\\CalibrationValuesFile.txt");
 	if (!file.is_open ()) {
@@ -110,16 +125,20 @@ void CalibrationThreadWorker::calibrate (calSettings& cal, unsigned which) {
 	file.close ();
 	//result.calibrationCoefficients = input.pythonHandler->runCalibrationFits (cal, input.parentWin);
 	//PolynomialFit<cal.includeSqrt, 5> fitworker;
-	std::vector<double> initP(result.polynomialOrder + 2 * result.includesSqrt, 0.0);
-	initP[0] = result.calmin;
-	if (result.includesSqrt) {
-		initP[result.polynomialOrder + 2 * result.includesSqrt - 1] = result.ctrlVals[0];
-	}
-	PolynomialFit fitWorker(result.ctrlVals.size(), result.ctrlVals.data(), result.resVals.data(),
-		result.polynomialOrder, result.includesSqrt,initP);
-	fitWorker.solve_system();
-	result.calibrationCoefficients = fitWorker.fittedPara();
-	result.includesSqrt = cal.includeSqrt;
+	//std::vector<double> initP(1 + result.polynomialOrder + 2 * result.includesSqrt, 0.0);
+	//initP[0] = result.calmin;
+	//if (result.includesSqrt) {
+	//	initP[result.polynomialOrder + 2 * result.includesSqrt] = result.ctrlVals[0] - 0.5;
+	//}
+	//PolynomialFit fitWorker(result.ctrlVals.size(),  result.resVals.data(), result.ctrlVals.data(),
+	//	result.polynomialOrder, result.includesSqrt,initP);
+	//fitWorker.solve_system();
+	//result.calibrationCoefficients = fitWorker.fittedPara();
+	result.bsfit.initialize(result.ctrlVals.size(), result.resVals, result.ctrlVals, 
+		result.orderBSpline, result.nBreak);
+	result.bsfit.solve_system();
+	result.fillCalibrationResult();
+	//result.includesSqrt = cal.includeSqrt;
 	//calibrationTable->repaint ();
 	cal.calibrated = true;
 	if (cal.useAg) {

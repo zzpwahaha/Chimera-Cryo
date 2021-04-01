@@ -19,16 +19,16 @@ ArbGenCore::ArbGenCore(const arbGenSettings& settings) :
 	setupCommands(settings.setupCommands),
 	isConnected(false)
 {
-	calibrations[0].includesSqrt = false;
+	//calibrations[0].includesSqrt = false;
 	calibrations[0].calibrationCoefficients = settings.calibrationCoeff;
-	calibrations[0].polynomialOrder = settings.calibrationCoeff.size();
+	//calibrations[0].polynomialOrder = settings.calibrationCoeff.size();
 	// could probably set these properly but in general wasn't doing this when was doing manual calibrations.
 	calibrations[0].calmax = 1e6;
 	calibrations[0].calmin = -1e6;
 
-	calibrations[1].includesSqrt = false;
+	//calibrations[1].includesSqrt = false;
 	calibrations[1].calibrationCoefficients = settings.calibrationCoeff;
-	calibrations[1].polynomialOrder = settings.calibrationCoeff.size();
+	//calibrations[1].polynomialOrder = settings.calibrationCoeff.size();
 	calibrations[1].calmax = 1e6;
 	calibrations[1].calmin = -1e6;
 
@@ -229,79 +229,6 @@ bool ArbGenCore::connected() {
 }
 
 
-//void ArbGenCore::setDC(int channel, dcInfo info, unsigned var) {
-//	if (channel != 1 && channel != 2) {
-//		thrower("Bad value for channel inside setDC! Channel shoulde be 1 or 2.");
-//	}
-//	try {
-//		visaFlume.write("SOURce" + str(channel) + ":APPLy:DC DEF, DEF, "
-//			+ str(convertPowerToSetPoint(info.dcLevel.getValue(var), info.useCal, calibrations[channel - 1])) + " V");
-//	}
-//	catch (ChimeraError&) {
-//		throwNested("Seen while programming DC for channel " + str(channel) + " (1-indexed).");
-//	}
-//}
-
-//void ArbGenCore::setExistingWaveform(int channel, preloadedArbInfo info) {
-//	if (channel != 1 && channel != 2) {
-//		thrower("Bad value for channel in setExistingWaveform! Channel shoulde be 1 or 2.");
-//	}
-//	auto sStr = "SOURCE" + str(channel);
-//	visaFlume.write(sStr + ":DATA:VOL:CLEAR");
-//	// Load sequence that was previously loaded.
-//	visaFlume.write("MMEM:LOAD:DATA \"" + info.address.expressionStr + "\"");
-//	// tell it that it's outputting something arbitrary (not sure if necessary)
-//	visaFlume.write(sStr + ":FUNC ARB");
-//	// tell it what arb it's outputting.
-//	visaFlume.write(sStr + ":FUNC:ARB \"" + memoryLoc + ":\\" + info.address.expressionStr + "\"");
-//	programBurstMode(channel, info.burstMode);
-//	visaFlume.write("OUTPUT" + str(channel) + " ON");
-//}
-
-//void ArbGenCore::programBurstMode(int channel, bool burstOption) {
-//	auto sStr = "SOURCE" + str(channel);
-//	if (burstOption) {
-//		// not really bursting... but this allows us to reapeat on triggers. Might be another way to do this.
-//		visaFlume.write(sStr + ":BURST::MODE TRIGGERED");
-//		visaFlume.write(sStr + ":BURST::NCYCLES 1");
-//		visaFlume.write(sStr + ":BURST::PHASE 0");
-//		visaFlume.write(sStr + ":BURST::STATE ON");
-//	}
-//	else {
-//		visaFlume.write(sStr + ":BURST::STATE OFF");
-//	}
-//}
-
-// set the agilent to output a square wave.
-//void ArbGenCore::setSquare(int channel, squareInfo info, unsigned var) {
-//	if (channel != 1 && channel != 2) {
-//		thrower("Bad Value for Channel in setSquare! Channel shoulde be 1 or 2.");
-//	}
-//	try {
-//		visaFlume.write("SOURCE" + str(channel) + ":APPLY:SQUARE " + str(info.frequency.getValue(var)) + " KHZ, "
-//			+ str(convertPowerToSetPoint(info.amplitude.getValue(var), info.useCal, calibrations[channel - 1])) + " VPP, "
-//			+ str(convertPowerToSetPoint(info.offset.getValue(var), info.useCal, calibrations[channel - 1])) + " V");
-//	}
-//	catch (ChimeraError&) {
-//		throwNested("Seen while programming Square Wave for channel " + str(channel) + " (1-indexed).");
-//	}
-//}
-
-//void ArbGenCore::setSine(int channel, sineInfo info, unsigned var) {
-//	if (channel != 1 && channel != 2) {
-//		thrower("Bad value for channel in setSine! Channel shoulde be 1 or 2.");
-//	}
-//	try {
-//		visaFlume.write("SOURCE" + str(channel) + ":APPLY:SINUSOID " + str(info.frequency.getValue(var)) + " KHZ, "
-//			+ str(convertPowerToSetPoint(info.amplitude.getValue(var), info.useCal, calibrations[channel - 1])) + " VPP");
-//	}
-//	catch (ChimeraError&) {
-//		throwNested("Seen while programming Sine Wave for channel " + str(channel) + " (1-indexed).");
-//	}
-//
-//}
-
-
 void ArbGenCore::convertInputToFinalSettings(unsigned chan, deviceOutputInfo& info, std::vector<parameterType>& params) {
 	unsigned totalVariations = (params.size() == 0) ? 1 : params.front().keyValues.size();
 	channelInfo& channel = info.channel[chan];
@@ -338,19 +265,6 @@ void ArbGenCore::convertInputToFinalSettings(unsigned chan, deviceOutputInfo& in
 }
 
 /**
- * This function tells the agilent to put out the DC default waveform.
- */
-//void ArbGenCore::setDefault(int channel) {
-//	try {
-//		// turn it to the default voltage...
-//		std::string setPointString = str(convertPowerToSetPoint(AGILENT_DEFAULT_POWER, true, calibrations[channel - 1]));
-//		visaFlume.write("SOURce" + str(channel) + ":APPLy:DC DEF, DEF, " + setPointString + " V");
-//	}
-//	catch (ChimeraError&) {
-//		throwNested("Seen while programming default voltage.");
-//	}
-//}
-/**
  * expects the inputted power to be in -MILI-WATTS!
  * returns set point in VOLTS
  */
@@ -385,53 +299,6 @@ void ArbGenCore::programSetupCommands() {
 		throwNested("Failed to program setup commands for " + arbGenName + " ArbGen!");
 	}
 }
-
-
-//void ArbGenCore::handleScriptVariation(unsigned variation, scriptedArbInfo& scriptInfo, unsigned channel,
-//	std::vector<parameterType>& params) {
-//	prepAgilentSettings(channel);
-//	programSetupCommands();
-//	if (scriptInfo.wave.isVaried() || variation == 0) {
-//		unsigned totalSegmentNumber = scriptInfo.wave.getSegmentNumber();
-//		// Loop through all segments
-//		for (auto segNumInc : range(totalSegmentNumber)) {
-//			// Use that information to writebtn the data.
-//			try {
-//				scriptInfo.wave.calSegmentData(segNumInc, sampleRate, variation);
-//			}
-//			catch (ChimeraError&) {
-//				throwNested("IntensityWaveform.calSegmentData threw an error! Error occurred in segment #"
-//					+ str(totalSegmentNumber));
-//			}
-//		}
-//		// order matters.
-//		// loop through again and calc/normalize/writebtn values.
-//		scriptInfo.wave.convertPowersToVoltages(scriptInfo.useCal, calibrations[channel - 1]);
-//		scriptInfo.wave.calcMinMax();
-//		scriptInfo.wave.minsAndMaxes.resize(variation + 1);
-//		scriptInfo.wave.minsAndMaxes[variation].second = scriptInfo.wave.getMaxVolt();
-//		scriptInfo.wave.minsAndMaxes[variation].first = scriptInfo.wave.getMinVolt();
-//		scriptInfo.wave.normalizeVoltages();
-//		visaFlume.write("SOURCE" + str(channel) + ":DATA:VOL:CLEAR");
-//		prepAgilentSettings(channel);
-//		for (unsigned segNumInc : range(totalSegmentNumber)) {
-//			visaFlume.write(scriptInfo.wave.compileAndReturnDataSendString(segNumInc, variation,
-//				totalSegmentNumber, channel));
-//			// Save the segment
-//			visaFlume.write("MMEM:STORE:DATA" + str(channel) + " \"" + memoryLoc + ":\\segment"
-//				+ str(segNumInc + totalSegmentNumber * variation) + ".arb\"");
-//		}
-//		scriptInfo.wave.compileSequenceString(totalSegmentNumber, variation, channel, variation);
-//		// submit the sequence
-//		visaFlume.write(scriptInfo.wave.returnSequenceString());
-//		// Save the sequence
-//		visaFlume.write("SOURCE" + str(channel) + ":FUNC:ARB sequence" + str(variation));
-//		visaFlume.write("MMEM:STORE:DATA" + str(channel) + " \"" + memoryLoc + ":\\sequence"
-//			+ str(variation) + ".seq\"");
-//		// clear temporary memory.
-//		visaFlume.write("SOURCE" + str(channel) + ":DATA:VOL:CLEAR");
-//	}
-//}
 
 
 deviceOutputInfo ArbGenCore::getSettingsFromConfig(ConfigStream& file) {

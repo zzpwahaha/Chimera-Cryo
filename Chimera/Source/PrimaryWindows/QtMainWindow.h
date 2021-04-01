@@ -52,7 +52,7 @@ class QtMainWindow : public IChimeraQtWindow{
 		void fillMotInput (ExperimentThreadInput* input);
 
 		void startExperimentThread (ExperimentThreadInput* input);
-
+				
 		std::string getNotes ();
 		profileSettings getProfileSettings ();
 		debugInfo getDebuggingOptions ();

@@ -48,7 +48,7 @@ class AiSystem : public IChimeraSystem{
 		void handleOpenConfig(ConfigStream& file);
 		std::string getDelim () { return core.configDelim; }
 
-
+		AiCore& getCore() { return core; }
 
 
 	private:

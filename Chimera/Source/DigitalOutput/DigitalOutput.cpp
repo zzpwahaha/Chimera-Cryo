@@ -2,7 +2,7 @@
 #include "DigitalOutput.h"
 
 
-void DigitalOutput::updateStatus ( ){
+void DigitalOutput::updateStatus ( ){ // function name should probably be changed, updating check display only here
 	if ( check == nullptr )	{
 		return;
 	}
@@ -18,9 +18,11 @@ void DigitalOutput::initLoc ( unsigned numIn, unsigned rowIn ){
 }
 
 
-void DigitalOutput::set ( bool stat ){
+void DigitalOutput::set ( bool stat, bool updateDisplay ){
 	status = stat;
-	updateStatus ( );
+	if (updateDisplay) {
+		updateStatus();
+	}
 }
 
 

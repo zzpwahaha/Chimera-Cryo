@@ -91,6 +91,7 @@ QtMainWindow::QtMainWindow () :
 		});
 	// 6 minutes
 	timer->start (360000);
+
 }
 
 bool QtMainWindow::expIsRunning () {
@@ -261,6 +262,7 @@ void QtMainWindow::startExperimentThread (ExperimentThreadInput* input){
 	connect (expThread, &QThread::finished, expWorker, &QObject::deleteLater);
 	expThread->start (QThread::TimeCriticalPriority);
 }
+
 
 void QtMainWindow::fillMotInput (ExperimentThreadInput* input){
 	input->profile.configuration = "Set MOT Settings";

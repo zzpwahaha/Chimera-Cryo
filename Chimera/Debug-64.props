@@ -10,7 +10,7 @@
     <ClCompile>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <PreprocessorDefinitions>GSL_DLL;CBL_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;GSL_DLL;CBL_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <AdditionalDependencies>python38.lib;NIDAQmx.lib;visa32.lib;atmcd64m.lib;ftd2xx.lib;gsl.lib;cblas.lib;VimbaCPP.lib;VimbaImageTransform.lib;libhdf5_D.lib;libhdf5_cpp_D.lib;libhdf5_hl_D.lib;libhdf5_hl_cpp_D.lib;libhdf5_tools_D.lib;libszip_D.lib;libzlib_D.lib;%(AdditionalDependencies)</AdditionalDependencies>

@@ -357,6 +357,16 @@ OlSystem& QtAuxiliaryWindow::getOlSys() {
 	return olSys;
 }
 
+AiSystem& QtAuxiliaryWindow::getAiSys()
+{
+	return aiSys;
+}
+
+CalibrationManager& QtAuxiliaryWindow::getCalibManager()
+{
+	return calManager;
+}
+
 void QtAuxiliaryWindow::handleAbort (){
 	if (optimizer.isInMiddleOfOptimizing ()){
 		auto answer = QMessageBox::question (nullptr, qstr ("Save Opt?"), qstr ("Save Optimization Data?"), 
@@ -646,6 +656,7 @@ std::string QtAuxiliaryWindow::getVisaDeviceStatus (){
 
 void QtAuxiliaryWindow::fillExpDeviceList (DeviceList& list){
 	//list.list.push_back (dds.getCore ());
-	//list.list.push_back(olSys.getCore());
+	list.list.push_back(olSys.getCore());
+	list.list.push_back(aiSys.getCore());
 }
 

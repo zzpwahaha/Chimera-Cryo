@@ -68,6 +68,8 @@ class QtAuxiliaryWindow : public IChimeraQtWindow{
 		AoSystem& getAoSys();
 		DdsSystem& getDdsSys();
 		OlSystem& getOlSys();
+		AiSystem& getAiSys();
+		CalibrationManager& getCalibManager();
 
 		std::string getVisaDeviceStatus ();
 

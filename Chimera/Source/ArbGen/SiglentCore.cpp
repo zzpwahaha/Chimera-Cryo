@@ -52,7 +52,8 @@ void SiglentCore::setScriptOutput(unsigned varNum, scriptedArbInfo scriptInfo, u
 			programBurstMode(chan, true);
 
 
-			visaFlume.write(schan + ":OUTPut ON");
+			//visaFlume.write(schan + ":OUTPut ON");
+			outputOn(chan);
 		}
 	}
 }
@@ -62,8 +63,17 @@ void SiglentCore::outputOff(int channel) {
 	if (channel != 1 && channel != 2) {
 		thrower("bad value for channel inside outputOff! Channel shoulde be 1 or 2.");
 	}
-	channel++;
+	//channel++;
 	visaFlume.write("C" + str(channel) + ":OUTPut OFF");
+}
+
+void SiglentCore::outputOn(int channel)
+{
+	if (channel != 1 && channel != 2) {
+		thrower("bad value for channel inside outputOn! Channel shoulde be 1 or 2.");
+	}
+	//channel++;
+	visaFlume.write("C" + str(channel) + ":OUTPut ON");
 }
 
 
@@ -101,7 +111,8 @@ void SiglentCore::setExistingWaveform(int channel, preloadedArbInfo info) {
 	}
 	visaFlume.write("C" + str(channel) + ":ARWV NAME," + info.address.expressionStr);
 	programBurstMode(channel, info.burstMode);
-	visaFlume.write("C" + str(channel) + ":OUTPut ON");
+	//visaFlume.write("C" + str(channel) + ":OUTPut ON");
+	outputOn(channel);
 }
 
 
