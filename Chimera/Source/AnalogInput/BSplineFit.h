@@ -20,6 +20,7 @@ public:
 	std::vector<double> calculateY(std::vector<double> x);
 
 	std::vector<double> getConfidentInterval(double level = 0.95);
+	std::vector<double> getBoudaryPolyCoef(double boundaryPos);
 	std::vector<double> getfittedPara();
 	//return in the order of {orderBSpline, dataSize, nBreak, nBasis}
 	std::vector<unsigned> getBSplinePara();
@@ -29,8 +30,11 @@ public:
 		std::pair<double, double> xlim, std::vector<double> coef, std::vector<double> xpts);
 
 private:
+
+
+private:
 	bool emptyStart;
-	std::vector<double> datax, datay;
+	std::vector<double> datax, datay; // datax should be sorted in the ascending order
 
 	gsl_matrix* X; // design matrix in linear least square regression, dataSize x nBasis, each row is evaluated for the same x with different basis function
 	gsl_vector* y; // datay for fitting
@@ -41,6 +45,7 @@ private:
 	gsl_vector* B; // Bspline vector for a particular point x, to facilitate eval inside functions
 	double RSS, TSS, Rsq;
 	std::vector<double> confi95;
+	std::vector<double> leftPoly, rightPoly;
 
 
 	gsl_bspline_workspace* bw;

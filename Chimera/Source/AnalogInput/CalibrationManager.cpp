@@ -5,6 +5,7 @@
 #include "PhotodetectorCalibration.h"
 #include <QHeaderView>
 #include <QMenu>
+#include <qcombobox.h>
 #include "GeneralObjects/ChimeraStyleSheets.h"
 #include <PrimaryWindows/QtMainWindow.h>
 #include <qapplication.h>
@@ -298,6 +299,12 @@ std::vector<calResult> CalibrationManager::getCalibrationInfo (){
 	return results;
 }
 
+void CalibrationManager::handleSaveConfig(std::stringstream& configStream)
+{
+	handleSaveMasterConfig(configStream);
+	configStream << "\nEND_" + systemDelim + "\n";
+}
+
 void CalibrationManager::handleSaveMasterConfig (std::stringstream& configStream) {
 	configStream << "\n" << systemDelim
 		<< "\n/*Auto Cal Checked: */ " << expAutoCalButton->isChecked ()
@@ -358,7 +365,6 @@ void CalibrationManager::handleOpenMasterConfigIndvResult (ConfigStream& configS
 	configStream >> result.orderBSpline;
 	configStream >> result.nBreak;
 	
-
 	unsigned numCtrlVals;
 	configStream >> numCtrlVals;
 	if (numCtrlVals > 500) {
@@ -380,8 +386,19 @@ void CalibrationManager::handleOpenMasterConfigIndvResult (ConfigStream& configS
 	for (auto& val : result.resVals) {
 		configStream >> val;
 	}
-	
 	determineCalMinMax (result);
+
+	if (result.ctrlVals.size() != result.resVals.size()) {
+		thrower("Error in reading config for calibration: the control data size is not equal to result data size");
+	}
+	if (result.resVals.size() != 0) {
+		result.bsfit.initialize(result.ctrlVals.size(), result.resVals, result.ctrlVals,
+			result.orderBSpline, result.nBreak);
+		result.bsfit.solve_system();
+		result.fillCalibrationResult();
+	}
+
+
 }
 
 calSettings CalibrationManager::handleOpenMasterConfigIndvCal (ConfigStream& configStream) {
@@ -408,7 +425,9 @@ calSettings CalibrationManager::handleOpenMasterConfigIndvCal (ConfigStream& con
 		}
 		configStream >> tmpInfo.avgNum;
 		std::string whichAgString;
-		configStream >> tmpInfo.useAg >> whichAgString >> tmpInfo.agChannel;
+		configStream >> tmpInfo.useAg;
+		whichAgString = configStream.getline();
+		configStream >> tmpInfo.agChannel;
 		tmpInfo.whichAg = ArbGenEnum::fromStr (whichAgString);
 		handleOpenMasterConfigIndvResult (configStream, tmpInfo.result);
 		handleOpenMasterConfigIndvResult (configStream, tmpInfo.historicalResult);
@@ -421,7 +440,7 @@ calSettings CalibrationManager::handleOpenMasterConfigIndvCal (ConfigStream& con
 }
 
 void CalibrationManager::handleOpenMasterConfig (ConfigStream& configStream) {
-	ConfigSystem::jumpToDelimiter (configStream, "CALIBRATION_MANAGER");
+	//ConfigSystem::jumpToDelimiter (configStream, systemDelim);
 	bool expAutocal;
 	configStream >> expAutocal;
 	expAutoCalButton->setChecked (expAutocal);
@@ -438,6 +457,11 @@ void CalibrationManager::handleOpenMasterConfig (ConfigStream& configStream) {
 		}
 	}
 	refreshListview ();
+}
+
+void CalibrationManager::handleOpenConfig(ConfigStream& configStream)
+{
+	handleOpenMasterConfig(configStream);
 }
 
 void CalibrationManager::refreshListview () {
@@ -471,7 +495,8 @@ void CalibrationManager::addCalToListview (calSettings& cal) {
 	calibrationTable->item (row, 3)->setFlags (cal.useAg || !cal.active ?
 		calibrationTable->item (row, 3)->flags () & ~Qt::ItemIsEnabled
 		: calibrationTable->item (row, 3)->flags () | Qt::ItemIsEnabled);
-	
+	//QComboBox* combo = new QComboBox();
+	//ArbGenEnum::allAgs
 	calibrationTable->setItem (row, 4, new QTableWidgetItem (cal.useAg ? qstr(ArbGenEnum::toStr(cal.whichAg)) : "---"));
 	calibrationTable->item (row, 4)->setFlags (!cal.useAg || !cal.active ?
 		calibrationTable->item (row, 4)->flags () & ~Qt::ItemIsEnabled
@@ -515,6 +540,7 @@ bool CalibrationManager::wantsExpAutoCal () {
 	return expAutoCalButton->isChecked ();
 }
 
+
 void CalibrationManager::runAllThreaded () {
 	emit notification( qstr("Running All Calibrations.\n"),0 );
 	std::vector<std::reference_wrapper<calSettings>> calInput;
@@ -555,6 +581,7 @@ void CalibrationManager::standardStartThread (std::vector<std::reference_wrapper
 	connect (threadWorker, &CalibrationThreadWorker::newCalibrationDataPoint, this, [this](QPointF pt) {
 			auto* chartData = calibrationViewer.getCalData ();
 			chartData->addData(pt.x(), pt.y());
+			calibrationViewer.plot->rescaleAxes(true);
 			calibrationViewer.plot->replot();
 			//*chartData << pt;
 		});
@@ -605,15 +632,15 @@ void CalibrationManager::updateCalibrationView (calSettings& cal) {
 		dataPoint dp{ cal.result.ctrlVals[num] , cal.result.resVals[num] };
 		plotData[0].push_back (dp);
 	}
-	int numfitpts = 30;
+	int numfitpts = 300;
 	plotData[1].resize (numfitpts);
 
-	double runningVal= cal.result.calmin;
+	double runningVal= cal.result.calmin-0.5;
 	for (auto pnum : range (plotData[1].size ())) {
 		plotData[1][pnum].y = runningVal;
 		//plotData[1][pnum].x = calibrationFunction (plotData[1][pnum].y, cal.result, this);
 		plotData[1][pnum].x = cal.result.bsfit.calculateY(plotData[1][pnum].y);
-		runningVal += (cal.result.calmax - cal.result.calmin) / (numfitpts - 1);
+		runningVal += (cal.result.calmax +1.0- cal.result.calmin) / (numfitpts - 1);
 	}
 
 	numfitpts = 30;

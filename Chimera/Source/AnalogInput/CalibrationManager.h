@@ -34,18 +34,23 @@ class CalibrationManager : public IChimeraSystem {
 		void runAllThreaded ();
 		void calibrateThreaded (calSettings& cal, unsigned which);
 		bool wantsExpAutoCal ();
+		void handleSaveConfig(std::stringstream& configStream);
 		void handleSaveMasterConfig (std::stringstream& configStream);
 		void handleSaveMasterConfigIndvResult (std::stringstream& configStream, calResult& cal);
 		void handleOpenMasterConfigIndvResult (ConfigStream& configStream, calResult& result);
 		void handleOpenMasterConfig (ConfigStream& configStream);
+		void handleOpenConfig(ConfigStream& configStream);
 		std::vector<calResult> getCalibrationInfo ();
 		void standardStartThread (std::vector<std::reference_wrapper<calSettings>> calibrations);
 		void refreshListview ();
 		static std::vector<double> calPtTextToVals (QString qtxt);
 		//static double calibrationFunction (double val, calResult calibration, IChimeraSystem* parent = nullptr);
-	
-	private:
+		
+	public:
 		const std::string systemDelim = "CALIBRATION_MANAGER";
+
+	private:
+		
 		QLabel* calsHeader;
 		CQPushButton* calibrateAllButton;
 		CQCheckBox* expAutoCalButton;

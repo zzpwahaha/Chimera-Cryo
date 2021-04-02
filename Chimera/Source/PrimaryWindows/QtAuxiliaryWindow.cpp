@@ -204,6 +204,7 @@ void QtAuxiliaryWindow::windowSaveConfig (ConfigStream& saveFile){
 	aoSys.handleSaveConfig (saveFile);
 	dds.handleSaveConfig (saveFile);
 	aiSys.handleSaveConfig(saveFile);
+	calManager.handleSaveConfig(saveFile);
 }
 
 void QtAuxiliaryWindow::windowOpenConfig (ConfigStream& configFile){
@@ -214,6 +215,7 @@ void QtAuxiliaryWindow::windowOpenConfig (ConfigStream& configFile){
 		aoSys.updateEdits ();
 		ConfigSystem::standardOpenConfig (configFile, dds.getDelim (), &dds);
 		ConfigSystem::standardOpenConfig(configFile, aiSys.getDelim(), &aiSys);
+		ConfigSystem::standardOpenConfig(configFile, calManager.systemDelim, &calManager);
 	}
 	catch (ChimeraError&){
 		throwNested ("Auxiliary Window failed to read parameters from the configuration file.");

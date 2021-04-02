@@ -2,6 +2,7 @@
 #include "BSplineFit.h"
 #include <gsl/gsl_cdf.h>
 #include <gsl/gsl_linalg.h>
+#include <gsl/gsl_poly.h>
 #include <algorithm>
 
 
@@ -97,6 +98,8 @@ void BSplineFit::solve_system()
     Rsq = 1.0 - RSS / TSS;
 
     confi95 = getConfidentInterval(0.95);
+    leftPoly = getBoudaryPolyCoef(getxlim().first);
+    rightPoly = getBoudaryPolyCoef(getxlim().second);
 }
 
 double BSplineFit::calculateY(double x)
@@ -105,10 +108,19 @@ double BSplineFit::calculateY(double x)
         return 0;
     }
     double yi, yerr;
-    gsl_bspline_eval(x, B, bw); // B is assigned values of BSplines at x points of all basis functions
-    // yerr is calculated through B^T * cov * B from directly apply covaiance operator to Y, see my oneNote
-    gsl_multifit_linear_est(B, coef, cov, &yi, &yerr); 
+    if (x <= getxlim().first ) {
+        yi = gsl_poly_eval(leftPoly.data(), leftPoly.size(), x);
+    }
+    else if (x >= getxlim().second) {
+        yi = gsl_poly_eval(rightPoly.data(), rightPoly.size(), x);
+    }
+    else {
+        gsl_bspline_eval(x, B, bw); // B is assigned values of BSplines at x points of all basis functions
+        // yerr is calculated through B^T * cov * B from directly apply covaiance operator to Y, see my oneNote
+        gsl_multifit_linear_est(B, coef, cov, &yi, &yerr);
+    }
     return yi;
+    
 }
 
 std::vector<double> BSplineFit::calculateY(std::vector<double> x)
@@ -130,6 +142,50 @@ std::vector<double> BSplineFit::getConfidentInterval(double level)
     std::for_each(confixx.begin(), confixx.end(), [coefxx](auto& confid) {
         confid = coefxx * std::sqrt(confid); });
     return confixx;
+}
+
+std::vector<double> BSplineFit::getBoudaryPolyCoef(double boundaryPos)
+{
+    gsl_matrix* dB = gsl_matrix_alloc(nBasis, orderBSpline); 
+    gsl_vector* tmp = gsl_vector_alloc(orderBSpline);
+    gsl_bspline_deriv_eval(boundaryPos, orderBSpline - 1, dB, bw); // orderBSpline - 1 is the highest order of derivative
+    gsl_blas_dgemv(CblasTrans, 1.0, dB, coef, 0.0, tmp); // tmp stores Transpose(dB)*coef
+    // calculate the derivative matrix of the polynomial 
+    // use c[0] + c[1]*x + ... for various c[] (i.e c={1,0,0,...}, c={0,1,0,0,...}, c={0,0,1,0,0,...}) 
+    // to generate derivate matrix {{1,x,x^2,...,x^n},
+                                //  {0,1,2*x,...,n*x^(n-1)},
+                                //  {0,0,2,...,n*(n-1)*x^(n-2)}, ...}
+    gsl_matrix* derMat = gsl_matrix_alloc(orderBSpline, orderBSpline); 
+    for (size_t i = 0; i < orderBSpline; i++)
+    {
+        std::vector<double> coefPoly(orderBSpline, 0.0);
+        std::vector<double> der(orderBSpline, 0.0);
+        coefPoly[i] = 1.0; // set i-th element to be 1 and get i-th coloum of derivative matrix
+        gsl_poly_eval_derivs(coefPoly.data(), coefPoly.size(), boundaryPos, der.data(), der.size());
+        for (size_t j = 0; j < orderBSpline; j++)
+        {
+            gsl_matrix_set(derMat, j, i, der[j]);
+        }
+    }
+    // calculate inverse of the derivative matrix, which is to be multiplied to tmp = Transpose(dB)*coef
+    gsl_permutation* permutation = gsl_permutation_alloc(orderBSpline);
+    gsl_matrix* derMatInv = gsl_matrix_alloc(orderBSpline, orderBSpline);
+    int signum1;
+    gsl_linalg_LU_decomp(derMat, permutation, &signum1);
+    gsl_linalg_LU_invert(derMat, permutation, derMatInv);
+    // calculate derMatInv * tmp
+    gsl_vector* coefPoly = gsl_vector_alloc(orderBSpline);
+    gsl_blas_dgemv(CblasNoTrans, 1.0, derMatInv, tmp, 0.0, coefPoly);
+    
+    std::vector<double> coefPolyVec = std::vector<double>(coefPoly->data, coefPoly->data + coefPoly->size);
+    gsl_vector_free(coefPoly);
+    gsl_matrix_free(derMat);
+    gsl_matrix_free(derMatInv);
+    gsl_permutation_free(permutation);
+    gsl_vector_free(tmp);
+    gsl_matrix_free(dB);
+
+    return coefPolyVec;
 }
 
 std::vector<double> BSplineFit::getfittedPara()

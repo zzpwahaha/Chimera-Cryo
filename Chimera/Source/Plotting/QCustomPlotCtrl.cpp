@@ -22,6 +22,7 @@ void QCustomPlotCtrl::handleContextMenu(const QPoint& pos) {
 	plot->connect(clear, &QAction::triggered,
 		[this]() {
 			plot->clearGraphs();
+			plot->replot();
 		});
 	auto* leg = new QAction("Toggle Legend", plot);
 	plot->connect(leg, &QAction::triggered,
@@ -62,16 +63,6 @@ void QCustomPlotCtrl::initializeCalData(calSettings cal) {
 	plot->graph(0)->setLineStyle(QCPGraph::lsNone);
 	plot->graph(0)->setScatterStyle(QCPScatterStyle::ssCircle);
 	plot->graph(0)->setData({}, {});
-	//plot->clearGraphs();
-	//view->chart()->removeAllSeries();
-	//calibrationData = new QtCharts::QScatterSeries(view->chart());
-	//calibrationData->setBorderColor(Qt::black);
-	//calibrationData->setMarkerSize(8.0);
-	//calibrationData->setColor(QColor(255, 255, 255));
-	//calibrationData->setName("Calibration Data");
-	//double xmin = DBL_MAX, xmax = -DBL_MAX, ymin = DBL_MAX, ymax = -DBL_MAX;
-	//resetChart();
-
 }
 
 void QCustomPlotCtrl::setData(std::vector<plotDataVec> newData) {
@@ -283,6 +274,7 @@ void QCustomPlotCtrl::resetChart() {
 	plot->legend->setTextColor(neutralColor);
 	plot->setBackground(QColor(defs["@StaticBackground"]));
 	title->setTextColor(defs["@NeutralTextColor"]);
+	plot->replot();
 }
 
 void QCustomPlotCtrl::init(IChimeraQtWindow* parent, QString titleIn) 
