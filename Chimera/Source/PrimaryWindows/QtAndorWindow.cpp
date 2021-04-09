@@ -4,6 +4,7 @@
 #include <PrimaryWindows/QtScriptWindow.h>
 #include <PrimaryWindows/QtAndorWindow.h>
 #include <PrimaryWindows/QtAuxiliaryWindow.h>
+#include <PrimaryWindows/QtMakoWindow.h>
 #include <PrimaryWindows/QtMainWindow.h>
 #include <RealTimeDataAnalysis/AnalysisThreadWorker.h>
 #include <RealTimeDataAnalysis/AtomCruncherWorker.h>

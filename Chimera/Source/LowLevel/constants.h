@@ -74,7 +74,7 @@
 
 
 	//ArbGens
-	const bool UWAVE_SAFEMODE = false;
+	const bool UWAVE_SAFEMODE = true;
 	const int numArbGen = 2;
 	const std::string UWAVE_AGILENT_ADDRESS = "TCPIP0::10.10.0.5::inst0::INSTR";
 	const std::string UWAVE_SIGLENT_ADDRESS = "TCPIP0::10.10.0.4::inst0::INSTR";
@@ -84,6 +84,11 @@
 	const bool AI_SAFEMODE = false;
 	const std::string AI_SOCKET_ADDRESS = "10.10.0.10";
 	const std::string AI_SOCKET_PORT = "80";
+
+	//Mako camera
+	const unsigned MAKO_NUMBER = 2;
+	const bool MAKO_SAFEMODE = false;
+	const std::array<std::string, MAKO_NUMBER> MAKO_IPADDRS= { "10.10.0.6", "10.10.0.7" };
 
 #endif
 /// Random other Constants

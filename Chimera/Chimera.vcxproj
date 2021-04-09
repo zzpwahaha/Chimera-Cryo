@@ -76,12 +76,12 @@
   </ItemDefinitionGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="QtSettings">
     <QtInstall>msvc2019_64</QtInstall>
-    <QtModules>charts;core;gui;network;printsupport;serialport;uitools;widgets</QtModules>
+    <QtModules>charts;concurrent;core;gui;network;printsupport;serialport;uitools;widgets</QtModules>
     <QtBuildConfig>debug</QtBuildConfig>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="QtSettings">
     <QtInstall>msvc2019_64</QtInstall>
-    <QtModules>charts;core;gui;network;printsupport;serialport;uitools;widgets</QtModules>
+    <QtModules>charts;concurrent;core;gui;network;printsupport;serialport;uitools;widgets</QtModules>
     <QtBuildConfig>release</QtBuildConfig>
   </PropertyGroup>
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.props')">
@@ -118,22 +118,55 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <QtMoc Include="Source\CMOSCamera\MakoSettingControl.cpp">
+      <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">input</DynamicSource>
+      <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Filename).moc</QtMocFileName>
+      <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Release|x64'">input</DynamicSource>
+      <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(Filename).moc</QtMocFileName>
+    </QtMoc>
+    <ClCompile Include="Source\CustomQtControls\LineEditCompleter.cpp" />
+    <ClCompile Include="Source\CustomQtControls\TickSlider.cpp" />
+    <QtMoc Include="Source\CustomQtControls\TickSlider.h" />
+    <ClCompile Include="Source\CMOSCamera\CMOSSetting.cpp" />
+    <ClCompile Include="Source\CMOSCamera\MakoCameraCore.cpp" />
+    <ClCompile Include="Source\CMOSCamera\MakoWrapper.cpp" />
+    <ClCompile Include="Source\CMOSCamera\MakoCamera.cpp" />
+    <ClCompile Include="Source\GeneralImaging\PictureViewer.cpp" />
+    <ClCompile Include="Source\CMOSCamera\GaussianFit.cpp" />
+    <ClCompile Include="Source\CMOSCamera\ImageCalculatingThread.cpp" />
+    <ClCompile Include="Source\GeneralImaging\csvReader.cpp" />
+    <ClCompile Include="Source\CustomQtControls\RangeSlider.cpp" />
+    <ClCompile Include="Source\PrimaryWindows\QtMakoWindow.cpp" />
     <ClCompile Include="Source\AnalogInput\BSplineFit.cpp" />
     <ClCompile Include="Source\AnalogInput\PolynomialFit.cpp" />
-    <ClCompile Include="Source\CMOSCamera\CameraWrapper.cpp" />
     <ClCompile Include="Source\AnalogInput\AiCore.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Source\AnalogInput\AiSettings.cpp" />
+    <ClCompile Include="Source\CMOSCamera\FrameObserver.cpp" />
+    <ClCompile Include="Source\CMOSCamera\Helper.cpp" />
+    <ClCompile Include="Source\CMOSCamera\ImageProcessingThread.cpp" />
     <ClCompile Include="Source\GeneralFlumes\QtSocketFlume.cpp" />
     <ClCompile Include="Source\AnalogInput\AiSystem.cpp" />
     <ClCompile Include="Source\AnalogInput\AiUnits.cpp" />
     <ClCompile Include="Source\AnalogInput\CalibrationManager.cpp" />
     <ClCompile Include="Source\AnalogInput\CalibrationThreadWorker.cpp" />
     <ClCompile Include="Source\GeneralFlumes\WinSockFlume.cpp" />
+    <QtMoc Include="Source\PrimaryWindows\QtMakoWindow.h" />
+    <QtMoc Include="Source\GeneralImaging\PictureViewer.h" />
+    <QtMoc Include="Source\CustomQtControls\LineEditCompleter.h" />
+    <ClInclude Include="Source\CMOSCamera\CMOSSetting.h" />
+    <ClInclude Include="Source\CMOSCamera\MakoCameraCore.h" />
+    <QtMoc Include="Source\CMOSCamera\MakoWrapper.h" />
+    <ClInclude Include="Source\CMOSCamera\MakoCamera.h" />
     <ClInclude Include="Source\AnalogInput\BSplineFit.h" />
     <ClInclude Include="Source\AnalogInput\PolynomialFit.h" />
-    <ClInclude Include="Source\CMOSCamera\CameraWrapper.h" />
     <ClInclude Include="Source\AnalogInput\AiCore.h" />
+    <QtMoc Include="Source\CMOSCamera\FrameObserver.h" />
+    <ClInclude Include="Source\CMOSCamera\GaussianFit.h" />
+    <ClInclude Include="Source\CMOSCamera\Helper.h" />
+    <QtMoc Include="Source\CMOSCamera\ImageCalculatingThread.h" />
+    <ClInclude Include="Source\CMOSCamera\ImageProcessingThread.h" />
+    <QtMoc Include="Source\CMOSCamera\MakoSettingControl.h" />
     <ClInclude Include="Source\GeneralFlumes\QtSocketFlume.h" />
     <ClInclude Include="Source\AnalogInput\calInfo.h" />
     <ClCompile Include="Source\AnalogOutput\AnalogOutput.cpp" />
@@ -311,9 +344,11 @@
     <ClInclude Include="Source\GeneralFlumes\ftdiStructures.h" />
     <ClInclude Include="Source\GeneralFlumes\QtSerialFlume.h" />
     <ClInclude Include="Source\GeneralFlumes\VisaFlume.h" />
+    <ClInclude Include="Source\GeneralImaging\csvReader.h" />
     <ClInclude Include="Source\GeneralImaging\imageParameters.h" />
     <ClInclude Include="Source\GeneralImaging\PictureManager.h" />
     <ClInclude Include="Source\GeneralImaging\PictureStats.h" />
+    <QtMoc Include="Source\CustomQtControls\RangeSlider.h" />
     <ClInclude Include="Source\GeneralImaging\softwareAccumulationOption.h" />
     <ClInclude Include="Source\GeneralObjects\ChimeraStyleSheets.h" />
     <ClInclude Include="Source\GeneralObjects\CodeTimer.h" />
@@ -345,7 +380,6 @@
     <ClInclude Include="Source\Plotting\PlotDataSet.h" />
     <ClInclude Include="Source\Plotting\PlottingInfo.h" />
     <ClInclude Include="Source\Plotting\tinyPlotInfo.h" />
-    <ClInclude Include="Source\PrimaryWindows\CustomMessages.h" />
     <ClInclude Include="Source\Python\NewPythonHandler.h" />
     <ClInclude Include="Source\RealTimeDataAnalysis\analysisSettings.h" />
     <ClInclude Include="Source\RealTimeDataAnalysis\atomCruncherInput.h" />
@@ -392,9 +426,6 @@
     <QtMoc Include="Source\ConfigurationSystems\ConfigSystem.h" />
     <QtMoc Include="Source\Andor\AndorCameraThreadWorker.h" />
     <QtMoc Include="Source\AnalogInput\CalibrationThreadWorker.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="ClassDiagram.cd" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

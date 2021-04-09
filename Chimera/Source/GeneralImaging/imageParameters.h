@@ -96,10 +96,10 @@ struct imageParameters{
 				thrower ( errstr + "bottom > 512" + currValues ( ) );
 			}
 		}
-		if ( cam == "ace" ){
-			if ( horRawPixelNum() % 16 != 0 || vertRawPixelNum() % 16 != 0 ){
+		if ( cam == "mako" ){
+			if ( horRawPixelNum() % 4 != 0 || vertRawPixelNum() % 4 != 0 ){
 				thrower ( "ERROR: In the ace camera, the number of pixels in each dimension must be a multiple "
-						  "of 16!\r\n" + currValues());
+						  "of 4!\r\n" + currValues());
 			}
 		}
 	}

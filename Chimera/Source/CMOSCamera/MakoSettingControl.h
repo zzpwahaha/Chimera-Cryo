@@ -1,0 +1,233 @@
+#pragma once
+#include "CMOSSetting.h"
+#include "MakoWrapper.h"
+#include <qwidget.h>
+#include <QMap>
+#include <QTreeView>
+#include <QStringList>
+#include <QObject>
+#include <QTimer>
+#include <qitemdelegate.h>
+#include <qstandarditemmodel.h>
+#include <qpushbutton.h>
+#include <qspinbox.h>
+#include <VimbaCPP/Include/Feature.h>
+#include <VimbaCPP/Include/IFeatureObserver.h>
+#include <VimbaCPP/Include/VimbaSystem.h>
+
+
+
+#include <QSortFilterProxyModel>
+
+using AVT::VmbAPI::FeaturePtr;
+using AVT::VmbAPI::CameraPtr;
+
+class FeatureObserver : public QObject, public AVT::VmbAPI::IFeatureObserver
+{
+    Q_OBJECT
+public:
+
+    FeatureObserver(CameraPtr pCam);
+    ~FeatureObserver(void);
+    virtual void FeatureChanged(const FeaturePtr& feature);
+
+signals:
+    void setChangedFeature(const QString& sFeat, const QString& sValue, const bool& bIsWritable);
+};
+typedef SP_DECL(FeatureObserver) FeatureObserverPtr;
+
+
+class ItemDelegate;
+class SortFilterProxyModel;
+class MultiCompleter;
+class IntSpinBox;
+class QComboBox;
+class QCheckBox;
+class TickSlider;
+class DoubleTickSlider;
+
+class MakoSettingControl : public QTreeView
+{
+    Q_OBJECT
+    public:
+        MakoSettingControl(QString sID = " ", CameraPtr pCam = CameraPtr(), QWidget* parent = nullptr);
+        ~MakoSettingControl();
+
+        void updateRegisterFeature();
+        void updateUnRegisterFeature();
+        void saveFeaturesToTextFile(const QString& sDestPathAndFileName) {};
+
+        /*getter for m_model*/
+        const QStandardItemModel* const controllerModel() { return m_Model; }
+
+    protected:
+        void showEvent(QShowEvent* event);
+        void hideEvent(QHideEvent* event);
+
+    private:
+        void mapInformation(const QString sName, const FeaturePtr featPtr);
+        QString getFeatureNameFromModel(const QModelIndex& item) const;
+        QString getFeatureNameFromMap(const QString& sDisplayName) const;
+        FeaturePtr getFeaturePtrFromMap(const QString& sFeature);
+        bool isFeatureWritable(const QString& sFeature);
+        void showIt(const QModelIndex item, const QString& sWhat);
+
+        void sortCategoryAndAttribute(const FeaturePtr& featPtr, QStandardItemModel* Model);
+        bool findCategory(const QMap <QString, QString>& map, const QString& sName) const;
+        unsigned int getGrandParentLevel(const QList<QStandardItem*>& items, const QString& sGrandParent) const;
+        bool registerFeatureObserver(const QString& sFeatureName);
+        void unregisterFeatureObserver(const QString& sFeatureName);
+        void updateExpandedTreeValue(const FeaturePtr& featPtr, const QString& sName);
+
+
+        void createCommandButton(const QModelIndex item);  /*  maps to VmbFeatureDataCommand */
+        void createEnumComboBox(const QModelIndex item);  /*  maps to VmbFeatureDataEnum */
+        void createIntSliderSpinBox(const QModelIndex item);  /*  maps to VmbFeatureDataInt */
+        void createFloatSliderEditBox(const QModelIndex item);  /*  maps to VmbFeatureDataFloat */
+        void createBooleanCheckBox(const QModelIndex item);  /*  maps to VmbFeatureDataBool */
+        void createStringEditBox(const QModelIndex item);  /*  maps to VmbFeatureDataString */
+        //void createLineEdit(const QModelIndex& item); /*  maps to register stuffs*/
+        //void createLogarithmicSlider(const QModelIndex& item); /*  maps to Exposure*/
+        void resetControl();
+
+        void setIntegerValue(const int& nValue);
+        void updateCurrentIntValue();
+        void setFloatingValue(const double& dValue);
+        void updateCurrentFloatValue();
+        void onIntSliderReleased();
+        void onFloatSliderReleased();
+        void AdjustOffscreenPosition(QPoint& position, QWidget& parentWidget);
+        template<typename COMPOUND_WIDGET>
+        void updateEditWidget(COMPOUND_WIDGET* w, const QVariant& value, bool bIsWritable);
+        void updateWidget(const bool bIsWritable, const QVariant& value);
+
+        bool eventFilter(QObject* object, QEvent* event);
+
+
+    public slots:
+        void closeControls(void);
+           
+
+    private slots:
+        void onSetChangedFeature(const QString& sFeature, const QString& sValue, const bool& bIsWritable);
+        void pollingFeaturesValue();
+
+        void onClicked(const QModelIndex& index);
+        void expand(const QModelIndex& index);
+        void collapse(const QModelIndex& index);
+        void updateColWidth();
+
+        void onCmdButtonClick();
+        void onIntSpinBoxClick();
+        void onFloatEditFinished();
+        void onIntSliderChanged(int nValue);
+        void onFloatSliderChanged(double dValue);
+        void onBoolCheckBoxClick(bool bValue);
+        void onEnumComboBoxClick(const QString& sSelected);
+        void onEditText();
+        
+    signals:
+        void setDescription(const QString& sDesc);
+        void acquisitionStartStop(const QString& sThisFeature);
+        void resetFPS();
+
+
+
+    public:
+        /* Filter Search Proxy */
+        SortFilterProxyModel*               m_ProxyModel;
+    private:
+        FeaturePtrVector                    m_featPtrVec;
+        CameraPtr                           m_pCam;
+        MultiCompleter* m_StringCompleter;
+        ItemDelegate* m_TreeDelegate;
+        IFeatureObserverPtr                 m_pFeatureObs;
+        QString                             m_sCameraID;
+        // QMap<key, value>
+        QMap <QString, QString>             m_DescriptonMap;
+        QMap <QString, QString>             m_DisplayFeatureNameMap;
+        QMap <QString, FeaturePtr>          m_featPtrMap;
+
+        QVector < QMap <QString, QString> > m_Level;
+        QMap <QString, QString>             m_Level0Map;
+        QMap <QString, QString>             m_Level1Map;
+        QMap <QString, QString>             m_Level2Map;
+        QMap <QString, QString>             m_Level3Map;
+        QMap <QString, QString>             m_Level4Map;
+        QMap <QString, QString>             m_Level5Map;
+        QMap <QString, QString>             m_Level6Map;
+        QMap <QString, QString>             m_Level7Map;
+        QMap <QString, QString>             m_Level8Map;
+        QMap <QString, QString>             m_Level9Map;
+
+        FeaturePtr                          m_FeaturePtr_Command;
+        FeaturePtr                          m_FeaturePtr_EnumComboBox;
+        FeaturePtr                          m_FeaturePtr_CheckBox;
+        FeaturePtr                          m_FeaturePtr_IntSpinBox;
+        FeaturePtr                          m_FeaturePtr_FloatSliderSpinBox;
+        FeaturePtr                          m_FeaturePtr_StringEditBox;
+        FeaturePtr                          m_FeaturePtr_LineEdit;
+
+        QString                             m_sFeature_Command;
+        QString                             m_sFeature_EnumComboBox;
+        QString                             m_sFeature_CheckBox;
+        QString                             m_sFeature_IntSpinBox;
+        QString                             m_sFeature_FloatSliderSpinBox;
+        QString                             m_sFeature_StringEditBox;
+        QString                             m_sFeature_StringLineEdit;
+        QString                             m_sCurrentSelectedFeature;
+
+        QStandardItemModel* m_Model;
+
+        int                                 m_nIntSliderOldValue;
+        unsigned int                        m_nSliderStep;
+        double                              m_dMinimum;
+        double                              m_dMaximum;
+        double                              m_dIncrement;
+
+
+        /* Logarithmic Slider */
+        //QWidget* m_LogSliderWidget;
+        //QwtSlider* m_LogSlider;
+        //QHBoxLayout* m_HLogSliderLayout;
+
+        /* Button */
+        QPushButton*                        m_CmdButton;
+        QWidget*                            m_ButtonWidget;
+
+        /* ComboBox */
+        QWidget* m_ComboWidget;
+        QComboBox* m_EnumComboBox;
+
+        /* Integer Feature Slider-SpinBoxes */
+        QWidget* m_IntSpinSliderWidget;
+        IntSpinBox* m_SpinBox_Int;
+        TickSlider* m_Slider_Int;
+
+        /* Float Feature Slider-Edit */
+        QWidget* m_FloatSliderEditWidget;
+        QLineEdit* m_EditBox_Float;
+        DoubleTickSlider* m_Slider_Float;
+
+        /* String Feature EditBox */
+        QWidget* m_EditWidget;
+        QLineEdit* m_TextEdit_String;
+
+        /* Boolean Feature CheckBox */
+        QWidget* m_BooleanWidget;
+        QCheckBox* m_CheckBox_Bool;
+
+
+        bool                                m_bIsTooltipOn;
+        QString                             m_sTooltip;
+
+        bool                                m_bIsJobDone;
+        bool                                m_bIsBusy;
+        bool                                m_bIsMousePressed;
+
+        QTimer*                             m_FeaturesPollingTimer;
+        QList <QString>                     m_FeaturesPollingName;
+        
+};
+
+

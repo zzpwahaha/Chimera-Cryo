@@ -5,6 +5,7 @@
 #include <PrimaryWindows/QtScriptWindow.h>
 #include <PrimaryWindows/QtAndorWindow.h>
 #include <PrimaryWindows/QtAuxiliaryWindow.h>
+#include <PrimaryWindows/QtMakoWindow.h>
 #include <ExperimentThread/autoCalConfigInfo.h>
 #include <GeneralObjects/ChimeraStyleSheets.h>
 #include <ExperimentThread/ExpThreadWorker.h>
@@ -29,14 +30,17 @@ QtMainWindow::QtMainWindow () :
 		andorWin = new QtAndorWindow;
 		which = "Auxiliary";
 		auxWin = new QtAuxiliaryWindow;
+		which = "CMOS";
+		makoWin = new QtMakoWindow;
 	}
 	catch (ChimeraError& err) {
 		errBox ("FATAL ERROR: " + which + " Window constructor failed! Error: " + err.trace ());
 		return;
 	}
-	scriptWin->loadFriends( this, scriptWin, auxWin, andorWin );
-	andorWin->loadFriends (this, scriptWin, auxWin, andorWin);
-	auxWin->loadFriends (this, scriptWin, auxWin, andorWin);
+	scriptWin->loadFriends( this, scriptWin, auxWin, andorWin, makoWin );
+	andorWin->loadFriends (this, scriptWin, auxWin, andorWin, makoWin);
+	auxWin->loadFriends (this, scriptWin, auxWin, andorWin, makoWin);
+	makoWin->loadFriends(this, scriptWin, auxWin, andorWin, makoWin);
 	startupTimes.push_back (chronoClock::now ());
 
 	for (auto* window : winList ()) {
@@ -402,10 +406,11 @@ DeviceList QtMainWindow::getDevices (){
 void QtMainWindow::handleColorboxUpdate (QString color, QString systemDelim){
 	auto colorstr = str (color);
 	auto delimStr = str (systemDelim);
-	mainWin->changeBoxColor (delimStr, colorstr);
-	scriptWin->changeBoxColor (delimStr, colorstr);
-	andorWin->changeBoxColor (delimStr, colorstr);
-	auxWin->changeBoxColor (delimStr, colorstr);
+	for (auto win_ : winList()) {
+		if (win_ != nullptr) {
+			win_->changeBoxColor(delimStr, colorstr);
+		}
+	}
 }
 
 void QtMainWindow::handleNotification (QString txt, unsigned level){
