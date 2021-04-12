@@ -9,7 +9,7 @@
 
 void FrameObserver::Stopping()
 {
-    m_pImageProcessingThread->StopProcessing();
+    m_imgPThread.StopProcessing();
     m_FPSCamera.stop();
     m_FPSReceived.stop();
     QMutexLocker guard(&m_StoppingLock);
@@ -20,7 +20,7 @@ void FrameObserver::Starting()
 {
     QMutexLocker guard(&m_StoppingLock);
     m_IsStopping = false;
-    m_pImageProcessingThread->StartProcessing();
+    m_imgPThread.StartProcessing();
 }
 
 FrameObserver::FrameObserver ( CameraPtr pCam )
@@ -29,8 +29,10 @@ FrameObserver::FrameObserver ( CameraPtr pCam )
     , m_nFrames                     ( MAX_FRAMES_TO_COUNT )
     , m_IsStopping                  ( false )
     , m_pCam                        ( pCam )
+    , m_imgPThread                  (   )
 { 
-    m_pImageProcessingThread    = QSharedPointer<ImageProcessingThread>(new ImageProcessingThread());
+    //m_imgPThread = ImageProcessingThread();
+    //m_pImageProcessingThread    = QSharedPointer<ImageProcessingThread>(new ImageProcessingThread());
 
     //also this for QCustomPlot
     qRegisterMetaType< QVector<ushort> >("QVector<ushort>");
@@ -42,9 +44,9 @@ FrameObserver::FrameObserver ( CameraPtr pCam )
 
 FrameObserver::~FrameObserver ( void )
 {
-    if( NULL != m_pImageProcessingThread || m_pImageProcessingThread->isRunning() )
+    if(m_imgPThread.isRunning() )
     {
-        m_pImageProcessingThread->quit();
+        m_imgPThread.quit();
     }
 }
 
@@ -82,9 +84,9 @@ void FrameObserver::FrameReceived ( const AVT::VmbAPI::FramePtr frame  )
             {
                 fps += " Cam:" + qstr(m_FPSCamera.CurrentFPS(), 2);
             }
-            if( m_pImageProcessingThread->getFPSCounter().isValid() )
+            if (m_imgPThread.getFPSCounter().isValid())
             {
-                fps += " Dis:" + qstr(m_pImageProcessingThread->getFPSCounter().CurrentFPS(), 2);
+                fps += " Dis:" + qstr(m_imgPThread.getFPSCounter().CurrentFPS(), 2);
             }
         }
         emit setCurrentFPS( fps );
@@ -110,7 +112,7 @@ bool FrameObserver::setFrame (const AVT::VmbAPI::FramePtr &frame )
     {
         tFrameInfo tmpInfo( frame );
         // the following funciton will call enque function in the processthread, which will wake the lock in the run function
-        m_pImageProcessingThread->setThreadFrame( tmpInfo );
+        m_imgPThread.setThreadFrame( tmpInfo );
     }
     catch (...)
     {

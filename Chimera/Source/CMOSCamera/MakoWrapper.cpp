@@ -3,16 +3,6 @@
 #include <CMOSCamera/Helper.h>
 #include <qendian.h>
 
-MakoWrapper::MakoWrapper()
-	: m_VimbaSystem(AVT::VmbAPI::VimbaSystem::GetInstance())
-{
-}
-
-MakoWrapper::~MakoWrapper()
-{
-    m_VimbaSystem.Shutdown();
-}
-
 InterfacePtr MakoWrapper::getInterfaceByID(VimbaSystem& vsys, std::string sInterfaceID)
 {
     InterfacePtr interfacePtr;
@@ -147,121 +137,6 @@ void MakoWrapper::setFloatingValue(FeaturePtr featPtr, double dValue)
     }
 }
 
-void MakoWrapper::initializeVimba()
-{
-	CameraPtrVector     currentListedCameras;
-    VmbErrorType error = m_VimbaSystem.Startup();
-    if (VmbErrorSuccess != error)
-    {
-        thrower("Startup failed, Error: " + str(Helper::mapReturnCodeToString(error)));
-        return;
-    }
-    try
-    {
-        CameraPtrVector tmpCameras;
-        error = m_VimbaSystem.GetCameras(tmpCameras);
-        if (tmpCameras.size() != MAKO_NUMBER) {
-            thrower("Less number of cMOS cameras than expected. Expect" + str(MAKO_NUMBER) + " but only get" + str(tmpCameras.size()));
-        }
-        cameraPtrs = tmpCameras;
-        if (VmbErrorSuccess == error)
-        {
-            searchCameras(tmpCameras);
-            QtCameraObserverPtr pDeviceObs(new CameraObserver());
-            error = m_VimbaSystem.RegisterCameraListObserver(pDeviceObs);
-            if (VmbErrorSuccess != error)
-            {
-                thrower("RegisterCameraListObserver Failed, Error: " + str(error) + " " + str(Helper::mapReturnCodeToString(error)));
-            }
-        }
-        else
-        {
-            thrower("could not get camera list,  Error: " + str(error) + " " + str(Helper::mapReturnCodeToString(error)));
-        }
-        
-    }
-    catch (const ChimeraError& e)
-    {
-        throwNested(str("Mako <constructor> Exception: ") + e.what());
-    }
-}
-
-void MakoWrapper::searchCameras(const CameraPtrVector& Cameras)
-{
-    QMap <QString, QString>     ifTypeMap;
-    InterfacePtrVector          ifPtrVec;
-    std::string                 sInterfaceID;
-    VmbErrorType                error;
-    /* list all interfaces found by VmbAPI */
-    error = m_VimbaSystem.GetInterfaces(ifPtrVec);
-    if (VmbErrorSuccess != error)
-    {
-        thrower("GetInterfaces Failed, Error: "+str(Helper::mapReturnCodeToString(error)));
-        return;
-    }
-    /* check type of Interfaces and complain if there is types other than GigE*/
-    for (unsigned int i = 0; i < ifPtrVec.size(); i++)
-    {
-        error = ifPtrVec.at(i)->GetID(sInterfaceID);
-        if (VmbErrorSuccess != error) {
-            thrower("GetID <Interface " + str(i) + " Failed, Error: " + str(Helper::mapReturnCodeToString(error)));
-            continue;
-        }
-
-        VmbInterfaceType    ifType = VmbInterfaceUnknown;
-        VmbErrorType        errorGetType = ifPtrVec.at(i)->GetType(ifType);
-        if (VmbErrorSuccess != errorGetType) {
-            thrower("GetType <Interface " + str(i) + " Failed, Error: " + str(Helper::mapReturnCodeToString(errorGetType)));
-            continue;
-        }
-
-        switch (ifType)
-        {
-        case VmbInterfaceEthernet:
-            ifTypeMap[qstr(sInterfaceID)] = "GigE";
-            break;
-        default: 
-            thrower("Error in search Mako camera, found camera type other than GigE");
-        }
-    }
-    
-    /*gather info for all listed camera and compare to the expected one from constant.h*/
-    for (unsigned int i = 0; i < Cameras.size(); i++)
-    {
-        /*get camera name*/
-        std::string displayName;
-        error = getCameraDisplayName(Cameras[i], displayName);
-        if (VmbErrorSuccess != error)
-        {
-            thrower("GetDisplayName error for camera " + str(i) + "Error: " + str(error) + " " + str(Helper::mapReturnCodeToString(error)));
-            continue;
-        }
-        cameraNames[i] = displayName;
-
-        /*check ip address*/
-        std::string ipaddress;
-        error = getIPAddress(Cameras[i], ipaddress);
-        if (VmbErrorSuccess != error)
-        {
-            thrower("GetIPAddress error for camera " + str(i) + "Error: " + str(error) + " " + str(Helper::mapReturnCodeToString(error)));
-            continue;
-        }
-
-        /*check access type*/
-        VmbAccessModeType accessType = VmbAccessModeType::VmbAccessModeNone;
-        error = Cameras[i]->GetPermittedAccess(accessType);
-        if (VmbErrorSuccess == error) {
-            if (accessType != VmbAccessModeType::VmbAccessModeFull) {
-                thrower("Camera do not support full access mode, check if there is running program that grab the camera.");
-            }
-        }
-        else {
-            thrower("Error in GetPermittedAccess. Error: " + str(error) + " " + str(Helper::mapReturnCodeToString(error)));
-        }
-    }
-
-}
-
 std::string MakoWrapper::getFeatureInformation(FeaturePtr featPtr)
 {
     std::string sInformation;
@@ -376,7 +251,6 @@ bool MakoWrapper::isEventFeature(FeaturePtr pFeature)
 }
 
 
-
 /*below two functions are directly copied from Vimba example and I do not want to mess up with it (even though it is definitly optimizable)*/
 VmbErrorType MakoWrapper::getCameraDisplayName(const CameraPtr& camera, std::string& sDisplayName)
 {
@@ -485,7 +359,7 @@ VmbErrorType MakoWrapper::getIPAddress(const AVT::VmbAPI::CameraPtr& camera, std
         if (VmbErrorSuccess == error)
         {
             // get a pointer to the interface
-            error = m_VimbaSystem.GetInterfaceByID(sInterfaceID.c_str(), pInterface);
+            error = AVT::VmbAPI::VimbaSystem::GetInstance().GetInterfaceByID(sInterfaceID.c_str(), pInterface);
             if (VmbErrorSuccess == error)
             {
                 // open the interface 

@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "LineEditCompleter.h"
 
-LineEditCompleter::LineEditCompleter(QWidget* parent) : QLineEdit(parent), c(0)
+LineEditCompleter::LineEditCompleter(QWidget* parent) : QLineEdit(parent), c(nullptr)
 {
 }
 
@@ -11,16 +11,15 @@ LineEditCompleter::~LineEditCompleter()
 
 void LineEditCompleter::setCompleter(MultiCompleter* completer)
 {
-    if (c)
+    if (nullptr == c)
         QObject::disconnect(c, 0, this, 0);
 
     c = completer;
 
     if (!c)
         return;
-
     c->setWidget(this);
-    connect(completer, SIGNAL(activated(const QString&)), this, SLOT(insertCompletion(const QString&)));
+    connect(completer, qOverload<const QString&>(&QCompleter::activated), this, &LineEditCompleter::insertCompletion);
 }
 
 MultiCompleter* LineEditCompleter::completer() const

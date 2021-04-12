@@ -5,6 +5,8 @@
 #include "ConfigurationSystems/profileSettings.h"
 #include "ExperimentThread/ExperimentThreadInput.h"
 #include "IChimeraQtWindow.h"
+#include <CMOSCamera/MakoCamera.h>
+
 
 class QtMakoWindow : public IChimeraQtWindow 
 {
@@ -20,6 +22,7 @@ public:
     void fillExpDeviceList(DeviceList& list) {};
 
 private:
+    MakoCamera cam;
 
 };
 

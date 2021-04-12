@@ -9,13 +9,10 @@
 #include <QTimer>
 #include <qitemdelegate.h>
 #include <qstandarditemmodel.h>
-#include <qpushbutton.h>
-#include <qspinbox.h>
+#include <qstring.h>
 #include <VimbaCPP/Include/Feature.h>
 #include <VimbaCPP/Include/IFeatureObserver.h>
 #include <VimbaCPP/Include/VimbaSystem.h>
-
-
 
 #include <QSortFilterProxyModel>
 
@@ -40,8 +37,10 @@ typedef SP_DECL(FeatureObserver) FeatureObserverPtr;
 class ItemDelegate;
 class SortFilterProxyModel;
 class MultiCompleter;
+class LineEditCompleter;
 class IntSpinBox;
 class QComboBox;
+class QPushButton;
 class QCheckBox;
 class TickSlider;
 class DoubleTickSlider;
@@ -50,9 +49,12 @@ class MakoSettingControl : public QTreeView
 {
     Q_OBJECT
     public:
-        MakoSettingControl(QString sID = " ", CameraPtr pCam = CameraPtr(), QWidget* parent = nullptr);
+        MakoSettingControl(QWidget* parent = nullptr);
         ~MakoSettingControl();
-
+        // initialize pcam, featureobserver and the qtreeview
+        void initialize(QString sID, CameraPtr pCam, QWidget* parent = nullptr);
+        // called from parent widget to assemble a full controller gui, just to ease the burden in the parent class
+        void initializeWidget(QWidget* widget);
         void updateRegisterFeature();
         void updateUnRegisterFeature();
         void saveFeaturesToTextFile(const QString& sDestPathAndFileName) {};
@@ -89,9 +91,11 @@ class MakoSettingControl : public QTreeView
         //void createLineEdit(const QModelIndex& item); /*  maps to register stuffs*/
         //void createLogarithmicSlider(const QModelIndex& item); /*  maps to Exposure*/
         void resetControl();
-
+        
+        bool initCurrentFeatureInt(const QString& name);
         void setIntegerValue(const int& nValue);
         void updateCurrentIntValue();
+        bool initCurrentFeatureFloat(const QString& name);
         void setFloatingValue(const double& dValue);
         void updateCurrentFloatValue();
         void onIntSliderReleased();
@@ -106,13 +110,12 @@ class MakoSettingControl : public QTreeView
 
     public slots:
         void closeControls(void);
-           
+        void onClicked(const QModelIndex& index);
 
     private slots:
         void onSetChangedFeature(const QString& sFeature, const QString& sValue, const bool& bIsWritable);
         void pollingFeaturesValue();
 
-        void onClicked(const QModelIndex& index);
         void expand(const QModelIndex& index);
         void collapse(const QModelIndex& index);
         void updateColWidth();
@@ -132,15 +135,14 @@ class MakoSettingControl : public QTreeView
         void resetFPS();
 
 
-
     public:
         /* Filter Search Proxy */
         SortFilterProxyModel*               m_ProxyModel;
     private:
         FeaturePtrVector                    m_featPtrVec;
         CameraPtr                           m_pCam;
-        MultiCompleter* m_StringCompleter;
-        ItemDelegate* m_TreeDelegate;
+        MultiCompleter*                     m_StringCompleter;
+        ItemDelegate*                       m_TreeDelegate;
         IFeatureObserverPtr                 m_pFeatureObs;
         QString                             m_sCameraID;
         // QMap<key, value>
@@ -177,45 +179,42 @@ class MakoSettingControl : public QTreeView
         QString                             m_sFeature_StringLineEdit;
         QString                             m_sCurrentSelectedFeature;
 
-        QStandardItemModel* m_Model;
+        QStandardItemModel*                 m_Model;
 
         int                                 m_nIntSliderOldValue;
-        unsigned int                        m_nSliderStep;
+        VmbInt64_t                          m_nMinimum;
+        VmbInt64_t                          m_nMaximum;
+        VmbInt64_t                          m_nIncrement;
         double                              m_dMinimum;
         double                              m_dMaximum;
         double                              m_dIncrement;
-
-
-        /* Logarithmic Slider */
-        //QWidget* m_LogSliderWidget;
-        //QwtSlider* m_LogSlider;
-        //QHBoxLayout* m_HLogSliderLayout;
+        StringVector                        m_sEnumEntries;
 
         /* Button */
         QPushButton*                        m_CmdButton;
         QWidget*                            m_ButtonWidget;
 
         /* ComboBox */
-        QWidget* m_ComboWidget;
-        QComboBox* m_EnumComboBox;
+        QWidget*                            m_ComboWidget;
+        QComboBox*                          m_EnumComboBox;
 
         /* Integer Feature Slider-SpinBoxes */
-        QWidget* m_IntSpinSliderWidget;
-        IntSpinBox* m_SpinBox_Int;
-        TickSlider* m_Slider_Int;
+        QWidget*                            m_IntSpinSliderWidget;
+        IntSpinBox*                         m_SpinBox_Int;
+        TickSlider*                         m_Slider_Int;
 
         /* Float Feature Slider-Edit */
-        QWidget* m_FloatSliderEditWidget;
-        QLineEdit* m_EditBox_Float;
-        DoubleTickSlider* m_Slider_Float;
+        QWidget*                            m_FloatSliderEditWidget;
+        QLineEdit*                          m_EditBox_Float;
+        DoubleTickSlider*                   m_Slider_Float;
 
         /* String Feature EditBox */
-        QWidget* m_EditWidget;
-        QLineEdit* m_TextEdit_String;
+        QWidget*                            m_EditWidget;
+        QLineEdit*                          m_TextEdit_String;
 
         /* Boolean Feature CheckBox */
-        QWidget* m_BooleanWidget;
-        QCheckBox* m_CheckBox_Bool;
+        QWidget*                            m_BooleanWidget;
+        QCheckBox*                          m_CheckBox_Bool;
 
 
         bool                                m_bIsTooltipOn;

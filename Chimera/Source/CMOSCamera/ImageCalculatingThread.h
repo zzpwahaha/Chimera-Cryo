@@ -13,14 +13,59 @@ class ImageCalculatingThread :
     public QThread
 {
     Q_OBJECT
+public:
+    ImageCalculatingThread(const SP_DECL(FrameObserver)&,
+        const CameraPtr&, QCustomPlot* plot, QCPColorMap* cmap, QCPGraph* pbot, QCPGraph* pleft);
+    ~ImageCalculatingThread();
+    void StartProcessing();
+    void StopProcessing();
+    void updateXYOffset();
+    void updateExposureTime();
+    void updateCameraGain();
+    template <class T>
+    void assignValue(const QVector<T>& vec1d, std::string sFormat, 
+        unsigned Height, unsigned Width, unsigned offsetX, unsigned offsetY);
+
+private:
+    void calcCrossSectionXY();
+    void fit1dGaussian();
+    void fit2dGaussian();
+
+public:
+    virtual void run() override;
+
+    void setDefaultView();
+
+
+    QPoint& mousePos() { return m_mousePos; }
+    std::pair<int, int> maxWidthHeight() { return std::pair(m_widthMax, m_heightMax); }
+    std::pair<int, int> WidthHeight() { return std::pair(m_width, m_height); }
+    std::pair<int, int> offsetXY() { return std::pair(m_offsetX, m_offsetY); }
+    std::string format() { return m_format; }
+    double exposureTime() { return m_exposureTime; }
+    double cameraGain() { return m_cameraGain; }
+    QVector<double> rawImageDefinite();  /*used in save image*/
+    QMutex& mutex() const { return m_pProcessingThread->mutex(); }
+
+signals:
+    void imageReadyForPlot();
+    void currentFormat(QString format);
+
+public slots:
+    
+    void updateMousePos(QMouseEvent* event);
+    void toggleDoFitting(bool dofit);
+    void toggleDoFitting2D(bool dofit);
+
+
 private:
     SP_DECL(FrameObserver)                    m_pFrameObs;
     CameraPtr                                 m_pCam;
     QSharedPointer<ImageProcessingThread>     m_pProcessingThread;
-    QSharedPointer<QCustomPlot>               m_pQCP;
-    QSharedPointer<QCPColorMap>               m_pQCPColormap;
-    QSharedPointer<QCPGraph>                  m_pQCPbottomGraph;
-    QSharedPointer<QCPGraph>                  m_pQCPleftGraph;
+    QCustomPlot*                              m_pQCP;
+    QCPColorMap*                              m_pQCPColormap;
+    QCPGraph*                                 m_pQCPbottomGraph;
+    QCPGraph*                                 m_pQCPleftGraph;
     QVector<ushort>                           m_uint16QVector;
     QVector<double>                           m_doubleQVector;
     QVector<double>                           m_doubleCrxX;
@@ -50,52 +95,5 @@ private:
     Gaussian1DFit                             m_gfitBottom;
     Gaussian1DFit                             m_gfitLeft;
     Gaussian2DFit                             m_gfit2D;
-public:
-    ImageCalculatingThread(const SP_DECL(FrameObserver)& ,
-        const CameraPtr&,
-        const QSharedPointer<QCustomPlot>&,
-        const QSharedPointer<QCPColorMap>&,
-        const QSharedPointer<QCPGraph>& pbot,
-        const QSharedPointer<QCPGraph>& pleft);
-    ~ImageCalculatingThread();
-    void StartProcessing();
-    void StopProcessing();
-    void updateXYOffset();
-    void updateExposureTime();
-    void updateCameraGain();
-    template <class T>
-    void assignValue(const QVector<T>& vec1d, std::string sFormat, 
-        unsigned Height, unsigned Width, unsigned offsetX, unsigned offsetY);
-
-private:
-    void calcCrossSectionXY();
-    void fit1dGaussian();
-    void fit2dGaussian();
-
-public:
-    virtual void run() override;
-
-    void setDefaultView();
-
-
-    const QPoint& mousePos() const { return m_mousePos; }
-    std::pair<int, int> maxWidthHeight() const { return std::pair(m_widthMax, m_heightMax); }
-    std::pair<int, int> WidthHeight() const { return std::pair(m_width, m_height); }
-    std::pair<int, int> offsetXY() const { return std::pair(m_offsetX, m_offsetY); }
-    std::string format() { return m_format; }
-    const double exposureTime() const { return m_exposureTime; }
-    const double cameraGain() const { return m_cameraGain; }
-    QVector<double> rawImageDefinite();  /*used in save image*/
-    QMutex& mutex() const { return m_pProcessingThread->mutex(); }
-
-signals:
-    void imageReadyForPlot();
-    void currentFormat(QString format);
-
-public slots:
-    
-    void updateMousePos(QMouseEvent* event);
-    void toggleDoFitting(bool dofit);
-    void toggleDoFitting2D(bool dofit);
 };
 

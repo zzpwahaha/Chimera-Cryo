@@ -1,4 +1,5 @@
 #pragma once
+#include <qobject.h>
 #include "VimbaCPP/Include/VimbaSystem.h"
 #include <VimbaCPP/Include/ICameraListObserver.h>
 
@@ -14,8 +15,10 @@ public:
 	~CameraObserver(void) {};
 	virtual void CameraListChanged(AVT::VmbAPI::CameraPtr pCam, AVT::VmbAPI::UpdateTriggerType reason) 
 	{
-		thrower("FATAL ERROR: Mako camera list changed! Check camera connection, either plugged in or disconnected one or several cameras!"
-		"\n This should not happen.");
+		if (UpdateTriggerType::UpdateTriggerPluggedOut == reason) {
+			thrower("FATAL ERROR: Mako camera list changed! Check camera connection, either plugged in or disconnected one or several cameras!"
+				"\n This should not happen.");
+		}
 	};
 
 protected:
@@ -32,13 +35,6 @@ typedef AVT::VmbAPI::shared_ptr<CameraObserver> QtCameraObserverPtr;
 class MakoWrapper
 {
 public:
-	// THIS CLASS IS NOT COPYABLE.
-	MakoWrapper& operator=(const MakoWrapper&) = delete;
-	MakoWrapper(const MakoWrapper&) = delete;
-
-	MakoWrapper();
-	~MakoWrapper();
-
 	static InterfacePtr getInterfaceByID(VimbaSystem& vsys, std::string sInterfaceID);
 	static FeaturePtr getInterfaceFeatureByName(InterfacePtr interfaceP, std::string featurename);
 	static std::string getFeatureValue(FeaturePtr featPtr);
@@ -46,16 +42,8 @@ public:
 	static void setFloatingValue(FeaturePtr featPtr, double dValue);
 	static std::string getFeatureInformation(FeaturePtr featPtr);
 	static bool isEventFeature(FeaturePtr pFeature);
-
-
-	void initializeVimba();
-	void searchCameras(const CameraPtrVector& Cameras);
-	VmbErrorType getCameraDisplayName(const CameraPtr& camera, std::string& sDisplayName);
-	VmbErrorType getIPAddress(const AVT::VmbAPI::CameraPtr& camera, std::string& sIPAdress);
-private:
-	VimbaSystem& m_VimbaSystem;
-	std::array<std::string, MAKO_NUMBER> cameraNames;
-	std::vector<CameraPtr> cameraPtrs;
+	static VmbErrorType getCameraDisplayName(const CameraPtr& camera, std::string& sDisplayName);
+	static VmbErrorType getIPAddress(const AVT::VmbAPI::CameraPtr& camera, std::string& sIPAdress);
 
 
 };

@@ -10,17 +10,13 @@ using AVT::VmbAPI::FramePtr;
 using AVT::VmbAPI::FeaturePtr;
 
 ImageCalculatingThread::ImageCalculatingThread(
-    const SP_DECL(FrameObserver)& pFrameObs,
-    const CameraPtr& pCam,
-    const QSharedPointer<QCustomPlot>& pQCP,
-    const QSharedPointer<QCPColorMap>& pcmap,
-    const QSharedPointer<QCPGraph>& pbot,
-    const QSharedPointer<QCPGraph>& pleft)
+    const SP_DECL(FrameObserver)& pFrameObs, const CameraPtr& pCam,
+    QCustomPlot* plot, QCPColorMap* cmap, QCPGraph* pbot, QCPGraph* pleft)
     : QThread()
     , m_pFrameObs(pFrameObs)
     , m_pCam(pCam)
-    , m_pQCP(pQCP)
-    , m_pQCPColormap(pcmap)
+    , m_pQCP(plot)
+    , m_pQCPColormap(cmap)
     , m_pQCPbottomGraph(pbot)
     , m_pQCPleftGraph(pleft)
     , m_width(0)

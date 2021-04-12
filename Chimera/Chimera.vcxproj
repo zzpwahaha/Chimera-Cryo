@@ -118,22 +118,25 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
-    <QtMoc Include="Source\CMOSCamera\MakoSettingControl.cpp">
+    <ClCompile Include="Source\CMOSCamera\CMOSSetting.cpp" />
+    <ClCompile Include="Source\CMOSCamera\FrameObserver.cpp" />
+    <ClCompile Include="Source\CMOSCamera\GaussianFit.cpp" />
+    <ClCompile Include="Source\CMOSCamera\Helper.cpp" />
+    <ClCompile Include="Source\CMOSCamera\ImageCalculatingThread.cpp" />
+    <ClCompile Include="Source\CMOSCamera\ImageProcessingThread.cpp" />
+    <ClCompile Include="Source\CMOSCamera\MakoCamera.cpp" />
+    <ClCompile Include="Source\CMOSCamera\MakoCameraCore.cpp" />
+    <ClCompile Include="Source\CMOSCamera\MakoSettingControl.cpp">
       <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">input</DynamicSource>
       <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Filename).moc</QtMocFileName>
       <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Release|x64'">input</DynamicSource>
       <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(Filename).moc</QtMocFileName>
-    </QtMoc>
+    </ClCompile>
+    <ClCompile Include="Source\CMOSCamera\MakoWrapper.cpp" />
     <ClCompile Include="Source\CustomQtControls\LineEditCompleter.cpp" />
     <ClCompile Include="Source\CustomQtControls\TickSlider.cpp" />
     <QtMoc Include="Source\CustomQtControls\TickSlider.h" />
-    <ClCompile Include="Source\CMOSCamera\CMOSSetting.cpp" />
-    <ClCompile Include="Source\CMOSCamera\MakoCameraCore.cpp" />
-    <ClCompile Include="Source\CMOSCamera\MakoWrapper.cpp" />
-    <ClCompile Include="Source\CMOSCamera\MakoCamera.cpp" />
     <ClCompile Include="Source\GeneralImaging\PictureViewer.cpp" />
-    <ClCompile Include="Source\CMOSCamera\GaussianFit.cpp" />
-    <ClCompile Include="Source\CMOSCamera\ImageCalculatingThread.cpp" />
     <ClCompile Include="Source\GeneralImaging\csvReader.cpp" />
     <ClCompile Include="Source\CustomQtControls\RangeSlider.cpp" />
     <ClCompile Include="Source\PrimaryWindows\QtMakoWindow.cpp" />
@@ -142,9 +145,6 @@
     <ClCompile Include="Source\AnalogInput\AiCore.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Source\AnalogInput\AiSettings.cpp" />
-    <ClCompile Include="Source\CMOSCamera\FrameObserver.cpp" />
-    <ClCompile Include="Source\CMOSCamera\Helper.cpp" />
-    <ClCompile Include="Source\CMOSCamera\ImageProcessingThread.cpp" />
     <ClCompile Include="Source\GeneralFlumes\QtSocketFlume.cpp" />
     <ClCompile Include="Source\AnalogInput\AiSystem.cpp" />
     <ClCompile Include="Source\AnalogInput\AiUnits.cpp" />
@@ -154,19 +154,19 @@
     <QtMoc Include="Source\PrimaryWindows\QtMakoWindow.h" />
     <QtMoc Include="Source\GeneralImaging\PictureViewer.h" />
     <QtMoc Include="Source\CustomQtControls\LineEditCompleter.h" />
-    <ClInclude Include="Source\CMOSCamera\CMOSSetting.h" />
-    <ClInclude Include="Source\CMOSCamera\MakoCameraCore.h" />
-    <QtMoc Include="Source\CMOSCamera\MakoWrapper.h" />
-    <ClInclude Include="Source\CMOSCamera\MakoCamera.h" />
     <ClInclude Include="Source\AnalogInput\BSplineFit.h" />
     <ClInclude Include="Source\AnalogInput\PolynomialFit.h" />
     <ClInclude Include="Source\AnalogInput\AiCore.h" />
+    <ClInclude Include="Source\CMOSCamera\CMOSSetting.h" />
     <QtMoc Include="Source\CMOSCamera\FrameObserver.h" />
     <ClInclude Include="Source\CMOSCamera\GaussianFit.h" />
     <ClInclude Include="Source\CMOSCamera\Helper.h" />
     <QtMoc Include="Source\CMOSCamera\ImageCalculatingThread.h" />
     <ClInclude Include="Source\CMOSCamera\ImageProcessingThread.h" />
+    <QtMoc Include="Source\CMOSCamera\MakoCamera.h" />
+    <ClInclude Include="Source\CMOSCamera\MakoCameraCore.h" />
     <QtMoc Include="Source\CMOSCamera\MakoSettingControl.h" />
+    <QtMoc Include="Source\CMOSCamera\MakoWrapper.h" />
     <ClInclude Include="Source\GeneralFlumes\QtSocketFlume.h" />
     <ClInclude Include="Source\AnalogInput\calInfo.h" />
     <ClCompile Include="Source\AnalogOutput\AnalogOutput.cpp" />

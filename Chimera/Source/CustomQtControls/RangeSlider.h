@@ -102,7 +102,8 @@ public:
     ~RangeSliderIntg() {};
 
     void setRange(int low, int upr);
-
+    QSpinBox* upperSpinBox() { return upperSB; }
+    QSpinBox* lowerSpinBox() { return lowerSB; }
 private:
     int getSilderSmlVal();
     int getSilderLrgVal();

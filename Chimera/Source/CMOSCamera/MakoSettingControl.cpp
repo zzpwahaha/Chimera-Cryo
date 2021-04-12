@@ -9,6 +9,10 @@
 #include <qcombobox.h>
 #include <qcheckbox.h>
 #include <qdesktopwidget.h>
+#include <qpushbutton.h>
+#include <qtextedit.h>
+#include <qlabel.h>
+#include <qsplitter.h>
 #include <limits>
 
 #ifndef WIN32
@@ -108,7 +112,7 @@ protected:
 
 class IntSpinBox : public QSpinBox
 {
-    Q_OBJECT
+    //Q_OBJECT
 public:
     IntSpinBox(QWidget* parent) {};
     ~IntSpinBox() {};
@@ -143,7 +147,8 @@ private:
 };
 
 
-MakoSettingControl::MakoSettingControl(QString sID, CameraPtr pCam, QWidget* parent)
+
+MakoSettingControl::MakoSettingControl(QWidget* parent)
     : QTreeView ( parent ), m_TreeDelegate ( nullptr ),
     m_BooleanWidget         ( nullptr ), m_CheckBox_Bool   ( nullptr ),
     m_EditWidget            ( nullptr ), m_TextEdit_String ( nullptr ),
@@ -152,13 +157,31 @@ MakoSettingControl::MakoSettingControl(QString sID, CameraPtr pCam, QWidget* par
     m_IntSpinSliderWidget   ( nullptr ), m_SpinBox_Int     ( nullptr ), m_Slider_Int   ( nullptr ),
     m_FloatSliderEditWidget ( nullptr ), m_EditBox_Float   ( nullptr ), m_Slider_Float ( nullptr ),
     m_FeaturesPollingTimer  ( nullptr ),
-    m_nSliderStep ( 0 ), m_dMinimum ( 0 ), m_dMaximum ( 0 ), m_dIncrement ( 0 ), m_nIntSliderOldValue ( 0 ), 
-    m_pFeatureObs( new FeatureObserver(pCam)),  m_bIsTooltipOn ( true ), m_bIsJobDone ( true ), m_bIsMousePressed ( false ), m_bIsBusy ( false )
+    m_dMinimum ( 0 ), m_dMaximum ( 0 ), m_dIncrement ( 0 ), m_nIntSliderOldValue ( 0 ), 
+    m_nMinimum ( 0 ), m_nMaximum ( 0 ), m_nIncrement ( 0 ), 
+     
+    m_bIsTooltipOn ( true ), m_bIsJobDone ( true ), m_bIsMousePressed ( false ), m_bIsBusy ( false )
+{
+    m_pFeatureObs = SP_DECL(IFeatureObserver)((IFeatureObserver*)nullptr);
+}
+
+MakoSettingControl::~MakoSettingControl()
+{
+    if (m_FeaturesPollingTimer != nullptr) {
+        m_FeaturesPollingTimer->stop();
+    }
+    resetControl();
+    //m_pCam->Close();
+}
+
+void MakoSettingControl::initialize(QString sID, CameraPtr pCam, QWidget* parent)
 {
     m_pCam = pCam;
     m_sCameraID = sID;
+    m_pFeatureObs = SP_DECL(IFeatureObserver)(new FeatureObserver(pCam));
+    VmbErrorType error;
     //setup Tree
-    m_Model = new QStandardItemModel();
+    m_Model = new QStandardItemModel(this);
     QStringList sHeader;
     sHeader << tr("Feature ") << tr("Value ");
     m_Model->setHorizontalHeaderLabels(sHeader);
@@ -176,7 +199,7 @@ MakoSettingControl::MakoSettingControl(QString sID, CameraPtr pCam, QWidget* par
 
     /* Features string completer for filter */
     QStringList CompletionList;
-    VmbError_t error = m_pCam->GetFeatures(m_featPtrVec);
+    error = m_pCam->GetFeatures(m_featPtrVec);
     if (VmbErrorSuccess == error)
     {
         for (unsigned int i = 0; i < m_featPtrVec.size(); i++)
@@ -201,8 +224,11 @@ MakoSettingControl::MakoSettingControl(QString sID, CameraPtr pCam, QWidget* par
             }
         }
     }
+    else {
+        thrower("Mako getting Camera pointers failed, check whether camera is still connected."
+            "\nthis error is very abnormal");
+    }
     m_StringCompleter = new MultiCompleter(CompletionList, this);
-    m_StringCompleter->setCaseSensitivity(Qt::CaseInsensitive);
 
     m_ProxyModel = new SortFilterProxyModel(this);
     m_ProxyModel->setDynamicSortFilter(true);
@@ -230,11 +256,6 @@ MakoSettingControl::MakoSettingControl(QString sID, CameraPtr pCam, QWidget* par
     m_FeaturesPollingTimer->start(500);
 }
 
-MakoSettingControl::~MakoSettingControl()
-{
-    m_FeaturesPollingTimer->stop();
-    resetControl();
-}
 
 void MakoSettingControl::showEvent(QShowEvent* event)
 {
@@ -471,6 +492,83 @@ void MakoSettingControl::updateColWidth()
 {
     resizeColumnToContents(0);
     resizeColumnToContents(1);
+}
+
+void MakoSettingControl::initializeWidget(QWidget* widget)
+{
+    if (widget == nullptr) {
+        return;
+    }
+    MakoSettingControl* controller = this;
+    QVBoxLayout* ctrlDiaVLayout = new QVBoxLayout(widget);
+    ctrlDiaVLayout->setContentsMargins(0, 0, 0, 0);
+    widget->setLayout(ctrlDiaVLayout);
+
+    /* add Filter Pattern */
+    QHBoxLayout* pattern_HLayout = new QHBoxLayout(widget);
+    QLabel* filterPatternLabel = new QLabel("Filter pattern:", widget);
+    filterPatternLabel->setStyleSheet("font-weight: bold;");
+    LineEditCompleter* filterPatternLineEdit = new LineEditCompleter(widget);
+    filterPatternLineEdit->setText(tr("Example: Gain|Width"));
+    filterPatternLineEdit->setToolTip(tr("To filter multiple features, e.g: Width|Gain|xyz|etc"));
+    filterPatternLineEdit->setCompleter(controller->m_StringCompleter);
+    filterPatternLineEdit->setMinimumWidth(200);
+    QPushButton* patternButton = new QPushButton("Search", widget);
+
+    /*put controller related into controller dialog*/
+    pattern_HLayout->addWidget(filterPatternLabel);
+    pattern_HLayout->addWidget(filterPatternLineEdit);
+    pattern_HLayout->addWidget(patternButton);
+
+    // this widget holds the Hlayout(filterEdit) and controller Tree
+    QWidget* ctrlTreeVerticalLayoutWidget = new QWidget(widget);
+    QVBoxLayout* ctrlTreeVerticalLayout = new QVBoxLayout(widget);
+    ctrlTreeVerticalLayout->addLayout(pattern_HLayout, 0);
+    ctrlTreeVerticalLayout->addWidget(controller, 1);
+    ctrlTreeVerticalLayout->setContentsMargins(0, 0, 0, 0);
+    ctrlTreeVerticalLayoutWidget->setLayout(ctrlTreeVerticalLayout);
+
+    QTextEdit* description = new QTextEdit(widget);
+    description->setLineWrapMode(QTextEdit::NoWrap);
+    description->setReadOnly(true);
+    description->setStyleSheet("font: 12px;\n" "font-family: Verdana;\n");
+
+    // the splitter holds ctrlTreeVerticalLayoutWidget and description QTextEdit
+    QSplitter* splitter = new QSplitter(widget);
+    QList<int> listSize;
+    listSize << 5000;
+    splitter->setChildrenCollapsible(false);
+    splitter->setOrientation(Qt::Vertical);
+    splitter->addWidget(ctrlTreeVerticalLayoutWidget);
+    splitter->addWidget(description);
+    splitter->setSizes(listSize);
+
+    ctrlDiaVLayout->addWidget(splitter);
+
+    connect(this, &MakoSettingControl::setDescription, [this, description](const QString& descrip) {
+        description->setText(descrip); });
+    connect(filterPatternLineEdit, &QLineEdit::returnPressed, [this, filterPatternLineEdit]() {
+        QRegExp::PatternSyntax syntax = QRegExp::PatternSyntax(0);
+        Qt::CaseSensitivity caseSensitivity = Qt::CaseInsensitive;
+        QRegExp regExp(filterPatternLineEdit->text(), caseSensitivity, syntax);
+        this->m_ProxyModel->setFilterRegExp(regExp);
+        this->expandAll();
+        this->updateUnRegisterFeature();
+        this->updateRegisterFeature();
+        filterPatternLineEdit->setFocus();
+        filterPatternLineEdit->selectAll(); });
+    connect(patternButton, &QPushButton::clicked, [this, filterPatternLineEdit](bool checked) {
+        QRegExp::PatternSyntax syntax = QRegExp::PatternSyntax(0);
+        Qt::CaseSensitivity caseSensitivity = Qt::CaseInsensitive;
+        QRegExp regExp(filterPatternLineEdit->text(), caseSensitivity, syntax);
+        this->m_ProxyModel->setFilterRegExp(regExp);
+        this->expandAll();
+        this->updateUnRegisterFeature();
+        this->updateRegisterFeature();
+        filterPatternLineEdit->setFocus();
+        filterPatternLineEdit->selectAll(); });
+
+
 }
 
 void MakoSettingControl::updateRegisterFeature()
@@ -852,7 +950,7 @@ void MakoSettingControl::createCommandButton(const QModelIndex item)
         m_sCurrentSelectedFeature = m_sFeature_Command = sFeature_Command;
 
         m_FeaturePtr_Command = getFeaturePtrFromMap(sFeature_Command);
-        if (NULL == m_FeaturePtr_Command)
+        if (FeaturePtr() == m_FeaturePtr_Command)
             return;
 
         resetControl();
@@ -888,29 +986,27 @@ void MakoSettingControl::onCmdButtonClick()
         || (0 == m_sFeature_Command.compare("AcquisitionAbort"))
         || (0 == m_sFeature_Command.compare("Acquisition Abort")))
     {
-        error = m_FeaturePtr_Command->RunCommand();
-        emit acquisitionStartStop("AcquisitionStopFreerun");
+        emit acquisitionStartStop("AcquisitionStop");
     }
     else if ((0 == m_sFeature_Command.compare("AcquisitionStart"))
         || (0 == m_sFeature_Command.compare("Acquisition Start")))
     {
-        emit acquisitionStartStop("AcquisitionStartFreerun");
+        emit acquisitionStartStop("AcquisitionStart");
     }
-
-    if ((0 != m_sFeature_Command.compare("AcquisitionStop"))
+    else if ((0 != m_sFeature_Command.compare("AcquisitionStop"))
         && (0 != m_sFeature_Command.compare("Acquisition Stop"))
         && (0 != m_sFeature_Command.compare("AcquisitionAbort"))
         && (0 != m_sFeature_Command.compare("Acquisition Abort")))
     {
         error = m_FeaturePtr_Command->RunCommand();
+        if (VmbErrorSuccess != error)
+        {
+            thrower("ERROR Feature: " + str(m_sCurrentSelectedFeature) + " returned " + str(error) +
+                " " + str(Helper::mapReturnCodeToString(error)));
+        }
     }
 
-    if (VmbErrorSuccess != error)
-    {
-        thrower("ERROR Feature: " + str(m_sCurrentSelectedFeature) + " returned " + str(error) +
-            " " + str(Helper::mapReturnCodeToString(error)));
-    }
-    else if (0 == m_sFeature_Command.compare("GVSP Adjust Packet Size"))
+    if (0 == m_sFeature_Command.compare("GVSP Adjust Packet Size"))
     {
         bool bIsDone = false;
         this->setEnabled(false);
@@ -919,7 +1015,6 @@ void MakoSettingControl::onCmdButtonClick()
         {
             error = m_FeaturePtr_Command->IsCommandDone(bIsDone);
         }
-
         this->setEnabled(true);
     }
 }
@@ -939,18 +1034,17 @@ void MakoSettingControl::createEnumComboBox(const QModelIndex item)
         m_FeaturePtr_EnumComboBox = getFeaturePtrFromMap(m_sFeature_EnumComboBox);
         if (FeaturePtr() == m_FeaturePtr_EnumComboBox)
             return;
-
+        // Get all possible enumerations as string
+        m_sEnumEntries.clear();
+        error = m_FeaturePtr_EnumComboBox->GetValues(m_sEnumEntries);
         resetControl();
+
         m_ComboWidget = new QWidget(this);
         QHBoxLayout* HComboLayout = new QHBoxLayout(m_ComboWidget);
         m_EnumComboBox = new QComboBox(m_ComboWidget);
         QHBoxLayout* HComboLayout2 = new QHBoxLayout(m_ComboWidget);
         HComboLayout2->addWidget(m_EnumComboBox);
         HComboLayout->addLayout(HComboLayout2);
-
-        // Get all possible enumerations as string
-        StringVector sEnumEntries;
-        error = m_FeaturePtr_EnumComboBox->GetValues(sEnumEntries);
 
         if (VmbErrorSuccess == error)
         {
@@ -959,17 +1053,17 @@ void MakoSettingControl::createEnumComboBox(const QModelIndex item)
             // Get currently selected enumeration
             if (VmbErrorSuccess == m_FeaturePtr_EnumComboBox->GetValue(sCurrentValue) || VmbErrorSuccess == error)
             {
-                for (unsigned int i = 0; i < sEnumEntries.size(); i++)
+                for (unsigned int i = 0; i < m_sEnumEntries.size(); i++)
                 {
                     // Check each enumeration if it is currently applicable
                     bool bIsAvailable = false;
-                    m_FeaturePtr_EnumComboBox->IsValueAvailable(sEnumEntries.at(i).c_str(), bIsAvailable);
+                    m_FeaturePtr_EnumComboBox->IsValueAvailable(m_sEnumEntries.at(i).c_str(), bIsAvailable);
                     if (bIsAvailable)
                     {
                         // Add all applicable enumerations to drop down
-                        m_EnumComboBox->addItem(qstr(sEnumEntries.at(i)));
+                        m_EnumComboBox->addItem(qstr(m_sEnumEntries.at(i)));
                         // Is this currently selected enumeration?
-                        if (0 == sEnumEntries.at(i).compare(sCurrentValue))
+                        if (0 == m_sEnumEntries.at(i).compare(sCurrentValue))
                             // Set drop down index
                             m_EnumComboBox->setCurrentIndex(nPos);
                         nPos++;
@@ -1094,113 +1188,68 @@ void MakoSettingControl::createIntSliderSpinBox(const QModelIndex item)
 {
     VmbError_t error;
     QString sFeature_IntSpinBox = getFeatureNameFromModel(item);
-
-    if (isFeatureWritable(sFeature_IntSpinBox))
-    {
-        m_sCurrentSelectedFeature = m_sFeature_IntSpinBox = sFeature_IntSpinBox;
-
-        m_FeaturePtr_IntSpinBox = getFeaturePtrFromMap(m_sFeature_IntSpinBox);
-
-        std::string sRepresentation;
-        m_FeaturePtr_IntSpinBox->GetRepresentation(sRepresentation);
-
-        VmbInt64_t nMin = 0, nMax = 0, nInc = 1, nValue = 0;
-        error = m_FeaturePtr_IntSpinBox->GetRange(nMin, nMax);
-
-        /* use a line edit to show reg add in Hex */
-        QString sName = getFeatureNameFromMap(m_sCurrentSelectedFeature);
-        if (VmbErrorSuccess == error &&
-            (sRepresentation == "HexNumber" || Helper::needsIPv4Format(sName, sRepresentation) || nMax > 9999))
-        {
-            // not doing hex manipulation in Chimera, always use VimbaViewer if want to change the ip related stuff
-            //createLineEdit(item);
-            return;
-        }
-
-        if (nullptr == m_FeaturePtr_IntSpinBox)
-            return;
-
-        resetControl();
-
-        m_IntSpinSliderWidget = new QWidget(this);
-        QHBoxLayout* HSpinSliderLayout_Int = new QHBoxLayout(m_IntSpinSliderWidget);
-
-        if (VmbErrorSuccess == error)
-        {
-            if (nMin < std::numeric_limits<int>::min())
-            {
-                nMin = std::numeric_limits<int>::min();
-            }
-
-            if (nMax > std::numeric_limits<int>::max())
-            {
-                nMax = std::numeric_limits<int>::max();
-                if (VmbErrorSuccess == m_FeaturePtr_IntSpinBox->GetValue(nValue))
-                {
-                    if (nMax < nValue)
-                        m_FeaturePtr_IntSpinBox->SetValue(nMax);
-                }
-            }
-
-            m_SpinBox_Int = new IntSpinBox(m_IntSpinSliderWidget);
-            m_SpinBox_Int->setObjectName("value");      //mark as the element of this dialog that contains the value, used in "updateWidget()"
-            m_Slider_Int = new TickSlider(Qt::Horizontal, m_IntSpinSliderWidget);
-            m_Slider_Int->installEventFilter(this);
-            m_Slider_Int->setTickPosition(QSlider::TicksBelow);
-
-            error = m_FeaturePtr_IntSpinBox->GetIncrement(nInc);
-            if (VmbErrorSuccess == error)
-            {
-                m_SpinBox_Int->setSingleStep(nInc);
-                m_Slider_Int->setTickInterval((nMax - nMin) / 5); // only show five ticks
-                m_Slider_Int->setSingleStep(nInc);
-            }
-
-            nMax = nMax - ((nMax - nMin) % nInc);
-            m_SpinBox_Int->setRange(nMin, nMax);
-            m_Slider_Int->setRange(nMin, nMax);
-
-            m_nSliderStep = nInc;
-
-            error = m_FeaturePtr_IntSpinBox->GetValue(nValue);
-            if (VmbErrorSuccess == error)
-            {
-                if (nValue > std::numeric_limits<int>::max())
-                {
-                    nValue = std::numeric_limits<int>::max();
-                }
-
-                m_SpinBox_Int->setValue(nValue);
-                m_Slider_Int->setValue(nValue);
-                m_nIntSliderOldValue = nValue;
-            }
-
-            m_Slider_Int->setPageStep((nMax - nMin) / 5 / nInc);
-        }
-        else
-        {
-            thrower("ERROR Feature: " + str(m_sCurrentSelectedFeature) + " (GetRange) returned " + str(error) +
-                " " + str(Helper::mapReturnCodeToString(error)));
-        }
-
-        QHBoxLayout* HSpinSliderLayout_Int2 = new QHBoxLayout(m_IntSpinSliderWidget);
-        HSpinSliderLayout_Int2->addWidget(m_Slider_Int);
-        HSpinSliderLayout_Int2->addWidget(m_SpinBox_Int);
-        HSpinSliderLayout_Int->addLayout(HSpinSliderLayout_Int2);
-
-        QPoint p = QCursor::pos();
-        m_IntSpinSliderWidget->setFixedHeight(100);
-        m_IntSpinSliderWidget->setWindowFlags(Qt::Tool | Qt::WindowCloseButtonHint);
-        m_IntSpinSliderWidget->setWindowTitle(m_sCurrentSelectedFeature);
-        AdjustOffscreenPosition(p, *m_IntSpinSliderWidget);
-        m_IntSpinSliderWidget->move(p.x(), p.y());
-
-        connect(m_Slider_Int, &QSlider::valueChanged, this, &MakoSettingControl::onIntSliderChanged);
-        connect(m_SpinBox_Int, &QSpinBox::editingFinished, this, &MakoSettingControl::onIntSpinBoxClick);
-        setCursor(Qt::PointingHandCursor);
-
-        m_IntSpinSliderWidget->show();
+    if (!initCurrentFeatureInt(sFeature_IntSpinBox)) {
+        return;
     }
+
+    VmbInt64_t nValue = 0;
+    if (VmbErrorSuccess == m_FeaturePtr_IntSpinBox->GetValue(nValue))
+    {
+        if (m_nMaximum < nValue)
+            m_FeaturePtr_IntSpinBox->SetValue(m_nMaximum);
+    }
+
+    m_IntSpinSliderWidget = new QWidget(this);
+    QHBoxLayout* HSpinSliderLayout_Int = new QHBoxLayout(m_IntSpinSliderWidget);
+    m_SpinBox_Int = new IntSpinBox(m_IntSpinSliderWidget);
+    m_SpinBox_Int->setObjectName("value");      //mark as the element of this dialog that contains the value, used in "updateWidget()"
+    m_Slider_Int = new TickSlider(Qt::Horizontal, m_IntSpinSliderWidget);
+    m_Slider_Int->installEventFilter(this);
+    m_Slider_Int->setTickPosition(QSlider::TicksBelow);
+
+    error = m_FeaturePtr_IntSpinBox->GetIncrement(m_nIncrement);
+    if (VmbErrorSuccess == error) {
+        m_SpinBox_Int->setSingleStep(m_nIncrement);
+        m_Slider_Int->setTickInterval((m_nMaximum - m_nMinimum) / 5); // only show five ticks
+        m_Slider_Int->setSingleStep(m_nIncrement);
+    }
+
+    m_SpinBox_Int->setRange(m_nMinimum, m_nMaximum);
+    m_Slider_Int->setRange(m_nMinimum, m_nMaximum);
+
+    error = m_FeaturePtr_IntSpinBox->GetValue(nValue);
+    if (VmbErrorSuccess == error)
+    {
+        if (nValue > std::numeric_limits<int>::max())
+        {
+            nValue = std::numeric_limits<int>::max();
+        }
+
+        m_SpinBox_Int->setValue(nValue);
+        m_Slider_Int->setValue(nValue);
+        m_nIntSliderOldValue = nValue;
+    }
+
+    m_Slider_Int->setPageStep((m_nMaximum - m_nMinimum) / 5 / m_nIncrement);
+
+    QHBoxLayout* HSpinSliderLayout_Int2 = new QHBoxLayout(m_IntSpinSliderWidget);
+    HSpinSliderLayout_Int2->addWidget(m_Slider_Int);
+    HSpinSliderLayout_Int2->addWidget(m_SpinBox_Int);
+    HSpinSliderLayout_Int->addLayout(HSpinSliderLayout_Int2);
+
+    QPoint p = QCursor::pos();
+    m_IntSpinSliderWidget->setFixedHeight(100);
+    m_IntSpinSliderWidget->setWindowFlags(Qt::Tool | Qt::WindowCloseButtonHint);
+    m_IntSpinSliderWidget->setWindowTitle(m_sCurrentSelectedFeature);
+    AdjustOffscreenPosition(p, *m_IntSpinSliderWidget);
+    m_IntSpinSliderWidget->move(p.x(), p.y());
+
+    connect(m_Slider_Int, &QSlider::valueChanged, this, &MakoSettingControl::onIntSliderChanged);
+    connect(m_SpinBox_Int, &QSpinBox::editingFinished, this, &MakoSettingControl::onIntSpinBoxClick);
+    setCursor(Qt::PointingHandCursor);
+
+    m_IntSpinSliderWidget->show();
+    
 }
 
 void MakoSettingControl::onIntSliderReleased()
@@ -1219,13 +1268,13 @@ void MakoSettingControl::onIntSliderChanged(int nValue)
 
     if ((m_nIntSliderOldValue > nValue) && (m_Slider_Int->minimum() != nValue))
     {
-        int nMod = nValue % m_nSliderStep;
+        int nMod = nValue % m_nIncrement;
         nValue = nValue - nMod;
     }
 
-    if ((0 != (nValue % m_nSliderStep)) && (m_Slider_Int->minimum() != nValue) && (m_Slider_Int->maximum() != nValue))
+    if ((0 != (nValue % m_nIncrement)) && (m_Slider_Int->minimum() != nValue) && (m_Slider_Int->maximum() != nValue))
     {
-        nValue = nValue + (m_nSliderStep - (nValue % m_nSliderStep));
+        nValue = nValue + (m_nIncrement - (nValue % m_nIncrement));
     }
 
     if (m_Slider_Int->hasFocus())
@@ -1241,12 +1290,56 @@ void MakoSettingControl::onIntSpinBoxClick()
 {
     int nValue = m_SpinBox_Int->value();
 
-    if ((0 != (nValue % m_nSliderStep)) && (m_SpinBox_Int->minimum() != nValue) && (m_SpinBox_Int->maximum() != nValue))
+    if ((0 != (nValue % m_nIncrement)) && (m_SpinBox_Int->minimum() != nValue) && (m_SpinBox_Int->maximum() != nValue))
     {
-        nValue = (nValue + (m_nSliderStep - (nValue % m_nSliderStep)));
+        nValue = (nValue + (m_nIncrement - (nValue % m_nIncrement)));
     }
 
     setIntegerValue(nValue);
+}
+
+
+bool MakoSettingControl::initCurrentFeatureInt(const QString& name)
+{
+    if (isFeatureWritable(name)) {
+        return false;
+    }
+    m_sCurrentSelectedFeature = m_sFeature_IntSpinBox = name;
+    m_FeaturePtr_IntSpinBox = getFeaturePtrFromMap(m_sFeature_IntSpinBox);
+    if (FeaturePtr() == m_FeaturePtr_IntSpinBox)
+        return false;
+    resetControl();
+    VmbError_t error = m_FeaturePtr_IntSpinBox->GetRange(m_nMinimum, m_nMaximum);
+    if (VmbErrorSuccess == error)
+    {
+        if (m_nMinimum < std::numeric_limits<int>::min())
+        {
+            m_nMinimum = std::numeric_limits<int>::min();
+        }
+
+        if (m_nMaximum > std::numeric_limits<int>::max())
+        {
+            m_nMaximum = std::numeric_limits<int>::max();
+        }
+        m_nMaximum = m_nMaximum - ((m_nMaximum - m_nMinimum) % m_nIncrement);
+        m_FeaturePtr_IntSpinBox->GetIncrement(m_nIncrement);
+        return true;
+    }
+    else {
+        thrower("ERROR Feature: " + str(m_sCurrentSelectedFeature) + " (GetRange) returned " + str(error) +
+            " " + str(Helper::mapReturnCodeToString(error)));
+        return false;
+    }
+    /* use a line edit to show reg add in Hex, no :(  */
+    std::string sRepresentation;
+    m_FeaturePtr_IntSpinBox->GetRepresentation(sRepresentation);
+    QString sName = getFeatureNameFromMap(m_sCurrentSelectedFeature);
+    if (VmbErrorSuccess == error &&
+        (sRepresentation == "HexNumber" || Helper::needsIPv4Format(sName, sRepresentation) || m_nMaximum > 9999))
+    {
+        // not doing hex manipulation in Chimera, always use VimbaViewer if want to change the ip related stuff
+        return false;
+    }
 }
 
 void MakoSettingControl::setIntegerValue(const int& nValue)
@@ -1256,7 +1349,7 @@ void MakoSettingControl::setIntegerValue(const int& nValue)
     if (0 == m_sFeature_IntSpinBox.compare("Width") || 0 == m_sFeature_IntSpinBox.compare("Height"))
     {
         /* stop Acquisition */
-        emit acquisitionStartStop("AcquisitionStopWidthHeight");
+        emit acquisitionStartStop("AcquisitionStop");
 
         error = m_FeaturePtr_IntSpinBox->SetValue(nValue);
         if (VmbErrorSuccess != error)
@@ -1284,8 +1377,10 @@ void MakoSettingControl::setIntegerValue(const int& nValue)
 
 void MakoSettingControl::updateCurrentIntValue()
 {
+    if (m_IntSpinSliderWidget == nullptr) {
+        return;
+    }
     VmbInt64_t nCurrentValue = 0;
-
     VmbError_t error = m_FeaturePtr_IntSpinBox->GetValue(nCurrentValue);
     if (VmbErrorSuccess == error)
     {
@@ -1305,122 +1400,85 @@ void MakoSettingControl::createFloatSliderEditBox(const QModelIndex item)
 {
     VmbError_t error;
     QString sFeature_FloatSliderEditBox = getFeatureNameFromModel(item);
+    if (!initCurrentFeatureFloat(sFeature_FloatSliderEditBox)) {
+        return;
+    }
 
-    if (isFeatureWritable(sFeature_FloatSliderEditBox))
+    std::string sRepresentation;
+    m_FeaturePtr_FloatSliderSpinBox->GetRepresentation(sRepresentation);
+    /* use a logarithmic slider for exposure , no, never :( */
+
+    m_FloatSliderEditWidget = new QWidget(this);
+    QHBoxLayout* HSpinSliderLayout_Float = new QHBoxLayout(m_FloatSliderEditWidget);
+
+    /* Line Edit */
+    m_EditBox_Float = new QLineEdit(m_FloatSliderEditWidget);
+    m_EditBox_Float->setObjectName("value");    //mark as the element of this dialog that contains the value, used in "updateWidget()"
+
+    /* GigE: Gain, Hue
+    *  1394: Trigger Delay
+    *  They will be treated as Floating in fact they are int
+    */
+    double dValue = 0;
+    error = m_FeaturePtr_FloatSliderSpinBox->GetValue(dValue);
+
+    if (VmbErrorSuccess == error)
     {
-        m_sCurrentSelectedFeature = m_sFeature_FloatSliderSpinBox = sFeature_FloatSliderEditBox;
-        m_FeaturePtr_FloatSliderSpinBox = getFeaturePtrFromMap(sFeature_FloatSliderEditBox);
-        if (nullptr == m_FeaturePtr_FloatSliderSpinBox)
-            return;
+        m_EditBox_Float->setText(QString::number(dValue));
+    }
+    else
+    {
+        thrower("ERROR Feature: " + str(m_sCurrentSelectedFeature) + " (GetValue) " + str(QString::number(dValue, 'g', 16)) + " returned " + str(error) +
+            " " + str(Helper::mapReturnCodeToString(error)));
+    }
 
-        resetControl();
+    /* Slider */
+    m_Slider_Float = new DoubleTickSlider(Qt::Horizontal, m_FloatSliderEditWidget);
+    m_Slider_Float->setFocusPolicy(Qt::StrongFocus);
+    m_Slider_Float->installEventFilter(this);
+    m_Slider_Float->setTotalSteps(20000);
+    m_Slider_Float->setDoubleScale(m_dMinimum, m_dMaximum);
+    m_Slider_Float->setDoubleTickInterval((m_dMaximum - m_dMinimum) / 5); // only show five ticks
+    if (abs(m_dIncrement) > 0.0000001)
+    {
+        m_Slider_Float->setDoubleSingleStep(m_dIncrement);
+    }
 
-        error = m_FeaturePtr_FloatSliderSpinBox->GetRange(m_dMinimum, m_dMaximum);
-
-        if (VmbErrorSuccess == error)
-        {
-            /* if there's an increment, compute the correct maximum (allowing some float uncertainty) */
-            if (VmbErrorSuccess == m_FeaturePtr_FloatSliderSpinBox->GetIncrement(m_dIncrement))
-            {
-                double dSteps = floor((m_dMaximum - m_dMinimum) / m_dIncrement * 1.000000000001);
-                double dMaximum = m_dMinimum + dSteps * m_dIncrement * 1.000000000001;
-                if (dMaximum < m_dMaximum)
-                    m_dMaximum = dMaximum;
-            }
-            else
-            {
-                m_dIncrement = 0.0;
-            }
-        }
-        else
-        {
-            thrower("ERROR Feature: " + str(m_sCurrentSelectedFeature) + " (GetRange) " + " returned " + str(error) +
-                " " + str(Helper::mapReturnCodeToString(error)));
-            return;
-        }
-
-        std::string sRepresentation;
-        m_FeaturePtr_FloatSliderSpinBox->GetRepresentation(sRepresentation);
-
-        /* use a logarithmic slider for exposure , no, never :( */
-        //if (0 == sFeature_FloatSliderEditBox.compare("Exposure Time") || 0 == sFeature_FloatSliderEditBox.compare("ExposureTimeAbs")
-        //    || 0 == sRepresentation.compare("Logarithmic"))
-        //{
-        //    createLogarithmicSlider(item);
-        //    return;
-        //}
-
-        m_FloatSliderEditWidget = new QWidget(this);
-        QHBoxLayout* HSpinSliderLayout_Float = new QHBoxLayout(m_FloatSliderEditWidget);
-
-        /* Line Edit */
-        m_EditBox_Float = new QLineEdit(m_FloatSliderEditWidget);
-        m_EditBox_Float->setObjectName("value");    //mark as the element of this dialog that contains the value, used in "updateWidget()"
-
-        /* GigE: Gain, Hue
-        *  1394: Trigger Delay
-        *  They will be treated as Floating in fact they are int
-        */
-        double dValue = 0;
-        error = m_FeaturePtr_FloatSliderSpinBox->GetValue(dValue);
-
-        if (VmbErrorSuccess == error)
-        {
-            m_EditBox_Float->setText(QString::number(dValue));
-        }
-        else
-        {
-            thrower("ERROR Feature: " + str(m_sCurrentSelectedFeature) + " (GetValue) " + str(QString::number(dValue, 'g', 16)) + " returned " + str(error) +
-                " " + str(Helper::mapReturnCodeToString(error)));
-        }
-
-        /* Slider */
-        m_Slider_Float = new DoubleTickSlider(Qt::Horizontal, m_FloatSliderEditWidget);
-        m_Slider_Float->setFocusPolicy(Qt::StrongFocus);
-        m_Slider_Float->installEventFilter(this);
-        m_Slider_Float->setTotalSteps(20000);
-        m_Slider_Float->setDoubleScale(m_dMinimum, m_dMaximum);
-        m_Slider_Float->setDoubleTickInterval((m_dMaximum - m_dMinimum) / 5); // only show five ticks
-        if (abs(m_dIncrement) > 0.0000001)
-        {
+    if (0 == m_sFeature_FloatSliderSpinBox.compare("ExposureTimeAbs")) {
+        m_Slider_Float->setDoubleScale(m_dMinimum, m_dMaximum / 100);
+        m_Slider_Float->setDoubleTickInterval((m_dMaximum / 100 - m_dMinimum) / 5); // only show five ticks
+        if (abs(m_dIncrement) > 0.0000001) {
             m_Slider_Float->setDoubleSingleStep(m_dIncrement);
         }
-
-        if (0 == m_sFeature_FloatSliderSpinBox.compare("ExposureTimeAbs")) {
-            m_Slider_Float->setDoubleScale(m_dMinimum, m_dMaximum / 100);
-            m_Slider_Float->setDoubleTickInterval((m_dMaximum / 100 - m_dMinimum) / 5); // only show five ticks
-            if (abs(m_dIncrement) > 0.0000001) {
-                m_Slider_Float->setDoubleSingleStep(m_dIncrement);
-            }
-        }
-        
-        m_Slider_Float->setDoubleValue(dValue);
-
-
-        QHBoxLayout* HSliderEditLayout_Float2 = new QHBoxLayout(m_FloatSliderEditWidget);
-        HSliderEditLayout_Float2->addWidget(m_Slider_Float);
-        m_Slider_Float->setMinimumWidth(200);
-        m_EditBox_Float->setMinimumWidth(60);
-        m_EditBox_Float->setMaximumWidth(80);
-        HSliderEditLayout_Float2->addWidget(m_EditBox_Float);
-        m_EditBox_Float->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-        HSpinSliderLayout_Float->addLayout(HSliderEditLayout_Float2);
-
-        QPoint p = QCursor::pos();
-        m_FloatSliderEditWidget->setFixedHeight(60);
-        m_FloatSliderEditWidget->setWindowFlags(Qt::Tool | Qt::WindowCloseButtonHint);
-        m_FloatSliderEditWidget->setWindowTitle(m_sCurrentSelectedFeature);
-        AdjustOffscreenPosition(p, *m_FloatSliderEditWidget);
-        m_FloatSliderEditWidget->move(p.x(), p.y());
-        m_FloatSliderEditWidget->show();
-        m_FloatSliderEditWidget->setFocus();
-
-        /* As of Vimba >= 1.4, float features other than ExposureTime don't use spin box anymore */
-        connect(m_Slider_Float, &DoubleTickSlider::doubleValueChanged, this, &MakoSettingControl::onFloatSliderChanged);
-        connect(m_EditBox_Float, &QLineEdit::editingFinished, this, &MakoSettingControl::onFloatEditFinished);
-        setCursor(Qt::PointingHandCursor);
-        m_FloatSliderEditWidget->show();
     }
+        
+    m_Slider_Float->setDoubleValue(dValue);
+
+
+    QHBoxLayout* HSliderEditLayout_Float2 = new QHBoxLayout(m_FloatSliderEditWidget);
+    HSliderEditLayout_Float2->addWidget(m_Slider_Float);
+    m_Slider_Float->setMinimumWidth(200);
+    m_EditBox_Float->setMinimumWidth(60);
+    m_EditBox_Float->setMaximumWidth(80);
+    HSliderEditLayout_Float2->addWidget(m_EditBox_Float);
+    m_EditBox_Float->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    HSpinSliderLayout_Float->addLayout(HSliderEditLayout_Float2);
+
+    QPoint p = QCursor::pos();
+    m_FloatSliderEditWidget->setFixedHeight(60);
+    m_FloatSliderEditWidget->setWindowFlags(Qt::Tool | Qt::WindowCloseButtonHint);
+    m_FloatSliderEditWidget->setWindowTitle(m_sCurrentSelectedFeature);
+    AdjustOffscreenPosition(p, *m_FloatSliderEditWidget);
+    m_FloatSliderEditWidget->move(p.x(), p.y());
+    m_FloatSliderEditWidget->show();
+    m_FloatSliderEditWidget->setFocus();
+
+    /* As of Vimba >= 1.4, float features other than ExposureTime don't use spin box anymore */
+    connect(m_Slider_Float, &DoubleTickSlider::doubleValueChanged, this, &MakoSettingControl::onFloatSliderChanged);
+    connect(m_EditBox_Float, &QLineEdit::editingFinished, this, &MakoSettingControl::onFloatEditFinished);
+    setCursor(Qt::PointingHandCursor);
+    m_FloatSliderEditWidget->show();
+    
 }
 
 void MakoSettingControl::onFloatSliderReleased()
@@ -1453,6 +1511,42 @@ void MakoSettingControl::onFloatEditFinished()
 {
     double dValue = m_EditBox_Float->text().toDouble() * 1.0000000000001; // allow some float imprecision
     setFloatingValue(dValue);
+}
+
+bool MakoSettingControl::initCurrentFeatureFloat(const QString& name)
+{
+    if (!isFeatureWritable(name)) {
+        return false;
+    }
+    m_sCurrentSelectedFeature = m_sFeature_FloatSliderSpinBox = name;
+    m_FeaturePtr_FloatSliderSpinBox = getFeaturePtrFromMap(name);
+    if (FeaturePtr() == m_FeaturePtr_FloatSliderSpinBox)
+        return false;
+
+    resetControl();
+    VmbError_t error = m_FeaturePtr_FloatSliderSpinBox->GetRange(m_dMinimum, m_dMaximum);
+    if (VmbErrorSuccess == error)
+    {
+        /* if there's an increment, compute the correct maximum (allowing some float uncertainty) */
+        if (VmbErrorSuccess == m_FeaturePtr_FloatSliderSpinBox->GetIncrement(m_dIncrement))
+        {
+            double dSteps = floor((m_dMaximum - m_dMinimum) / m_dIncrement * 1.000000000001);
+            double dMaximum = m_dMinimum + dSteps * m_dIncrement * 1.000000000001;
+            if (dMaximum < m_dMaximum)
+                m_dMaximum = dMaximum;
+        }
+        else
+        {
+            m_dIncrement = 0.0;
+        }
+        return true;
+    }
+    else
+    {
+        thrower("ERROR Feature: " + str(m_sCurrentSelectedFeature) + " (GetRange) " + " returned " + str(error) +
+            " " + str(Helper::mapReturnCodeToString(error)));
+        return false;
+    }
 }
 
 void MakoSettingControl::setFloatingValue(const double& dValue)
@@ -1495,9 +1589,11 @@ void MakoSettingControl::setFloatingValue(const double& dValue)
 
 void MakoSettingControl::updateCurrentFloatValue()
 {
+    if (m_FloatSliderEditWidget == nullptr) {
+        return;
+    }
     double dCurrentValue;
     VmbError_t error = m_FeaturePtr_FloatSliderSpinBox->GetValue(dCurrentValue);
-
     if (VmbErrorSuccess == error)
     {
         const QString newValue = QString::number(dCurrentValue);
@@ -1523,7 +1619,7 @@ void MakoSettingControl::createBooleanCheckBox(const QModelIndex item)
         m_sCurrentSelectedFeature = m_sFeature_CheckBox = sFeature_CheckBox;
 
         m_FeaturePtr_CheckBox = getFeaturePtrFromMap(m_sFeature_CheckBox);
-        if (NULL == m_FeaturePtr_CheckBox)
+        if (FeaturePtr() == m_FeaturePtr_CheckBox)
             return;
 
         resetControl();
@@ -1602,7 +1698,7 @@ void MakoSettingControl::createStringEditBox(const QModelIndex item)
         m_sCurrentSelectedFeature = m_sFeature_StringEditBox = sFeature_StringEditBox;
 
         m_FeaturePtr_StringEditBox = getFeaturePtrFromMap(m_sFeature_StringEditBox);
-        if (nullptr == m_FeaturePtr_StringEditBox)
+        if (FeaturePtr() == m_FeaturePtr_StringEditBox)
             return;
 
         resetControl();

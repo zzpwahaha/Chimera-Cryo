@@ -385,6 +385,9 @@ RangeSliderIntg::RangeSliderIntg(Qt::Orientation ori, RangeSlider::Option handle
     QGridLayout* vRSlayout = new QGridLayout(aparent);
     QHBoxLayout* vSB1 = new QHBoxLayout();
     QHBoxLayout* vSB2 = new QHBoxLayout();
+    vSB1->setContentsMargins(0, 0, 0, 0);
+    vSB2->setContentsMargins(0, 0, 0, 0);
+    vRSlayout->setContentsMargins(0, 0, 0, 0);
 
     vSB1->addWidget(new QLabel("Upper: "), 0);
     vSB1->addWidget(upperSB, 1);
@@ -414,13 +417,15 @@ RangeSliderIntg::RangeSliderIntg(Qt::Orientation ori, RangeSlider::Option handle
     if (orientation == Qt::Vertical) {
         vRSlayout->addWidget(axslid, 2, 0);
         vRSlayout->addWidget(rslider, 2, 1);
+        axslid->setMaximumHeight(400);
     }
     else {
         vRSlayout->addWidget(axslid, 0, 2);
         vRSlayout->addWidget(rslider, 1, 2);
+        axslid->setMaximumWidth(400);
     }
     connect(rslider, &RangeSlider::sizeChanged, axslid, [this](int height) {
-        if (orientation == Qt::VerPattern) {
+        if (orientation == Qt::Vertical) {
             axslid->axisRect()->setMaximumSize(50, height + 16);
             axslid->axisRect()->setMinimumSize(10, height + 16);
             axslid->replot();
@@ -478,6 +483,10 @@ void RangeSliderIntg::setRange(int low, int upr)
         rslider->SetRange(low, upr);
         axslid->xAxis->setRange(low, upr);
     }
+
+    axslid->replot();
+    upperSB->setRange(low, upr);
+    lowerSB->setRange(low, upr);
     
 }
 

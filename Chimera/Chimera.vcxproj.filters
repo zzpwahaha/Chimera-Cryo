@@ -360,40 +360,13 @@
     <ClCompile Include="Source\AnalogInput\BSplineFit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\CMOSCamera\FrameObserver.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\CMOSCamera\Helper.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\CMOSCamera\ImageProcessingThread.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Source\PrimaryWindows\QtMakoWindow.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\CMOSCamera\ImageCalculatingThread.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\GeneralImaging\csvReader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\GeneralImaging\PictureViewer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\CMOSCamera\MakoCamera.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\CMOSCamera\MakoWrapper.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\CMOSCamera\GaussianFit.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\CMOSCamera\MakoCameraCore.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\CMOSCamera\CMOSSetting.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\CustomQtControls\LineEditCompleter.cpp">
@@ -403,6 +376,33 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\CustomQtControls\TickSlider.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\CMOSCamera\CMOSSetting.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\CMOSCamera\FrameObserver.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\CMOSCamera\GaussianFit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\CMOSCamera\Helper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\CMOSCamera\ImageCalculatingThread.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\CMOSCamera\ImageProcessingThread.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\CMOSCamera\MakoCamera.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\CMOSCamera\MakoCameraCore.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\CMOSCamera\MakoWrapper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\CMOSCamera\MakoSettingControl.cpp">
@@ -518,19 +518,10 @@
     <QtMoc Include="Source\Scripts\SyntaxHighlighter.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <QtMoc Include="Source\CMOSCamera\FrameObserver.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
     <QtMoc Include="Source\PrimaryWindows\QtMakoWindow.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <QtMoc Include="Source\CMOSCamera\ImageCalculatingThread.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
     <QtMoc Include="Source\GeneralImaging\PictureViewer.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="Source\CMOSCamera\MakoWrapper.h">
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="Source\CustomQtControls\LineEditCompleter.h">
@@ -542,7 +533,19 @@
     <QtMoc Include="Source\CustomQtControls\TickSlider.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <QtMoc Include="Source\CMOSCamera\FrameObserver.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\CMOSCamera\ImageCalculatingThread.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
     <QtMoc Include="Source\CMOSCamera\MakoSettingControl.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\CMOSCamera\MakoWrapper.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\CMOSCamera\MakoCamera.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
@@ -898,25 +901,22 @@
     <ClInclude Include="Source\AnalogInput\BSplineFit.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Source\GeneralImaging\csvReader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\CMOSCamera\CMOSSetting.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\CMOSCamera\GaussianFit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="Source\CMOSCamera\Helper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\CMOSCamera\ImageProcessingThread.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\GeneralImaging\csvReader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\CMOSCamera\MakoCamera.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\CMOSCamera\GaussianFit.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Source\CMOSCamera\MakoCameraCore.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\CMOSCamera\CMOSSetting.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

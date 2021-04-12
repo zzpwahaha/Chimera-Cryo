@@ -51,7 +51,7 @@ PictureViewer::PictureViewer(std::string plotname, QWidget* parent)
     m_QCPleftAxisRect->setMinimumSize(120, 600);
     m_QCPleftAxisRect->setMaximumSize(120, 600);
     //QRect rec = QApplication::desktop()->screenGeometry();
-    m_QCP->setMaximumSize(900, 400);
+    m_QCP->setMaximumSize(900, 900);
 
     // move newly created axes on "axes" layer and grids on "grid" layer:
     foreach(QCPAxisRect * rect, m_QCP->axisRects())
@@ -201,10 +201,7 @@ PictureViewer::PictureViewer(std::string plotname, QWidget* parent)
     m_QCPtraceTextleft->setRotation(90);
     m_QCPtraceTextleft->position->setCoords(-12, 0);
 
-    connect(m_QCP.data(), &QCustomPlot::mouseMove, this, &PictureViewer::onSetMousePosInCMap);
-
-
-
+    //connect(m_QCP.data(), &QCustomPlot::mouseMove, this, &PictureViewer::onSetMousePosInCMap);
     //connect(m_QCP.data(), &QCustomPlot::mouseDoubleClick, this, [this]() {
     //    m_pImgCThread->setDefaultView();
     //    m_QCP->replot(); });
@@ -212,14 +209,14 @@ PictureViewer::PictureViewer(std::string plotname, QWidget* parent)
 
     /***********************************************************************/
     /*manual range silder*/
-    handleManualColorRange();
-
+    //handleManualColorRange();
     /***********************************************************************/
     /*set image layout*/
     QVBoxLayout* m_VertLayout = new QVBoxLayout(this);
-    QLabel* namelabel = new QLabel(qstr(plotname));
-    namelabel->setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
-    m_VertLayout->addWidget(namelabel, 0);
+    m_VertLayout->setContentsMargins(0, 0, 0, 0);
+    //QLabel* namelabel = new QLabel(qstr(plotname));
+    //namelabel->setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
+    //m_VertLayout->addWidget(namelabel, 0);
     m_VertLayout->addWidget(m_QCP.data(), 1);
     //this->setStyleSheet("background-color: rgb(85, 100, 100)");
     //this->setWindowFlags(Qt::Widget);
@@ -229,6 +226,7 @@ PictureViewer::PictureViewer(std::string plotname, QWidget* parent)
     /***********************************************************************/
     /*create context menu*/
     m_QCP->setContextMenuPolicy(Qt::CustomContextMenu);
+    m_ContextMenu = new QMenu(this);
     connect(m_QCP.data(), &QCustomPlot::customContextMenuRequested, this, [this](QPoint) {
       m_ContextMenu->exec(QCursor::pos()); });
     /***********************************************************************/
@@ -237,86 +235,27 @@ PictureViewer::PictureViewer(std::string plotname, QWidget* parent)
     /*create image calculating thread*/
     /***********************************************************************/
     /* Statusbar */
-    //QStatusBar* statusbar1 = new QStatusBar;
-    //QStatusBar* statusbar2 = new QStatusBar;
-    //m_OperatingStatusLabel = new QLabel(" Ready ");
-    //m_FormatButton = new QPushButton;
-    //m_ImageSizeButtonH = new QPushButton;
-    //m_ImageSizeButtonW = new QPushButton;
-    //m_FramesLabel = new QLabel;
-    //m_FramerateButton = new QPushButton;
-    //m_CursorScenePosLabel = new QLabel;
-    //m_ExposureTimeButton = new QPushButton;
-    //m_CameraGainButton = new QPushButton();
-    ////for (auto& tmp : QList<QLabel*>{ m_OperatingStatusLabel ,m_FormatLabel ,m_ImageSizeLabel,m_CursorScenePosLabel })
-    ////{
-    ////    tmp->setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
-    ////}
-    //QWidget* imageSizeBtn = new QWidget();
-    //QHBoxLayout* imageSizeBtnLayout = new QHBoxLayout(imageSizeBtn);
-    //imageSizeBtnLayout->setMargin(0);
-    //imageSizeBtnLayout->addWidget(m_ImageSizeButtonH);
-    //imageSizeBtnLayout->addWidget(m_ImageSizeButtonW);
-    //statusbar1->addWidget(m_OperatingStatusLabel);
-    //statusbar1->addWidget(imageSizeBtn);
-    //statusbar1->addWidget(m_FormatButton);
-    //statusbar2->addWidget(m_ExposureTimeButton);
-    //statusbar2->addWidget(m_CameraGainButton);
-    //statusbar2->addWidget(m_FramesLabel);
-    //statusbar2->addWidget(m_FramerateButton);
-    //statusbar1->addWidget(m_CursorScenePosLabel);
-
-    //m_OperatingStatusLabel->setStyleSheet("background-color: rgb(0,0, 0); color: rgb(255,255,255)");
-    //for (auto& btn : { m_ImageSizeButtonH ,m_ImageSizeButtonW,m_CameraGainButton,m_ExposureTimeButton,m_FormatButton,m_FramerateButton })
-    //    btn->setStyleSheet("border: none; color: rgb(128, 89, 255)");
-    //m_VertLayout->addWidget(statusbar1, 0);
-    //m_VertLayout->addWidget(statusbar2, 0);
-    //connect(m_FormatButton, &QPushButton::clicked, this, [this]() {
-    //    m_Controller->updateRegisterFeature();
-    //    QList<QStandardItem*> tmp = m_Controller->controllerModel()->findItems("PixelFormat", Qt::MatchRecursive | Qt::MatchWrap);
-    //    if (!tmp.isEmpty()) { m_Controller->onClicked(tmp.at(0)->index().siblingAtColumn(1)); }
-    //    });
-    //connect(m_ImageSizeButtonH, &QPushButton::clicked, this, [this]() {
-    //    m_Controller->updateRegisterFeature();
-    //    QList<QStandardItem*> tmp = m_Controller->controllerModel()->findItems("Height", Qt::MatchRecursive | Qt::MatchWrap);
-    //    if (!tmp.isEmpty()) { m_Controller->onClicked(tmp.at(0)->index().siblingAtColumn(1)); }
-    //    });
-    //connect(m_ImageSizeButtonW, &QPushButton::clicked, this, [this]() {
-    //    m_Controller->updateRegisterFeature();
-    //    QList<QStandardItem*> tmp = m_Controller->controllerModel()->findItems("Width", Qt::MatchRecursive | Qt::MatchWrap);
-    //    if (!tmp.isEmpty()) { m_Controller->onClicked(tmp.at(0)->index().siblingAtColumn(1)); }
-    //    });
-    //connect(m_CameraGainButton, &QPushButton::clicked, this, [this]() {
-    //    m_Controller->updateRegisterFeature();
-    //    QList<QStandardItem*> tmp = m_Controller->controllerModel()->findItems("Gain", Qt::MatchRecursive | Qt::MatchWrap);
-    //    if (!tmp.isEmpty()) { m_Controller->onClicked(tmp.at(0)->index().siblingAtColumn(1)); }
-    //    });
-    //connect(m_ExposureTimeButton, &QPushButton::clicked, this, [this]() {
-    //    m_Controller->updateRegisterFeature();
-    //    QList<QStandardItem*> tmp = m_Controller->controllerModel()->findItems("ExposureTimeAbs", Qt::MatchRecursive | Qt::MatchWrap);
-    //    if (!tmp.isEmpty()) { m_Controller->onClicked(tmp.at(0)->index().siblingAtColumn(1)); }
-    //    });
-    //connect(m_FramerateButton, &QPushButton::clicked, this, [this]() {
-    //    m_Controller->updateRegisterFeature();
-    //    QList<QStandardItem*> tmp = m_Controller->controllerModel()->findItems("AcquisitionFrameRateAbs", Qt::MatchRecursive | Qt::MatchWrap);
-    //    if (!tmp.isEmpty()) { m_Controller->onClicked(tmp.at(0)->index().siblingAtColumn(1)); }
-    //    });
-
-
     /***********************************************************************/
 
-    //setMaximumSize(600, 600);
+    //setMaximumSize(960, 600);
 
 }
 
-void PictureViewer::onSetMousePosInCMap(QMouseEvent* event)
+PictureViewer::~PictureViewer()
+{
+    m_QCP->~QCustomPlot();
+}
+
+// m_QCP replot should be taken care of manually depending on whether camera is running
+// the info is set to the argument 'label'
+void PictureViewer::onSetMousePosInCMap(QMouseEvent* event, QLabel* label)
 {
     //or also use m_colorMap->keyAxis(), they are the same 
     double x = m_QCPcenterAxisRect->axis(QCPAxis::atBottom)->pixelToCoord(event->pos().x());
     double y = m_QCPcenterAxisRect->axis(QCPAxis::atLeft)->pixelToCoord(event->pos().y());
     //double z = m_colorMap->data()->data(x, y);
     //qDebug() << x << "," << std::floor(x + 0.5) << "," << y << "," << std::floor(y + 0.5) << "," << z;
-    m_CursorScenePosLabel->setText("(" + QString::number(std::floor(x + 0.5)) + " , " +
+    label->setText("(" + QString::number(std::floor(x + 0.5)) + " , " +
         QString::number(std::floor(y + 0.5)) + " , " +
         QString::number(m_colorMap->data()->data(x, y)) + ")");
 
@@ -343,18 +282,20 @@ void PictureViewer::onSetMousePosInCMap(QMouseEvent* event)
             "(" + QString::number(leftKey - m_leftGraph->dataMainKey(0)) + ")" + "," +
             QString::number(leftVal, 'e', 3));
     }
-    //if (!m_bIsCameraRunning) { m_QCP->replot(); }
-
 }
 
-void PictureViewer::handleManualColorRange()
+void PictureViewer::initManualColorRangeAction(QAction* mcbarRange)
 {
     m_DiagRSlider = new QDialog(this);
     m_DiagRSlider->setWindowTitle("Color Scale Slider");
     m_DiagRSlider->setWindowFlags(m_DiagRSlider->windowFlags() & ~Qt::WindowContextHelpButtonHint);
     m_DiagRSlider->setMaximumSize(300, 700);
-    intgSlider = new RangeSliderIntg(Qt::Vertical, RangeSlider::Option::DoubleHandles);
 
+    QVBoxLayout* layout = new QVBoxLayout(m_DiagRSlider);
+    m_DiagRSlider->setLayout(layout);
+    intgSlider = new RangeSliderIntg(Qt::Vertical, RangeSlider::Option::DoubleHandles);
+    layout->addWidget(intgSlider);
+    intgSlider->setRange(0, 4095);
     connect(intgSlider, &RangeSliderIntg::smlValueChanged, this, [this](int val) {
         m_colorScale->setDataRange(QCPRange(val, m_colorScale->dataRange().upper));
         /*m_QCP->replot();*/ });
@@ -363,133 +304,19 @@ void PictureViewer::handleManualColorRange()
         /*m_QCP->replot();*/ });
 
 
-    connect(m_QCP.data(), &QCustomPlot::axisDoubleClick, this, [this](QCPAxis* axis, QCPAxis::SelectablePart part) {
-        if (axis == m_colorScale->axis() && m_aManualCscale->isChecked())
+    connect(m_QCP.data(), &QCustomPlot::axisDoubleClick, this, 
+        [this, mcbarRange](QCPAxis* axis, QCPAxis::SelectablePart part) {
+        if (axis == m_colorScale->axis() && mcbarRange->isChecked())
         {
             m_DiagRSlider->move(QCursor::pos());
             m_DiagRSlider->show();
         } });
+    m_ContextMenu->addAction(mcbarRange);
 }
 
 void PictureViewer::handleContextMenu()
 {
-    //m_ContextMenu = new QMenu;
-    //this->setContextMenuPolicy(Qt::CustomContextMenu);
 
-    //m_aStartStopCap = new QAction("&Streaming");
-    //m_ContextMenu->addAction(m_aStartStopCap);
-    //m_aStartStopCap->setCheckable(true);
-    //m_aStartStopCap->setEnabled(isStreamingAvailable());
-    //connect(m_aStartStopCap, &QAction::triggered, this, &PictureViewer::on_ActionFreerun_triggered);
-
-    //m_aDiagCtrler = new QAction("Con&troller");
-    //m_ContextMenu->addAction(m_aDiagCtrler);
-    //connect(m_aDiagCtrler, &QAction::triggered, this, [&]() {m_DiagController->show(); });
-
-    //m_aDiagInfo = new QAction("Infor&mation");
-    //m_ContextMenu->addAction(m_aDiagInfo);
-    //connect(m_aDiagInfo, &QAction::triggered, this, [&]() {m_DiagInfomation->show(); });
-
-    //m_ContextMenu->addSeparator();
-
-    //m_aSetCurrScrROI = new QAction("SetCurrentRO&I");
-    //m_ContextMenu->addAction(m_aSetCurrScrROI);
-    //connect(m_aSetCurrScrROI, &QAction::triggered, this, &PictureViewer::SetCurrentScreenROI);
-
-    //m_aResetFullROI = new QAction("ResetFullROI");
-    //m_ContextMenu->addAction(m_aResetFullROI);
-    //connect(m_aResetFullROI, &QAction::triggered, this, &PictureViewer::ResetFullROI);
-
-
-    //m_aPlotTracer = new QAction("Tracer");
-    //m_aPlotTracer->setCheckable(true);
-    //m_aPlotTracer->setChecked(true);
-    //m_ContextMenu->addAction(m_aPlotTracer);
-    //connect(m_aPlotTracer, &QAction::triggered, this, [this]() {
-    //    for (auto& tra : { m_QCPtracerbottom,m_QCPtracerleft })
-    //    {
-    //        m_aPlotTracer->isChecked() ? tra->setVisible(true) : tra->setVisible(false);
-    //    }
-    //    for (auto& tra : { m_QCPtraceTextbottom,m_QCPtraceTextleft })
-    //    {
-    //        m_aPlotTracer->isChecked() ? tra->setVisible(true) : tra->setVisible(false);
-    //    }
-    //    m_QCP->replot(); });
-
-    //m_aPlotFitter = new QAction("Fitting");
-    //m_aPlotFitter->setCheckable(true);
-    //m_aPlotFitter->setChecked(true);
-    //m_ContextMenu->addAction(m_aPlotFitter);
-    //connect(m_aPlotFitter, &QAction::triggered, this, [this]() {
-    //    for (auto& fitgraph : { m_QCP->graph(2),m_QCP->graph(3) })
-    //    {
-    //        m_aPlotFitter->isChecked() ? fitgraph->setVisible(true) : fitgraph->setVisible(false);
-    //    }
-    //    for (auto& ax : { m_QCPbottomAxisRect->axis(QCPAxis::atBottom),m_QCPleftAxisRect->axis(QCPAxis::atLeft) })
-    //    {
-    //        m_aPlotFitter->isChecked() ? 0 : ax->setLabel(" ");
-    //    }
-    //    m_aPlotFitter->isChecked() ? m_pImgCThread->toggleDoFitting(true) : m_pImgCThread->toggleDoFitting(false);
-    //    m_QCP->replot(); });
-
-    //m_aPlotFitter2D = new QAction("Fitting2D");
-    //m_aPlotFitter2D->setCheckable(true);
-    //m_aPlotFitter2D->setChecked(false);
-    //m_ContextMenu->addAction(m_aPlotFitter2D);
-    //connect(m_aPlotFitter2D, &QAction::triggered, this, [this]() {
-    //    auto hairCurve = reinterpret_cast<QCPCurve*>(m_QCP->axisRect(1)->plottables().at(1));
-    //    auto parametric = reinterpret_cast<QCPCurve*>(m_QCP->axisRect(1)->plottables().at(2));
-    //    for (auto& fitgraph : { hairCurve,parametric })
-    //    {
-    //        m_aPlotFitter2D->isChecked() ? fitgraph->setVisible(true) : fitgraph->setVisible(false);
-    //    }
-    //    for (auto& ax : { m_QCPcenterAxisRect->axis(QCPAxis::atTop) })
-    //    {
-    //        m_aPlotFitter2D->isChecked() ? 0 : ax->setLabel(" ");
-    //    }
-    //    m_aPlotFitter2D->isChecked() ? m_pImgCThread->toggleDoFitting2D(true) : m_pImgCThread->toggleDoFitting2D(false);
-    //    m_QCP->replot(); });
-
-
-    //m_aCscale = new QAction("Color Scale");
-    //m_ContextMenu->addAction(m_aCscale);
-    //connect(m_aCscale, &QAction::triggered, this, [this]() {
-    //    m_dCScale->move(QCursor::pos());
-    //    m_dCScale->show(); });
-
-
-    //m_aManualCscale = new QAction("Manual Color Scale");
-    //m_aManualCscale->setCheckable(true);
-    //m_aManualCscale->setChecked(false);
-    //m_ContextMenu->addAction(m_aManualCscale);
-
-
-
-    //m_ContextMenu->addSeparator();
-
-    //m_aSaveCamSetting = new QAction("Save Setting");
-    //m_ContextMenu->addAction(m_aSaveCamSetting);
-    //connect(m_aSaveCamSetting, &QAction::triggered, this, &PictureViewer::on_ActionSaveCameraSettings_triggered);
-
-    //m_aLoadCamSetting = new QAction("Load Setting");
-    //m_ContextMenu->addAction(m_aLoadCamSetting);
-    //connect(m_aLoadCamSetting, &QAction::triggered, this, &PictureViewer::on_ActionLoadCameraSettings_triggered);
-
-    //m_aSaveImg = new QAction("Save Image");
-    //m_ContextMenu->addAction(m_aSaveImg);
-    //connect(m_aSaveImg, &QAction::triggered, this, &PictureViewer::on_ActionSaveAs_triggered);
-
-
-    //m_ContextMenu->addSeparator();
-
-    ////connecting the following action to a slot happens at cameraMainWindow, be careful of the order
-    //m_aCamlist = new QAction("&Camera");
-    //m_ContextMenu->addAction(m_aCamlist);
-    //m_aDisconnect = new QAction("&Disconnect");
-    //m_ContextMenu->addAction(m_aDisconnect);
-
-    //connect(this, SIGNAL(customContextMenuRequested(const QPoint&)),
-    //    this, SLOT(OnShowContextMenu(const QPoint&)));
 }
 
 
@@ -528,6 +355,28 @@ void PictureViewer::loadColorCsv()
             counter++;
         }
     }
+
+}
+
+void PictureViewer::renderImgFromCalcThread(bool manualColorScale)
+{
+    if (!manualColorScale)
+    {
+        m_colorMap->rescaleDataRange(true);
+        intgSlider->upperSpinBox()->setValue(m_colorScale->dataRange().upper);
+        intgSlider->lowerSpinBox()->setValue(m_colorScale->dataRange().lower);
+    }
+    m_QCPcenterAxisRect->axis(QCPAxis::atLeft)->setScaleRatio(m_QCPcenterAxisRect->axis(QCPAxis::atBottom), 1.0);
+    m_bottomGraph->rescaleValueAxis(true, true); //only enlarge y and scale corresponde to visible x
+    m_bottomGraph->keyAxis()->setRange(m_colorMap->keyAxis()->range());
+    m_leftGraph->rescaleValueAxis(true, true);
+    m_leftGraph->keyAxis()->setRange(m_colorMap->valueAxis()->range());
+
+    /*set the secondary relative axis, now replaced with connect rangechanged*/
+    //m_QCPleftAxisRect->axis(QCPAxis::atLeft)->setRange(m_leftGraph->keyAxis()->range() - m_leftGraph->data()->at(0)->key);
+    //m_QCPbottomAxisRect->axis(QCPAxis::atBottom)->setRange(m_bottomGraph->keyAxis()->range() - m_bottomGraph->data()->at(0)->key);
+    m_QCP->replot();
+
 
 }
 

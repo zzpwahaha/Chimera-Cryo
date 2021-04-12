@@ -33,7 +33,7 @@ class FrameObserver : public QObject, public AVT::VmbAPI::IFrameObserver
            ~FrameObserver ();
             virtual void FrameReceived          ( const FramePtr frame );
             void resetFrameCounter              ( bool bIsRestart );
-            const QSharedPointer<ImageProcessingThread>& ImageProcessThreadPtr() const { return m_pImageProcessingThread; }
+            ImageProcessingThread* ImageProcessThreadPtr() { return &m_imgPThread; }
        
     private:
             bool setFrame                       ( const FramePtr &frame );
@@ -52,7 +52,7 @@ class FrameObserver : public QObject, public AVT::VmbAPI::IFrameObserver
         unsigned int                            m_nFrames;
         unsigned int                            m_nFramesCounter;       // nr frames received
 
-        QSharedPointer<ImageProcessingThread>   m_pImageProcessingThread;   // Image processing thread
+        ImageProcessingThread               m_imgPThread;   // Image processing thread
         bool                                m_IsStopping;
         QMutex                              m_StoppingLock;
             
