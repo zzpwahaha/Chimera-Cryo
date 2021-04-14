@@ -22,7 +22,7 @@ public:
     void fillExpDeviceList(DeviceList& list) {};
 
 private:
-    MakoCamera cam;
+    std::array<MakoCamera, MAKO_NUMBER> cam;
 
 };
 

@@ -10,7 +10,7 @@ using AVT::VmbAPI::FramePtr;
 using AVT::VmbAPI::FeaturePtr;
 
 ImageCalculatingThread::ImageCalculatingThread(
-    const SP_DECL(FrameObserver)& pFrameObs, const CameraPtr& pCam,
+    const SP_DECL(FrameObserver)& pFrameObs, const CameraPtr& pCam, bool SAFEMODE,
     QCustomPlot* plot, QCPColorMap* cmap, QCPGraph* pbot, QCPGraph* pleft)
     : QThread()
     , m_pFrameObs(pFrameObs)
@@ -36,6 +36,11 @@ ImageCalculatingThread::ImageCalculatingThread(
     , m_gfit2D(16, 4, 4, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 100) /* emulating 4*4 matrix */
 {
     m_pProcessingThread = QSharedPointer<ImageProcessingThread>(SP_ACCESS(m_pFrameObs)->ImageProcessThreadPtr());
+    
+    if (SAFEMODE) {
+        return;
+    }
+
     /*get the max width and height*/
     FeaturePtr pFeat;
     if (VmbErrorSuccess == m_pCam->GetFeatureByName("HeightMax", pFeat))

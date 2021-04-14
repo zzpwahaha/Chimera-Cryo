@@ -3,6 +3,7 @@
 #include "FrameObserver.h"
 #include "MakoWrapper.h"
 #include "MakoSettingControl.h"
+#include "CMOSSetting.h"
 
 class MakoCameraCore : public IDeviceCore
 {
@@ -11,7 +12,7 @@ public:
 	MakoCameraCore& operator=(const MakoCameraCore&) = delete;
 	MakoCameraCore(const MakoCameraCore&) = delete;
 
-	MakoCameraCore(std::string ip);
+	MakoCameraCore(std::string ip, bool SAFEMODE);
 	~MakoCameraCore();
 	
 	std::string getDelim() override { return configDelim; }
@@ -43,13 +44,15 @@ public:
 
 	void resetFullROI();
 
+	void updateCurrentSettings();
+
 
 
 	std::string CameraName() { return cameraName; }
 	MakoSettingControl& getMakoCtrl() { return makoCtrl; }
 	FrameObserver* getFrameObs() { return frameObs.get(); }
 	CameraPtr& getCameraPtr() { return cameraPtr; }
-
+	MakoSettings getRunningSettings() { return runSettings; }
 
 
 public:
@@ -64,8 +67,10 @@ private:
 	std::string cameraIP;
 
 	CameraPtr cameraPtr;
-	
 	std::string cameraName;
+
+	MakoSettings runSettings;
+	MakoSettings expRunSettings;
     
 
 };

@@ -62,6 +62,9 @@ class MakoSettingControl : public QTreeView
         /*getter for m_model*/
         const QStandardItemModel* const controllerModel() { return m_Model; }
 
+        void updateCurrentSettings();
+        MakoSettings getCurrentSettings() { return currentSettings; }
+
     protected:
         void showEvent(QShowEvent* event);
         void hideEvent(QHideEvent* event);
@@ -139,6 +142,9 @@ class MakoSettingControl : public QTreeView
         /* Filter Search Proxy */
         SortFilterProxyModel*               m_ProxyModel;
     private:
+        MakoSettings                        currentSettings;
+
+
         FeaturePtrVector                    m_featPtrVec;
         CameraPtr                           m_pCam;
         MultiCompleter*                     m_StringCompleter;

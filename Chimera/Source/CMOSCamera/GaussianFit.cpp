@@ -466,8 +466,8 @@ void Gaussian2DFit::solve_system()
         //thrd.detach();
         //thrd.~thread();
         thrd.join();
-        throw std::runtime_error("Timeout");
-        //return;
+        //throw std::runtime_error("Timeout");
+        return;
     }
     else { thrd.detach(); }
 

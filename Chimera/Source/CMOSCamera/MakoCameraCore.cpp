@@ -3,11 +3,14 @@
 
 #include <qdebug.h>
 
-MakoCameraCore::MakoCameraCore(std::string ip)
+MakoCameraCore::MakoCameraCore(std::string ip, bool SAFEMODE)
     : m_VimbaSystem(AVT::VmbAPI::VimbaSystem::GetInstance())
     , cameraIP(ip)
     , makoCtrl()
 {
+    if (SAFEMODE) {
+        return;
+    }
     try {
         initializeVimba();
         SP_SET(frameObs, new FrameObserver(cameraPtr));
@@ -448,5 +451,11 @@ void MakoCameraCore::resetFullROI()
         }
     }
 
+}
+
+void MakoCameraCore::updateCurrentSettings()
+{
+    makoCtrl.updateCurrentSettings();
+    runSettings = makoCtrl.getCurrentSettings();
 }
 

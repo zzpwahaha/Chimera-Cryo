@@ -10,9 +10,10 @@
 #include <ExcessDialogs/openWithExplorer.h>
 #include <qlayout.h>
 
-QtMakoWindow::QtMakoWindow(QWidget* parent) 
+QtMakoWindow::QtMakoWindow(QWidget* parent)
 	: IChimeraQtWindow(parent)
-	, cam(MAKO_IPADDRS[0],this)
+	, cam{ MakoCamera(MAKO_IPADDRS[0], false/*MAKO_SAFEMODE[0]*/, this),
+	MakoCamera(MAKO_IPADDRS[1], MAKO_SAFEMODE[1], this) }
 {
 	setWindowTitle("Mako Camera Window");
 }
@@ -28,6 +29,8 @@ void QtMakoWindow::initializeWidgets()
 	setCentralWidget(centralWidget);
 
 	QHBoxLayout* layout = new QHBoxLayout(centralWidget);
-	cam.initialize();
-	layout->addWidget(&cam, 0);
+	cam[0].initialize();
+	cam[1].initialize();
+	layout->addWidget(&cam[0], 1);
+	layout->addWidget(&cam[1], 1);
 }

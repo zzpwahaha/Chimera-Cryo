@@ -16,8 +16,7 @@
 #include <VimbaCPP/Include/Frame.h>
 #include <VimbaCPP/Include/Camera.h>
 
-/* Number of frames in use to count the first FPS since start*/
-const unsigned int MAX_FRAMES_TO_COUNT = 50;
+
 
 using AVT::VmbAPI::CameraPtr;
 using AVT::VmbAPI::FramePtr;
@@ -41,6 +40,10 @@ class FrameObserver : public QObject, public AVT::VmbAPI::IFrameObserver
     signals:
             void setCurrentFPS                       ( const QString &sFPS );
             void setFrameCounter                     ( const unsigned int &nFrame );
+
+    public:
+        /* Number of frames in use to count the first FPS since start*/
+        const unsigned int MAX_FRAMES_TO_COUNT = 5;
 
     private:
         typedef QSharedPointer<unsigned char>   FrameDataPtr;

@@ -348,7 +348,7 @@ void MakoSettingControl::pollingFeaturesValue()
 
 void MakoSettingControl::mapInformation(const QString sName, const FeaturePtr featPtr)
 {
-    if (NULL == featPtr)
+    if (nullptr == featPtr)
         return;
 
     std::string sDescription;
@@ -395,7 +395,7 @@ void MakoSettingControl::onClicked(const QModelIndex& current)
     mapInformation(sFeature, FeatPtr);
     showIt(current, "Description");
 
-    if ((NULL == FeatPtr) || !isFeatureWritable(sFeature) || 0 == current.column())
+    if ((nullptr == FeatPtr) || !isFeatureWritable(sFeature) || 0 == current.column())
     {
         m_bIsBusy = false;
         m_sCurrentSelectedFeature = sFeature;
@@ -1239,6 +1239,7 @@ void MakoSettingControl::createIntSliderSpinBox(const QModelIndex item)
 
     QPoint p = QCursor::pos();
     m_IntSpinSliderWidget->setFixedHeight(100);
+    m_IntSpinSliderWidget->setMinimumWidth(400);
     m_IntSpinSliderWidget->setWindowFlags(Qt::Tool | Qt::WindowCloseButtonHint);
     m_IntSpinSliderWidget->setWindowTitle(m_sCurrentSelectedFeature);
     AdjustOffscreenPosition(p, *m_IntSpinSliderWidget);
@@ -1301,7 +1302,7 @@ void MakoSettingControl::onIntSpinBoxClick()
 
 bool MakoSettingControl::initCurrentFeatureInt(const QString& name)
 {
-    if (isFeatureWritable(name)) {
+    if (!isFeatureWritable(name)) {
         return false;
     }
     m_sCurrentSelectedFeature = m_sFeature_IntSpinBox = name;
@@ -1321,8 +1322,8 @@ bool MakoSettingControl::initCurrentFeatureInt(const QString& name)
         {
             m_nMaximum = std::numeric_limits<int>::max();
         }
-        m_nMaximum = m_nMaximum - ((m_nMaximum - m_nMinimum) % m_nIncrement);
         m_FeaturePtr_IntSpinBox->GetIncrement(m_nIncrement);
+        m_nMaximum = m_nMaximum - ((m_nMaximum - m_nMinimum) % m_nIncrement);
         return true;
     }
     else {
@@ -1424,7 +1425,7 @@ void MakoSettingControl::createFloatSliderEditBox(const QModelIndex item)
 
     if (VmbErrorSuccess == error)
     {
-        m_EditBox_Float->setText(QString::number(dValue));
+        m_EditBox_Float->setText(qstr(dValue, 3));
     }
     else
     {
@@ -1439,9 +1440,14 @@ void MakoSettingControl::createFloatSliderEditBox(const QModelIndex item)
     m_Slider_Float->setTotalSteps(20000);
     m_Slider_Float->setDoubleScale(m_dMinimum, m_dMaximum);
     m_Slider_Float->setDoubleTickInterval((m_dMaximum - m_dMinimum) / 5); // only show five ticks
+    m_Slider_Float->setTickPosition(QSlider::TicksBelow);
     if (abs(m_dIncrement) > 0.0000001)
     {
         m_Slider_Float->setDoubleSingleStep(m_dIncrement);
+    }
+    if (sFeature_FloatSliderEditBox=="Gain") // gain is treated as float but indeed it is an int
+    {
+        m_Slider_Float->setDoubleSingleStep(1.0);
     }
 
     if (0 == m_sFeature_FloatSliderSpinBox.compare("ExposureTimeAbs")) {
@@ -1449,6 +1455,9 @@ void MakoSettingControl::createFloatSliderEditBox(const QModelIndex item)
         m_Slider_Float->setDoubleTickInterval((m_dMaximum / 100 - m_dMinimum) / 5); // only show five ticks
         if (abs(m_dIncrement) > 0.0000001) {
             m_Slider_Float->setDoubleSingleStep(m_dIncrement);
+        }
+        else {
+            m_Slider_Float->setDoubleSingleStep(100.0/*us*/);
         }
     }
         
@@ -1465,7 +1474,7 @@ void MakoSettingControl::createFloatSliderEditBox(const QModelIndex item)
     HSpinSliderLayout_Float->addLayout(HSliderEditLayout_Float2);
 
     QPoint p = QCursor::pos();
-    m_FloatSliderEditWidget->setFixedHeight(60);
+    m_FloatSliderEditWidget->setFixedHeight(100);
     m_FloatSliderEditWidget->setWindowFlags(Qt::Tool | Qt::WindowCloseButtonHint);
     m_FloatSliderEditWidget->setWindowTitle(m_sCurrentSelectedFeature);
     AdjustOffscreenPosition(p, *m_FloatSliderEditWidget);
@@ -1483,7 +1492,7 @@ void MakoSettingControl::createFloatSliderEditBox(const QModelIndex item)
 
 void MakoSettingControl::onFloatSliderReleased()
 {
-    onFloatSliderChanged(m_Slider_Float->value());
+    onFloatSliderChanged(m_Slider_Float->doubleValue());
 }
 
 void MakoSettingControl::onFloatSliderChanged(double dValue)
@@ -1499,7 +1508,7 @@ void MakoSettingControl::onFloatSliderChanged(double dValue)
 
     if (m_Slider_Float->hasFocus())
     {
-        m_EditBox_Float->setText(QString::number(dValue));
+        m_EditBox_Float->setText(qstr(dValue, 3));
         /* As of Vimba >= 1.4, float features other than ExposureTime don't use spin box anymore */
         onFloatEditFinished();
     }
@@ -1599,7 +1608,7 @@ void MakoSettingControl::updateCurrentFloatValue()
         const QString newValue = QString::number(dCurrentValue);
         if (m_EditBox_Float->text() != newValue)
         {
-            m_EditBox_Float->setText(newValue);
+            m_EditBox_Float->setText(qstr(newValue, 3));
         }
 
         if (!m_Slider_Float->hasFocus())
@@ -1940,7 +1949,19 @@ void MakoSettingControl::updateWidget(const bool bIsWritable, const QVariant& va
 
     else if (nullptr != m_FloatSliderEditWidget)
     {
-        updateEditWidget(m_FloatSliderEditWidget, value, bIsWritable);
+        if (bIsWritable)
+        {
+            QLineEdit* lineEdit = m_FloatSliderEditWidget->findChild<QLineEdit*>(QString("value"));
+            if (nullptr != lineEdit)
+            {
+                QString newValue = qstr(value.toFloat(), 3);
+                if (lineEdit->text() != newValue
+                    && !lineEdit->hasFocus())
+                {
+                    lineEdit->setText(newValue);
+                }
+            }
+        }
     }
 
     else if (nullptr != m_BooleanWidget)
@@ -1955,6 +1976,98 @@ void MakoSettingControl::updateWidget(const bool bIsWritable, const QVariant& va
         updateEditWidget(m_EditWidget, value, bIsWritable);
     }
 
+}
+
+void MakoSettingControl::updateCurrentSettings()
+{
+    FeaturePtr feature;
+    VmbErrorType error;
+    double dval;
+    VmbInt64_t ival;
+    bool bval;
+    std::string sval;
+    std::string errorStr("");
+    
+    feature = getFeaturePtrFromMap("Gain");
+    error = feature->GetValue(dval);
+    if (VmbErrorSuccess == error) {
+        currentSettings.rawGain = dval;
+    }
+    else {
+        errorStr += "Error in getting Gain, with error" + str(error) + ", " + str(Helper::mapReturnCodeToString(error)) + "\n";
+    }
+
+    feature = getFeaturePtrFromMap("TriggerMode");
+    error = feature->GetValue(sval);
+    if (VmbErrorSuccess == error) {
+        currentSettings.trigOn = (sval=="On") ? true : false;
+    }
+    else {
+        errorStr += "Error in getting TriggerMode, with error" + str(error) + ", " + str(Helper::mapReturnCodeToString(error)) + "\n";
+    }
+
+    feature = getFeaturePtrFromMap("TriggerSource");
+    error = feature->GetValue(sval);
+    if (VmbErrorSuccess == error) {
+        currentSettings.triggerMode = MakoTrigger::fromStr(sval);
+    }
+    else {
+        errorStr += "Error in getting TriggerSource, with error" + str(error) + ", " + str(Helper::mapReturnCodeToString(error)) + "\n";
+    }
+    
+    feature = getFeaturePtrFromMap("ExposureTimeAbs");
+    error = feature->GetValue(dval);
+    if (VmbErrorSuccess == error) {
+        currentSettings.exposureTime = dval;
+    }
+    else {
+        errorStr += "Error in getting ExposureTimeAbs, with error" + str(error) + ", " + str(Helper::mapReturnCodeToString(error)) + "\n";
+    }
+
+    feature = getFeaturePtrFromMap("AcquisitionFrameRateAbs");
+    error = feature->GetValue(dval);
+    if (VmbErrorSuccess == error) {
+        currentSettings.frameRate = dval;
+    }
+    else {
+        errorStr += "Error in getting AcquisitionFrameRateAbs, with error" + str(error) + ", " + str(Helper::mapReturnCodeToString(error)) + "\n";
+    }
+
+    feature = getFeaturePtrFromMap("OffsetX");
+    error = feature->GetValue(ival);
+    if (VmbErrorSuccess == error) {
+        currentSettings.dims.left = ival;
+    }
+    else {
+        errorStr += "Error in getting OffsetX, with error" + str(error) + ", " + str(Helper::mapReturnCodeToString(error)) + "\n";
+    }
+
+    feature = getFeaturePtrFromMap("Width");
+    error = feature->GetValue(ival);
+    if (VmbErrorSuccess == error) {
+        currentSettings.dims.right = currentSettings.dims.left + ival;
+    }
+    else {
+        errorStr += "Error in getting Width, with error" + str(error) + ", " + str(Helper::mapReturnCodeToString(error)) + "\n";
+    }
+
+    feature = getFeaturePtrFromMap("OffsetY");
+    error = feature->GetValue(ival);
+    if (VmbErrorSuccess == error) {
+        currentSettings.dims.bottom = ival;
+    }
+    else {
+        errorStr += "Error in getting OffsetY, with error" + str(error) + ", " + str(Helper::mapReturnCodeToString(error)) + "\n";
+    }
+
+    feature = getFeaturePtrFromMap("Height");
+    error = feature->GetValue(ival);
+    if (VmbErrorSuccess == error) {
+        currentSettings.dims.top = currentSettings.dims.bottom + ival;
+    }
+    else {
+        errorStr += "Error in getting Height, with error" + str(error) + ", " + str(Helper::mapReturnCodeToString(error)) + "\n";
+    }
 }
 
 

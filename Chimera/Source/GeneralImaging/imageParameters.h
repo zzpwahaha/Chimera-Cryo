@@ -97,7 +97,7 @@ struct imageParameters{
 			}
 		}
 		if ( cam == "mako" ){
-			if ( horRawPixelNum() % 4 != 0 || vertRawPixelNum() % 4 != 0 ){
+			if ( horRawPixelNum() % 4 != 0 || vertRawPixelNum() % 2 != 0 ){
 				thrower ( "ERROR: In the ace camera, the number of pixels in each dimension must be a multiple "
 						  "of 4!\r\n" + currValues());
 			}

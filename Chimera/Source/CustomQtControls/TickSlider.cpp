@@ -8,12 +8,13 @@
 TickSlider::TickSlider(QWidget* parent)
     : QSlider(parent)
 {
-
+    
 }
 
 TickSlider::TickSlider(Qt::Orientation ori, QWidget* parent)
     : QSlider(ori, parent)
 {
+    
 }
 
 TickSlider::~TickSlider()
@@ -121,6 +122,7 @@ void DoubleTickSlider::setDoubleScale(double min_, double max_)
     max = max_;
     min = min_;
     slope = ((double)steps)/ (max - min);
+    setRange(0, steps);
 }
 
 void DoubleTickSlider::setDoubleTickInterval(double interval)
@@ -147,6 +149,7 @@ void DoubleTickSlider::setTotalSteps(unsigned int steps_)
 {
     steps = steps_;
     slope = ((double)steps) / (max - min);
+    setRange(0, steps);
 }
 
 void DoubleTickSlider::notifyValueChanged(int value)

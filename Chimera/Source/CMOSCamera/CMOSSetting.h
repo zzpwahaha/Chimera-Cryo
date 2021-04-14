@@ -18,10 +18,11 @@ struct CMOSTrigger {
 	enum class mode {
 		External,
 		AutomaticSoftware,
-		ManualSoftware
+		ManualSoftware,
+		ContinuousSoftware
 	};
-	static std::string toStr(mode m);
-	static mode fromStr(std::string txt);
+	virtual std::string toStr(mode m);
+	virtual mode fromStr(std::string txt);
 };
 
 struct CMOSAcquisition {
@@ -50,3 +51,23 @@ struct CMOSSettings {
 	unsigned totalPictures() { return picsPerRep * repsPerVar * variations; }
 };
 
+struct MakoTrigger : public CMOSTrigger
+{
+	static std::string toStr(mode m);
+	static mode fromStr(std::string txt);
+};
+
+struct MakoSettings {
+	bool on;
+	bool expActive;
+	unsigned int rawGain;
+	bool trigOn;
+	MakoTrigger::mode triggerMode = MakoTrigger::mode::External;
+	double exposureTime;
+	double frameRate;
+	imageParameters dims; // mako do not do binning
+	unsigned picsPerRep;
+	unsigned repsPerVar;
+	unsigned variations;
+	unsigned totalPictures() { return picsPerRep * repsPerVar * variations; }
+};

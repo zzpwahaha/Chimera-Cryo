@@ -87,7 +87,7 @@
 
 	//Mako camera
 	const unsigned MAKO_NUMBER = 2;
-	const bool MAKO_SAFEMODE = false;
+	const std::array<bool, MAKO_NUMBER> MAKO_SAFEMODE = { true,false };
 	const std::array<std::string, MAKO_NUMBER> MAKO_IPADDRS= { "10.10.0.6", "10.10.0.7" };
 
 #endif

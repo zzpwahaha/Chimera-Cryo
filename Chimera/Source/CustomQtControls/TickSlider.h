@@ -15,8 +15,8 @@ private:
 
 private:
     int m_firstWidth = 0;
-    int offsetx = -10;
-    int offsety = 5;
+    int offsetx = -7;
+    int offsety = 0;
 };
 
 class DoubleTickSlider : public QSlider 
@@ -52,7 +52,7 @@ private:
     double slope = 100.0; // = steps/(max-min)
 
     int m_firstWidth = 0;
-    int offsetx = -10;
-    int offsety = 5;
+    int offsetx = 0;
+    int offsety = 0;
 };
 

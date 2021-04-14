@@ -33,6 +33,8 @@ std::string CMOSTrigger::toStr(CMOSTrigger::mode m) {
 		return "Automatic-Software-Trigger";
 	case mode::ManualSoftware:
 		return "Manual-Software-Trigger";
+	case mode::ContinuousSoftware:
+		return "Continuous-Software-Streaming";
 	default:
 		return "None";
 	}
@@ -40,7 +42,7 @@ std::string CMOSTrigger::toStr(CMOSTrigger::mode m) {
 
 
 CMOSTrigger::mode CMOSTrigger::fromStr(std::string txt) {
-	for (auto m : { mode::External, mode::ManualSoftware, mode::AutomaticSoftware }) {
+	for (auto m : { mode::External, mode::ManualSoftware, mode::AutomaticSoftware, mode::ContinuousSoftware }) {
 		if (txt == toStr(m)) {
 			return m;
 		}
@@ -71,4 +73,30 @@ std::string CMOSAcquisition::toStr(CMOSAcquisition::mode m) {
 	}
 }
 
+std::string MakoTrigger::toStr(mode m)
+{
+	switch (m) {
+	case mode::External:
+		return "Line1";
+	case mode::AutomaticSoftware:
+		return "FixedRate";
+	case mode::ManualSoftware:
+		return "Software";
+	case mode::ContinuousSoftware:
+		return "Freerun";
+	default:
+		return "None";
+	}
+}
 
+MakoTrigger::mode MakoTrigger::fromStr(std::string txt)
+{
+	for (auto m : { mode::External, mode::ManualSoftware, mode::AutomaticSoftware, mode::ContinuousSoftware }) {
+		if (txt == toStr(m)) {
+			return m;
+		}
+	}
+	// doesn't match any.
+	errBox("Failed to convert text (" + txt + ") to Mako trigger mode! defaulting to sofware fixedrate trigger.");
+	return CMOSTrigger::mode::AutomaticSoftware;
+}

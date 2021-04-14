@@ -18,7 +18,7 @@ public:
 	MakoCamera& operator=(const MakoCamera&) = delete;
 	MakoCamera(const MakoCamera&) = delete;
 	
-	MakoCamera(std::string ip, IChimeraQtWindow* parent);
+	MakoCamera(std::string ip, bool SAFEMODE, IChimeraQtWindow* parent);
     ~MakoCamera();
 
     void initialize();
@@ -55,9 +55,11 @@ private:
 
 
 	QLabel*                             m_OperatingStatusLabel;
-    QPushButton*                        m_FormatButton;
     QPushButton*                        m_ImageSizeButtonH;
     QPushButton*                        m_ImageSizeButtonW;
+    //QPushButton*                        m_FormatButton;
+    QPushButton*                        m_TrigOnOffButton;
+    QPushButton*                        m_TrigSourceButton;
     //QPushButton*                        m_FramerateButton;
     //QLabel*                             m_FramesLabel;
     QLabel*                             m_CursorScenePosLabel;

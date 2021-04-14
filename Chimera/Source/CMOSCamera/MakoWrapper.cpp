@@ -52,7 +52,7 @@ std::string MakoWrapper::getFeatureValue(FeaturePtr featPtr)
         case VmbFeatureDataFloat:
             error = featPtr->GetValue(dValue);
             if (VmbErrorSuccess == error) {
-                sValue = str(dValue);
+                sValue = str(dValue, 4);
             }
             else {
                 thrower("Get feature value double Failed, Error: " + str(Helper::mapReturnCodeToString(error)));

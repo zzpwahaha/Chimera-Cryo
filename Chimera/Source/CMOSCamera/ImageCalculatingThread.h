@@ -3,6 +3,7 @@
 #include <qtconcurrentrun.h>
 #include <VimbaCPP/Include/VimbaSystem.h>
 #include "FrameObserver.h"
+#include "MakoCameraCore.h"
 #include "../3rd_Party/qcustomplot/qcustomplot.h"
 #include "GaussianFit.h"
 #include <utility>
@@ -14,8 +15,8 @@ class ImageCalculatingThread :
 {
     Q_OBJECT
 public:
-    ImageCalculatingThread(const SP_DECL(FrameObserver)&,
-        const CameraPtr&, QCustomPlot* plot, QCPColorMap* cmap, QCPGraph* pbot, QCPGraph* pleft);
+    ImageCalculatingThread(const SP_DECL(FrameObserver)&, const CameraPtr&, 
+        bool SAFEMODE, QCustomPlot* plot, QCPColorMap* cmap, QCPGraph* pbot, QCPGraph* pleft);
     ~ImageCalculatingThread();
     void StartProcessing();
     void StopProcessing();
