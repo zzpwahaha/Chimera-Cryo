@@ -52,7 +52,7 @@ private:
     QFileDialog* saveFileDialog;
 
 	bool isCamRunning;
-
+    bool SAFEMODE;
 
 	QLabel*                             m_OperatingStatusLabel;
     QPushButton*                        m_ImageSizeButtonH;

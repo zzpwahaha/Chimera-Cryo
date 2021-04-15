@@ -12,7 +12,7 @@
 
 QtMakoWindow::QtMakoWindow(QWidget* parent)
 	: IChimeraQtWindow(parent)
-	, cam{ MakoCamera(MAKO_IPADDRS[0], false/*MAKO_SAFEMODE[0]*/, this),
+	, cam{ MakoCamera(MAKO_IPADDRS[0], MAKO_SAFEMODE[0], this),
 	MakoCamera(MAKO_IPADDRS[1], MAKO_SAFEMODE[1], this) }
 {
 	setWindowTitle("Mako Camera Window");

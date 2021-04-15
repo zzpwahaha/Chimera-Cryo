@@ -254,8 +254,21 @@ void MakoSettingControl::initialize(QString sID, CameraPtr pCam, QWidget* parent
     m_FeaturesPollingTimer = new QTimer(this);
     connect(m_FeaturesPollingTimer, &QTimer::timeout, this, &MakoSettingControl::pollingFeaturesValue);
     m_FeaturesPollingTimer->start(500);
+
+    initialzePreset();
 }
 
+void MakoSettingControl::initialzePreset()
+{
+    std::string errstr("");
+    setFeatureValue("SensorShutterMode", "GlobalReset", errstr);
+    setFeatureValue("AcquisitionMode", "Continuous", errstr);
+    setFeatureValue("Gamma", 1.0, errstr); 
+    setFeatureValue("PixelFormat", "Mono12", errstr);
+    setFeatureValue("ExposureAuto", "Off", errstr);
+    FeaturePtr gsvp = getFeaturePtrFromMap("GVSP Adjust Packet Size"); //adjust package size to make sure it works
+    gsvp->RunCommand();
+}
 
 void MakoSettingControl::showEvent(QShowEvent* event)
 {
@@ -1991,6 +2004,17 @@ dataType MakoSettingControl::getFeatureValue(std::string feaName, std::string& e
     return val;
 }
 
+template<typename dataType>
+void MakoSettingControl::setFeatureValue(std::string feaName, dataType val, std::string& errstr)
+{
+    FeaturePtr feature = getFeaturePtrFromMap(qstr(feaName));
+    VmbErrorType error;
+    error = feature->SetValue(val);
+    if (VmbErrorSuccess != error) {
+        errstr += "Error in setting " + feaName + ", with error" + str(error) + ", " + str(Helper::mapReturnCodeToString(error)) + "\n";
+    }
+}
+
 void MakoSettingControl::updateCurrentSettings()
 {
     FeaturePtr feature;
@@ -2013,9 +2037,9 @@ void MakoSettingControl::updateCurrentSettings()
     currentSettings.frameRate = getFeatureValue<double>("AcquisitionFrameRateAbs", errorStr);
 
     currentSettings.dims.left = getFeatureValue<VmbInt64_t>("OffsetX", errorStr);
-    currentSettings.dims.right = currentSettings.dims.left + getFeatureValue<VmbInt64_t>("Width", errorStr);
+    currentSettings.dims.right = currentSettings.dims.left + getFeatureValue<VmbInt64_t>("Width", errorStr) - 1;
     currentSettings.dims.bottom = getFeatureValue<VmbInt64_t>("OffsetY", errorStr);
-    currentSettings.dims.top = currentSettings.dims.bottom + getFeatureValue<VmbInt64_t>("Height", errorStr);
+    currentSettings.dims.top = currentSettings.dims.bottom + getFeatureValue<VmbInt64_t>("Height", errorStr) - 1;
 
 }
 

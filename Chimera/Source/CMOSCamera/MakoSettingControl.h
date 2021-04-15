@@ -64,6 +64,8 @@ class MakoSettingControl : public QTreeView
 
         template<typename dataType>
         dataType getFeatureValue(std::string feaName, std::string& errstr);
+        template<typename dataType>
+        void setFeatureValue(std::string feaName, dataType val, std::string& errstr);
 
         void updateCurrentSettings();
         MakoSettings getCurrentSettings() { return currentSettings; }
@@ -74,6 +76,7 @@ class MakoSettingControl : public QTreeView
         void hideEvent(QHideEvent* event);
 
     private:
+        void initialzePreset(); // settings that are defined for all mako
         void mapInformation(const QString sName, const FeaturePtr featPtr);
         QString getFeatureNameFromModel(const QModelIndex& item) const;
         QString getFeatureNameFromMap(const QString& sDisplayName) const;

@@ -13,6 +13,7 @@ MakoCamera::MakoCamera(std::string ip, bool SAFEMODE, IChimeraQtWindow* parent)
     , viewer(core.CameraName(), this)
     , imgCThread(SP_DECL(FrameObserver)(core.getFrameObs()), core, SAFEMODE,
         viewer.plot(), viewer.cmap(), viewer.bottomPlot(), viewer.leftPlot())
+    , SAFEMODE(SAFEMODE)
     , saveFileDialog(nullptr)
 {
     
@@ -77,11 +78,9 @@ void MakoCamera::initialize()
     QRect rec = QApplication::desktop()->screenGeometry();
     this->setMaximumSize(rec.width() / 2, rec.height());
 
-    //connect(m_FormatButton, &QPushButton::clicked, this, [this]() {
-    //    core.getMakoCtrl().updateRegisterFeature();
-    //    QList<QStandardItem*> tmp = core.getMakoCtrl().controllerModel()->findItems("PixelFormat", Qt::MatchRecursive | Qt::MatchWrap);
-    //    if (!tmp.isEmpty()) { core.getMakoCtrl().onClicked(tmp.at(0)->index().siblingAtColumn(1)); }
-    //    });
+    if (SAFEMODE) {
+        return; // do not do the follow handling in safemode
+    }
     connect(m_TrigOnOffButton, &QPushButton::clicked, this, [this]() {
         handleStatusButtonClicked("TriggerMode"); });
     connect(m_TrigSourceButton, &QPushButton::clicked, this, [this]() {
@@ -173,7 +172,10 @@ void MakoCamera::initialize()
 void MakoCamera::handleStatusButtonClicked(QString featName)
 {
     try {
-        core.getMakoCtrl().updateRegisterFeature();
+        try {
+            core.getMakoCtrl().updateRegisterFeature();
+        }
+        catch (...) {}
         updateStatusBar();
         QList<QStandardItem*> tmp = core.getMakoCtrl().controllerModel()->findItems(featName, Qt::MatchRecursive | Qt::MatchWrap);
         if (!tmp.isEmpty()) {
