@@ -8,11 +8,12 @@
 #include <qaction.h>
 
 MakoCamera::MakoCamera(std::string ip, bool SAFEMODE, IChimeraQtWindow* parent)
-	: IChimeraSystem(parent)
-	, core(ip, SAFEMODE)
-	, viewer(core.CameraName(), this)
-	, imgCThread(SP_DECL(FrameObserver)(core.getFrameObs()), core.getCameraPtr(), SAFEMODE,
-		viewer.plot(), viewer.cmap(), viewer.bottomPlot(), viewer.leftPlot())
+    : IChimeraSystem(parent)
+    , core(ip, SAFEMODE)
+    , viewer(core.CameraName(), this)
+    , imgCThread(SP_DECL(FrameObserver)(core.getFrameObs()), core, SAFEMODE,
+        viewer.plot(), viewer.cmap(), viewer.bottomPlot(), viewer.leftPlot())
+    , saveFileDialog(nullptr)
 {
     
 	//connect()
@@ -82,47 +83,19 @@ void MakoCamera::initialize()
     //    if (!tmp.isEmpty()) { core.getMakoCtrl().onClicked(tmp.at(0)->index().siblingAtColumn(1)); }
     //    });
     connect(m_TrigOnOffButton, &QPushButton::clicked, this, [this]() {
-        core.getMakoCtrl().updateRegisterFeature();
-        updateStatusBar();
-        QList<QStandardItem*> tmp = core.getMakoCtrl().controllerModel()->findItems("TriggerMode", Qt::MatchRecursive | Qt::MatchWrap);
-        if (!tmp.isEmpty()) { core.getMakoCtrl().onClicked(tmp.at(0)->index().siblingAtColumn(1)); }
-        }); 
+        handleStatusButtonClicked("TriggerMode"); });
     connect(m_TrigSourceButton, &QPushButton::clicked, this, [this]() {
-        core.getMakoCtrl().updateRegisterFeature();
-        updateStatusBar();
-        QList<QStandardItem*> tmp = core.getMakoCtrl().controllerModel()->findItems("TriggerSource", Qt::MatchRecursive | Qt::MatchWrap);
-        if (!tmp.isEmpty()) { core.getMakoCtrl().onClicked(tmp.at(0)->index().siblingAtColumn(1)); }
-        });
+        handleStatusButtonClicked("TriggerSource"); });
     connect(m_ImageSizeButtonH, &QPushButton::clicked, this, [this]() {
-        core.getMakoCtrl().updateRegisterFeature();
-        updateStatusBar();
-        QList<QStandardItem*> tmp = core.getMakoCtrl().controllerModel()->findItems("Height", Qt::MatchRecursive | Qt::MatchWrap);
-        if (!tmp.isEmpty()) { core.getMakoCtrl().onClicked(tmp.at(0)->index().siblingAtColumn(1)); }
-        });
+        handleStatusButtonClicked("Height"); });
     connect(m_ImageSizeButtonW, &QPushButton::clicked, this, [this]() {
-        core.getMakoCtrl().updateRegisterFeature();
-        updateStatusBar();
-        QList<QStandardItem*> tmp = core.getMakoCtrl().controllerModel()->findItems("Width", Qt::MatchRecursive | Qt::MatchWrap);
-        if (!tmp.isEmpty()) { core.getMakoCtrl().onClicked(tmp.at(0)->index().siblingAtColumn(1)); }
-        });
+        handleStatusButtonClicked("Width"); });
     connect(m_CameraGainButton, &QPushButton::clicked, this, [this]() {
-        core.getMakoCtrl().updateRegisterFeature();
-        updateStatusBar();
-        QList<QStandardItem*> tmp = core.getMakoCtrl().controllerModel()->findItems("Gain", Qt::MatchRecursive | Qt::MatchWrap);
-        if (!tmp.isEmpty()) { core.getMakoCtrl().onClicked(tmp.at(0)->index().siblingAtColumn(1)); }
-        });
+        handleStatusButtonClicked("Gain"); });
     connect(m_ExposureTimeButton, &QPushButton::clicked, this, [this]() {
-        core.getMakoCtrl().updateRegisterFeature();
-        updateStatusBar();
-        QList<QStandardItem*> tmp = core.getMakoCtrl().controllerModel()->findItems("ExposureTimeAbs", Qt::MatchRecursive | Qt::MatchWrap);
-        if (!tmp.isEmpty()) { core.getMakoCtrl().onClicked(tmp.at(0)->index().siblingAtColumn(1)); }
-        });
+        handleStatusButtonClicked("ExposureTimeAbs"); });
     connect(framerateButton, &QPushButton::clicked, this, [this]() {
-        core.getMakoCtrl().updateRegisterFeature();
-        updateStatusBar();
-        QList<QStandardItem*> tmp = core.getMakoCtrl().controllerModel()->findItems("AcquisitionFrameRateAbs", Qt::MatchRecursive | Qt::MatchWrap);
-        if (!tmp.isEmpty()) { core.getMakoCtrl().onClicked(tmp.at(0)->index().siblingAtColumn(1)); }
-        });
+        handleStatusButtonClicked("AcquisitionFrameRateAbs"); });
 
     connect(core.getFrameObs(), &FrameObserver::setCurrentFPS, this,
         [this, framerateButton](const QString& sFPS) {
@@ -196,6 +169,23 @@ void MakoCamera::initialize()
 
     initPlotContextMenu();
 }
+
+void MakoCamera::handleStatusButtonClicked(QString featName)
+{
+    try {
+        core.getMakoCtrl().updateRegisterFeature();
+        updateStatusBar();
+        QList<QStandardItem*> tmp = core.getMakoCtrl().controllerModel()->findItems(featName, Qt::MatchRecursive | Qt::MatchWrap);
+        if (!tmp.isEmpty()) {
+            core.getMakoCtrl().onClicked(tmp.at(0)->index().siblingAtColumn(1));
+        }
+    }
+    catch (ChimeraError& e) {
+        emit error(qstr("Error in handle the MakoStatusButton") + e.what());
+    }
+    
+}
+
 
 void MakoCamera::initPlotContextMenu()
 {
@@ -364,7 +354,7 @@ void MakoCamera::acquisitionStartStopFromAction()
 
 void MakoCamera::setCurrentScreenROI()
 {
-    auto [maxw, maxh] = imgCThread.maxWidthHeight();
+    auto [maxh, maxw] = core.getMakoCtrl().getMaxImageSize();
     QCPRange xr = viewer.centerAxes()->axis(QCPAxis::atBottom)->range();
     QCPRange yr = viewer.centerAxes()->axis(QCPAxis::atLeft)->range();
     if (xr.lower > 0 && xr.upper < maxw && yr.lower>0 && yr.upper < maxh)

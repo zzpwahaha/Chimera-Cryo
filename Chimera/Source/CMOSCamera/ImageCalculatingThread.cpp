@@ -10,11 +10,12 @@ using AVT::VmbAPI::FramePtr;
 using AVT::VmbAPI::FeaturePtr;
 
 ImageCalculatingThread::ImageCalculatingThread(
-    const SP_DECL(FrameObserver)& pFrameObs, const CameraPtr& pCam, bool SAFEMODE,
+    const SP_DECL(FrameObserver)& pFrameObs, MakoCameraCore& core, bool SAFEMODE,
     QCustomPlot* plot, QCPColorMap* cmap, QCPGraph* pbot, QCPGraph* pleft)
     : QThread()
     , m_pFrameObs(pFrameObs)
-    , m_pCam(pCam)
+    , core(core)
+    , m_pCam(core.getCameraPtr())
     , m_pQCP(plot)
     , m_pQCPColormap(cmap)
     , m_pQCPbottomGraph(pbot)
@@ -40,32 +41,16 @@ ImageCalculatingThread::ImageCalculatingThread(
     if (SAFEMODE) {
         return;
     }
-
+    
     /*get the max width and height*/
-    FeaturePtr pFeat;
-    if (VmbErrorSuccess == m_pCam->GetFeatureByName("HeightMax", pFeat))
-    {
-        VmbInt64_t  nValue64 = 0;
-        if (VmbErrorSuccess == pFeat->GetValue(nValue64))
-        {
-            m_heightMax = nValue64;
-        }
-    }
-    if (VmbErrorSuccess == m_pCam->GetFeatureByName("WidthMax", pFeat))
-    {
-        VmbInt64_t  nValue64 = 0;
-        if (VmbErrorSuccess == pFeat->GetValue(nValue64))
-        {
-            m_widthMax = nValue64;
-        }
-    }
-
+    auto [maxh, maxw] = core.getMakoCtrl().getMaxImageSize();
+    m_doubleCrxX.reserve(maxh);
+    m_doubleCrxY.reserve(maxw);
 
     updateExposureTime();
     updateXYOffset();
 
-    m_doubleCrxX.reserve(m_widthMax);
-    m_doubleCrxY.reserve(m_heightMax);
+
 
 }
 
@@ -81,62 +66,30 @@ void ImageCalculatingThread::updateMousePos(QMouseEvent* event)
 
 void ImageCalculatingThread::updateExposureTime()
 {
-    FeaturePtr pFeat;
-    double  dValue = 0;
-    if (VmbErrorSuccess == m_pCam->GetFeatureByName("ExposureTimeAbs", pFeat))
-    {
-        auto tmp = pFeat->GetValue(dValue);
-        if (VmbErrorSuccess != tmp)
-        {
-            thrower("Failed to get Exposure time, error code: " + str(Helper::mapReturnCodeToString(tmp)));
-            return;
-        }
-        m_exposureTime = dValue;
+    std::string errorStr("");
+    m_exposureTime = core.getMakoCtrl().getFeatureValue<double>("ExposureTimeAbs", errorStr);
+    if (!errorStr.empty()) {
+        thrower(errorStr);
     }
 }
 
 void ImageCalculatingThread::updateCameraGain()
 {
-    FeaturePtr pFeat;
-    double  dValue = 0;
-    if (VmbErrorSuccess == m_pCam->GetFeatureByName("Gain", pFeat))
-    {
-        auto tmp = pFeat->GetValue(dValue);
-        if (VmbErrorSuccess != tmp)
-        {
-            thrower("Failed to get Gain, error code: " + str(Helper::mapReturnCodeToString(tmp)));
-            return;
-        }
-        m_cameraGain = dValue;
+    std::string errorStr("");
+    m_cameraGain = core.getMakoCtrl().getFeatureValue<double>("Gain", errorStr);
+    if (!errorStr.empty()) {
+        thrower(errorStr);
     }
 }
 
 void ImageCalculatingThread::updateXYOffset()
 {
-    FeaturePtr pFeat;
-    VmbInt64_t xlower = 0;
-    VmbInt64_t ylower = 0;
-    if (VmbErrorSuccess == m_pCam->GetFeatureByName("OffsetX", pFeat))
-    {
-        auto tmp = pFeat->GetValue(xlower);
-        if (VmbErrorSuccess != tmp)
-        {
-            thrower("image calculating thread get XY offset failed for X, error code: " + str(Helper::mapReturnCodeToString(tmp)));
-            return;
-        }
+    std::string errorStr("");
+    m_offsetX = core.getMakoCtrl().getFeatureValue<VmbInt64_t>("OffsetX", errorStr);
+    m_offsetY = core.getMakoCtrl().getFeatureValue<VmbInt64_t>("OffsetY", errorStr);
+    if (!errorStr.empty()) {
+        thrower(errorStr);
     }
-    if (VmbErrorSuccess == m_pCam->GetFeatureByName("OffsetY", pFeat))
-    {
-        auto tmp = pFeat->GetValue(ylower);
-        if (VmbErrorSuccess != tmp)
-        {
-            thrower("image calculating thread get XY offset failed for Y, error code: " + str(Helper::mapReturnCodeToString(tmp)));
-            return;
-        }
-    }
-
-    m_offsetX = xlower;
-    m_offsetY = ylower;
 }
 
 template <class T>

@@ -15,7 +15,7 @@ class ImageCalculatingThread :
 {
     Q_OBJECT
 public:
-    ImageCalculatingThread(const SP_DECL(FrameObserver)&, const CameraPtr&, 
+    ImageCalculatingThread(const SP_DECL(FrameObserver)&, MakoCameraCore& core,
         bool SAFEMODE, QCustomPlot* plot, QCPColorMap* cmap, QCPGraph* pbot, QCPGraph* pleft);
     ~ImageCalculatingThread();
     void StartProcessing();
@@ -61,6 +61,7 @@ public slots:
 
 private:
     SP_DECL(FrameObserver)                    m_pFrameObs;
+    MakoCameraCore&                           core;
     CameraPtr                                 m_pCam;
     QSharedPointer<ImageProcessingThread>     m_pProcessingThread;
     QCustomPlot*                              m_pQCP;

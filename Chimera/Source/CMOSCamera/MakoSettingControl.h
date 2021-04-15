@@ -13,8 +13,8 @@
 #include <VimbaCPP/Include/Feature.h>
 #include <VimbaCPP/Include/IFeatureObserver.h>
 #include <VimbaCPP/Include/VimbaSystem.h>
-
 #include <QSortFilterProxyModel>
+#include <utility>
 
 using AVT::VmbAPI::FeaturePtr;
 using AVT::VmbAPI::CameraPtr;
@@ -62,8 +62,12 @@ class MakoSettingControl : public QTreeView
         /*getter for m_model*/
         const QStandardItemModel* const controllerModel() { return m_Model; }
 
+        template<typename dataType>
+        dataType getFeatureValue(std::string feaName, std::string& errstr);
+
         void updateCurrentSettings();
         MakoSettings getCurrentSettings() { return currentSettings; }
+        std::pair<VmbInt64_t, VmbInt64_t> getMaxImageSize();
 
     protected:
         void showEvent(QShowEvent* event);

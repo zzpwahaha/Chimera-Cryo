@@ -39,7 +39,7 @@ public:
 
 private:
     void initPlotContextMenu();
-
+    void handleStatusButtonClicked(QString featName);
 
 
 private:

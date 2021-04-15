@@ -1978,98 +1978,54 @@ void MakoSettingControl::updateWidget(const bool bIsWritable, const QVariant& va
 
 }
 
+template<typename dataType>
+dataType MakoSettingControl::getFeatureValue(std::string feaName, std::string& errstr)
+{
+    FeaturePtr feature = getFeaturePtrFromMap(qstr(feaName));
+    VmbErrorType error;
+    dataType val;
+    error = feature->GetValue(val);
+    if (VmbErrorSuccess != error) {
+        errstr += "Error in getting " + feaName + ", with error" + str(error) + ", " + str(Helper::mapReturnCodeToString(error)) + "\n";
+    }
+    return val;
+}
+
 void MakoSettingControl::updateCurrentSettings()
 {
     FeaturePtr feature;
-    VmbErrorType error;
-    double dval;
-    VmbInt64_t ival;
-    bool bval;
+    double dval = 0;
+    VmbInt64_t ival = 0;
+    bool bval = 0;
     std::string sval;
     std::string errorStr("");
     
-    feature = getFeaturePtrFromMap("Gain");
-    error = feature->GetValue(dval);
-    if (VmbErrorSuccess == error) {
-        currentSettings.rawGain = dval;
-    }
-    else {
-        errorStr += "Error in getting Gain, with error" + str(error) + ", " + str(Helper::mapReturnCodeToString(error)) + "\n";
-    }
+    currentSettings.rawGain = getFeatureValue<double>("Gain", errorStr);
 
-    feature = getFeaturePtrFromMap("TriggerMode");
-    error = feature->GetValue(sval);
-    if (VmbErrorSuccess == error) {
-        currentSettings.trigOn = (sval=="On") ? true : false;
-    }
-    else {
-        errorStr += "Error in getting TriggerMode, with error" + str(error) + ", " + str(Helper::mapReturnCodeToString(error)) + "\n";
-    }
 
-    feature = getFeaturePtrFromMap("TriggerSource");
-    error = feature->GetValue(sval);
-    if (VmbErrorSuccess == error) {
-        currentSettings.triggerMode = MakoTrigger::fromStr(sval);
-    }
-    else {
-        errorStr += "Error in getting TriggerSource, with error" + str(error) + ", " + str(Helper::mapReturnCodeToString(error)) + "\n";
-    }
-    
-    feature = getFeaturePtrFromMap("ExposureTimeAbs");
-    error = feature->GetValue(dval);
-    if (VmbErrorSuccess == error) {
-        currentSettings.exposureTime = dval;
-    }
-    else {
-        errorStr += "Error in getting ExposureTimeAbs, with error" + str(error) + ", " + str(Helper::mapReturnCodeToString(error)) + "\n";
-    }
+    sval = getFeatureValue<std::string>("Gain", errorStr);
+    currentSettings.trigOn = (sval=="On") ? true : false;
 
-    feature = getFeaturePtrFromMap("AcquisitionFrameRateAbs");
-    error = feature->GetValue(dval);
-    if (VmbErrorSuccess == error) {
-        currentSettings.frameRate = dval;
-    }
-    else {
-        errorStr += "Error in getting AcquisitionFrameRateAbs, with error" + str(error) + ", " + str(Helper::mapReturnCodeToString(error)) + "\n";
-    }
+    sval = getFeatureValue<std::string>("TriggerSource", errorStr);
+    currentSettings.triggerMode = MakoTrigger::fromStr(sval);
 
-    feature = getFeaturePtrFromMap("OffsetX");
-    error = feature->GetValue(ival);
-    if (VmbErrorSuccess == error) {
-        currentSettings.dims.left = ival;
-    }
-    else {
-        errorStr += "Error in getting OffsetX, with error" + str(error) + ", " + str(Helper::mapReturnCodeToString(error)) + "\n";
-    }
+    currentSettings.exposureTime = getFeatureValue<double>("ExposureTimeAbs", errorStr);
+    currentSettings.frameRate = getFeatureValue<double>("AcquisitionFrameRateAbs", errorStr);
 
-    feature = getFeaturePtrFromMap("Width");
-    error = feature->GetValue(ival);
-    if (VmbErrorSuccess == error) {
-        currentSettings.dims.right = currentSettings.dims.left + ival;
-    }
-    else {
-        errorStr += "Error in getting Width, with error" + str(error) + ", " + str(Helper::mapReturnCodeToString(error)) + "\n";
-    }
+    currentSettings.dims.left = getFeatureValue<VmbInt64_t>("OffsetX", errorStr);
+    currentSettings.dims.right = currentSettings.dims.left + getFeatureValue<VmbInt64_t>("Width", errorStr);
+    currentSettings.dims.bottom = getFeatureValue<VmbInt64_t>("OffsetY", errorStr);
+    currentSettings.dims.top = currentSettings.dims.bottom + getFeatureValue<VmbInt64_t>("Height", errorStr);
 
-    feature = getFeaturePtrFromMap("OffsetY");
-    error = feature->GetValue(ival);
-    if (VmbErrorSuccess == error) {
-        currentSettings.dims.bottom = ival;
-    }
-    else {
-        errorStr += "Error in getting OffsetY, with error" + str(error) + ", " + str(Helper::mapReturnCodeToString(error)) + "\n";
-    }
-
-    feature = getFeaturePtrFromMap("Height");
-    error = feature->GetValue(ival);
-    if (VmbErrorSuccess == error) {
-        currentSettings.dims.top = currentSettings.dims.bottom + ival;
-    }
-    else {
-        errorStr += "Error in getting Height, with error" + str(error) + ", " + str(Helper::mapReturnCodeToString(error)) + "\n";
-    }
 }
 
+std::pair<VmbInt64_t, VmbInt64_t> MakoSettingControl::getMaxImageSize()
+{
+    std::string errorStr("");
+    VmbInt64_t hm = getFeatureValue<VmbInt64_t>("HeightMax", errorStr);
+    VmbInt64_t wm = getFeatureValue<VmbInt64_t>("WidthMax", errorStr);
+    return std::pair<VmbInt64_t, VmbInt64_t>(hm,wm);
+}
 
 void MakoSettingControl::closeControls()
 {
