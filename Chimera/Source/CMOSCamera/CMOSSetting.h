@@ -59,7 +59,7 @@ struct MakoTrigger : public CMOSTrigger
 
 struct MakoSettings {
 	bool on;
-	bool expActive;
+	bool expActive = false;
 	unsigned int rawGain;
 	bool trigOn;
 	MakoTrigger::mode triggerMode = MakoTrigger::mode::External;

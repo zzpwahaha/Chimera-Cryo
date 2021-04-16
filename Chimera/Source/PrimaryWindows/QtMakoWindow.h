@@ -17,8 +17,8 @@ public:
     ~QtMakoWindow();
 
     void initializeWidgets();
-    void windowOpenConfig(ConfigStream& configFile) {};
-    void windowSaveConfig(ConfigStream& newFile) {};
+    void windowOpenConfig(ConfigStream& configFile);
+    void windowSaveConfig(ConfigStream& newFile);
     void fillExpDeviceList(DeviceList& list) {};
 
 private:

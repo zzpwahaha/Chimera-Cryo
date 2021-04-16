@@ -51,7 +51,7 @@ PictureViewer::PictureViewer(std::string plotname, QWidget* parent)
     m_QCPleftAxisRect->setMinimumSize(120, 600);
     m_QCPleftAxisRect->setMaximumSize(120, 600);
     //QRect rec = QApplication::desktop()->screenGeometry();
-    m_QCP->setMaximumSize(900, 900);
+    m_QCP->setMaximumSize(960, 900);
 
     // move newly created axes on "axes" layer and grids on "grid" layer:
     foreach(QCPAxisRect * rect, m_QCP->axisRects())

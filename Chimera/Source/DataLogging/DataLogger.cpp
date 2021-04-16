@@ -190,7 +190,7 @@ void DataLogger::initializeDataFiles( std::string specialName, bool checkForCali
 		throwNested ( "ERROR: Failed to initialize HDF5 data file: " + err.getDetailMsg() + "; Full error:" + fullE);
 	}
 	currentAndorPicNumber = 0;
-	currentBaslerPicNumber = 0;
+	currentMakoPicNumber = 0;
 }
 
 
@@ -485,8 +485,8 @@ void DataLogger::logMiscellaneousStart(){
 void DataLogger::assertClosed () {
 	AndorPicureSetDataSpace.close ();
 	AndorPictureDataset.close ();
-	BaslerPictureDataset.close ();
-	BaslerPicureSetDataSpace.close ();
+	MakoPictureDataset.close ();
+	MakoPicureSetDataSpace.close ();
 	voltsDataSpace.close ();
 	voltsDataSet.close ();
 	file.close ();

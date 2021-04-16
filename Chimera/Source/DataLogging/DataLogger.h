@@ -64,14 +64,14 @@ class DataLogger : public IChimeraSystem {
 		H5::DataSet writeDataSet (std::vector<std::string> dataVec, std::string name, H5::Group& group);
 		void writeAttribute (double data, std::string name, H5::DataSet& dset);
 		void writeAttribute (bool data, std::string name, H5::DataSet& dset);
-		H5::DataSet AndorPictureDataset, voltsDataSet, BaslerPictureDataset;
+		H5::DataSet AndorPictureDataset, voltsDataSet, MakoPictureDataset;
 		// for the entire set
-		H5::DataSpace AndorPicureSetDataSpace, BaslerPicureSetDataSpace;
+		H5::DataSpace AndorPicureSetDataSpace, MakoPicureSetDataSpace;
 		// just one pic
-		H5::DataSpace AndorPicDataSpace, BaslerPicDataSpace;
+		H5::DataSpace AndorPicDataSpace, MakoPicDataSpace;
 
 		H5::DataSpace voltsDataSpace, voltsSetDataSpace;
-		unsigned currentAndorPicNumber, currentBaslerPicNumber;
+		unsigned currentAndorPicNumber, currentMakoPicNumber;
 		std::string mr_dayStr, mr_monthStr, mr_yearStr;
 
 	private:

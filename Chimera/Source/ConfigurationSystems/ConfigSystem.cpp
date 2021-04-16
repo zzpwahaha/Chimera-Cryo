@@ -7,6 +7,7 @@
 #include "PrimaryWindows/QtAuxiliaryWindow.h"
 #include "PrimaryWindows/QtAndorWindow.h"
 #include "PrimaryWindows/QtScriptWindow.h"
+#include "PrimaryWindows/QtMakoWindow.h"
 #include "PrimaryWindows/QtMainWindow.h"
 #include "ExcessDialogs/openWithExplorer.h"
 #include "ExcessDialogs/saveWithExplorer.h"
@@ -103,6 +104,7 @@ void ConfigSystem::openConfigFromPath( std::string pathToConfig, IChimeraQtWindo
 		win->scriptWin->windowOpenConfig(cStream );
 		win->andorWin->windowOpenConfig(cStream );
 		win->auxWin->windowOpenConfig(cStream );
+		win->makoWin->windowOpenConfig(cStream);
 		win->mainWin->windowOpenConfig(cStream );
 	}
 	catch ( ChimeraError& err ){
@@ -203,6 +205,7 @@ void ConfigSystem::saveConfiguration(IChimeraQtWindow* win){
 	win->scriptWin->windowSaveConfig(saveStream);
 	win->andorWin->windowSaveConfig(saveStream);
 	win->auxWin->windowSaveConfig(saveStream);
+	win->makoWin->windowSaveConfig(saveStream);
 	win->mainWin->windowSaveConfig(saveStream);
 	std::ofstream configSaveFile (currentProfile.configLocation + configNameToSave + "." + CONFIG_EXTENSION);
 	if (!configSaveFile.is_open ()){
@@ -242,6 +245,7 @@ void ConfigSystem::saveConfigurationAs(IChimeraQtWindow* win){
 	win->scriptWin->windowSaveConfig(configSaveStream);
 	win->andorWin->windowSaveConfig(configSaveStream);
 	win->auxWin->windowSaveConfig(configSaveStream);
+	win->makoWin->windowSaveConfig(configSaveStream);
 	win->mainWin->windowSaveConfig(configSaveStream);
 	// check if file already exists
 	std::ofstream configSaveFile (configurationPathToSave);

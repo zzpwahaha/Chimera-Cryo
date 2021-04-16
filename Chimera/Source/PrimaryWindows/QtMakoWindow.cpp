@@ -12,8 +12,8 @@
 
 QtMakoWindow::QtMakoWindow(QWidget* parent)
 	: IChimeraQtWindow(parent)
-	, cam{ MakoCamera(MAKO_IPADDRS[0], MAKO_SAFEMODE[0], this),
-	MakoCamera(MAKO_IPADDRS[1], MAKO_SAFEMODE[1], this) }
+	, cam{ MakoCamera(MAKO_IPADDRS[0],MAKO_DELIMS[0], false/*MAKO_SAFEMODE[0]*/, this),
+	MakoCamera(MAKO_IPADDRS[1], MAKO_DELIMS[1], MAKO_SAFEMODE[1], this) }
 {
 	setWindowTitle("Mako Camera Window");
 }
@@ -33,4 +33,32 @@ void QtMakoWindow::initializeWidgets()
 	cam[1].initialize();
 	layout->addWidget(&cam[0], 1);
 	layout->addWidget(&cam[1], 1);
+}
+
+void QtMakoWindow::windowOpenConfig(ConfigStream& configFile)
+{
+	for (auto& camera : cam) {
+		MakoSettings settings;
+		ConfigSystem::stdGetFromConfig(configFile, camera.getMakoCore(), settings, Version("1.0"));
+		try {
+			camera.getMakoCore().getMakoCtrl().setSettings(settings);
+			camera.updateStatusBar();
+		}
+		catch(ChimeraError& e) {
+			emit errBox("Error in open config for MAKO window" + str(e.what()));
+		}
+	}
+}
+
+void QtMakoWindow::windowSaveConfig(ConfigStream& newFile)
+{
+	for (auto& camera : cam) {
+		try {
+			camera.getMakoCore().getMakoCtrl().handleSavingConfig(newFile,camera.getMakoCore().getDelim());
+		}
+		catch (ChimeraError& e) {
+			emit errBox("Error in open config for MAKO window" + str(e.what()));
+		}
+	}
+	
 }

@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #define NOMINMAX
 #include "MakoSettingControl.h"
+#include "ConfigurationSystems/ConfigSystem.h"
 #include <CustomQtControls/LineEditCompleter.h>
 #include <CustomQtControls/TickSlider.h>
 #include <CMOSCamera/Helper.h>
@@ -149,7 +150,7 @@ private:
 
 
 MakoSettingControl::MakoSettingControl(QWidget* parent)
-    : QTreeView ( parent ), m_TreeDelegate ( nullptr ),
+    : QTreeView ( parent ), m_TreeDelegate ( nullptr ), 
     m_BooleanWidget         ( nullptr ), m_CheckBox_Bool   ( nullptr ),
     m_EditWidget            ( nullptr ), m_TextEdit_String ( nullptr ),
     m_ButtonWidget          ( nullptr ), m_CmdButton       ( nullptr ),
@@ -159,9 +160,9 @@ MakoSettingControl::MakoSettingControl(QWidget* parent)
     m_FeaturesPollingTimer  ( nullptr ),
     m_dMinimum ( 0 ), m_dMaximum ( 0 ), m_dIncrement ( 0 ), m_nIntSliderOldValue ( 0 ), 
     m_nMinimum ( 0 ), m_nMaximum ( 0 ), m_nIncrement ( 0 ), 
-     
     m_bIsTooltipOn ( true ), m_bIsJobDone ( true ), m_bIsMousePressed ( false ), m_bIsBusy ( false )
 {
+    m_pCam = SP_DECL(Camera)((Camera*)nullptr);
     m_pFeatureObs = SP_DECL(IFeatureObserver)((IFeatureObserver*)nullptr);
 }
 
@@ -605,6 +606,26 @@ void MakoSettingControl::updateUnRegisterFeature()
     }
 }
 
+void MakoSettingControl::handleSavingConfig(ConfigStream& configFile, std::string delim)
+{
+    updateCurrentSettings();
+    configFile << delim + "\n";
+    configFile << "/*Mako System Active:*/ " << currentSettings.expActive
+        << "\n/*Left:*/ " << currentSettings.dims.left
+        << "\n/*Top:*/ " << currentSettings.dims.top
+        << "\n/*Right:*/ " << currentSettings.dims.right
+        << "\n/*Bottom:*/ " << currentSettings.dims.bottom
+        << "\n/*H-Bin:*/ " << currentSettings.dims.horizontalBinning
+        << "\n/*V-Bin:*/ " << currentSettings.dims.verticalBinning
+        << "\n/*Exposure Time:*/ " << currentSettings.exposureTime
+        << "\n/*Frame Rate:*/ " << currentSettings.frameRate
+        << "\n/*Raw Gain:*/ " << currentSettings.rawGain
+        << "\n/*Pics Per Rep:*/ " << currentSettings.picsPerRep
+        << "\n/*Trigger Mode:*/ " << MakoTrigger::toStr(currentSettings.triggerMode)
+        << "\n";
+    configFile << "END_"+ delim + "\n";
+}
+
 QString MakoSettingControl::getFeatureNameFromModel(const QModelIndex& item) const
 {
     QString sAttrName("");
@@ -1030,6 +1051,7 @@ void MakoSettingControl::onCmdButtonClick()
         }
         this->setEnabled(true);
     }
+    emit updateStatusBar();
 }
 
 /* VmbFeatureDataEnum */
@@ -1172,6 +1194,7 @@ void MakoSettingControl::onEnumComboBoxClick(const QString& sSelected)
 
         /*start Acquisition */
         emit acquisitionStartStop("AcquisitionStart");
+        emit updateStatusBar();
         return;
     }
 
@@ -1187,6 +1210,7 @@ void MakoSettingControl::onEnumComboBoxClick(const QString& sSelected)
         /* make sure to set back the valid value from the camera to combobox */
         nIndex = m_EnumComboBox->findText(QString::fromStdString(sCurrentValue));
         m_EnumComboBox->setCurrentIndex(nIndex);
+        emit updateStatusBar();
     }
     else
     {
@@ -1387,6 +1411,7 @@ void MakoSettingControl::setIntegerValue(const int& nValue)
     }
 
     updateCurrentIntValue();
+    emit updateStatusBar();
 }
 
 void MakoSettingControl::updateCurrentIntValue()
@@ -1601,6 +1626,7 @@ void MakoSettingControl::setFloatingValue(const double& dValue)
         {
             emit resetFPS();
         }
+        emit updateStatusBar();
     }
     else
     {
@@ -1696,6 +1722,7 @@ void MakoSettingControl::onBoolCheckBoxClick(bool bValue)
             QString sValue = "false";
             (true == bCurrentValue) ? sValue = "true" : sValue = "false";
             m_CheckBox_Bool->setChecked(bCurrentValue);
+            emit updateStatusBar();
         }
         else
         {
@@ -1767,6 +1794,7 @@ void MakoSettingControl::onEditText()
         if (VmbErrorSuccess == error)
         {
             m_TextEdit_String->setText(qstr(sCurrentValue));
+            emit updateStatusBar();
         }
         else
         {
@@ -1994,6 +2022,9 @@ void MakoSettingControl::updateWidget(const bool bIsWritable, const QVariant& va
 template<typename dataType>
 dataType MakoSettingControl::getFeatureValue(std::string feaName, std::string& errstr)
 {
+    if (m_pCam == nullptr) {
+        return 0; //means in SAFEMODE
+    }
     FeaturePtr feature = getFeaturePtrFromMap(qstr(feaName));
     VmbErrorType error;
     dataType val;
@@ -2007,11 +2038,32 @@ dataType MakoSettingControl::getFeatureValue(std::string feaName, std::string& e
 template<typename dataType>
 void MakoSettingControl::setFeatureValue(std::string feaName, dataType val, std::string& errstr)
 {
+    if (m_pCam == nullptr) {
+        return; //means in SAFEMODE
+    }
     FeaturePtr feature = getFeaturePtrFromMap(qstr(feaName));
     VmbErrorType error;
     error = feature->SetValue(val);
     if (VmbErrorSuccess != error) {
         errstr += "Error in setting " + feaName + ", with error" + str(error) + ", " + str(Helper::mapReturnCodeToString(error)) + "\n";
+    }
+}
+
+void MakoSettingControl::setSettings(MakoSettings newSettings)
+{
+    currentSettings = newSettings;
+    std::string errstr("");
+    setFeatureValue<double>("Gain", currentSettings.rawGain, errstr);
+    setFeatureValue("TriggerMode", currentSettings.trigOn ? "On" : "Off", errstr);
+    setFeatureValue("TriggerSource", MakoTrigger::toStr(currentSettings.triggerMode).c_str(), errstr);
+    setFeatureValue<double>("ExposureTimeAbs", currentSettings.exposureTime, errstr);
+    setFeatureValue<double>("AcquisitionFrameRateAbs", currentSettings.frameRate, errstr);
+    setFeatureValue<VmbInt64_t>("OffsetX", currentSettings.dims.left, errstr);
+    setFeatureValue<VmbInt64_t>("Width", currentSettings.dims.width(), errstr);
+    setFeatureValue<VmbInt64_t>("OffsetY", currentSettings.dims.bottom, errstr);
+    setFeatureValue<VmbInt64_t>("Height", currentSettings.dims.height(), errstr);
+    if (!errstr.empty()) {
+        thrower("Error in setting MakoSetting" + errstr);
     }
 }
 
@@ -2025,9 +2077,7 @@ void MakoSettingControl::updateCurrentSettings()
     std::string errorStr("");
     
     currentSettings.rawGain = getFeatureValue<double>("Gain", errorStr);
-
-
-    sval = getFeatureValue<std::string>("Gain", errorStr);
+    sval = getFeatureValue<std::string>("TriggerMode", errorStr);
     currentSettings.trigOn = (sval=="On") ? true : false;
 
     sval = getFeatureValue<std::string>("TriggerSource", errorStr);
@@ -2040,7 +2090,9 @@ void MakoSettingControl::updateCurrentSettings()
     currentSettings.dims.right = currentSettings.dims.left + getFeatureValue<VmbInt64_t>("Width", errorStr) - 1;
     currentSettings.dims.bottom = getFeatureValue<VmbInt64_t>("OffsetY", errorStr);
     currentSettings.dims.top = currentSettings.dims.bottom + getFeatureValue<VmbInt64_t>("Height", errorStr) - 1;
-
+    if (!errorStr.empty()) {
+        thrower("Error in update mako Current Settings" + errorStr);
+    }
 }
 
 std::pair<VmbInt64_t, VmbInt64_t> MakoSettingControl::getMaxImageSize()

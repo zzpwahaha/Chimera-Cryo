@@ -12,18 +12,18 @@ public:
 	MakoCameraCore& operator=(const MakoCameraCore&) = delete;
 	MakoCameraCore(const MakoCameraCore&) = delete;
 
-	MakoCameraCore(std::string ip, bool SAFEMODE);
+	MakoCameraCore(std::string ip, std::string camDelim, bool SAFEMODE);
 	~MakoCameraCore();
 	
 	std::string getDelim() override { return configDelim; }
 	void loadExpSettings(ConfigStream& stream) override {};
-	void logSettings(DataLogger& logger, ExpThreadWorker* threadworker) override {};
+	void logSettings(DataLogger& logger, ExpThreadWorker* threadworker) override;
 	void calculateVariations(std::vector<parameterType>& params, ExpThreadWorker* threadworker) override {};
 	void programVariation(unsigned variation, std::vector<parameterType>& params,
 		ExpThreadWorker* threadworker) override {};
 	void normalFinish() override {};
 	void errorFinish() override {};
-	
+	MakoSettings getSettingsFromConfig(ConfigStream& configFile);
 
 	void initializeVimba();
 	void validateCamera(const CameraPtrVector& Cameras);
@@ -56,7 +56,6 @@ public:
 
 
 public:
-    std::string configDelim = "MAKO_CAMERA_SETTINGS";
 	const unsigned int BUFFER_COUNT = 7;
 
 private:
@@ -65,6 +64,7 @@ private:
 	MakoSettingControl makoCtrl;
 	SP_DECL(FrameObserver) frameObs;
 	std::string cameraIP;
+	std::string configDelim;
 
 	CameraPtr cameraPtr;
 	std::string cameraName;

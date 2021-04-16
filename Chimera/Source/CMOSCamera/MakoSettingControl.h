@@ -1,6 +1,7 @@
 #pragma once
 #include "CMOSSetting.h"
 #include "MakoWrapper.h"
+#include "ConfigurationSystems/ConfigStream.h"
 #include <qwidget.h>
 #include <QMap>
 #include <QTreeView>
@@ -58,6 +59,8 @@ class MakoSettingControl : public QTreeView
         void updateRegisterFeature();
         void updateUnRegisterFeature();
         void saveFeaturesToTextFile(const QString& sDestPathAndFileName) {};
+        void handleSavingConfig(ConfigStream& configFile, std::string delim);
+
 
         /*getter for m_model*/
         const QStandardItemModel* const controllerModel() { return m_Model; }
@@ -67,6 +70,7 @@ class MakoSettingControl : public QTreeView
         template<typename dataType>
         void setFeatureValue(std::string feaName, dataType val, std::string& errstr);
 
+        void setSettings(MakoSettings newSettings);
         void updateCurrentSettings();
         MakoSettings getCurrentSettings() { return currentSettings; }
         std::pair<VmbInt64_t, VmbInt64_t> getMaxImageSize();
@@ -142,6 +146,7 @@ class MakoSettingControl : public QTreeView
     signals:
         void setDescription(const QString& sDesc);
         void acquisitionStartStop(const QString& sThisFeature);
+        void updateStatusBar();
         void resetFPS();
 
 

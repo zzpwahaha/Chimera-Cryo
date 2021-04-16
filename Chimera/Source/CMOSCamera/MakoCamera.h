@@ -18,7 +18,7 @@ public:
 	MakoCamera& operator=(const MakoCamera&) = delete;
 	MakoCamera(const MakoCamera&) = delete;
 	
-	MakoCamera(std::string ip, bool SAFEMODE, IChimeraQtWindow* parent);
+	MakoCamera(std::string ip, std::string camDelim, bool SAFEMODE, IChimeraQtWindow* parent);
     ~MakoCamera();
 
     void initialize();
@@ -36,6 +36,9 @@ public:
     void manualSaveImage();
 
     void updateStatusBar();
+
+    MakoCameraCore& getMakoCore() { return core; };
+
 
 private:
     void initPlotContextMenu();

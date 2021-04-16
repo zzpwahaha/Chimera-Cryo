@@ -7,9 +7,9 @@
 #include <qpushbutton.h>
 #include <qaction.h>
 
-MakoCamera::MakoCamera(std::string ip, bool SAFEMODE, IChimeraQtWindow* parent)
+MakoCamera::MakoCamera(std::string ip, std::string camDelim, bool SAFEMODE, IChimeraQtWindow* parent)
     : IChimeraSystem(parent)
-    , core(ip, SAFEMODE)
+    , core(ip, camDelim, SAFEMODE)
     , viewer(core.CameraName(), this)
     , imgCThread(SP_DECL(FrameObserver)(core.getFrameObs()), core, SAFEMODE,
         viewer.plot(), viewer.cmap(), viewer.bottomPlot(), viewer.leftPlot())
@@ -102,13 +102,17 @@ void MakoCamera::initialize()
     connect(core.getFrameObs(), &FrameObserver::setFrameCounter, this,
         [this, framesLabel](unsigned int nNumberOfFrames) {
             framesLabel->setText("Frames: " + qstr(nNumberOfFrames) + " "); });
-        
+    connect(&core.getMakoCtrl(), &MakoSettingControl::acquisitionStartStop, this,
+        [this](QString sThisFeature) {
+            acquisitionStartStopFromCtrler(sThisFeature); });
+    connect(&core.getMakoCtrl(), &MakoSettingControl::updateStatusBar, this,
+        [this]() {
+            updateStatusBar(); });
 
     /*image calc thread*/
     connect(&imgCThread, &ImageCalculatingThread::imageReadyForPlot, this, [this]() {
         viewer.renderImgFromCalcThread(m_aManualCscale->isChecked());
         imgCThread.mutex().lock();
-        //updateStatusBar();
         QMouseEvent event(QMouseEvent::None, imgCThread.mousePos(), Qt::NoButton, 0, 0);
         viewer.onSetMousePosInCMap(&event, m_CursorScenePosLabel);
         imgCThread.mutex().unlock(); });
@@ -162,9 +166,14 @@ void MakoCamera::initialize()
         if (!isCamRunning) { viewer.plot()->replot(); } });
 
     connect(viewer.plot(), &QCustomPlot::mouseDoubleClick, this, [this]() {
-        updateStatusBar();
-        imgCThread.setDefaultView();
-        viewer.plot()->replot(); });
+        try {
+            updateStatusBar();
+            imgCThread.setDefaultView();
+            viewer.plot()->replot();
+        }
+        catch (ChimeraError& e) {
+            emit error(qstr("Error in handling Mako double click") + e.what());
+        }});
 
     initPlotContextMenu();
 }
@@ -174,9 +183,9 @@ void MakoCamera::handleStatusButtonClicked(QString featName)
     try {
         try {
             core.getMakoCtrl().updateRegisterFeature();
+            updateStatusBar();
         }
         catch (...) {}
-        updateStatusBar();
         QList<QStandardItem*> tmp = core.getMakoCtrl().controllerModel()->findItems(featName, Qt::MatchRecursive | Qt::MatchWrap);
         if (!tmp.isEmpty()) {
             core.getMakoCtrl().onClicked(tmp.at(0)->index().siblingAtColumn(1));
@@ -308,8 +317,13 @@ void MakoCamera::acquisitionStartStopFromCtrler(const QString& sThisFeature)
 
 void MakoCamera::acquisitionStartStopFromAction()
 {
-    core.checkDisplayInterval();
-    updateStatusBar();
+    try {
+        core.checkDisplayInterval();
+        updateStatusBar();
+    }
+    catch (ChimeraError& e) {
+        emit error(qstr("Error in trying to start Acquisition") + e.what());
+    }
     /* ON */
     if (m_aStartStopCap->isChecked())
     {
@@ -493,9 +507,11 @@ void MakoCamera::manualSaveImage()
 
 void MakoCamera::updateStatusBar()
 {
+    if (SAFEMODE) {
+        return;
+    }
     core.updateCurrentSettings();
     MakoSettings ms = core.getRunningSettings();
-
     //m_FormatButton->setText("Pixel Format: " + qstr(imgCThread.format()) + " ");
     //auto [w, h] = imgCThread.WidthHeight();
     //QMouseEvent event(QMouseEvent::None, imgCThread.mousePos(), Qt::NoButton, 0, 0);

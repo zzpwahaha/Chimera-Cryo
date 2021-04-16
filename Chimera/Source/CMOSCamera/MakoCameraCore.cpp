@@ -1,11 +1,15 @@
 #include "stdafx.h"
 #include "MakoCameraCore.h"
-
+#include "ConfigurationSystems/ConfigSystem.h"
+#include <ExperimentThread/ExpThreadWorker.h>
+#include "MiscellaneousExperimentOptions/Repetitions.h"
+#include <DataLogging/DataLogger.h>
 #include <qdebug.h>
 
-MakoCameraCore::MakoCameraCore(std::string ip, bool SAFEMODE)
+MakoCameraCore::MakoCameraCore(std::string ip, std::string camDelim, bool SAFEMODE)
     : m_VimbaSystem(AVT::VmbAPI::VimbaSystem::GetInstance())
     , cameraIP(ip)
+    , configDelim(camDelim)
     , makoCtrl()
 {
     if (SAFEMODE) {
@@ -32,6 +36,77 @@ MakoCameraCore::~MakoCameraCore()
     releaseBuffer();
     cameraPtr->Close();
     m_VimbaSystem.Shutdown();
+}
+
+void MakoCameraCore::logSettings(DataLogger& log, ExpThreadWorker* threadworker)
+{
+    try {
+        if (!experimentActive) {
+            H5::Group makoGroup(log.file.createGroup("/Mako:Off"));
+            return;
+        }
+        H5::Group makoGroup(log.file.createGroup("/Mako"));
+        hsize_t rank1[] = { 1 };
+        // pictures. These are permanent members of the class for speed during the writing process.	
+        hsize_t setDims[] = { unsigned __int64(expRunSettings.totalPictures()), expRunSettings.dims.width(),
+                               expRunSettings.dims.height() };
+        hsize_t picDims[] = { 1, expRunSettings.dims.width(), expRunSettings.dims.height() };
+        log.MakoPicureSetDataSpace = H5::DataSpace(3, setDims);
+        log.MakoPicDataSpace = H5::DataSpace(3, picDims);
+        log.MakoPictureDataset = makoGroup.createDataSet("Pictures", H5::PredType::NATIVE_LONG,
+            log.MakoPicureSetDataSpace);
+        log.currentMakoPicNumber = 0;
+        //log.writeDataSet(BaslerAcquisition::toStr(expRunSettings.acquisitionMode), "Camera-Mode", baslerGroup);
+        //log.writeDataSet(BaslerAutoExposure::toStr(expRunSettings.exposureMode), "Exposure-Mode", baslerGroup);
+        log.writeDataSet(expRunSettings.exposureTime, "Exposure-Time", makoGroup);
+        log.writeDataSet(MakoTrigger::toStr(expRunSettings.triggerMode), "Trigger-Mode", makoGroup);
+        // image settings
+        H5::Group imageDims = makoGroup.createGroup("Image-Dimensions");
+        log.writeDataSet(expRunSettings.dims.top, "Top", imageDims);
+        log.writeDataSet(expRunSettings.dims.bottom, "Bottom", imageDims);
+        log.writeDataSet(expRunSettings.dims.left, "Left", imageDims);
+        log.writeDataSet(expRunSettings.dims.right, "Right", imageDims);
+        log.writeDataSet(expRunSettings.dims.horizontalBinning, "Horizontal-Binning", imageDims);
+        log.writeDataSet(expRunSettings.dims.verticalBinning, "Vertical-Binning", imageDims);
+        log.writeDataSet(expRunSettings.frameRate, "Frame-Rate", makoGroup);
+        log.writeDataSet(expRunSettings.rawGain, "Raw-Gain", makoGroup);
+    }
+    catch (H5::Exception err) {
+        log.logError(err);
+        throwNested("ERROR: Failed to log basler parameters in HDF5 file: " + err.getDetailMsg());
+    }
+}
+
+MakoSettings MakoCameraCore::getSettingsFromConfig(ConfigStream& configFile)
+{
+    MakoSettings newSettings;
+    configFile >> newSettings.expActive;
+    newSettings.expActive = true;
+    std::string test;
+    try {
+        configFile >> test;
+        newSettings.dims.left = boost::lexical_cast<int>(test);
+        configFile >> test;
+        newSettings.dims.top = boost::lexical_cast<int>(test);
+        configFile >> test;
+        newSettings.dims.right = boost::lexical_cast<int>(test);
+        configFile >> test;
+        newSettings.dims.bottom = boost::lexical_cast<int>(test);
+    }
+    catch (boost::bad_lexical_cast&) {
+        throwNested("Mako control failed to convert dimensions recorded in the config file "
+            "to integers");
+    }
+    configFile >> newSettings.dims.horizontalBinning;
+    configFile >> newSettings.dims.verticalBinning;
+    configFile >> newSettings.exposureTime;
+    configFile >> newSettings.frameRate;
+    configFile >> newSettings.rawGain;
+    configFile >> newSettings.picsPerRep;
+    std::string txt;
+    configFile >> txt;
+    newSettings.triggerMode = MakoTrigger::fromStr(txt);
+    return newSettings;
 }
 
 void MakoCameraCore::initializeVimba()
