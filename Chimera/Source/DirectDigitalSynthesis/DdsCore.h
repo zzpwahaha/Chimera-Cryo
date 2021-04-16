@@ -40,6 +40,7 @@ class DdsCore : public IDeviceCore{
 
 		DdsCore ( bool safemode );
 		~DdsCore ( );
+
 		ddsExpSettings getSettingsFromConfig (ConfigStream& file );
 		void writeRampListToConfig ( std::vector<ddsIndvRampListInfo> list, ConfigStream& file );
 		void programVariation ( unsigned variationNum, std::vector<parameterType>& params, ExpThreadWorker* threadworker) override;

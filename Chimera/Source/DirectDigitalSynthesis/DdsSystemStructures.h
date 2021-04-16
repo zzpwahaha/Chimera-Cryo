@@ -27,7 +27,7 @@ struct DdsInfo
 	double maxAmp = 10;
 	double defaultAmp = 10;
 
-	std::string note = "";
+	std::string note = "None";
 };
 
 
@@ -83,10 +83,6 @@ struct DdsChannelSnapshot
 
 
 /*mark's dds table*/
-
-
-
-
 struct ddsConnectionType{
 	enum class type	{
 		None, Serial, Async

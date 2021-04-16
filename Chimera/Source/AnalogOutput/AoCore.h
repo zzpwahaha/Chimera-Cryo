@@ -6,7 +6,7 @@
 //#include "ParameterSystem/ParameterSystem.h"
 //#include "ConfigurationSystems/Version.h"
 #include "ZynqTCP/ZynqTCP.h"
-
+//#include <GeneralObjects/IDeviceCore.h>
 
 #include <vector>
 #include <array>
@@ -18,9 +18,13 @@ class AoCore
 
 public:
 	AoCore();
+	~AoCore() {};
 
+	const std::string configDelim = "DAC_SYSTEM";
+	std::string getDelim() { return configDelim; }
 	void setNames(std::array<std::string, size_t(AOGrid::total)> namesIn);
 	std::array<std::string, size_t(AOGrid::total)> getNames();
+
 
 	unsigned getNumberSnapshots(unsigned variation);
 	std::vector<std::vector<AoSnapshot>> getSnapshots();

@@ -7,7 +7,8 @@
 #include "LowLevel/constants.h"
 #include "PrimaryWindows/QtAuxiliaryWindow.h"
 #include "GeneralUtilityFunctions/range.h"
-
+#include "ConfigurationSystems/Version.h"
+#include "ConfigurationSystems/ConfigSystem.h"
 #include <sstream>
 #include <unordered_map>
 #include <bitset>
@@ -31,13 +32,38 @@ DoSystem::~DoSystem() { }
 
 void DoSystem::handleSaveConfig(ConfigStream& saveFile){
 	/// ttl settings
-	saveFile << "TTLS\n";
-	// nothing at the moment.
-	saveFile << "END_TTLS\n";
+	saveFile << core.getDelim() << "\n";
+	saveFile << "/*TTL Name:*/ ";
+	std::array<std::string, size_t(DOGrid::total)> names = core.getAllNames();
+	for (auto& name : names) {
+		saveFile << name << " ";
+	}
+	saveFile << "\n";
+
+	saveFile << "/*TTL State:*/ ";
+	std::for_each(outputs.begin(), outputs.end(), [this, &saveFile](DigitalOutput& out) {
+		saveFile << out.getStatus() << " "; });
+	saveFile << "\n";
+
+	saveFile << "END_" << core.getDelim() << "\n";
 }
 
 void DoSystem::handleOpenConfig(ConfigStream& openFile)
 {
+	std::vector<std::string> allNames;
+	std::array<std::string, size_t(DOGrid::total)> allname;
+	std::for_each(outputs.begin(), outputs.end(), [this, &openFile, &allNames](DigitalOutput& out) {
+		std::string name;
+		openFile >> name;
+		allNames.push_back(name);
+		out.setName(name); });
+	std::move(allNames.begin(), allNames.end(), allname.begin());
+	core.setNames(allname);
+
+	std::for_each(outputs.begin(), outputs.end(), [this, &openFile](DigitalOutput& out) {
+		bool state;
+		openFile >> state;
+		out.set(state); });
 }
 
 

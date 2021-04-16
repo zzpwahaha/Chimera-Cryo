@@ -23,7 +23,6 @@ std::array<std::string, size_t(AOGrid::total)> AoCore::getNames()
 }
 
 
-
 unsigned AoCore::getNumberSnapshots(unsigned variation) 
 {
 	return dacSnapshots[variation].size();

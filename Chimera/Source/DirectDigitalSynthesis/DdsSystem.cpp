@@ -183,16 +183,105 @@ void DdsSystem::programNow ( std::vector<parameterType>& constants ){
 
 void DdsSystem::handleSaveConfig (ConfigStream& file ){
 	//refreshCurrentRamps ();
-	//file << getDelim() << "\n";
+	file << core.getDelim() << "\n";
+	file << "/*DDS Name:*/ ";
+	for (auto& out : outputs) {
+		file << out.info.name << " ";
+	}
+	file << "\n";
+
+	file << "/*DDS Amplitude:*/ ";
+	for (auto& out : outputs) {
+		file << out.info.currAmp << " ";
+	}
+	file << "\n";
+
+	file << "/*DDS Amplitude Max:*/ ";
+	for (auto& out : outputs) {
+		file << out.info.maxAmp << " ";
+	}
+	file << "\n";
+
+	file << "/*DDS Amplitude Min:*/ ";
+	for (auto& out : outputs) {
+		file << out.info.minAmp << " ";
+	}
+	file << "\n";
+
+	file << "/*DDS Frequency:*/ ";
+	for (auto& out : outputs) {
+		file << out.info.currFreq << " ";
+	}
+	file << "\n";
+
+	file << "/*DDS Frequency Max:*/ ";
+	for (auto& out : outputs) {
+		file << out.info.maxFreq << " ";
+	}
+	file << "\n";
+
+	file << "/*DDS Frequency Min:*/ ";
+	for (auto& out : outputs) {
+		file << out.info.minFreq << " ";
+	}
+	file << "\n";
+	
+	file << "/*DDS Description:*/ ";
+	for (auto& out : outputs) {
+		file << out.info.note << " ";
+	}
+	file << "\nEND_" + getDelim() << "\n";
 	//file << "/*Control?*/ " << controlCheck->isChecked () << "\n";
 	//core.writeRampListToConfig ( currentRamps, file );
 	//file << "\nEND_" + getDelim ( ) << "\n";
 }
 
 
-void DdsSystem::handleOpenConfig ( ConfigStream& file ){
-	auto res = core.getSettingsFromConfig (file);
-	currentRamps = res.ramplist;
+void DdsSystem::handleOpenConfig ( ConfigStream& file )
+{
+	std::string test;
+	for (auto& out : outputs) {
+		file >> out.info.name;
+	}
+
+	try {
+		for (auto& out : outputs) {
+			file >> test;
+			out.info.currAmp = boost::lexical_cast<double>(test);
+		}
+		for (auto& out : outputs) {
+			file >> test;
+			out.info.maxAmp = boost::lexical_cast<double>(test);
+		}
+		for (auto& out : outputs) {
+			file >> test;
+			out.info.minAmp = boost::lexical_cast<double>(test);
+		}
+		for (auto& out : outputs) {
+			file >> test;
+			out.info.currFreq= boost::lexical_cast<double>(test);
+		}
+		for (auto& out : outputs) {
+			file >> test;
+			out.info.maxFreq = boost::lexical_cast<double>(test);
+		}
+		for (auto& out : outputs) {
+			file >> test;
+			out.info.minFreq = boost::lexical_cast<double>(test);
+		}
+	}
+	catch (boost::bad_lexical_cast&) {
+		throwNested("DDS control failed to convert values recorded in the config file "
+			"to doubles");
+	}
+	for (auto& out : outputs) {
+		file >> out.info.note;
+	}
+
+	
+
+	//auto res = core.getSettingsFromConfig (file);
+	//currentRamps = res.ramplist;
 	//controlCheck->setChecked (res.control);
 	//redrawListview ( );
 }
@@ -204,7 +293,7 @@ std::string DdsSystem::getSystemInfo ( ){
 
 
 std::string DdsSystem::getDelim ( ){
-	return core.configDelim;
+	return core.getDelim();
 }
 
 DdsCore& DdsSystem::getCore ( ){

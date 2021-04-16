@@ -22,6 +22,9 @@ class DoCore
 		DoCore();
 		~DoCore ();
 
+		const std::string configDelim = "TTL_SYSTEM";
+		std::string getDelim() { return configDelim; }
+
 		//void ftdi_connectasync (const char devSerial[]);
 		//void ftdi_disconnect ();
 		//DWORD ftdi_write (unsigned variation, bool loadSkipf);

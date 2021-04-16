@@ -211,8 +211,8 @@ void QtAuxiliaryWindow::windowSaveConfig (ConfigStream& saveFile){
 void QtAuxiliaryWindow::windowOpenConfig (ConfigStream& configFile){
 	try{
 		ConfigSystem::standardOpenConfig (configFile, configParamCtrl.configDelim, &configParamCtrl);
-		ConfigSystem::standardOpenConfig (configFile, "TTLS", &ttlBoard);
-		ConfigSystem::standardOpenConfig (configFile, "DACS", &aoSys);
+		ConfigSystem::standardOpenConfig (configFile, ttlBoard.getCore().getDelim(), &ttlBoard);
+		ConfigSystem::standardOpenConfig (configFile, aoSys.getCore().getDelim(), &aoSys);
 		aoSys.updateEdits ();
 		ConfigSystem::standardOpenConfig (configFile, dds.getDelim (), &dds);
 		ConfigSystem::standardOpenConfig(configFile, aiSys.getDelim(), &aiSys);

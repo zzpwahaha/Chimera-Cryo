@@ -4,7 +4,7 @@
 #include "PrimaryWindows/QtAuxiliaryWindow.h"
 #include "PrimaryWindows/QtMainWindow.h"
 #include "ConfigurationSystems/Version.h"
-
+#include "ConfigurationSystems/ConfigSystem.h"
 // for other ni stuff
 //#include "nidaqmx2.h"
 #include "GeneralUtilityFunctions/range.h"
@@ -47,8 +47,7 @@ std::array<AoInfo, size_t(AOGrid::total)> AoSystem::getDacInfo( ){
 
 void AoSystem::handleOpenConfig(ConfigStream& openFile)
 {
-	/*ProfileSystem::checkDelimiterLine(openFile, "DACS");
-	prepareForce();
+	/*prepareForce();
 	std::vector<double> values(getNumberOfDacs());
 	unsigned dacInc = 0;
 	for (auto& dac : values)
@@ -65,16 +64,68 @@ void AoSystem::handleOpenConfig(ConfigStream& openFile)
 			thrower("ERROR: failed to convert dac value to voltage. string was " + dacString);
 		}
 		dacInc++;
+	}*/
+
+	std::string test;
+	for (auto& out : outputs) {
+		openFile >> out.info.name;
 	}
-	ProfileSystem::checkDelimiterLine(openFile, "END_DACS");*/
-	emit notification ("AO system finished opening config, which is not yet added.\n" 
-		+ QString(__FILE__) +"line: "+ QString::number(__LINE__)+ "\r\n", 2) ;
+	try {
+		for (auto& out : outputs) {
+			openFile >> test;
+			out.info.currVal = boost::lexical_cast<double>(test);
+		}
+		for (auto& out : outputs) {
+			openFile >> test;
+			out.info.maxVal = boost::lexical_cast<double>(test);
+		}
+		for (auto& out : outputs) {
+			openFile >> test;
+			out.info.minVal = boost::lexical_cast<double>(test);
+		}
+	}
+	catch (boost::bad_lexical_cast&) {
+		throwNested("DDS control failed to convert values recorded in the config file "
+			"to doubles");
+	}
+	for (auto& out : outputs) {
+		openFile >> out.info.note;
+	}
 
 }
 
 void AoSystem::handleSaveConfig(ConfigStream& saveFile) 
 {
-	saveFile << "DACS\nEND_DACS\n";
+	saveFile << core.getDelim() << "\n";
+	saveFile << "/*DAC Name:*/ ";
+	for (auto& out : outputs) {
+		saveFile << out.info.name << " ";
+	}
+	saveFile << "\n";
+
+	saveFile << "/*DAC Value:*/ ";
+	for (auto& out : outputs) {
+		saveFile << out.info.currVal << " ";
+	}
+	saveFile << "\n";
+
+	saveFile << "/*DAC Value Max:*/ ";
+	for (auto& out : outputs) {
+		saveFile << out.info.maxVal << " ";
+	}
+	saveFile << "\n";
+
+	saveFile << "/*DAC Value Min:*/ ";
+	for (auto& out : outputs) {
+		saveFile << out.info.minVal << " ";
+	}
+	saveFile << "\n";
+
+	saveFile << "/*DAC Description:*/ ";
+	for (auto& out : outputs) {
+		saveFile << out.info.note << " ";
+	}
+	saveFile << "\nEND_" + core.getDelim() << "\n";
 }
 
 void AoSystem::standardExperimentPrep ( unsigned variationInc, std::vector<parameterType>& expParams, 

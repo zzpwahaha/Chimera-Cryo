@@ -15,7 +15,6 @@ DdsCore::~DdsCore ( ){
 	disconnect ( );
 }
 
-
 void DdsCore::assertDdsValuesValid ( std::vector<parameterType>& params ){
 	unsigned variations = ( ( params.size ( ) ) == 0 ) ? 1 : params.front ( ).keyValues.size ( );
 	for (auto& ramp : expRampList)	{
