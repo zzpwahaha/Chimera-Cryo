@@ -608,6 +608,9 @@ void MakoSettingControl::updateUnRegisterFeature()
 
 void MakoSettingControl::handleSavingConfig(ConfigStream& configFile, std::string delim)
 {
+    if (m_pCam == nullptr) {
+        return; //means in SAFEMODE
+    }
     updateCurrentSettings();
     configFile << delim + "\n";
     configFile << "/*Mako System Active:*/ " << currentSettings.expActive
@@ -2093,6 +2096,11 @@ void MakoSettingControl::updateCurrentSettings()
     if (!errorStr.empty()) {
         thrower("Error in update mako Current Settings" + errorStr);
     }
+}
+
+void MakoSettingControl::setExpActive(bool active)
+{
+    currentSettings.expActive = active;
 }
 
 std::pair<VmbInt64_t, VmbInt64_t> MakoSettingControl::getMaxImageSize()

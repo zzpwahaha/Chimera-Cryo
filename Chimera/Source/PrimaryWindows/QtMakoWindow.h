@@ -19,10 +19,19 @@ public:
     void initializeWidgets();
     void windowOpenConfig(ConfigStream& configFile);
     void windowSaveConfig(ConfigStream& newFile);
-    void fillExpDeviceList(DeviceList& list) {};
+    void fillExpDeviceList(DeviceList& list);
+
+//public slots: will this work without qslot?
+    void prepareWinForAcq(MakoSettings* settings, CameraInfo caminfo);
+
+
+public:
+    const CameraInfo camInfo1{ CameraInfo::name::Mako1,MAKO_IPADDRS[0],MAKO_DELIMS[0],MAKO_SAFEMODE[0] };
+    const CameraInfo camInfo2{ CameraInfo::name::Mako2,MAKO_IPADDRS[1],MAKO_DELIMS[1],MAKO_SAFEMODE[1] };
 
 private:
     std::array<MakoCamera, MAKO_NUMBER> cam;
+
 
 };
 

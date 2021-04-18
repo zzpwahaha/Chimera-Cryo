@@ -106,7 +106,7 @@ class ExpThreadWorker : public QObject
         void warn (QString msg, unsigned debugLvl=1);
         void repUpdate (unsigned int);
         void prepareAndor (AndorRunSettings*, analysisSettings);
-        void prepareBasler (baslerSettings* settings);
+        void prepareMako (MakoSettings* settings, CameraInfo camInfo);
         void plot_Xvals_determined (std::vector<double>);
         void doAoData (const std::vector<std::vector<plotDataVec>>& doData,
                        const std::vector<std::vector<plotDataVec>>& aoData);

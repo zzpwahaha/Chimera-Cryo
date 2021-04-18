@@ -15,7 +15,7 @@ namespace commonFunctions{
 	/// Run Menu
 	void calibrateCameraBackground (IChimeraQtWindow* win);
 	void prepareMasterThread( int msgID, IChimeraQtWindow* win, AllExperimentInput& input, bool runTtls,
-							  bool runAndor, bool runBasler, bool startPlotThread );
+							  bool runAndor, bool runMako, bool startPlotThread );
 	void startExperimentThread (IChimeraQtWindow* win, AllExperimentInput& input);
 	void logStandard( AllExperimentInput input, DataLogger& logger, std::string specialName="", bool needsCal=false );
 	void abortCamera(IChimeraQtWindow* win);

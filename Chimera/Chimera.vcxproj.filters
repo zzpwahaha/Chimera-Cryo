@@ -548,6 +548,9 @@
     <QtMoc Include="Source\CMOSCamera\MakoCamera.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <QtMoc Include="Source\CMOSCamera\MakoCameraCore.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\AnalogInput\AiSettings.h">
@@ -914,9 +917,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\CMOSCamera\ImageProcessingThread.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\CMOSCamera\MakoCameraCore.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

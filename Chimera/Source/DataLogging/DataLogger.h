@@ -28,6 +28,7 @@ class DataLogger : public IChimeraSystem {
 		void logError ( H5::Exception& err );
 		void initializeDataFiles( std::string specialName="", bool needsCal=true);
 		void writeAndorPic( Matrix<long> image, imageParameters dims );
+		void writeMakoPic(std::vector<double> image, int width, int height);
 		void writeVolts ( unsigned currentVoltNumber, std::vector<float64> data );
 		void assertCalibrationFilesExist ();
 		void logMasterInput( ExperimentThreadInput* input );

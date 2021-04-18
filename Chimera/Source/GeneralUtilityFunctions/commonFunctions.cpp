@@ -264,7 +264,7 @@ namespace commonFunctions{
 	}
 
 	void prepareMasterThread( int msgID, IChimeraQtWindow* win, AllExperimentInput& input, 
-							  bool runMaster, bool runAndor, bool runBasler, bool updatePlotXVals )	{
+							  bool runMaster, bool runAndor, bool runMako, bool updatePlotXVals )	{
 		win->mainWin->checkProfileSave();
 		win->scriptWin->checkScriptSaves( );
 		// Set the thread structure.

@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "MakoCamera.h"
+#include <PrimaryWindows/QtAndorWindow.h>
 #include <qdialog.h>
 #include <qfiledialog.h>
 #include <qlabel.h>
@@ -7,13 +8,13 @@
 #include <qpushbutton.h>
 #include <qaction.h>
 
-MakoCamera::MakoCamera(std::string ip, std::string camDelim, bool SAFEMODE, IChimeraQtWindow* parent)
+MakoCamera::MakoCamera(CameraInfo camInfo, IChimeraQtWindow* parent)
     : IChimeraSystem(parent)
-    , core(ip, camDelim, SAFEMODE)
+    , core(camInfo)
     , viewer(core.CameraName(), this)
-    , imgCThread(SP_DECL(FrameObserver)(core.getFrameObs()), core, SAFEMODE,
+    , imgCThread(SP_DECL(FrameObserver)(core.getFrameObs()), core, camInfo.safemode,
         viewer.plot(), viewer.cmap(), viewer.bottomPlot(), viewer.leftPlot())
-    , SAFEMODE(SAFEMODE)
+    , camInfo(camInfo)
     , saveFileDialog(nullptr)
 {
     
@@ -32,10 +33,21 @@ void MakoCamera::initialize()
 {
     QVBoxLayout* layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
-    /*image title*/
+    /*image title and expActive checkbox*/
+    QHBoxLayout* nameLayout = new QHBoxLayout(this);
+    nameLayout->setContentsMargins(0, 0, 0, 0);
     QLabel* namelabel = new QLabel(qstr(core.CameraName()));
     namelabel->setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
-    layout->addWidget(namelabel, 0);
+    QLabel* activeLabel = new QLabel("Exp. Active?", this);
+    m_expActive = new QCheckBox(this);
+    nameLayout->addWidget(namelabel, 1);
+    nameLayout->addWidget(activeLabel, 0);
+    nameLayout->addWidget(m_expActive, 0);
+    layout->addLayout(nameLayout, 0);
+    connect(m_expActive, &QCheckBox::clicked, [this](bool checked) {
+        core.setExpActive(checked);
+        imgCThread.setExpActive(checked); });
+
     /*status bar*/
     QStatusBar* statusbar1 = new QStatusBar(this);
     QStatusBar* statusbar2 = new QStatusBar(this);
@@ -78,7 +90,7 @@ void MakoCamera::initialize()
     QRect rec = QApplication::desktop()->screenGeometry();
     this->setMaximumSize(rec.width() / 2, rec.height());
 
-    if (SAFEMODE) {
+    if (camInfo.safemode) {
         return; // do not do the follow handling in safemode
     }
     connect(m_TrigOnOffButton, &QPushButton::clicked, this, [this]() {
@@ -128,23 +140,28 @@ void MakoCamera::initialize()
             auto [ox, oy] = imgCThread.offsetXY();
             viewer.leftAxes()->axis(QCPAxis::atLeft)->setRange(range - oy); });
 
-    connect(&imgCThread, &ImageCalculatingThread::currentFormat, this, [this](QString format) {
-        if (0 == currentFormat.compare(format)) return;
-        if (0 == format.compare("Mono12")) {
-            viewer.rangeSlider()->setRange(0, 4095);
-            viewer.rangeSlider()->upperSpinBox()->setRange(0, 4095);
-            viewer.rangeSlider()->lowerSpinBox()->setRange(0, 4095);
-            currentFormat = format;
-        }
-        else if (0 == format.compare("Mono8")) {
-            viewer.rangeSlider()->setRange(0, 255);
-            viewer.rangeSlider()->upperSpinBox()->setRange(0, 255);
-            viewer.rangeSlider()->lowerSpinBox()->setRange(0, 255);
-            currentFormat = format;
-        }
-        else {
-            emit error("I am curious how on earth do you get format other than Mono8/12");
-        } });
+    connect(&imgCThread, &ImageCalculatingThread::imageReadyForExp, this, &MakoCamera::handleExpImage);
+    //connect(&core, MakoCameraCore::makoFinished, [this]() {
+    //    imgCThread.experimentFinished();
+    //    isExpRunning = false; });
+
+    //connect(&imgCThread, &ImageCalculatingThread::currentFormat, this, [this](QString format) {
+    //    if (0 == currentFormat.compare(format)) return;
+    //    if (0 == format.compare("Mono12")) {
+    //        viewer.rangeSlider()->setRange(0, 4095);
+    //        viewer.rangeSlider()->upperSpinBox()->setRange(0, 4095);
+    //        viewer.rangeSlider()->lowerSpinBox()->setRange(0, 4095);
+    //        currentFormat = format;
+    //    }
+    //    else if (0 == format.compare("Mono8")) {
+    //        viewer.rangeSlider()->setRange(0, 255);
+    //        viewer.rangeSlider()->upperSpinBox()->setRange(0, 255);
+    //        viewer.rangeSlider()->lowerSpinBox()->setRange(0, 255);
+    //        currentFormat = format;
+    //    }
+    //    else {
+    //        emit error("I am curious how on earth do you get format other than Mono8/12");
+    //    } });
 
 
     /*set up mako controller gui*/
@@ -507,11 +524,12 @@ void MakoCamera::manualSaveImage()
 
 void MakoCamera::updateStatusBar()
 {
-    if (SAFEMODE) {
+    if (camInfo.safemode) {
         return;
     }
     core.updateCurrentSettings();
     MakoSettings ms = core.getRunningSettings();
+    m_expActive->setChecked(ms.expActive);
     //m_FormatButton->setText("Pixel Format: " + qstr(imgCThread.format()) + " ");
     //auto [w, h] = imgCThread.WidthHeight();
     //QMouseEvent event(QMouseEvent::None, imgCThread.mousePos(), Qt::NoButton, 0, 0);
@@ -524,4 +542,49 @@ void MakoCamera::updateStatusBar()
     m_CameraGainButton->setText("Gain (dB): " + qstr(ms.rawGain, 0));
     m_TrigOnOffButton->setText(ms.trigOn ? "Trig: On" : "Trig: Off");
     m_TrigSourceButton->setText("TrigSource: " + qstr(MakoTrigger::toStr(ms.triggerMode)));
+
 }
+
+void MakoCamera::prepareForExperiment()
+{
+    currentRepNumber = 0;
+    isExpRunning = true;
+}
+
+void MakoCamera::handleExpImage(QVector<double> img, int width, int height)
+{
+    if (!isExpRunning) {
+        return;
+    }
+    try {
+        auto* andorWin = parentWin->andorWin;
+        currentRepNumber++;
+        m_OperatingStatusLabel->setText("Exp Running");
+        if (core.getRunningSettings().triggerMode == CMOSTrigger::mode::ContinuousSoftware) {
+            // don't write data if continuous, that's a recipe for disaster.
+            emit error("Mako camera mode is continuous, such high data rate is hard to write to "
+                "disk continously. Double check if this is what you need.");
+            return;
+        }
+        andorWin->getLogger().writeMakoPic(img.toStdVector(), width, height);
+
+        if (currentRepNumber == core.getRunningSettings().totalPictures()) {
+            // handle balser finish
+            isExpRunning = false;
+            imgCThread.experimentFinished();
+            m_OperatingStatusLabel->setText("Exp Finished");
+            // tell the andor window that the basler camera finished so that the data file can be handled appropriately.
+            //mainWin->getComm ()->sendBaslerFin ();
+            if (!andorWin->cameraIsRunning()) {
+                // else it will close when the basler camera finishes.
+                andorWin->getLogger().normalCloseFile();
+            }
+        }
+    }
+    catch (ChimeraError& err) {
+        emit error(err.qtrace());
+        m_OperatingStatusLabel->setText("Exp ERROR!");
+    }
+}
+
+

@@ -132,7 +132,7 @@ void QtMainWindow::initializeWidgets (){
 	layout->addWidget(&errorStatus, 0, 1, 5, 1);
 
 
-	profile.initialize (this);
+	profile.initialize (this); // this and inside it, "handleSelectConfigButton" connect the open config button to openning the config for all windows 
 	notes.initialize (this);
 	repetitionControl.initialize (this);
 	mainOptsCtrl.initialize (this);
@@ -251,6 +251,7 @@ void QtMainWindow::startExperimentThread (ExperimentThreadInput* input){
 	expWorker->moveToThread (expThread);
 	connect (expWorker, &ExpThreadWorker::updateBoxColor, this, &QtMainWindow::handleColorboxUpdate);
 	connect (expWorker, &ExpThreadWorker::prepareAndor, andorWin, &QtAndorWindow::handlePrepareForAcq);
+	connect (expWorker, &ExpThreadWorker::prepareMako, makoWin, &QtMakoWindow::prepareWinForAcq);
 	connect (expWorker, &ExpThreadWorker::notification, this, &QtMainWindow::handleNotification);
 	connect (expWorker, &ExpThreadWorker::warn, this, &QtMainWindow::onErrorMessage);
 	connect (expWorker, &ExpThreadWorker::doAoData, auxWin, &QtAuxiliaryWindow::handleDoAoPlotData);

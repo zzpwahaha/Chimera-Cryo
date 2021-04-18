@@ -424,6 +424,26 @@ void DataLogger::writeAndorPic( Matrix<long> image, imageParameters dims){
 			+ fullE);
 	}
 }
+
+void DataLogger::writeMakoPic(std::vector<double> image, int width, int height)
+{
+	if (fileIsOpen == false) {
+		thrower("Tried to write to h5 file (for basler pic), but the file is closed!\r\n");
+	}
+	// starting coordinates of writebtn area in the h5 file of the array of picture data points.
+	hsize_t offset[] = { currentMakoPicNumber++, 0, 0 };
+	hsize_t slabdim[3] = { 1, width, height };// dims.width (), dims.height ()};
+	try {
+		MakoPicureSetDataSpace.selectHyperslab(H5S_SELECT_SET, slabdim, offset);
+		MakoPictureDataset.write(image.data(), H5::PredType::NATIVE_LONG, MakoPicDataSpace,
+			MakoPicureSetDataSpace);
+	}
+	catch (H5::Exception& err) {
+		auto fullE = getFullError(err);
+		throwNested("Failed to write mako pic data to HDF5 file! Error: " + str(err.getDetailMsg()) + "\n"
+			"; Full error:" + fullE);
+	}
+}
  
 void DataLogger::writeVolts( unsigned currentVoltNumber, std::vector<float64> data ){
 	if ( fileIsOpen == false ){

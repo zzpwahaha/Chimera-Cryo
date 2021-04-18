@@ -27,6 +27,10 @@ public:
     void assignValue(const QVector<T>& vec1d, std::string sFormat, 
         unsigned Height, unsigned Width, unsigned offsetX, unsigned offsetY);
 
+    void setExpActive(bool active);
+    void experimentFinished();
+
+
 private:
     void calcCrossSectionXY();
     void fit1dGaussian();
@@ -50,6 +54,7 @@ public:
 
 signals:
     void imageReadyForPlot();
+    void imageReadyForExp(const QVector<double>&, int w, int h);
     void currentFormat(QString format);
 
 public slots:
@@ -64,6 +69,9 @@ private:
     MakoCameraCore&                           core;
     CameraPtr                                 m_pCam;
     QSharedPointer<ImageProcessingThread>     m_pProcessingThread;
+    bool                                      expActive;
+    bool                                      expRunning;
+
     QCustomPlot*                              m_pQCP;
     QCPColorMap*                              m_pQCPColormap;
     QCPGraph*                                 m_pQCPbottomGraph;

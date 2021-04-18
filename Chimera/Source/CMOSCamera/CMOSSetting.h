@@ -1,7 +1,23 @@
 #pragma once
-#pragma once
 #include <string>
 #include "GeneralImaging/imageParameters.h"
+
+struct CameraInfo
+{
+	enum class name {
+		Mako1,Mako2
+	};
+	static const std::array<name, MAKO_NUMBER> allCams;
+	CameraInfo::name camName;
+	std::string ip;
+	std::string delim;
+	bool safemode = true;
+
+	static std::string toStr(name m_);
+	static CameraInfo::name fromStr(std::string txt);
+
+};
+
 
 struct CMOSAutoExposure {
 	enum class mode {

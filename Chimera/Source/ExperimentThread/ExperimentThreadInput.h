@@ -20,6 +20,7 @@
 #include "DeviceList.h"
 
 #include <AnalogInput/calInfo.h>
+#include <CMOSCamera/CMOSSetting.h>
 #include "ZynqTcp/ZynqTcp.h"
 
 

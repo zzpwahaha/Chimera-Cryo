@@ -164,7 +164,7 @@
     <QtMoc Include="Source\CMOSCamera\ImageCalculatingThread.h" />
     <ClInclude Include="Source\CMOSCamera\ImageProcessingThread.h" />
     <QtMoc Include="Source\CMOSCamera\MakoCamera.h" />
-    <ClInclude Include="Source\CMOSCamera\MakoCameraCore.h" />
+    <QtMoc Include="Source\CMOSCamera\MakoCameraCore.h" />
     <QtMoc Include="Source\CMOSCamera\MakoSettingControl.h" />
     <QtMoc Include="Source\CMOSCamera\MakoWrapper.h" />
     <ClInclude Include="Source\GeneralFlumes\QtSocketFlume.h" />

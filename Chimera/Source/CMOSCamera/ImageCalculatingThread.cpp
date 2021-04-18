@@ -16,6 +16,8 @@ ImageCalculatingThread::ImageCalculatingThread(
     , m_pFrameObs(pFrameObs)
     , core(core)
     , m_pCam(core.getCameraPtr())
+    , expActive(false)
+    , expRunning(false)
     , m_pQCP(plot)
     , m_pQCPColormap(cmap)
     , m_pQCPbottomGraph(pbot)
@@ -50,7 +52,8 @@ ImageCalculatingThread::ImageCalculatingThread(
     updateExposureTime();
     updateXYOffset();
 
-
+    // for imageReadyForExp
+    qRegisterMetaType< QVector<double> >("QVector<double>");
 
 }
 
@@ -139,6 +142,16 @@ void ImageCalculatingThread::StopProcessing()
     wait();
 }
 
+void ImageCalculatingThread::setExpActive(bool active)
+{
+    expActive = active;
+}
+
+void ImageCalculatingThread::experimentFinished()
+{
+    expRunning = false;
+}
+
 /*should only be called in the run, with the guard of mutex and everything properly initialized*/
 void ImageCalculatingThread::calcCrossSectionXY()
 {
@@ -200,7 +213,7 @@ void ImageCalculatingThread::setDefaultView()
     //m_pQCP->axisRect(0)->axis(QCPAxis::atLeft)->setRange(m_pQCPleftGraph->keyAxis()->range() - m_pQCPleftGraph->data()->at(0)->key);
 }
 
-QVector<double> ImageCalculatingThread::rawImageDefinite()
+QVector<double> ImageCalculatingThread::rawImageDefinite() // used now only in gui saving
 {
     QTime time = QTime::currentTime();
     time.start();
@@ -397,7 +410,6 @@ void ImageCalculatingThread::fit2dGaussian()
 }
 
 
-
 void ImageCalculatingThread::run()
 {
     while (!m_Stopping)
@@ -419,7 +431,15 @@ void ImageCalculatingThread::run()
         }
         m_pProcessingThread->mutex().unlock();
         
-
+        if (expActive && expRunning) {
+            emit imageReadyForExp(m_doubleQVector, m_width, m_height);
+            // will call copy ctor for const reference see https://embeddeduse.com/2013/06/29/copied-or-not-copied-arguments-signals-slots/
+            /*SIGNAL	SLOT	DIRECT	QUEUED
+            const Copy& const Copy& 0	1
+            const Copy& Copy	1	2
+            Copy	const Copy& 1	2
+            Copy	Copy	2	3*/
+        }
         if (m_dataValid && !m_Stopping && !m_doubleQVector.isEmpty())
         {
             //m_doubleQVector = QVector<double>(m_uint16QVector.begin(), m_uint16QVector.end());

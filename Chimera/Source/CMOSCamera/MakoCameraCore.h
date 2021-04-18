@@ -7,22 +7,23 @@
 
 class MakoCameraCore : public IDeviceCore
 {
+	Q_OBJECT
 public:
 	// THIS CLASS IS NOT COPYABLE.
 	MakoCameraCore& operator=(const MakoCameraCore&) = delete;
 	MakoCameraCore(const MakoCameraCore&) = delete;
 
-	MakoCameraCore(std::string ip, std::string camDelim, bool SAFEMODE);
+	MakoCameraCore(CameraInfo camInfo);
 	~MakoCameraCore();
 	
-	std::string getDelim() override { return configDelim; }
-	void loadExpSettings(ConfigStream& stream) override {};
+	std::string getDelim() override { return camInfo.delim; }
 	void logSettings(DataLogger& logger, ExpThreadWorker* threadworker) override;
-	void calculateVariations(std::vector<parameterType>& params, ExpThreadWorker* threadworker) override {};
+	void loadExpSettings(ConfigStream& stream) override;
+	void calculateVariations(std::vector<parameterType>& params, ExpThreadWorker* threadworker) override;
 	void programVariation(unsigned variation, std::vector<parameterType>& params,
 		ExpThreadWorker* threadworker) override {};
-	void normalFinish() override {};
-	void errorFinish() override {};
+	void normalFinish() override;
+	void errorFinish() override;
 	MakoSettings getSettingsFromConfig(ConfigStream& configFile);
 
 	void initializeVimba();
@@ -46,6 +47,7 @@ public:
 
 	void updateCurrentSettings();
 
+	void setExpActive(bool active);
 
 
 	std::string CameraName() { return cameraName; }
@@ -54,6 +56,8 @@ public:
 	CameraPtr& getCameraPtr() { return cameraPtr; }
 	MakoSettings getRunningSettings() { return runSettings; }
 
+signals:
+	void makoFinished();
 
 public:
 	const unsigned int BUFFER_COUNT = 7;
@@ -63,12 +67,11 @@ private:
 	//remember to setParent in the gui class
 	MakoSettingControl makoCtrl;
 	SP_DECL(FrameObserver) frameObs;
-	std::string cameraIP;
-	std::string configDelim;
+	CameraInfo camInfo;
 
 	CameraPtr cameraPtr;
-	std::string cameraName;
-
+	std::string cameraName; // name shown on top of viewer with camID, not same as name in CameraInfo
+	// official copy.
 	MakoSettings runSettings;
 	MakoSettings expRunSettings;
     

@@ -5,6 +5,7 @@
 #include "ConfigurationSystems/ConfigStream.h"
 #include "PrimaryWindows/IChimeraQtWindow.h"
 #include <QLabel.h>
+#include <qcheckbox.h>
 #include <array>
 #include "MakoCameraCore.h"
 #include "ImageCalculatingThread.h"
@@ -18,7 +19,7 @@ public:
 	MakoCamera& operator=(const MakoCamera&) = delete;
 	MakoCamera(const MakoCamera&) = delete;
 	
-	MakoCamera(std::string ip, std::string camDelim, bool SAFEMODE, IChimeraQtWindow* parent);
+	MakoCamera(CameraInfo camInfo, IChimeraQtWindow* parent);
     ~MakoCamera();
 
     void initialize();
@@ -37,7 +38,14 @@ public:
 
     void updateStatusBar();
 
+    void prepareForExperiment();
+
     MakoCameraCore& getMakoCore() { return core; };
+    const CameraInfo& getCameraInfo() { return camInfo; }
+
+public slots:
+    void handleExpImage(QVector<double> img, int width, int height);
+
 
 
 private:
@@ -49,14 +57,18 @@ private:
     // this order matters since the ctor will initialize core first and then viewer and finally imgCThread
     MakoCameraCore core;
 	PictureViewer viewer;
-	ImageCalculatingThread imgCThread;
+    ImageCalculatingThread imgCThread;
+    CameraInfo camInfo;
 
     QDialog* makoCtrlDialog;
     QFileDialog* saveFileDialog;
 
 	bool isCamRunning;
-    bool SAFEMODE;
 
+    unsigned int currentRepNumber;
+    bool isExpRunning;
+
+    QCheckBox*                          m_expActive;
 	QLabel*                             m_OperatingStatusLabel;
     QPushButton*                        m_ImageSizeButtonH;
     QPushButton*                        m_ImageSizeButtonW;
@@ -71,7 +83,7 @@ private:
 
 	QAction*                            m_aStartStopCap;
     QAction*                            m_aManualCscale;
-    QString                             currentFormat;
+    //QString                             currentFormat;
 
 };
 

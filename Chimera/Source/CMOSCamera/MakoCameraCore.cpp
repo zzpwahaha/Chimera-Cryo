@@ -6,19 +6,18 @@
 #include <DataLogging/DataLogger.h>
 #include <qdebug.h>
 
-MakoCameraCore::MakoCameraCore(std::string ip, std::string camDelim, bool SAFEMODE)
+MakoCameraCore::MakoCameraCore(CameraInfo camInfo)
     : m_VimbaSystem(AVT::VmbAPI::VimbaSystem::GetInstance())
-    , cameraIP(ip)
-    , configDelim(camDelim)
     , makoCtrl()
+    , camInfo(camInfo)
 {
-    if (SAFEMODE) {
+    if (camInfo.safemode) {
         return;
     }
     try {
         initializeVimba();
         SP_SET(frameObs, new FrameObserver(cameraPtr));
-        makoCtrl.initialize(qstr(cameraName), cameraPtr);
+        makoCtrl.initialize(qstr(cameraName), cameraPtr); // cameraName is initialized in initializeVimba->validateCamera
     }
     catch (ChimeraError& e) {
         throwNested(e.what());
@@ -77,11 +76,38 @@ void MakoCameraCore::logSettings(DataLogger& log, ExpThreadWorker* threadworker)
     }
 }
 
+void MakoCameraCore::loadExpSettings(ConfigStream& stream) {
+    ConfigSystem::stdGetFromConfig(stream, *this, expRunSettings, Version("1.0"));
+    expRunSettings.repsPerVar = ConfigSystem::stdConfigGetter(stream, "REPETITIONS",
+        Repetitions::getSettingsFromConfig);
+    experimentActive = expRunSettings.expActive;
+}
+
+void MakoCameraCore::calculateVariations(std::vector<parameterType>& params, ExpThreadWorker* threadworker)
+{
+    expRunSettings.variations = (params.size() == 0 ? 1 : params.front().keyValues.size());
+    makoCtrl.setSettings(expRunSettings);
+    runSettings = expRunSettings;    
+    if (experimentActive) {
+        emit threadworker->prepareMako(&expRunSettings, camInfo);
+    }
+}
+
+// to disable emitting imageReadyForExp in ImageCalculatingThread
+void MakoCameraCore::normalFinish()
+{
+    emit makoFinished();
+}
+
+void MakoCameraCore::errorFinish()
+{
+    emit makoFinished();
+}
+
 MakoSettings MakoCameraCore::getSettingsFromConfig(ConfigStream& configFile)
 {
     MakoSettings newSettings;
     configFile >> newSettings.expActive;
-    newSettings.expActive = true;
     std::string test;
     try {
         configFile >> test;
@@ -201,7 +227,7 @@ void MakoCameraCore::validateCamera(const CameraPtrVector& Cameras)
             continue;
         }
         allIPs += ipaddress.append(" ");
-        if (ipaddress.find(cameraIP) != std::string::npos) {
+        if (ipaddress.find(camInfo.ip) != std::string::npos) {
             cameraPtr = Cameras[i];
             QtCameraObserverPtr pDeviceObs(new CameraObserver());
             error = m_VimbaSystem.RegisterCameraListObserver(pDeviceObs);
@@ -238,7 +264,7 @@ void MakoCameraCore::validateCamera(const CameraPtrVector& Cameras)
             return;
         }
     }
-    thrower("Mako validate Error: Did not find the camera IP in the current cameras. Want " + cameraIP +
+    thrower("Mako validate Error: Did not find the camera IP in the current cameras. Want " + camInfo.ip +
         ", but the the listed IPs are " + allIPs);
 }
 
@@ -532,5 +558,12 @@ void MakoCameraCore::updateCurrentSettings()
 {
     makoCtrl.updateCurrentSettings();
     runSettings = makoCtrl.getCurrentSettings();
+}
+
+void MakoCameraCore::setExpActive(bool active)
+{
+    runSettings.expActive = active;
+    expRunSettings.expActive = active;
+    makoCtrl.setExpActive(active);
 }
 
