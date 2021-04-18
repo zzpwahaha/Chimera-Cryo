@@ -1,10 +1,10 @@
 # Build results
-[Dd]ebug/
+[Dd]ebug/*
 [Dd]ebugPublic/
 [Rr]elease/
 [Rr]eleases/
 x64/
-x86/
+x86/*
 [Ww][Ii][Nn]32/
 [Aa][Rr][Mm]/
 [Aa][Rr][Mm]64/
@@ -22,6 +22,12 @@ Chimera/3rd_Party/DM/Lib/*
 Chimera/*.dll
 
 !Chimera/3rd_Party/GSL_MSVC/dll/**
+!Chimera/3rd_Party/myBoost/boost/preprocessor/debug/error.hpp
+!**/x86/*.h
+!**/x86/*.hpp
+
+OffsetLock/*
+!OffsetLock/**/*.ino
 
 *.obj
 *.log
