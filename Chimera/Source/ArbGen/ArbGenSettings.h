@@ -22,7 +22,7 @@ struct arbGenSettings {
 // NOT IN USE AT THE MOMENT (Nov 27th, 2020)
 const arbGenSettings UWAVE_AGILENT_SETTINGS = {
 	// safemode option											
-	UWAVE_SAFEMODE,
+	UWAVE_SAFEMODE_AGI,
 	// usb/tcpip address
 	/*UWAVE_SIGLENT_ADDRESS*/UWAVE_AGILENT_ADDRESS,
 	// sample rate in hertz
@@ -49,7 +49,7 @@ const arbGenSettings UWAVE_AGILENT_SETTINGS = {
 
 const arbGenSettings UWAVE_SIGLENT_SETTINGS = {
 	// safemode option											
-	UWAVE_SAFEMODE,
+	UWAVE_SAFEMODE_SIG,
 	// usb/tcpip address
 	UWAVE_SIGLENT_ADDRESS/*UWAVE_AGILENT_ADDRESS*/,
 	// sample rate in hertz

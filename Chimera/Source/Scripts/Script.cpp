@@ -442,7 +442,7 @@ void Script::newScript(){
 	if (deviceType == "ArbGen"){
 		tempName += "DEFAULT_ARBGEN_SCRIPT.aScript";
 	}
-	else if (deviceType == "ArbGen"){
+	else if (deviceType == "Master"){
 		tempName += "DEFAULT_MASTER_SCRIPT.mScript";
 	}	
 	reset();
