@@ -1,0 +1,18 @@
+%%%%%%%%%%%%%%%%% Start With 1ms %%%%%%%%%%%%%%%%% 
+t = 1
+pulseon: SrcMotTrg 1
+pulseon: scimottrg 1
+dac: srcmotamp 9.9
+dac: scimotamp 9.9
+dac: motcoil1 7
+dac: motcoil2 -7
+dac: biascoilx 2
+dac: biascoily -1.2
+dac: biascoilz -0.7
+
+%t += 0.1
+ol: cooling 1222 
+ol: repump 5280 
+
+t += 1500
+pulseon: do1_0 1

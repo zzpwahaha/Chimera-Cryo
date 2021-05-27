@@ -78,6 +78,7 @@ void doChannelInfoDialog::handleOk ()
 			}
 			names[cnts] = name.toStdString();
 			input->setName(row, numberInc, name.toStdString());
+			cnts++;
 		}
 	}
 	input->getCore().setNames(names);

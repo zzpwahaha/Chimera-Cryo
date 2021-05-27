@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "LineEditCompleter.h"
+#include <qabstractitemview.h>
 
 LineEditCompleter::LineEditCompleter(QWidget* parent) : QLineEdit(parent), c(nullptr)
 {
