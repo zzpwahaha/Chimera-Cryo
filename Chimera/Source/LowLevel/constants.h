@@ -19,7 +19,7 @@
 	//constexpr bool DOFTDI_SAFEMODE = true;
 	constexpr bool DDS_SAFEMODE = true;
 	constexpr bool ANDOR_SAFEMODE = true;
-	constexpr bool OFFSETLOCK_SAFEMODE = true/*false*/;
+	constexpr bool OFFSETLOCK_SAFEMODE = false/*false*/;
 	//constexpr bool ANALOG_IN_SAFEMODE = true;
 	#ifdef _DEBUG
 		constexpr bool PYTHON_SAFEMODE = true;
@@ -29,7 +29,7 @@
 	constexpr bool DAQMX_SAFEMODE = true;
 	//constexpr bool ANALOG_OUT_SAFEMODE = true;
 
-	constexpr auto CODE_ROOT = "D:\\Chimera\\Chimera-Cryo";
+	constexpr auto CODE_ROOT = "C:\\Chimera\\Chimera-Cryo";
 
 	const std::string PLOT_FILES_SAVE_LOCATION = str (CODE_ROOT) + "\\Plotting";
 	const std::string DATA_ANALYSIS_CODE_LOCATION = "C:\\Users\\Regal-Lab\\Code\\Data_Analysis_Control\\";
@@ -38,7 +38,7 @@
 	const std::string PROFILES_PATH = str (CODE_ROOT) + "\\Profiles\\";
 
 	//const std::string DATA_SAVE_LOCATION = "J:\\Data Repository\\New Data Repository\\";
-	const std::string DATA_SAVE_LOCATION = "D:\\Chimera\\Chimera-Cryo\\tmpDataSave\\";
+	const std::string DATA_SAVE_LOCATION = "C:\\Chimera\\Chimera-Cryo\\tmpDataSave\\";
 
 	const std::string MUSIC_LOCATION = str (CODE_ROOT) + "\\Final Fantasy VII - Victory Fanfare [HQ].mp3";
 	const std::string FUNCTIONS_FOLDER_LOCATION = str (CODE_ROOT) + "\\Functions\\";
@@ -75,19 +75,22 @@
 
 	//ArbGens
 	const bool UWAVE_SAFEMODE = true;
+	const bool UWAVE_SAFEMODE_SIG = true;
+	const bool UWAVE_SAFEMODE_AGI = false;
 	const int numArbGen = 2;
-	const std::string UWAVE_AGILENT_ADDRESS = "TCPIP0::10.10.0.5::inst0::INSTR";
+	//const std::string UWAVE_AGILENT_ADDRESS = "TCPIP0::10.10.0.5::inst0::INSTR";
+	const std::string UWAVE_AGILENT_ADDRESS = "USB0::0x0957::0x2807::MY57400998::INSTR";
 	const std::string UWAVE_SIGLENT_ADDRESS = "TCPIP0::10.10.0.4::inst0::INSTR";
 	const std::string RAMP_LOCATION = str(CODE_ROOT) + "\\Ramp_Files\\";
 
 	//Analog in 
-	const bool AI_SAFEMODE = false;
+	const bool AI_SAFEMODE = true;
 	const std::string AI_SOCKET_ADDRESS = "10.10.0.10";
 	const std::string AI_SOCKET_PORT = "80";
 
 	//Mako camera
 	const unsigned MAKO_NUMBER = 2;
-	const std::array<bool, MAKO_NUMBER> MAKO_SAFEMODE = { true,false };
+	const std::array<bool, MAKO_NUMBER> MAKO_SAFEMODE = { false,false };
 	const std::array<std::string, MAKO_NUMBER> MAKO_DELIMS = { "MAKO1_CAMERA_SETTING", "MAKO2_CAMERA_SETTING" };
 	const std::array<std::string, MAKO_NUMBER> MAKO_IPADDRS= { "10.10.0.6", "10.10.0.7" };
 

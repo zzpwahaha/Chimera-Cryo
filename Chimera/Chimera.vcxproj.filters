@@ -51,9 +51,6 @@
     <ClCompile Include="Source\AnalogOutput\AoSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\AnalogOutput\DaqMxFlume.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Source\Andor\AndorCameraCore.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -581,9 +578,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\AnalogOutput\AoSystem.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\AnalogOutput\DaqMxFlume.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\Andor\AndorCameraCore.h">

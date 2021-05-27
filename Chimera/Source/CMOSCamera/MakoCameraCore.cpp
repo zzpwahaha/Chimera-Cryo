@@ -148,9 +148,9 @@ void MakoCameraCore::initializeVimba()
     {
         CameraPtrVector tmpCameras;
         error = m_VimbaSystem.GetCameras(tmpCameras);
-        if (tmpCameras.size() != MAKO_NUMBER) {
+        /*if (tmpCameras.size() != MAKO_NUMBER) {
             thrower("Less number of cMOS cameras than expected. Expect" + str(MAKO_NUMBER) + " but only get" + str(tmpCameras.size()));
-        }
+        }*/
         if (VmbErrorSuccess == error)
         {
             validateCamera(tmpCameras);
