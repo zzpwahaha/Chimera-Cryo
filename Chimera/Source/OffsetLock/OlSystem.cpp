@@ -3,9 +3,10 @@
 #include "PrimaryWindows/IChimeraQtWindow.h"
 #include "PrimaryWindows/QtAuxiliaryWindow.h"
 
-OlSystem::OlSystem(IChimeraQtWindow* parent)
+OlSystem::OlSystem(IChimeraQtWindow* parent, DoSystem& ttlBoard)
 	: IChimeraSystem(parent)
 	, core(OFFSETLOCK_SAFEMODE)
+	, ttlBoard(ttlBoard)
 	, roundToOlPrecision(false)
 {
 }
@@ -73,34 +74,51 @@ bool OlSystem::eventFilter(QObject* obj, QEvent* event) {
 
 void OlSystem::handleOpenConfig(ConfigStream& openFile)
 {
-	/*ProfileSystem::checkDelimiterLine(openFile, "DACS");
-	prepareForce();
-	std::vector<double> values(getNumberOfDacs());
-	unsigned olInc = 0;
-	for (auto& ol : values)
-	{
-		std::string olString;
-		openFile >> olString;
-		try
-		{
-			double olValue = std::stod(olString);
-			prepareDacForceChange(olInc, olValue);
-		}
-		catch (std::invalid_argument&)
-		{
-			thrower("ERROR: failed to convert ol value to voltage. string was " + olString);
-		}
-		olInc++;
+	std::string test;
+	for (auto& out : outputs) {
+		openFile >> out.info.name;
 	}
-	ProfileSystem::checkDelimiterLine(openFile, "END_DACS");*/
-	emit notification("OL system finished opening config, which is not yet added.\n"
-		+ QString(__FILE__) + "line: " + QString::number(__LINE__), 2);
+	try {
+		for (auto& out : outputs) {
+			openFile >> test;
+			out.info.currFreq = boost::lexical_cast<double>(test);
+		}
+	}
+	catch (boost::bad_lexical_cast&) {
+		throwNested("AO control failed to convert values recorded in the config file "
+			"to doubles");
+	}
+	for (auto& out : outputs) {
+		openFile >> out.info.note;
+	}
+	updateCoreNames();
+	updateEdits();
+	setOLs(ttlBoard.getCore(), ttlBoard.getCurrentStatus());
+}
 
+std::string OlSystem::getDelim()
+{
+	return core.getDelim();
 }
 
 void OlSystem::handleSaveConfig(ConfigStream& saveFile)
 {
-	saveFile << "OFFSETLOCKS\nEND_OFFSETLOCKS\n";
+	saveFile << core.getDelim() << "\n";
+	saveFile << "/*OffsetLock Name:*/ ";
+	for (auto& out : outputs) {
+		saveFile << out.info.name << " ";
+	}
+	saveFile << "\n";
+	saveFile << "/*OffsetLock Value:*/ ";
+	for (auto& out : outputs) {
+		saveFile << out.info.currFreq << " ";
+	}
+	saveFile << "\n";
+	saveFile << "/*OffsetLock Description:*/ ";
+	for (auto& out : outputs) {
+		saveFile << out.info.note << " ";
+	}
+	saveFile << "\nEND_" + core.getDelim() << "\n";
 }
 
 

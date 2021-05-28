@@ -21,7 +21,7 @@ struct OlInfo
 	double maxFreq = 6000.0;
 	double defaultFreq = 1500.0;
 
-	std::string note = "";
+	std::string note = "None";
 
 };
 

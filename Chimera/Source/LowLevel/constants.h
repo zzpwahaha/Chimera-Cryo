@@ -67,8 +67,8 @@
 
 	const double OL_TIME_RESOLUTION = 0.02; //in ms
 	const std::vector<std::pair<unsigned, unsigned>> OL_TRIGGER_LINE
-		= { std::make_pair(6 - 1,0),std::make_pair(6 - 1,1) }; /*the first is the label on the box minus 1, has minus'd 1 explicitly */
-	const double OL_TRIGGER_TIME = 0.01; //in ms i.e. 10us
+		= { std::make_pair(3 - 1,6),std::make_pair(3 - 1,7) }; /*the first is the label on the box minus 1, has minus'd 1 explicitly */
+	const double OL_TRIGGER_TIME = 0.05; //in ms i.e. 50us
 
 	//#define DDS_FPGA_ADDRESS "FT1I6IBSB"; //Device Serial: FT1I6IBS, Use FT1I6IBSB in C++ to select Channel B
 

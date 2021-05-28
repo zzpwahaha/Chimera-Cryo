@@ -71,6 +71,7 @@ void ExpThreadWorker::experimentThreadProcedure () {
 			}
 		}
 		/// Begin experiment 
+		std::vector<double> finaltimes = input->ttls.getFinalTimes();
 		for (const auto& variationInc : range (determineVariationNumber (expRuntime.expParams))) {
 			initVariation (variationInc, expRuntime.expParams);
 			emit notification ("Programming Devices for Variation...\n");
@@ -81,7 +82,7 @@ void ExpThreadWorker::experimentThreadProcedure () {
 			for (const auto& repInc : range (expRuntime.repetitions)) {
 				handlePause (isPaused, isAborting);
 				startRep (repInc, variationInc, input->skipNext == nullptr ? false : input->skipNext->load ());
-				Sleep(10);//wait 500ms between rep, added temporarily by zzp 20210225
+				Sleep(finaltimes[variationInc]);//wait 500ms between rep, added temporarily by zzp 20210225
 			}
 		}
 		waitForAndorFinish ();

@@ -64,6 +64,8 @@ void DoSystem::handleOpenConfig(ConfigStream& openFile)
 		bool state;
 		openFile >> state;
 		out.set(state); });
+	core.FPGAForceOutput(getCurrentStatus());
+	
 }
 
 

@@ -20,7 +20,7 @@ QtAuxiliaryWindow::QtAuxiliaryWindow (QWidget* parent)
 	, configParamCtrl (this, "CONFIG_PARAMETERS")
 	, globalParamCtrl (this, "GLOBAL_PARAMETERS")
 	, dds (this, DDS_SAFEMODE)
-	, olSys(this)
+	, olSys(this, ttlBoard)
 	, calManager(this)
 {	
 	
@@ -204,6 +204,7 @@ void QtAuxiliaryWindow::windowSaveConfig (ConfigStream& saveFile){
 	ttlBoard.handleSaveConfig (saveFile);
 	aoSys.handleSaveConfig (saveFile);
 	dds.handleSaveConfig (saveFile);
+	olSys.handleSaveConfig(saveFile);
 	aiSys.handleSaveConfig(saveFile);
 	calManager.handleSaveConfig(saveFile);
 }
@@ -213,8 +214,8 @@ void QtAuxiliaryWindow::windowOpenConfig (ConfigStream& configFile){
 		ConfigSystem::standardOpenConfig (configFile, configParamCtrl.configDelim, &configParamCtrl);
 		ConfigSystem::standardOpenConfig (configFile, ttlBoard.getCore().getDelim(), &ttlBoard);
 		ConfigSystem::standardOpenConfig (configFile, aoSys.getCore().getDelim(), &aoSys);
-		aoSys.updateEdits ();
 		ConfigSystem::standardOpenConfig (configFile, dds.getDelim (), &dds);
+		ConfigSystem::standardOpenConfig(configFile, olSys.getDelim(), &olSys);
 		ConfigSystem::standardOpenConfig(configFile, aiSys.getDelim(), &aiSys);
 		ConfigSystem::standardOpenConfig(configFile, calManager.systemDelim, &calManager);
 	}
@@ -659,7 +660,7 @@ std::string QtAuxiliaryWindow::getVisaDeviceStatus (){
 
 void QtAuxiliaryWindow::fillExpDeviceList (DeviceList& list){
 	//list.list.push_back (dds.getCore ());
-	list.list.push_back(olSys.getCore());
+	//list.list.push_back(olSys.getCore());
 	list.list.push_back(aiSys.getCore());
 }
 

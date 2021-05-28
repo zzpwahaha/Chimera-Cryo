@@ -5,8 +5,6 @@
 #include "PrimaryWindows/QtMainWindow.h"
 #include "ConfigurationSystems/Version.h"
 #include "ConfigurationSystems/ConfigSystem.h"
-// for other ni stuff
-//#include "nidaqmx2.h"
 #include "GeneralUtilityFunctions/range.h"
 #include <boost/lexical_cast.hpp>
 #include <ExperimentThread/ExpThreadWorker.h>
@@ -47,25 +45,6 @@ std::array<AoInfo, size_t(AOGrid::total)> AoSystem::getDacInfo( ){
 
 void AoSystem::handleOpenConfig(ConfigStream& openFile)
 {
-	/*prepareForce();
-	std::vector<double> values(getNumberOfDacs());
-	unsigned dacInc = 0;
-	for (auto& dac : values)
-	{
-		std::string dacString;
-		openFile >> dacString;
-		try
-		{
-			double dacValue = std::stod(dacString);
-			prepareDacForceChange(dacInc, dacValue);
-		}
-		catch (std::invalid_argument&)
-		{
-			thrower("ERROR: failed to convert dac value to voltage. string was " + dacString);
-		}
-		dacInc++;
-	}*/
-
 	std::string test;
 	for (auto& out : outputs) {
 		openFile >> out.info.name;
@@ -85,13 +64,20 @@ void AoSystem::handleOpenConfig(ConfigStream& openFile)
 		}
 	}
 	catch (boost::bad_lexical_cast&) {
-		throwNested("DDS control failed to convert values recorded in the config file "
+		throwNested("AO control failed to convert values recorded in the config file "
 			"to doubles");
 	}
 	for (auto& out : outputs) {
 		openFile >> out.info.note;
 	}
-
+	std::array<std::string, size_t(AOGrid::total)> namesIn;
+	for (unsigned idx = 0; idx < namesIn.size(); idx++)
+	{
+		namesIn[idx] = outputs[idx].info.name;
+	}
+	core.setNames(namesIn);
+	updateEdits();
+	setDACs();
 }
 
 void AoSystem::handleSaveConfig(ConfigStream& saveFile) 

@@ -4,7 +4,7 @@
 #include "OlStructure.h"
 #include "OlCore.h"
 #include "GeneralFlumes/QtSerialFlume.h"
-
+#include "DigitalOutput/DoSystem.h"
 #include "qlabel.h"
 #include <qpushbutton.h>
 #include <qcheckbox.h>
@@ -16,7 +16,7 @@ public:
 	// THIS CLASS IS NOT COPYABLE.
 	OlSystem& operator=(const OlSystem&) = delete;
 	OlSystem(const OlSystem&) = delete;
-	OlSystem(IChimeraQtWindow* parent);
+	OlSystem(IChimeraQtWindow* parent, DoSystem& ttlBoard);
 
 	// standard functions for gui elements
 	void initialize(IChimeraQtWindow* master);
@@ -24,7 +24,7 @@ public:
 	// configs
 	void handleSaveConfig(ConfigStream& saveFile);
 	void handleOpenConfig(ConfigStream& openFile);
-
+	std::string getDelim();
 
 
 	void handleRoundToOl();
@@ -66,8 +66,9 @@ private:
 	CQCheckBox* quickChange;
 
 	std::array<OffsetLockOutput, size_t(OLGrid::total)> outputs;
-	OlCore core;
 
+	OlCore core;
+	DoSystem& ttlBoard;
 	bool roundToOlPrecision;
 
 

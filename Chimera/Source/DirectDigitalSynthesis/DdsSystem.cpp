@@ -231,9 +231,6 @@ void DdsSystem::handleSaveConfig (ConfigStream& file ){
 		file << out.info.note << " ";
 	}
 	file << "\nEND_" + getDelim() << "\n";
-	//file << "/*Control?*/ " << controlCheck->isChecked () << "\n";
-	//core.writeRampListToConfig ( currentRamps, file );
-	//file << "\nEND_" + getDelim ( ) << "\n";
 }
 
 
@@ -277,13 +274,9 @@ void DdsSystem::handleOpenConfig ( ConfigStream& file )
 	for (auto& out : outputs) {
 		file >> out.info.note;
 	}
-
-	
-
-	//auto res = core.getSettingsFromConfig (file);
-	//currentRamps = res.ramplist;
-	//controlCheck->setChecked (res.control);
-	//redrawListview ( );
+	updateEdits();
+	updateCoreNames();
+	setDDSs();
 }
 
 
