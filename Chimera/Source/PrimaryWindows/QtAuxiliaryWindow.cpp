@@ -62,6 +62,11 @@ void QtAuxiliaryWindow::initializeWidgets (){
 
 		olSys.initialize(this);
 		layout1->addWidget(&olSys, 0);
+
+		dds.initialize(this);
+		layout1->addWidget(&dds, 0);
+		//dds.initialize (this, "DDS SYSTEM");
+		//layout3->addWidget(&dds, 1);
 		layout1->addStretch(1);
 
 		QVBoxLayout* layout3 = new QVBoxLayout();
@@ -72,13 +77,10 @@ void QtAuxiliaryWindow::initializeWidgets (){
 		configParamCtrl.setParameterControlActive (false);
 		layout3->addWidget(&configParamCtrl, 1);
 		
-		dds.initialize(this);
-		layout3->addWidget(&dds, 0);
-		//dds.initialize (this, "DDS SYSTEM");
-		//layout3->addWidget(&dds, 1);
+
 		
 		optimizer.initialize (this);
-		layout3->addWidget(&optimizer, 1);
+		//layout3->addWidget(&optimizer, 1);
 		
 		QVBoxLayout* layout2 = new QVBoxLayout();
 
@@ -625,8 +627,6 @@ std::string QtAuxiliaryWindow::getOtherSystemStatusMsg (){
 	else{
 		msg += "\tZynq System is disabled! Enable in \"constants.h\" as well as \"ZynqTcp.h\"\n";
 	}
-	//msg += "\t Zynq placeholder \n";
-	//msg += "\t" + std::string(__FILE__) + ", line: " + std::to_string(__LINE__) + "\n";
 
 	msg += "Offset Lock:\n";
 	if (!OFFSETLOCK_SAFEMODE) {
