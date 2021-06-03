@@ -20,8 +20,8 @@ public:
     void windowOpenConfig(ConfigStream& configFile);
     void windowSaveConfig(ConfigStream& newFile);
     void fillExpDeviceList(DeviceList& list);
-
-//public slots: will this work without qslot?
+    std::string getSystemStatusString();
+public slots: //will this work without qslot? NO zzp 2021/06/01
     void prepareWinForAcq(MakoSettings* settings, CameraInfo caminfo);
 
 
@@ -34,4 +34,3 @@ private:
 
 
 };
-

@@ -1,0 +1,65 @@
+%%%%%%%%%%%%%%%%% Start With 1ms %%%%%%%%%%%%%%%%% 
+t = 1
+pulseon: SrcMotTrg 1500
+pulseon: scimottrg 1500
+%on: srcmottrg 
+%on: scimottrg 
+ddsfreq: dds2_0 80
+%ddsfreq: dds2_1 80
+%ddsfreq: dds2_2 106
+%ddsfreq: dds2_3 107.5
+
+t += 5
+%ddsfreq: dds0_0 110
+ddsfreq: dds0_1 80
+%ddsfreq: dds0_2 200
+%ddsfreq: dds0_3 10
+
+t += 5
+ddsamp: dds2_0 10
+%ddsamp: dds2_1 10
+%ddsamp: dds2_2 10
+%ddsamp: dds2_3 10
+
+t += 5
+%ddsamp: dds0_0 10
+ddsamp: dds0_1 10
+%ddsamp: dds0_2 10
+%ddsamp: dds0_3 10
+
+t += 5
+dac: srcmotamp 9.9
+dac: scimotamp 9.9
+dac: motcoil1 7
+dac: motcoil2 -7
+dac: biascoilx 2.1
+dac: biascoily -1.9
+dac: biascoilz -0.63
+ol: ol0_0 1222 
+ol: ol0_1 5280
+
+t += 1000
+pulseon: do1_0 1
+
+
+t += 500
+pulseon: do1_0 1
+ol: ol0_0 1206 
+ol: ol0_1 5282 
+
+t += 5
+ddsamp: dds2_0 0
+%ddsamp: dds2_1 10
+%ddsamp: dds2_2 10
+%ddsamp: dds2_3 10
+
+t += 5
+%ddsamp: dds0_0 10
+ddsamp: dds0_1 0
+%ddsamp: dds0_2 10
+%ddsamp: dds0_3 10
+
+
+
+t += 1000
+pulseon: do1_0 1

@@ -64,7 +64,7 @@ void ExpThreadWorker::experimentThreadProcedure () {
 		if (input->expType != ExperimentType::LoadMot) {
 			for (auto& device : input->devices.list) {
 				if (device.get ().experimentActive) {
-					emit notification (qstr ("Logging Devce " + device.get ().getDelim ()
+					emit notification (qstr ("Logging Device " + device.get ().getDelim ()
 						+ " Settings...\n"), 1);
 					device.get ().logSettings (input->logger, this);
 				}

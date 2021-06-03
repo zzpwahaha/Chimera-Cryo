@@ -435,7 +435,7 @@ void DataLogger::writeMakoPic(std::vector<double> image, int width, int height)
 	hsize_t slabdim[3] = { 1, width, height };// dims.width (), dims.height ()};
 	try {
 		MakoPicureSetDataSpace.selectHyperslab(H5S_SELECT_SET, slabdim, offset);
-		MakoPictureDataset.write(image.data(), H5::PredType::NATIVE_LONG, MakoPicDataSpace,
+		MakoPictureDataset.write(image.data(), H5::PredType::NATIVE_DOUBLE, MakoPicDataSpace,
 			MakoPicureSetDataSpace);
 	}
 	catch (H5::Exception& err) {

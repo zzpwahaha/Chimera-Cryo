@@ -76,11 +76,15 @@ void MakoCameraCore::logSettings(DataLogger& log, ExpThreadWorker* threadworker)
     }
 }
 
+// to enable emitting imageReadyForExp in ImageCalculatingThread
 void MakoCameraCore::loadExpSettings(ConfigStream& stream) {
     ConfigSystem::stdGetFromConfig(stream, *this, expRunSettings, Version("1.0"));
     expRunSettings.repsPerVar = ConfigSystem::stdConfigGetter(stream, "REPETITIONS",
         Repetitions::getSettingsFromConfig);
     experimentActive = expRunSettings.expActive;
+    if (experimentActive) {
+        emit makoStarted();
+    }
 }
 
 void MakoCameraCore::calculateVariations(std::vector<parameterType>& params, ExpThreadWorker* threadworker)
@@ -567,3 +571,9 @@ void MakoCameraCore::setExpActive(bool active)
     makoCtrl.setExpActive(active);
 }
 
+void MakoCameraCore::setPicsPerRep(int picsperrep)
+{
+    runSettings.picsPerRep = picsperrep;
+    expRunSettings.picsPerRep = picsperrep;
+    makoCtrl.setPicsPerRep(picsperrep);
+}

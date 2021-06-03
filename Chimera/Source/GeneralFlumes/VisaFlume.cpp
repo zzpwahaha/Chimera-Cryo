@@ -57,7 +57,7 @@ std::string VisaFlume::identityQuery(){
 		errCheck( viQueryf( instrument, (ViString)"*IDN?\n", "%1024t", buf ), "*IDN?\n" );
 	}
 	else{
-		return "Device is in Safemode. Change this in the constants.h file.";
+		return "Device is in Safemode. Change this in the constants.h file.\r\n";
 	}
 	return buf;
 }

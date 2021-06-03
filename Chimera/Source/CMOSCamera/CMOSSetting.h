@@ -87,3 +87,7 @@ struct MakoSettings {
 	unsigned variations;
 	unsigned totalPictures() { return picsPerRep * repsPerVar * variations; }
 };
+
+
+Q_DECLARE_METATYPE(MakoSettings*)
+Q_DECLARE_METATYPE(CameraInfo)

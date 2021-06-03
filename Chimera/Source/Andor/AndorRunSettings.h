@@ -51,3 +51,4 @@ struct AndorCameraSettings {
 	double mostRecentTemp;
 };
 
+Q_DECLARE_METATYPE(AndorRunSettings)

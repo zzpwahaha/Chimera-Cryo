@@ -28,6 +28,7 @@ public:
         unsigned Height, unsigned Width, unsigned offsetX, unsigned offsetY);
 
     void setExpActive(bool active);
+    void experimentStarted();
     void experimentFinished();
 
 

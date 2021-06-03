@@ -38,12 +38,18 @@ void MakoCamera::initialize()
     nameLayout->setContentsMargins(0, 0, 0, 0);
     QLabel* namelabel = new QLabel(qstr(core.CameraName()));
     namelabel->setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
+    QLabel* repLabel = new QLabel("PicsPerRep: ");
+    m_picsPerRep = new QSpinBox(this);
     QLabel* activeLabel = new QLabel("Exp. Active?", this);
     m_expActive = new QCheckBox(this);
     nameLayout->addWidget(namelabel, 1);
+    nameLayout->addWidget(repLabel, 0);
+    nameLayout->addWidget(m_picsPerRep, 0);
     nameLayout->addWidget(activeLabel, 0);
     nameLayout->addWidget(m_expActive, 0);
     layout->addLayout(nameLayout, 0);
+    connect(m_picsPerRep, qOverload<int>(&QSpinBox::valueChanged), [this](int pics) {
+        core.setPicsPerRep(pics); });
     connect(m_expActive, &QCheckBox::clicked, [this](bool checked) {
         core.setExpActive(checked);
         imgCThread.setExpActive(checked); });
@@ -141,9 +147,8 @@ void MakoCamera::initialize()
             viewer.leftAxes()->axis(QCPAxis::atLeft)->setRange(range - oy); });
 
     connect(&imgCThread, &ImageCalculatingThread::imageReadyForExp, this, &MakoCamera::handleExpImage);
-    //connect(&core, MakoCameraCore::makoFinished, [this]() {
-    //    imgCThread.experimentFinished();
-    //    isExpRunning = false; });
+    connect(&core, &MakoCameraCore::makoFinished, this, &MakoCamera::finishExp);
+    connect(&core, &MakoCameraCore::makoStarted, this, &MakoCamera::startExp);
 
     //connect(&imgCThread, &ImageCalculatingThread::currentFormat, this, [this](QString format) {
     //    if (0 == currentFormat.compare(format)) return;
@@ -213,6 +218,24 @@ void MakoCamera::handleStatusButtonClicked(QString featName)
     }
     
 }
+
+
+void MakoCamera::startExp()
+{
+    m_expActive->setEnabled(false);
+    m_picsPerRep->setEnabled(false);
+    imgCThread.experimentStarted();
+    isExpRunning = true;
+}
+
+void MakoCamera::finishExp()
+{
+    m_expActive->setEnabled(true);
+    m_picsPerRep->setEnabled(true);
+    imgCThread.experimentFinished();
+    isExpRunning = false;
+}
+
 
 
 void MakoCamera::initPlotContextMenu()
@@ -530,12 +553,18 @@ void MakoCamera::updateStatusBar()
     core.updateCurrentSettings();
     MakoSettings ms = core.getRunningSettings();
     m_expActive->setChecked(ms.expActive);
+    m_picsPerRep->setValue(ms.picsPerRep);
+    core.setExpActive(ms.expActive);
+    core.setPicsPerRep(ms.picsPerRep);
+    imgCThread.setExpActive(ms.expActive);
+
     //m_FormatButton->setText("Pixel Format: " + qstr(imgCThread.format()) + " ");
     //auto [w, h] = imgCThread.WidthHeight();
     //QMouseEvent event(QMouseEvent::None, imgCThread.mousePos(), Qt::NoButton, 0, 0);
     //viewer.onSetMousePosInCMap(&event, m_CursorScenePosLabel);
     //imgCThread.updateExposureTime();
     //imgCThread.updateCameraGain();
+
     m_ImageSizeButtonH->setText("Size H: " + qstr(ms.dims.height()));
     m_ImageSizeButtonW->setText(",W: " + qstr(ms.dims.width()) + " ");
     m_ExposureTimeButton->setText("Exposure time (ms): " + qstr(ms.exposureTime / 1.0e3, 3));
@@ -559,11 +588,11 @@ void MakoCamera::handleExpImage(QVector<double> img, int width, int height)
     try {
         auto* andorWin = parentWin->andorWin;
         currentRepNumber++;
-        m_OperatingStatusLabel->setText("Exp Running");
+        m_OperatingStatusLabel->setText("Exp Running" + qstr(currentRepNumber));
         if (core.getRunningSettings().triggerMode == CMOSTrigger::mode::ContinuousSoftware) {
             // don't write data if continuous, that's a recipe for disaster.
             emit error("Mako camera mode is continuous, such high data rate is hard to write to "
-                "disk continously. Double check if this is what you need.");
+                "disk continously. Double check if this is what you need.\n");
             return;
         }
         andorWin->getLogger().writeMakoPic(img.toStdVector(), width, height);

@@ -49,6 +49,8 @@ public:
 
 	void setExpActive(bool active);
 
+	void setPicsPerRep(int picsperrep);
+
 
 	std::string CameraName() { return cameraName; }
 	MakoSettingControl& getMakoCtrl() { return makoCtrl; }
@@ -58,6 +60,7 @@ public:
 
 signals:
 	void makoFinished();
+	void makoStarted();
 
 public:
 	const unsigned int BUFFER_COUNT = 7;

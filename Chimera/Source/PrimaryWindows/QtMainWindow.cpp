@@ -81,6 +81,7 @@ QtMainWindow::QtMainWindow () :
 		initializationString += auxWin->getOtherSystemStatusMsg ();
 		initializationString += andorWin->getSystemStatusString ();
 		initializationString += auxWin->getVisaDeviceStatus ();
+		initializationString += makoWin->getSystemStatusString();
 		initializationString += scriptWin->getSystemStatusString ();
 		reportStatus (qstr(initializationString));
 	}

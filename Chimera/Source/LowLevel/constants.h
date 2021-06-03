@@ -19,14 +19,14 @@
 	//constexpr bool DOFTDI_SAFEMODE = true;
 	constexpr bool DDS_SAFEMODE = true;
 	constexpr bool ANDOR_SAFEMODE = true;
-	constexpr bool OFFSETLOCK_SAFEMODE = false/*false*/;
+	constexpr bool OFFSETLOCK_SAFEMODE = true/*false*/;
 	//constexpr bool ANALOG_IN_SAFEMODE = true;
 	#ifdef _DEBUG
 		constexpr bool PYTHON_SAFEMODE = true;
 	#else
 		constexpr bool  PYTHON_SAFEMODE = true;
 	#endif
-	constexpr bool DAQMX_SAFEMODE = true;
+	//constexpr bool DAQMX_SAFEMODE = true;
 	//constexpr bool ANALOG_OUT_SAFEMODE = true;
 
 	constexpr auto CODE_ROOT = "C:\\Chimera\\Chimera-Cryo";
@@ -93,6 +93,9 @@
 	const std::array<bool, MAKO_NUMBER> MAKO_SAFEMODE = { false,false };
 	const std::array<std::string, MAKO_NUMBER> MAKO_DELIMS = { "MAKO1_CAMERA_SETTING", "MAKO2_CAMERA_SETTING" };
 	const std::array<std::string, MAKO_NUMBER> MAKO_IPADDRS= { "10.10.0.6", "10.10.0.7" };
+	const std::vector<std::pair<unsigned, unsigned>> MAKO_TRIGGER_LINE
+		= { std::make_pair(3 - 1,4),std::make_pair(3 - 1,5) }; 
+	/*the first is the label on the box minus 1, has minus'd 1 explicitly and this is not used in the code, just a reminder*/
 
 #endif
 /// Random other Constants

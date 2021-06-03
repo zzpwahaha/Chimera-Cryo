@@ -147,6 +147,11 @@ void ImageCalculatingThread::setExpActive(bool active)
     expActive = active;
 }
 
+void ImageCalculatingThread::experimentStarted()
+{
+    expRunning = true;
+}
+
 void ImageCalculatingThread::experimentFinished()
 {
     expRunning = false;
@@ -418,7 +423,11 @@ void ImageCalculatingThread::run()
         m_pProcessingThread->mutex().lock();
         //m_doubleQVector.clear();
         {
-            m_pProcessingThread->calcWait().wait(&m_pProcessingThread->mutex(),2000);
+            bool notTimeout = m_pProcessingThread->calcWait().wait(&m_pProcessingThread->mutex(), 2000);
+            if (expRunning && !notTimeout) {
+                m_pProcessingThread->mutex().unlock();
+                continue;
+            }
 
             if (!m_Stopping)//protect it from overwrite when stop
             { 

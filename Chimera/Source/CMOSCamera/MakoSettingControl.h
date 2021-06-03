@@ -74,6 +74,7 @@ class MakoSettingControl : public QTreeView
         void updateCurrentSettings();
         MakoSettings getCurrentSettings() { return currentSettings; }
         void setExpActive(bool active); // dedicated for toggling expActive from MakoCamera.h
+        void setPicsPerRep(int picsperrep); // dedicated for setPicsPerRep from MakoCameraCore.h
         std::pair<VmbInt64_t, VmbInt64_t> getMaxImageSize();
 
     protected:

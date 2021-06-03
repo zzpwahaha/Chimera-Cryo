@@ -27,6 +27,10 @@ int main (int argc, char** argv) {
 	qRegisterMetaType<parameterType> ();
 	qRegisterMetaType<std::vector<parameterType>> ();
 
+	qRegisterMetaType<CameraInfo>();
+	qRegisterMetaType<AndorRunSettings>();
+	qRegisterMetaType<MakoSettings*>();
+
 	QtMainWindow* mainWinQt = new QtMainWindow ();
 	mainWinQt->show ();
 	//splash.finish (mainWinQt);

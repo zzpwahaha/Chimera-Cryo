@@ -73,6 +73,23 @@ void QtMakoWindow::fillExpDeviceList(DeviceList& list)
 	}
 }
 
+std::string QtMakoWindow::getSystemStatusString()
+{
+	std::string msg;
+	msg += "CMOS System:\n";
+	for (unsigned idx = 0; idx < MAKO_NUMBER; idx++)
+	{
+		if (MAKO_SAFEMODE[idx]) {
+			msg += "\tCMOS camera at " + MAKO_IPADDRS[idx] + ": is in safemode. Enable in \"constants.h\" \r\n";
+		}
+		else {
+			msg += "\tCMOS camera at " + MAKO_IPADDRS[idx] + ": " + cam[idx].getMakoCore().CameraName() + " is running \r\n";
+		}
+	}
+	
+	return msg;
+}
+
 void QtMakoWindow::prepareWinForAcq(MakoSettings* , CameraInfo info) {
 	try {
 		for (auto& camera : cam) {

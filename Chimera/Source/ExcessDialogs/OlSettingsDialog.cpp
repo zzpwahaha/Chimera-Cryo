@@ -90,19 +90,6 @@ void OlSettingsDialog::handleOk()
 			return;
 		}
 		input->setName(olInc, str(text));
-		//double min, max;
-		//try {
-		//	text = minValEdits[olInc]->text();
-		//	min = boost::lexical_cast<double>(str(text));
-		//	text = maxValEdits[olInc]->text();
-		//	max = boost::lexical_cast<double>(str(text));
-		//	input->setAmpMinMax(olInc, min, max);
-		//}
-		//catch (boost::bad_lexical_cast& err) {
-		//	errBox(err.what());
-		//	return;
-		//}
-		/*make sure set ampminmax is not the last one, relies on setname/setnote to update the tooltip*/
 		text = noteEdits[olInc]->text();
 		input->setNote(olInc, str(text));
 

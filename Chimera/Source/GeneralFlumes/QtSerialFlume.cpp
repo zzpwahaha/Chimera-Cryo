@@ -64,6 +64,9 @@ void QtSerialFlume::resetConnection()
 
 std::string QtSerialFlume::read () 
 {
+	if (safemode) {
+		return std::string("I am in safemode");
+	}
 	/*have to use this funny way to get the feedback properly. May be don't have to have the feedback*/
 	bool dataready = false;
 	for (size_t i = 0; i < 50; i++) {

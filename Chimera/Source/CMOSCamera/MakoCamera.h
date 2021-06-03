@@ -45,7 +45,8 @@ public:
 
 public slots:
     void handleExpImage(QVector<double> img, int width, int height);
-
+    void startExp();
+    void finishExp();
 
 
 private:
@@ -69,6 +70,7 @@ private:
     bool isExpRunning;
 
     QCheckBox*                          m_expActive;
+    QSpinBox*                           m_picsPerRep;
 	QLabel*                             m_OperatingStatusLabel;
     QPushButton*                        m_ImageSizeButtonH;
     QPushButton*                        m_ImageSizeButtonW;

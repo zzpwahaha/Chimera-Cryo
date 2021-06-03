@@ -2054,17 +2054,45 @@ void MakoSettingControl::setFeatureValue(std::string feaName, dataType val, std:
 
 void MakoSettingControl::setSettings(MakoSettings newSettings)
 {
+    updateCurrentSettings();
+    MakoSettings originalSetting = currentSettings;
     currentSettings = newSettings;
+    
     std::string errstr("");
-    setFeatureValue<double>("Gain", currentSettings.rawGain, errstr);
-    setFeatureValue("TriggerMode", currentSettings.trigOn ? "On" : "Off", errstr);
-    setFeatureValue("TriggerSource", MakoTrigger::toStr(currentSettings.triggerMode).c_str(), errstr);
-    setFeatureValue<double>("ExposureTimeAbs", currentSettings.exposureTime, errstr);
-    setFeatureValue<double>("AcquisitionFrameRateAbs", currentSettings.frameRate, errstr);
-    setFeatureValue<VmbInt64_t>("OffsetX", currentSettings.dims.left, errstr);
-    setFeatureValue<VmbInt64_t>("Width", currentSettings.dims.width(), errstr);
-    setFeatureValue<VmbInt64_t>("OffsetY", currentSettings.dims.bottom, errstr);
-    setFeatureValue<VmbInt64_t>("Height", currentSettings.dims.height(), errstr);
+    //emit acquisitionStartStop("AcquisitionStop");
+    if (currentSettings.rawGain != originalSetting.rawGain) {
+        setFeatureValue<double>("Gain", currentSettings.rawGain, errstr);
+    }
+    if (!(currentSettings.trigOn ^ originalSetting.trigOn)) {
+        setFeatureValue("TriggerMode", currentSettings.trigOn ? "On" : "Off", errstr);
+    }
+    if (currentSettings.triggerMode != originalSetting.triggerMode) {
+        setFeatureValue("TriggerSource", MakoTrigger::toStr(currentSettings.triggerMode).c_str(), errstr);
+    }
+    if (currentSettings.exposureTime != originalSetting.exposureTime) {
+        setFeatureValue<double>("ExposureTimeAbs", currentSettings.exposureTime, errstr);
+    }
+    if (abs(currentSettings.frameRate - originalSetting.frameRate) < DBL_EPSILON * 10) {
+        setFeatureValue<double>("AcquisitionFrameRateAbs", currentSettings.frameRate, errstr);
+    }
+    if (currentSettings.dims.left != originalSetting.dims.left) {
+        setFeatureValue<VmbInt64_t>("OffsetX", currentSettings.dims.left, errstr);
+    }
+    if (currentSettings.dims.width() != originalSetting.dims.width()) {
+        setFeatureValue<VmbInt64_t>("Width", currentSettings.dims.width(), errstr);
+    }
+    if (currentSettings.dims.bottom != originalSetting.dims.bottom) {
+        setFeatureValue<VmbInt64_t>("OffsetY", currentSettings.dims.bottom, errstr);
+    }
+    if (currentSettings.dims.height() != originalSetting.dims.height()) {
+        setFeatureValue<VmbInt64_t>("Height", currentSettings.dims.height(), errstr);
+    }
+
+    //emit acquisitionStartStop("AcquisitionStart");
+    //Sleep(500);
+    //emit acquisitionStartStop("AcquisitionStop");
+    //updateRegisterFeature();
+    //updateCurrentSettings();
     if (!errstr.empty()) {
         thrower("Error in setting MakoSetting" + errstr);
     }
@@ -2101,6 +2129,11 @@ void MakoSettingControl::updateCurrentSettings()
 void MakoSettingControl::setExpActive(bool active)
 {
     currentSettings.expActive = active;
+}
+
+void MakoSettingControl::setPicsPerRep(int picsperrep)
+{
+    currentSettings.picsPerRep = picsperrep;
 }
 
 std::pair<VmbInt64_t, VmbInt64_t> MakoSettingControl::getMaxImageSize()
