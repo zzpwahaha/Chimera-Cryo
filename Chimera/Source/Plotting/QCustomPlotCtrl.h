@@ -28,6 +28,7 @@ class QCustomPlotCtrl : public QObject {
 	Q_OBJECT;
 public:
 	QCustomPlotCtrl();
+	QCustomPlotCtrl(const QCustomPlotCtrl&) = delete;
 	QCustomPlotCtrl(unsigned numTraces, plotStyle inStyle, std::vector<int> thresholds,
 		bool narrowOpt = false, bool plotHistOption = false);
 	~QCustomPlotCtrl();

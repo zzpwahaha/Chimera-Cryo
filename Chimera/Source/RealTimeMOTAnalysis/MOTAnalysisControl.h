@@ -18,6 +18,7 @@ class MOTAnalysisControl : public IChimeraSystem
 {
 public:
 	MOTAnalysisControl(IChimeraQtWindow* parent);
+	MOTAnalysisControl(const MOTAnalysisControl&) = delete;
 	void initialize(IChimeraQtWindow* parent);
 	void handleOpenConfig(ConfigStream& file) {};
 	void handleSaveConfig(ConfigStream& file) {};
