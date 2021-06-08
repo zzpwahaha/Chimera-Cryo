@@ -94,3 +94,4 @@ private:
 
 };
 
+Q_DECLARE_METATYPE(size_t);
