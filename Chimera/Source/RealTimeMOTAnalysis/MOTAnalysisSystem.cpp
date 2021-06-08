@@ -5,21 +5,25 @@
 
 MOTAnalysisSystem::MOTAnalysisSystem(IChimeraQtWindow* parent)
 	: IChimeraSystem(parent)
-	//, MOTCalcCtrl{ { MOTAnalysisControl(parent),MOTAnalysisControl(parent),MOTAnalysisControl(parent) } }
-	, MOTCalcCtrl1(parent)
-	, MOTCalcCtrl2(parent)
-	, MOTCalcCtrl3(parent)
+	, MOTCalcCtrl{ { MOTAnalysisControl(parent),MOTAnalysisControl(parent),MOTAnalysisControl(parent) } }
+	//, MOTCalcCtrl1(parent)
+	//, MOTCalcCtrl2(parent)
+	//, MOTCalcCtrl3(parent)
 {
-	MOTCalcCtrl.push_back(MOTCalcCtrl1);
-	MOTCalcCtrl.push_back(MOTCalcCtrl2);
-	MOTCalcCtrl.push_back(MOTCalcCtrl3);
+	//MOTCalcCtrl.resize(1);
+	//MOTCalcCtrl.push_back(MOTCalcCtrl1);
+	//MOTCalcCtrl.push_back(MOTCalcCtrl2);
+	//MOTCalcCtrl.push_back(MOTCalcCtrl3);
 }
 
 void MOTAnalysisSystem::initialize()
 {
 	for (auto& calcCtrl : MOTCalcCtrl) {
-		calcCtrl.get().initialize(this->parentWin);
+		calcCtrl.initialize(this->parentWin);
 	}
+	//MOTCalcCtrl1.initialize(this->parentWin);
+	//MOTCalcCtrl2.initialize(this->parentWin);
+	//MOTCalcCtrl3.initialize(this->parentWin);
 }
 
 void MOTAnalysisSystem::prepareMOTAnalysis()
@@ -27,11 +31,12 @@ void MOTAnalysisSystem::prepareMOTAnalysis()
 	camExp.clear(); // find the exp active MOT camera that requires analysis
 	std::array<MakoCamera*, MOTCALCTRL_NUM> camPts;
 	for (unsigned idx = 0; idx < MOTCALCTRL_NUM; idx++) {
-		MOTCalcCtrl[idx].get().prepareMOTAnalysis(camPts[idx]);
+		MOTCalcCtrl[idx].prepareMOTAnalysis(camPts[idx]);
 	}
 	for (auto pt : camPts) {
-		if (pt != nullptr || std::find(camExp.begin(), camExp.end(), pt) == camExp.end()) {
+		if (pt != nullptr && std::find(camExp.begin(), camExp.end(), pt) == camExp.end()) {
 			camExp.push_back(pt);
+			emit notification("get MAKO as" + qstr(pt));
 		}
 	}
 	if (camExp.size() > MAKO_NUMBER) {
@@ -47,7 +52,7 @@ void MOTAnalysisSystem::prepareMOTAnalysis(int idx)
 {
 	MOTAnalysisThreadWoker* MOTCalc = MOTCalcWkr[idx];
 	MakoCamera* makoCam = camExp[idx];
-	MOTAnalysisControl& MOTCtrl = MOTCalcCtrl[idx].get();
+	MOTAnalysisControl& MOTCtrl = MOTCalcCtrl[idx];
 
 	//calcThreadActive = true;
 	//calcThreadAborting = false;

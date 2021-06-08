@@ -20,11 +20,11 @@ private:
 	void prepareMOTAnalysis(int idx); // for all MOTAnalysisThreadWoker
 
 public:
-	//std::array<MOTAnalysisControl, MOTCALCTRL_NUM> MOTCalcCtrl;
-	std::vector<std::reference_wrapper<MOTAnalysisControl>> MOTCalcCtrl;
-	MOTAnalysisControl MOTCalcCtrl1;
-	MOTAnalysisControl MOTCalcCtrl2;
-	MOTAnalysisControl MOTCalcCtrl3;
+	//MOTAnalysisControl MOTCalcCtrl1;
+	//MOTAnalysisControl MOTCalcCtrl2;
+	//MOTAnalysisControl MOTCalcCtrl3;
+	std::array<MOTAnalysisControl, MOTCALCTRL_NUM> MOTCalcCtrl;
+	//std::vector<std::reference_wrapper<MOTAnalysisControl>> MOTCalcCtrl;
 	std::array<MOTAnalysisThreadWoker*, MAKO_NUMBER> MOTCalcWkr;
 	
 

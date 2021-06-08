@@ -24,9 +24,9 @@ MOTAnalysisControl::MOTAnalysisControl(IChimeraQtWindow* parent)
 		}
 		//calcViewer.emplace( tp, QCustomPlotCtrl() ); emplace does not work here since QCustomPlotCtrl does not have a move contructor, 
 		//see https://stackoverflow.com/questions/41317880/unordered-map-emplace-giving-compiler-time-errors
-		calcViewer[tp]; // this will work since [] operator will auto create val if key is not existed before
+		//calcViewer[tp]; // this will work since [] operator will auto create val if key is not existed before
 	}
-	calcViewer[MOTAnalysisType::type::density2d].setStyle(plotStyle::PicturePlot);
+	//calcViewer[MOTAnalysisType::type::density2d].setStyle(plotStyle::PicturePlot);
 
 }
 
@@ -34,7 +34,7 @@ void MOTAnalysisControl::initialize(IChimeraQtWindow* parent)
 {
 	//IChimeraQtWindow* parent = this->parentWin;
 
-	calcActive = new QCheckBox("Active?");
+	calcActive = new QCheckBox("Active?", this);
 	QLabel* tmp = new QLabel("Calc.Type:", this);
 	MOTCalcCombo = new CQComboBox(parent);
 	for (auto& t : MOTAnalysisType::allTypes) {
@@ -61,9 +61,11 @@ void MOTAnalysisControl::initialize(IChimeraQtWindow* parent)
 	xKeyValCombo = new CQComboBox(parent);
 	yKeyValCombo = new CQComboBox(parent);
 	for (auto tp : MOTAnalysisType::allTypes) {
+		calcViewer[tp];
 		calcViewer[tp].init(parent, qstr(MOTAnalysisType::toStr(tp)));
 		calcViewer[tp].plot->replot();
 	}
+	calcViewer[MOTAnalysisType::type::density2d].setStyle(plotStyle::PicturePlot);
 
 	connect(MOTCalcCombo, qOverload<int>(&QComboBox::currentIndexChanged), this, [this, xkeyvalL, ykeyvalL](int idx) {
 		auto currentType = MOTAnalysisType::allTypes[MOTCalcCombo->currentIndex()];
@@ -208,6 +210,7 @@ void MOTAnalysisControl::prepareMOTAnalysis(MakoCamera*& cam)
 	if (makoCam == nullptr) {
 		emit error("MOT analysis sees a null camera ptr, please check if you selected the working camera. Possibly"
 			" a low level bug");
+		cam = nullptr;
 		return;
 	}
 	if (calcActive->isChecked() && makoCam != nullptr) {
@@ -224,6 +227,11 @@ void MOTAnalysisControl::prepareMOTAnalysis(MakoCamera*& cam)
 	}
 	incomeOrder.clear();
 	incomeOrder.reserve(makoCam->getMakoCore().getRunningSettings().totalPictures());
+	updateXYKeys();
+	currentXKeys = xKeysList[xKeyCombo->currentIndex()].keyValues;
+	if (twoDScanActive->isChecked()) {
+		currentYKeys = yKeysList[yKeyCombo->currentIndex()].keyValues;
+	}
 }
 
 void MOTAnalysisControl::handleNewPlotData1D(std::vector<double> val, std::vector<double> stdev, int currentNum) 
@@ -233,7 +241,7 @@ void MOTAnalysisControl::handleNewPlotData1D(std::vector<double> val, std::vecto
 	for (size_t idx = 0; idx < val.size(); idx++) {
 		auto typ = MOTAnalysisType::allTypes[idx];
 		plotData1D[typ][currentNum % dim1] = val[idx];
-		plotStdev1D[typ][currentNum % dim1] = val[idx];
+		plotStdev1D[typ][currentNum % dim1] = stdev[idx];
 	}
 	updatePlotData();
 

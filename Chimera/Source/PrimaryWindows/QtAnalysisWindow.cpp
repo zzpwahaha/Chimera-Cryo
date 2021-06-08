@@ -40,9 +40,10 @@ void QtAnalysisWindow::initializeWidgets()
 
 	QHBoxLayout* layout = new QHBoxLayout(centralWidget);
 	MOTAnalySys.initialize();
-	layout->addWidget(&MOTAnalySys.MOTCalcCtrl[0].get(), 0);
-	layout->addWidget(&MOTAnalySys.MOTCalcCtrl[1].get(), 0);
-	layout->addWidget(&MOTAnalySys.MOTCalcCtrl[2].get(), 0);
+	//layout->addWidget(&MOTAnalySys.MOTCalcCtrl1, 0);
+	layout->addWidget(&MOTAnalySys.MOTCalcCtrl[0], 0);
+	layout->addWidget(&MOTAnalySys.MOTCalcCtrl[1], 0);
+	layout->addWidget(&MOTAnalySys.MOTCalcCtrl[2], 0);
 }
 
 void QtAnalysisWindow::prepareCalcForAcq()

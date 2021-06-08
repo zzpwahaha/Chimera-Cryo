@@ -76,16 +76,19 @@ void MOTAnalysisThreadWoker::handleNewImg(QVector<double> img, int width, int he
 	for (size_t idx = 0; idx < currentNum / input.camSet.variations; idx++) {
 		trueIdx.push_back(resultOrder[var + input.camSet.variations * idx]);
 	}
-	std::vector<double> mean(result1d.size(), 0.0);
+	std::vector<double> mean;
 	for (auto& [key, val] : result1d) {
 		double tmp = 0.0;
 		for (auto trueid : trueIdx) {
 			tmp += val[trueid];
 		}
-		mean.push_back(tmp / trueIdx.size());
+		if (trueIdx.empty()) {
+			tmp += val[0];
+		}
+		mean.push_back(tmp / (trueIdx.size() + 1));
 	}
 	if (currentNum / input.camSet.variations) { // the very first round is finished, able to do statistics
-		std::vector<double> stdev(result1d.size(), 0.0);
+		std::vector<double> stdev;
 		for (size_t idx = 0; idx < result1d.size(); idx++)
 		{
 			double tmp = 0.0;
@@ -93,7 +96,7 @@ void MOTAnalysisThreadWoker::handleNewImg(QVector<double> img, int width, int he
 				tmp += (result1d[MOTAnalysisType::allTypes[idx]][trueid] - mean[idx])
 					* (result1d[MOTAnalysisType::allTypes[idx]][trueid] - mean[idx]);
 			}
-			stdev.push_back(sqrt( tmp / (trueIdx.size() - 1) ));
+			stdev.push_back(sqrt( tmp / (trueIdx.size()) ));
 		}
 		emit newPlotData1D(mean, stdev, currentNum);
 	}
@@ -119,7 +122,7 @@ std::vector<double> MOTAnalysisThreadWoker::fit1dGaussian(std::vector<double> Cr
 	std::generate(CrxKey.begin(), CrxKey.end(), [n = 0.0]() mutable { return n++; }); // 0,1,2,..., height
 	auto [xmin_it, xmax_it] = std::minmax_element(Crx.begin(), Crx.end());
 	double a0x = *xmax_it - *xmin_it;
-	double b0x = CrxKey.at(xmax_it - CrxKey.begin());/*although this return a const reference, can nontheless force a copy ctor to get a copy of the returned value*/
+	double b0x = CrxKey.at(xmax_it - Crx.begin());/*although this return a const reference, can nontheless force a copy ctor to get a copy of the returned value*/
 	double c0x = 0.5 * width;
 	double d0x = *xmin_it;
 	/* model function: a * exp( -1/2 * [ (t - b) / c ]^2 ) + d */
