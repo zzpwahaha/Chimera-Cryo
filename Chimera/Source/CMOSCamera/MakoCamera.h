@@ -40,6 +40,8 @@ public:
 
     void prepareForExperiment();
 
+    void setMOTCalcActive(bool active);
+
     MakoCameraCore& getMakoCore() { return core; };
     const CameraInfo& getCameraInfo() { return camInfo; }
 
@@ -48,6 +50,8 @@ public slots:
     void startExp();
     void finishExp();
 
+signals:
+    void imgReadyForAnalysis(QVector<double> img, int width, int height, size_t currentNum);
 
 private:
     void initPlotContextMenu();
@@ -68,6 +72,7 @@ private:
 
     unsigned int currentRepNumber;
     bool isExpRunning;
+    bool MOTCalcActive; // will be initialized in Analysis window before every experiment
 
     QCheckBox*                          m_expActive;
     QSpinBox*                           m_picsPerRep;

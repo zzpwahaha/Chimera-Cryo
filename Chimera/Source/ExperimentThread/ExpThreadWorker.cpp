@@ -60,6 +60,11 @@ void ExpThreadWorker::experimentThreadProcedure () {
 			deviceCalculateVariations (device, expRuntime.expParams);
 		}
 		calculateAdoVariations (expRuntime);
+
+		/// Anaylsis preparation
+		emit prepareAnalysis();
+		emit notification("Enabling real time analysis", 1);
+
 		runConsistencyChecks (expRuntime.expParams);
 		if (input->expType != ExperimentType::LoadMot) {
 			for (auto& device : input->devices.list) {
@@ -70,21 +75,36 @@ void ExpThreadWorker::experimentThreadProcedure () {
 				}
 			}
 		}
+
 		/// Begin experiment 
 		std::vector<double> finaltimes = input->ttls.getFinalTimes();
-		for (const auto& variationInc : range (determineVariationNumber (expRuntime.expParams))) {
-			initVariation (variationInc, expRuntime.expParams);
-			emit notification ("Programming Devices for Variation...\n");
-			//for (auto& device : input->devices.list) {
-			//	deviceProgramVariation (device, expRuntime.expParams, variationInc);
-			//}
-			emit notification ("Running Experiment.\n");
-			for (const auto& repInc : range (expRuntime.repetitions)) {
-				handlePause (isPaused, isAborting);
-				startRep (repInc, variationInc, input->skipNext == nullptr ? false : input->skipNext->load ());
+		//for (const auto& variationInc : range (determineVariationNumber (expRuntime.expParams))) {
+		//	initVariation (variationInc, expRuntime.expParams);
+		//	emit notification ("Programming Devices for Variation...\n");
+		//	//for (auto& device : input->devices.list) {
+		//	//	deviceProgramVariation (device, expRuntime.expParams, variationInc);
+		//	//}
+		//	emit notification ("Running Experiment.\n");
+		//	for (const auto& repInc : range (expRuntime.repetitions)) {
+		//		handlePause (isPaused, isAborting);
+		//		emit notification(qstr("Starting Repetition #" + qstr(repInc) + "\n"), 2);
+		//		startRep (repInc, variationInc, input->skipNext == nullptr ? false : input->skipNext->load ());
+		//		Sleep(finaltimes[variationInc]);//wait 500ms between rep, added temporarily by zzp 20210225
+		//	}
+		//}
+
+		for (const auto& repInc : range(expRuntime.repetitions)) {
+			emit notification(qstr("Starting Repetition #" + qstr(repInc) + "\n"), 0);
+			emit repUpdate(repInc);
+			for (const auto& variationInc : range(determineVariationNumber(expRuntime.expParams))) {
+				emit notification("Programming Devices for Variation...\n", 2);
+				initVariation(variationInc, expRuntime.expParams);
+				handlePause(isPaused, isAborting);
+				startRep(repInc, variationInc, input->skipNext == nullptr ? false : input->skipNext->load());
 				Sleep(finaltimes[variationInc]);//wait 500ms between rep, added temporarily by zzp 20210225
 			}
 		}
+
 		waitForAndorFinish ();
 		for (auto& device : input->devices.list) {
 			deviceNormalFinish (device);
@@ -1168,7 +1188,7 @@ void ExpThreadWorker::handlePause (std::atomic<bool>& isPaused, std::atomic<bool
 
 void ExpThreadWorker::initVariation (unsigned variationInc,std::vector<parameterType> expParams) {
 	auto variations = determineVariationNumber (expParams);
-	emit notification (("Variation #" + str (variationInc + 1) + "/" + str (variations) + ": ").c_str ());
+	emit notification (qstr("Variation #" + str (variationInc + 1) + "/" + str (variations) + ": \n"), 2);
 	if (input->sleepTime != 0) { Sleep (input->sleepTime); }
 	for (auto param : expParams) {
 		if (param.valuesVary) {
@@ -1176,7 +1196,7 @@ void ExpThreadWorker::initVariation (unsigned variationInc,std::vector<parameter
 				thrower ("Variable " + param.name + " varies, but has no values assigned to "
 					"it! (This shouldn't happen, it's a low-level bug...)");
 			}
-			emit notification ((param.name + ": " + str (param.keyValues[variationInc], 12) + "\r\n").c_str ());
+			emit notification (qstr(param.name + ": " + str (param.keyValues[variationInc], 12) + "\r\n"), 2);
 		}
 	}
 	waitForAndorFinish ();
@@ -1238,7 +1258,9 @@ void ExpThreadWorker::normalFinish (ExperimentType& expType, bool runMaster,
 
 void ExpThreadWorker::startRep (unsigned repInc, unsigned variationInc, bool skip) {
 	if (true /*runMaster*/) {
-		emit notification (qstr ("Starting Repetition #" + qstr (repInc) + "\n"), 2);
+		//QTime timer;
+		//timer.start();
+		//emit notification (qstr ("Starting Repetition #" + qstr (repInc) + "\n"), 2);
 		emit repUpdate (repInc + 1);
 		//input->aoSys.resetDacs (variationInc, skip);
 		//input->ttls.ftdi_trigger ();
@@ -1249,9 +1271,10 @@ void ExpThreadWorker::startRep (unsigned repInc, unsigned variationInc, bool ski
 		input->dds.writeDDSs(variationInc, skip);
 		input->ol.writeOLs(variationInc);
 		input->ttls.writeTtlDataToFPGA(variationInc, skip);
-
+		//emit notification("0.1: " + qstr(timer.elapsed()) + "\t");
+		Sleep(10); /// have to sleep for this amount of time to make TCP connect smoothly?????? zzp 2021/06/04 very annoying
 		input->zynqExp.sendCommand("trigger");
-
+		//emit notification("0.2: " + qstr(timer.elapsed()) + "\n");
 	}
 }
 

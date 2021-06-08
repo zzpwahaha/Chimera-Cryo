@@ -107,6 +107,7 @@ class ExpThreadWorker : public QObject
         void repUpdate (unsigned int);
         void prepareAndor (AndorRunSettings*, analysisSettings);
         void prepareMako (MakoSettings* settings, CameraInfo camInfo);
+		void prepareAnalysis();
         void plot_Xvals_determined (std::vector<double>);
         void doAoData (const std::vector<std::vector<plotDataVec>>& doData,
                        const std::vector<std::vector<plotDataVec>>& aoData);

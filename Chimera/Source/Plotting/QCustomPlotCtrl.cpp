@@ -7,12 +7,39 @@
 #include <qmenu.h>
 #include <AnalogInput/CalibrationManager.h>
 
+QCustomPlotCtrl::QCustomPlotCtrl() :
+	style(plotStyle::GeneralErrorPlot)
+{
+}
+
 QCustomPlotCtrl::QCustomPlotCtrl(unsigned numTraces, plotStyle inStyle, std::vector<int> thresholds_in,
 	bool narrowOpt, bool plotHistOption) :
-	style(inStyle), narrow(narrowOpt) {
+	style(inStyle)/*, narrow(narrowOpt)*/ {
 }
 
 QCustomPlotCtrl::~QCustomPlotCtrl() {
+}
+
+
+void QCustomPlotCtrl::init(IChimeraQtWindow* parent, QString titleIn)
+{
+	plot = new QCustomPlot(parent);
+	plot->setContextMenuPolicy(Qt::CustomContextMenu);
+	parent->connect(plot, &QtCharts::QChartView::customContextMenuRequested,
+		[this, parent](const QPoint& pos2) {
+			try {
+				handleContextMenu(pos2);
+			}
+			catch (ChimeraError& err) {
+				parent->reportErr(err.qtrace());
+			}
+		});
+	title = new QCPTextElement(plot, titleIn);
+	plot->plotLayout()->insertRow(0);
+	plot->plotLayout()->addElement(0, 0, title);
+	plot->setMinimumSize(400, 400);
+	resetChart();
+
 }
 
 void QCustomPlotCtrl::handleContextMenu(const QPoint& pos) {
@@ -110,7 +137,7 @@ void QCustomPlotCtrl::setData(std::vector<plotDataVec> newData) {
 		plot->graph(2)->setPen(QColor("orange"));
 		plot->graph(2)->setData(histCalXdata, histCalYdata);
 	}
-	else if (style == plotStyle::BinomialDataPlot) {
+	else if (style == plotStyle::BinomialDataPlot || style == plotStyle::GeneralErrorPlot) {
 		if (newData.size() == 0 || !plot) {
 			return;
 		}
@@ -275,27 +302,6 @@ void QCustomPlotCtrl::resetChart() {
 	plot->setBackground(QColor(defs["@StaticBackground"]));
 	title->setTextColor(defs["@NeutralTextColor"]);
 	plot->replot();
-}
-
-void QCustomPlotCtrl::init(IChimeraQtWindow* parent, QString titleIn) 
-{
-	plot = new QCustomPlot(parent);
-	plot->setContextMenuPolicy(Qt::CustomContextMenu);
-	parent->connect(plot, &QtCharts::QChartView::customContextMenuRequested,
-		[this, parent](const QPoint& pos2) {
-			try {
-				handleContextMenu(pos2);
-			}
-			catch (ChimeraError& err) {
-				parent->reportErr(err.qtrace());
-			}
-		});
-	title = new QCPTextElement(plot, titleIn);
-	plot->plotLayout()->insertRow(0);
-	plot->plotLayout()->addElement(0, 0, title);
-	plot->setMinimumSize(400, 400);
-	resetChart();
-
 }
 
 void QCustomPlotCtrl::setControlLocation(QRect loc) {

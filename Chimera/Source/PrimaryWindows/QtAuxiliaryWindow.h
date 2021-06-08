@@ -96,7 +96,8 @@ class QtAuxiliaryWindow : public IChimeraQtWindow{
 
 
 
-		ParameterSystem& getGlobals ();
+		ParameterSystem& getGlobals();
+		ParameterSystem& getConfigs();
 		std::vector<parameterType> getUsableConstants ();
 		void fillExpDeviceList (DeviceList& list);
 	protected:

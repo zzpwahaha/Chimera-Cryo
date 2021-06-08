@@ -196,6 +196,11 @@ ParameterSystem& QtAuxiliaryWindow::getGlobals (){
 	return globalParamCtrl;
 }
 
+ParameterSystem& QtAuxiliaryWindow::getConfigs()
+{
+	return configParamCtrl;
+}
+
 std::pair<unsigned, unsigned> QtAuxiliaryWindow::getTtlBoardSize (){
 	return ttlBoard.getTtlBoardSize ();
 }

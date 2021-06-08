@@ -428,7 +428,7 @@ void DataLogger::writeAndorPic( Matrix<long> image, imageParameters dims){
 void DataLogger::writeMakoPic(std::vector<double> image, int width, int height)
 {
 	if (fileIsOpen == false) {
-		thrower("Tried to write to h5 file (for basler pic), but the file is closed!\r\n");
+		thrower("Tried to write to h5 file (for Mako pic), but the file is closed!\r\n");
 	}
 	// starting coordinates of writebtn area in the h5 file of the array of picture data points.
 	hsize_t offset[] = { currentMakoPicNumber++, 0, 0 };

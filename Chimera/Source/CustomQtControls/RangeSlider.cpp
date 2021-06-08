@@ -397,7 +397,7 @@ RangeSliderIntg::RangeSliderIntg(Qt::Orientation ori, RangeSlider::Option handle
     vRSlayout->addLayout(vSB1, 0, 0, 1, 2);
     vRSlayout->addLayout(vSB2, 1, 0, 1, 2);
 
-    std::initializer_list<QCPAxis*> axisToHide;
+    std::array<QCPAxis*,3> axisToHide;
     if (orientation == Qt::Vertical) {
         axisToHide = { axslid->xAxis, axslid->xAxis2, axslid->yAxis2 };
     }

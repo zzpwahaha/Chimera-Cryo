@@ -1,6 +1,7 @@
 %%%%%%%%%%%%%%%%% Start With 1ms %%%%%%%%%%%%%%%%% 
 t = 1
 pulseon: mako1 10
-
+dac: dac1_15 tt
+dac: dac1_14 x
 t += 1000
 pulseon: do1_0 1

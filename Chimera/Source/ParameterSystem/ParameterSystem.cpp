@@ -81,6 +81,11 @@ void ParameterSystem::handleContextMenu (const QPoint& pos){
 			if (index.column () >= paramModel.preRangeColumns && (index.column () - paramModel.preRangeColumns) % 3 != 2) {
 				menu.addAction (toggleInclusivity);
 			}
+			auto params = paramModel.getParams();
+			if ((params[index.row()].constant && true)) {
+				addRange->setEnabled(false);
+				rmRange->setEnabled(false);
+			}
 		}
 	}
 	menu.addAction (newParam);
@@ -130,6 +135,8 @@ void ParameterSystem::initialize (IChimeraQtWindow* parent, std::string title, P
 	}
 	parametersView->connect (&paramModel, &ParameterModel::paramsChanged, 
 							 parent->scriptWin, &QtScriptWindow::updateVarNames);
+	parametersView->connect(&paramModel, &ParameterModel::paramsChanged,
+		[this]() {emit paramsChanged(); });
 	setTableviewColumnSize ();
 }
 

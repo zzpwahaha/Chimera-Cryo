@@ -59,6 +59,7 @@
       <WarningLevel>Level3</WarningLevel>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard_C>Default</LanguageStandard_C>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -127,6 +128,10 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Source\RealTimeMOTAnalysis\MOTAnalysisSystem.cpp" />
+    <ClCompile Include="Source\PrimaryWindows\QtAnalysisWindow.cpp" />
+    <ClCompile Include="Source\RealTimeMOTAnalysis\MOTAnalysisControl.cpp" />
+    <ClCompile Include="Source\RealTimeMOTAnalysis\MOTAnalysisThreadWoker.cpp" />
     <ClCompile Include="Source\CMOSCamera\CMOSSetting.cpp" />
     <ClCompile Include="Source\CMOSCamera\FrameObserver.cpp" />
     <ClCompile Include="Source\CMOSCamera\GaussianFit.cpp" />
@@ -163,6 +168,10 @@
     <QtMoc Include="Source\PrimaryWindows\QtMakoWindow.h" />
     <QtMoc Include="Source\GeneralImaging\PictureViewer.h" />
     <QtMoc Include="Source\CustomQtControls\LineEditCompleter.h" />
+    <QtMoc Include="Source\PrimaryWindows\QtAnalysisWindow.h" />
+    <ClInclude Include="Source\RealTimeMOTAnalysis\MOTAnalysisSystem.h" />
+    <ClInclude Include="Source\RealTimeMOTAnalysis\MOTAnalysisControl.h" />
+    <QtMoc Include="Source\RealTimeMOTAnalysis\MOTAnalysisThreadWoker.h" />
     <ClInclude Include="Source\AnalogInput\BSplineFit.h" />
     <ClInclude Include="Source\AnalogInput\PolynomialFit.h" />
     <ClInclude Include="Source\AnalogInput\AiCore.h" />
@@ -275,6 +284,7 @@
     <ClCompile Include="Source\RealTimeDataAnalysis\MachineOptimizer.cpp" />
     <ClCompile Include="Source\RealTimeDataAnalysis\PlotDesignerDialog.cpp" />
     <ClCompile Include="Source\RealTimeDataAnalysis\QtPlotDesignerDlg.cpp" />
+    <ClCompile Include="Source\RealTimeMOTAnalysis\MOTAnalysisType.cpp" />
     <ClCompile Include="Source\Scripts\CQCodeEdit.cpp" />
     <ClCompile Include="Source\Scripts\Script.cpp" />
     <ClCompile Include="Source\Scripts\ScriptStream.cpp" />
@@ -394,6 +404,8 @@
     <ClInclude Include="Source\RealTimeDataAnalysis\DataAnalysisControl.h" />
     <ClInclude Include="Source\RealTimeDataAnalysis\PlotDesignerDialog.h" />
     <ClInclude Include="Source\RealTimeDataAnalysis\realTimePlotterInput.h" />
+    <ClInclude Include="Source\RealTimeMOTAnalysis\MOTAnalysisType.h" />
+    <ClInclude Include="Source\RealTimeMOTAnalysis\MOTThreadInput.h" />
     <ClInclude Include="Source\Scripts\ScriptableDevices.h" />
     <ClInclude Include="Source\Scripts\ScriptStream.h" />
     <ClInclude Include="Source\stdafx.h" />

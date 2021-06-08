@@ -27,6 +27,7 @@ typedef std::vector<dataPoint> plotDataVec;
 class QCustomPlotCtrl : public QObject {
 	Q_OBJECT;
 public:
+	QCustomPlotCtrl();
 	QCustomPlotCtrl(unsigned numTraces, plotStyle inStyle, std::vector<int> thresholds,
 		bool narrowOpt = false, bool plotHistOption = false);
 	~QCustomPlotCtrl();
@@ -45,7 +46,7 @@ public:
 private:
 
 	QCPTextElement* title;
-	const bool narrow;
+	//const bool narrow;
 	std::vector<int> thresholds;
 	plotStyle style;
 	// first level deliminates different lines which get different colors. second level deliminates different 

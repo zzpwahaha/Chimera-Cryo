@@ -405,6 +405,21 @@
     <ClCompile Include="Source\CMOSCamera\MakoSettingControl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\RealTimeMOTAnalysis\MOTAnalysisThreadWoker.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RealTimeMOTAnalysis\MOTAnalysisControl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\PrimaryWindows\QtAnalysisWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RealTimeMOTAnalysis\MOTAnalysisType.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RealTimeMOTAnalysis\MOTAnalysisSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="3rd_Party\qcustomplot\qcustomplot.h">
@@ -546,6 +561,12 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="Source\CMOSCamera\MakoCameraCore.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\PrimaryWindows\QtAnalysisWindow.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\RealTimeMOTAnalysis\MOTAnalysisThreadWoker.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
@@ -911,6 +932,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\CMOSCamera\ImageProcessingThread.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\RealTimeMOTAnalysis\MOTAnalysisControl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\RealTimeMOTAnalysis\MOTThreadInput.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\RealTimeMOTAnalysis\MOTAnalysisType.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\RealTimeMOTAnalysis\MOTAnalysisSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

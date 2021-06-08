@@ -6,6 +6,7 @@
 #include <PrimaryWindows/QtAndorWindow.h>
 #include <PrimaryWindows/QtAuxiliaryWindow.h>
 #include <PrimaryWindows/QtMakoWindow.h>
+#include <PrimaryWindows/QtAnalysisWindow.h>
 #include <ExperimentThread/autoCalConfigInfo.h>
 #include <GeneralObjects/ChimeraStyleSheets.h>
 #include <ExperimentThread/ExpThreadWorker.h>
@@ -32,15 +33,18 @@ QtMainWindow::QtMainWindow () :
 		auxWin = new QtAuxiliaryWindow;
 		which = "CMOS";
 		makoWin = new QtMakoWindow;
+		which = "Analysis";
+		analysisWin = new QtAnalysisWindow;
 	}
 	catch (ChimeraError& err) {
 		errBox ("FATAL ERROR: " + which + " Window constructor failed! Error: " + err.trace ());
 		return;
 	}
-	scriptWin->loadFriends( this, scriptWin, auxWin, andorWin, makoWin );
-	andorWin->loadFriends (this, scriptWin, auxWin, andorWin, makoWin);
-	auxWin->loadFriends (this, scriptWin, auxWin, andorWin, makoWin);
-	makoWin->loadFriends(this, scriptWin, auxWin, andorWin, makoWin);
+	scriptWin->loadFriends( this, scriptWin, auxWin, andorWin, makoWin, analysisWin);
+	andorWin->loadFriends (this, scriptWin, auxWin, andorWin, makoWin, analysisWin);
+	auxWin->loadFriends (this, scriptWin, auxWin, andorWin, makoWin, analysisWin);
+	makoWin->loadFriends(this, scriptWin, auxWin, andorWin, makoWin, analysisWin);
+	analysisWin->loadFriends(this, scriptWin, auxWin, andorWin, makoWin, analysisWin);
 	startupTimes.push_back (chronoClock::now ());
 
 	for (auto* window : winList ()) {
@@ -83,6 +87,7 @@ QtMainWindow::QtMainWindow () :
 		initializationString += auxWin->getVisaDeviceStatus ();
 		initializationString += makoWin->getSystemStatusString();
 		initializationString += scriptWin->getSystemStatusString ();
+		initializationString += analysisWin->getSystemStatusString();
 		reportStatus (qstr(initializationString));
 	}
 	catch (ChimeraError & err) {
@@ -171,11 +176,13 @@ void QtMainWindow::showHardwareStatus (){
 	try	{
 		// ordering of aux window pieces is a bit funny because I want the devices grouped by type, not by window.
 		std::string initializationString;
-		initializationString += getSystemStatusString ();
-		initializationString += auxWin->getOtherSystemStatusMsg ();
-		initializationString += andorWin->getSystemStatusString ();
-		initializationString += auxWin->getVisaDeviceStatus ();
-		initializationString += scriptWin->getSystemStatusString ( );
+		initializationString += getSystemStatusString();
+		initializationString += auxWin->getOtherSystemStatusMsg();
+		initializationString += andorWin->getSystemStatusString();
+		initializationString += auxWin->getVisaDeviceStatus();
+		initializationString += makoWin->getSystemStatusString();
+		initializationString += scriptWin->getSystemStatusString();
+		initializationString += analysisWin->getSystemStatusString();
 		infoBox (initializationString);
 	}
 	catch (ChimeraError& err)	{
@@ -253,6 +260,7 @@ void QtMainWindow::startExperimentThread (ExperimentThreadInput* input){
 	connect (expWorker, &ExpThreadWorker::updateBoxColor, this, &QtMainWindow::handleColorboxUpdate);
 	connect (expWorker, &ExpThreadWorker::prepareAndor, andorWin, &QtAndorWindow::handlePrepareForAcq);
 	connect (expWorker, &ExpThreadWorker::prepareMako, makoWin, &QtMakoWindow::prepareWinForAcq);
+	connect (expWorker, &ExpThreadWorker::prepareAnalysis, analysisWin, &QtAnalysisWindow::prepareCalcForAcq);
 	connect (expWorker, &ExpThreadWorker::notification, this, &QtMainWindow::handleNotification);
 	connect (expWorker, &ExpThreadWorker::warn, this, &QtMainWindow::onErrorMessage);
 	connect (expWorker, &ExpThreadWorker::doAoData, auxWin, &QtAuxiliaryWindow::handleDoAoPlotData);

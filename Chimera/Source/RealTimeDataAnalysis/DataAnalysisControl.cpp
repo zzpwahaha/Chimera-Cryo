@@ -5,7 +5,7 @@
 #include "Control.h"
 #include "PrimaryWindows/QtAndorWindow.h"
 #include "ConfigurationSystems/ConfigSystem.h"
-#include "RealTimeDataAnalysis/PlotDesignerDialog.h"
+#include "RealTimeDataAnalysis/QtPlotDesignerDlg.h"
 #include "RealTimeDataAnalysis/realTimePlotterInput.h"
 #include "GeneralUtilityFunctions/range.h"
 #include <PrimaryWindows/QtMainWindow.h>
@@ -84,15 +84,11 @@ void DataAnalysisControl::handleContextMenu (const QPoint& pos) {
 	menu.addAction (detailsAction);
 	auto* editAction = new QAction ("Edit Plot", plotListview);
 	plotListview->connect (detailsAction, &QAction::triggered, [this, item]() {
-		try {
-			// edit existing plot file using the plot designer.
-			//PlotDesignerDialog dlg (fonts, PLOT_FILES_SAVE_LOCATION + "\\" + allTinyPlots[clRow].name + "."
-			//						  + PLOTTING_EXTENSION);
-			//dlg.DoModal ();
-		}
-		catch (ChimeraError & err) {
-			errBox (err.trace ());
-		}});
+		QtPlotDesignerDlg* dialog = new QtPlotDesignerDlg(unofficialPicsPerRep);
+		dialog->setStyleSheet(chimeraStyleSheets::stdStyleSheet());
+		dialog->exec();
+		//allTinyPlots.push_back (newPlot);
+		reloadListView(); });
 	menu.addAction (editAction);
 
 	auto* newPerson = new QAction ("New Plot", plotListview);

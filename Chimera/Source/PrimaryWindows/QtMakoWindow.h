@@ -21,6 +21,7 @@ public:
     void windowSaveConfig(ConfigStream& newFile);
     void fillExpDeviceList(DeviceList& list);
     std::string getSystemStatusString();
+    MakoCamera* getMakoCam(int idx) { return &cam[idx]; }
 public slots: //will this work without qslot? NO zzp 2021/06/01
     void prepareWinForAcq(MakoSettings* settings, CameraInfo caminfo);
 

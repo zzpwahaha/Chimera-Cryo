@@ -234,6 +234,7 @@ void MakoCamera::finishExp()
     m_picsPerRep->setEnabled(true);
     imgCThread.experimentFinished();
     isExpRunning = false;
+    MOTCalcActive = false;
 }
 
 
@@ -580,6 +581,11 @@ void MakoCamera::prepareForExperiment()
     isExpRunning = true;
 }
 
+void MakoCamera::setMOTCalcActive(bool active)
+{
+    MOTCalcActive = active;
+}
+
 void MakoCamera::handleExpImage(QVector<double> img, int width, int height)
 {
     if (!isExpRunning) {
@@ -595,10 +601,13 @@ void MakoCamera::handleExpImage(QVector<double> img, int width, int height)
                 "disk continously. Double check if this is what you need.\n");
             return;
         }
+        if (MOTCalcActive) {
+            emit imgReadyForAnalysis(img, width, height, currentRepNumber - 1);
+        }
         andorWin->getLogger().writeMakoPic(img.toStdVector(), width, height);
 
         if (currentRepNumber == core.getRunningSettings().totalPictures()) {
-            // handle balser finish
+            // handle mako finish
             isExpRunning = false;
             imgCThread.experimentFinished();
             m_OperatingStatusLabel->setText("Exp Finished");

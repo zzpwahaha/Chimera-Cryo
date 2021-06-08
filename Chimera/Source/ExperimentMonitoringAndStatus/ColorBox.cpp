@@ -17,7 +17,7 @@ ColorBox::ColorBox(IChimeraQtWindow* parent, DeviceList devices)
 		box.delim = dev.getDelim ();
 		box.ctrl = new QLabel(box.delim.c_str(), parent);
 		this->addWidget(box.ctrl, 0);
-		box.ctrl->setStyleSheet ("QLabel { font: 8pt; }");
+		//box.ctrl->setStyleSheet ("QLabel { font: 8pt; }");
 	}
 	//zynqProg =new QProgressBar(parent);
 	//zynqProg->setRange(0, 100);
