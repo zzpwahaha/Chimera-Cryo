@@ -1272,7 +1272,7 @@ void ExpThreadWorker::startRep (unsigned repInc, unsigned variationInc, bool ski
 		input->ol.writeOLs(variationInc);
 		input->ttls.writeTtlDataToFPGA(variationInc, skip);
 		//emit notification("0.1: " + qstr(timer.elapsed()) + "\t");
-		Sleep(10); /// have to sleep for this amount of time to make TCP connect smoothly?????? zzp 2021/06/04 very annoying
+		Sleep(50); /// have to sleep for this amount of time to make TCP connect smoothly?????? zzp 2021/06/04 very annoying
 		input->zynqExp.sendCommand("trigger");
 		//emit notification("0.2: " + qstr(timer.elapsed()) + "\n");
 	}

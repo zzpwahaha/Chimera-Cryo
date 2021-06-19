@@ -6,14 +6,8 @@
 MOTAnalysisSystem::MOTAnalysisSystem(IChimeraQtWindow* parent)
 	: IChimeraSystem(parent)
 	, MOTCalcCtrl{ { MOTAnalysisControl(parent),MOTAnalysisControl(parent),MOTAnalysisControl(parent) } }
-	//, MOTCalcCtrl1(parent)
-	//, MOTCalcCtrl2(parent)
-	//, MOTCalcCtrl3(parent)
 {
-	//MOTCalcCtrl.resize(1);
-	//MOTCalcCtrl.push_back(MOTCalcCtrl1);
-	//MOTCalcCtrl.push_back(MOTCalcCtrl2);
-	//MOTCalcCtrl.push_back(MOTCalcCtrl3);
+
 }
 
 void MOTAnalysisSystem::initialize()
@@ -21,9 +15,6 @@ void MOTAnalysisSystem::initialize()
 	for (auto& calcCtrl : MOTCalcCtrl) {
 		calcCtrl.initialize(this->parentWin);
 	}
-	//MOTCalcCtrl1.initialize(this->parentWin);
-	//MOTCalcCtrl2.initialize(this->parentWin);
-	//MOTCalcCtrl3.initialize(this->parentWin);
 }
 
 void MOTAnalysisSystem::prepareMOTAnalysis()

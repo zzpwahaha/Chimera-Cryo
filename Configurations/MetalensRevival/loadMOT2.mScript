@@ -1,0 +1,91 @@
+%%%%%%%%%%%%%%%%% Start With 1ms %%%%%%%%%%%%%%%%% 
+t = 1
+ddsfreq: dds0_1 80
+ddsfreq: dds2_0 80
+t += 5
+ddsamp: dds0_1 10
+ddsamp: dds2_0 10
+
+t += 10
+on: scimotzshutter
+%LOAD MOT
+on: SrcMotTrg
+dac: SrcMotAmp 9.9
+on: SciMotTrg
+dac: SciMotAmp 9.9
+on: TaRepTrg 
+dac: TaRepAmp 9.9
+
+dac: motcoil1 7
+dac: motcoil2 -7
+
+dac: biascoilx 1.9
+dac: biascoily -1.9
+dac: biascoilz -0.5
+
+ol: ol0_0 1222
+ol: ol0_1 5280
+
+t += 700
+%%PGC
+%off: SrcMotTrg
+%dac: SrcMotAmp 0
+%on: SciMotTrg
+%dac: SciMotAmp 6.5 
+%
+%dac: TaRepAmp 5
+%
+%dac: motcoil1 0
+%dac: motcoil2 0
+%
+%dac: biascoilx -0.6
+%dac: biascoily -0.63
+%dac: biascoilz -0.05
+%
+%ol: ol0_0 1370
+%ol: ol0_1 5280
+%
+%t += 20
+%TOF
+off: SrcMotTrg
+dac: SrcMotAmp 0
+off: SciMotTrg
+dac: SciMotAmp 0
+
+dac: motcoil1 0
+dac: motcoil2 0
+
+
+%Fluorescence
+off: scimotzshutter
+t += 0.1
+off: SrcMotTrg
+dac: SrcMotAmp 0
+off: SciMotTrg
+dac: SciMotAmp 9.9 
+
+dac: TARepAmp 9.9
+on: TARepTrg 
+
+ol: ol0_0 1206
+ol: ol0_1 5282
+
+t += 0.6
+pulseon: mako1 1
+t += 0.1
+pulseon: SciMotTrg 3
+
+%END sequence
+t = 1300
+ol: ol0_0 1206
+ol: ol0_1 5282
+%pulseon: SciMotTrg 10
+
+
+
+
+
+
+
+
+
