@@ -46,7 +46,7 @@ QVariant ParameterModel::data (const QModelIndex& index, int role) const{
 		}
 		case Qt::BackgroundRole: { // background color
 			if (param.active) {
-				return QVariant (QBrush (QColor (40,40,80)));
+				return QVariant (QBrush (QColor (31, 148, 7)));
 			}
 			return QVariant (); // default
 		}
