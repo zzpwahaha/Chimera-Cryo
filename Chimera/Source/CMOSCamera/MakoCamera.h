@@ -77,6 +77,8 @@ private:
     QCheckBox*                          m_expActive;
     QSpinBox*                           m_picsPerRep;
 	QLabel*                             m_OperatingStatusLabel;
+    QPushButton*                        m_ImageSizeButtonX;
+    QPushButton*                        m_ImageSizeButtonY;
     QPushButton*                        m_ImageSizeButtonH;
     QPushButton*                        m_ImageSizeButtonW;
     //QPushButton*                        m_FormatButton;

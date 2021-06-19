@@ -60,11 +60,15 @@ void MakoCamera::initialize()
     m_OperatingStatusLabel = new QLabel(" Ready ", this);
     m_TrigOnOffButton = new QPushButton("Trig:On/Off", this);
     m_TrigSourceButton = new QPushButton("TrigSrc", this);
+    m_ImageSizeButtonX = new QPushButton("X", this);
+    m_ImageSizeButtonY = new QPushButton("Y", this);
     m_ImageSizeButtonH = new QPushButton("sizeH", this);
     m_ImageSizeButtonW = new QPushButton("sizeW", this);
     QWidget* imageSizeBtn = new QWidget();
     QHBoxLayout* imageSizeBtnLayout = new QHBoxLayout(imageSizeBtn);
     imageSizeBtnLayout->setMargin(0);
+    imageSizeBtnLayout->addWidget(m_ImageSizeButtonX);
+    imageSizeBtnLayout->addWidget(m_ImageSizeButtonY);
     imageSizeBtnLayout->addWidget(m_ImageSizeButtonH);
     imageSizeBtnLayout->addWidget(m_ImageSizeButtonW);
     QLabel* framesLabel = new QLabel("frame#", this);
@@ -83,7 +87,8 @@ void MakoCamera::initialize()
     statusbar2->addWidget(framerateButton);
 
     m_OperatingStatusLabel->setStyleSheet("background-color: rgb(0,0, 0); color: rgb(255,255,255)");
-    for (auto& btn : { m_ImageSizeButtonH ,m_ImageSizeButtonW,m_CameraGainButton,m_ExposureTimeButton,
+    for (auto& btn : { m_ImageSizeButtonX,m_ImageSizeButtonY,m_ImageSizeButtonH ,m_ImageSizeButtonW,
+        m_CameraGainButton,m_ExposureTimeButton,
         framerateButton,m_TrigOnOffButton,m_TrigSourceButton })
         btn->setStyleSheet("border: none; color: rgb(128, 89, 255); font: 10pt");
     
@@ -103,6 +108,10 @@ void MakoCamera::initialize()
         handleStatusButtonClicked("TriggerMode"); });
     connect(m_TrigSourceButton, &QPushButton::clicked, this, [this]() {
         handleStatusButtonClicked("TriggerSource"); });
+    connect(m_ImageSizeButtonX, &QPushButton::clicked, this, [this]() {
+        handleStatusButtonClicked("OffsetX"); });
+    connect(m_ImageSizeButtonY, &QPushButton::clicked, this, [this]() {
+        handleStatusButtonClicked("OffsetY"); });
     connect(m_ImageSizeButtonH, &QPushButton::clicked, this, [this]() {
         handleStatusButtonClicked("Height"); });
     connect(m_ImageSizeButtonW, &QPushButton::clicked, this, [this]() {
@@ -565,7 +574,8 @@ void MakoCamera::updateStatusBar()
     //viewer.onSetMousePosInCMap(&event, m_CursorScenePosLabel);
     //imgCThread.updateExposureTime();
     //imgCThread.updateCameraGain();
-
+    m_ImageSizeButtonX->setText("X: " + qstr(ms.dims.left));
+    m_ImageSizeButtonY->setText("Y: " + qstr(ms.dims.bottom));
     m_ImageSizeButtonH->setText("Size H: " + qstr(ms.dims.height()));
     m_ImageSizeButtonW->setText(",W: " + qstr(ms.dims.width()) + " ");
     m_ExposureTimeButton->setText("Exposure time (ms): " + qstr(ms.exposureTime / 1.0e3, 3));
