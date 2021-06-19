@@ -69,7 +69,7 @@ std::string QtSerialFlume::read ()
 	}
 	/*have to use this funny way to get the feedback properly. May be don't have to have the feedback*/
 	bool dataready = false;
-	for (size_t i = 0; i < 50; i++) {
+	for (size_t i = 0; i < 500; i++) {
 		if (port.waitForReadyRead(10) || port.bytesAvailable() != 0) {
 			dataready = true;
 			break;
