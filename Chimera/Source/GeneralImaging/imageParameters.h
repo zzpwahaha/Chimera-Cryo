@@ -40,14 +40,14 @@ struct imageParameters{
 		if ( this->horizontalBinning == 0 ){
 			thrower ( "ERROR: In imageParameters.width(), horizontalBinning was zero!" );
 		}
-		return horRawPixelNum() / this->horizontalBinning;
+		return horRawPixelNum() /*/ this->horizontalBinning*/;
 	}
 	/* in units of # of binned pixels */
 	unsigned height( ){
 		if ( this->verticalBinning == 0 ){
 			thrower ( "ERROR: In imageParameters.width(), verticalBinning was zero!" );
 		}
-		return vertRawPixelNum() / this->verticalBinning;
+		return vertRawPixelNum() /*/ this->verticalBinning*/;
 	}
 	/* in units of # of binned pixels */
 	unsigned size ( ){
