@@ -429,8 +429,9 @@ void QtAuxiliaryWindow::handleMasterConfigSave (std::stringstream& configStream)
 void QtAuxiliaryWindow::handleNormalFin () {
 	try {
 		/*TODO add dds*/
-		aoSys.setDacStatusNoForceOut (aoSys.getCore().getFinalSnapshot ());
-		ttlBoard.setTtlStatusNoForceOut (ttlBoard.getCore().getFinalSnapshot ());
+		//aoSys.setDacStatusNoForceOut (aoSys.getCore().getFinalSnapshot ());
+		//ttlBoard.setTtlStatusNoForceOut (ttlBoard.getCore().getFinalSnapshot ());
+		/// 2021/06/23 I want the control to remain at the before-experiment-status after exp finishes --ZZP
 	}
 	catch (ChimeraError&) { /* this gets thrown if no dac events. just continue.*/ }
 }
