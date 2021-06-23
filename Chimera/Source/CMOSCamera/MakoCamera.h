@@ -81,6 +81,8 @@ private:
     QPushButton*                        m_ImageSizeButtonY;
     QPushButton*                        m_ImageSizeButtonH;
     QPushButton*                        m_ImageSizeButtonW;
+    QPushButton*                        m_ImageBinButtonH;
+    QPushButton*                        m_ImageBinButtonW;
     //QPushButton*                        m_FormatButton;
     QPushButton*                        m_TrigOnOffButton;
     QPushButton*                        m_TrigSourceButton;

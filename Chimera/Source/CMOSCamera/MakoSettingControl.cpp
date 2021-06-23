@@ -267,6 +267,9 @@ void MakoSettingControl::initialzePreset()
     setFeatureValue("Gamma", 1.0, errstr); 
     setFeatureValue("PixelFormat", "Mono12", errstr);
     setFeatureValue("ExposureAuto", "Off", errstr);
+    setFeatureValue("BinningHorizontalMode", "Sum", errstr);
+    setFeatureValue("BinningVerticalMode", "Average", errstr); 
+    setFeatureValue("BlackLevel", 0.0, errstr);
     FeaturePtr gsvp = getFeaturePtrFromMap("GVSP Adjust Packet Size"); //adjust package size to make sure it works
     gsvp->RunCommand();
 }
@@ -587,15 +590,21 @@ void MakoSettingControl::initializeWidget(QWidget* widget)
 
 void MakoSettingControl::updateRegisterFeature()
 {
-    for (int i = 0; i < model()->rowCount(); i++)
-    {
-        if (isExpanded(model()->index(i, 0)))
+    try {
+        for (int i = 0; i < model()->rowCount(); i++)
         {
-            expand(model()->index(i, 0));
+            if (isExpanded(model()->index(i, 0)))
+            {
+                expand(model()->index(i, 0));
+            }
         }
+
+        updateColWidth();
+    }
+    catch (ChimeraError& e) {
+        emit errBox(e.trace());
     }
 
-    updateColWidth();
 }
 
 void MakoSettingControl::updateUnRegisterFeature()
@@ -609,9 +618,11 @@ void MakoSettingControl::updateUnRegisterFeature()
 void MakoSettingControl::handleSavingConfig(ConfigStream& configFile, std::string delim)
 {
     if (m_pCam == nullptr) {
-        return; //means in SAFEMODE
+        /*return*/; //means in SAFEMODE, do not update the setting but do write to the config
     }
-    updateCurrentSettings();
+    else {
+        updateCurrentSettings();
+    }
     configFile << delim + "\n";
     configFile << "/*Mako System Active:*/ " << currentSettings.expActive
         << "\n/*Left:*/ " << currentSettings.dims.left
@@ -1243,7 +1254,14 @@ void MakoSettingControl::createIntSliderSpinBox(const QModelIndex item)
     QHBoxLayout* HSpinSliderLayout_Int = new QHBoxLayout(m_IntSpinSliderWidget);
     m_SpinBox_Int = new IntSpinBox(m_IntSpinSliderWidget);
     m_SpinBox_Int->setObjectName("value");      //mark as the element of this dialog that contains the value, used in "updateWidget()"
-    m_Slider_Int = new TickSlider(Qt::Horizontal, m_IntSpinSliderWidget);
+    QString tn = sFeature_IntSpinBox; //tmp name
+    if (tn == "OffsetX" || tn == "OffsetX" || tn == "OffsetY" || tn == "Height" || tn == "Width" || tn == "Gain" || tn == "ExposureTimeAbs"
+        || tn == "AcquisitionFrameRateAbs") {
+        m_Slider_Int = new TickSlider(Qt::Horizontal, this);
+    }
+    else {
+        m_Slider_Int = new QSlider(Qt::Horizontal, this);
+    }
     m_Slider_Int->installEventFilter(this);
     m_Slider_Int->setTickPosition(QSlider::TicksBelow);
 
@@ -1273,7 +1291,12 @@ void MakoSettingControl::createIntSliderSpinBox(const QModelIndex item)
     m_Slider_Int->setPageStep((m_nMaximum - m_nMinimum) / 5 / m_nIncrement);
 
     QHBoxLayout* HSpinSliderLayout_Int2 = new QHBoxLayout(m_IntSpinSliderWidget);
-    HSpinSliderLayout_Int2->addWidget(m_Slider_Int);
+    if ((sFeature_IntSpinBox == "OffsetX" || sFeature_IntSpinBox == "OffsetY") && m_nMaximum == 0) {
+        // do not add slider, it will cause trouble
+    }
+    else {
+        HSpinSliderLayout_Int2->addWidget(m_Slider_Int);
+    }
     HSpinSliderLayout_Int2->addWidget(m_SpinBox_Int);
     HSpinSliderLayout_Int->addLayout(HSpinSliderLayout_Int2);
 
@@ -1335,8 +1358,13 @@ void MakoSettingControl::onIntSpinBoxClick()
     {
         nValue = (nValue + (m_nIncrement - (nValue % m_nIncrement)));
     }
+    try {
+        setIntegerValue(nValue);
 
-    setIntegerValue(nValue);
+    }
+    catch (ChimeraError& e) {
+        errBox(e.what());
+    }
 }
 
 
@@ -2026,7 +2054,7 @@ template<typename dataType>
 dataType MakoSettingControl::getFeatureValue(std::string feaName, std::string& errstr)
 {
     if (m_pCam == nullptr) {
-        return 0; //means in SAFEMODE
+        return dataType(); //means in SAFEMODE
     }
     FeaturePtr feature = getFeaturePtrFromMap(qstr(feaName));
     VmbErrorType error;
@@ -2121,6 +2149,8 @@ void MakoSettingControl::updateCurrentSettings()
     currentSettings.dims.right = currentSettings.dims.left + getFeatureValue<VmbInt64_t>("Width", errorStr) - 1;
     currentSettings.dims.bottom = getFeatureValue<VmbInt64_t>("OffsetY", errorStr);
     currentSettings.dims.top = currentSettings.dims.bottom + getFeatureValue<VmbInt64_t>("Height", errorStr) - 1;
+    currentSettings.dims.horizontalBinning = getFeatureValue<VmbInt64_t>("BinningHorizontal", errorStr);
+    currentSettings.dims.verticalBinning = getFeatureValue<VmbInt64_t>("BinningVertical", errorStr);
     if (!errorStr.empty()) {
         thrower("Error in update mako Current Settings" + errorStr);
     }

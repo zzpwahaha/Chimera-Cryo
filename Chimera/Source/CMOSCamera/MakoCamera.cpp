@@ -71,6 +71,13 @@ void MakoCamera::initialize()
     imageSizeBtnLayout->addWidget(m_ImageSizeButtonY);
     imageSizeBtnLayout->addWidget(m_ImageSizeButtonH);
     imageSizeBtnLayout->addWidget(m_ImageSizeButtonW);
+    QWidget* imageBinBtn = new QWidget();
+    QHBoxLayout* imageBinBtnLayout = new QHBoxLayout(imageBinBtn);
+    imageBinBtnLayout->setMargin(0);
+    m_ImageBinButtonH = new QPushButton("BinH");
+    m_ImageBinButtonW = new QPushButton("BinW");
+    imageBinBtnLayout->addWidget(m_ImageBinButtonH);
+    imageBinBtnLayout->addWidget(m_ImageBinButtonW);
     QLabel* framesLabel = new QLabel("frame#", this);
     QPushButton* framerateButton = new QPushButton("FPS", this);
     m_CursorScenePosLabel = new QLabel("pos", this);
@@ -78,6 +85,7 @@ void MakoCamera::initialize()
     m_CameraGainButton = new QPushButton("gain", this);
     statusbar1->addWidget(m_OperatingStatusLabel);
     statusbar1->addWidget(imageSizeBtn);
+    statusbar1->addWidget(imageBinBtn);
     statusbar1->addWidget(m_TrigOnOffButton);
     statusbar1->addWidget(m_TrigSourceButton);
     statusbar1->addWidget(m_CursorScenePosLabel);
@@ -88,6 +96,7 @@ void MakoCamera::initialize()
 
     m_OperatingStatusLabel->setStyleSheet("background-color: rgb(0,0, 0); color: rgb(255,255,255)");
     for (auto& btn : { m_ImageSizeButtonX,m_ImageSizeButtonY,m_ImageSizeButtonH ,m_ImageSizeButtonW,
+        m_ImageBinButtonH,m_ImageBinButtonW,
         m_CameraGainButton,m_ExposureTimeButton,
         framerateButton,m_TrigOnOffButton,m_TrigSourceButton })
         btn->setStyleSheet("border: none; color: rgb(128, 89, 255); font: 10pt");
@@ -116,6 +125,10 @@ void MakoCamera::initialize()
         handleStatusButtonClicked("Height"); });
     connect(m_ImageSizeButtonW, &QPushButton::clicked, this, [this]() {
         handleStatusButtonClicked("Width"); });
+    connect(m_ImageBinButtonH, &QPushButton::clicked, this, [this]() {
+        handleStatusButtonClicked("BinningVertical"); });
+    connect(m_ImageBinButtonW, &QPushButton::clicked, this, [this]() {
+        handleStatusButtonClicked("BinningHorizontal"); });
     connect(m_CameraGainButton, &QPushButton::clicked, this, [this]() {
         handleStatusButtonClicked("Gain"); });
     connect(m_ExposureTimeButton, &QPushButton::clicked, this, [this]() {
@@ -578,6 +591,8 @@ void MakoCamera::updateStatusBar()
     m_ImageSizeButtonY->setText("Y: " + qstr(ms.dims.bottom));
     m_ImageSizeButtonH->setText("Size H: " + qstr(ms.dims.height()));
     m_ImageSizeButtonW->setText(",W: " + qstr(ms.dims.width()) + " ");
+    m_ImageBinButtonH->setText("Bin H: " + qstr(ms.dims.verticalBinning));
+    m_ImageBinButtonW->setText(",W: " + qstr(ms.dims.horizontalBinning) + " ");
     m_ExposureTimeButton->setText("Exposure time (ms): " + qstr(ms.exposureTime / 1.0e3, 3));
     m_CameraGainButton->setText("Gain (dB): " + qstr(ms.rawGain, 0));
     m_TrigOnOffButton->setText(ms.trigOn ? "Trig: On" : "Trig: Off");

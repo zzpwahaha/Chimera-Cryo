@@ -20,7 +20,7 @@ MakoCameraCore::MakoCameraCore(CameraInfo camInfo)
         makoCtrl.initialize(qstr(cameraName), cameraPtr); // cameraName is initialized in initializeVimba->validateCamera
     }
     catch (ChimeraError& e) {
-        throwNested(e.what());
+        throwNested(e.trace());
     }
 
     connect(&makoCtrl, &MakoSettingControl::resetFPS, [this]() {
@@ -78,6 +78,9 @@ void MakoCameraCore::logSettings(DataLogger& log, ExpThreadWorker* threadworker)
 
 // to enable emitting imageReadyForExp in ImageCalculatingThread
 void MakoCameraCore::loadExpSettings(ConfigStream& stream) {
+    if (camInfo.safemode) {
+        return;
+    }
     ConfigSystem::stdGetFromConfig(stream, *this, expRunSettings, Version("1.0"));
     expRunSettings.repsPerVar = ConfigSystem::stdConfigGetter(stream, "REPETITIONS",
         Repetitions::getSettingsFromConfig);
@@ -89,6 +92,9 @@ void MakoCameraCore::loadExpSettings(ConfigStream& stream) {
 
 void MakoCameraCore::calculateVariations(std::vector<parameterType>& params, ExpThreadWorker* threadworker)
 {
+    if (camInfo.safemode) {
+        return;
+    }
     expRunSettings.variations = (params.size() == 0 ? 1 : params.front().keyValues.size());
     makoCtrl.setSettings(expRunSettings);
     runSettings = expRunSettings;    

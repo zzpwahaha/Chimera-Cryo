@@ -221,7 +221,7 @@ class MakoSettingControl : public QTreeView
         /* Integer Feature Slider-SpinBoxes */
         QWidget*                            m_IntSpinSliderWidget;
         IntSpinBox*                         m_SpinBox_Int;
-        TickSlider*                         m_Slider_Int;
+        QSlider*                            m_Slider_Int;
 
         /* Float Feature Slider-Edit */
         QWidget*                            m_FloatSliderEditWidget;

@@ -41,7 +41,7 @@ std::string MakoWrapper::getFeatureValue(FeaturePtr featPtr)
         {
         case VmbFeatureDataInt:
             error = featPtr->GetValue(nValue64);
-            if (VmbErrorSuccess == error){ 
+            if (VmbErrorSuccess == error || VmbErrorInvalidAccess == error){
                 sValue = str(nValue64); 
             }
             else{ 
@@ -51,7 +51,7 @@ std::string MakoWrapper::getFeatureValue(FeaturePtr featPtr)
 
         case VmbFeatureDataFloat:
             error = featPtr->GetValue(dValue);
-            if (VmbErrorSuccess == error) {
+            if (VmbErrorSuccess == error || VmbErrorInvalidAccess == error) {
                 sValue = str(dValue, 4);
             }
             else {
@@ -61,7 +61,7 @@ std::string MakoWrapper::getFeatureValue(FeaturePtr featPtr)
 
         case VmbFeatureDataEnum:
             error = featPtr->GetValue(stdValue);
-            if (VmbErrorSuccess == error) {
+            if (VmbErrorSuccess == error || VmbErrorInvalidAccess == error) {
                 sValue = stdValue;
             }
             else {
@@ -71,7 +71,7 @@ std::string MakoWrapper::getFeatureValue(FeaturePtr featPtr)
 
         case VmbFeatureDataString:
             error = featPtr->GetValue(stdValue);
-            if (VmbErrorSuccess == error) {
+            if (VmbErrorSuccess == error || VmbErrorInvalidAccess ==error) {
                 sValue = stdValue;
             }
             else {
@@ -81,7 +81,7 @@ std::string MakoWrapper::getFeatureValue(FeaturePtr featPtr)
 
         case VmbFeatureDataBool:
             error = featPtr->GetValue(bValue);
-            if (VmbErrorSuccess == error) {
+            if (VmbErrorSuccess == error || VmbErrorInvalidAccess == error) {
                 bValue ? sValue = "true" : sValue = "false";
             }
             else {
