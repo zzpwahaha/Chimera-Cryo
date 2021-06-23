@@ -3,6 +3,7 @@
 //#include <RealTimeMOTAnalysis/MOTAnalysisControl.h>
 #include <CMOSCamera/GaussianFit.h>
 #include <qtconcurrentrun.h>
+#include <qdebug.h>
 
 MOTAnalysisThreadWoker::MOTAnalysisThreadWoker(MOTThreadInput input_)
 	: input(input_)
@@ -51,12 +52,12 @@ void MOTAnalysisThreadWoker::handleNewImg(QVector<double> img, int width, int he
 	QFuture<std::vector<double>> futurex = QtConcurrent::run(this, &MOTAnalysisThreadWoker::fit1dGaussian, CrxX);
 	QFuture<std::vector<double>> futurey = QtConcurrent::run(this, &MOTAnalysisThreadWoker::fit1dGaussian, CrxY);
 	std::vector<double> fitx = futurex.result();
-	std::vector<double> fity = futurex.result();
+	std::vector<double> fity = futurey.result();
 	result1d[MOTAnalysisType::type::meanx].push_back(fitx[0]);
-	result1d[MOTAnalysisType::type::sigmax].push_back(fitx[2]);
+	result1d[MOTAnalysisType::type::sigmax].push_back(std::abs(fitx[2]));
 	result1d[MOTAnalysisType::type::meany].push_back(fity[0]);
-	result1d[MOTAnalysisType::type::sigmay].push_back(fity[2]);
-
+	result1d[MOTAnalysisType::type::sigmay].push_back(std::abs(fity[2]));
+	qDebug() << result1d[MOTAnalysisType::type::sigmax] << result1d[MOTAnalysisType::type::sigmay];
 	double sum = std::accumulate(img.begin(), img.end(), 0.0);
 	sum -= img.size() * *(it.first);
 	result1d[MOTAnalysisType::type::atomNum].push_back(sum);
@@ -73,7 +74,7 @@ void MOTAnalysisThreadWoker::handleNewImg(QVector<double> img, int width, int he
 
 	//check if one variation is finished and is able to do statistics for 1d result
 	std::vector<size_t> trueIdx;
-	for (size_t idx = 0; idx < currentNum / input.camSet.variations; idx++) {
+	for (size_t idx = 0; idx < rep + 1; idx++) {
 		trueIdx.push_back(resultOrder[var + input.camSet.variations * idx]);
 	}
 	std::vector<double> mean;
@@ -82,12 +83,9 @@ void MOTAnalysisThreadWoker::handleNewImg(QVector<double> img, int width, int he
 		for (auto trueid : trueIdx) {
 			tmp += val[trueid];
 		}
-		if (trueIdx.empty()) {
-			tmp += val[0];
-		}
-		mean.push_back(tmp / (trueIdx.size() + 1));
+		mean.push_back(tmp / (trueIdx.size()));
 	}
-	if (currentNum / input.camSet.variations) { // the very first round is finished, able to do statistics
+	if (rep) { // the very first round is finished, able to do statistics
 		std::vector<double> stdev;
 		for (size_t idx = 0; idx < result1d.size(); idx++)
 		{
@@ -96,14 +94,14 @@ void MOTAnalysisThreadWoker::handleNewImg(QVector<double> img, int width, int he
 				tmp += (result1d[MOTAnalysisType::allTypes[idx]][trueid] - mean[idx])
 					* (result1d[MOTAnalysisType::allTypes[idx]][trueid] - mean[idx]);
 			}
-			stdev.push_back(sqrt( tmp / (trueIdx.size()) ));
+			stdev.push_back(sqrt( tmp / (trueIdx.size()-1) ));
 		}
 		emit newPlotData1D(mean, stdev, currentNum);
 	}
 	else {
 		emit newPlotData1D(mean, std::vector<double>(mean.size(), 0.0), currentNum);
 	}
-
+	qDebug() << mean;
 
 	if (currentNum == input.camSet.totalPictures()) {
 		emit finished();
