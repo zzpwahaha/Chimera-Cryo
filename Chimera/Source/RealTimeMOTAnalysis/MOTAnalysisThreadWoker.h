@@ -24,7 +24,7 @@ public slots:
     //void setXpts(std::vector<double>) {};
 signals:
     void newPlotData1D(std::vector<double> val, std::vector<double> stdev, int currentNum);
-    void newPlotData2D(std::vector<double> val, int currentNum);
+    void newPlotData2D(std::vector<double> val, int width, int height, int currentNum);
     void finished(); //for ending the thread
 
 private:

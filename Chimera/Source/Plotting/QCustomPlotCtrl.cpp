@@ -37,9 +37,54 @@ void QCustomPlotCtrl::init(IChimeraQtWindow* parent, QString titleIn)
 	title = new QCPTextElement(plot, titleIn);
 	plot->plotLayout()->insertRow(0);
 	plot->plotLayout()->addElement(0, 0, title);
+	if (this->style == plotStyle::DensityPlot) {
+		//QCPAxisRect* centerAxisRect = new QCPAxisRect(plot);
+		plot->axisRect()->setupFullAxesBox(true);
+		plot->axisRect()->setRangeZoomFactor(0.95);
+		//plot->plotLayout()->addElement(0, 0, centerAxisRect);
+		/*colorbar*/
+		QCPColorScale* colorScale = new QCPColorScale(plot);
+		colorScale->setType(QCPAxis::atRight);
+		colorScale->setRangeZoom(false);
+		colorScale->setRangeDrag(false);
+		plot->plotLayout()->addElement(1, 1, colorScale);
+		QCPColorGradient tmpCG = QCPColorGradient();
+		tmpCG.setColorInterpolation(QCPColorGradient::ciRGB);
+		for (size_t i = 0; i < INFERNO_POSITION.size(); i++)
+		{
+			tmpCG.setColorStopAt(INFERNO_POSITION[i], QColor(INFERNO[i][0], INFERNO[i][1], INFERNO[i][2]));
+		}
+		colorScale->setGradient(tmpCG);
+		/*set alignment of plot + 1 colorbar*/
+		QCPMarginGroup* marginGroup = new QCPMarginGroup(plot);
+		plot->axisRect()->setMarginGroup(QCP::msAll, marginGroup);
+		colorScale->setMarginGroup(QCP::msBottom | QCP::msTop, marginGroup);
+		plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
+		/*color map and cmap gradient*/
+		colorMap = new QCPColorMap(plot->xAxis, plot->yAxis);
+		colorMap->setInterpolate(false);
+		colorMap->setColorScale(colorScale);
+		/*setup a ticker for colormap that only gives integer ticks:*/
+		QCPAxisTickerFixed* intTicker = new QCPAxisTickerFixed();
+		intTicker->setTickStep(1.0);
+		intTicker->setScaleStrategy(QCPAxisTickerFixed::ssMultiples);
+		colorMap->keyAxis()->setTicker(QSharedPointer<QCPAxisTickerFixed>(intTicker));
+		colorMap->valueAxis()->setTicker(QSharedPointer<QCPAxisTickerFixed>(intTicker));
+		connect(plot, &QCustomPlot::mouseDoubleClick, this, [this]() {
+			colorMap->rescaleAxes();
+			colorMap->rescaleDataRange(true);
+			colorMap->colorScale()->rescaleDataRange(true);
+			plot->yAxis->setScaleRatio(plot->xAxis, 1.0);
+			plot->replot(); });
+	}
+
+
+
 	plot->setMinimumSize(400, 400);
 	resetChart();
-
+	if (this->style == plotStyle::DensityPlot) {
+		colorMap->data()->setSize(10, 10);
+	}
 }
 
 void QCustomPlotCtrl::handleContextMenu(const QPoint& pos) {
@@ -51,16 +96,20 @@ void QCustomPlotCtrl::handleContextMenu(const QPoint& pos) {
 			plot->clearGraphs();
 			plot->replot();
 		});
-	auto* leg = new QAction("Toggle Legend", plot);
-	plot->connect(leg, &QAction::triggered,
-		[this]() {
-			showLegend = !showLegend;
-			resetChart();
-		});
-
-
 	menu.addAction(clear);
-	menu.addAction(leg);
+	if (this->style != plotStyle::DensityPlot) {
+		auto* leg = new QAction("Toggle Legend", plot);
+		plot->connect(leg, &QAction::triggered,
+			[this]() {
+				showLegend = !showLegend;
+				resetChart();
+			});
+		menu.addAction(leg);
+	}
+
+
+
+	
 	menu.exec(plot->mapToGlobal(pos));
 }
 
@@ -79,7 +128,9 @@ QCPGraph* QCustomPlotCtrl::getCalData() {
 
 void QCustomPlotCtrl::removeData() {
 	//plot->clearGraphs();
-	plot->clearPlottables();
+	if (this->style != plotStyle::DensityPlot) {
+		plot->clearPlottables();
+	}
 }
 
 void QCustomPlotCtrl::initializeCalData(calSettings cal) {
@@ -92,7 +143,8 @@ void QCustomPlotCtrl::initializeCalData(calSettings cal) {
 	plot->graph(0)->setData({}, {});
 }
 
-void QCustomPlotCtrl::setData(std::vector<plotDataVec> newData) {
+void QCustomPlotCtrl::setData(std::vector<plotDataVec> newData) 
+{
 	removeData();
 	if (style == plotStyle::CalibrationPlot) {
 		// need to rename...
@@ -204,6 +256,21 @@ void QCustomPlotCtrl::setData(std::vector<plotDataVec> newData) {
 			infLine->setPen(QColor(color[0], color[1], color[2], 150));
 		}
 	}
+	else if (style == plotStyle::DensityPlot) {
+		if (newData.size() == 0 || !plot) {
+			return;
+		}
+		int Height= newData.size();
+		int Width = newData[0].size();
+		auto pp = plot->axisRect()->plottables().at(0);
+		colorMap->data()->setRange(QCPRange(0, Width - 1), QCPRange(0, Height - 1));
+		colorMap->data()->setSize(Width, Height);
+		for (size_t i = 0; i < Height; i++) {
+			for (size_t j = 0; j < Width; j++) {
+				colorMap->data()->setCell(j, i, newData[i][j].y);
+			}
+		}
+	}
 	else if (style == plotStyle::PicturePlot) {
 		if (newData.size() == 0 || !plot) {
 			return;
@@ -259,13 +326,15 @@ void QCustomPlotCtrl::setStyle(plotStyle newStyle) {
 }
 
 void QCustomPlotCtrl::resetChart() {
-	if (!showLegend) {
-		plot->legend->setVisible(false);
+	if (this->style != plotStyle::DensityPlot) {
+		if (!showLegend) {
+			plot->legend->setVisible(false);
+		}
+		else {
+			plot->legend->setVisible(true);
+		}
 	}
-	else {
-		plot->legend->setVisible(true);
-	}
-	
+
 	if (style == plotStyle::BinomialDataPlot) {
 		plot->yAxis->setRange({ 0,1 });
 		plot->xAxis->rescale();
@@ -275,10 +344,16 @@ void QCustomPlotCtrl::resetChart() {
 		plot->yAxis->setRangeLower(0);
 		plot->xAxis->rescale();
 	}
+	else if (style == plotStyle::DensityPlot) {
+		colorMap->rescaleDataRange(true);
+		colorMap->colorScale()->rescaleDataRange(true);
+		plot->yAxis->setScaleRatio(plot->xAxis, 1.0);
+	}
 	else {
 		plot->rescaleAxes();
 	}
-
+	//plot->yAxis->scaleRange(1.1, plot->yAxis->range().center());
+	//plot->xAxis->scaleRange(1.1, plot->yAxis->range().center());
 	auto defs = chimeraStyleSheets::getDefs();
 	auto neutralColor = QColor(defs["@NeutralTextColor"]);
 	auto generalPen = QPen(neutralColor);
@@ -295,10 +370,12 @@ void QCustomPlotCtrl::resetChart() {
 	plot->xAxis->setTickLabelColor(neutralColor);
 	plot->yAxis->setTickLabelColor(neutralColor);
 	plot->axisRect()->insetLayout()->setInsetAlignment(0, Qt::AlignTop | Qt::AlignLeft);
-	auto legendColor = QColor(defs["@StaticBackground"]);
-	legendColor.setAlpha(150);
-	plot->legend->setBrush(legendColor);
-	plot->legend->setTextColor(neutralColor);
+	if (this->style != plotStyle::DensityPlot) {
+		auto legendColor = QColor(defs["@StaticBackground"]);
+		legendColor.setAlpha(150);
+		plot->legend->setBrush(legendColor);
+		plot->legend->setTextColor(neutralColor);
+	}
 	plot->setBackground(QColor(defs["@StaticBackground"]));
 	title->setTextColor(defs["@NeutralTextColor"]);
 	plot->replot();

@@ -57,7 +57,7 @@ void MOTAnalysisThreadWoker::handleNewImg(QVector<double> img, int width, int he
 	result1d[MOTAnalysisType::type::sigmax].push_back(std::abs(fitx[2]));
 	result1d[MOTAnalysisType::type::meany].push_back(fity[0]);
 	result1d[MOTAnalysisType::type::sigmay].push_back(std::abs(fity[2]));
-	qDebug() << result1d[MOTAnalysisType::type::sigmax] << result1d[MOTAnalysisType::type::sigmay];
+
 	double sum = std::accumulate(img.begin(), img.end(), 0.0);
 	sum -= img.size() * *(it.first);
 	result1d[MOTAnalysisType::type::atomNum].push_back(sum);
@@ -68,9 +68,9 @@ void MOTAnalysisThreadWoker::handleNewImg(QVector<double> img, int width, int he
 	else {
 		auto& den = density2d[var];
 		std::transform(den.begin(), den.end(), img.begin(), den.begin(), [rep](double old, double n3w) {
-			return (old * (rep - 1) + n3w) / (rep * 1.0); });
+			return (old * (rep) + n3w) / (rep * 1.0); });
 	}
-	emit newPlotData2D(density2d[var], currentNum);
+	emit newPlotData2D(density2d[var], width, height, currentNum);
 
 	//check if one variation is finished and is able to do statistics for 1d result
 	std::vector<size_t> trueIdx;
@@ -101,7 +101,6 @@ void MOTAnalysisThreadWoker::handleNewImg(QVector<double> img, int width, int he
 	else {
 		emit newPlotData1D(mean, std::vector<double>(mean.size(), 0.0), currentNum);
 	}
-	qDebug() << mean;
 
 	if (currentNum == input.camSet.totalPictures()) {
 		emit finished();

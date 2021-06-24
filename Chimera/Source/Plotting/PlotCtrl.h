@@ -17,6 +17,7 @@
 
 enum class plotStyle{
 	PicturePlot,
+	DensityPlot,
 	// ttl and dac plot use steps.
 	TtlPlot,
 	DacPlot,

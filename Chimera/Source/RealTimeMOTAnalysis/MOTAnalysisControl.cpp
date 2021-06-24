@@ -62,10 +62,12 @@ void MOTAnalysisControl::initialize(IChimeraQtWindow* parent)
 	yKeyValCombo = new CQComboBox(parent);
 	for (auto tp : MOTAnalysisType::allTypes) {
 		calcViewer[tp];
+		if (tp == MOTAnalysisType::type::density2d) {
+			calcViewer[MOTAnalysisType::type::density2d].setStyle(plotStyle::DensityPlot);
+		}
 		calcViewer[tp].init(parent, qstr(MOTAnalysisType::toStr(tp)));
 		calcViewer[tp].plot->replot();
 	}
-	calcViewer[MOTAnalysisType::type::density2d].setStyle(plotStyle::PicturePlot);
 
 	connect(MOTCalcCombo, qOverload<int>(&QComboBox::currentIndexChanged), this, [this, xkeyvalL, ykeyvalL](int idx) {
 		auto currentType = MOTAnalysisType::allTypes[MOTCalcCombo->currentIndex()];
@@ -84,6 +86,7 @@ void MOTAnalysisControl::initialize(IChimeraQtWindow* parent)
 		}
 		visiblePlot->hide();
 		visiblePlot = calcViewer[currentType].plot;
+		calcViewer[currentType].resetChart();
 		visiblePlot->show();
 		visiblePlot->replot(); });
 
@@ -112,7 +115,7 @@ void MOTAnalysisControl::initialize(IChimeraQtWindow* parent)
 				xKeyValCombo->addItem(qstr(val,3,true));
 			}
 			currentXKeys = xKeysList[idx].keyValues;
-			updatePlotData();
+			updatePlotData1D();
 			for (auto& [key, val] : calcViewer) {
 				val.plot->xAxis->setLabel(qstr(xKeysList[idx].name));
 				val.plot->replot();
@@ -131,7 +134,25 @@ void MOTAnalysisControl::initialize(IChimeraQtWindow* parent)
 			}
 		} });
 
-	
+	connect(xKeyValCombo, qOverload<int>(&QComboBox::currentIndexChanged), this, [this](int idx) {
+		if (plotData2D.empty()) {
+			return;
+		}
+		std::vector<double>& val = plotData2D[idx];
+		if (val.size() != (height2D * width2D) || val.empty() || width2D == 0 || height2D == 0) {
+			return;
+		}
+		std::vector<plotDataVec> ddvec(height2D);
+		for (size_t idx = 0; idx < height2D; idx++)
+		{
+			ddvec[idx].reserve(width2D);
+			for (size_t idd = 0; idd < width2D; idd++)
+			{
+				ddvec[idx].push_back(dataPoint{ 0,val[idx * width2D + idd],0 }); // x,y,err
+			}
+		}
+		calcViewer[MOTAnalysisType::type::density2d].setData(ddvec);
+		});
 
 
 	QVBoxLayout* layout = new QVBoxLayout(this);
@@ -225,6 +246,10 @@ void MOTAnalysisControl::prepareMOTAnalysis(MakoCamera*& cam)
 			plotStdev1D[typ].resize(xKeysList.back().keyValues.size(), 0.0);
 		}
 	}
+	width2D = makoCam->getMakoCore().getRunningSettings().dims.width();
+	height2D = makoCam->getMakoCore().getRunningSettings().dims.height();
+	plotData2D.clear();
+	plotData2D.resize(xKeysList.back().keyValues.size());
 	incomeOrder.clear();
 	incomeOrder.reserve(makoCam->getMakoCore().getRunningSettings().totalPictures());
 	updateXYKeys();
@@ -243,15 +268,35 @@ void MOTAnalysisControl::handleNewPlotData1D(std::vector<double> val, std::vecto
 		plotData1D[typ][currentNum % dim1] = val[idx];
 		plotStdev1D[typ][currentNum % dim1] = stdev[idx];
 	}
-	updatePlotData();
+	updatePlotData1D();
 
 }
 
-void MOTAnalysisControl::handleNewPlotData2D(std::vector<double> val, int currentNum)
+void MOTAnalysisControl::handleNewPlotData2D(std::vector<double> val, int width, int height, int currentNum)
 {
+	if (width2D != width || height2D != height) {
+		errBox("MOTAnalysis see a discrepency in the image width and size. The size expected from"
+			" MAKO setting is (" + str(width2D) + "," + str(height2D) + "). But get(" + str(width) + ", " + str(height) + ") instead");
+		return;
+	}
+	//right now 2D data does not support 2D scan
+	std::vector<plotDataVec> ddvec(height);
+	for (size_t idx = 0; idx < height; idx++)
+	{
+		ddvec[idx].reserve(width);
+		for (size_t idd = 0; idd < width; idd++)
+		{
+			ddvec[idx].push_back(dataPoint{ 0,val[idx * width + idd],0 }); // x,y,err
+		}
+	}
+	int var = currentNum % xKeysList.back().keyValues.size();
+	if (xKeyValCombo->currentIndex() == var) {
+		calcViewer[MOTAnalysisType::type::density2d].setData(ddvec);
+	}
+	plotData2D[currentNum % xKeysList.back().keyValues.size()] = val;
 }
 
-void MOTAnalysisControl::updatePlotData()
+void MOTAnalysisControl::updatePlotData1D()
 {
 	for (auto& [typ, view] : calcViewer) {
 		if (plotData1D[typ].empty()) {

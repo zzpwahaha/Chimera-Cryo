@@ -28,10 +28,10 @@ public:
 
 public slots:
 	void handleNewPlotData1D(std::vector<double> val, std::vector<double> stdev, int currentNum); // all in MOTAnalysisType except density2d
-	void handleNewPlotData2D(std::vector<double> val, int currentNum); // now only for density2d
+	void handleNewPlotData2D(std::vector<double> val, int width, int height, int currentNum); // now only for density2d
 
 private:
-	void updatePlotData();
+	void updatePlotData1D();
 
 public:
 	MOTAnalysisThreadWoker* MOTCalc;
@@ -60,6 +60,8 @@ private:
 	std::map<MOTAnalysisType::type, std::vector<double>> plotData1D;
 	std::map<MOTAnalysisType::type, std::vector<double>> plotStdev1D;
 	std::vector<std::vector<double>> plotData2D;
+	int width2D = 0;
+	int height2D = 0;
 	std::vector<size_t> incomeOrder;
 };
 
