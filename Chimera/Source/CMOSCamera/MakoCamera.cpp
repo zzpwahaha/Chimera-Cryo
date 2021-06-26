@@ -216,7 +216,7 @@ void MakoCamera::initialize()
             viewer.plot()->replot();
         }
         catch (ChimeraError& e) {
-            emit error(qstr("Error in handling Mako double click") + e.what());
+            emit error(qstr("Error in handling Mako double click") + qstr(e.trace()));
         }});
 
     initPlotContextMenu();
@@ -236,7 +236,7 @@ void MakoCamera::handleStatusButtonClicked(QString featName)
         }
     }
     catch (ChimeraError& e) {
-        emit error(qstr("Error in handle the MakoStatusButton") + e.what());
+        emit error(qstr("Error in handle the MakoStatusButton") + qstr(e.trace()));
     }
     
 }
@@ -385,7 +385,7 @@ void MakoCamera::acquisitionStartStopFromAction()
         updateStatusBar();
     }
     catch (ChimeraError& e) {
-        emit error(qstr("Error in trying to start Acquisition") + e.what());
+        emit error(qstr("Error in trying to start Acquisition") + qstr(e.trace()));
     }
     /* ON */
     if (m_aStartStopCap->isChecked())
@@ -400,7 +400,7 @@ void MakoCamera::acquisitionStartStopFromAction()
             m_OperatingStatusLabel->setText("Error");
             m_OperatingStatusLabel->setStyleSheet("background-color: rgb(196,0, 0); color: rgb(255,255,255)");
             m_aStartStopCap->setChecked(false);
-            emit IChimeraSystem::error(qstr("Failed to start! \n") + e.what());
+            emit IChimeraSystem::error(qstr("Failed to start! \n") + qstr(e.trace()));
             return;
         }
         // Do some GUI-related preparations before really starting (to avoid timing problems)
@@ -419,7 +419,7 @@ void MakoCamera::acquisitionStartStopFromAction()
         catch (ChimeraError& e) {
             m_OperatingStatusLabel->setText("Error");
             m_OperatingStatusLabel->setStyleSheet("background-color: rgb(196,0, 0); color: rgb(255,255,255)");
-            emit IChimeraSystem::error(qstr("Failed to stop! \n") + e.what());
+            emit IChimeraSystem::error(qstr("Failed to stop! \n") + qstr(e.trace()));
             return;
         }
         m_OperatingStatusLabel->setText(" Ready ");
@@ -456,7 +456,7 @@ void MakoCamera::setCurrentScreenROI()
             acquisitionStartStopFromCtrler("AcquisitionStart");
         }
         catch (ChimeraError& e) {
-            emit IChimeraSystem::error("Error in setting CMOS ROI \n" + qstr(e.what()));
+            emit IChimeraSystem::error("Error in setting CMOS ROI \n" + qstr(e.trace()));
         }
         
         Sleep(50);

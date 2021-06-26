@@ -329,7 +329,7 @@ void ImageCalculatingThread::fit2dGaussian()
             m_gfit2D.solve_system();
         }
         catch (ChimeraError& e) {
-            thrower(str("Exception from the thread: ") + e.what());
+            thrower(str("Exception from the thread: ") + e.trace());
             return;
         }
 

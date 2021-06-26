@@ -48,7 +48,7 @@ void QtMakoWindow::windowOpenConfig(ConfigStream& configFile)
 			camera.updateStatusBar();
 		}
 		catch(ChimeraError& e) {
-			emit errBox("Error in open config for MAKO window" + str(e.what()));
+			errBox("Error in open config for MAKO window\n" + str(e.trace()));
 		}
 	}
 }
@@ -60,7 +60,7 @@ void QtMakoWindow::windowSaveConfig(ConfigStream& newFile)
 			camera.getMakoCore().getMakoCtrl().handleSavingConfig(newFile, camera.getMakoCore().getDelim());
 		}
 		catch (ChimeraError& e) {
-			emit errBox("Error in open config for MAKO window" + str(e.what()));
+			errBox("Error in open config for MAKO window\n" + str(e.trace()));
 		}
 	}
 	

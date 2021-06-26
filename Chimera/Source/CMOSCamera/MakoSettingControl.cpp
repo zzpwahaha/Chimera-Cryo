@@ -602,7 +602,7 @@ void MakoSettingControl::updateRegisterFeature()
         updateColWidth();
     }
     catch (ChimeraError& e) {
-        emit errBox(e.trace());
+        errBox(e.trace());
     }
 
 }
@@ -1363,7 +1363,7 @@ void MakoSettingControl::onIntSpinBoxClick()
 
     }
     catch (ChimeraError& e) {
-        errBox(e.what());
+        errBox(e.trace());
     }
 }
 
