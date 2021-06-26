@@ -45,9 +45,15 @@ QVariant ParameterModel::data (const QModelIndex& index, int role) const{
 			return QVariant (); // default
 		}
 		case Qt::BackgroundRole: { // background color
-			if (param.active) {
-				return QVariant (QBrush (QColor (31, 148, 7)));
+            if (!param.constant && !param.active) {
+                return QVariant(QBrush(QColor(250, 250, 210)));
+            }
+			if (param.constant && param.active) {
+                return QVariant(QBrush(QColor(31, 148, 7)));
 			}
+            if (!param.constant && param.active) {
+                return QVariant(QBrush(QColor(255, 255, 0)));
+            }
 			return QVariant (); // default
 		}
         case Qt::EditRole: 

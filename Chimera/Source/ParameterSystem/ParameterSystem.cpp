@@ -94,7 +94,8 @@ void ParameterSystem::handleContextMenu (const QPoint& pos){
 
 void ParameterSystem::initialize (IChimeraQtWindow* parent, std::string title, ParameterSysType type)
 {
-	this->setMaximumWidth(600);
+	this->setMaximumWidth(650);
+	this->setMinimumWidth(450);
 	QVBoxLayout* layout = new QVBoxLayout(this);
 	paramSysType = type;
 
@@ -112,6 +113,11 @@ void ParameterSystem::initialize (IChimeraQtWindow* parent, std::string title, P
 	parametersView->horizontalHeader ()->setStretchLastSection (true); 
 	parametersView->horizontalHeader ()->setSectionResizeMode (QHeaderView::ResizeToContents);
 	parametersView->horizontalHeader ()->setSectionResizeMode (QHeaderView::Interactive);	
+
+	/// More work to allow the column to be dragable, the more important thing is that it is annoying to change the data order in model. -ZZP 06/26/2021
+	//parametersView->verticalHeader()->setSectionsMovable(true);
+	//parametersView->verticalHeader()->setDragEnabled(true);
+	//parametersView->verticalHeader()->setDragDropMode(QAbstractItemView::InternalMove);
 
 	parametersView->setContextMenuPolicy (Qt::CustomContextMenu);
 	parent->connect (parametersView, &QTableView::doubleClicked, parent, &IChimeraQtWindow::configUpdated);
