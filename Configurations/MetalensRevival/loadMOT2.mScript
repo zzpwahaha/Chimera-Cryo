@@ -1,8 +1,17 @@
 %%%%%%%%%%%%%%%%% Start With 1ms %%%%%%%%%%%%%%%%% 
 t = 1
+off: SciMotTrg
+off: SrcMotTrg
+off: PrbTrg
+off: srcmotshutter
+off: scimotzshutter
+t += 1
+%pulseon: mako1 1 % take two imgs for testing
+t += 10
+on: srcmotshutter
 ddsfreq: ddsMOT 80
 ddsfreq: ddsTARep 80
-dac: PrbAmp 2.5
+dac: PrbAmp 2
 t += 1
 dac: prbrepamp 9.9
 off: PrbTrg
@@ -62,7 +71,7 @@ dac: biascoily biasypgc %-0.65
 dac: biascoilz biaszpgc %-0.1
 
 ol: ol0_0 pgcdetune %1328 %1370
-ol: ol0_1 5282
+ol: ol0_1 5272
 
 t += pgcdur
 
@@ -83,18 +92,18 @@ t += 0.1
 %off: SrcMotTrg
 %dac: SrcMotAmp 0
 %off: SciMotTrg
-dac: SciMotAmp 7
+%dac: SciMotAmp 7
 %dac: PrbAmp 1.8
 t += 1.6
-%dac: prbrepamp 9.9
-dac: TARepAmp 5
-on: TARepTrg 
+dac: prbrepamp 9.9
+%dac: TARepAmp 5
+%on: TARepTrg 
 
-ol: ol0_0 1206
-ol: ol0_1 5282
+%ol: ol0_0 1206
+%ol: ol0_1 5282
 
-%ol: ol0_0 1340 % for pixis
-%ol: ol0_1 5193
+ol: ol0_0 1320 % for pixis
+ol: ol0_1 5230
 %pulseon: PrbTrg 0.01
 
 t += -srcmotshutterdelay
@@ -103,13 +112,13 @@ t += srcmotshutterdelay
 t += -scimotshutterdelay
 off: scimotzshutter
 t += scimotshutterdelay-0.1 %1.6
-pulseon: mako1 1
+%pulseon: mako1 1
 t += 0.1
 pulseon: SciMotTrg 0.5
 %pulseon: pixis_trg 1
 t += 7
-%pulseon: PrbTrg 25
-off: PrbTrg
+pulseon: PrbTrg 25
+%off: PrbTrg
 
 %END sequence
 t = 1300

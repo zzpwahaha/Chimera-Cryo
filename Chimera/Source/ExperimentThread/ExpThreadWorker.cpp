@@ -41,9 +41,9 @@ void ExpThreadWorker::experimentThreadProcedure () {
 	isPaused = false;
 	try {
 	 	for (auto& device : input->devices.list) {
-	 		emit updateBoxColor ("Black", device.get ().getDelim ().c_str ());
+	 		emit updateBoxColor ("Violet", device.get ().getDelim ().c_str ());
 	 	}
-		emit updateBoxColor ("Black", "Other");
+		emit updateBoxColor ("Violet", "Other");
 		emit notification ("Loading Experiment Settings...\n");
 		ConfigStream cStream (input->profile.configFilePath (), true);
 		loadExperimentRuntime (cStream, expRuntime);
@@ -1296,7 +1296,7 @@ void ExpThreadWorker::deviceProgramVariation (IDeviceCore& device, std::vector<p
 		try {
 			emit notification (qstr ("Programming Devce " + device.getDelim () + "...\n"), 1);
 			device.programVariation (variationInc, expParams, this);
-			emit updateBoxColor ("Green", device.getDelim ().c_str ());
+			emit updateBoxColor ("Blue", device.getDelim ().c_str ());
 		}
 		catch (ChimeraError&) {
 			emit updateBoxColor ("Red", device.getDelim ().c_str ());
@@ -1323,11 +1323,11 @@ void ExpThreadWorker::deviceCalculateVariations (IDeviceCore& device, std::vecto
 
 void ExpThreadWorker::deviceNormalFinish (IDeviceCore& device) {
 	if (device.experimentActive) {
-		emit updateBoxColor ("Blue", device.getDelim ().c_str ());
+		emit updateBoxColor ("Green", device.getDelim ().c_str ());
 		device.normalFinish ();
 	}
 	else {
-		emit updateBoxColor ("Black", device.getDelim ().c_str ());
+		emit updateBoxColor ("Dark gray", device.getDelim ().c_str ());
 	}
 }
 
