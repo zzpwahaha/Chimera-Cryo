@@ -53,10 +53,11 @@ void MOTAnalysisThreadWoker::handleNewImg(QVector<double> img, int width, int he
 	QFuture<std::vector<double>> futurey = QtConcurrent::run(this, &MOTAnalysisThreadWoker::fit1dGaussian, CrxY);
 	std::vector<double> fitx = futurex.result();
 	std::vector<double> fity = futurey.result();
-	result1d[MOTAnalysisType::type::meanx].push_back(fitx[0]);
-	result1d[MOTAnalysisType::type::sigmax].push_back(std::abs(fitx[2]));
-	result1d[MOTAnalysisType::type::meany].push_back(fity[0]);
-	result1d[MOTAnalysisType::type::sigmay].push_back(std::abs(fity[2]));
+	result1d[MOTAnalysisType::type::meanx].push_back(fitx[2]);
+	result1d[MOTAnalysisType::type::sigmax].push_back(std::abs(fitx[4]));
+	result1d[MOTAnalysisType::type::meany].push_back(fity[2]);
+	result1d[MOTAnalysisType::type::sigmay].push_back(std::abs(fity[4]));
+	result1d[MOTAnalysisType::type::amplitude].push_back((fitx[0] + fity[0]) / 2);
 
 	double sum = std::accumulate(img.begin(), img.end(), 0.0);
 	sum -= img.size() * *(it.first);
@@ -127,6 +128,6 @@ std::vector<double> MOTAnalysisThreadWoker::fit1dGaussian(std::vector<double> Cr
 	fit.solve_system();
 	QVector<double> fitParax = fit.fittedPara();
 	QVector<double> confi95x = fit.confidence95Interval();
-	return std::vector<double>({ fitParax[1],confi95x[1],fitParax[2],confi95x[2] });
+	return std::vector<double>({ fitParax[0],confi95x[0],fitParax[1],confi95x[1],fitParax[2],confi95x[2] });
 
 }

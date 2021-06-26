@@ -13,6 +13,7 @@ struct MOTAnalysisType
 		meany,
 		sigmax,
 		sigmay,
+		amplitude,
 		atomNum,
 		density2d
 	};
@@ -31,6 +32,8 @@ struct MOTAnalysisType
 			return "Width X";
 		case type::sigmay:
 			return "Width Y";
+		case type::amplitude:
+			return "Fitted Amplitude";
 		case type::atomNum:
 			return "Atom Number";
 		case type::density2d:
