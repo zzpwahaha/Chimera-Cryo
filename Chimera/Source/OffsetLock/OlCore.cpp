@@ -65,22 +65,7 @@ std::array<std::string, size_t(OLGrid::total)> OlCore::getName()
 }
 
 /**********************************************************************************************/
-void OlCore::logSettings(DataLogger& log, ExpThreadWorker* threadworker)
-{
-}
 
-void OlCore::loadExpSettings(ConfigStream& stream)
-{
-}
-
-void OlCore::normalFinish()
-{
-
-}
-
-void OlCore::errorFinish()
-{
-}
 
 
 void OlCore::resetOLEvents()

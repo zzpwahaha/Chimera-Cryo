@@ -4,7 +4,7 @@
 #include "GeneralFlumes/QtSerialFlume.h"
 #include "DigitalOutput/DoCore.h"
 
-class OlCore : public IDeviceCore
+class OlCore
 {
 public:
 	// THIS CLASS IS NOT COPYABLE.
@@ -14,15 +14,9 @@ public:
 	OlCore(bool safemode);
 	~OlCore();
 
-	void programVariation(unsigned variationNum, std::vector<parameterType>& params, ExpThreadWorker* threadworker) override {  }
-	void calculateVariations(std::vector<parameterType>& params, ExpThreadWorker* threadworker) override;
-	void logSettings(DataLogger& log, ExpThreadWorker* threadworker) override;
-	void loadExpSettings(ConfigStream& stream) override;
-	void normalFinish() override;
-	void errorFinish() override;
-
+	void calculateVariations(std::vector<parameterType>& params, ExpThreadWorker* threadworker);
 	const std::string configDelim = "OFFSETLOCK_SYSTEM";
-	std::string getDelim() override { return configDelim; }
+	std::string getDelim() { return configDelim; }
 
 	bool isValidOLName(std::string name);
 	int getOLIdentifier(std::string name);
