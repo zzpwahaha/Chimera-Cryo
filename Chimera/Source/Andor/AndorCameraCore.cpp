@@ -667,12 +667,12 @@ void AndorCameraCore::logSettings (DataLogger& log, ExpThreadWorker* threadworke
 		}
 		// image settings
 		H5::Group imageDims = andorGroup.createGroup ("Image-Dimensions");
-		log.writeDataSet (expRunSettings.imageSettings.top, "Top", andorGroup);
-		log.writeDataSet (expRunSettings.imageSettings.bottom, "Bottom", andorGroup);
-		log.writeDataSet (expRunSettings.imageSettings.left, "Left", andorGroup);
-		log.writeDataSet (expRunSettings.imageSettings.right, "Right", andorGroup);
-		log.writeDataSet (expRunSettings.imageSettings.horizontalBinning, "Horizontal-Binning", andorGroup);
-		log.writeDataSet (expRunSettings.imageSettings.verticalBinning, "Vertical-Binning", andorGroup);
+		log.writeDataSet (expRunSettings.imageSettings.top, "Top", imageDims);
+		log.writeDataSet (expRunSettings.imageSettings.bottom, "Bottom", imageDims);
+		log.writeDataSet (expRunSettings.imageSettings.left, "Left", imageDims);
+		log.writeDataSet (expRunSettings.imageSettings.right, "Right", imageDims);
+		log.writeDataSet (expRunSettings.imageSettings.horizontalBinning, "Horizontal-Binning", imageDims);
+		log.writeDataSet (expRunSettings.imageSettings.verticalBinning, "Vertical-Binning", imageDims);
 		log.writeDataSet (expRunSettings.temperatureSetting, "Temperature-Setting", andorGroup);
 		log.writeDataSet (expRunSettings.picsPerRepetition, "Pictures-Per-Repetition", andorGroup);
 		log.writeDataSet (expRunSettings.repetitionsPerVariation, "Repetitions-Per-Variation", andorGroup);

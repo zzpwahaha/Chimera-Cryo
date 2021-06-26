@@ -183,7 +183,7 @@ void DataLogger::initializeDataFiles( std::string specialName, bool checkForCali
  		// create the file. H5F_ACC_TRUNC means it will overwrite files with the same name.
 		file = H5::H5File( cstr( dataFilesBaseLocation + finalSaveFolder + finalSaveFileName ), H5F_ACC_TRUNC );
 		fileIsOpen = true;
-		H5::Group ttlsGroup( file.createGroup( "/TTLs" ) );
+		//H5::Group ttlsGroup( file.createGroup( "/TTLs" ) );
 	}
 	catch (H5::Exception err) {
 		auto fullE = getFullError (err);
@@ -197,7 +197,7 @@ void DataLogger::initializeDataFiles( std::string specialName, bool checkForCali
 void DataLogger::logPlotData ( std::string name ){
 }
 
-
+// TODO add logOlSystemSettings and logDdsSystemSettings
 void DataLogger::logAoSystemSettings ( AoSystem& aoSys ){
 	auto info = aoSys.getDacInfo ( );
 	H5::Group AoSystemGroup ( file.createGroup ( "/Ao_System" ) );
