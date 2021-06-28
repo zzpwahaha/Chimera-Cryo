@@ -85,6 +85,11 @@ void QCustomPlotCtrl::init(IChimeraQtWindow* parent, QString titleIn, unsigned n
 			errBox("For DAC, TTL, OFFSETLOCK, you should spec the number of trace you want.");
 		}
 		isShow = std::vector<std::byte>(numTraces, std::byte(1));
+		connect(plot, &QCustomPlot::mouseDoubleClick, this, [this]() {
+			plot->rescaleAxes();
+			plot->replot(); });
+		//connect(plot, &QCustomPlot::plottableClick, this, [this](QCPAbstractPlottable* p, int dataIndex) {
+		//	});
 	}
 
 
@@ -123,14 +128,17 @@ void QCustomPlotCtrl::handleContextMenu(const QPoint& pos) {
 				errBox("There is currently " + qstr(graphs.size()) + " traces in the plot which does not match the"
 					" number of plot control for the traces: " + qstr(isShow.size()) + ". Please make sure you run-ed the experiemnt and the plot is updated");
 			}
-			QDialogButtonBox* diag = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+			QDialog* diag = new QDialog();
+			diag->setModal(false);
 			diag->setWindowTitle(title->text() + ": Select To Show");
-			//QDialog* diag = new QDialog();
-			//diag->setModal(false);
 			diag->setAttribute(Qt::WA_DeleteOnClose);
-			QHBoxLayout* layout = new QHBoxLayout(diag);
+			QVBoxLayout* layoutDiag = new QVBoxLayout();
+			diag->setLayout(layoutDiag);
+			QHBoxLayout* layout = new QHBoxLayout();
 			QVBoxLayout* layout1 = new QVBoxLayout();
 			QVBoxLayout* layout2 = new QVBoxLayout();
+			layout->addLayout(layout1);
+			layout->addLayout(layout2);
 			std::vector<QCheckBox*> chkbrd;
 			for (unsigned i = 0; i < graphs.size(); i++) {
 				chkbrd.push_back(new QCheckBox(graphs.at(i)->name()));
@@ -142,15 +150,44 @@ void QCustomPlotCtrl::handleContextMenu(const QPoint& pos) {
 					layout2->addWidget(chkbrd.back());
 				}
 			}
-			connect(diag, &QDialogButtonBox::accepted, [this, chkbrd]() {
+			QDialogButtonBox* diagbutton = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+			layoutDiag->addLayout(layout, 1);
+			layoutDiag->addWidget(diagbutton, 0);
+			connect(diagbutton, &QDialogButtonBox::accepted, [this, chkbrd, diag]() {
 				auto graphs = plot->axisRect()->graphs();
 				for (unsigned idx = 0; idx < chkbrd.size(); idx++) {
 					isShow[idx] = std::byte(chkbrd[idx]->isChecked() ? 1 : 0);
 					graphs.at(idx)->setVisible(chkbrd[idx]->isChecked());
-					plot->replot();
-				}});
+				}
+				plot->replot();
+				diag->close(); });
+			QPoint p = QCursor::pos();
+			diag->move(p.x(), p.y());
+			diag->show();
 			});
 		menu.addAction(tra);
+		auto* autos = new QAction("Disable Auto Scale", plot);
+		autos->setCheckable(true);
+		autos->setChecked(!autoScale);
+		plot->connect(autos, &QAction::triggered, [this, autos]() {
+			autoScale = !autos->isChecked(); });
+		menu.addAction(autos);
+
+		if (plot->selectedGraphs().size() > 0) {
+			menu.addAction("Hide selected graph", this, [this]() {
+				auto selectedGras = plot->selectedGraphs();
+				auto* selectedGra = plot->selectedGraphs().first();
+				if (selectedGras.size() > 0) {
+					auto gras = plot->axisRect()->graphs();
+					int idx = gras.indexOf(selectedGra);
+					selectedGra->setVisible(false);
+					if (idx >= 0) {
+						isShow[idx] = std::byte(0);
+					}
+					plot->replot();
+				}});
+		}
+
 	}
 
 	
@@ -357,6 +394,8 @@ void QCustomPlotCtrl::setData(std::vector<plotDataVec> newData, std::vector<std:
 			if (addLegend) {
 				plot->graph()->setName(qstr(legends[traceNum]));
 			}
+			plot->graph()->setVisible(isShow[traceNum] == std::byte(0) ? false : true);
+
 		}
 	}
 	else { // line plot... not sure specificly
@@ -421,6 +460,11 @@ void QCustomPlotCtrl::resetChart() {
 		colorMap->rescaleDataRange(true);
 		colorMap->colorScale()->rescaleDataRange(true);
 		plot->yAxis->setScaleRatio(plot->xAxis, 1.0);
+	}
+	else if (style == plotStyle::DacPlot || style == plotStyle::TtlPlot) {
+		if (autoScale) {
+			plot->rescaleAxes();
+		}
 	}
 	else {
 		plot->rescaleAxes();
