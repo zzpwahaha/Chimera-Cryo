@@ -410,13 +410,15 @@ std::vector<std::vector<plotDataVec>> DoCore::getPlotData (unsigned variation){
 	for (auto line : range (size_t(DOGrid::total))) {
 		auto& data = ttlData[line / linesPerPlot][line % linesPerPlot];
 		data.clear ();
+		unsigned frst = line / size_t(DOGrid::numPERunit);
+		unsigned secd = line % size_t(DOGrid::numPERunit);
 		for (auto snapn : range(ttlSnapshots [variation].size())){
 			if (snapn != 0){
-				data.push_back ({ ttlSnapshots [variation][snapn].time,
-								  double (ttlSnapshots [variation][snapn-1].ttlStatus[line / linesPerPlot][line % linesPerPlot]), 0 });
+				data.push_back({ ttlSnapshots[variation][snapn].time,
+								  double(ttlSnapshots[variation][snapn - 1].ttlStatus[frst][secd]), 0 });
 			}
-			data.push_back ({ ttlSnapshots [variation][snapn].time, 
-							  double (ttlSnapshots [variation][snapn].ttlStatus[line / linesPerPlot][line % linesPerPlot]), 0 });
+			data.push_back({ ttlSnapshots[variation][snapn].time,
+							  double(ttlSnapshots[variation][snapn].ttlStatus[frst][secd]), 0 });
 		}
 	}
 	return ttlData;

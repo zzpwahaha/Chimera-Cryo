@@ -363,13 +363,41 @@ void OlCore::organizeOLCommands(unsigned variation, std::string& warning)
 	//}
 
 	///// make the snapshots
-	//if (timeOrganizer.size() == 0)
+	///// The following code is wrong, if want snapshot, need to combine all channels
+	///// together, say ch1 need 3 changes, and ch2 need 1 change, unless ch2 change at the same time as
+	///// ch1, there would be 4 snapshots. ZZP 06/27/2021
+	//auto& snap = olSnapshots[variation];
+	//snap.clear();
+	//for (unsigned short channel = 0; channel < size_t(OLGrid::total); channel++)
 	//{
-	//	// no commands, that's fine.
-	//	return;
+	//	auto& timeOgzer = timeOrganizer[channel];
+	//	if (timeOgzer.size() == 0) {
+	//		continue; // no commands, that's fine.
+	//	}
+	//	snap.push_back(initSnap);
+	//	if (timeOgzer[0].first != 0) {
+	//		// then there were no commands at time 0, so just set the initial state to be exactly the original state before
+	//		// the experiment started. I don't need to modify the first snapshot in this case, it's already set. Add a snapshot
+	//		// here so that the thing modified is the second snapshot not the first. 
+	//		snap.push_back(initSnap);
+	//	}
+	//	unsigned cnts = 0;
+	//	for (auto& command : timeOgzer) {
+	//		if (cnts != 0) {
+	//			// handle the zero case specially. This may or may not be the literal first snapshot.
+	//			// first copy the last set so that things that weren't changed remain unchanged.
+	//			snap.push_back(snap.back());
+	//		}
+	//		snap.back().time = command.first;
+	//		auto& change = command.second;
+	//		// see description of this command above... update everything that changed at this time.
+	//		snap.back().olValues[change.line] = change.value;
+	//		snap.back().olEndValues[change.line] = change.endValue;
+	//		snap.back().olRampTimes[change.line] = change.rampTime;
+	//		cnts++;
+	//	}
 	//}
-
-
+	
 }
 
 void OlCore::makeFinalDataFormat(unsigned variation, DoCore& doCore)
@@ -405,19 +433,16 @@ std::vector<std::vector<plotDataVec>> OlCore::getPlotData(unsigned var)
 	unsigned linesPerPlot = size_t(OLGrid::total) / ExperimentSeqPlotter::NUM_OL_PLTS;
 	std::vector<std::vector<plotDataVec>> olData(ExperimentSeqPlotter::NUM_OL_PLTS,
 		std::vector<plotDataVec>(linesPerPlot));
-	if (olSnapshots.size() <= var) {
+	if (olChannelSnapshots.size() <= var) {
 		thrower("Attempted to use offsetlock data from variation " + str(var) + ", which does not exist!");
 	}
-	// each element of olData should be one ttl line.
-	for (auto line : range(size_t(OLGrid::total))) {
-		auto& data = olData[line / linesPerPlot][line % linesPerPlot];
-		data.clear();
-		for (auto snapn : range(olSnapshots[var].size())) {
-			if (snapn != 0) {
-				data.push_back({ olSnapshots[var][snapn].time, double(olSnapshots[var][snapn - 1].olValues[line]), 0 });
-			}
-			data.push_back({ olSnapshots[var][snapn].time, double(olSnapshots[var][snapn].olValues[line]), 0 });
+	for (auto olchSnapn : range(olChannelSnapshots[var].size())) {
+		auto& olchSnap = olChannelSnapshots[var][olchSnapn];
+		auto& data = olData[olchSnap.channel / linesPerPlot][olchSnap.channel % linesPerPlot];
+		if (olchSnapn != 0) {
+			data.push_back({ olchSnap.time, olChannelSnapshots[var][olchSnapn - 1].val, 0 });
 		}
+		data.push_back({ olchSnap.time, olChannelSnapshots[var][olchSnapn].val, 0 });
 	}
 	return olData;
 }
