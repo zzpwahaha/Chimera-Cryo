@@ -29,7 +29,7 @@ public:
 	void initializeDataObjects(unsigned variationNum);
 	void setOLCommandForm(OlCommandForm command);
 	void handleOLScriptCommand(OlCommandForm command, std::string name, std::vector<parameterType>& vars);
-	void organizeOLCommands(unsigned variation, std::string& warning);
+	void organizeOLCommands(unsigned variation, OlSnapshot initSnap, std::string& warning);
 	void makeFinalDataFormat(unsigned variation, DoCore& doCore);
 	std::vector<std::vector<plotDataVec>> getPlotData(unsigned var);
 	//void standardExperimentPrep(unsigned variation, DoCore& doCore, std::string& warning);

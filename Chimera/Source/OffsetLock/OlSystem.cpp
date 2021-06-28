@@ -265,6 +265,6 @@ void OlSystem::setOlStatusNoForceOut(std::array<double, size_t(OLGrid::total)> s
 
 void OlSystem::standardExperimentPrep(unsigned variation, DoCore& doCore, std::string& warning)
 {
-	core.organizeOLCommands(variation, warning);
+	core.organizeOLCommands(variation, { ZYNQ_DEADTIME,getOlValues() }, warning);
 	core.makeFinalDataFormat(variation, doCore);
 }

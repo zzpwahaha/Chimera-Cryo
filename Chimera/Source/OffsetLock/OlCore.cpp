@@ -254,7 +254,7 @@ void OlCore::calculateVariations(std::vector<parameterType>& variables, ExpThrea
 }
 
 
-void OlCore::organizeOLCommands(unsigned variation, std::string& warning)
+void OlCore::organizeOLCommands(unsigned variation, OlSnapshot initSnap, std::string& warning)
 {
 	// timeOrganizer: each element of this is a different time (the double), and associated with each time is a vector which locates 
 	// which commands were at this time, for ease of retrieving all of the values in a moment.
@@ -274,7 +274,9 @@ void OlCore::organizeOLCommands(unsigned variation, std::string& warning)
 	{
 		auto& timeOgzer = timeOrganizer[channel];
 		timeOgzer.clear();
-		//timeOgzer.push_back({ ZYNQ_DEADTIME, OlCommand{channel,ZYNQ_DEADTIME,status[channel],status[channel],1,OL_TIME_RESOLUTION} });
+		// intentionally avoid colliding with DO at t = ZYNQ_DEADTIME since DO will assert state status at that time
+		timeOgzer.push_back({ ZYNQ_DEADTIME * 2,
+			OlCommand{channel,ZYNQ_DEADTIME * 2,initSnap.olValues[channel],initSnap.olValues[channel],1,OL_TIME_RESOLUTION} });
 
 		for (unsigned commandInc = 0; commandInc < tempEvents.size(); commandInc++)
 		{
