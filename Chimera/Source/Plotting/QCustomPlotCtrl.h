@@ -12,6 +12,7 @@
 
 #include <mutex>
 #include <vector>
+#include <string>
 #include <memory>
 #include <plotting/PlotCtrl.h>
 
@@ -35,7 +36,8 @@ public:
 	void initializeCalData(calSettings cal);
 	void removeData();
 	QCPGraph* getCalData();
-	void init(IChimeraQtWindow* parent, QString titleIn);
+	// numTraces is used for DAC, OFFSETLOCK or TTL plot for std::vector<std::byte> isShow
+	void init(IChimeraQtWindow* parent, QString titleIn, unsigned numTraces = 0);
 	dataPoint getMainAnalysisResult();
 	void resetChart();
 	void setStyle(plotStyle newStyle);
@@ -54,7 +56,8 @@ private:
 	// first level deliminates different lines which get different colors. second level deliminates different 
 	// points within the line.
 	bool showLegend = false;
-
+	// used for DAC, OFFSETLOCK or TTL plot to determine whether the trace is shown
+	std::vector<std::byte> isShow;
 	// a colormap that I use for plot stuffs.
 	const std::vector<std::array<int, 3>> GIST_RAINBOW_RGB{ { 255 , 0 , 40 },
 							{ 255 , 0 , 35 },
@@ -829,7 +832,10 @@ private:
 
 
 public Q_SLOTS:
-	void setData(std::vector<plotDataVec> newData);
+	void setData(std::vector<plotDataVec> newData, 
+		std::vector<std::string> legends = std::vector<std::string>());
 
 };
 
+//Q_DECLARE_METATYPE(std::vector<std::vector<plotDataVec>>)
+Q_DECLARE_METATYPE(std::vector<std::string>)

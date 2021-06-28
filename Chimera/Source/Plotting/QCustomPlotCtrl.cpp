@@ -5,6 +5,7 @@
 #include <qgraphicslayout.h>
 #include <qdebug.h>
 #include <qmenu.h>
+#include <qdialogbuttonbox.h>
 #include <AnalogInput/CalibrationManager.h>
 
 QCustomPlotCtrl::QCustomPlotCtrl() :
@@ -21,7 +22,7 @@ QCustomPlotCtrl::~QCustomPlotCtrl() {
 }
 
 
-void QCustomPlotCtrl::init(IChimeraQtWindow* parent, QString titleIn)
+void QCustomPlotCtrl::init(IChimeraQtWindow* parent, QString titleIn, unsigned numTraces)
 {
 	plot = new QCustomPlot(parent);
 	plot->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -77,10 +78,17 @@ void QCustomPlotCtrl::init(IChimeraQtWindow* parent, QString titleIn)
 			plot->yAxis->setScaleRatio(plot->xAxis, 1.0);
 			plot->replot(); });
 	}
+	if (this->style == plotStyle::DacPlot || this->style == plotStyle::TtlPlot) {
+		plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectPlottables);
+		plot->axisRect()->setRangeZoomFactor(0.95);
+		if (numTraces == 0) {
+			errBox("For DAC, TTL, OFFSETLOCK, you should spec the number of trace you want.");
+		}
+		isShow = std::vector<std::byte>(numTraces, std::byte(1));
+	}
 
 
-
-	plot->setMinimumSize(400, 400);
+	plot->setMinimumSize(600, 400);
 	resetChart();
 	if (this->style == plotStyle::DensityPlot) {
 		colorMap->data()->setSize(10, 10);
@@ -107,7 +115,43 @@ void QCustomPlotCtrl::handleContextMenu(const QPoint& pos) {
 		menu.addAction(leg);
 	}
 
-
+	if (this->style == plotStyle::DacPlot || this->style == plotStyle::TtlPlot) {
+		auto* tra = new QAction("Toggle Traces", plot);
+		plot->connect(tra, &QAction::triggered, [this]() {
+			auto graphs = plot->axisRect()->graphs();
+			if (graphs.size() != isShow.size()) {
+				errBox("There is currently " + qstr(graphs.size()) + " traces in the plot which does not match the"
+					" number of plot control for the traces: " + qstr(isShow.size()) + ". Please make sure you run-ed the experiemnt and the plot is updated");
+			}
+			QDialogButtonBox* diag = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+			diag->setWindowTitle(title->text() + ": Select To Show");
+			//QDialog* diag = new QDialog();
+			//diag->setModal(false);
+			diag->setAttribute(Qt::WA_DeleteOnClose);
+			QHBoxLayout* layout = new QHBoxLayout(diag);
+			QVBoxLayout* layout1 = new QVBoxLayout();
+			QVBoxLayout* layout2 = new QVBoxLayout();
+			std::vector<QCheckBox*> chkbrd;
+			for (unsigned i = 0; i < graphs.size(); i++) {
+				chkbrd.push_back(new QCheckBox(graphs.at(i)->name()));
+				chkbrd.back()->setChecked(isShow[i] > std::byte(0));
+				if (i < graphs.size() / 2) {
+					layout1->addWidget(chkbrd.back());
+				}
+				else {
+					layout2->addWidget(chkbrd.back());
+				}
+			}
+			connect(diag, &QDialogButtonBox::accepted, [this, chkbrd]() {
+				auto graphs = plot->axisRect()->graphs();
+				for (unsigned idx = 0; idx < chkbrd.size(); idx++) {
+					isShow[idx] = std::byte(chkbrd[idx]->isChecked() ? 1 : 0);
+					graphs.at(idx)->setVisible(chkbrd[idx]->isChecked());
+					plot->replot();
+				}});
+			});
+		menu.addAction(tra);
+	}
 
 	
 	menu.exec(plot->mapToGlobal(pos));
@@ -143,7 +187,8 @@ void QCustomPlotCtrl::initializeCalData(calSettings cal) {
 	plot->graph(0)->setData({}, {});
 }
 
-void QCustomPlotCtrl::setData(std::vector<plotDataVec> newData) 
+// legends is currently only used for DAC, OFFSETLOCK or TTL plot
+void QCustomPlotCtrl::setData(std::vector<plotDataVec> newData, std::vector<std::string> legends)
 {
 	removeData();
 	if (style == plotStyle::CalibrationPlot) {
@@ -290,11 +335,36 @@ void QCustomPlotCtrl::setData(std::vector<plotDataVec> newData)
 			lineCount++;
 		}
 	}
-	else { // line plot... e.g. for dio and ao data
+	else if (style == plotStyle::DacPlot || style == plotStyle::TtlPlot) {
 		if (newData.size() == 0 || !plot) {
 			return;
 		}
 		unsigned lineCount = 0;
+		bool addLegend = newData.size() != legends.size() ? false : true;
+		for (auto traceNum : range(newData.size())) {
+			auto& newLine = newData[traceNum];
+			auto color = GIST_RAINBOW_RGB[lineCount * GIST_RAINBOW_RGB.size() / newData.size()];
+			QVector<double> newXdata, newYdata;
+			for (auto count : range(newLine.size())) {
+				newXdata.append(newLine[count].x);
+				newYdata.append(newLine[count].y);
+			}
+			lineCount++;
+			plot->addGraph();
+			plot->graph()->setPen(QColor(color[0], color[1], color[2]));
+			plot->graph()->addData(newXdata, newYdata);
+			plot->graph()->setName(qstr(legends[traceNum]));
+			if (addLegend) {
+				plot->graph()->setName(qstr(legends[traceNum]));
+			}
+		}
+	}
+	else { // line plot... not sure specificly
+		if (newData.size() == 0 || !plot) {
+			return;
+		}
+		unsigned lineCount = 0;
+		bool addLegend = newData.size() != legends.size() ? false : true;
 		for (auto traceNum : range(newData.size())) {
 			auto& newLine = newData[traceNum];
 			auto color = GIST_RAINBOW_RGB[lineCount * GIST_RAINBOW_RGB.size() / newData.size()];
@@ -307,6 +377,9 @@ void QCustomPlotCtrl::setData(std::vector<plotDataVec> newData)
 			plot->addGraph();
 			plot->graph()->setPen(QColor(color[0],color[1],color[2]));
 			plot->graph()->addData(newXdata, newYdata);
+			if (addLegend) {
+				plot->graph()->setName(qstr(legends[traceNum]));
+			}
 		}
 	}
 	resetChart();

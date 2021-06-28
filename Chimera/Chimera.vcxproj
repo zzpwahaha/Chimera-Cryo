@@ -128,6 +128,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Source\ExperimentMonitoringAndStatus\ExperimentSeqPlotter.cpp" />
     <ClCompile Include="Source\RealTimeMOTAnalysis\MOTAnalysisSystem.cpp" />
     <ClCompile Include="Source\PrimaryWindows\QtAnalysisWindow.cpp" />
     <ClCompile Include="Source\RealTimeMOTAnalysis\MOTAnalysisControl.cpp" />
@@ -169,6 +170,7 @@
     <QtMoc Include="Source\GeneralImaging\PictureViewer.h" />
     <QtMoc Include="Source\CustomQtControls\LineEditCompleter.h" />
     <QtMoc Include="Source\PrimaryWindows\QtAnalysisWindow.h" />
+    <QtMoc Include="Source\ExperimentMonitoringAndStatus\ExperimentSeqPlotter.h" />
     <ClInclude Include="Source\RealTimeMOTAnalysis\MOTAnalysisSystem.h" />
     <ClInclude Include="Source\RealTimeMOTAnalysis\MOTAnalysisControl.h" />
     <QtMoc Include="Source\RealTimeMOTAnalysis\MOTAnalysisThreadWoker.h" />

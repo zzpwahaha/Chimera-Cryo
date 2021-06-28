@@ -2,6 +2,7 @@
 #include "DoCore.h"
 #include "DoStructures.h"
 #include "qdebug.h"
+#include <ExperimentMonitoringAndStatus/ExperimentSeqPlotter.h>
 
 #include <bitset>
 
@@ -398,24 +399,24 @@ std::vector<double> DoCore::getFinalTimes ()
 
 
 std::vector<std::vector<plotDataVec>> DoCore::getPlotData (unsigned variation){
-	std::vector<std::vector<plotDataVec>> ttlData(4, std::vector<plotDataVec>(16));
-	std::string message;
+	unsigned linesPerPlot = size_t(DOGrid::total) / ExperimentSeqPlotter::NUM_TTL_PLTS;
+	std::vector<std::vector<plotDataVec>> ttlData(ExperimentSeqPlotter::NUM_TTL_PLTS, 
+		std::vector<plotDataVec>(linesPerPlot));
 	if (ttlSnapshots.size () <= variation) {
 		thrower ("Attempted to retrieve ttl data from variation " + str (variation) + ", which does not "
 			"exist in the dio code object!");
 	}
 	// each element of ttlData should be one ttl line.
-	unsigned linesPerPlot = 64 / ttlData.size ();
-	for (auto line : range (64)) {
+	for (auto line : range (size_t(DOGrid::total))) {
 		auto& data = ttlData[line / linesPerPlot][line % linesPerPlot];
 		data.clear ();
 		for (auto snapn : range(ttlSnapshots [variation].size())){
 			if (snapn != 0){
 				data.push_back ({ ttlSnapshots [variation][snapn].time,
-								  double (ttlSnapshots [variation][snapn-1].ttlStatus[line / 16][line % 16]), 0 });
+								  double (ttlSnapshots [variation][snapn-1].ttlStatus[line / linesPerPlot][line % linesPerPlot]), 0 });
 			}
 			data.push_back ({ ttlSnapshots [variation][snapn].time, 
-							  double (ttlSnapshots [variation][snapn].ttlStatus[line / 16][line % 16]), 0 });
+							  double (ttlSnapshots [variation][snapn].ttlStatus[line / linesPerPlot][line % linesPerPlot]), 0 });
 		}
 	}
 	return ttlData;

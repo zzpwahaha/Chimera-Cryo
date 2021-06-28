@@ -348,10 +348,10 @@ double ExpThreadWorker::convertToTime (timeType time, std::vector<parameterType>
 	return variableTime + time.second;
 }
 
-void ExpThreadWorker::handleDebugPlots (DoCore& ttls, AoSystem& aoSys, unsigned variation) {
-	emit doAoData (ttls.getPlotData (variation), aoSys.getCore().getPlotData (variation));
-	emit notification (qstr (ttls.getTtlSequenceMessage (variation)), 2);
-	emit notification (qstr (aoSys.getCore().getDacSequenceMessage (variation)), 2);
+void ExpThreadWorker::handleDebugPlots (DoCore& ttls, AoCore& aoSys, OlCore& olSys, unsigned variation) {
+	emit doAoOlData(ttls.getPlotData (variation), aoSys.getPlotData (variation), olSys.getPlotData(variation));
+	//emit notification (qstr (ttls.getTtlSequenceMessage (variation)), 2);
+	//emit notification (qstr (aoSys.getDacSequenceMessage (variation)), 2);
 }
 
 bool ExpThreadWorker::runningStatus () {
@@ -1202,7 +1202,7 @@ void ExpThreadWorker::initVariation (unsigned variationInc,std::vector<parameter
 	waitForAndorFinish ();
 	bool skipOption = input->skipNext == nullptr ? false : input->skipNext->load ();
 	if (true /*runMaster*/) { /*input->ttls.ftdi_write (variationInc, skipOption);*/ }
-	//handleDebugPlots ( input->ttls, input->aoSys, variationInc ); deal it later zzp 20210203
+	handleDebugPlots(input->ttls, input->ao, input->ol, variationInc);
 }
 
 void ExpThreadWorker::waitForAndorFinish () {

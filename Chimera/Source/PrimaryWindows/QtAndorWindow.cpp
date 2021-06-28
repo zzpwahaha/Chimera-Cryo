@@ -913,6 +913,7 @@ void QtAndorWindow::handleBumpAnalysis (profileSettings finishedProfile) {
 			// zero is the default.
 			if (name != "" && res != 0) {
 				auxWin->getGlobals ().adjustVariableValue (str (name, 13, false, true), res);
+				// TODO adapt this for cryo. ZZP 06/26/2021
 			}
 			reportStatus ( qstr("Successfully completed auto bump analysis and set variable \"" + name + "\" to value " 
 						   + str (res) + "\n"));

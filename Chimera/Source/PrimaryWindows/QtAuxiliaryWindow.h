@@ -47,7 +47,7 @@ class QtAuxiliaryWindow : public IChimeraQtWindow{
 		void initializeWidgets ();
 		void handleNormalFin ();
 		void updateOptimization (AllExperimentInput& input);
-		void handleMasterConfigSave (std::stringstream& configStream);
+		void handleMasterConfigSave (std::stringstream& configStream); // TODO get rid of these two, no longer in use. ZZP 06/26/2021
 		void handleMasterConfigOpen (ConfigStream& configStream);
 		/// Message Map Functions
 		void ViewOrChangeTTLNames();

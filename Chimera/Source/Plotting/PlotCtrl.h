@@ -15,7 +15,7 @@
 #include <vector>
 #include <memory>
 
-enum class plotStyle{
+enum class plotStyle {
 	PicturePlot,
 	DensityPlot,
 	// ttl and dac plot use steps.

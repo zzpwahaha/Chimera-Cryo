@@ -420,6 +420,9 @@
     <ClCompile Include="Source\RealTimeMOTAnalysis\MOTAnalysisSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\ExperimentMonitoringAndStatus\ExperimentSeqPlotter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="3rd_Party\qcustomplot\qcustomplot.h">
@@ -567,6 +570,9 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="Source\RealTimeMOTAnalysis\MOTAnalysisThreadWoker.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\ExperimentMonitoringAndStatus\ExperimentSeqPlotter.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>

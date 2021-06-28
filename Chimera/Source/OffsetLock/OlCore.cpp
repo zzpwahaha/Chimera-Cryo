@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "OlCore.h"
-
+#include <ExperimentMonitoringAndStatus/ExperimentSeqPlotter.h>
 #include <qDebug>
 #include <qelapsedtimer.h>
 
@@ -398,6 +398,28 @@ void OlCore::makeFinalDataFormat(unsigned variation, DoCore& doCore)
 		}
 	}
 
+}
+
+std::vector<std::vector<plotDataVec>> OlCore::getPlotData(unsigned var)
+{
+	unsigned linesPerPlot = size_t(OLGrid::total) / ExperimentSeqPlotter::NUM_OL_PLTS;
+	std::vector<std::vector<plotDataVec>> olData(ExperimentSeqPlotter::NUM_OL_PLTS,
+		std::vector<plotDataVec>(linesPerPlot));
+	if (olSnapshots.size() <= var) {
+		thrower("Attempted to use offsetlock data from variation " + str(var) + ", which does not exist!");
+	}
+	// each element of olData should be one ttl line.
+	for (auto line : range(size_t(OLGrid::total))) {
+		auto& data = olData[line / linesPerPlot][line % linesPerPlot];
+		data.clear();
+		for (auto snapn : range(olSnapshots[var].size())) {
+			if (snapn != 0) {
+				data.push_back({ olSnapshots[var][snapn].time, double(olSnapshots[var][snapn - 1].olValues[line]), 0 });
+			}
+			data.push_back({ olSnapshots[var][snapn].time, double(olSnapshots[var][snapn].olValues[line]), 0 });
+		}
+	}
+	return olData;
 }
 
 //void OlCore::standardExperimentPrep(unsigned variation, DoCore& doCore, std::string& warning)

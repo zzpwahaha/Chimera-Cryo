@@ -2,6 +2,7 @@
 #include "IChimeraQtWindow.h"
 #include "ExperimentThread/ExperimentThreadInput.h"
 #include <RealTimeMOTAnalysis/MOTAnalysisSystem.h>
+#include <ExperimentMonitoringAndStatus/ExperimentSeqPlotter.h>
 
 
 namespace Ui {
@@ -29,11 +30,11 @@ private:
 
 
 public:
-	
+	MOTAnalysisSystem MOTAnalySys;
+	ExperimentSeqPlotter SeqPlotter;
 
 private:
 	Ui::QtAnalysisWindow* ui;
-	MOTAnalysisSystem MOTAnalySys;
 
 
 };

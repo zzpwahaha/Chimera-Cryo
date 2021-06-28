@@ -16,6 +16,7 @@ int main (int argc, char** argv) {
 	qRegisterMetaType<QVector<double>> ();
 	qRegisterMetaType<std::vector<double>> ();
 	qRegisterMetaType<std::vector<std::vector<plotDataVec>>> ();
+	qRegisterMetaType<std::vector<std::string>>("std::vector<std::string>");
 	qRegisterMetaType<NormalImage> ();
 	qRegisterMetaType<atomQueue> ();
 	qRegisterMetaType<std::vector<std::vector<dataPoint> >> ();

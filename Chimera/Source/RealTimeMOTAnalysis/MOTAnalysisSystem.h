@@ -14,7 +14,7 @@ public:
 	void handleSaveConfig(ConfigStream& file) {};
 	void prepareMOTAnalysis();
 
-	static const unsigned MOTCALCTRL_NUM = 3;
+	static const unsigned MOTCALCTRL_NUM = 2;
 
 private:
 	void prepareMOTAnalysis(int idx); // for all MOTAnalysisThreadWoker

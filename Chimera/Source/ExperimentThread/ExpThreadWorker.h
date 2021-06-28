@@ -62,7 +62,7 @@ class ExpThreadWorker : public QObject
 		void experimentThreadProcedure ();
 		void analyzeFunctionDefinition (std::string defLine, std::string& functionName, std::vector<std::string>& args);
 		static unsigned determineVariationNumber (std::vector<parameterType> vars);
-		void handleDebugPlots (DoCore& ttls, AoSystem& aoSys, unsigned variation);
+		void handleDebugPlots (DoCore& ttls, AoCore& ao, OlCore& ol, unsigned variation);
 		double convertToTime (timeType time, std::vector<parameterType> variables, unsigned variation);
 		void calculateAdoVariations (ExpRuntimeData& runtime);
 		static std::vector<parameterType> getLocalParameters (ScriptStream& stream);
@@ -109,8 +109,9 @@ class ExpThreadWorker : public QObject
         void prepareMako (MakoSettings* settings, CameraInfo camInfo);
 		void prepareAnalysis();
         void plot_Xvals_determined (std::vector<double>);
-        void doAoData (const std::vector<std::vector<plotDataVec>>& doData,
-                       const std::vector<std::vector<plotDataVec>>& aoData);
+        void doAoOlData (const std::vector<std::vector<plotDataVec>>& doData,
+                         const std::vector<std::vector<plotDataVec>>& aoData,
+						 const std::vector<std::vector<plotDataVec>>& olData);
         void normalExperimentFinish (QString, profileSettings);
 		void calibrationFinish (QString, profileSettings);
         void errorExperimentFinish (QString, profileSettings);

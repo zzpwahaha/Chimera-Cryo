@@ -71,6 +71,7 @@ void QtAuxiliaryWindow::initializeWidgets (){
 
 		QVBoxLayout* layout3 = new QVBoxLayout();
 		globalParamCtrl.initialize (this, "GLOBAL PARAMETERS", ParameterSysType::global);
+		globalParamCtrl.setMaximumHeight(300); // TODO see whether we need the globalPara. ZZP 06/26/2021
 		layout3->addWidget(&globalParamCtrl, 1);
 
 		configParamCtrl.initialize (this, "CONFIGURATION PARAMETERS", ParameterSysType::config);
@@ -388,6 +389,7 @@ void QtAuxiliaryWindow::handleAbort (){
 	}
 }
 
+// TODO get rid of these two, no longer in use. ZZP 06/26/2021
 void QtAuxiliaryWindow::handleMasterConfigSave (std::stringstream& configStream){
 	/// ttls
 	for (auto row : range(size_t(DOGrid::numOFunit))){

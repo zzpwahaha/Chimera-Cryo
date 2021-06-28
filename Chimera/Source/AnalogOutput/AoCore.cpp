@@ -2,6 +2,7 @@
 #include "AoCore.h"
 #include "ExperimentThread/ExpThreadWorker.h"
 #include "GeneralObjects/CodeTimer.h"
+#include <ExperimentMonitoringAndStatus/ExperimentSeqPlotter.h>
 
 
 AoCore::AoCore() : dacTriggerTime(0.0005)
@@ -65,18 +66,16 @@ std::string AoCore::getDacSequenceMessage(unsigned variation)
 
 std::vector<std::vector<plotDataVec>> AoCore::getPlotData(unsigned var) 
 {
-	std::vector<std::vector<plotDataVec>> dacData(static_cast<size_t>(AOGrid::numOFunit), std::vector<plotDataVec>(size_t(AOGrid::numPERunit)));
-	std::string message;
-	// each element of dacData should be one ttl line.
-	unsigned linesPerPlot = size_t(AOGrid::numPERunit);
-
+	unsigned linesPerPlot = size_t(AOGrid::total) / ExperimentSeqPlotter::NUM_DAC_PLTS;
+	std::vector<std::vector<plotDataVec>> dacData(ExperimentSeqPlotter::NUM_DAC_PLTS,
+		std::vector<plotDataVec>(linesPerPlot));
+	if (dacSnapshots.size() <= var) {
+		thrower("Attempted to use dac data from variation " + str(var) + ", which does not exist!");
+	}
+	// each element of dacData should be one analog line.
 	for (auto line : range(size_t(AOGrid::total))) {
 		auto& data = dacData[line / linesPerPlot][line % linesPerPlot];
 		data.clear();
-		if (dacSnapshots.size() <= var) {
-			thrower("Attempted to use dac data from variation " + str(var) + ", which does not exist!");
-		}
-
 		for (auto snapn : range(dacSnapshots[var].size())) {
 			if (snapn != 0) {
 				data.push_back({ dacSnapshots[var][snapn].time, double(dacSnapshots[var][snapn - 1].dacValues[line]), 0 });

@@ -263,7 +263,8 @@ void QtMainWindow::startExperimentThread (ExperimentThreadInput* input){
 	connect (expWorker, &ExpThreadWorker::prepareAnalysis, analysisWin, &QtAnalysisWindow::prepareCalcForAcq);
 	connect (expWorker, &ExpThreadWorker::notification, this, &QtMainWindow::handleNotification);
 	connect (expWorker, &ExpThreadWorker::warn, this, &QtMainWindow::onErrorMessage);
-	connect (expWorker, &ExpThreadWorker::doAoData, auxWin, &QtAuxiliaryWindow::handleDoAoPlotData);
+	//connect (expWorker, &ExpThreadWorker::doAoData, auxWin, &QtAuxiliaryWindow::handleDoAoPlotData);
+	connect (expWorker, &ExpThreadWorker::doAoOlData, &analysisWin->SeqPlotter, &ExperimentSeqPlotter::handleDoAoOlPlotData);
 	connect (expWorker, &ExpThreadWorker::repUpdate, this, &QtMainWindow::onRepProgress);
 	connect (expWorker, &ExpThreadWorker::mainProcessFinish, expThread, &QThread::quit);
 	connect (expWorker, &ExpThreadWorker::normalExperimentFinish, this, &QtMainWindow::onNormalFinish);

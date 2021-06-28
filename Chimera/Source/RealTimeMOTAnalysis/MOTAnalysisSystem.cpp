@@ -5,7 +5,7 @@
 
 MOTAnalysisSystem::MOTAnalysisSystem(IChimeraQtWindow* parent)
 	: IChimeraSystem(parent)
-	, MOTCalcCtrl{ { MOTAnalysisControl(parent),MOTAnalysisControl(parent),MOTAnalysisControl(parent) } }
+	, MOTCalcCtrl{ { MOTAnalysisControl(parent),MOTAnalysisControl(parent) } }
 {
 
 }

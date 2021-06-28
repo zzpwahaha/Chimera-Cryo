@@ -3,6 +3,7 @@
 #include "OffsetLockOutput.h"
 #include "GeneralFlumes/QtSerialFlume.h"
 #include "DigitalOutput/DoCore.h"
+#include "Plotting/QCustomPlotCtrl.h"
 
 class OlCore
 {
@@ -30,6 +31,7 @@ public:
 	void handleOLScriptCommand(OlCommandForm command, std::string name, std::vector<parameterType>& vars);
 	void organizeOLCommands(unsigned variation, std::string& warning);
 	void makeFinalDataFormat(unsigned variation, DoCore& doCore);
+	std::vector<std::vector<plotDataVec>> getPlotData(unsigned var);
 	//void standardExperimentPrep(unsigned variation, DoCore& doCore, std::string& warning);
 	void writeOLs(unsigned variation);
 
