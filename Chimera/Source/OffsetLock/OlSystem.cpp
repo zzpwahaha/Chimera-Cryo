@@ -94,6 +94,11 @@ void OlSystem::handleOpenConfig(ConfigStream& openFile)
 	updateCoreNames();
 	updateEdits();
 	setOLs(ttlBoard.getCore(), ttlBoard.getCurrentStatus());
+	// update tooltip through setName and setNote
+	for (auto idx : range(outputs.size())) {
+		setName(idx, outputs[idx].info.name);
+		setNote(idx, outputs[idx].info.note);
+	}
 }
 
 std::string OlSystem::getDelim()

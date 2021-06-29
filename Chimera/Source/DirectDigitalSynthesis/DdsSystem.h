@@ -42,6 +42,7 @@ class DdsSystem : public IChimeraSystem{
 		void refreshCurrentRamps ();
 		void programNow (std::vector<parameterType>& constants);
 		std::string getSystemInfo ( );
+		std::array<DdsInfo, size_t(DDSGrid::total)> getDdsInfo();
 		std::string getDelim ( );
 		DdsCore& getCore ( );
 		

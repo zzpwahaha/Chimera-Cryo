@@ -16,6 +16,8 @@
 #include <functional>
 
 class AoSystem;
+class DdsSystem;
+class OlSystem;
 struct ExperimentThreadInput;
 /*
  * Handles the writing of h5 files. Some parts of this are effectively HDF5 wrappers.
@@ -37,6 +39,8 @@ class DataLogger : public IChimeraSystem {
 		void logFunctions( H5::Group& group );
 		void logAoSystemSettings ( AoSystem& aoSys);
 		void logDoSystemSettings ( DoCore& doSys );
+		void logOlSystemSettings(OlSystem& aoSys);
+		void logDdsSystemSettings(DdsSystem& ddsSys);
 		void logPlotData ( std::string name );
 		int getCalibrationFileIndex ();
 		static void getDataLocation ( std::string base, std::string& todayFolder, std::string& fullPath );

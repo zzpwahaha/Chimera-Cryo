@@ -277,11 +277,25 @@ void DdsSystem::handleOpenConfig ( ConfigStream& file )
 	updateEdits();
 	updateCoreNames();
 	setDDSs();
+	// update tooltip through setName and setNote
+	for (auto idx : range(outputs.size())) {
+		setName(idx, outputs[idx].info.name);
+		setNote(idx, outputs[idx].info.note);
+	}
 }
 
 
 std::string DdsSystem::getSystemInfo ( ){
 	return core.getSystemInfo();
+}
+
+std::array<DdsInfo, size_t(DDSGrid::total)> DdsSystem::getDdsInfo()
+{
+	std::array<DdsInfo, size_t(DDSGrid::total)> info;
+	for (auto ddsNum : range(outputs.size())) {
+		info[ddsNum] = outputs[ddsNum].info;
+	}
+	return info;
 }
 
 
