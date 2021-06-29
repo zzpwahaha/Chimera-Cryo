@@ -604,6 +604,10 @@ void MakoCamera::prepareForExperiment()
 {
     currentRepNumber = 0;
     isExpRunning = true;
+    if (core.getRunningSettings().picsPerRep <= 0) {
+        thrower("The CMOS camera " + CameraInfo::toStr(camInfo.camName) + " is set to be Experiment Active but the Picture-Per-Repetion is " + str(core.getRunningSettings().picsPerRep)
+            + " which is not greater than or equal to 1");
+    }
 }
 
 void MakoCamera::setMOTCalcActive(bool active)
