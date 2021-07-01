@@ -192,7 +192,10 @@ void DataLogger::initializeDataFiles( std::string specialName, bool checkForCali
 		throwNested ( "ERROR: Failed to initialize HDF5 data file: " + err.getDetailMsg() + "; Full error:" + fullE);
 	}
 	currentAndorPicNumber = 0;
-	currentMakoPicNumber = 0;
+	for (auto nn : CameraInfo::allCams) {
+		currentMakoPicNumber.insert({ nn,0 });
+	}
+	
 }
 
 
@@ -462,18 +465,18 @@ void DataLogger::writeAndorPic( Matrix<long> image, imageParameters dims){
 	}
 }
 
-void DataLogger::writeMakoPic(std::vector<double> image, int width, int height)
+void DataLogger::writeMakoPic(std::vector<double> image, int width, int height, CameraInfo::name name)
 {
 	if (fileIsOpen == false) {
 		thrower("Tried to write to h5 file (for Mako pic), but the file is closed!\r\n");
 	}
 	// starting coordinates of writebtn area in the h5 file of the array of picture data points.
-	hsize_t offset[] = { currentMakoPicNumber++, 0, 0 };
+	hsize_t offset[] = { currentMakoPicNumber[name]++, 0, 0 };
 	hsize_t slabdim[3] = { 1, width, height };// dims.width (), dims.height ()};
 	try {
-		MakoPicureSetDataSpace.selectHyperslab(H5S_SELECT_SET, slabdim, offset);
-		MakoPictureDataset.write(image.data(), H5::PredType::NATIVE_DOUBLE, MakoPicDataSpace,
-			MakoPicureSetDataSpace);
+		MakoPicureSetDataSpace[name].selectHyperslab(H5S_SELECT_SET, slabdim, offset);
+		MakoPictureDataset[name].write(image.data(), H5::PredType::NATIVE_DOUBLE, MakoPicDataSpace[name],
+			MakoPicureSetDataSpace[name]);
 	}
 	catch (H5::Exception& err) {
 		auto fullE = getFullError(err);
@@ -542,8 +545,10 @@ void DataLogger::logMiscellaneousStart(){
 void DataLogger::assertClosed () {
 	AndorPicureSetDataSpace.close ();
 	AndorPictureDataset.close ();
-	MakoPictureDataset.close ();
-	MakoPicureSetDataSpace.close ();
+	for (auto nn : CameraInfo::allCams) {
+		MakoPictureDataset[nn].close();
+		MakoPicureSetDataSpace[nn].close();
+	}
 	voltsDataSpace.close ();
 	voltsDataSet.close ();
 	file.close ();

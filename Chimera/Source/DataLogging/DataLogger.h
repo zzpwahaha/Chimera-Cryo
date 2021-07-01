@@ -7,6 +7,7 @@
 #include "Andor/AndorRunSettings.h"
 #include <GeneralObjects/Matrix.h>
 #include <DigitalOutput/DoCore.h>
+#include <CMOSCamera/CMOSSetting.h>
 // there's potentially a typedef conflict with a python file which also typedefs ssize_t.
 #define ssize_t h5_ssize_t
 #include "H5Cpp.h"
@@ -30,7 +31,7 @@ class DataLogger : public IChimeraSystem {
 		void logError ( H5::Exception& err );
 		void initializeDataFiles( std::string specialName="", bool needsCal=true);
 		void writeAndorPic( Matrix<long> image, imageParameters dims );
-		void writeMakoPic(std::vector<double> image, int width, int height);
+		void writeMakoPic(std::vector<double> image, int width, int height, CameraInfo::name name);
 		void writeVolts ( unsigned currentVoltNumber, std::vector<float64> data );
 		void assertCalibrationFilesExist ();
 		void logMasterInput( ExperimentThreadInput* input );
@@ -69,14 +70,18 @@ class DataLogger : public IChimeraSystem {
 		H5::DataSet writeDataSet (std::vector<std::string> dataVec, std::string name, H5::Group& group);
 		void writeAttribute (double data, std::string name, H5::DataSet& dset);
 		void writeAttribute (bool data, std::string name, H5::DataSet& dset);
-		H5::DataSet AndorPictureDataset, voltsDataSet, MakoPictureDataset;
+		H5::DataSet AndorPictureDataset, voltsDataSet/*, MakoPictureDataset*/;
+		std::map<CameraInfo::name, H5::DataSet> MakoPictureDataset;
 		// for the entire set
-		H5::DataSpace AndorPicureSetDataSpace, MakoPicureSetDataSpace;
+		H5::DataSpace AndorPicureSetDataSpace/*, MakoPicureSetDataSpace*/;
+		std::map<CameraInfo::name, H5::DataSpace> MakoPicureSetDataSpace;
 		// just one pic
-		H5::DataSpace AndorPicDataSpace, MakoPicDataSpace;
+		H5::DataSpace AndorPicDataSpace/*, MakoPicDataSpace*/;
+		std::map<CameraInfo::name, H5::DataSpace> MakoPicDataSpace;
 
 		H5::DataSpace voltsDataSpace, voltsSetDataSpace;
-		unsigned currentAndorPicNumber, currentMakoPicNumber;
+		unsigned currentAndorPicNumber/*, currentMakoPicNumber*/;
+		std::map<CameraInfo::name, unsigned> currentMakoPicNumber;
 		std::string mr_dayStr, mr_monthStr, mr_yearStr;
 
 	private:

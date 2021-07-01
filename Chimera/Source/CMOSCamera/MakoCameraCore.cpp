@@ -44,31 +44,38 @@ void MakoCameraCore::logSettings(DataLogger& log, ExpThreadWorker* threadworker)
             H5::Group makoGroup(log.file.createGroup("/Mako:Off"));
             return;
         }
-        H5::Group makoGroup(log.file.createGroup("/Mako"));
+        H5::Group makoGroup;
+        try {
+            makoGroup = log.file.openGroup("/Mako");
+        }
+        catch (H5::Exception&) {
+            makoGroup = log.file.createGroup("/Mako");
+        }
+        H5::Group makoSubGroup(makoGroup.createGroup(CameraInfo::toStr(camInfo.camName)));
         hsize_t rank1[] = { 1 };
         // pictures. These are permanent members of the class for speed during the writing process.	
         hsize_t setDims[] = { unsigned __int64(expRunSettings.totalPictures()), expRunSettings.dims.width(),
                                expRunSettings.dims.height() };
         hsize_t picDims[] = { 1, expRunSettings.dims.width(), expRunSettings.dims.height() };
-        log.MakoPicureSetDataSpace = H5::DataSpace(3, setDims);
-        log.MakoPicDataSpace = H5::DataSpace(3, picDims);
-        log.MakoPictureDataset = makoGroup.createDataSet("Pictures", H5::PredType::NATIVE_LONG,
-            log.MakoPicureSetDataSpace);
-        log.currentMakoPicNumber = 0;
+        log.MakoPicureSetDataSpace[camInfo.camName] = H5::DataSpace(3, setDims);
+        log.MakoPicDataSpace[camInfo.camName] = H5::DataSpace(3, picDims);
+        log.MakoPictureDataset[camInfo.camName] = makoSubGroup.createDataSet("Pictures", H5::PredType::NATIVE_LONG,
+            log.MakoPicureSetDataSpace[camInfo.camName]);
+        log.currentMakoPicNumber[camInfo.camName] = 0;
         //log.writeDataSet(BaslerAcquisition::toStr(expRunSettings.acquisitionMode), "Camera-Mode", baslerGroup);
         //log.writeDataSet(BaslerAutoExposure::toStr(expRunSettings.exposureMode), "Exposure-Mode", baslerGroup);
-        log.writeDataSet(expRunSettings.exposureTime, "Exposure-Time", makoGroup);
-        log.writeDataSet(MakoTrigger::toStr(expRunSettings.triggerMode), "Trigger-Mode", makoGroup);
+        log.writeDataSet(expRunSettings.exposureTime, "Exposure-Time", makoSubGroup);
+        log.writeDataSet(MakoTrigger::toStr(expRunSettings.triggerMode), "Trigger-Mode", makoSubGroup);
         // image settings
-        H5::Group imageDims = makoGroup.createGroup("Image-Dimensions");
+        H5::Group imageDims = makoSubGroup.createGroup("Image-Dimensions");
         log.writeDataSet(expRunSettings.dims.top, "Top", imageDims);
         log.writeDataSet(expRunSettings.dims.bottom, "Bottom", imageDims);
         log.writeDataSet(expRunSettings.dims.left, "Left", imageDims);
         log.writeDataSet(expRunSettings.dims.right, "Right", imageDims);
         log.writeDataSet(expRunSettings.dims.horizontalBinning, "Horizontal-Binning", imageDims);
         log.writeDataSet(expRunSettings.dims.verticalBinning, "Vertical-Binning", imageDims);
-        log.writeDataSet(expRunSettings.frameRate, "Frame-Rate", makoGroup);
-        log.writeDataSet(expRunSettings.rawGain, "Raw-Gain", makoGroup);
+        log.writeDataSet(expRunSettings.frameRate, "Frame-Rate", makoSubGroup);
+        log.writeDataSet(expRunSettings.rawGain, "Raw-Gain", makoSubGroup);
     }
     catch (H5::Exception err) {
         log.logError(err);

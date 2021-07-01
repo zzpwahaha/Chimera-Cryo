@@ -44,6 +44,7 @@ public:
 
     MakoCameraCore& getMakoCore() { return core; };
     const CameraInfo& getCameraInfo() { return camInfo; }
+    bool isExpStillRunning() { return isExpRunning; } // used in MakoWindow to verify all cam is finished writing data to hdf5
 
 public slots:
     void handleExpImage(QVector<double> img, int width, int height);
@@ -71,8 +72,8 @@ private:
 	bool isCamRunning;
 
     unsigned int currentRepNumber;
-    bool isExpRunning;
-    bool MOTCalcActive; // will be initialized in Analysis window before every experiment
+    bool isExpRunning = false;
+    bool MOTCalcActive = false; // will be initialized in Analysis window before every experiment
 
     QCheckBox*                          m_expActive;
     QSpinBox*                           m_picsPerRep;

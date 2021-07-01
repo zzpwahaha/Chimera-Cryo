@@ -90,6 +90,18 @@ std::string QtMakoWindow::getSystemStatusString()
 	return msg;
 }
 
+void QtMakoWindow::CMOSChkFinished()
+{
+	bool allfinished = true;
+	for (auto& camera : cam) {
+		allfinished = allfinished && (!camera.isExpStillRunning());
+	}
+	if (!andorWin->cameraIsRunning() && allfinished) {
+		// else it will close when the mako camera finishes.
+		andorWin->getLogger().normalCloseFile();
+	}
+}
+
 void QtMakoWindow::prepareWinForAcq(MakoSettings* , CameraInfo info) {
 	try {
 		for (auto& camera : cam) {

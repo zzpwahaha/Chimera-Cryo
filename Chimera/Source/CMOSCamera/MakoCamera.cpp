@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "MakoCamera.h"
 #include <PrimaryWindows/QtAndorWindow.h>
+#include <PrimaryWindows/QtMakoWindow.h>
 #include <qdialog.h>
 #include <qfiledialog.h>
 #include <qlabel.h>
@@ -633,7 +634,7 @@ void MakoCamera::handleExpImage(QVector<double> img, int width, int height)
         if (MOTCalcActive) {
             emit imgReadyForAnalysis(img, width, height, currentRepNumber - 1);
         }
-        andorWin->getLogger().writeMakoPic(img.toStdVector(), width, height);
+        andorWin->getLogger().writeMakoPic(img.toStdVector(), width, height, camInfo.camName);
 
         if (currentRepNumber == core.getRunningSettings().totalPictures()) {
             // handle mako finish
@@ -642,10 +643,7 @@ void MakoCamera::handleExpImage(QVector<double> img, int width, int height)
             m_OperatingStatusLabel->setText("Exp Finished");
             // tell the andor window that the basler camera finished so that the data file can be handled appropriately.
             //mainWin->getComm ()->sendBaslerFin ();
-            if (!andorWin->cameraIsRunning()) {
-                // else it will close when the basler camera finishes.
-                andorWin->getLogger().normalCloseFile();
-            }
+            parentWin->makoWin->CMOSChkFinished();
         }
     }
     catch (ChimeraError& err) {

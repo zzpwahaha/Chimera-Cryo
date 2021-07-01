@@ -63,7 +63,7 @@ void ExpThreadWorker::experimentThreadProcedure () {
 
 		/// Anaylsis preparation
 		emit prepareAnalysis();
-		emit notification("Enabling real time analysis", 1);
+		emit notification("Enabling real time analysis \r\n", 1);
 
 		runConsistencyChecks (expRuntime.expParams);
 		if (input->expType != ExperimentType::LoadMot) {

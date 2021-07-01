@@ -229,16 +229,20 @@ void MOTAnalysisControl::updateXYKeys()
 void MOTAnalysisControl::prepareMOTAnalysis(MakoCamera*& cam)
 {
 	if (makoCam == nullptr) {
-		emit error("MOT analysis sees a null camera ptr, please check if you selected the working camera. Possibly"
-			" a low level bug");
+		//emit notification("MOT analysis sees a null camera ptr, please check if you selected the working camera. Possibly"
+		//	" a low level bug");
 		cam = nullptr;
 		return;
 	}
+	emit notification("MOT analysis is turned on for " + qstr(CameraInfo::toStr(cam->getCameraInfo().camName)) + "\r\n", 1);
 	if (calcActive->isChecked() && makoCam != nullptr) {
 		cam = makoCam;
 	}
 	else {
 		cam = nullptr;
+	}
+	if (xKeysList.empty()) {
+		thrower("Error in MOTAnalysis: the keylist is empty, make sure to change parameter from const to var and then enable the analysis");
 	}
 	for (auto typ : MOTAnalysisType::allTypes) {
 		if (typ != MOTAnalysisType::type::density2d) {
