@@ -162,8 +162,8 @@ void QCustomPlotCtrl::handleContextMenu(const QPoint& pos) {
 				plot->replot();
 				diag->close(); });
 			QPoint p = QCursor::pos();
-			diag->move(p.x(), p.y());
 			diag->show();
+			diag->move(p.x() - diag->width() / 2, p.y() - diag->height() / 2); // show will update the diag size
 			});
 		menu.addAction(tra);
 		auto* autos = new QAction("Disable Auto Scale", plot);
