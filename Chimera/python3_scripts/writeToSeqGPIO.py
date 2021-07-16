@@ -45,9 +45,9 @@ def writeToSeqGPIO(dev, point):
 
   i = 0
 
-  print 'writing to seqGPIO'
+  print('writing to seqGPIO')
   for word in words:
-    print(ord(word))
+    print((ord(word)))
     i=i+1
     if(i==4):
       print("\n")

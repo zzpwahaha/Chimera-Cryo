@@ -45,7 +45,7 @@ class AXI_GPIO:
       self.mem.seek(0+8*(channel-1))
       self.mem.write(word)
     else:
-      print('{0:#010x}     written to GPIO'.format(struct.unpack('>I',word)[0]))
+      print(('{0:#010x}     written to GPIO'.format(struct.unpack('>I',word)[0])))
 
   def set_bit(self, bit_number, channel=1, MSB_first=True):
     reg=self.read_axi_gpio(channel=channel)
@@ -92,7 +92,7 @@ def print_usage():
     devs.append(item)
   devs.sort(key=lambda v: v.upper())
   for item in devs:
-    print("    {}".format(item))
+    print(("    {}".format(item)))
 
 if __name__ == "__main__":
   if  (len(sys.argv) != 5):
@@ -114,7 +114,7 @@ if __name__ == "__main__":
     
     gpio = AXI_GPIO(gpio_devices[sys.argv[1]])
     if sys.argv[4]=='r':
-      print("0x{}".format(binascii.hexlify(gpio.read_axi_gpio(channel=int(sys.argv[2])))))
+      print(("0x{}".format(binascii.hexlify(gpio.read_axi_gpio(channel=int(sys.argv[2]))))))
     else:
-      print("writing {}".format(sys.argv[3]))
+      print(("writing {}".format(sys.argv[3])))
       gpio.write_axi_gpio(struct.pack('>I', int(sys.argv[3], 0)),channel=int(sys.argv[2]))

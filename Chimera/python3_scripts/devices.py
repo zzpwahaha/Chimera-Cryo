@@ -23,7 +23,7 @@ gpio_devices = {
 
 if __name__ == "__main__":
   for dev in fifo_devices:
-    print("{}  -  {}".format(dev,fifo_devices[dev]))
+    print(("{}  -  {}".format(dev,fifo_devices[dev])))
   print("")
   for dev in gpio_devices:
-    print("{0:s}  -  {1:#018x}".format(dev,gpio_devices[dev]))
+    print(("{0:s}  -  {1:#018x}".format(dev,gpio_devices[dev])))

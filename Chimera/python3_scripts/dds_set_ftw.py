@@ -5,7 +5,7 @@ import struct
 def writeToDDS(dds_char_dev, address, data):
   data_bytes = struct.pack('<I', data)
   for byte in data_bytes:
-    print struct.unpack('<B', byte)
+    print(struct.unpack('<B', byte))
   words = []
   #instruction and D16-D31
   words.append(data_bytes[2])

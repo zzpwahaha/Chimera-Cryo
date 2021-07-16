@@ -82,7 +82,7 @@ class sequencer:
 		self.fifo_dio_seq = AXIS_FIFO(fifo_devices['GPIO_seq'])
 
 	def initExp(self):
-		print 'initializing experiment'
+		print('initializing experiment')
 		self.mod_disable()
 		reset()
 		dds_lock_pll.dds_lock_pll() 
@@ -183,16 +183,16 @@ class sequencer:
 		self.gpio2.clear_bit(0, channel=1)
 
 	def reset_disable_mod(self):
-		print 'disabling mod and resetting sequencers'
+		print('disabling mod and resetting sequencers')
 		self.gpio2.write_axi_gpio(0xffff0000,channel=2)
 		self.gpio2.write_axi_gpio(0x0000ffff,channel=2)
 		self.mod_disable()
 
 	def mod_report(self):
-		print(self.gpio2.read_axi_gpio(channel=1))
+		print((self.gpio2.read_axi_gpio(channel=1)))
 
 	def dac_seq_write_points(self, byte_len, byte_buf, num_snapshots):
-		print 'DAC points'
+		print('DAC points')
 		points0 = []
 		points1 = []
 		for ii in range(num_snapshots):
@@ -205,7 +205,7 @@ class sequencer:
 				# print(s, end, num_steps, ramp_inc)
 			if (ramp_inc < -0.1):
 				ramp_inc = int(self.dacIncrMax + ramp_inc)
-			print "ramp_inc = ", ramp_inc, " num_steps = ", num_steps, " dacRangeConv = ", self.dacRangeConv
+			print("ramp_inc = ", ramp_inc, " num_steps = ", num_steps, " dacRangeConv = ", self.dacRangeConv)
 			if (chan < 16):
 				points0.append(DAC_seq_point(address=len(points0),time=t,start=s,steps=duration,incr=ramp_inc,chan=chan))
 			else:
@@ -227,21 +227,21 @@ class sequencer:
 					points1[i].time = points1[i].time + 1
 
 		for point in points0:
-			print "add: ", point.address
-			print "time: ", point.time
-			print "start: ", point.start
-			print "steps: ", point.steps
-			print "incr: ", point.incr
-			print "chan: ", point.chan
+			print("add: ", point.address)
+			print("time: ", point.time)
+			print("start: ", point.start)
+			print("steps: ", point.steps)
+			print("incr: ", point.incr)
+			print("chan: ", point.chan)
 			self.write_dac_point(self.fifo_dac0_seq, point)
 
 		for point in points1:
-			print "add: ", point.address
-			print "time: ", point.time
-			print "start: ", point.start
-			print "steps: ", point.steps
-			print "incr: ", point.incr
-			print "chan: ", point.chan
+			print("add: ", point.address)
+			print("time: ", point.time)
+			print("start: ", point.start)
+			print("steps: ", point.steps)
+			print("incr: ", point.incr)
+			print("chan: ", point.chan)
 			self.write_dac_point(self.fifo_dac1_seq, point)
 
 
@@ -264,15 +264,15 @@ class sequencer:
 					ramp_inc = int(self.ddsAmpRangeConv + ramp_inc)
 				atw_points.append(DDS_atw_seq_point(address=ii, time=t, start=s, steps=duration, incr=ramp_inc, chan=channel))
 			else:
-				print "invalid dds type. set to 'f' for freq or 'a' for amp"
+				print("invalid dds type. set to 'f' for freq or 'a' for amp")
 		for channel in range(0,4,4):
 			ftw_points.append(DDS_ftw_seq_point(address=num_snapshots, time=0, start=0, steps=0, incr=0, chan=channel))
 			atw_points.append(DDS_atw_seq_point(address=num_snapshots, time=0, start=0, steps=0, incr=0, chan=channel))
 
 		for point in ftw_points:
-			print "freq time = ", point.time
-			print "freq chan = ", point.chan
-			print "freq start = ", point.start
+			print("freq time = ", point.time)
+			print("freq chan = ", point.chan)
+			print("freq start = ", point.start)
 			if (point.chan < 4):
 				fifo = self.fifo_dds0_ftw_seq
 			elif (4 <= point.chan < 8):
@@ -284,9 +284,9 @@ class sequencer:
 			self.write_ftw_point(fifo, point)
 
 		for point in atw_points:
-			print "amp time = ", point.time
-			print "amp chan = ", point.chan
-			print "amp start = ", point.start
+			print("amp time = ", point.time)
+			print("amp chan = ", point.chan)
+			print("amp start = ", point.start)
 			if (point.chan < 4):
 				fifo = self.fifo_dds0_atw_seq
 			elif (4 <= point.chan < 8):
@@ -326,10 +326,10 @@ class sequencer:
 		points.append(GPIO_seq_point(address=num_snapshots,time=0,outputA=0x00000000,outputB=0x00000000))
 
 		for point in points:
-			print "add: ", point.address
-			print "time: ", point.time
-			print "outputA: ", point.outputA
-			print "outputB: ", point.outputB
+			print("add: ", point.address)
+			print("time: ", point.time)
+			print("outputA: ", point.outputA)
+			print("outputB: ", point.outputB)
 
 		# with open("/dev/axis_fifo_0x0000000080004000", "r+b") as character:
 		for point in points:

@@ -48,7 +48,7 @@ def writeToSeqGPIO(dds_char_dev, address, time, banka, bankb):
   i = 0
 
   for word in words:
-    print(ord(word))
+    print((ord(word)))
     i=i+1
     if(i==4):
       print("\n")

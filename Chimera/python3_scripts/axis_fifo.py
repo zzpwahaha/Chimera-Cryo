@@ -39,7 +39,7 @@ class AXIS_FIFO:
       invword=word[::-1]
       for char in invword:
         txt = txt + "{0:#04x}".format(ord(char))[2:]
-      print('0x' + txt + '     written to FIFO')
+      print(('0x' + txt + '     written to FIFO'))
 
 def print_usage():
   print("Usage: axis_fifo.py device value")
@@ -58,10 +58,10 @@ def print_usage():
     devs.append(item)
   devs.sort(key=lambda v: v.upper())
   for item in devs:
-    print("    {}".format(item))
+    print(("    {}".format(item)))
 
 if __name__ == "__main__":
-  print(sys.argv[2])
+  print((sys.argv[2]))
   if  (len(sys.argv) != 3):
     print_usage()
   elif (not sys.argv[2].startswith("0x")):
@@ -71,6 +71,6 @@ if __name__ == "__main__":
     print("ERROR: Invalid device\n")
     print_usage()
   else:
-    print("writing {}".format(sys.argv[2]))
+    print(("writing {}".format(sys.argv[2])))
     fifo = AXIS_FIFO(fifo_devices[sys.argv[1]])
     fifo.write_axis_fifo(sys.argv[2])

@@ -50,7 +50,7 @@ class DAC81416:
 
 if __name__ == "__main__":
     from devices import fifo_devices
-    print 'setting dac0 0'
+    print('setting dac0 0')
     dac = DAC81416(fifo_devices['DAC81416_0'])
     # print "0"
     valInt = int((float(sys.argv[1])+10)*256*256/20)

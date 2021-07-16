@@ -58,7 +58,7 @@ class DAC_ramp_tester:
     self.gpio2.clear_bit(0, channel=1)
 
   def mod_report(self):
-    print(self.gpio2.read_axi_gpio(channel=1))
+    print((self.gpio2.read_axi_gpio(channel=1)))
 
   def dac_seq_write_points(self):
     points0=[]
@@ -87,10 +87,10 @@ class DAC_ramp_tester:
     points.append(GPIO_seq_point(address=4,time=0,outputA=0x00000000,outputB=0x00000000))
 
     for point in points:
-      print "add: ", point.address
-      print "time: ", point.time
-      print "outputA: ", point.outputA
-      print "outputB: ", point.outputB
+      print("add: ", point.address)
+      print("time: ", point.time)
+      print("outputA: ", point.outputA)
+      print("outputB: ", point.outputB)
 
     # with open("/dev/axis_fifo_0x0000000080004000", "r+b") as character:
     for point in points:

@@ -6,7 +6,7 @@ from vimba import *
 with Vimba.get_instance () as vimba:
 	cams = vimba.get_all_cameras ()
 
-	print(cams[0])
+	print((cams[0]))
 
 	with cams[0] as cam:
 		frame = cam.get_frame ()
