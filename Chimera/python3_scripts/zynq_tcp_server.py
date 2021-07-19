@@ -51,7 +51,7 @@ class zynq_tcp_server:
 
 				# Receive the data in small chunks
 				while True:
-					data = connection.recv(64)
+					data = connection.recv(64).decode('utf-8')
 					print('------------------------------------------------------------')
 					print('received "%s"' % data)
 					# print(len(data))
@@ -104,7 +104,7 @@ class zynq_tcp_server:
 	def writeDIOseq(self, conn, data_split):
 		num_snapshots = int(data_split[1])
 		print('num_bytes = ', self.dioByteLen*num_snapshots)
-		byte_buf = self.socket_read(conn, self.dioByteLen*num_snapshots) #each byte buffer snapshot consists of 3 sets of 4 bytes
+		byte_buf = self.socket_read(conn, self.dioByteLen*num_snapshots).decode('utf-8') #each byte buffer snapshot consists of 3 sets of 4 bytes
 		# print hex(ord(byte_buf[0]))
 		for ii in range(num_snapshots):
 			print('\n', 'snapshot', ii)

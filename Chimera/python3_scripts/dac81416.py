@@ -40,11 +40,11 @@ class DAC81416:
     self.fifo.write_axis_fifo("\x00\x09\x00\x00")
     
     for channel in range(16):
-	   self.set_DAC(channel, 256*128)
+	    self.set_DAC(channel, 256*128)
 
   def set_DAC(self, channel, value):
     assert channel>=0 and channel<=15, 'Invalid channel for DAC81416 in set_DAC'
-    val = "\x00" + struct.pack('B',channel+16) + struct.pack('>H', value)
+    val = b"\x00" + struct.pack('B',channel+16) + struct.pack('>H', value)
     if self.fifo is not None:
       self.fifo.write_axis_fifo(val)
 
