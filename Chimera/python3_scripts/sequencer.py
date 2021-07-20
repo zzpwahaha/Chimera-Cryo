@@ -368,7 +368,7 @@ class sequencer:
 		# points.append(GPIO_seq_point(address=num_snapshots,time=6400000,outputA=0x00000000,outputB=0x00000000))
 		points.append(GPIO_seq_point(address=num_snapshots,time=0,outputA=0x00000000,outputB=0x00000000))
 
-		# with open("/dev/axis_fifo_0x0000000080004000", "r+b") as character:
+		# with open("/dev/axis_fifo_0x0000000080004000", "wb") as character:
 		for point in points:
 				# writeToSeqGPIO(character, point)
 			seqWords = getSeqGPIOWords(point)

@@ -128,7 +128,7 @@ class DDS_ramp_tester:
         print("outputA: ", point.outputA)
         print("outputB: ", point.outputB)
 
-      # with open("/dev/axis_fifo_0x0000000080004000", "r+b") as character:
+      # with open("/dev/axis_fifo_0x0000000080004000", "wb") as character:
       for point in points:
           # writeToSeqGPIO(character, point)
         seqWords = getSeqGPIOWords(point)

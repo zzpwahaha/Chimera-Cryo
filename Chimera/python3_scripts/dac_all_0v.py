@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-with open("/dev/axis_fifo_0x0000000080002000", "r+b") as character:
+with open("/dev/axis_fifo_0x0000000080002000", "wb") as character:
     writewords = []
     #SPI config register
     writewords.append("\x84\x0A\x03\x00")

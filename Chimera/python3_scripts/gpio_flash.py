@@ -57,7 +57,7 @@ def writeToSeqGPIO(dds_char_dev, address, time, banka, bankb):
 
 if __name__ == "__main__":
   print("writing to 4000")
-  with open("/dev/axis_fifo_0x0000000080004000", "r+b") as character:
+  with open("/dev/axis_fifo_0x0000000080004000", "wb") as character:
     #note that this sequence leaves all signals high when complete.
     #that makes it easy to verify that all outputs are OK for testing
     #high
