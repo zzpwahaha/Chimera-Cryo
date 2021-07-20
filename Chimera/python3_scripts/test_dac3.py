@@ -4,13 +4,62 @@ from devices import fifo_devices
 from axi_gpio import AXI_GPIO
 from devices import gpio_devices
 
-from dac81416 import DAC81416
+# from dac81416 import DAC81416
 import struct
 import soft_trigger
 import reset_all
 
 from getSeqGPIOWords import getSeqGPIOWords
 from time import sleep
+
+class DAC81416:
+  """Class to control DAC81416 in project KA012.
+  Very simple class just used for testing.
+  """
+
+  def __init__(self, device=None, noinit=False):
+    if device is None:
+      self.fifo = AXIS_FIFO()
+    else:
+      self.fifo = AXIS_FIFO(device)
+    if not noinit:
+      #SPI config register
+      #sets device in active mode
+      #activates streaming mode
+      self.fifo.write_axis_fifo("\x00\x03\x0A\x8C")
+      #GEN config
+      #activate internal ref
+      self.fifo.write_axis_fifo("\x00\x04\x3F\x00")
+      #BRDCONFIG - disable broadcast mode
+      self.fifo.write_axis_fifo("\x00\x05\x00\x00")
+      #SYNCCONFIG - activate LDAC
+      self.fifo.write_axis_fifo("\x00\x06\xFF\xFF")
+      #TOGGCONFIG0 - leave at default
+      self.fifo.write_axis_fifo("\x00\x07\x00\x00")
+      #TOGGCONFIG1 - leave at default
+      self.fifo.write_axis_fifo("\x00\x08\x00\x00")
+      #DACRANGE set to +-10V
+      self.fifo.write_axis_fifo("\x00\x0A\xAA\xAA")
+      #DACRANGE set to +-10V
+      self.fifo.write_axis_fifo("\x00\x0B\xAA\xAA")
+      #DACRANGE set to +-10V
+      self.fifo.write_axis_fifo("\x00\x0C\xAA\xAA")
+      #DACRANGE set to +-10V
+      self.fifo.write_axis_fifo("\x00\x0D\xAA\xAA")
+      #TRIGGER - leave at default
+      self.fifo.write_axis_fifo("\x00\x0E\x00\x00")
+      #power down control
+      self.fifo.write_axis_fifo("\x00\x09\x00\x00")
+
+      for channel in range(16):
+       self.set_DAC(channel, 0)
+       #self.set_DAC(channel, 256*128)
+
+  def set_DAC(self, channel, value):
+    assert channel>=0 and channel<=15, 'Invalid channel for DAC81416 in set_DAC'
+    val = b"\x00" + struct.pack('B',channel+16) + struct.pack('>H', value)
+    if self.fifo is not None:
+      self.fifo.write_axis_fifo(val)
 
 class GPIO_seq_point:
   def __init__(self, address, time, outputA, outputB):
@@ -59,7 +108,7 @@ class DAC_ramp_tester:
     #acc_start   <= gpio_in(47 downto 32);
     #acc_incr    <= gpio_in(31 downto  0);
 
-    fifo.write_axis_fifo("\x01\x00" + struct.pack('>H', point.address))
+    fifo.write_axis_fifo(b"\x01\x00" + struct.pack('>H', point.address))
     fifo.write_axis_fifo(struct.pack('>I', point.time))
     fifo.write_axis_fifo(struct.pack('>I', point.clr_incr*16*256*256 + point.chan*256*256 + point.start))
     fifo.write_axis_fifo(struct.pack('>I', point.incr))
@@ -125,23 +174,24 @@ class DAC_ramp_tester:
   def dio_seq_write_points(self):
     points=[]
     points.append(GPIO_seq_point(address=0,time=1,outputA=0x00000001,outputB=0x00000001))
-    points.append(GPIO_seq_point(address=1,time=20000,outputA=0x00000000,outputB=0x00000000))
-    points.append(GPIO_seq_point(address=2,time=40000,outputA=0x00000001,outputB=0x00000001))
+    points.append(GPIO_seq_point(address=1,time=80000,outputA=0x00000000,outputB=0x00000000))
+    points.append(GPIO_seq_point(address=2,time=160000,outputA=0x00000001,outputB=0x00000001))
     points.append(GPIO_seq_point(address=3,time=6400000,outputA=0x00000000,outputB=0x00000000))
     points.append(GPIO_seq_point(address=4,time=0,outputA=0x00000000,outputB=0x00000000))
 
     for point in points:
-      print "add: ", point.address
-      print "time: ", point.time
-      print "outputA: ", point.outputA
-      print "outputB: ", point.outputB
+      print ("add: ", point.address)
+      print ("time: ", point.time)
+      print ("outputA: ", point.outputA)
+      print ("outputB: ", point.outputB)
 
     # with open("/dev/axis_fifo_0x0000000080004000", "r+b") as character:
     for point in points:
         # writeToSeqGPIO(character, point)
       seqWords = getSeqGPIOWords(point)
+      print ("write SeqGPIO", seqWords)
       for word in  seqWords:
-        # print word
+        print (word)
         self.fifo_main_seq.write_axis_fifo(word[0], MSB_first=False)
 
 def program(tester):
@@ -162,11 +212,11 @@ if __name__ == "__main__":
 
   tester = DAC_ramp_tester(fifo_devices['DAC81416_0'], fifo_devices['DAC81416_1'], fifo_devices['DAC81416_0_seq'], fifo_devices['DAC81416_1_seq'], fifo_devices['GPIO_seq'])
   reset_all.reset()
-  sleep(1)
+  # sleep(1)
   program(tester)
-  sleep(1)
+  # sleep(1)
   tester.mod_enable()
-  sleep(1)
+  # sleep(1)
   soft_trigger.trigger()
   sleep(5)
   #reset_all.reset()

@@ -51,12 +51,14 @@ class AXI_GPIO:
     reg=self.read_axi_gpio(channel=channel)
     data_set=struct.unpack('>I', reg)[0]        #get int
     data_set=data_set | 1<<bit_number           #set bit
+    print("set_bit",data_set)
     self.write_axi_gpio(data_set,channel=channel)
 
   def clear_bit(self, bit_number, channel=1, MSB_first=True):
     reg=self.read_axi_gpio(channel=channel)
     data_clear=struct.unpack('>I', reg)[0]      #get int
     data_clear=data_clear & (~(1<<bit_number))  #clear bit
+    print("clear_bit",data_clear)
     self.write_axi_gpio(data_clear,channel=channel)
 
   def read_axi_gpio(self, channel=1, MSB_first=True):
