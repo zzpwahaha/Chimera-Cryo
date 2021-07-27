@@ -1,0 +1,139 @@
+%%%%%%%%%%%%%%%%% Start With 1ms %%%%%%%%%%%%%%%%% 
+t = 1
+off: SciMotTrg
+%off: SrcMotTrg
+%off: PrbTrg
+%off: srcmotshutter
+%off: scimotzshutter
+%off: mako1
+%t += 1
+%%pulseon: mako1 1 % take two imgs for testing
+%t += 10
+%on: srcmotshutter
+%ddsfreq: ddsMOT 80
+%ddsfreq: ddsTARep 80
+%dac: PrbAmp 2
+%t += 1
+%dac: prbrepamp 9.9
+%off: PrbTrg
+%on: scimotzshutter
+%on: srcmotshutter
+%t += 5
+%ddsfreq: ddsPrbRep 80
+%ddsfreq: ddsPrb 200
+%t += 5
+%ddsamp: ddsMOT 10
+%ddsamp: ddsTARep 10
+%t += 5
+%ddsamp: ddsPrbRep 10
+%ddsamp: ddsPrb 10
+%
+%t += 5
+%
+%%LOAD MOT
+%on: SrcMotTrg
+%dac: SrcMotAmp 7
+%t += 1
+%on: SciMotTrg
+%dac: SciMotAmp 7.5
+%t += 1
+%on: TaRepTrg 
+%dac: TaRepAmp 9.9
+%t += 1
+%dac: motcoil1 7
+%t += 1
+%dac: motcoil2 -7
+%t += 1
+%dac: biascoilx biasx %1.6 %1.8
+%t += 1
+%dac: biascoily biasy %-1.2 %-1.7
+%t += 1
+%dac: biascoilz biasz %-1.0 %-0.45
+%
+%ol: ol0_0 1222
+%ol: ol0_1 5282
+
+t += 700
+pulseon: SciMotTrg 1
+
+%%PGC
+%off: SrcMotTrg
+%dac: SrcMotAmp 0
+%on: SciMotTrg
+%dac: SciMotAmp pgcamp %scan this
+%
+%dac: TaRepAmp 5
+%
+%dac: motcoil1 0
+%dac: motcoil2 0
+%
+%dac: biascoilx biasxpgc %-0.6
+%dac: biascoily biasypgc %-0.65
+%dac: biascoilz biaszpgc %-0.1
+%
+%ol: ol0_0 pgcdetune %1328 %1370
+%ol: ol0_1 5272
+
+t += pgcdur
+%t += 15
+
+
+%TOF
+pulseon: SciMotTrg 2
+%dac: SrcMotAmp 0
+%off: SciMotTrg
+%dac: SciMotAmp 0
+
+%dac: motcoil1 0
+%dac: motcoil2 0
+%t += tt
+%off: SciMotTrg
+
+%Fluorescence
+%t += 0.1
+%off: SrcMotTrg
+%dac: SrcMotAmp 0
+%off: SciMotTrg
+%dac: SciMotAmp 7
+%dac: PrbAmp 1.8
+%t += 1.6
+%dac: prbrepamp 9.9
+%dac: TARepAmp 5
+%on: TARepTrg 
+
+%ol: ol0_0 1206
+%ol: ol0_1 5282
+
+%ol: ol0_0 1320 % for pixis
+%ol: ol0_1 5230
+%pulseon: PrbTrg 0.01
+
+%t += -srcmotshutterdelay
+%off: srcmotshutter
+%t += srcmotshutterdelay
+%t += -scimotshutterdelay
+%off: scimotzshutter
+%t += scimotshutterdelay-0.1 %1.6
+%pulseon: mako1 1+makobgsudoscan
+%t += 0.1
+%pulseon: SciMotTrg 0.5
+%pulseon: pixis_trg 1
+%t += 7
+%pulseon: PrbTrg 25
+%off: PrbTrg
+
+%END sequence
+t = 1300
+%ol: ol0_0 1206
+%ol: ol0_1 5282
+%pulseon: SciMotTrg 10
+off: SciMotTrg
+
+
+
+
+
+
+
+
+

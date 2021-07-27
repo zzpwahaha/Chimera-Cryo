@@ -1,0 +1,38 @@
+%%%%%%%%%%%%%%%%% Start With 1ms %%%%%%%%%%%%%%%%% 
+t = 1
+%off: SciMotTrg
+%off: SrcMotTrg
+%off: PrbTrg
+%off: srcmotshutter
+%off: scimotzshutter
+off: mako1
+off: mako2
+off: magprbTrg
+dac: magprbamp 2
+ddsfreq: dds2_3 80
+ddsamp: dds2_3 10
+t += 500
+%pulseon: mako1 1 % take two imgs for testing
+pulseon: mako1 1
+pulseon: mako2 1
+%off: PrbTrg
+t += 0.1
+%pulseon: magprbTrg 0.5
+%END sequence
+
+t = 1300
+off: mako1
+off: mako2
+off: magprbTrg
+%ol: ol0_0 1206
+%ol: ol0_1 5282
+%pulseon: SciMotTrg 10
+
+
+
+
+
+
+
+
+

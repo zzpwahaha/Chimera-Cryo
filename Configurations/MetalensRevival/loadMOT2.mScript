@@ -5,6 +5,7 @@ off: SrcMotTrg
 off: PrbTrg
 off: srcmotshutter
 off: scimotzshutter
+off: mako1
 t += 1
 %pulseon: mako1 1 % take two imgs for testing
 t += 10
@@ -112,7 +113,7 @@ t += srcmotshutterdelay
 t += -scimotshutterdelay
 off: scimotzshutter
 t += scimotshutterdelay-0.1 %1.6
-%pulseon: mako1 1
+pulseon: mako1 1+makobgsudoscan
 t += 0.1
 pulseon: SciMotTrg 0.5
 %pulseon: pixis_trg 1
