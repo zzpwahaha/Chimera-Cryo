@@ -85,48 +85,6 @@ void QtAuxiliaryWindow::initializeWidgets (){
 		
 		QVBoxLayout* layout2 = new QVBoxLayout();
 
-		/* initialize plot controls.*/
-		//aoPlots.resize (NUM_DAC_PLTS);
-		//for (auto dacPltCount : range (aoPlots.size ())){
-		//	std::string titleTxt;
-		//	switch (dacPltCount){
-		//	case 0:
-		//		titleTxt = "DACs: 0-7";
-		//		break;
-		//	case 1:
-		//		titleTxt = "DACs: 8-15";
-		//		break;
-		//	case 2:
-		//		titleTxt = "DACs: 16-23";
-		//		break;
-		//	}
-		//	aoPlots[dacPltCount] = new PlotCtrl (8, plotStyle::DacPlot, std::vector<int> (), titleTxt);
-		//	aoPlots[dacPltCount]->init ( this);
-		//	layout2->addWidget(aoPlots[dacPltCount]->getView(), 1);
-		//}
-		//// ttl plots are similar to aoSys.
-		//ttlPlots.resize (NUM_TTL_PLTS);
-		//for (auto ttlPltCount : range (ttlPlots.size ())){
-		//	// currently assuming 4 ttl plots...
-		//	std::string titleTxt;
-		//	switch (ttlPltCount){
-		//	case 0:
-		//		titleTxt = "Ttls: Row A";
-		//		break;
-		//	case 1:
-		//		titleTxt = "Ttls: Row B";
-		//		break;
-		//	case 2:
-		//		titleTxt = "Ttls: Row C";
-		//		break;
-		//	case 3:
-		//		titleTxt = "Ttls: Row D";
-		//		break;
-		//	}
-		//	ttlPlots[ttlPltCount] = new PlotCtrl (16, plotStyle::TtlPlot, std::vector<int> (), titleTxt);
-		//	ttlPlots[ttlPltCount]->init (this);
-		//	layout2->addWidget(ttlPlots[ttlPltCount]->getView(), 1);
-		//}
 		aiSys.initialize(this);
 		calManager.initialize(this, &aiSys, &aoSys, &ttlBoard,
 			scriptWin->getArbGenCore(), andorWin->getPython());
@@ -430,12 +388,14 @@ void QtAuxiliaryWindow::handleMasterConfigSave (std::stringstream& configStream)
 
 void QtAuxiliaryWindow::handleNormalFin () {
 	try {
-		/*TODO add dds*/
-		//aoSys.setDacStatusNoForceOut (aoSys.getCore().getFinalSnapshot ());
-		//ttlBoard.setTtlStatusNoForceOut (ttlBoard.getCore().getFinalSnapshot ());
-		/// 2021/06/23 I want the control to remain at the before-experiment-status after exp finishes --ZZP
+		SetDacs();
+		SetDds();
+		SetOls();
+		ttlBoard.setTtlStatusNoForceOut (ttlBoard.getCore().getFinalSnapshot ());
 	}
-	catch (ChimeraError&) { /* this gets thrown if no dac events. just continue.*/ }
+	catch (ChimeraError& e) { 
+		reportErr("Error in setting the GUI settings after experiment finished: \n\t" + qstr(e.trace()));
+	}
 }
 
 

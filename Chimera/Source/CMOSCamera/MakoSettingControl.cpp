@@ -262,13 +262,18 @@ void MakoSettingControl::initialize(QString sID, CameraPtr pCam, QWidget* parent
 void MakoSettingControl::initialzePreset()
 {
     std::string errstr("");
-    setFeatureValue("SensorShutterMode", "GlobalReset", errstr);
+    std::string modeName = getFeatureValue<std::string>("DeviceModelName", errstr);
+    if (modeName.find("G-319B") != std::string::npos) { // this is a global shutter camera, does not have "SensorShutterMode" feature
+    }
+    else {
+        setFeatureValue("SensorShutterMode", "GlobalReset", errstr);
+        setFeatureValue("BinningHorizontalMode", "Sum", errstr);
+        setFeatureValue("BinningVerticalMode", "Average", errstr);
+    }
     setFeatureValue("AcquisitionMode", "Continuous", errstr);
     setFeatureValue("Gamma", 1.0, errstr); 
     setFeatureValue("PixelFormat", "Mono12", errstr);
     setFeatureValue("ExposureAuto", "Off", errstr);
-    setFeatureValue("BinningHorizontalMode", "Sum", errstr);
-    setFeatureValue("BinningVerticalMode", "Average", errstr); 
     setFeatureValue("BlackLevel", 0.0, errstr);
     FeaturePtr gsvp = getFeaturePtrFromMap("GVSP Adjust Packet Size"); //adjust package size to make sure it works
     gsvp->RunCommand();
@@ -1255,7 +1260,7 @@ void MakoSettingControl::createIntSliderSpinBox(const QModelIndex item)
     m_SpinBox_Int = new IntSpinBox(m_IntSpinSliderWidget);
     m_SpinBox_Int->setObjectName("value");      //mark as the element of this dialog that contains the value, used in "updateWidget()"
     QString tn = sFeature_IntSpinBox; //tmp name
-    if (tn == "OffsetX" || tn == "OffsetX" || tn == "OffsetY" || tn == "Height" || tn == "Width" || tn == "Gain" || tn == "ExposureTimeAbs"
+    if (tn == "OffsetX" || tn == "OffsetY" || tn == "Height" || tn == "Width" || tn == "Gain" || tn == "ExposureTimeAbs"
         || tn == "AcquisitionFrameRateAbs") {
         m_Slider_Int = new TickSlider(Qt::Horizontal, this);
     }
