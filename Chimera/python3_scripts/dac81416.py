@@ -14,14 +14,15 @@ class DAC81416:
       self.fifo = AXIS_FIFO(device)
     #SPI config register
     #sets device in active mode
-    self.fifo.write_axis_fifo("\x00\x03\x0A\x84")
+    #activates streaming mode
+    self.fifo.write_axis_fifo("\x00\x03\x0A\x8C")
     #GEN config
     #activate internal ref
     self.fifo.write_axis_fifo("\x00\x04\x3F\x00")
     #BRDCONFIG - disable broadcast mode
     self.fifo.write_axis_fifo("\x00\x05\x00\x00")
-    #SYNCCONFIG - leave at default
-    self.fifo.write_axis_fifo("\x00\x06\x00\x00")
+    #SYNCCONFIG - activate LDAC
+    self.fifo.write_axis_fifo("\x00\x06\xFF\xFF")
     #TOGGCONFIG0 - leave at default
     self.fifo.write_axis_fifo("\x00\x07\x00\x00")
     #TOGGCONFIG1 - leave at default
@@ -45,6 +46,7 @@ class DAC81416:
   def set_DAC(self, channel, value):
     assert channel>=0 and channel<=15, 'Invalid channel for DAC81416 in set_DAC'
     val = b"\x00" + struct.pack('B',channel+16) + struct.pack('>H', value)
+    print(val)
     if self.fifo is not None:
       self.fifo.write_axis_fifo(val)
 

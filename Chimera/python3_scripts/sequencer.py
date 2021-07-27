@@ -168,11 +168,15 @@ class sequencer:
 
 
 	def reset_DAC(self):
-		self.dac = DAC81416(device) # initialize DAC
+		self.dac0 = DAC81416(fifo_devices['DAC81416_0'])
+		self.dac1 = DAC81416(fifo_devices['DAC81416_1'])
 
 	def set_DAC(self, channel, value):
 		valueInt = int((value-self.dacRange[0])*self.dacRes/(self.dacRange[1]-self.dacRange[0]))
 		assert channel>=0 and channel<=31, 'Invalid channel for DAC81416 in set_DAC'
+		assert valueInt>=0 and valueInt<=65536, 'Invalid value for DAC81416 in set_DAC'
+		if valueInt == 65536:
+			valueInt -= 1
 		if (channel > 15):
 			channel = channel-16
 			self.dac1.set_DAC(channel, valueInt)

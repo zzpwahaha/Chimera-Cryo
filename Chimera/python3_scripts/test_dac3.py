@@ -130,7 +130,7 @@ class DAC_ramp_tester:
     points0=[]
     points1=[]
     #step 100 LSB per 10 us
-    points0.append(DAC_seq_point(address=0,  time=0,  start=10000,incr=6553600,chan=0, clr_incr=0))
+    points0.append(DAC_seq_point(address=0,  time=0,  start=100,incr=6553600,chan=0, clr_incr=0))
     points0.append(DAC_seq_point(address=1,  time=1,  start=1000,incr=6553600,chan=1, clr_incr=0))
     points0.append(DAC_seq_point(address=2,  time=2,  start=2000,incr=6553600,chan=2, clr_incr=0))
     points0.append(DAC_seq_point(address=3,  time=3,  start=3000,incr=6553600,chan=3, clr_incr=0))
