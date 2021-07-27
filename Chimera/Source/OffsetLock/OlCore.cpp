@@ -506,3 +506,8 @@ void OlCore::OLForceOutput(std::array<double,size_t(OLGrid::total)> status, DoCo
 	doCore.FPGAForcePulse(dostatus, OL_TRIGGER_LINE, OL_TRIGGER_TIME);
 	
 }
+
+void OlCore::resetConnection()
+{
+	qtFlume.resetConnection();
+}

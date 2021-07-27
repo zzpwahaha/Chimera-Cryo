@@ -522,7 +522,7 @@ void DoCore::FPGAForceOutput(DOStatus status)
 	}
 	else
 	{
-		thrower("connection to zynq failed. can't write DAC data\n");
+		thrower("connection to zynq failed. can't write TTL data\n");
 	}
 
 }

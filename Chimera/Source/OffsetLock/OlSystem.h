@@ -63,6 +63,7 @@ private:
 	QLabel* olTitle;
 	CQPushButton* olSetButton;
 	CQPushButton* zeroOlsButton;
+	CQPushButton* reconnectButton;
 	CQCheckBox* quickChange;
 
 	std::array<OffsetLockOutput, size_t(OLGrid::total)> outputs;

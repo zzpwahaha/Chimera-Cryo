@@ -30,6 +30,21 @@ void OlSystem::initialize(IChimeraQtWindow* parent)
 	zeroOlsButton = new CQPushButton("Zero OffsetLocks", parent);
 	zeroOlsButton->setToolTip("Press this button to set all offset values to default minimum.");
 	parent->connect(zeroOlsButton, &QPushButton::released, [parent]() { parent->auxWin->zeroOls(); });
+
+	reconnectButton = new CQPushButton("Reconnect COM", parent);
+	reconnectButton->setToolTip("Press this button to reset connection of the COM port.");
+	parent->connect(reconnectButton, &QPushButton::released, [parent, this]() { 	
+		auto* aux = parent->auxWin->auxWin;
+		aux->reportStatus("----------------------\r\nReconnect Offsetlocks... \n");
+		try {
+			core.resetConnection();
+			aux->reportStatus("Finished Reconnecting Offsetlocks.\r\n");
+		}
+		catch (ChimeraError& exception) {
+			errBox(exception.trace());
+			aux->reportStatus(": " + exception.qtrace() + "\r\n");
+			aux->reportErr(exception.qtrace());
+		} });
 	// 
 	quickChange = new CQCheckBox("Quick-Change", parent);
 	quickChange->setChecked(false);
@@ -38,6 +53,7 @@ void OlSystem::initialize(IChimeraQtWindow* parent)
 
 	layout1->addWidget(olSetButton, 0);
 	layout1->addWidget(zeroOlsButton, 0);
+	layout1->addWidget(reconnectButton, 0);
 	layout1->addWidget(quickChange, 0);
 	layout->addLayout(layout1);
 
