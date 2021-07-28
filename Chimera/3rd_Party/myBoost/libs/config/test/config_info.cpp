@@ -848,6 +848,7 @@ void print_stdlib_macros()
    PRINT_MACRO(_GLIBCXX_HOSTED);
    PRINT_MACRO(_GLIBCXX_SJLJ_EXCEPTIONS);
    PRINT_MACRO(_GLIBCXX_RELEASE);
+   PRINT_MACRO(_GLIBCXX_USE_FLOAT128);
 
    // Modena C++ standard library
    PRINT_MACRO(MSIPL_ANSI_HEADER);
@@ -1083,6 +1084,8 @@ void print_boost_macros()
    PRINT_MACRO(BOOST_NO_CV_VOID_SPECIALIZATIONS);
    PRINT_MACRO(BOOST_NO_CWCHAR);
    PRINT_MACRO(BOOST_NO_CWCTYPE);
+   PRINT_MACRO(BOOST_NO_CXX03);
+   PRINT_MACRO(BOOST_NO_CXX11);
    PRINT_MACRO(BOOST_NO_CXX11_ADDRESSOF);
    PRINT_MACRO(BOOST_NO_CXX11_ALIGNAS);
    PRINT_MACRO(BOOST_NO_CXX11_ALLOCATOR);
@@ -1130,6 +1133,7 @@ void print_boost_macros()
    PRINT_MACRO(BOOST_NO_CXX11_NON_PUBLIC_DEFAULTED_FUNCTIONS);
    PRINT_MACRO(BOOST_NO_CXX11_NULLPTR);
    PRINT_MACRO(BOOST_NO_CXX11_NUMERIC_LIMITS);
+   PRINT_MACRO(BOOST_NO_CXX11_OVERRIDE);
    PRINT_MACRO(BOOST_NO_CXX11_POINTER_TRAITS);
    PRINT_MACRO(BOOST_NO_CXX11_RANGE_BASED_FOR);
    PRINT_MACRO(BOOST_NO_CXX11_RAW_LITERALS);
@@ -1145,9 +1149,11 @@ void print_boost_macros()
    PRINT_MACRO(BOOST_NO_CXX11_TRAILING_RESULT_TYPES);
    PRINT_MACRO(BOOST_NO_CXX11_UNICODE_LITERALS);
    PRINT_MACRO(BOOST_NO_CXX11_UNIFIED_INITIALIZATION_SYNTAX);
+   PRINT_MACRO(BOOST_NO_CXX11_UNRESTRICTED_UNION);
    PRINT_MACRO(BOOST_NO_CXX11_USER_DEFINED_LITERALS);
    PRINT_MACRO(BOOST_NO_CXX11_VARIADIC_MACROS);
    PRINT_MACRO(BOOST_NO_CXX11_VARIADIC_TEMPLATES);
+   PRINT_MACRO(BOOST_NO_CXX14);
    PRINT_MACRO(BOOST_NO_CXX14_AGGREGATE_NSDMI);
    PRINT_MACRO(BOOST_NO_CXX14_BINARY_LITERALS);
    PRINT_MACRO(BOOST_NO_CXX14_CONSTEXPR);
@@ -1159,7 +1165,13 @@ void print_boost_macros()
    PRINT_MACRO(BOOST_NO_CXX14_RETURN_TYPE_DEDUCTION);
    PRINT_MACRO(BOOST_NO_CXX14_STD_EXCHANGE);
    PRINT_MACRO(BOOST_NO_CXX14_VARIABLE_TEMPLATES);
+   PRINT_MACRO(BOOST_NO_CXX17);
    PRINT_MACRO(BOOST_NO_CXX17_FOLD_EXPRESSIONS);
+   PRINT_MACRO(BOOST_NO_CXX17_HDR_ANY);
+   PRINT_MACRO(BOOST_NO_CXX17_HDR_CHARCONV);
+   PRINT_MACRO(BOOST_NO_CXX17_HDR_EXECUTION);
+   PRINT_MACRO(BOOST_NO_CXX17_HDR_FILESYSTEM);
+   PRINT_MACRO(BOOST_NO_CXX17_HDR_MEMORY_RESOURCE);
    PRINT_MACRO(BOOST_NO_CXX17_HDR_OPTIONAL);
    PRINT_MACRO(BOOST_NO_CXX17_HDR_STRING_VIEW);
    PRINT_MACRO(BOOST_NO_CXX17_HDR_VARIANT);
@@ -1231,10 +1243,9 @@ void print_boost_macros()
    PRINT_MACRO(BOOST_NO_USING_DECLARATION_OVERLOADS_FROM_TYPENAME_BASE);
    PRINT_MACRO(BOOST_NO_USING_TEMPLATE);
    PRINT_MACRO(BOOST_NO_VOID_RETURNS);
-
-
    // END GENERATED BLOCK
 
+   PRINT_MACRO(BOOST_CXX_VERSION);
    PRINT_MACRO(BOOST_INTEL);
    PRINT_MACRO(BOOST_MSVC);
    PRINT_MACRO(BOOST_GCC);
@@ -1256,9 +1267,146 @@ void print_boost_macros()
    PRINT_MACRO(BOOST_NORETURN);
 }
 
+#ifdef __has_include
+#if __has_include(<version>)
+#  include <version>
+#endif
+#endif
+
 void print_sd6_macros()
 {
     // http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2017/p0096r5.html
+
+    // Library macros are only really available if we have <version> :
+
+    PRINT_MACRO(__cpp_lib_addressof_constexpr);
+    PRINT_MACRO(__cpp_lib_allocator_traits_is_always_equal);
+    PRINT_MACRO(__cpp_lib_any);
+    PRINT_MACRO(__cpp_lib_apply);
+    PRINT_MACRO(__cpp_lib_array_constexpr);
+    PRINT_MACRO(__cpp_lib_as_const);
+    PRINT_MACRO(__cpp_lib_assume_aligned);
+    PRINT_MACRO(__cpp_lib_atomic_flag_test);
+    PRINT_MACRO(__cpp_lib_atomic_float);
+    PRINT_MACRO(__cpp_lib_atomic_is_always_lock_free);
+    PRINT_MACRO(__cpp_lib_atomic_lock_free_type_aliases);
+    PRINT_MACRO(__cpp_lib_atomic_ref);
+    PRINT_MACRO(__cpp_lib_atomic_shared_ptr);
+    PRINT_MACRO(__cpp_lib_atomic_value_initialization);
+    PRINT_MACRO(__cpp_lib_atomic_wait);
+    PRINT_MACRO(__cpp_lib_barrier);
+    PRINT_MACRO(__cpp_lib_bind_front);
+    PRINT_MACRO(__cpp_lib_bit_cast);
+    PRINT_MACRO(__cpp_lib_bitops);
+    PRINT_MACRO(__cpp_lib_bool_constant);
+    PRINT_MACRO(__cpp_lib_bounded_array_traits);
+    PRINT_MACRO(__cpp_lib_boyer_moore_searcher);
+    PRINT_MACRO(__cpp_lib_byte);
+    PRINT_MACRO(__cpp_lib_char8_t);
+    PRINT_MACRO(__cpp_lib_chrono);
+    PRINT_MACRO(__cpp_lib_chrono_udls);
+    PRINT_MACRO(__cpp_lib_clamp);
+    PRINT_MACRO(__cpp_lib_complex_udls);
+    PRINT_MACRO(__cpp_lib_concepts);
+    PRINT_MACRO(__cpp_lib_constexpr_algorithms);
+    PRINT_MACRO(__cpp_lib_constexpr_complex);
+    PRINT_MACRO(__cpp_lib_constexpr_dynamic_alloc);
+    PRINT_MACRO(__cpp_lib_constexpr_functional);
+    PRINT_MACRO(__cpp_lib_constexpr_iterator);
+    PRINT_MACRO(__cpp_lib_constexpr_memory);
+    PRINT_MACRO(__cpp_lib_constexpr_numeric);
+    PRINT_MACRO(__cpp_lib_constexpr_string);
+    PRINT_MACRO(__cpp_lib_constexpr_string_view);
+    PRINT_MACRO(__cpp_lib_constexpr_tuple);
+    PRINT_MACRO(__cpp_lib_constexpr_utility);
+    PRINT_MACRO(__cpp_lib_constexpr_vector);
+    PRINT_MACRO(__cpp_lib_coroutine);
+    PRINT_MACRO(__cpp_lib_destroying_delete);
+    PRINT_MACRO(__cpp_lib_enable_shared_from_this);
+    PRINT_MACRO(__cpp_lib_endian);
+    PRINT_MACRO(__cpp_lib_erase_if);
+    PRINT_MACRO(__cpp_lib_exchange_function);
+    PRINT_MACRO(__cpp_lib_execution);
+    PRINT_MACRO(__cpp_lib_filesystem);
+    PRINT_MACRO(__cpp_lib_format);
+    PRINT_MACRO(__cpp_lib_gcd_lcm);
+    PRINT_MACRO(__cpp_lib_generic_associative_lookup);
+    PRINT_MACRO(__cpp_lib_generic_unordered_lookup);
+    PRINT_MACRO(__cpp_lib_hardware_interference_size);
+    PRINT_MACRO(__cpp_lib_has_unique_object_representations);
+    PRINT_MACRO(__cpp_lib_hypot);
+    PRINT_MACRO(__cpp_lib_incomplete_container_elements);
+    PRINT_MACRO(__cpp_lib_int_pow2);
+    PRINT_MACRO(__cpp_lib_integer_comparison_functions);
+    PRINT_MACRO(__cpp_lib_integer_sequence);
+    PRINT_MACRO(__cpp_lib_integral_constant_callable);
+    PRINT_MACRO(__cpp_lib_interpolate);
+    PRINT_MACRO(__cpp_lib_invoke);
+    PRINT_MACRO(__cpp_lib_is_aggregate);
+    PRINT_MACRO(__cpp_lib_is_constant_evaluated);
+    PRINT_MACRO(__cpp_lib_is_final);
+    PRINT_MACRO(__cpp_lib_is_invocable);
+    PRINT_MACRO(__cpp_lib_is_layout_compatible);
+    PRINT_MACRO(__cpp_lib_is_nothrow_convertible);
+    PRINT_MACRO(__cpp_lib_is_null_pointer);
+    PRINT_MACRO(__cpp_lib_is_pointer_interconvertible);
+    PRINT_MACRO(__cpp_lib_is_swappable);
+    PRINT_MACRO(__cpp_lib_jthread);
+    PRINT_MACRO(__cpp_lib_latch);
+    PRINT_MACRO(__cpp_lib_launder);
+    PRINT_MACRO(__cpp_lib_list_remove_return_type);
+    PRINT_MACRO(__cpp_lib_logical_traits);
+    PRINT_MACRO(__cpp_lib_make_from_tuple);
+    PRINT_MACRO(__cpp_lib_make_reverse_iterator);
+    PRINT_MACRO(__cpp_lib_make_unique);
+    PRINT_MACRO(__cpp_lib_map_try_emplace);
+    PRINT_MACRO(__cpp_lib_math_constants);
+    PRINT_MACRO(__cpp_lib_math_special_functions);
+    PRINT_MACRO(__cpp_lib_memory_resource);
+    PRINT_MACRO(__cpp_lib_node_extract);
+    PRINT_MACRO(__cpp_lib_nonmember_container_access);
+    PRINT_MACRO(__cpp_lib_not_fn);
+    PRINT_MACRO(__cpp_lib_null_iterators);
+    PRINT_MACRO(__cpp_lib_optional);
+    PRINT_MACRO(__cpp_lib_parallel_algorithm);
+    PRINT_MACRO(__cpp_lib_polymorphic_allocator);
+    PRINT_MACRO(__cpp_lib_quoted_string_io);
+    PRINT_MACRO(__cpp_lib_ranges);
+    PRINT_MACRO(__cpp_lib_raw_memory_algorithms);
+    PRINT_MACRO(__cpp_lib_remove_cvref);
+    PRINT_MACRO(__cpp_lib_result_of_sfinae);
+    PRINT_MACRO(__cpp_lib_robust_nonmodifying_seq_ops);
+    PRINT_MACRO(__cpp_lib_sample);
+    PRINT_MACRO(__cpp_lib_scoped_lock);
+    PRINT_MACRO(__cpp_lib_semaphore);
+    PRINT_MACRO(__cpp_lib_shared_mutex);
+    PRINT_MACRO(__cpp_lib_shared_ptr_arrays);
+    PRINT_MACRO(__cpp_lib_shared_ptr_weak_type);
+    PRINT_MACRO(__cpp_lib_shared_timed_mutex);
+    PRINT_MACRO(__cpp_lib_shift);
+    PRINT_MACRO(__cpp_lib_smart_ptr_for_overwrite);
+    PRINT_MACRO(__cpp_lib_source_location);
+    PRINT_MACRO(__cpp_lib_span);
+    PRINT_MACRO(__cpp_lib_ssize);
+    PRINT_MACRO(__cpp_lib_starts_ends_with);
+    PRINT_MACRO(__cpp_lib_string_udls);
+    PRINT_MACRO(__cpp_lib_string_view);
+    PRINT_MACRO(__cpp_lib_syncbuf);
+    PRINT_MACRO(__cpp_lib_three_way_comparison);
+    PRINT_MACRO(__cpp_lib_to_address);
+    PRINT_MACRO(__cpp_lib_to_array);
+    PRINT_MACRO(__cpp_lib_to_chars);
+    PRINT_MACRO(__cpp_lib_transformation_trait_aliases);
+    PRINT_MACRO(__cpp_lib_transparent_operators);
+    PRINT_MACRO(__cpp_lib_tuple_element_t);
+    PRINT_MACRO(__cpp_lib_tuples_by_type);
+    PRINT_MACRO(__cpp_lib_type_identity);
+    PRINT_MACRO(__cpp_lib_type_trait_variable_templates);
+    PRINT_MACRO(__cpp_lib_uncaught_exceptions);
+    PRINT_MACRO(__cpp_lib_unordered_map_try_emplace);
+    PRINT_MACRO(__cpp_lib_unwrap_ref);
+    PRINT_MACRO(__cpp_lib_variant);
+    PRINT_MACRO(__cpp_lib_void_t);
 
     // C++20:
     PRINT_MACRO(__cpp_aggregate_paren_init);
