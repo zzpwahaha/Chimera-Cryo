@@ -45,6 +45,10 @@ void Script::initialize(IChimeraQtWindow* parent, std::string deviceTypeInput, s
 		devenum = ScriptableDevice::Master;
 		extension = str (".") + MASTER_SCRIPT_EXTENSION;
 	}
+	else if (deviceTypeInput == "GMoog") {
+		devenum = ScriptableDevice::GMoog;
+		extension = str(".") + GMOOG_SCRIPT_EXTENSION;
+	}
 	else {
 		thrower (": Device input type not recognized during construction of script control.  (A low level bug, "
 			"this shouldn't happen)");
@@ -124,6 +128,16 @@ void Script::initialize(IChimeraQtWindow* parent, std::string deviceTypeInput, s
 						"- sech, ~ sech(time/width)\n"
 						"- gaussian, width = gaussian sigma\n"
 						"- lorentzian, width = FWHM (curve is normalized)\n");
+	}
+	else if (deviceType == "GMoog") {
+		help->setToolTip(">>> This is a script for programming the Gigamoogs. <<<\n"
+						 "- the input format is referenced below using angled brackets <...>. Place the input on\n"
+						 " the line below the command in the format specified.\n"
+						 "- The associated c++ code has been designed to be flexible when it comes to trailing white spaces at the ends of\n"
+						 " lines and in between commands, so use whatever such formatting pleases your eyes.\n"
+						 "Accepted Commands:\n"
+						 "(A) set:\n"
+						 "DAC number, channel number, amplitude (%), frequency (MHz), phase (degrees).");
 	}
 	else{
 		help->setToolTip ("No Help available");
@@ -444,10 +458,15 @@ void Script::newScript(){
 	}
 	else if (deviceType == "Master"){
 		tempName += "DEFAULT_MASTER_SCRIPT.mScript";
-	}	
+	}
+	else if (deviceType == "GMoog") {
+		tempName += "DEFAULT_GMOOG_SCRIPT.gScript";
+	}
 	reset();
 	loadFile(tempName, std::ios::_Openmode(std::ios::out | std::ios::trunc));
-	edit->setText("%%%%%%%%%%%%%%%%% Start With 1ms %%%%%%%%%%%%%%%%% \r\nt = 1");
+	if (deviceType == "Master") {
+		edit->setText("%%%%%%%%%%%%%%%%% Start With 1ms %%%%%%%%%%%%%%%%% \r\nt = 1");
+	}
 }
 
 
@@ -465,12 +484,17 @@ void Script::openParentScript(std::string parentScriptFileAndPath, std::string c
 	std::string extStr(extChars);
 	if (deviceType == "ArbGen"){
 		if (extStr != str( "." ) + ARBGEN_SCRIPT_EXTENSION){
-			thrower ("Attempted to open non-agilent script from agilent script control.");
+			thrower ("Attempted to open non-arbgen script from arbgen script control.");
 		}
 	}
 	else if (deviceType == "Master"){
 		if (extStr != str( "." ) + MASTER_SCRIPT_EXTENSION){
 			thrower ("Attempted to open non-master script from master script control!");
+		}
+	}
+	else if (deviceType == "GMoog") {
+		if (extStr != str(".") + GMOOG_SCRIPT_EXTENSION) {
+			thrower("Attempted to open non-gigamoog script from gmoog script control!");
 		}
 	}
 	else{

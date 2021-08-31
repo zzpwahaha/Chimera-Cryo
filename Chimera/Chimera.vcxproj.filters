@@ -423,6 +423,21 @@
     <ClCompile Include="Source\ExperimentMonitoringAndStatus\ExperimentSeqPlotter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\GigaMOOG\GigaMoogSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\GeneralFlumes\BoostAsyncSerial.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\GigaMOOG\MessagePrinter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\GigaMOOG\MessageSender.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\GigaMOOG\GigaMoogCore.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="3rd_Party\qcustomplot\qcustomplot.h">
@@ -950,6 +965,24 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\RealTimeMOTAnalysis\MOTAnalysisSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\GigaMOOG\GigaMoogSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\GeneralFlumes\BoostAsyncSerial.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\GigaMOOG\MessagePrinter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\GigaMOOG\MessageSender.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\GigaMOOG\Messagetypes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\GigaMOOG\GigaMoogCore.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

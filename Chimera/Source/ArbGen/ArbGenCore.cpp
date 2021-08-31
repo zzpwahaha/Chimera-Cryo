@@ -68,7 +68,7 @@ std::string ArbGenCore::getDeviceInfo() {
 void ArbGenCore::analyzeArbGenScript(scriptedArbInfo& infoObj, std::vector<parameterType>& variables,
 	std::string& warnings) {
 	ScriptStream stream;
-	ExpThreadWorker::loadAgilentScript(infoObj.fileAddress.expressionStr, stream);
+	ExpThreadWorker::loadArbGenScript(infoObj.fileAddress.expressionStr, stream);
 	int currentSegmentNumber = 0;
 	infoObj.wave.resetNumberOfTriggers();
 	// Procedurally readbtn lines into segment objects.
@@ -392,7 +392,7 @@ void ArbGenCore::logSettings(DataLogger& log, ExpThreadWorker* threadworker) {
 			// TODO: load script file itself
 			ScriptStream stream;
 			try {
-				ExpThreadWorker::loadAgilentScript(channel.scriptedArb.fileAddress.expressionStr, stream);
+				ExpThreadWorker::loadArbGenScript(channel.scriptedArb.fileAddress.expressionStr, stream);
 				log.writeDataSet(stream.str(), "ArbGen-Script-Script", scriptedArbSettings);
 			}
 			catch (ChimeraError&) {

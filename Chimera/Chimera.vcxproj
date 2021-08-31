@@ -60,6 +60,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard_C>Default</LanguageStandard_C>
+      <ShowIncludes>false</ShowIncludes>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -75,6 +76,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard_C>Default</LanguageStandard_C>
+      <ShowIncludes>false</ShowIncludes>
     </ClCompile>
     <Link>
       <AdditionalDependencies>ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -128,7 +130,12 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Source\GigaMOOG\GigaMoogCore.cpp" />
     <ClCompile Include="Source\ExperimentMonitoringAndStatus\ExperimentSeqPlotter.cpp" />
+    <ClCompile Include="Source\GeneralFlumes\BoostAsyncSerial.cpp" />
+    <ClCompile Include="Source\GigaMOOG\GigaMoogSystem.cpp" />
+    <ClCompile Include="Source\GigaMOOG\MessagePrinter.cpp" />
+    <ClCompile Include="Source\GigaMOOG\MessageSender.cpp" />
     <ClCompile Include="Source\RealTimeMOTAnalysis\MOTAnalysisSystem.cpp" />
     <ClCompile Include="Source\PrimaryWindows\QtAnalysisWindow.cpp" />
     <ClCompile Include="Source\RealTimeMOTAnalysis\MOTAnalysisControl.cpp" />
@@ -171,6 +178,12 @@
     <QtMoc Include="Source\CustomQtControls\LineEditCompleter.h" />
     <QtMoc Include="Source\PrimaryWindows\QtAnalysisWindow.h" />
     <QtMoc Include="Source\ExperimentMonitoringAndStatus\ExperimentSeqPlotter.h" />
+    <ClInclude Include="Source\GigaMOOG\GigaMoogCore.h" />
+    <ClInclude Include="Source\GeneralFlumes\BoostAsyncSerial.h" />
+    <ClInclude Include="Source\GigaMOOG\GigaMoogSystem.h" />
+    <ClInclude Include="Source\GigaMOOG\MessagePrinter.h" />
+    <ClInclude Include="Source\GigaMOOG\MessageSender.h" />
+    <ClInclude Include="Source\GigaMOOG\Messagetypes.h" />
     <ClInclude Include="Source\RealTimeMOTAnalysis\MOTAnalysisSystem.h" />
     <ClInclude Include="Source\RealTimeMOTAnalysis\MOTAnalysisControl.h" />
     <QtMoc Include="Source\RealTimeMOTAnalysis\MOTAnalysisThreadWoker.h" />

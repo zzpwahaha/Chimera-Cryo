@@ -26,9 +26,10 @@ class ExpThreadWorker : public QObject
 		void pause ();
 		void unPause ();
 		bool getIsPaused ();
-		void abort ();
-		void loadMasterScript (std::string scriptAddress, ScriptStream& script);
-		static void loadAgilentScript (std::string scriptAddress, ScriptStream& agilentScript);
+		void abort();
+		void loadMasterScript(std::string scriptAddress, ScriptStream& script);
+		static void loadGMoogScript(std::string scriptAddress, ScriptStream& gmoogScript);
+		static void loadArbGenScript(std::string scriptAddress, ScriptStream& agilentScript);
 		void checkTriggerNumbers (std::vector<parameterType>& expParams);
 		void analyzeMasterScript (DoCore& ttls, AoCore& ao, DdsCore& dds, OlCore& ol,
 			std::vector<parameterType>& vars,

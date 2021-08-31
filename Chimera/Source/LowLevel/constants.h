@@ -97,6 +97,11 @@
 		= { std::make_pair(3 - 1,4),std::make_pair(3 - 1,5) }; 
 	/*the first is the label on the box minus 1, has minus'd 1 explicitly and this is not used in the code, just a reminder*/
 
+	//GIGAMOOG
+	const bool GIGAMOOG_SAFEMODE = true;
+	std::string GIGAMOOG_PORT = "COM6";//temporary
+	int GIGAMOOG_BAUDRATE = 115200;
+
 #endif
 /// Random other Constants
 constexpr double PI = 3.14159265358979323846264338327950288;

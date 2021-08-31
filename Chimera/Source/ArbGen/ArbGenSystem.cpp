@@ -35,7 +35,7 @@ ArbGenSystem::~ArbGenSystem()
 	delete pCore;
 }
 
-void ArbGenSystem::programAgilentNow (std::vector<parameterType> constants){
+void ArbGenSystem::programArbGenNow(std::vector<parameterType> constants){
 	readGuiSettings ();
 	std::string warnings_;
 	if (currentGuiInfo.channel[0].scriptedArb.fileAddress.expressionStr != ""){
@@ -133,7 +133,7 @@ void ArbGenSystem::initialize(std::string headerText, IChimeraQtWindow* win)
 	win->connect (programNow, &QPushButton::released, [win, this]() {
 		try	{ 
 			checkSave (win->mainWin->getProfileSettings ().configLocation, win->mainWin->getRunInfo ()); 
-			programAgilentNow (win->auxWin->getUsableConstants ()); 
+			programArbGenNow (win->auxWin->getUsableConstants ()); 
 			win->reportStatus (qstr("Programmed Agilent " + getConfigDelim () + ".\r\n")); 
 		}
 		catch (ChimeraError& err) {

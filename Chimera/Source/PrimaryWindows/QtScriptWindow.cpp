@@ -14,6 +14,7 @@ QtScriptWindow::QtScriptWindow(QWidget* parent) : IChimeraQtWindow(parent)
 	, masterScript(this)
 	, arbGens{ {ArbGenSystem(UWAVE_SIGLENT_SETTINGS, ArbGenType::Siglent, this),
 		ArbGenSystem(UWAVE_AGILENT_SETTINGS, ArbGenType::Agilent, this) } }
+	, gigaMoog(GIGAMOOG_PORT, GIGAMOOG_BAUDRATE, this)
 {
 	setWindowTitle ("Script Window");
 }
@@ -34,9 +35,14 @@ void QtScriptWindow::initializeWidgets (){
 	
 
 	masterScript.initialize(this, "Master", "Master Script");
+	gigaMoog.gmoogScript.initialize(this, "GMoog", "GigaMoog Script");
 	//profileDisplay.initialize (this);
-	layout->addWidget(&arbGens[0], 1);
-	layout->addWidget(&arbGens[1], 1);
+	QVBoxLayout* layout1 = new QVBoxLayout(this);
+	layout1->setContentsMargins(0, 0, 0, 0);
+	layout1->addWidget(&arbGens[0], 1);
+	layout1->addWidget(&arbGens[1], 1);
+	layout->addLayout(layout1, 1);
+	layout->addWidget(&gigaMoog, 1);
 	layout->addWidget(&masterScript, 1);
 	
 	try {
@@ -108,6 +114,7 @@ void QtScriptWindow::handleMasterFunctionChange (){
 
 void QtScriptWindow::checkScriptSaves (){
 	masterScript.checkSave (getProfile ().configLocation, mainWin->getRunInfo());
+	gigaMoog.gmoogScript.checkSave(getProfile().configLocation, mainWin->getRunInfo());
 	for (auto name : ArbGenEnum::allAgs) {
 		arbGens[(int)name].checkSave(getProfile().configLocation, mainWin->getRunInfo());
 	}
@@ -129,6 +136,7 @@ std::string QtScriptWindow::getSystemStatusString (){
 scriptInfo<std::string> QtScriptWindow::getScriptNames (){
 	scriptInfo<std::string> names;
 	names.master = masterScript.getScriptName ();
+	names.gmoog = gigaMoog.gmoogScript.getScriptName();
 	//names.intensityAgilent = intensityAgilent.arbGenScript.getScriptName();
 	return names;
 }
@@ -140,6 +148,7 @@ scriptInfo<bool> QtScriptWindow::getScriptSavedStatuses (){
 	scriptInfo<bool> status;
 	//status.intensityAgilent = intensityAgilent.arbGenScript.savedStatus();
 	status.master = masterScript.savedStatus ();
+	status.gmoog = gigaMoog.gmoogScript.savedStatus();
 	return status;
 }
 
@@ -150,6 +159,7 @@ scriptInfo<std::string> QtScriptWindow::getScriptAddresses (){
 	scriptInfo<std::string> addresses;
 	//addresses.intensityAgilent = intensityAgilent.arbGenScript.getScriptPathAndName();
 	addresses.master = masterScript.getScriptPathAndName ();
+	addresses.gmoog = gigaMoog.gmoogScript.getScriptPathAndName();
 	return addresses;
 }
 
@@ -262,9 +272,33 @@ void QtScriptWindow::windowOpenConfig (ConfigStream& configFile){
 	try{
 		configFile.get ();
 		auto getlineFunc = ConfigSystem::getGetlineFunc (configFile.ver);
-		std::string masterName;
+		std::string masterName/*, gmoogName*/;
+		// order should match the windowsaveconfig
 		getlineFunc (configFile, masterName);
+		//getlineFunc(configFile, gmoogName);
 		ConfigSystem::checkDelimiterLine (configFile, "END_SCRIPTS");
+		try {
+			openMasterScript(masterName);
+		}
+		catch (ChimeraError& err) {
+			auto answer = QMessageBox::question(this, "Open Failed", "ERROR: Failed to open master script file: "
+				+ qstr(masterName) + ", with error \r\n" + err.qtrace() + "\r\nAttempt to find file yourself?");
+			if (answer == QMessageBox::Yes) {
+				openMasterScript(openWithExplorer(nullptr, "mScript"));
+			}
+		}
+
+		ConfigSystem::standardOpenConfig(configFile, gigaMoog.getDelim(), &gigaMoog);
+		try {
+			openGMoogScript(gigaMoog.scriptAddress);
+		}
+		catch (ChimeraError& err) {
+			auto answer = QMessageBox::question(this, "Open Failed", "ERROR: Failed to open master script file: "
+				+ qstr(gigaMoog.scriptAddress) + ", with error \r\n" + err.qtrace() + "\r\nAttempt to find file yourself?");
+			if (answer == QMessageBox::Yes) {
+				openGMoogScript(openWithExplorer(nullptr, "gScript"));
+			}
+		}
 		for (auto name : ArbGenEnum::allAgs) {
 			deviceOutputInfo info;
 			ConfigSystem::stdGetFromConfig(configFile, arbGens[(int)name].getCore(), info, Version("1.0"));
@@ -272,16 +306,7 @@ void QtScriptWindow::windowOpenConfig (ConfigStream& configFile){
 			arbGens[(int)name].updateSettingsDisplay(getProfileSettings().configLocation, mainWin->getRunInfo());
 		}
 
-		try{
-			openMasterScript (masterName);
-		}
-		catch (ChimeraError& err){
-			auto answer = QMessageBox::question (this, "Open Failed", "ERROR: Failed to open master script file: " 
-				+ qstr(masterName) + ", with error \r\n" + err.qtrace () + "\r\nAttempt to find file yourself?");
-			if (answer == QMessageBox::Yes){
-				openMasterScript (openWithExplorer (nullptr, "mScript"));
-			}
-		}
+
 		considerScriptLocations();
 	}
 	catch (ChimeraError& err)	{
@@ -312,6 +337,10 @@ void QtScriptWindow::openMasterScript (IChimeraQtWindow* parent){
 	catch (ChimeraError& err){
 		reportErr ("Open Master Script Failed: " + err.qtrace () + "\r\n");
 	}
+}
+
+void QtScriptWindow::openMasterScript(std::string name) {
+	masterScript.openParentScript(name, getProfile().configLocation, mainWin->getRunInfo());
 }
 
 void QtScriptWindow::saveMasterScript (){
@@ -357,12 +386,65 @@ void QtScriptWindow::deleteMasterFunction (){
 	// todo. Right now you can just delete the file itself...
 }
 
+void QtScriptWindow::newGMoogScript()
+{
+	try {
+		gigaMoog.gmoogScript.checkSave(getProfile().configLocation, mainWin->getRunInfo());
+		gigaMoog.gmoogScript.newScript();
+		updateConfigurationSavedStatus(false);
+		gigaMoog.gmoogScript.updateScriptNameText(getProfile().configLocation);
+	}
+	catch (ChimeraError& err) {
+		reportErr(err.qtrace());
+	}
+}
+
+void QtScriptWindow::openGMoogScript(IChimeraQtWindow* parent)
+{
+	try {
+		gigaMoog.gmoogScript.checkSave(getProfile().configLocation, mainWin->getRunInfo());
+		std::string openName = openWithExplorer(parent, Script::GMOOG_SCRIPT_EXTENSION);
+		gigaMoog.gmoogScript.openParentScript(openName, getProfile().configLocation, mainWin->getRunInfo());
+		updateConfigurationSavedStatus(false);
+		gigaMoog.gmoogScript.updateScriptNameText(getProfile().configLocation);
+	}
+	catch (ChimeraError& err) {
+		reportErr("Open GigaMoog Script Failed: " + err.qtrace() + "\r\n");
+	}
+}
+
+void QtScriptWindow::openGMoogScript(std::string name)
+{
+	gigaMoog.gmoogScript.openParentScript(name, getProfile().configLocation, mainWin->getRunInfo());
+}
+
+void QtScriptWindow::saveGMoogScript()
+{
+	gigaMoog.gmoogScript.saveScript(getProfile().configLocation, mainWin->getRunInfo());
+	gigaMoog.gmoogScript.updateScriptNameText(getProfile().configLocation);
+}
+
+void QtScriptWindow::saveGMoogScriptAs(IChimeraQtWindow* parent)
+{
+	std::string extensionNoPeriod = gigaMoog.gmoogScript.getExtension();
+	if (extensionNoPeriod.size() == 0) {
+		return;
+	}
+	extensionNoPeriod = extensionNoPeriod.substr(1, extensionNoPeriod.size());
+	std::string newScriptAddress = saveWithExplorer(parent, extensionNoPeriod, getProfileSettings());
+	gigaMoog.gmoogScript.saveScriptAs(newScriptAddress, mainWin->getRunInfo());
+	updateConfigurationSavedStatus(false);
+	gigaMoog.gmoogScript.updateScriptNameText(getProfile().configLocation);
+}
+
 void QtScriptWindow::windowSaveConfig (ConfigStream& saveFile){
 	scriptInfo<std::string> addresses = getScriptAddresses ();
 	// order matters!
 	saveFile << "SCRIPTS\n";
 	saveFile << "/*Master Script Address:*/ " << addresses.master << "\n";
+	//saveFile << "/*GigaMoog Script Address:*/ " << addresses.gmoog << "\n";
 	saveFile << "END_SCRIPTS\n";
+	gigaMoog.handleSaveConfig(saveFile);
 	for (auto name : ArbGenEnum::allAgs) {
 		arbGens[(int)name].handleSavingConfig(saveFile, getProfileSettings().configLocation, mainWin->getRunInfo());
 	}
@@ -370,16 +452,15 @@ void QtScriptWindow::windowSaveConfig (ConfigStream& saveFile){
 
 void QtScriptWindow::checkMasterSave (){
 	masterScript.checkSave (getProfile ().configLocation, mainWin->getRunInfo());
-}
-
-void QtScriptWindow::openMasterScript (std::string name){
-	masterScript.openParentScript (name, getProfile ().configLocation, mainWin->getRunInfo());
+	gigaMoog.gmoogScript.checkSave(getProfile().configLocation, mainWin->getRunInfo());
 }
 
 void QtScriptWindow::considerScriptLocations() {
 	for (auto name : ArbGenEnum::allAgs) {
 		arbGens[(int)name].arbGenScript.considerCurrentLocation(getProfile().configLocation, mainWin->getRunInfo());
 	}
+	masterScript.considerCurrentLocation(getProfile().configLocation, mainWin->getRunInfo());
+	gigaMoog.gmoogScript.considerCurrentLocation(getProfile().configLocation, mainWin->getRunInfo());
 }
 
 //void QtScriptWindow::updateProfile (std::string text){
@@ -398,6 +479,7 @@ void QtScriptWindow::fillExpDeviceList (DeviceList& list) {
 	for (auto name : ArbGenEnum::allAgs) {
 		list.list.push_back(arbGens[(int)name].getCore());
 	}
+	list.list.push_back(gigaMoog.getCore());
 }
 
 std::vector<std::reference_wrapper<ArbGenSystem>> QtScriptWindow::getArbGenSystem()

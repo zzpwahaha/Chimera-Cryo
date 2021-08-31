@@ -6,6 +6,7 @@
 #include "Scripts/Script.h"
 #include "ArbGen/ArbGenSystem.h"
 #include <ArbGen/whichAg.h>
+#include <GigaMOOG/GigaMoogSystem.h>
 #include "ConfigurationSystems/profileSettings.h"
 #include "ExperimentThread/ExperimentThreadInput.h"
 #include "IChimeraQtWindow.h"
@@ -13,6 +14,7 @@
 // a convenient structure for containing one object for each script. For example, the address of each script.
 template <typename type> struct scriptInfo{
 	type master;
+	type gmoog;
 };
 
 namespace Ui {
@@ -63,6 +65,13 @@ class QtScriptWindow : public IChimeraQtWindow{
 		void saveMasterFunction ();
 		void deleteMasterFunction ();
 
+		void newGMoogScript();
+		void openGMoogScript(IChimeraQtWindow* parent);
+		void openGMoogScript(std::string name);
+		void saveGMoogScript();
+		void saveGMoogScriptAs(IChimeraQtWindow* parent);
+
+
 		void updateConfigurationSavedStatus (bool status);
 
 		/*these two seems not in use -zzp2021/02/25*/
@@ -78,9 +87,11 @@ class QtScriptWindow : public IChimeraQtWindow{
     private:
         Ui::QtScriptWindow* ui;
         Script masterScript;
+		//Script gmoogScript;
         //ProfileIndicator profileDisplay;
 
 		std::array<ArbGenSystem, numArbGen> arbGens;
+		GigaMoogSystem gigaMoog;
 
 	public Q_SLOTS:
 		void updateVarNames ();

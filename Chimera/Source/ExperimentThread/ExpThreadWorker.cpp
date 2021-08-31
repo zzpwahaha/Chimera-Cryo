@@ -386,7 +386,18 @@ void ExpThreadWorker::abort () {
 	isAborting = true;
 }
 
-void ExpThreadWorker::loadAgilentScript (std::string scriptAddress, ScriptStream& agilentScript) {
+void ExpThreadWorker::loadGMoogScript(std::string scriptAddress, ScriptStream& gmoogScript) 
+{
+	std::ifstream scriptFile(scriptAddress);
+	if (!scriptFile.is_open()) {
+		thrower("Scripted Agilent File \"" + scriptAddress + "\" failed to open!");
+	}
+	gmoogScript << scriptFile.rdbuf();
+	gmoogScript.seekg(0);
+	scriptFile.close();
+}
+
+void ExpThreadWorker::loadArbGenScript(std::string scriptAddress, ScriptStream& agilentScript) {
 	std::ifstream scriptFile (scriptAddress);
 	if (!scriptFile.is_open ()) {
 		thrower ("Scripted Agilent File \"" + scriptAddress + "\" failed to open!");

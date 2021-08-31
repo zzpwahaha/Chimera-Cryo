@@ -1,5 +1,5 @@
 #pragma once
-
+#include <winsock2.h>
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
 #include <boost/thread.hpp>

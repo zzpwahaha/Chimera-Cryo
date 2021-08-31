@@ -44,6 +44,11 @@ SyntaxHighlighter::SyntaxHighlighter (ScriptableDevice device, QTextDocument* pa
 					QColor (181, 137, 0), true, true);
 		addRules ({ "#" }, QColor (100, 100, 100), true, false);
 	}
+	else if (device == ScriptableDevice::GMoog) {
+		addRules({ "set" }, QColor(108, 113, 196), true, true);
+		addRules({ "{", "}" }, QColor(181, 137, 0), true, true);
+		addRules({ "dac0","dac1","dac2","dac3" }, QColor(153, 115, 0), true, false);
+	}
 
 	QTextCharFormat singleLineCommentFormat;
 	singleLineCommentFormat.setForeground (QColor (101, 115, 126));

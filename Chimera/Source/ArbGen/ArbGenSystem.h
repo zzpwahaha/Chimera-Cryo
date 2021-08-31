@@ -3,8 +3,8 @@
 #include "ArbGenCore.h"
 #include "AgilentCore.h"
 #include "SiglentCore.h"
-#include "Scripts/ScriptStream.h"
-#include "ConfigurationSystems/ConfigStream.h"
+//#include "Scripts/ScriptStream.h"
+//#include "ConfigurationSystems/ConfigStream.h"
 #include "GeneralFlumes/VisaFlume.h"
 #include "ArbGenStructures.h"
 #include "whichAg.h"
@@ -51,7 +51,7 @@ class ArbGenSystem : public IChimeraSystem
 		
 		//std::pair<unsigned, unsigned> getTriggerLine( );
 		std::string getConfigDelim ();
-		void programAgilentNow (std::vector<parameterType> constants);
+		void programArbGenNow (std::vector<parameterType> constants);
 		
 		void setOutputSettings (deviceOutputInfo info);
 		void verifyScriptable ( );
