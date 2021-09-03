@@ -57,10 +57,30 @@ void GigaMoogCore::logSettings(DataLogger& logger, ExpThreadWorker* threadworker
 
 void GigaMoogCore::calculateVariations(std::vector<parameterType>& params, ExpThreadWorker* threadworker)
 {
+	unsigned variations = params.size() == 0 ? 1 : params.front().keyValues.size();
+	if (variations == 0) {
+		variations = 1;
+	}
+	/// imporantly, this sizes the relevant structures.
+	gigaMoogCommandList.clear();
+	gigaMoogCommandList.resize(variations);
+	for (auto variationInc : range(variations)) {
+		analyzeMoogScript(fileAddress, params, variationInc);
+	}
+
 }
 
 void GigaMoogCore::programVariation(unsigned variation, std::vector<parameterType>& params, ExpThreadWorker* threadworker)
 {
+	send(gigaMoogCommandList[variation]);
+}
+
+void GigaMoogCore::programGMoogNow(std::string fileAddr, std::vector<parameterType>& constants)
+{
+	gigaMoogCommandList.clear();
+	gigaMoogCommandList.resize(1);
+	analyzeMoogScript(fileAddr, constants, 0);
+	send(gigaMoogCommandList[0]);
 }
 
 void GigaMoogCore::analyzeMoogScript(std::string fileAddr, std::vector<parameterType>& variables, UINT variation)
@@ -72,7 +92,6 @@ void GigaMoogCore::analyzeMoogScript(std::string fileAddr, std::vector<parameter
 
 	writeOff(ms);
 
-	std::string currentMoogScriptText = currentMoogScript.str();
 	if (currentMoogScript.str() == "") {
 		thrower("ERROR: Moog script is empty!\r\n");
 	}
@@ -130,7 +149,8 @@ void GigaMoogCore::analyzeMoogScript(std::string fileAddr, std::vector<parameter
 		ms.enqueue(m);
 	}
 
-	send(ms);
+	//send(ms);
+	gigaMoogCommandList.push_back(ms);
 
 }
 

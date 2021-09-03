@@ -98,6 +98,9 @@ void ExpThreadWorker::experimentThreadProcedure () {
 			emit repUpdate(repInc);
 			for (const auto& variationInc : range(determineVariationNumber(expRuntime.expParams))) {
 				emit notification("Programming Devices for Variation...\n", 2);
+				for (auto& device : input->devices.list) {
+					deviceProgramVariation(device, expRuntime.expParams, variationInc);
+				}
 				initVariation(variationInc, expRuntime.expParams);
 				handlePause(isPaused, isAborting);
 				startRep(repInc, variationInc, input->skipNext == nullptr ? false : input->skipNext->load());
@@ -390,7 +393,7 @@ void ExpThreadWorker::loadGMoogScript(std::string scriptAddress, ScriptStream& g
 {
 	std::ifstream scriptFile(scriptAddress);
 	if (!scriptFile.is_open()) {
-		thrower("Scripted Agilent File \"" + scriptAddress + "\" failed to open!");
+		thrower("Scripted GigaMoog File \"" + scriptAddress + "\" failed to open!");
 	}
 	gmoogScript << scriptFile.rdbuf();
 	gmoogScript.seekg(0);
@@ -1307,7 +1310,7 @@ void ExpThreadWorker::deviceProgramVariation (IDeviceCore& device, std::vector<p
 	unsigned variationInc) {
 	if (device.experimentActive) {
 		try {
-			emit notification (qstr ("Programming Devce " + device.getDelim () + "...\n"), 1);
+			emit notification (qstr ("Programming Devce " + device.getDelim () + "...\n"), 3);
 			device.programVariation (variationInc, expParams, this);
 			emit updateBoxColor ("Blue", device.getDelim ().c_str ());
 		}

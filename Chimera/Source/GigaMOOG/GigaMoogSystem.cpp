@@ -1,6 +1,8 @@
 #include "stdafx.h" 
 #include "GigaMoogSystem.h" 
 #include <PrimaryWindows/IChimeraQtWindow.h>
+#include <PrimaryWindows/QtMainWindow.h>
+#include <PrimaryWindows/QtAuxiliaryWindow.h>
 
 //using namespace::boost::asio; 
 //using namespace::std; 
@@ -31,12 +33,27 @@ void GigaMoogSystem::initialize(IChimeraQtWindow* win)
 	layout->setContentsMargins(0, 0, 0, 0);
 	QLabel* header = new QLabel("GIGAMOOG", win);
 	expActive = new CQCheckBox("Exp. Active?", win);
+	QPushButton* programNowBtn = new QPushButton("Program", win);
 	QHBoxLayout* layout1 = new QHBoxLayout();
 	layout1->setContentsMargins(0, 0, 0, 0);
 	layout1->addWidget(header, 1);
 	layout1->addWidget(expActive, 0);
+	layout1->addWidget(programNowBtn, 0);
+
 	layout->addLayout(layout1, 0);
+	gmoogScript.initialize(win, "GMoog", "GigaMoog Script");
 	layout->addWidget(&gmoogScript, 1);
+
+	connect(programNowBtn, &QPushButton::released, this, [this, win]() {
+		try {
+			gmoogScript.checkSave(win->mainWin->getProfileSettings().configLocation, win->mainWin->getRunInfo());
+			std::string fileAddr = gmoogScript.getScriptPathAndName();
+			core.programGMoogNow(fileAddr, win->auxWin->getUsableConstants());
+			win->reportStatus(qstr("Programmed GigaMoog " + core.getDelim() + ".\r\n"));
+		}
+		catch (ChimeraError& err) {
+			win->reportErr(qstr("Error while programming GigaMoog " + core.getDelim() + ": " + err.trace() + "\r\n"));
+		}});
 }
 
 void GigaMoogSystem::handleSaveConfig(ConfigStream& saveFile)

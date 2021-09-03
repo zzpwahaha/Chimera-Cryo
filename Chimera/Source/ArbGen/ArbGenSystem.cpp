@@ -134,10 +134,10 @@ void ArbGenSystem::initialize(std::string headerText, IChimeraQtWindow* win)
 		try	{ 
 			checkSave (win->mainWin->getProfileSettings ().configLocation, win->mainWin->getRunInfo ()); 
 			programArbGenNow (win->auxWin->getUsableConstants ()); 
-			win->reportStatus (qstr("Programmed Agilent " + getConfigDelim () + ".\r\n")); 
+			win->reportStatus (qstr("Programmed ArbGen " + getConfigDelim () + ".\r\n")); 
 		}
 		catch (ChimeraError& err) {
-			win->reportErr (qstr("Error while programming agilent " + getConfigDelim () + ": " + err.trace () + "\r\n"));
+			win->reportErr (qstr("Error while programming arbGen " + getConfigDelim () + ": " + err.trace () + "\r\n"));
 		}
 	});
 

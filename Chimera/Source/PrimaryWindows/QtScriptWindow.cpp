@@ -35,7 +35,7 @@ void QtScriptWindow::initializeWidgets (){
 	
 
 	masterScript.initialize(this, "Master", "Master Script");
-	gigaMoog.gmoogScript.initialize(this, "GMoog", "GigaMoog Script");
+	gigaMoog.initialize(this);
 	//profileDisplay.initialize (this);
 	QVBoxLayout* layout1 = new QVBoxLayout(this);
 	layout1->setContentsMargins(0, 0, 0, 0);
