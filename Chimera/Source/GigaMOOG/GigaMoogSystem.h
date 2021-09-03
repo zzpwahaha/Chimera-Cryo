@@ -1,7 +1,5 @@
 #pragma once 
-#include "stdafx.h" 
 #include <iostream> 
-#include "LowLevel/constants.h" 
 #include <GeneralObjects/IChimeraSystem.h>
 #include "Scripts/Script.h" 
 #include <Scripts/ScriptStream.h>

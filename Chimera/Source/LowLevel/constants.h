@@ -99,8 +99,8 @@
 
 	//GIGAMOOG
 	const bool GIGAMOOG_SAFEMODE = true;
-	std::string GIGAMOOG_PORT = "COM6";//temporary
-	int GIGAMOOG_BAUDRATE = 115200;
+	const std::string GIGAMOOG_PORT = "COM6";//temporary
+	const int GIGAMOOG_BAUDRATE = 115200;
 
 #endif
 /// Random other Constants
