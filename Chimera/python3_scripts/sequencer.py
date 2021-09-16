@@ -450,5 +450,5 @@ if __name__ == "__main__":
 	# seq.set_DAC(0, 1)
 	# seq.dac_seq_write_points(42, byte_buf_dac, 2)
 	# seq.dio_seq_write_points(28, byte_buf_dio, 4)
-	seq.mod_enable()
+	# seq.mod_enable()
 	trigger()
