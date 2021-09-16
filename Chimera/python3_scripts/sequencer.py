@@ -106,7 +106,7 @@ class sequencer:
 
 	def write_dio_point(self, point):
 	  #01XXAAAA TTTTTTTT DDDDDDDD
-	  self.fifo_dio_seq.write_axis_fifo("\x01\x00" + struct.pack('>H', point.address))
+	  self.fifo_dio_seq.write_axis_fifo(b"\x01\x00" + struct.pack('>H', point.address))
 	  self.fifo_dio_seq.write_axis_fifo(struct.pack('>I', point.time))
 	  self.fifo_dio_seq.write_axis_fifo(struct.pack('>I', point.outputA))
 	  self.fifo_dio_seq.write_axis_fifo(struct.pack('>I', point.outputB))
@@ -124,7 +124,7 @@ class sequencer:
 		#acc_chan    <= to_integer(unsigned(gpio_in( 3 downto  0)));
 		print("add:", point.address, " time:", point.time, " start:", point.start, \
 		" steps:", point.steps, " incr:", point.incr, " chan:", point.chan)
-		fifo.write_axis_fifo("\x01\x00" + struct.pack('>H', point.address))
+		fifo.write_axis_fifo(b"\x01\x00" + struct.pack('>H', point.address))
 		fifo.write_axis_fifo(struct.pack('>I', point.time))
 		fifo.write_axis_fifo(struct.pack('>I', (point.start << 16) + point.steps))
 		fifo.write_axis_fifo(struct.pack('>I', (point.incr << 4) + point.chan))
@@ -141,7 +141,7 @@ class sequencer:
 		#unused      <= gpio_in( 3 downto  2);
 		#acc_chan    <= gpio_in( 1 downto  0);
 		print('addr', point.address, 'time', point.time, 'start', point.start, 'steps', point.steps, 'incr', point.incr, 'channel', point.chan)
-		fifo.write_axis_fifo("\x01\x00" + struct.pack('>H', point.address))
+		fifo.write_axis_fifo(b"\x01\x00" + struct.pack('>H', point.address))
 		fifo.write_axis_fifo(struct.pack('>I', point.time))
 		fifo.write_axis_fifo(struct.pack('>I', (point.start << 16) + point.steps))
 		fifo.write_axis_fifo(struct.pack('>I', (point.incr << 4) + point.chan))
@@ -160,7 +160,7 @@ class sequencer:
 		# print point.steps * 256 * 256, incr_hi,incr_lo, point.incr, point.steps * 256 * 256 + incr_hi
 		# print point.incr & (0xffff>>28), point.incr & ((1<<28)-1), (point.steps << 16) + incr_hi, (incr_lo << 4) + point.chan
 		# print incr_hi, incr_lo, point.steps * 256 * 256 + incr_hi, incr_lo * 16 + point.chan
-		fifo.write_axis_fifo("\x01\x00" + struct.pack('>H', point.address))
+		fifo.write_axis_fifo(b"\x01\x00" + struct.pack('>H', point.address))
 		fifo.write_axis_fifo(struct.pack('>I', point.time))
 		fifo.write_axis_fifo(struct.pack('>I', point.start))
 		fifo.write_axis_fifo(struct.pack('>I', (point.steps << 16) + incr_hi))
@@ -423,13 +423,13 @@ if __name__ == "__main__":
 
 	import time
 	
-	byte_buf_dio = 't00000010_b0000000000000000\0' \
+	byte_buf_dio = 't00000010_b000fff0000000000\0' \
 				   't00000A00_bF000000100000000\0' \
-				   't00030d40_b0000000000000001\0' \
+				   't00030d40_b000fff0000000001\0' \
 				   't00061a80_b0000000000000000\0'
 	byte_buf_dds = 't00000064_c0001_f_s100.000_e050.000_000009ff0\0' \
 				   't00010064_c0002_f_s080.000_e050.000_000009ff0\0'
-	byte_buf_dds = 't00000064_c0001_a_s100.000_e000.000_0000000f0\0'
+	byte_buf_dds = 't00000064_c0001_a_s001.000_e000.000_0000000f0\0'
 	#byte_buf1 = 't00000064_c0000_f_s080.000_e000.000_d00000000\0'
 
 	byte_buf_dac = 't00000000_c0000_s05.000_e00.000_d0000c350\0' \
@@ -447,8 +447,10 @@ if __name__ == "__main__":
 	seq.set_DDS(1, 100, 0)
 	# seq.dds_seq_write_atw_points()
 	#seq.dds_seq_write_ftw_points()
-	# seq.set_DAC(0, 1)
+	seq.set_DAC(0, -1)
+	seq.set_DAC(16, 1)
+	seq.set_DAC(19, 1)
 	# seq.dac_seq_write_points(42, byte_buf_dac, 2)
-	# seq.dio_seq_write_points(28, byte_buf_dio, 4)
+	seq.dio_seq_write_points(28, byte_buf_dio, 4)
 	# seq.mod_enable()
 	trigger()
