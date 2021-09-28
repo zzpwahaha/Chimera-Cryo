@@ -543,7 +543,7 @@ void MakoCamera::manualSaveImage()
                             for (size_t j = 0; j < imgWidth; j++)
                             {
                                 stream << imgSave[i * imgWidth + j];
-                                j == imgWidth - 1 ? stream << "," : stream << endl;
+                                j == imgWidth - 1 ? stream << endl : stream << ",";
                             }
                         }
                     }
