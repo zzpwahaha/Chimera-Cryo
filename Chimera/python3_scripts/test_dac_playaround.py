@@ -59,7 +59,7 @@ class DAC_ramp_tester:
     #acc_start   <= gpio_in(47 downto 32);
     #acc_incr    <= gpio_in(31 downto  0);
 
-    fifo.write_axis_fifo("\x01\x00" + struct.pack('>H', point.address))
+    fifo.write_axis_fifo(b"\x01\x00" + struct.pack('>H', point.address))
     fifo.write_axis_fifo(struct.pack('>I', point.time))
     fifo.write_axis_fifo(struct.pack('>I', point.clr_incr*16*256*256 + point.chan*256*256 + point.start))
     fifo.write_axis_fifo(struct.pack('>I', point.incr))
@@ -97,7 +97,9 @@ class DAC_ramp_tester:
     points0.append(DAC_seq_point(address=13, time=13, start=13000,incr=6553600,chan=13,clr_incr=0))
     points0.append(DAC_seq_point(address=14, time=14, start=14000,incr=6553600,chan=14,clr_incr=0))
     points0.append(DAC_seq_point(address=15, time=15, start=15000,incr=6553600,chan=15,clr_incr=0))
-    points0.append(DAC_seq_point(address=16, time=0,  start=0,incr=0,chan=0,clr_incr=0))
+    points0.append(DAC_seq_point(address=16, time=100000,  start=int(2000+(6553600*100000/1000.0)/2**16),incr=2**29,chan=2, clr_incr=0))
+    points0.append(DAC_seq_point(address=17, time=101000,  start=0,incr=0,chan=2, clr_incr=1))
+    points0.append(DAC_seq_point(address=18, time=0,  start=0,incr=0,chan=0,clr_incr=0))
     #step 100 LSB per 10 us
     points1.append(DAC_seq_point(address=0,  time=0,  start=10000,incr=6553600,chan=0, clr_incr=0))
     points1.append(DAC_seq_point(address=1,  time=1,  start=1000,incr=6553600,chan=1, clr_incr=0))
@@ -136,10 +138,10 @@ class DAC_ramp_tester:
     points.append(GPIO_seq_point(address=4,time=0,outputA=0x00000000,outputB=0x00000000))
 
     for point in points:
-      print "add: ", point.address
-      print "time: ", point.time
-      print "outputA: ", point.outputA
-      print "outputB: ", point.outputB
+      print( "add: ", point.address)
+      print( "time: ", point.time)
+      print( "outputA: ", point.outputA)
+      print( "outputB: ", point.outputB)
 
     # with open("/dev/axis_fifo_0x0000000080004000", "r+b") as character:
     for point in points:
@@ -164,7 +166,6 @@ def program(tester):
   # ~ print('  tester.mod_disable()')
 
 if __name__ == "__main__":
-
   tester = DAC_ramp_tester(fifo_devices['DAC81416_0'], fifo_devices['DAC81416_1'], fifo_devices['DAC81416_0_seq'], fifo_devices['DAC81416_1_seq'], fifo_devices['GPIO_seq'])
   reset_all.reset()
   sleep(1)
