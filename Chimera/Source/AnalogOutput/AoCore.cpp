@@ -390,21 +390,18 @@ void AoCore::organizeDacCommands(unsigned variation, AoSnapshot initSnap)
 		// because the events are sorted by time, the time organizer will already be sorted by time, and therefore I 
 		// just need to check the back value's time. Check that the times are greater than a pico second apart. 
 		// pretty arbitrary.
-		if (commandInc == 0 || fabs(command.time - timeOrganizer.back().first) > 1e-9)
-		{
+		if (commandInc == 0 || fabs(command.time - timeOrganizer.back().first) > 1e-9) {
 			// new time
 			std::vector<AoCommand> quickVec = { command };
 			timeOrganizer.push_back({ command.time, quickVec });
 		}
-		else
-		{
+		else {
 			// old time
 			timeOrganizer.back().second.push_back(command);
 		}
 	}
 	/// make the snapshots
-	if (timeOrganizer.size() == 0)
-	{
+	if (timeOrganizer.size() == 0) {
 		// no commands, that's fine.
 		return;
 	}
@@ -413,8 +410,7 @@ void AoCore::organizeDacCommands(unsigned variation, AoSnapshot initSnap)
 
 	//snap.push_back({ ZYNQ_DEADTIME,dacValuestmp });
 	snap.push_back(initSnap);
-	if (timeOrganizer[0].first != 0)
-	{
+	if (timeOrganizer[0].first != 0) {
 		// then there were no commands at time 0, so just set the initial state to be exactly the original state before
 		// the experiment started. I don't need to modify the first snapshot in this case, it's already set. Add a snapshot
 		// here so that the thing modified is the second snapshot not the first. 
@@ -424,16 +420,14 @@ void AoCore::organizeDacCommands(unsigned variation, AoSnapshot initSnap)
 	unsigned cnts = 0;
 	for (auto& command : timeOrganizer)
 	{
-		if (cnts != 0)
-		{
+		if (cnts != 0) {
 			// handle the zero case specially. This may or may not be the literal first snapshot.
 			// first copy the last set so that things that weren't changed remain unchanged.
 			snap.push_back(snap.back());
 		}
 
 		snap.back().time = command.first;
-		for (auto& change : command.second)
-		{
+		for (auto& change : command.second) {
 			// see description of this command above... update everything that changed at this time.
 			snap.back().dacValues[change.line] = change.value;
 			snap.back().dacEndValues[change.line] = change.endValue;
