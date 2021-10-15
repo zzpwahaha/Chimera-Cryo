@@ -225,7 +225,7 @@ void AoCore::calculateVariations(std::vector<parameterType>& params, ExpThreadWo
 				finalValue = formList.finalVal.evaluate(params, variationInc, calibrations);
 				// deal with ramp inc
 				rampInc = formList.rampInc.evaluate(params, variationInc, calibrations);
-				if (rampInc < 10.0 / pow(2, 16) && resolutionWarningPosted) {
+				if (rampInc < 10.0 / pow(2, 16) && !resolutionWarningPosted) {
 					resolutionWarningPosted = true;
 					emit threadworker->warn(cstr("Warning: ramp increment of " + str(rampInc) + " in dac command number "
 						+ str(eventInc) + " is below the resolution of the aoSys (which is 10/2^16 = "
@@ -235,8 +235,8 @@ void AoCore::calculateVariations(std::vector<parameterType>& params, ExpThreadWo
 				// calculate the time increment:
 				int steps = int(fabs(finalValue - initValue) / rampInc + 0.5);
 				double stepsFloat = fabs(finalValue - initValue) / rampInc;
-				double diff = fabs(steps - fabs(finalValue - initValue) / rampInc);
-				if (diff > 100 * DBL_EPSILON && nonIntegerWarningPosted) {
+				double diff = fabs(steps - stepsFloat);
+				if (diff > 100 * DBL_EPSILON && !nonIntegerWarningPosted) {
 					nonIntegerWarningPosted = true;
 					emit threadworker->warn(cstr("Warning: Ideally your spacings for a dacArange would result in a non-integer number "
 						"of steps. The code will attempt to compensate by making a last step to the final value which"
@@ -246,10 +246,15 @@ void AoCore::calculateVariations(std::vector<parameterType>& params, ExpThreadWo
 				double timeInc = rampTime / steps;
 				double initTime = tempEvent.time;
 				double currentTime = tempEvent.time;
+				if (timeInc < DAC_TIME_RESOLUTION) {
+					thrower("Warning: numPoints of " + str(steps) + " results in a ramp time steps of "
+						+ str(timeInc) + " is below the time resolution of the aoSys (which is 20us)."
+						" You probably want to use dacramp instead of dacarange\r\n");
+				}
 				// handle the two directions seperately.
 				if (initValue < finalValue) {
 					for (double dacValue = initValue;
-						(dacValue - finalValue) < -steps * 2 * DBL_EPSILON; dacValue += rampInc)
+						(dacValue - finalValue) < -rampInc/2 + DBL_EPSILON; dacValue += rampInc)
 					{
 						tempEvent.value = dacValue;
 						tempEvent.endValue = dacValue;
@@ -263,7 +268,7 @@ void AoCore::calculateVariations(std::vector<parameterType>& params, ExpThreadWo
 				else
 				{
 					for (double dacValue = initValue;
-						dacValue - finalValue > 100 * DBL_EPSILON; dacValue -= rampInc) {
+						dacValue - finalValue > rampInc/2 - DBL_EPSILON; dacValue -= rampInc) {
 						tempEvent.value = dacValue;
 						tempEvent.endValue = dacValue;
 						tempEvent.rampTime = 0;
@@ -294,19 +299,24 @@ void AoCore::calculateVariations(std::vector<parameterType>& params, ExpThreadWo
 				double rampInc = (finalValue - initValue) / numSteps;
 				// this warning isn't actually very useful. very rare that actually run into issues with overtaxing ao 
 				// or do systems like this and these circumstances often happen when something is ramped.
-				/*if ( (fabs( rampInc ) < 10.0 / pow( 2, 16 )) && !resolutionWarningPosted ){
+				if ( (fabs( rampInc ) < 10.0 / pow( 2, 16 )) && !resolutionWarningPosted ){
 					resolutionWarningPosted = true;
 					emit threadworker->warn (cstr ("Warning: numPoints of " + str (numSteps) + " results in a ramp increment of "
 						+ str (rampInc) + " is below the resolution of the aoSys (which is 10/2^16 = "
-						+ str (10.0 / pow (2, 16)) + "). It's likely taxing the system to "
-						"calculate the ramp unnecessarily.\r\n"));
-				}*/
+						+ str (10.0 / pow (2, 16)) + ").These linspace points are unnecessary\r\n"));
+				}
 				// This might be the first not i++ usage of a for loop I've ever done... XD
 				// calculate the time increment:
 				double timeInc = rampTime / numSteps;
 				double initTime = tempEvent.time;
 				double currentTime = tempEvent.time;
 				double val = initValue;
+				if (timeInc < DAC_TIME_RESOLUTION) {
+					thrower("Warning: numPoints of " + str(numSteps) + " results in a ramp time steps of "
+						+ str(timeInc) + " is below the time resolution of the aoSys (which is 20us)."
+						" You probably want to use dacramp instead of daclinspace\r\n");
+				}
+
 				// handle the two directions seperately.
 				for (auto stepNum : range(numSteps))
 				{
@@ -341,25 +351,59 @@ void AoCore::calculateVariations(std::vector<parameterType>& params, ExpThreadWo
 				// set votlage resolution to be maximum allowed by the ramp range and time
 				numSteps = rampTime / DAC_TIME_RESOLUTION;
 				double rampInc = (finalValue - initValue) / numSteps;
-				if ((fabs(rampInc) < dacResolution) && !resolutionWarningPosted)
+				if ((fabs(rampInc) < dacResolution))
 				{
-					resolutionWarningPosted = true;
-					thrower("Warning: numPoints of " + str(numSteps) + " results in a ramp increment of "
+					emit threadworker->warn(qstr("Warning: numPoints of " + str(numSteps) + " results in a ramp increment of "
 						+ str(rampInc) + " is below the resolution of the dacs (which is 20/2^16 = "
-						+ str(dacResolution) + "). Ramp will not run.\r\n");
+						+ str(dacResolution) + "). \r\n"));
 				}
-				if (numSteps > DAC_RAMP_MAX_PTS) {
-					thrower("Warning: numPoints of " + str(numSteps) + " is larger than the max time of the DAC ramps. Ramp will be truncated. \r\n");
+				//if (numSteps > DAC_RAMP_MAX_PTS) {
+				//	thrower("Warning: numPoints of " + str(numSteps) + " is larger than the max time of the DAC ramps."
+				//		" Ramp will not run. \r\n");
+				//}
+				unsigned numStepsInt = unsigned(numSteps + 0.5);
+				if (fabs(numSteps - numStepsInt) > 100 * DBL_EPSILON) {
+					thrower("Warning: numPoints of " + str(numSteps) + "resulting from ramping time = " + str(rampTime) +
+						"ms, and dac timing resolution 20us, is not an interger. "
+						"Ramp will not run. \r\n");
 				}
+				if (rampTime < DAC_TIME_RESOLUTION) {
+					thrower("Warning: Ramp time of "
+						+ str(rampTime) + " is below the time resolution of the aoSys (which is 20us)."
+						" Ramp will not run. \r\n");
+				}
+				
 
 				double initTime = tempEvent.time;
 
-				// for dacRamp, pass the ramp points and time directly to a single dacCommandList element
-				tempEvent.value = initValue;
-				tempEvent.endValue = finalValue;
-				tempEvent.time = initTime;
-				tempEvent.rampTime = rampTime;
-				cmdList.push_back(tempEvent);
+				// for dacRamp, need to check whether the end point can be reached without rounding error and then
+				// pass the ramp points and time directly to a single or two dacCommandList element
+				unsigned codeInit = unsigned((initValue / 20 + 0.5) * 65535); // ((dacval+10)/20*65535), [-10,10]->[0,65535], 65536 pts and 65535 intervals
+				unsigned codeFinl = unsigned((finalValue / 20 + 0.5) * 65535);
+				unsigned incr = ((codeFinl << 16) - (codeInit << 16)) / numStepsInt;
+				unsigned res = ((codeFinl << 16) - (codeInit << 16)) % numStepsInt;
+				if (res == 0) { // no rounding error, just push back
+					tempEvent.value = initValue;
+					tempEvent.endValue = finalValue;
+					tempEvent.time = initTime;
+					tempEvent.rampTime = rampTime;
+					cmdList.push_back(tempEvent);
+				}
+				else { // handle the last ramp specifically
+					tempEvent.value = initValue;
+					tempEvent.endValue = (codeFinl / 65535.0) * 20.0 - 10.0;
+					tempEvent.time = initTime;
+					tempEvent.rampTime = rampTime - DAC_TIME_RESOLUTION;
+					cmdList.push_back(tempEvent);
+
+					tempEvent.value = tempEvent.endValue;
+					tempEvent.endValue = finalValue;
+					tempEvent.time += tempEvent.rampTime;
+					tempEvent.rampTime = DAC_TIME_RESOLUTION;
+					cmdList.push_back(tempEvent);
+
+				}
+
 			}
 
 			else {
@@ -469,8 +513,7 @@ void AoCore::formatDacForFPGA(UINT variation, AoSnapshot initSnap)
 
 		snapshot = dacSnapshots[variation][i];
 
-		if (i == 0)
-		{
+		if (i == 0) {
 			for (int j = 0; j < size_t(AOGrid::total); ++j)
 			{
 				if (snapshot.dacValues[j] != dacValuestmp[j] ||
