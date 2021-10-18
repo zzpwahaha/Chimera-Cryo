@@ -378,10 +378,10 @@ void AoCore::calculateVariations(std::vector<parameterType>& params, ExpThreadWo
 
 				// for dacRamp, need to check whether the end point can be reached without rounding error and then
 				// pass the ramp points and time directly to a single or two dacCommandList element
-				unsigned codeInit = unsigned((initValue / 20 + 0.5) * 65535); // ((dacval+10)/20*65535), [-10,10]->[0,65535], 65536 pts and 65535 intervals
-				unsigned codeFinl = unsigned((finalValue / 20 + 0.5) * 65535);
-				unsigned incr = ((codeFinl << 16) - (codeInit << 16)) / numStepsInt;
-				unsigned res = ((codeFinl << 16) - (codeInit << 16)) % numStepsInt;
+				signed codeInit = signed((initValue / 20 + 0.5) * 65535); // ((dacval+10)/20*65535), [-10,10]->[0,65535], 65536 pts and 65535 intervals
+				signed codeFinl = signed((finalValue / 20 + 0.5) * 65535);
+				signed incr = ((codeFinl << 16) - (codeInit << 16)) / numStepsInt;
+				signed res = ((codeFinl << 16) - (codeInit << 16)) % numStepsInt; // https://stackoverflow.com/questions/7594508/modulo-operator-with-negative-values, (-7/3) => -2;-2 * 3 = > -6;so a % b = > -1; (7 / -3) = > -2;- 2 * -3 = > 6;so a % b = > 1
 				if (res == 0) { // no rounding error, just push back
 					tempEvent.value = initValue;
 					tempEvent.endValue = finalValue;
@@ -391,7 +391,7 @@ void AoCore::calculateVariations(std::vector<parameterType>& params, ExpThreadWo
 				}
 				else { // handle the last ramp specifically
 					tempEvent.value = initValue;
-					tempEvent.endValue = (codeFinl / 65535.0) * 20.0 - 10.0;
+					tempEvent.endValue = ((codeFinl-(incr/0x10000)) / 65535.0) * 20.0 - 10.0;
 					tempEvent.time = initTime;
 					tempEvent.rampTime = rampTime - DAC_TIME_RESOLUTION;
 					cmdList.push_back(tempEvent);
@@ -402,6 +402,11 @@ void AoCore::calculateVariations(std::vector<parameterType>& params, ExpThreadWo
 					tempEvent.rampTime = DAC_TIME_RESOLUTION;
 					cmdList.push_back(tempEvent);
 
+					tempEvent.value = finalValue;
+					tempEvent.endValue = finalValue; // the purpose is to keep the value at endValue
+					tempEvent.time += tempEvent.rampTime;
+					tempEvent.rampTime = 0;
+					cmdList.push_back(tempEvent);
 				}
 
 			}
@@ -527,9 +532,11 @@ void AoCore::formatDacForFPGA(UINT variation, AoSnapshot initSnap)
 			for (int j = 0; j < size_t(AOGrid::total); ++j)
 			{
 				if (snapshot.dacValues[j] != snapshotPrev.dacValues[j] ||
-					snapshot.dacValues[j] != snapshotPrev.dacEndValues[j] ||
-					(snapshot.dacValues[j] == snapshotPrev.dacValues[j] &&
-						snapshot.dacRampTimes[j] != 0 && snapshotPrev.dacRampTimes[j] == 0))
+					snapshot.dacEndValues[j] != snapshotPrev.dacEndValues[j] ||
+					(snapshot.dacValues[j] == snapshotPrev.dacEndValues[j] &&
+						snapshot.dacRampTimes[j] != 0 && snapshotPrev.dacRampTimes[j] == 0) /*start to ramp*/ ||
+					(snapshot.dacValues[j] == snapshotPrev.dacEndValues[j] && 
+						snapshot.dacRampTimes[j] == 0 && snapshotPrev.dacRampTimes[j] != 0 /*end ramp*/))
 				{
 					channels.push_back(j);
 				}

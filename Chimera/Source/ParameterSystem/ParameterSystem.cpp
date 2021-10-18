@@ -528,6 +528,9 @@ ScanRangeInfo ParameterSystem::getRangeInfoFromFile ( std::string configFileName
 
 void ParameterSystem::generateKey( std::vector<parameterType>& parameters, bool randomizeVariationsOption,
 								   ScanRangeInfo inputRangeInfo ){
+	if (parameters.empty()) {
+		thrower("You at least one parameter to run the experiment.");
+	}
 	for ( auto& variable : parameters ){
 		variable.keyValues.clear( );
 	}

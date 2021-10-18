@@ -56,12 +56,12 @@
 	const auto ZYNQ_PORT = "8080";
 	const int ZYNQ_MAX_BUFF = 64;
 	const int DIO_LEN_BYTE_BUF = 28;
-	const int DAC_LEN_BYTE_BUF = 42;
+	const int DAC_LEN_BYTE_BUF = 44;
 	const int DDS_LEN_BYTE_BUF = 46;
 
-	const double DIO_TIME_RESOLUTION = 1e-5;
-	const double DAC_TIME_RESOLUTION = 1.6; // in ms
-	const int DAC_RAMP_MAX_PTS = 0xffff; // 65535 ???
+	const double DIO_TIME_RESOLUTION = 1e-5; // in ms, 10ns
+	const double DAC_TIME_RESOLUTION = 0.02; // in ms, 20us for 50kHz update rate
+	//const int DAC_RAMP_MAX_PTS = 0xffff; // 65535 ???
 	const double DDS_TIME_RESOLUTION = 1.6; // in ms
 	const double DDS_MAX_AMP = 1.25; // in mW
 
@@ -90,7 +90,7 @@
 
 	//Mako camera
 	const unsigned MAKO_NUMBER = 2;
-	const std::array<bool, MAKO_NUMBER> MAKO_SAFEMODE = { false,false };
+	const std::array<bool, MAKO_NUMBER> MAKO_SAFEMODE = { false,false};
 	const std::array<std::string, MAKO_NUMBER> MAKO_DELIMS = { "MAKO1_CAMERA_SETTING", "MAKO2_CAMERA_SETTING" };
 	const std::array<std::string, MAKO_NUMBER> MAKO_IPADDRS= { "10.10.0.6", "10.10.0.7" };
 	const std::vector<std::pair<unsigned, unsigned>> MAKO_TRIGGER_LINE
