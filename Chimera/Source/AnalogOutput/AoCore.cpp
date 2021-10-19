@@ -5,7 +5,7 @@
 #include <ExperimentMonitoringAndStatus/ExperimentSeqPlotter.h>
 
 
-AoCore::AoCore() : dacTriggerTime(0.0005)
+AoCore::AoCore() : dacTriggerTime(0.020)
 {
 
 }
@@ -117,14 +117,12 @@ void AoCore::initializeDataObjects(unsigned cmdNum)
 	dacCommandList.clear();
 	dacSnapshots.clear();
 	loadSkipDacSnapshots.clear();
-	//finalFormatDacData.clear();
-	//loadSkipDacFinalFormat.clear();
+	finalDacSnapshots.clear();
 
 	dacCommandList.resize(cmdNum);
 	dacSnapshots.resize(cmdNum);
 	loadSkipDacSnapshots.resize(cmdNum);
-	//finalFormatDacData.resize(cmdNum);
-	//loadSkipDacFinalFormat.resize(cmdNum);
+	finalDacSnapshots.resize(cmdNum);
 
 }
 
@@ -135,8 +133,7 @@ void AoCore::resetDacEvents()
 	dacCommandList.clear();
 	dacSnapshots.clear();
 	loadSkipDacSnapshots.clear();
-
-	//loadSkipDacFinalFormat.clear();
+	finalDacSnapshots.clear();
 
 	initializeDataObjects(0);
 }
@@ -155,17 +152,11 @@ void AoCore::calculateVariations(std::vector<parameterType>& params, ExpThreadWo
 	dacCommandList.clear();
 	dacSnapshots.clear();
 	loadSkipDacSnapshots.clear();
-	//finalFormatDacData.clear();
-	//loadSkipDacFinalFormat.clear();
-
 	finalDacSnapshots.clear();
 
 	dacCommandList.resize(variations);
 	dacSnapshots.resize(variations);
 	loadSkipDacSnapshots.resize(variations);
-	//finalFormatDacData.resize(variations);
-	//loadSkipDacFinalFormat.resize(variations);
-
 	finalDacSnapshots.resize(variations);
 
 	bool resolutionWarningPosted = false;
@@ -378,10 +369,10 @@ void AoCore::calculateVariations(std::vector<parameterType>& params, ExpThreadWo
 
 				// for dacRamp, need to check whether the end point can be reached without rounding error and then
 				// pass the ramp points and time directly to a single or two dacCommandList element
-				signed codeInit = signed((initValue / 20 + 0.5) * 65535); // ((dacval+10)/20*65535), [-10,10]->[0,65535], 65536 pts and 65535 intervals
-				signed codeFinl = signed((finalValue / 20 + 0.5) * 65535);
-				signed incr = ((codeFinl << 16) - (codeInit << 16)) / numStepsInt;
-				signed res = ((codeFinl << 16) - (codeInit << 16)) % numStepsInt; // https://stackoverflow.com/questions/7594508/modulo-operator-with-negative-values, (-7/3) => -2;-2 * 3 = > -6;so a % b = > -1; (7 / -3) = > -2;- 2 * -3 = > 6;so a % b = > 1
+				long long int codeInit = long long int((initValue / 20 + 0.5) * 65535); // ((dacval+10)/20*65535), [-10,10]->[0,65535], 65536 pts and 65535 intervals
+				long long int codeFinl = long long int((finalValue / 20 + 0.5) * 65535);
+				long long int incr = ((codeFinl << 16) - (codeInit << 16)) / numStepsInt; // https://stackoverflow.com/questions/7221409/is-unsigned-integer-subtraction-defined-behavior The result of a subtraction generating a negative number in an unsigned type is well-defined: //[...] A computation involving unsigned operands can never overflow, because a result that cannot be represented by the resulting unsigned integer type is reduced modulo the number that is one greater than the largest value that can be represented by the resulting type. (ISO / IEC 9899:1999 (E)§6.2.5 / 9) //As you can see, (unsigned)0 - (unsigned)1 equals - 1 modulo UINT_MAX + 1, or in other words, UINT_MAX.
+				long long int res = ((codeFinl << 16) - (codeInit << 16)) % numStepsInt; // https://stackoverflow.com/questions/7594508/modulo-operator-with-negative-values, (-7/3) => -2;-2 * 3 = > -6;so a % b = > -1; (7 / -3) = > -2;- 2 * -3 = > 6;so a % b = > 1
 				if (res == 0) { // no rounding error, just push back
 					tempEvent.value = initValue;
 					tempEvent.endValue = finalValue;
@@ -695,7 +686,7 @@ void AoCore::checkTimingsWork(unsigned variation)
 				continue;
 			}
 			// can't trigger faster than the trigger time.
-			if (fabs(time - secondTime) < dacTriggerTime) {
+			if (fabs(time - secondTime) < dacTriggerTime - 2*DBL_EPSILON) {
 				thrower("timings are such that the dac system would have to get triggered too fast to follow the"
 					" programming! ");
 			}

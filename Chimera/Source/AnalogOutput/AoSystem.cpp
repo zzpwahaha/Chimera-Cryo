@@ -249,13 +249,6 @@ void AoSystem::updateEdits( )
 }
 
 
-
-/*
- * IMPORTANT: this does not actually change any of the outputs of the board. It is meant to be called when things have
- * happened such that the control doesn't know what it's own status is, e.g. at the end of an experiment, since the 
- * program doesn't change it's internal memory of all of the status of the aoSys as the experiment runs. (it can't, 
- * besides it would intensive to keep track of that in real time).
- */
 /*TODO get it a better name*/
 void AoSystem::setDacStatusNoForceOut(std::array<double, size_t(AOGrid::total)> status)
 {
@@ -273,24 +266,10 @@ void AoSystem::setDacStatusNoForceOut(std::array<double, size_t(AOGrid::total)> 
 //template<class T> using vec = std::vector<T>;
 
 
-
-/*TODO get it a better name, the functioning is overlapped with setDacStatusNoForceOut*/
 /// used in AuxWindow->handleMasterConfigOpen, address it later
-// this is a function called in preparation for forcing a dac change. Remember, you need to call ___ to actually change things.
-/*mainly for preparing the trigger which is not needed in zynq*/
 void AoSystem::prepareDacForceChange(int line, double voltage)
 {
-	// change parameters in the AoSystem object so that the object knows what the current settings are.
-	//std::string valStr = roundToDacPrecision? str ( AnalogOutput::roundToDacResolution ( voltage ), 13 ) : str ( voltage, 13 );
-	//if (valStr.find(".") != std::string::npos)	{
-	//	// then it's a double. kill extra zeros on the end.
-	//	valStr.erase(valStr.find_last_not_of('0') + 1, std::string::npos);
-	//}
-
-
 	outputs[ line ].info.currVal = voltage;
-	//dacValues[line] = voltage;
-
 }
 
 

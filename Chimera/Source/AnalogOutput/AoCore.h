@@ -70,7 +70,7 @@ private:
 	std::vector<std::vector<AoChannelSnapshot>> finalDacSnapshots;
 	//Zynq tcp connection
 	ZynqTCP zynq_tcp;
-	double dacTriggerTime;
+	double dacTriggerTime; // used in checkTimingsWork() to see if time of two points in dac is shorter than 1/ramp freq
 
 	AnalogOutput dummyOutput;
 
