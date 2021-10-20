@@ -1278,6 +1278,8 @@ void ExpThreadWorker::startRep (unsigned repInc, unsigned variationInc, bool ski
 		//timer.start();
 		//emit notification (qstr ("Starting Repetition #" + qstr (repInc) + "\n"), 2);
 		emit repUpdate (repInc + 1);
+		input->zynqExp.sendCommand("initExp");
+		Sleep(10);
 		//input->aoSys.resetDacs (variationInc, skip);
 		//input->ttls.ftdi_trigger ();
 		//input->ttls.FtdiWaitTillFinished (variationInc);
