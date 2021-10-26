@@ -17,8 +17,9 @@ class DAC81416:
     #activates streaming mode
     self.fifo.write_axis_fifo("\x00\x03\x0A\x8C")
     #GEN config
-    #activate internal ref
-    self.fifo.write_axis_fifo("\x00\x04\x3F\x00")
+    #activate internal/external ref
+    # self.fifo.write_axis_fifo("\x00\x04\x3F\x00")
+    self.fifo.write_axis_fifo("\x00\x04\x7F\x00")
     #BRDCONFIG - disable broadcast mode
     self.fifo.write_axis_fifo("\x00\x05\x00\x00")
     #SYNCCONFIG - activate LDAC
