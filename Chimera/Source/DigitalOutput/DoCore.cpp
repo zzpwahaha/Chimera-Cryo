@@ -517,6 +517,7 @@ void DoCore::FPGAForceOutput(DOStatus status)
 	if (tcp_connect == 0)
 	{
 		zynq_tcp.writeCommand("trigger");
+		Sleep(100);
 		zynq_tcp.writeCommand("disableMod");
 		zynq_tcp.disconnect();
 	}

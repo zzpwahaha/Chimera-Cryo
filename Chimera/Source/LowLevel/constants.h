@@ -19,7 +19,7 @@
 	//constexpr bool DOFTDI_SAFEMODE = true;
 	constexpr bool DDS_SAFEMODE = true;
 	constexpr bool ANDOR_SAFEMODE = true;
-	constexpr bool OFFSETLOCK_SAFEMODE = false/*false*/;
+	constexpr bool OFFSETLOCK_SAFEMODE = true/*false*/;
 	//constexpr bool ANALOG_IN_SAFEMODE = true;
 	#ifdef _DEBUG
 		constexpr bool PYTHON_SAFEMODE = true;
@@ -76,7 +76,7 @@
 	//ArbGens
 	const bool UWAVE_SAFEMODE = true;
 	const bool UWAVE_SAFEMODE_SIG = true;
-	const bool UWAVE_SAFEMODE_AGI = false;
+	const bool UWAVE_SAFEMODE_AGI = true;
 	const int numArbGen = 2;
 	//const std::string UWAVE_AGILENT_ADDRESS = "TCPIP0::10.10.0.5::inst0::INSTR";
 	const std::string UWAVE_AGILENT_ADDRESS = "USB0::0x0957::0x2807::MY57400998::INSTR";

@@ -112,16 +112,36 @@ class DAC_ramp_tester:
     # points0.append(DAC_seq_point( address= 8 , time =  100110000 ,start = 62258 ,incr =  0 ,chan= 0 ,clr_incr= 1 ))
     # points0.append(DAC_seq_point( address= 9 , time =  0 ,start = 0 ,incr =  0 ,chan= 0 ,clr_incr= 0 ))
 
-    points0 = [DAC_seq_point( address= 0 , time =  100000 ,start = 36044 ,incr =  0 ,chan= 0 ,clr_incr= 1 ),
-                DAC_seq_point( address= 1 , time =  100001 ,start = 49151 ,incr =  0 ,chan= 2 ,clr_incr= 1 ),
-                DAC_seq_point( address= 2 , time =  110000 ,start = 45874 ,incr =  8589228 ,chan= 0 ,clr_incr= 0 ),
-                DAC_seq_point( address= 3 , time =  110001 ,start = 55704 ,incr =  4288885608 ,chan= 2 ,clr_incr= 0 ),
-                DAC_seq_point( address= 4 , time =  208000 ,start = 52296 ,incr =  8650752 ,chan= 0 ,clr_incr= 0 ),
-                DAC_seq_point( address= 5 , time =  210000 ,start = 52428 ,incr =  0 ,chan= 0 ,clr_incr= 1 ),
-                DAC_seq_point( address= 6 , time =  608000 ,start = 32597 ,incr =  11141120 ,chan= 2 ,clr_incr= 0 ),
-                DAC_seq_point( address= 7 , time =  610000 ,start = 32767 ,incr =  0 ,chan= 2 ,clr_incr= 1 ),
-                DAC_seq_point( address= 8 , time =  100110000 ,start = 62258 ,incr =  0 ,chan= 0 ,clr_incr= 1 ),
-                DAC_seq_point( address= 9 , time =  0 ,start = 0 ,incr =  0 ,chan= 0 ,clr_incr= 0 )]
+    # points0 = [DAC_seq_point( address= 0 , time =  10000 ,start = 36044 ,incr =  0 ,chan= 0 ,clr_incr= 1 ),
+    #           DAC_seq_point( address= 1 , time =  100000 ,start = 36044 ,incr =  0 ,chan= 0 ,clr_incr= 1 ),
+    #           DAC_seq_point( address= 2 , time =  100002 ,start = 49151 ,incr =  0 ,chan= 2 ,clr_incr= 1 ),
+    #           DAC_seq_point( address= 3 , time =  110000 ,start = 32768 ,incr =  25769023 ,chan= 0 ,clr_incr= 0 ),
+    #           DAC_seq_point( address= 4 , time =  110002 ,start = 55705 ,incr =  4288954039 ,chan= 2 ,clr_incr= 0 ),
+    #           DAC_seq_point( address= 5 , time =  208000 ,start = 52035 ,incr =  25755648 ,chan= 0 ,clr_incr= 0 ),
+    #           DAC_seq_point( address= 6 , time =  210000 ,start = 52428 ,incr =  0 ,chan= 0 ,clr_incr= 1 ),
+    #           DAC_seq_point( address= 7 , time =  608002 ,start = 32858 ,incr =  4289069056 ,chan= 2 ,clr_incr= 0 ),
+    #           DAC_seq_point( address= 8 , time =  610002 ,start = 32768 ,incr =  0 ,chan= 2 ,clr_incr= 1 ),
+    #           DAC_seq_point( address= 9 , time =  100110000 ,start = 62258 ,incr =  0 ,chan= 0 ,clr_incr= 1 ),
+    #           DAC_seq_point( address= 10 , time =  0 ,start = 0 ,incr =  0 ,chan= 0 ,clr_incr= 0 )]
+    points0 = [DAC_seq_point( address= 0 , time =  100000 ,start = 45000 ,incr =  0 ,chan= 0 ,clr_incr= 1 ),
+                DAC_seq_point( address= 1 , time =  100001 ,start = 32768 ,incr =  0 ,chan= 1 ,clr_incr= 1 ),
+                DAC_seq_point( address= 2 , time =  100002 ,start = 40000 ,incr =  0 ,chan= 2 ,clr_incr= 1 ),
+                DAC_seq_point( address= 3 , time =  100003 ,start = 32768 ,incr =  0 ,chan= 3 ,clr_incr= 1 ),
+                DAC_seq_point( address= 4 , time =  100004 ,start = 32768 ,incr =  0 ,chan= 4 ,clr_incr= 1 ),
+                DAC_seq_point( address= 5 , time =  100005 ,start = 32768 ,incr =  0 ,chan= 5 ,clr_incr= 1 ),
+                DAC_seq_point( address= 6 , time =  100006 ,start = 49151 ,incr =  0 ,chan= 6 ,clr_incr= 1 ),
+                DAC_seq_point( address= 7 , time =  100007 ,start = 32768 ,incr =  0 ,chan= 7 ,clr_incr= 1 ),
+                DAC_seq_point( address= 8 , time =  100008 ,start = 32768 ,incr =  0 ,chan= 8 ,clr_incr= 1 ),
+                DAC_seq_point( address= 9 , time =  100009 ,start = 32768 ,incr =  0 ,chan= 9 ,clr_incr= 1 ),
+                DAC_seq_point( address= 10 , time =  100010 ,start = 32768 ,incr =  0 ,chan= 10 ,clr_incr= 1 ),
+                DAC_seq_point( address= 11 , time =  100011 ,start = 32768 ,incr =  0 ,chan= 11 ,clr_incr= 1 ),
+                DAC_seq_point( address= 12 , time =  100012 ,start = 32768 ,incr =  0 ,chan= 12 ,clr_incr= 1 ),
+                DAC_seq_point( address= 13 , time =  100013 ,start = 32768 ,incr =  0 ,chan= 13 ,clr_incr= 1 ),
+                DAC_seq_point( address= 14 , time =  100014 ,start = 32768 ,incr =  0 ,chan= 14 ,clr_incr= 1 ),
+                DAC_seq_point( address= 15 , time =  100015 ,start = 32768 ,incr =  0 ,chan= 15 ,clr_incr= 1 ),
+                DAC_seq_point( address= 16 , time =  0 ,start = 0 ,incr =  0 ,chan= 0 ,clr_incr= 0 )]
+
+
 
 
 
@@ -147,7 +167,24 @@ class DAC_ramp_tester:
     # points1.append(DAC_seq_point(address=18, time=1000000,  start=0,incr=0,chan=1, clr_incr=1))
     # points1.append(DAC_seq_point(address=19, time=1200000,  start=20000,incr=4281860096,chan=1, clr_incr=0))
     # points1.append(DAC_seq_point(address=20, time=1300000,  start=0,incr=0,chan=1, clr_incr=1))
-    # points1.append(DAC_seq_point(address=21, time=0,  start=0,incr=0,chan=0,clr_incr=0))
+    # points1.append(DAC_seq_point(address=0, time=0,  start=0,incr=0,chan=0,clr_incr=0))
+    points1 = [DAC_seq_point( address= 0 , time =  100000 ,start = 32768 ,incr =  0 ,chan= 0 ,clr_incr= 1 ),
+                DAC_seq_point( address= 1 , time =  100001 ,start = 32768 ,incr =  0 ,chan= 1 ,clr_incr= 1 ),
+                DAC_seq_point( address= 2 , time =  100002 ,start = 32768 ,incr =  0 ,chan= 2 ,clr_incr= 1 ),
+                DAC_seq_point( address= 3 , time =  100003 ,start = 32768 ,incr =  0 ,chan= 3 ,clr_incr= 1 ),
+                DAC_seq_point( address= 4 , time =  100004 ,start = 32768 ,incr =  0 ,chan= 4 ,clr_incr= 1 ),
+                DAC_seq_point( address= 5 , time =  100005 ,start = 32768 ,incr =  0 ,chan= 5 ,clr_incr= 1 ),
+                DAC_seq_point( address= 6 , time =  100006 ,start = 49151 ,incr =  0 ,chan= 6 ,clr_incr= 1 ),
+                DAC_seq_point( address= 7 , time =  100007 ,start = 32768 ,incr =  0 ,chan= 7 ,clr_incr= 1 ),
+                DAC_seq_point( address= 8 , time =  100008 ,start = 32768 ,incr =  0 ,chan= 8 ,clr_incr= 1 ),
+                DAC_seq_point( address= 9 , time =  100009 ,start = 32768 ,incr =  0 ,chan= 9 ,clr_incr= 1 ),
+                DAC_seq_point( address= 10 , time =  100010 ,start = 32768 ,incr =  0 ,chan= 10 ,clr_incr= 1 ),
+                DAC_seq_point( address= 11 , time =  100011 ,start = 32768 ,incr =  0 ,chan= 11 ,clr_incr= 1 ),
+                DAC_seq_point( address= 12 , time =  100012 ,start = 32768 ,incr =  0 ,chan= 12 ,clr_incr= 1 ),
+                DAC_seq_point( address= 13 , time =  100013 ,start = 32768 ,incr =  0 ,chan= 13 ,clr_incr= 1 ),
+                DAC_seq_point( address= 14 , time =  100014 ,start = 32768 ,incr =  0 ,chan= 14 ,clr_incr= 1 ),
+                DAC_seq_point( address= 15 , time =  100015 ,start = 32768 ,incr =  0 ,chan= 15 ,clr_incr= 1 ),
+                DAC_seq_point( address= 16 , time =  0 ,start = 0 ,incr =  0 ,chan= 0 ,clr_incr= 0 )]
 
     for point in points0:
       self.write_point(self.fifo_dac_seq0, point)
@@ -156,11 +193,20 @@ class DAC_ramp_tester:
 
   def dio_seq_write_points(self):
     points=[]
-    points.append(GPIO_seq_point(address=0,time=1,outputA=0x00000001,outputB=0x00000001))
-    points.append(GPIO_seq_point(address=1,time=20000,outputA=0x00000000,outputB=0x00000000))
-    points.append(GPIO_seq_point(address=2,time=40000,outputA=0x00000001,outputB=0x00000001))
-    points.append(GPIO_seq_point(address=3,time=6400000,outputA=0x00000000,outputB=0x00000000))
-    points.append(GPIO_seq_point(address=4,time=0,outputA=0x00000000,outputB=0x00000000))
+    # points.append(GPIO_seq_point(address=0,time=1,outputA=0x00000001,outputB=0x00000001))
+    # points.append(GPIO_seq_point(address=1,time=20000,outputA=0x00000000,outputB=0x00000000))
+    # points.append(GPIO_seq_point(address=2,time=40000,outputA=0x00000001,outputB=0x00000001))
+    # points.append(GPIO_seq_point(address=3,time=6400000,outputA=0x00000000,outputB=0x00000000))
+    # points.append(GPIO_seq_point(address=4,time=0,outputA=0x00000000,outputB=0x00000000))
+    points = [GPIO_seq_point(address =  0 ,time= 10000 ,outputA =  0x00000000 ,outputB =  0x00000000 ),
+              GPIO_seq_point(address =  1 ,time= 20000 ,outputA =  0x00c00000 ,outputB =  0x00000000 ),
+              GPIO_seq_point(address =  2 ,time= 25000 ,outputA =  0x00000000 ,outputB =  0x00000000 ),
+              GPIO_seq_point(address =  3 ,time= 100000 ,outputA =  0x00000001 ,outputB =  0x00000000 ),
+              GPIO_seq_point(address =  4 ,time= 101000 ,outputA =  0x00000000 ,outputB =  0x00000000 ),
+              GPIO_seq_point(address =  5 ,time= 110000 ,outputA =  0x00000001 ,outputB =  0x00000000 ),
+              GPIO_seq_point(address =  6 ,time= 120000 ,outputA =  0x00000000 ,outputB =  0x00000000 ),
+              GPIO_seq_point(address =  7 ,time= 100110000 ,outputA =  0x00008000 ,outputB =  0x00000000 ),
+              GPIO_seq_point(address =  8 ,time= 0 ,outputA =  0x00000000 ,outputB =  0x00000000 )]
 
     for point in points:
       print( "add: ", point.address)
@@ -175,11 +221,114 @@ class DAC_ramp_tester:
       for word in  seqWords:
         # print word
         self.fifo_main_seq.write_axis_fifo(word[0], MSB_first=False)
+  def dac_seq_write_points2(self):
+      points0 = [DAC_seq_point( address= 0 , time =  100000 ,start = 32768 ,incr =  0 ,chan= 0 ,clr_incr= 1 ),
+                  DAC_seq_point( address= 1 , time =  100001 ,start = 32768 ,incr =  0 ,chan= 1 ,clr_incr= 1 ),
+                  DAC_seq_point( address= 2 , time =  100002 ,start = 32768 ,incr =  0 ,chan= 2 ,clr_incr= 1 ),
+                  DAC_seq_point( address= 3 , time =  100003 ,start = 32768 ,incr =  0 ,chan= 3 ,clr_incr= 1 ),
+                  DAC_seq_point( address= 4 , time =  100004 ,start = 32768 ,incr =  0 ,chan= 4 ,clr_incr= 1 ),
+                  DAC_seq_point( address= 5 , time =  100005 ,start = 32768 ,incr =  0 ,chan= 5 ,clr_incr= 1 ),
+                  DAC_seq_point( address= 6 , time =  100006 ,start = 49151 ,incr =  0 ,chan= 6 ,clr_incr= 1 ),
+                  DAC_seq_point( address= 7 , time =  100007 ,start = 32768 ,incr =  0 ,chan= 7 ,clr_incr= 1 ),
+                  DAC_seq_point( address= 8 , time =  100008 ,start = 32768 ,incr =  0 ,chan= 8 ,clr_incr= 1 ),
+                  DAC_seq_point( address= 9 , time =  100009 ,start = 32768 ,incr =  0 ,chan= 9 ,clr_incr= 1 ),
+                  DAC_seq_point( address= 10 , time =  100010 ,start = 32768 ,incr =  0 ,chan= 10 ,clr_incr= 1 ),
+                  DAC_seq_point( address= 11 , time =  100011 ,start = 32768 ,incr =  0 ,chan= 11 ,clr_incr= 1 ),
+                  DAC_seq_point( address= 12 , time =  100012 ,start = 32768 ,incr =  0 ,chan= 12 ,clr_incr= 1 ),
+                  DAC_seq_point( address= 13 , time =  100013 ,start = 32768 ,incr =  0 ,chan= 13 ,clr_incr= 1 ),
+                  DAC_seq_point( address= 14 , time =  100014 ,start = 32768 ,incr =  0 ,chan= 14 ,clr_incr= 1 ),
+                  DAC_seq_point( address= 15 , time =  100015 ,start = 32768 ,incr =  0 ,chan= 15 ,clr_incr= 1 ),
+                  DAC_seq_point( address= 16 , time =  0 ,start = 0 ,incr =  0 ,chan= 0 ,clr_incr= 0 )]  
+      points1 = [DAC_seq_point( address= 0 , time =  100000 ,start = 32768 ,incr =  0 ,chan= 0 ,clr_incr= 1 ),
+                  DAC_seq_point( address= 1 , time =  100001 ,start = 32768 ,incr =  0 ,chan= 1 ,clr_incr= 1 ),
+                  DAC_seq_point( address= 2 , time =  100002 ,start = 32768 ,incr =  0 ,chan= 2 ,clr_incr= 1 ),
+                  DAC_seq_point( address= 3 , time =  100003 ,start = 32768 ,incr =  0 ,chan= 3 ,clr_incr= 1 ),
+                  DAC_seq_point( address= 4 , time =  100004 ,start = 32768 ,incr =  0 ,chan= 4 ,clr_incr= 1 ),
+                  DAC_seq_point( address= 5 , time =  100005 ,start = 32768 ,incr =  0 ,chan= 5 ,clr_incr= 1 ),
+                  DAC_seq_point( address= 6 , time =  100006 ,start = 32768 ,incr =  0 ,chan= 6 ,clr_incr= 1 ),
+                  DAC_seq_point( address= 7 , time =  100007 ,start = 32768 ,incr =  0 ,chan= 7 ,clr_incr= 1 ),
+                  DAC_seq_point( address= 8 , time =  100008 ,start = 32768 ,incr =  0 ,chan= 8 ,clr_incr= 1 ),
+                  DAC_seq_point( address= 9 , time =  100009 ,start = 32768 ,incr =  0 ,chan= 9 ,clr_incr= 1 ),
+                  DAC_seq_point( address= 10 , time =  100010 ,start = 32768 ,incr =  0 ,chan= 10 ,clr_incr= 1 ),
+                  DAC_seq_point( address= 11 , time =  100011 ,start = 32768 ,incr =  0 ,chan= 11 ,clr_incr= 1 ),
+                  DAC_seq_point( address= 12 , time =  100012 ,start = 32768 ,incr =  0 ,chan= 12 ,clr_incr= 1 ),
+                  DAC_seq_point( address= 13 , time =  100013 ,start = 32768 ,incr =  0 ,chan= 13 ,clr_incr= 1 ),
+                  DAC_seq_point( address= 14 , time =  100014 ,start = 32768 ,incr =  0 ,chan= 14 ,clr_incr= 1 ),
+                  DAC_seq_point( address= 15 , time =  100015 ,start = 32768 ,incr =  0 ,chan= 15 ,clr_incr= 1 ),
+                  DAC_seq_point( address= 16 , time =  0 ,start = 0 ,incr =  0 ,chan= 0 ,clr_incr= 0 )]
 
+      for point in points0:
+        self.write_point(self.fifo_dac_seq0, point)
+      for point in points1:
+        self.write_point(self.fifo_dac_seq1, point)
+
+  def dac_seq_write_points3(self):
+    points0 = [DAC_seq_point( address= 0 , time =  100000 ,start = 50000 ,incr =  0 ,chan= 0 ,clr_incr= 1 ),
+                DAC_seq_point( address= 1 , time =  100001 ,start = 32768 ,incr =  0 ,chan= 1 ,clr_incr= 1 ),
+                DAC_seq_point( address= 2 , time =  100002 ,start = 50000 ,incr =  0 ,chan= 2 ,clr_incr= 1 ),
+                DAC_seq_point( address= 3 , time =  100003 ,start = 32768 ,incr =  0 ,chan= 3 ,clr_incr= 1 ),
+                DAC_seq_point( address= 4 , time =  100004 ,start = 32768 ,incr =  0 ,chan= 4 ,clr_incr= 1 ),
+                DAC_seq_point( address= 5 , time =  100005 ,start = 32768 ,incr =  0 ,chan= 5 ,clr_incr= 1 ),
+                DAC_seq_point( address= 6 , time =  100006 ,start = 49151 ,incr =  0 ,chan= 6 ,clr_incr= 1 ),
+                DAC_seq_point( address= 7 , time =  100007 ,start = 32768 ,incr =  0 ,chan= 7 ,clr_incr= 1 ),
+                DAC_seq_point( address= 8 , time =  100008 ,start = 32768 ,incr =  0 ,chan= 8 ,clr_incr= 1 ),
+                DAC_seq_point( address= 9 , time =  100009 ,start = 32768 ,incr =  0 ,chan= 9 ,clr_incr= 1 ),
+                DAC_seq_point( address= 10 , time =  100010 ,start = 32768 ,incr =  0 ,chan= 10 ,clr_incr= 1 ),
+                DAC_seq_point( address= 11 , time =  100011 ,start = 32768 ,incr =  0 ,chan= 11 ,clr_incr= 1 ),
+                DAC_seq_point( address= 12 , time =  100012 ,start = 32768 ,incr =  0 ,chan= 12 ,clr_incr= 1 ),
+                DAC_seq_point( address= 13 , time =  100013 ,start = 32768 ,incr =  0 ,chan= 13 ,clr_incr= 1 ),
+                DAC_seq_point( address= 14 , time =  100014 ,start = 32768 ,incr =  0 ,chan= 14 ,clr_incr= 1 ),
+                DAC_seq_point( address= 15 , time =  100015 ,start = 32768 ,incr =  0 ,chan= 15 ,clr_incr= 1 ),
+                DAC_seq_point( address= 16 , time =  0 ,start = 0 ,incr =  0 ,chan= 0 ,clr_incr= 0 )]  
+    points1 = [DAC_seq_point( address= 0 , time =  100000 ,start = 32768 ,incr =  0 ,chan= 0 ,clr_incr= 1 ),
+                DAC_seq_point( address= 1 , time =  100001 ,start = 32768 ,incr =  0 ,chan= 1 ,clr_incr= 1 ),
+                DAC_seq_point( address= 2 , time =  100002 ,start = 32768 ,incr =  0 ,chan= 2 ,clr_incr= 1 ),
+                DAC_seq_point( address= 3 , time =  100003 ,start = 32768 ,incr =  0 ,chan= 3 ,clr_incr= 1 ),
+                DAC_seq_point( address= 4 , time =  100004 ,start = 32768 ,incr =  0 ,chan= 4 ,clr_incr= 1 ),
+                DAC_seq_point( address= 5 , time =  100005 ,start = 32768 ,incr =  0 ,chan= 5 ,clr_incr= 1 ),
+                DAC_seq_point( address= 6 , time =  100006 ,start = 50000 ,incr =  0 ,chan= 6 ,clr_incr= 1 ),
+                DAC_seq_point( address= 7 , time =  100007 ,start = 32768 ,incr =  0 ,chan= 7 ,clr_incr= 1 ),
+                DAC_seq_point( address= 8 , time =  100008 ,start = 32768 ,incr =  0 ,chan= 8 ,clr_incr= 1 ),
+                DAC_seq_point( address= 9 , time =  100009 ,start = 32768 ,incr =  0 ,chan= 9 ,clr_incr= 1 ),
+                DAC_seq_point( address= 10 , time =  100010 ,start = 32768 ,incr =  0 ,chan= 10 ,clr_incr= 1 ),
+                DAC_seq_point( address= 11 , time =  100011 ,start = 32768 ,incr =  0 ,chan= 11 ,clr_incr= 1 ),
+                DAC_seq_point( address= 12 , time =  100012 ,start = 32768 ,incr =  0 ,chan= 12 ,clr_incr= 1 ),
+                DAC_seq_point( address= 13 , time =  100013 ,start = 32768 ,incr =  0 ,chan= 13 ,clr_incr= 1 ),
+                DAC_seq_point( address= 14 , time =  100014 ,start = 32768 ,incr =  0 ,chan= 14 ,clr_incr= 1 ),
+                DAC_seq_point( address= 15 , time =  100015 ,start = 32768 ,incr =  0 ,chan= 15 ,clr_incr= 1 ),
+                DAC_seq_point( address= 16 , time =  0 ,start = 0 ,incr =  0 ,chan= 0 ,clr_incr= 0 )]
+
+    for point in points0:
+      self.write_point(self.fifo_dac_seq0, point)
+    for point in points1:
+      self.write_point(self.fifo_dac_seq1, point)
 def program(tester):
   # tester.fifo_dac_seq.write_axis_fifo("\x00\x0A\x01\x01")
   tester.dac_seq_write_points()
-  tester.dio_seq_write_points()
+  tester.mod_enable()
+  # tester.dio_seq_write_points()
+  soft_trigger.trigger()
+  sleep(0.01)
+  tester.mod_disable()
+  
+  sleep(1)
+
+  tester.dac_seq_write_points2()
+  tester.mod_enable()
+  # tester.dio_seq_write_points()
+  soft_trigger.trigger()
+  sleep(0.01)
+  tester.mod_disable()
+
+  sleep(1)
+
+  tester.dac_seq_write_points3()
+  tester.mod_enable()
+  # tester.dio_seq_write_points()
+  soft_trigger.trigger()
+  sleep(0.01)
+  tester.mod_disable()
+
 
   # ~ print('Next, we need to enable modulation')
   # ~ print('  tester.mod_enable()')
@@ -192,13 +341,13 @@ def program(tester):
 
 if __name__ == "__main__":
   tester = DAC_ramp_tester(fifo_devices['DAC81416_0'], fifo_devices['DAC81416_1'], fifo_devices['DAC81416_0_seq'], fifo_devices['DAC81416_1_seq'], fifo_devices['GPIO_seq'])
-  reset_all.reset()
+  # reset_all.reset()
   # sleep(1)
   program(tester)
-  # sleep(1)
-  tester.mod_enable()
-  # sleep(1)
-  soft_trigger.trigger()
-  sleep(0.5)
-  #reset_all.reset()
-  tester.mod_disable()
+  # # sleep(1)
+  # tester.mod_enable()
+  # # sleep(1)
+  # soft_trigger.trigger()
+  # sleep(0.01) # need enough time to finish the seq before calling mod_disable
+  # # reset_all.reset()
+  # tester.mod_disable()

@@ -276,34 +276,17 @@ void AoSystem::prepareDacForceChange(int line, double voltage)
 
 void AoSystem::setDACs()
 {
-	int tcp_connect;
-	try
-	{
-		tcp_connect = zynq_tcp.connectTCP(ZYNQ_ADDRESS);
-	}
-	catch (ChimeraError& err)
-	{
-		tcp_connect = 1;
-		thrower(err.what());
-	}
-
-	if (tcp_connect == 0)
-	{
-		std::ostringstream stringStream;
-		std::string command;
-		for (int line = 0; line < size_t(AOGrid::total); ++line) 
+	try {
+		std::vector<std::vector<AoChannelSnapshot>> channelSnapShot;
+		channelSnapShot.resize(1);
+		for (unsigned short line = 0; line < size_t(AOGrid::total); ++line)
 		{
-			stringStream.str("");
-			stringStream << "DAC_" << line << "_" << 
-				std::fixed << std::setprecision(numDigits) << outputs[line].info.currVal;
-			command = stringStream.str();
-			zynq_tcp.writeCommand(command);
+			channelSnapShot[0].push_back({ line,1.0,outputs[line].info.currVal ,outputs[line].info.currVal ,0.0 });
 		}
-		zynq_tcp.disconnect();
+		core.setGUIDacChange(channelSnapShot);
 	}
-	else
-	{
-		thrower("connection to zynq failed. can't trigger the sequence or new settings\n");
+	catch (ChimeraError& e) {
+		thrower(e.what());
 	}
 }
 

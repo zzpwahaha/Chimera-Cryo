@@ -57,7 +57,7 @@ public:
 	void checkTimingsWork(unsigned variation);
 	void checkValuesAgainstLimits(unsigned variation, const std::array<AnalogOutput, size_t(AOGrid::total)>& outputs);
 
-	
+	void setGUIDacChange(std::vector<std::vector<AoChannelSnapshot>> channelSnapShot);
 
 private:
 	std::array<std::string, size_t(AOGrid::total)> names;
@@ -71,8 +71,6 @@ private:
 	//Zynq tcp connection
 	ZynqTCP zynq_tcp;
 	double dacTriggerTime; // used in checkTimingsWork() to see if time of two points in dac is shorter than 1/ramp freq
-
-	AnalogOutput dummyOutput;
 
 	static constexpr double dacResolution = 20.0 / 0xffff; /*16bit dac*/
 	const int numDigits = static_cast<int>(abs(round(log10(dacResolution) - 0.49)));

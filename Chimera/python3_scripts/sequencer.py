@@ -65,7 +65,7 @@ class sequencer:
 		self.dacRes = 65535 #0xffff
 		self.dacRange = [-10, 10]
 
-		self.dacIncrMax = 0xffffffffffffffff # 32bit
+		self.dacIncrMax = 0xffffffff # 32bit
 		self.dacRampTimeRes = 2000 #20us in the unit of system clk (10ns)
 		self.ddsAmpRange = [0, 5]
 		self.ddsFreqRange = [0, 500]
@@ -207,6 +207,7 @@ class sequencer:
 
 	def mod_enable(self):
 		self.gpio2.set_bit(0, channel=1)
+		self.mod_report()
 
 	def mod_disable(self):
 		self.gpio2.clear_bit(0, channel=1)
@@ -237,28 +238,18 @@ class sequencer:
 				ramp_inc = int(abs((end<<16)-(s<<16))/num_steps+0.5)
 				clr_incr = 0
 				# print(s, end, num_steps, ramp_inc)
-			if (end<s):
+			if (end<s and ramp_inc != 0):
 				ramp_inc = int(self.dacIncrMax  + 1 - ramp_inc)
 			print('time',t,'channel', chan,'start', s,'end', end,'duration', duration, 'num_step',num_steps, 'ramp_inc: ', ramp_inc)
+			t = int(t/self.dacRampTimeRes + 0.5) * self.dacRampTimeRes + (chan%16)
 			if (chan < 16):
 				points0.append(DAC_seq_point(address=len(points0),time=t,start=s,incr=ramp_inc,chan=chan,clr_incr=clr_incr))
 			else:
-				points1.append(DAC_seq_point(address=len(points0),time=t,start=s,incr=ramp_inc,chan=chan-16,clr_incr=clr_incr))
+				points1.append(DAC_seq_point(address=len(points1),time=t,start=s,incr=ramp_inc,chan=chan-16,clr_incr=clr_incr))
 		if (len(points0) != 0):
 			points0.append(DAC_seq_point(address=len(points0), time=0,  start=0,incr=0,chan=0,clr_incr=0))
 		if (len(points1) != 0):
-			points1.append(DAC_seq_point(address=len(points0), time=0,  start=0,incr=0,chan=0,clr_incr=0))
-
-		for i in range(1, len(points0)):
-			for j in range(i):
-				# print(i,j)
-				if (points0[i].time == points0[j].time):
-					points0[i].time = points0[i].time + 1
-
-		for i in range(1, len(points1)):
-			for j in range(i):
-				if (points1[i].time == points1[j].time):
-					points1[i].time = points1[i].time + 1
+			points1.append(DAC_seq_point(address=len(points1), time=0,  start=0,incr=0,chan=0,clr_incr=0))
 
 		for point in points0:
 			print('DAC_seq_point(',
@@ -271,6 +262,13 @@ class sequencer:
 			self.write_dac_point(self.fifo_dac0_seq, point)
 
 		for point in points1:
+			print('DAC_seq_point(',
+			'address=', point.address,
+			', time = ', point.time,
+			',start =', point.start,
+			',incr = ', point.incr,
+			',chan=', point.chan, 
+			',clr_incr=', point.clr_incr, ')' )
 			self.write_dac_point(self.fifo_dac1_seq, point)
 
 
@@ -387,6 +385,10 @@ class sequencer:
 		for point in points:
 				# writeToSeqGPIO(character, point)
 			seqWords = getSeqGPIOWords(point)
+			print('GPIO_seq_point(address = ',point.address,
+				  ',time=',point.time,
+				  ',outputA = ',"{0:#0{1}x}".format(point.outputA,8+2),
+				  ',outputB = ',"{0:#0{1}x}".format(point.outputB,8+2), ')')
 			for word in  seqWords:
 				# print word
 				self.fifo_dio_seq.write_axis_fifo(word[0], MSB_first=False)
@@ -406,9 +408,9 @@ class sequencer:
 		t = int(snapshot_split[0].strip(b't'), 16)
 		chan = int(snapshot_split[1].strip(b'c'), 16)
 		start = int(self.dacRes*(float(snapshot_split[2].strip(b's')) - self.dacRange[0])
-			/(self.dacRange[1]-self.dacRange[0]))
+			/(self.dacRange[1]-self.dacRange[0]) + 0.5)
 		end = int(self.dacRes*(float(snapshot_split[3].strip(b'e')) - self.dacRange[0])
-			/(self.dacRange[1]-self.dacRange[0]))
+			/(self.dacRange[1]-self.dacRange[0]) + 0.5)
 		duration = int(snapshot_split[4].strip(b'd').strip(b'\0'), 16)
 		return [t, chan, start, end, duration]
 

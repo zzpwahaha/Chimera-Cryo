@@ -5,7 +5,7 @@
 #include <ExperimentMonitoringAndStatus/ExperimentSeqPlotter.h>
 
 
-AoCore::AoCore() : dacTriggerTime(0.020)
+AoCore::AoCore() : dacTriggerTime(DAC_TIME_RESOLUTION)
 {
 
 }
@@ -572,6 +572,35 @@ void AoCore::writeDacs(unsigned variation, bool loadSkip)
 	}
 }
 
+// channelSnapShot[0] contains changes that need to make for dac channels, do no call this during experiment interpretation.
+void AoCore::setGUIDacChange(std::vector<std::vector<AoChannelSnapshot>> channelSnapShot)
+{
+	dacSnapshots.resize(1); // just to make getNumberEvents happy
+	dacSnapshots[0].resize(channelSnapShot.size());
+	finalDacSnapshots = channelSnapShot;
+	writeDacs(0, true);
+	Sleep(10);
+	int tcp_connect;
+	try {
+		tcp_connect = zynq_tcp.connectTCP(ZYNQ_ADDRESS);
+	}
+	catch (ChimeraError& err) {
+		tcp_connect = 1;
+		thrower(err.what());
+	}
+
+	if (tcp_connect == 0) {
+		zynq_tcp.writeCommand("trigger");
+		Sleep(100);
+		zynq_tcp.writeCommand("disableMod");
+		zynq_tcp.disconnect();
+	}
+	else {
+		thrower("connection to zynq failed. can't write DAC data\n");
+	}
+}
+
+
 void AoCore::makeFinalDataFormat(unsigned variation) 
 {
 	/*auto& finalNormal = finalFormatDacData[variation];
@@ -711,3 +740,4 @@ void AoCore::checkValuesAgainstLimits(unsigned variation, const std::array<Analo
 		}
 	}
 }
+

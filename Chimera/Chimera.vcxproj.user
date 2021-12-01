@@ -11,4 +11,7 @@
     <LocalDebuggerEnvironment>PATH=$(QTDIR)\bin;$(ProjectDir)3rd_Party\Andor\Lib;$(ProjectDir)3rd_Party\FTDI\Lib;$(ProjectDir)3rd_Party\Vimba_4.2\VimbaCPP\Bin\Win64;$(ProjectDir)3rd_Party\Vimba_4.2\VimbaImageTransform\Bin\Win64;$(ProjectDir)3rd_Party\Thorlabs\Lib;$(ProjectDir)3rd_Party\GSL_MSVC\dll\x64\Debug;$(ProjectDir)3rd_Party\GSL_MSVC\dll\x64\Release;%(Path)%</LocalDebuggerEnvironment>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
+  <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <QtLastBackgroundBuild>2021-11-30T00:20:02.2478906Z</QtLastBackgroundBuild>
+  </PropertyGroup>
 </Project>
