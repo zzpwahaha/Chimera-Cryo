@@ -14,7 +14,8 @@ bld/
 [Ll]og/
 [Ll]ogs/
 
-
+!Chimera/3rd_Party/**/*.lib
+!Chimera/3rd_Party/**/*.dll
 Chimera/3rd_Party/Andor/Lib/*
 !Chimera/3rd_Party/Andor/Lib/.gitkeep
 Chimera/3rd_Party/DM/Lib/*
@@ -25,6 +26,7 @@ Chimera/*.dll
 !Chimera/3rd_Party/myBoost/boost/preprocessor/debug/error.hpp
 !**/x86/*.h
 !**/x86/*.hpp
+
 
 OffsetLock/*
 !OffsetLock/**/*.ino
