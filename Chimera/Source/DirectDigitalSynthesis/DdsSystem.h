@@ -40,7 +40,7 @@ class DdsSystem : public IChimeraSystem{
 		void initialize( IChimeraQtWindow* master, std::string title );
 		void initialize(IChimeraQtWindow* master);
 		void refreshCurrentRamps ();
-		void programNow (std::vector<parameterType>& constants);
+		void programNow (std::vector<parameterType> constants);
 		std::string getSystemInfo ( );
 		std::array<DdsInfo, size_t(DDSGrid::total)> getDdsInfo();
 		std::string getDelim ( );

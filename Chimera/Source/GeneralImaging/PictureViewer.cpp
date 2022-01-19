@@ -88,7 +88,7 @@ PictureViewer::PictureViewer(std::string plotname, QWidget* parent)
         layout->addLayout(layout1, 0);
         connect(reloadB, &QPushButton::clicked, this, [this]() {
             loadColorCsv();
-            std::for_each(m_cmapMap.keyValueBegin(), m_cmapMap.keyValueEnd(), [this](auto& tmp) {
+            std::for_each(m_cmapMap.keyValueBegin(), m_cmapMap.keyValueEnd(), [this](auto tmp) {
                 if (m_cmapCombo->findText(tmp.second) == -1)
                 {
                     m_cmapCombo->addItem(tmp.second);
@@ -97,7 +97,7 @@ PictureViewer::PictureViewer(std::string plotname, QWidget* parent)
     }
 
     loadColorCsv();
-    std::for_each(m_cmapMap.keyValueBegin(), m_cmapMap.keyValueEnd(), [this](auto& tmp)
+    std::for_each(m_cmapMap.keyValueBegin(), m_cmapMap.keyValueEnd(), [this](auto tmp)
         {m_cmapCombo->addItem(tmp.second); });
 
     if (m_cmapMap.values().contains("inferno"))

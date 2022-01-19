@@ -235,7 +235,8 @@ DOStatus DoCore::getFinalSnapshot ()
 /* mostly if not entirely used for setting dacs */
 void DoCore::standardNonExperimentStartDoSequence (DoSnapshot initSnap){
 	organizeTtlCommands (0, initSnap);
-	findLoadSkipSnapshots (0, std::vector<parameterType> (), 0);
+	std::vector<parameterType> variables = std::vector<parameterType>();
+	findLoadSkipSnapshots (0, variables, 0);
 	//convertToFtdiSnaps (0);
 	//convertToFinalFtdiFormat (0);
 

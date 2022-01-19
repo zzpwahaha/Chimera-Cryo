@@ -197,7 +197,7 @@ std::string ScriptedArbGenWaveform::returnSequenceString( ){
  */
 bool ScriptedArbGenWaveform::isVaried( ){
 	for ( auto& seg : waveformSegments ){
-		auto& input = seg.getInput( );
+		auto input = seg.getInput( );
 		if ( input.time.varies( ) ){
 			return true;
 		}
@@ -233,7 +233,7 @@ bool ScriptedArbGenWaveform::isVaried( ){
 */
 void ScriptedArbGenWaveform::calculateAllSegmentVariations( unsigned totalNumVariations, std::vector<parameterType>& variables ){
 	for (unsigned segNumInc = 0; segNumInc < waveformSegments.size(); segNumInc++){
-		waveformSegments[segNumInc].calculateSegVariations(totalNumVariations, variables );
+		waveformSegments[segNumInc].calculateSegVariations(variables, totalNumVariations);
 	}
 }
 

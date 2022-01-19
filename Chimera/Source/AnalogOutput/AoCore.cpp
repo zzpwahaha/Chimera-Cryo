@@ -666,7 +666,7 @@ int AoCore::getDacIdentifier(std::string name)
 {
 	for (auto dacInc : range(size_t(AOGrid::total)))
 	{
-		auto& dacName = str(names[dacInc]/*outputs[dacInc].info.name*/, 13, false, true);
+		auto dacName = str(names[dacInc]/*outputs[dacInc].info.name*/, 13, false, true);
 		// check names set by user and check standard names which are always acceptable
 		if (name == dacName || name == "dac" +
 			str(dacInc / size_t(AOGrid::numPERunit)) + "_" +

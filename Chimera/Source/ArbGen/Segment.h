@@ -9,7 +9,9 @@ class Segment {
 	public:
 		void storeInput( segmentInfo input );
 		segmentInfo getInput();
-		void calculateSegVariations( unsigned totalNumVariations = 1, std::vector<parameterType>& variables = std::vector<parameterType> ( ) );
+		void calculateSegVariations(std::vector<parameterType>& variables, unsigned totalNumVariations = 1);
+		// Overload to take the default argument of std::vector<parameterType>& 
+		void calculateSegVariations();
 		unsigned returnDataSize();
 		void assignDataVal( int dataNum, double val );
 		double returnDataVal( long dataNum );

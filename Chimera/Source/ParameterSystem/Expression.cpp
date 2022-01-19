@@ -326,12 +326,24 @@ void Expression::evaluateFunctions( std::vector<std::string>& terms ){
 }
 
 
+double Expression::evaluate()
+{
+	std::vector<parameterType> variables = std::vector<parameterType>();
+	return evaluate(variables);
+}
+
 void Expression::internalEvaluate ( std::vector<parameterType>& params, unsigned totalVariations ){
 	values.clear ( );
 	values.resize ( totalVariations );
 	for ( auto variation : range ( totalVariations ) ){
 		values[variation] = evaluate ( params, variation );
 	}
+}
+
+void Expression::internalEvaluate()
+{
+	std::vector<parameterType> params = std::vector<parameterType>();
+	internalEvaluate(params);
 }
 
 double Expression::getValue ( unsigned variation ){

@@ -17,10 +17,12 @@ class Expression {
 		std::string expressionStr;
 		std::string calName = "";
 		bool varies( );
-		double evaluate ( std::vector<parameterType>& variables = std::vector<parameterType> (), unsigned variation = -1,
+		double evaluate ( std::vector<parameterType>& variables, unsigned variation = -1,
 						  std::vector<calResult> calibrations = std::vector<calResult>());
-		void internalEvaluate ( std::vector<parameterType>& variables = std::vector<parameterType> ( ),
-			unsigned totalVariationNumber = -1 );
+		// Overload to take the default argument of std::vector<parameterType>& 
+		double evaluate();
+		void internalEvaluate();
+		void internalEvaluate(std::vector<parameterType>& variables, unsigned totalVariationNumber = -1);
 		double handleCalibration (double val, std::vector<calResult> calibrations);
 		double getValue ( unsigned variation );	
 	private:

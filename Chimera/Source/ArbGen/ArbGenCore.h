@@ -26,7 +26,8 @@ public:
 	std::string getDeviceIdentity();
 	void logSettings(DataLogger& log, ExpThreadWorker* threadworker);
 	void convertInputToFinalSettings(unsigned chan, deviceOutputInfo& info,
-		std::vector<parameterType>& variables = std::vector<parameterType>());
+		std::vector<parameterType>& variables);
+	void convertInputToFinalSettings(unsigned chan, deviceOutputInfo& info); // Overload to take the default argument of std::vector<parameterType>& variables
 	static double convertPowerToSetPoint(double power, bool conversionOption, calResult calibraiton);
 	
 	std::vector<std::string> getStartupCommands();

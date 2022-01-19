@@ -1350,8 +1350,8 @@ void ExpThreadWorker::deviceNormalFinish (IDeviceCore& device) {
 }
 
 void ExpThreadWorker::loadExperimentRuntime (ConfigStream& config, ExpRuntimeData& runtime) {
-	runtime.expParams = ParameterSystem::combineParams (
-		ParameterSystem::getConfigParamsFromFile (input->profile.configFilePath ()), input->globalParameters);
+	std::vector<parameterType> configParams = ParameterSystem::getConfigParamsFromFile(input->profile.configFilePath());
+	runtime.expParams = ParameterSystem::combineParams(configParams, input->globalParameters);
 	ScanRangeInfo varRangeInfo = ParameterSystem::getRangeInfoFromFile (input->profile.configFilePath ());
 	loadMasterScript (ConfigSystem::getMasterAddressFromConfig (input->profile), runtime.masterScript);
 	runtime.mainOpts = ConfigSystem::stdConfigGetter (config, "MAIN_OPTIONS", MainOptionsControl::getSettingsFromConfig);

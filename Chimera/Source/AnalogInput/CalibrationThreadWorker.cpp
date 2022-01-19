@@ -74,7 +74,8 @@ void CalibrationThreadWorker::calibrate (calSettings& cal, unsigned which) {
 				auto& ag = input.arbGens[int(cal.whichAg)].get();
 				dcInfo tempInfo;
 				tempInfo.dcLevel = str (calPoint);
-				tempInfo.dcLevel.internalEvaluate (std::vector<parameterType> (), 1);
+				std::vector<parameterType> var = std::vector<parameterType>();
+				tempInfo.dcLevel.internalEvaluate (var, 1);
 				ag.setDC (cal.agChannel, tempInfo, 0);
 				ag.outputOn(cal.agChannel);
 			}

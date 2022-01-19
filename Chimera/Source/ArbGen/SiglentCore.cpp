@@ -38,7 +38,8 @@ void SiglentCore::setScriptOutput(unsigned varNum, scriptedArbInfo scriptInfo, u
 		if (fabs(minMaxs.first - minMaxs.second) < 1e-6) {
 			dcInfo tempDc;
 			tempDc.dcLevel = str(minMaxs.first);
-			tempDc.dcLevel.internalEvaluate(std::vector<parameterType>(), 1);
+			std::vector<parameterType> var = std::vector<parameterType>();
+			tempDc.dcLevel.internalEvaluate(var, 1);
 			tempDc.useCal = scriptInfo.useCal;
 			setDC(chan, tempDc, 0);
 		}

@@ -264,6 +264,12 @@ void ArbGenCore::convertInputToFinalSettings(unsigned chan, deviceOutputInfo& in
 	}
 }
 
+void ArbGenCore::convertInputToFinalSettings(unsigned chan, deviceOutputInfo& info)
+{
+	std::vector<parameterType> variables = std::vector<parameterType>();
+	convertInputToFinalSettings(chan, info, variables);
+}
+
 /**
  * expects the inputted power to be in -MILI-WATTS!
  * returns set point in VOLTS

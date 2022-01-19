@@ -166,7 +166,7 @@ void DdsSystem::redrawListview ( ){
 	}
 }
 
-void DdsSystem::programNow ( std::vector<parameterType>& constants ){
+void DdsSystem::programNow ( std::vector<parameterType> constants ){
 	try{
 		refreshCurrentRamps ();
 		core.manualLoadExpRampList (currentRamps);

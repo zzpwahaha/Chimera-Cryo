@@ -4,7 +4,7 @@
 #include <boost/lexical_cast.hpp>
 
 
-void Segment::calculateSegVariations( unsigned totalNumVariations, std::vector<parameterType>& variables ){	
+void Segment::calculateSegVariations( std::vector<parameterType>& variables, unsigned totalNumVariations){
 	// handle more complicated things.
 	if ( input.ramp.isRamp ){
 		input.ramp.start.internalEvaluate (variables, totalNumVariations);
@@ -35,6 +35,12 @@ void Segment::calculateSegVariations( unsigned totalNumVariations, std::vector<p
 	//	// in which case you need a number of times to repeat.);
 	//	input.repeatNum.internalEvaluate( variables, totalNumVariations );
 	//}
+}
+
+void Segment::calculateSegVariations()
+{
+	std::vector<parameterType> variables = std::vector<parameterType>();
+	calculateSegVariations(variables);
 }
 
 void Segment::storeInput( segmentInfo inputToSet ){

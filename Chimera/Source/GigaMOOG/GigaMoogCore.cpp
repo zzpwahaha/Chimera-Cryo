@@ -75,7 +75,7 @@ void GigaMoogCore::programVariation(unsigned variation, std::vector<parameterTyp
 	send(gigaMoogCommandList[variation]);
 }
 
-void GigaMoogCore::programGMoogNow(std::string fileAddr, std::vector<parameterType>& constants)
+void GigaMoogCore::programGMoogNow(std::string fileAddr, std::vector<parameterType> constants)
 {
 	gigaMoogCommandList.clear();
 	gigaMoogCommandList.resize(1);
