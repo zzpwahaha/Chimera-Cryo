@@ -11,6 +11,7 @@
 #include "MiscellaneousExperimentOptions/MainOptionsControl.h"
 #include "ExperimentMonitoringAndStatus/StatusControl.h"
 #include "ExperimentMonitoringAndStatus/StatusIndicator.h"
+#include "ExperimentMonitoringAndStatus/TemperatureMonitor.h"
 #include "ConfigurationSystems/MasterConfiguration.h"
 #include "MiscellaneousExperimentOptions/Repetitions.h"
 #include "DataLogging/DataLogger.h"

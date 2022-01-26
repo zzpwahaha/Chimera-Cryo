@@ -11,6 +11,7 @@
 #include <DirectDigitalSynthesis/DdsSystem.h>
 #include <OffsetLock/OlSystem.h>
 #include <Scripts/Script.h>
+#include <ctime>
 
 #include <filesystem>
 
@@ -484,6 +485,38 @@ void DataLogger::writeMakoPic(std::vector<double> image, int width, int height, 
 			"; Full error:" + fullE);
 	}
 }
+
+void DataLogger::writeTemperature(std::pair<std::vector<long long>, std::vector<double>> timedata, std::string identifier)
+{
+	if (fileIsOpen == false) {
+		thrower("Tried to write to h5 file (for andor pic), but the file is closed!\r\n");
+	}
+	try {
+		H5::Group temperature;
+		try {
+			temperature = file.openGroup("TemperatureData");
+		}
+		catch (H5::Exception& e) {
+			/* group does not exists, create it */
+			temperature = file.createGroup("TemperatureData");
+		}
+		H5::Group subtemp = temperature.createGroup(identifier);
+		writeDataSet(timedata.first, "TimeEpoch(ms)", subtemp);
+		std::vector<std::string> timeStr;
+		char buffer[128];
+		std::transform(timedata.first.begin(), timedata.first.end(), timeStr.begin(), [&](long long epoch)-> std::string {
+			strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", localtime(&epoch));
+			return std::string(buffer); });
+		writeDataSet(timeStr, "Datetime", subtemp);
+		writeDataSet(timedata.second, "Temperature(K)", subtemp);
+		
+	}
+	catch (H5::Exception& err) {
+		auto fullE = getFullError(err);
+		throwNested("ERROR: Failed to log Temperature data in HDF5 file: detail:" + err.getDetailMsg()
+			+ "; Full error:" + fullE);
+	}
+}
  
 void DataLogger::writeVolts( unsigned currentVoltNumber, std::vector<float64> data ){
 	if ( fileIsOpen == false ){
@@ -693,6 +726,22 @@ H5::DataSet DataLogger::writeDataSet( std::vector<double> dataVec, std::string n
 		auto fullE = getFullError (err);
 		throwNested ( "ERROR: error while writing double vector data set to H5 File. Dataset name was " + name
 				 + ". Error was :\r\n" + err.getDetailMsg( ) + "; Full error:" + fullE);
+	}
+}
+
+H5::DataSet DataLogger::writeDataSet(std::vector<long long> dataVec, std::string name, H5::Group& group) {
+	try {
+		hsize_t rank1[] = { 1 };
+		rank1[0] = dataVec.size();
+		H5::DataSet dset = group.createDataSet(cstr(name), H5::PredType::NATIVE_LLONG, H5::DataSpace(1, rank1));
+		// get from the key file
+		dset.write(dataVec.data(), H5::PredType::NATIVE_LLONG);
+		return dset;
+	}
+	catch (H5::Exception& err) {
+		auto fullE = getFullError(err);
+		throwNested("ERROR: error while writing long long vector data set to H5 File. Dataset name was " + name
+			+ ". Error was :\r\n" + err.getDetailMsg() + "; Full error:" + fullE);
 	}
 }
 

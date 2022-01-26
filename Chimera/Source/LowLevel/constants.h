@@ -102,6 +102,13 @@
 	const std::string GIGAMOOG_PORT = "COM6";//temporary
 	const int GIGAMOOG_BAUDRATE = 115200;
 
+
+	//Temperature Monitor
+	const unsigned TEMPMON_NUMBER = 2;
+	const std::array<std::string, TEMPMON_NUMBER> TEMPMON_ID{ "Cold_Sheild", "Cold_Finger" };
+	const std::array<std::string, TEMPMON_NUMBER> TEMPMON_SYNTAX{ 
+		"SELECT \"Cold Shield\" from ColdEdge order by time desc limit 1", 
+		"SELECT \"Cold finger\" from ColdEdge order by time desc limit 1" };
 #endif
 /// Random other Constants
 constexpr double PI = 3.14159265358979323846264338327950288;
