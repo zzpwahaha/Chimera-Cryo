@@ -18,7 +18,9 @@
 
 QtMainWindow::QtMainWindow () : 
 	profile (PROFILES_PATH, this),
-	masterConfig (MASTER_CONFIGURATION_FILE_ADDRESS){
+	masterConfig (MASTER_CONFIGURATION_FILE_ADDRESS),
+	tempMonitor(this)
+{
 	
 	startupTimes.push_back (chronoClock::now ());
 	/// Initialize Windows
@@ -143,12 +145,14 @@ void QtMainWindow::initializeWidgets (){
 	repetitionControl.initialize (this);
 	mainOptsCtrl.initialize (this);
 	debugger.initialize (this);
+	tempMonitor.initialize(this);
 
 	layout->addWidget(&profile, 0, 2);
 	layout->addWidget(&notes, 1, 2);
 	layout->addWidget(&repetitionControl, 2, 2);
 	layout->addWidget(&mainOptsCtrl, 3, 2);
 	layout->addWidget(&debugger, 4, 2);
+	layout->addWidget(&tempMonitor, 5, 2);
 	
 }
 
@@ -404,7 +408,9 @@ void QtMainWindow::handleMasterConfigOpen (ConfigStream& configStream){
 void QtMainWindow::handleMasterConfigSave (std::stringstream& configStream){
 }
 
-void QtMainWindow::fillExpDeviceList (DeviceList& list) {}
+void QtMainWindow::fillExpDeviceList (DeviceList& list) {
+	list.list.push_back(tempMonitor.getCore());
+}
 
 DeviceList QtMainWindow::getDevices (){
 	DeviceList list;

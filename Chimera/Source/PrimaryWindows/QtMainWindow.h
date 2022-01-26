@@ -110,6 +110,8 @@ class QtMainWindow : public IChimeraQtWindow{
 		StatusControl errorStatus;
 		StatusIndicator shortStatus;
 
+		TemperatureMonitor tempMonitor;
+
 		ExpThreadWorker* expWorker;
 		QThread* expThread;
 		std::atomic<bool> experimentIsRunning = false;

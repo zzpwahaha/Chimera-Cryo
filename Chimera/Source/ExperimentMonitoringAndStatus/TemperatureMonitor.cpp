@@ -4,6 +4,7 @@
 #include <qtimer.h>
 #include <qdatetime.h>
 #include <filesystem>
+#include <algorithm>
 #include <DataLogging/DataLogger.h>
 #include <ParameterSystem/Expression.h>
 #include <PrimaryWindows/IChimeraQtWindow.h>
@@ -20,7 +21,9 @@ TemperatureMonitor::TemperatureMonitor(IChimeraQtWindow* parent_in)
 void TemperatureMonitor::initialize(IChimeraQtWindow* parent)
 {
 	for (auto id : range(TEMPMON_NUMBER)) {
-		name[id]->setText(qstr(core.dataBroker[id].identifier)+": ");
+		std::string identifier(core.dataBroker[id].identifier);
+		std::replace(identifier.begin(), identifier.end(), '_', ' ');
+		name[id]->setText(qstr(identifier)+": ");
 		name[id]->setStyleSheet("QLabel {font: bold 24pt;}");
 		reading[id]->setStyleSheet("QLabel {font: bold 24pt;}");
 	}
@@ -33,7 +36,20 @@ void TemperatureMonitor::initialize(IChimeraQtWindow* parent)
 		lay[id]->addWidget(reading[id], 0);
 		layout->addLayout(lay[id]);
 	}
-	
+	QTimer* timer = new QTimer(this);
+	QObject::connect(timer, &QTimer::timeout, [this]() {
+		std::pair<long long, double> timedata;
+		for (auto idx : range(TEMPMON_NUMBER)) {
+			try {
+				timedata = core.dataBroker[idx].queryDataPoint();
+			}
+			catch (ChimeraError& e) {
+				emit warning(qstr("Temperature sensor can not read properly. Please check \n") + e.what());
+			}
+			reading[idx]->setText(qstr(timedata.second, 2) + " K");
+		}});
+	timer->start(150000/*2.5min*60*1e3*/); // every 2.5min to query a data that updates every 5min to avoid some rounding issue in time
+
 }
 
 TemperatureMonitorCore::TemperatureMonitorCore(IChimeraQtWindow* parent)
@@ -133,12 +149,6 @@ InfluxBroker::InfluxBroker(std::string identifier, std::string syntax) :
 	experimentOngoing(false)
 {
 	influxPtr = influxdb::InfluxDBFactory::Get(dbAddr);
-	QTimer* timer = new QTimer();
-	QObject::connect(timer, &QTimer::timeout, [this]() {
-		queryDataPoint(); });
-	timer->start(150000/*2.5min*60*1e3*/); // every 2.5min to query a data that updates every 5min to avoid some rounding issue in time
-
-
 }
 
 std::pair<std::vector<long long>, std::vector<double>> InfluxBroker::getData()
@@ -160,7 +170,7 @@ void InfluxBroker::experimentPrep()
 	dataExp.clear();
 }
 
-void InfluxBroker::queryDataPoint()
+std::pair<long long, double> InfluxBroker::queryDataPoint()
 {
 	std::vector<influxdb::Point> points = influxPtr->query(syntax);
 	std::chrono::time_point<std::chrono::system_clock> tt = points[0].getTimestamp();
@@ -168,7 +178,7 @@ void InfluxBroker::queryDataPoint()
 	QMutexLocker locker(&lock);
 	if (!timeStamp.empty() && timeStamp.back() == time) { //https://stackoverflow.com/questions/7925479/if-argument-evaluation-order
 		// not a new point, skip this
-		return;
+		return std::make_pair(timeStamp.back(),data.back());
 	}
 	std::string temperature = points[0].getFields();
 	temperature = temperature.substr(temperature.find("=") + 1, temperature.size());
@@ -179,8 +189,9 @@ void InfluxBroker::queryDataPoint()
 
 	if (experimentOngoing) {
 		dataExp.push_back(data.back());
-		timeStampExp.push_back(timeStampExp.back());
+		timeStampExp.push_back(timeStamp.back());
 	}
+	return std::make_pair(timeStamp.back(), data.back());
 }
 
 

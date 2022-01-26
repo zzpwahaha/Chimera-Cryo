@@ -27,13 +27,14 @@ public:
 	void experimentPrep();
 	void experimentStart() { experimentOngoing=true; };
 	void experimentEnd() { experimentOngoing = false; };;
+	std::pair<long long,double> queryDataPoint();
+
 
 	const std::string dbAddr = "http://admin:Twizzler@6.1.1.77:8086?db=home";
 	const std::string syntax;
 	const std::string identifier;
 
 private:
-	void queryDataPoint();
 
 	std::unique_ptr<influxdb::InfluxDB> influxPtr;
 	std::atomic<bool> experimentOngoing; 
@@ -59,7 +60,7 @@ public:
 		ExpThreadWorker* threadworker) override {};
 	void normalFinish() override;
 	void errorFinish() override;
-	std::string getDelim() override { return "TempMon"; };
+	std::string getDelim() override { return "TEMPMON"; };
 	
 
 	void createDataFolder();
@@ -82,7 +83,7 @@ public:
 	TemperatureMonitor(const TemperatureMonitor&) = delete;
 	TemperatureMonitor(IChimeraQtWindow* parent_in);
 	void initialize(IChimeraQtWindow* parent);
-
+	TemperatureMonitorCore& getCore() { return core; };
 
 private:
 	std::array<QLabel*, TEMPMON_NUMBER>  name;
