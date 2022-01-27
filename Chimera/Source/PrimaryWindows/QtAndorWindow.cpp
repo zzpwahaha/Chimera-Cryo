@@ -32,22 +32,17 @@ int QtAndorWindow::getDataCalNum () {
 void QtAndorWindow::initializeWidgets (){
 	statBox = new ColorBox(this, mainWin->getDevices());
 	andor.initializeClass (this, &imageTimes);
-	QPoint position = { 0,25 };
 	//statBox->initialize (position, this, 480, mainWin->getDevices (), 2);
 	alerts.alertMainThread (0);
-	alerts.initialize (position, this);
-	analysisHandler.initialize (position, this);
-	andorSettingsCtrl.initialize (position, this, andor.getVertShiftSpeeds(), andor.getHorShiftSpeeds());
-	position = { 480, 25 };
-	stats.initialize (position, this);
+	alerts.initialize (this);
+	analysisHandler.initialize (this);
+	andorSettingsCtrl.initialize ( this, andor.getVertShiftSpeeds(), andor.getHorShiftSpeeds());
+	stats.initialize (this);
 	for (auto pltInc : range (6)){
-		mainAnalysisPlots.push_back (new PlotCtrl (1, plotStyle::BinomialDataPlot, { 0,0,0,0 }, "INACTIVE", false, false));
-		//mainAnalysisPlots.back ()->init (position, 315, 130, this);
-		mainAnalysisPlots.back()->init( this);
+		mainAnalysisPlots.push_back (new QCustomPlotCtrl(1, plotStyle::BinomialDataPlot, { 0,0,0,0 }, false, false));
+		mainAnalysisPlots.back()->init(this, "INACTIVE");
 	}
-	position = { 797, 25 };
-	timer.initialize (position, this);
-	position = { 797, 65 };
+	timer.initialize (this);
 	pics.initialize (position, 530 * 2, 460 * 2 + 5, this);
 	// end of literal initialization calls
 	pics.setSinglePicture (andorSettingsCtrl.getConfigSettings ().andor.imageSettings);

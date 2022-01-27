@@ -118,7 +118,7 @@ class QtAndorWindow : public IChimeraQtWindow{
 		DataAnalysisControl analysisHandler;
 		NewPythonHandler pythonHandler;
 		DataLogger dataHandler;
-		std::vector<PlotCtrl*> mainAnalysisPlots;
+		std::vector<QCustomPlotCtrl*> mainAnalysisPlots;
 		coordinate selectedPixel = { 0,0 };
 		// some picture menu options
 		bool autoScalePictureData;

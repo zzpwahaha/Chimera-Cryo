@@ -596,6 +596,21 @@
     <QtMoc Include="Source\ExperimentMonitoringAndStatus\TemperatureMonitor.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <QtMoc Include="Source\ExperimentMonitoringAndStatus\AlertSystem.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\Andor\AndorCameraSettingsControl.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\Andor\PictureSettingsControl.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\GeneralImaging\PictureStats.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\ExperimentMonitoringAndStatus\ExperimentTimer.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\AnalogInput\AiSettings.h">
@@ -631,9 +646,6 @@
     <ClInclude Include="Source\Andor\AndorCameraCore.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Andor\AndorCameraSettingsControl.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Source\Andor\AndorFlume.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -659,9 +671,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\Andor\cameraThreadInput.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Andor\PictureSettingsControl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\ArbGen\AgilentCore.h">
@@ -751,12 +760,6 @@
     <ClInclude Include="Source\ExcessDialogs\saveWithExplorer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\ExperimentMonitoringAndStatus\AlertSystem.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\ExperimentMonitoringAndStatus\ExperimentTimer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Source\ExperimentMonitoringAndStatus\StatusIndicator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -797,9 +800,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\GeneralImaging\PictureManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\GeneralImaging\PictureStats.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\GeneralImaging\softwareAccumulationOption.h">

@@ -7,35 +7,43 @@
 #include "PrimaryWindows/QtAndorWindow.h"
 #include "GeneralUtilityFunctions/miscCommonFunctions.h"
 #include <boost/lexical_cast.hpp>
+#include <qlayout.h>
 
 
-void AlertSystem::initialize( QPoint& pos, IChimeraQtWindow* parent ){
-	auto& px = pos.rx (), & py = pos.ry ();
+void AlertSystem::initialize(IChimeraQtWindow* parent ){
+	QVBoxLayout* layout = new QVBoxLayout(this);
+	layout->setContentsMargins(0, 0, 0, 0);
 
 	title = new QLabel ("ALERT SYSTEM", parent);
-	title->setGeometry (px, py, 480, 25);
+	layout->addWidget(title, 0);
 	
+	QHBoxLayout* layout1 = new QHBoxLayout(this);
+	layout1->setContentsMargins(0, 0, 0, 0);
 	atomsAlertActiveCheckBox = new QCheckBox ("If No Atoms?", parent);
-	atomsAlertActiveCheckBox->setGeometry (px, py+=25, 120, 20);
 	atomsAlertActiveCheckBox->setChecked( false );
-	
 	motAlertActiveCheckBox = new QCheckBox ("If No MOT?", parent);
-	motAlertActiveCheckBox->setGeometry (px + 120, py, 120, 20);
 	motAlertActiveCheckBox->setChecked ( true );
-	
-	alertThresholdText = new QLabel ("Alert Threshold:", parent);
-	alertThresholdText->setGeometry (px + 240, py, 120, 20);
-	
-	alertThresholdEdit = new QLineEdit ("10", parent);
-	alertThresholdEdit->setGeometry (px + 360, py, 120, 20);
+	alertThresholdText = new QLabel("Alert Threshold:", parent);
+	alertThresholdEdit = new QLineEdit("10", parent);
 
-	autoPauseAtAlert = new QCheckBox ("Automatically Pause on Alert?", parent);
-	autoPauseAtAlert->setGeometry (px, py += 20, 240, 20);
-	autoPauseAtAlert->setChecked ( true );
+	layout1->addWidget(atomsAlertActiveCheckBox, 0);
+	layout1->addWidget(motAlertActiveCheckBox, 0);
+	layout1->addWidget(alertThresholdText, 0);
+	layout1->addWidget(alertThresholdEdit, 1);
+
+	QHBoxLayout* layout2 = new QHBoxLayout(this);
+	layout2->setContentsMargins(0, 0, 0, 0);
+	autoPauseAtAlert = new QCheckBox("Automatically Pause on Alert?", parent);
+	autoPauseAtAlert->setChecked(true);
 	/// Sound checkbox
-	soundAtFinishCheck = new QCheckBox ("Play Sound at Finish?", parent);
-	soundAtFinishCheck->setGeometry (px + 240, py, 240, 20);
-	py += 20;
+	soundAtFinishCheck = new QCheckBox("Play Sound at Finish?", parent);
+	layout2->addWidget(autoPauseAtAlert, 0);
+	layout2->addWidget(soundAtFinishCheck, 0);
+
+
+	layout->addLayout(layout1);
+	layout->addLayout(layout2);
+
 }
 
 

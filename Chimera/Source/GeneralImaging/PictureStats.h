@@ -51,7 +51,9 @@ struct statPoint{
 };
 
 
-class PictureStats{
+class PictureStats : public QWidget
+{
+	Q_OBJECT
 	public:
 		static constexpr auto RAW_COUNTS = "Raw Counts";
 		static constexpr auto CAMERA_PHOTONS = "Camera Photons";
@@ -59,7 +61,7 @@ class PictureStats{
 		PictureStats::PictureStats(){
 			displayDataType = RAW_COUNTS;
 		}
-		void initialize( QPoint& pos, IChimeraQtWindow* parent );
+		void initialize( IChimeraQtWindow* parent );
 		std::pair<int, int> update ( Matrix<long> image, unsigned imageNumber, coordinate selectedPixel,
 									 int currentRepetitionNumber, int totalRepetitionCount );
 		void reset();

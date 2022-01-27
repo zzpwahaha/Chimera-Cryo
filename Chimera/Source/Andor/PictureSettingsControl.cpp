@@ -15,11 +15,12 @@ PictureSettingsControl::PictureSettingsControl()
 {
 }
 
-void PictureSettingsControl::initialize( QPoint& pos, IChimeraQtWindow* parent ){
-	auto& px = pos.rx (), &py = pos.ry ();
+void PictureSettingsControl::initialize( IChimeraQtWindow* parent ){
 	// introducing things row by row
 	/// Set Picture Options
-	unsigned count = 0;
+	QVBoxLayout* layout = new QVBoxLayout(this);
+	layout->setContentsMargins(0, 0, 0, 0);
+
 	auto handleChange = [this, parent]() {
 		try {
 			if (parent->andorWin) {
@@ -30,91 +31,103 @@ void PictureSettingsControl::initialize( QPoint& pos, IChimeraQtWindow* parent )
 			parent->reportErr (err.qtrace());
 		}
 	};
+
+	QHBoxLayout* layout1 = new QHBoxLayout(this);
+	layout1->setContentsMargins(0, 0, 0, 0);
+	picScaleFactorLabel = new QLabel("Pic. Scale Factor:", parent);
+	picScaleFactorEdit = new QLineEdit("50", parent);
+	parent->connect(picScaleFactorEdit, &QLineEdit::textChanged, handleChange);
+
 	transfModeLabel = new QLabel ("Qt Image Transformation Mode:", parent);
-	transfModeLabel->setGeometry (px, py, 240, 20);
 	transformationModeCombo = new CQComboBox (parent);
-	transformationModeCombo->setGeometry (px+240, py, 240, 20);
 	transformationModeCombo->addItems ({ "Fast", "Smooth" });
 	parent->connect (transformationModeCombo, qOverload<int> (&QComboBox::currentIndexChanged), 
 		parent->andorWin, &QtAndorWindow::handleTransformationModeChange);
+	layout1->addWidget(picScaleFactorLabel, 0);
+	layout1->addWidget(picScaleFactorEdit, 0);
+	layout1->addWidget(transfModeLabel, 0);
+	layout1->addWidget(transformationModeCombo, 1);
 
+	QGridLayout* layout2 = new QGridLayout(this);
+	layout2->setContentsMargins(0, 0, 0, 0);
 	/// Picture Numbers
 	pictureLabel = new QLabel ("Picture #:", parent);
-	pictureLabel->setGeometry (px, py += 20, 100, 20);
+	layout2->addWidget(pictureLabel, 0, 0);
 	for ( auto picInc : range(4) ) {
 		pictureNumbers[picInc] = new QLabel (cstr (picInc + 1), parent);
-		pictureNumbers[picInc]->setGeometry (px + 100 + 95 * picInc, py, 95, 20);
+		layout2->addWidget(pictureNumbers[picInc], 0, picInc + 1);
 	}
-	py += 20;
 	/// Total picture number
 	totalPicNumberLabel = new QLabel ("Total Picture #", parent);
-	totalPicNumberLabel->setGeometry (px, py, 100, 20);
+	layout2->addWidget(pictureLabel, 1, 0);
 	for (auto picInc : range (4)) {
 		totalNumberChoice[picInc] = new CQRadioButton ("", parent);
-		totalNumberChoice[picInc]->setGeometry (px + 100 + 95 * picInc, py, 95, 20);
 		totalNumberChoice[picInc]->setChecked (picInc == 0);
 		parent->connect (totalNumberChoice[picInc], &QRadioButton::toggled, handleChange);
+		layout2->addWidget(totalNumberChoice[picInc], 1, picInc + 1);
 	}
 	/// Exposure Times
 	exposureLabel = new QLabel ("Exposure (ms):", parent);
-	exposureLabel->setGeometry (px, py+=20, 100, 20);
+	layout2->addWidget(exposureLabel, 2, 0);
 	for ( auto picInc : range(4) ) {
 		exposureEdits[picInc] = new CQLineEdit (parent);
-		exposureEdits[picInc]->setGeometry (px + 100 + 95 * picInc, py, 95, 20);
 		parent->connect (exposureEdits[picInc], &QLineEdit::textChanged, handleChange);
+		layout2->addWidget(exposureEdits[picInc], 2, picInc + 1);
 	}
 	setUnofficialExposures(std::vector<float>(4, 10 / 1000.0f));
 
 	/// Thresholds
 	thresholdLabel = new QLabel ("Threshold (cts)", parent);
-	thresholdLabel->setGeometry (px, py += 20, 100, 20);
+	layout2->addWidget(thresholdLabel, 3, 0);
 	for ( auto picInc : range(4) ) {
 		thresholdEdits[picInc] = new CQLineEdit ("100", parent);
-		thresholdEdits[picInc]->setGeometry (px + 100 + 95 * picInc, py, 95, 20);
 		parent->connect (thresholdEdits[picInc], &QLineEdit::textChanged, handleChange);
 		currentPicSettings.thresholds[ picInc ] = { 100 };
+		layout2->addWidget(thresholdEdits[picInc], 3, picInc + 1);
 	}
 	
 	/// colormaps
 	colormapLabel = new QLabel ("Colormap", parent);
-	colormapLabel->setGeometry (px, py += 20,100, 25);
+	layout2->addWidget(colormapLabel, 4, 0);
 	for ( auto picInc : range(4) ){
 		colormapCombos[picInc] = new CQComboBox (parent);
-		colormapCombos[picInc]->setGeometry (px + 100 + 95 * picInc, py, 95, 25);
 		colormapCombos[picInc]->addItems ({ "Dark Viridis","Inferno","Black & White", "Red-Black-Blue" });
 		parent->connect (colormapCombos[picInc], qOverload<int>(&QComboBox::activated), handleChange);
-
 		colormapCombos[picInc]->setCurrentIndex( 0 );
 		currentPicSettings.colors[picInc] = 0;
+		layout2->addWidget(colormapCombos[picInc], 4, picInc + 1);
 	}
 	/// display types
 	displayTypeLabel = new QLabel ("Display-Type:", parent);
-	displayTypeLabel->setGeometry (px, py += 25, 100, 25);
+	layout2->addWidget(displayTypeLabel, 5, 0);
 	for ( auto picInc : range ( 4 ) ) {
 		displayTypeCombos[picInc] = new CQComboBox (parent);
-		displayTypeCombos[picInc]->setGeometry (px + 100 + 95 * picInc, py, 95, 25);
 		displayTypeCombos[picInc]->addItems ({"Normal","Dif: 1", "Dif: 2", "Dif: 3", "Dif: 4"});
 		parent->connect (displayTypeCombos[picInc], qOverload<int> (&QComboBox::activated), handleChange);
 		displayTypeCombos[ picInc ]->setCurrentIndex ( 0 );
 		currentPicSettings.colors[ picInc ] = 0;
+		layout2->addWidget(displayTypeCombos[picInc], 5, picInc + 1);
 	}
 	/// software accumulation mode
 	softwareAccumulationLabel = new QLabel ("Software Accum:", parent);
-	softwareAccumulationLabel->setGeometry (px, py += 25, 100, 20);
+	layout2->addWidget(displayTypeLabel, 6, 0);
 	for ( auto picInc : range ( 4 ) ) {
 		softwareAccumulateAll[picInc] = new CQCheckBox("All?", parent);
-		softwareAccumulateAll[picInc]->setGeometry (px + 100 + 95 * picInc, py, 65, 20);
 		softwareAccumulateAll[ picInc ]->setChecked( 0 );
 		parent->connect (softwareAccumulateAll[picInc], &QCheckBox::stateChanged, handleChange);
-
 		softwareAccumulateNum[picInc] = new CQLineEdit ("1", parent);
-		softwareAccumulateNum[picInc]->setGeometry (px + 165 + 95 * picInc, py, 30, 20);
 		parent->connect (softwareAccumulateNum[picInc], &QLineEdit::textChanged, handleChange);
+		QHBoxLayout* tmp = new QHBoxLayout(this);
+		tmp->addWidget(softwareAccumulateAll[picInc], 0);
+		tmp->addWidget(softwareAccumulateNum[picInc], 1);
+		layout2->addLayout(tmp, 6, picInc + 1);
 	}
 	setPictureControlEnabled (0, true);
 	setPictureControlEnabled (1, false);
 	setPictureControlEnabled (2, false);
 	setPictureControlEnabled (3, false);
+	layout->addLayout(layout1);
+	layout->addLayout(layout2);
 }
 
 std::array<displayTypeOption, 4> PictureSettingsControl::getDisplayTypeOptions( ){
@@ -159,6 +172,7 @@ void PictureSettingsControl::handleSaveConfig(ConfigStream& saveFile){
 	for ( auto saOpt : getSoftwareAccumulationOptions ( ) ){
 		saveFile << saOpt.accumAll << " " << saOpt.accumNum << " ";
 	}
+	saveFile << "\n/*Pic Scale Factor:*/\t" << str(picScaleFactorEdit->text());
 	saveFile << "\nEND_PICTURE_SETTINGS\n";
 }
 
@@ -320,6 +334,7 @@ void PictureSettingsControl::updateAllSettings ( andorPicSettingsGroup inputSett
 	else {
 		transformationModeCombo->setCurrentIndex (1);
 	}
+	picScaleFactorEdit->setText(qstr(inputSettings.picScaleFactor));
 }
 
 std::array<std::vector<int>, 4> PictureSettingsControl::getThresholds ( ){
@@ -390,5 +405,14 @@ void PictureSettingsControl::setEnabledStatus (bool viewRunningSettings) {
 			totalNumberChoice[num]->setEnabled (true);
 		}
 		setUnofficialPicsPerRep (unofficialPicsPerRep);
+	}
+}
+
+int PictureSettingsControl::getPicScaleFactor() {
+	try {
+		return boost::lexical_cast<int>(str(picScaleFactorEdit->text()));
+	}
+	catch (boost::bad_lexical_cast& err) {
+		thrower("Failed to convert picture scale factor to integer!");
 	}
 }

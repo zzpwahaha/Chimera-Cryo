@@ -5,20 +5,24 @@
 #include <qprogressbar.h>
 
 
-void ExperimentTimer::initialize( QPoint& pos, IChimeraQtWindow* parent ){
-	auto& px = pos.rx (), & py = pos.ry ();
+void ExperimentTimer::initialize( IChimeraQtWindow* parent ){
+	QHBoxLayout* layout = new QHBoxLayout(this);
+	layout->setContentsMargins(0, 0, 0, 0);
 	timeDisplay = new QLabel ("", parent);
-	timeDisplay->setGeometry (px, py, 168, 40);
+	layout->addWidget(timeDisplay);
 	/// PROGRESS BARS
 	// subseries progress bar
+	QVBoxLayout* layout1 = new QVBoxLayout(this);
+	layout1->setContentsMargins(0, 0, 0, 0);
 	long timerWidth = 550 * 2;
 	variationProgress = new QProgressBar (parent);
-	variationProgress->setGeometry (px + 168, py, timerWidth - 168,15);
 	variationProgress->setRange (0, 10000);
 	// series progress bar display
 	overallProgress = new QProgressBar (parent);
-	overallProgress->setGeometry (px + 168, py+15, timerWidth - 168, 25);
 	overallProgress->setRange (0, 10000);
+	layout1->addWidget(variationProgress);
+	layout1->addWidget(overallProgress);
+	layout->addLayout(layout1);
 }
 
 void ExperimentTimer::update(unsigned __int64 currentRepNumber, unsigned __int64 repsPerVariation, unsigned __int64 numberOfVariations, unsigned picsPerRep)

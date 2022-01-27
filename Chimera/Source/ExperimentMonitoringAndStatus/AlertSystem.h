@@ -8,15 +8,16 @@
 
 //#pragma comment(lib, "Winmm.lib")
 
-class AlertSystem
+class AlertSystem : public QWidget
 {
+	Q_OBJECT
 	public:
 		AlertSystem() {
 			// load the music!
 			//mciSendString( cstr( str( "open \"" ) + MUSIC_LOCATION + "\" type mpegvideo alias mp3" ), NULL, 0, NULL );
 		}
 		~AlertSystem() { /*mciSendString( "close mp3", NULL, 0, NULL );*/ }
-		void initialize( QPoint& positions, IChimeraQtWindow* parent );
+		void initialize( IChimeraQtWindow* parent );
 		void alertMainThread( int level );
 		void soundAlert();
 		unsigned getAlertThreshold();

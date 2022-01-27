@@ -3,64 +3,65 @@
 #include <algorithm>
 #include <numeric>
 #include "PictureStats.h"
+#include <qlayout.h>
 
 
 // as of right now, the position of this control is not affected by the mode or the trigger mode.
-void PictureStats::initialize( QPoint& pos, IChimeraQtWindow* parent )
+void PictureStats::initialize( IChimeraQtWindow* parent )
 {
-	auto& px = pos.rx (), & py = pos.ry ();
-	LONG size = 315;
+	QVBoxLayout* layout = new QVBoxLayout(this);
+	layout->setContentsMargins(0, 0, 0, 0);
+
 	pictureStatsHeader = new QLabel ("Raw Counts", parent);
-	pictureStatsHeader->setGeometry (px, py, size, 25);
 	repetitionIndicator = new QLabel ("Repetition ?/?", parent);
-	repetitionIndicator->setGeometry (px, py+=25, size, 25);
+	layout->addWidget(pictureStatsHeader);
+	layout->addWidget(repetitionIndicator);
 	/// Picture labels ////////////////////////////////////////////////////////////
+	QGridLayout* layout1 = new QGridLayout(this);
+	layout1->setContentsMargins(0, 0, 0, 0);
 	collumnHeaders[0] = new QLabel ("Pic:", parent);
-	collumnHeaders[0]->setGeometry (px, py += 25, size / 5, 25);
 	int inc = 0;
 	for (auto& control : picNumberIndicators)
 	{
 		inc++;
 		control = new QLabel (cstr ("#" + str (inc) + ":"), parent);
-		control->setGeometry (px, py+=25, size / 5, 25);
+		layout1->addWidget(control, inc, 0);
 	}
 	/// Max Count 
-	py -= 100;
-	px += size / 5;
 	collumnHeaders[1] = new QLabel ("Max:", parent);
-	collumnHeaders[1]->setGeometry (px, py, size / 5,25);
+	inc = 0;
 	for (auto& control : maxCounts) {
+		inc++;
 		control = new QLabel ("-", parent);
-		control->setGeometry (px, py += 25, size / 5, 25);
+		layout1->addWidget(control, inc, 1);
 	}
 	/// Min Counts
-	py -= 100;
-	px += size / 5;
 	collumnHeaders[2] = new QLabel ("Min:", parent);
-	collumnHeaders[2]->setGeometry (px, py, size / 5, 25);
+	inc = 0;
 	for (auto& control : minCounts) {
+		inc++;
 		control = new QLabel ("-", parent);
-		control->setGeometry (px, py += 25, size / 5, 25);
+		layout1->addWidget(control, inc, 1);
 	}
 	/// Average Counts
-	py -= 100;
-	px += size / 5;
 	collumnHeaders[3] = new QLabel ("Avg:", parent);
-	collumnHeaders[3]->setGeometry (px, py, size / 5, 25);
+	inc = 0;
 	for (auto& control : avgCounts) {
+		inc++;
 		control = new QLabel ("-", parent);
-		control->setGeometry (px, py += 25, size / 5, 25);
+		layout1->addWidget(control, inc, 2);
 	}
 	/// Selection Counts
-	py -= 100;
-	px += size / 5;
 	collumnHeaders[4] = new QLabel ("Avg:", parent);
-	collumnHeaders[4]->setGeometry (px, py, size / 5, 25);
+	inc = 0;
 	for (auto& control : selCounts) {
+		inc++;
 		control = new QLabel ("-", parent);
-		control->setGeometry (px, py += 25, size / 5, 25);
+		layout1->addWidget(control, inc, 3);
 	}
-	px -= 4./5*size;
+	for (auto idx : range(collumnHeaders.size())) {
+		layout1->addWidget(collumnHeaders[idx], 0, idx);
+	}
 }
 
 

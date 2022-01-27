@@ -24,14 +24,16 @@ struct displayTypeOption{
  * This class handles all of the gui objects for assigning camera settings. It works closely with the Andor class
  * because it eventually needs to communicate all of these settings to the Andor class.
  */
-class PictureSettingsControl {
+class PictureSettingsControl : public QWidget
+{
+	Q_OBJECT
 	public:
 		// must have parent. Enforced partially because both are singletons.
 		PictureSettingsControl();
 		void updateAllSettings ( andorPicSettingsGroup inputSettings );
 		void handleSaveConfig(ConfigStream& saveFile);
 		void handleOpenConfig(ConfigStream& openFile, AndorCameraCore* andor);
-		void initialize( QPoint& pos, IChimeraQtWindow* parent );
+		void initialize( IChimeraQtWindow* parent );
 		void handleOptionChange( );
 		void setPictureControlEnabled (int pic, bool enabled);
 		void setUnofficialExposures ( std::vector<float> times );
@@ -45,6 +47,7 @@ class PictureSettingsControl {
 		void updateSettings( );
 		void updateColormaps ( std::array<int, 4> colorsIndexes );
 		void setUnofficialPicsPerRep( unsigned picNum);
+		int getPicScaleFactor();
 		std::array<std::string, 4> getThresholdStrings();
 		std::array<softwareAccumulationOption, 4> getSoftwareAccumulationOptions ( );
 		void setSoftwareAccumulationOptions ( std::array<softwareAccumulationOption, 4> opts );
@@ -65,6 +68,8 @@ class PictureSettingsControl {
 		QLabel* colormapLabel;
 		QLabel* displayTypeLabel;
 		QLabel* softwareAccumulationLabel;
+		QLabel* picScaleFactorLabel;
+		QLineEdit* picScaleFactorEdit;
 		QLabel* transfModeLabel;
 		CQComboBox* transformationModeCombo;
 		// 

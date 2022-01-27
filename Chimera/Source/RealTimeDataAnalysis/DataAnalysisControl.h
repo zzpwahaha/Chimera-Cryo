@@ -34,7 +34,7 @@ class DataAnalysisControl : public IChimeraSystem {
 
 		DataAnalysisControl(IChimeraQtWindow* parent );
 
-		void initialize( QPoint& pos, IChimeraQtWindow* parent );
+		void initialize( IChimeraQtWindow* parent );
 		void handleOpenConfig(ConfigStream& file );
 		static analysisSettings getAnalysisSettingsFromFile (ConfigStream& file);
 		void setAnalysisSettings (analysisSettings settings);

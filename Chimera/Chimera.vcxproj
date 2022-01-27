@@ -324,7 +324,7 @@
     <ClInclude Include="Source\AnalogOutput\AoStructures.h" />
     <ClInclude Include="Source\AnalogOutput\AoSystem.h" />
     <ClInclude Include="Source\Andor\AndorCameraCore.h" />
-    <ClInclude Include="Source\Andor\AndorCameraSettingsControl.h" />
+    <QtMoc Include="Source\Andor\AndorCameraSettingsControl.h" />
     <ClInclude Include="Source\Andor\AndorFlume.h" />
     <ClInclude Include="Source\Andor\andorPicSettingsGroup.h" />
     <ClInclude Include="Source\Andor\AndorRunMode.h" />
@@ -334,7 +334,7 @@
     <ClInclude Include="Source\Andor\CameraCalibration.h" />
     <ClInclude Include="Source\Andor\CameraImageDimensions.h" />
     <ClInclude Include="Source\Andor\cameraThreadInput.h" />
-    <ClInclude Include="Source\Andor\PictureSettingsControl.h" />
+    <QtMoc Include="Source\Andor\PictureSettingsControl.h" />
     <ClInclude Include="Source\ArbGen\AgilentCore.h" />
     <ClInclude Include="Source\ArbGen\ArbGenChannelMode.h" />
     <ClInclude Include="Source\ArbGen\ArbGenCore.h" />
@@ -364,8 +364,8 @@
     <ClInclude Include="Source\DirectDigitalSynthesis\DdsSystemStructures.h" />
     <ClInclude Include="Source\ExcessDialogs\openWithExplorer.h" />
     <ClInclude Include="Source\ExcessDialogs\saveWithExplorer.h" />
-    <ClInclude Include="Source\ExperimentMonitoringAndStatus\AlertSystem.h" />
-    <ClInclude Include="Source\ExperimentMonitoringAndStatus\ExperimentTimer.h" />
+    <QtMoc Include="Source\ExperimentMonitoringAndStatus\AlertSystem.h" />
+    <QtMoc Include="Source\ExperimentMonitoringAndStatus\ExperimentTimer.h" />
     <ClInclude Include="Source\ExperimentMonitoringAndStatus\StatusIndicator.h" />
     <ClInclude Include="Source\ExperimentMonitoringAndStatus\statusMsg.h" />
     <ClInclude Include="Source\ExperimentThread\AllExperimentInput.h" />
@@ -381,7 +381,7 @@
     <ClInclude Include="Source\GeneralImaging\csvReader.h" />
     <ClInclude Include="Source\GeneralImaging\imageParameters.h" />
     <ClInclude Include="Source\GeneralImaging\PictureManager.h" />
-    <ClInclude Include="Source\GeneralImaging\PictureStats.h" />
+    <QtMoc Include="Source\GeneralImaging\PictureStats.h" />
     <QtMoc Include="Source\CustomQtControls\RangeSlider.h" />
     <ClInclude Include="Source\GeneralImaging\softwareAccumulationOption.h" />
     <ClInclude Include="Source\GeneralObjects\ChimeraStyleSheets.h" />

@@ -23,13 +23,15 @@ struct cameraPositions;
  * the camera and some base settings that the user does not change. Because of the close contact between this and the
  * andor class, this object is initialized with a pointer to the andor object.
  ***********************************************************************************************************************/
-class AndorCameraSettingsControl{
+class AndorCameraSettingsControl : public QWidget
+{
+	Q_OBJECT
 	public:
 		AndorCameraSettingsControl();
 		void setVariationNumber(unsigned varNumber);
 		void setRepsPerVariation(unsigned repsPerVar);
 		void updateRunSettingsFromPicSettings( );
-		void initialize( QPoint& pos, IChimeraQtWindow* parent, std::vector<std::string> vertSpeeds, 
+		void initialize( IChimeraQtWindow* parent, std::vector<std::string> vertSpeeds, 
 						 std::vector<std::string> horSpeeds );
 		void updateSettings( );
 		void updateMinKineticCycleTime( double time );
@@ -63,6 +65,7 @@ class AndorCameraSettingsControl{
 		AndorRunSettings getRunningSettings ();
 		unsigned getHsSpeed ();
 		unsigned getVsSpeed ();
+		unsigned getFrameTransferMode();
 	private:
 
 		AndorRunSettings currentlyRunningSettings;
@@ -83,6 +86,7 @@ class AndorCameraSettingsControl{
 		// 
 		CQComboBox* cameraModeCombo;
 
+		CQComboBox* frameTransferModeCombo = nullptr;
 		CQComboBox* verticalShiftSpeedCombo;
 		CQComboBox* horizontalShiftSpeedCombo;
 

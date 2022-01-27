@@ -13,23 +13,27 @@ AndorCameraSettingsControl::AndorCameraSettingsControl() : imageDimensionsObj("a
 	AndorRunSettings& andorSettings = configSettings.andor;
 }
 
-void AndorCameraSettingsControl::initialize ( QPoint& pos, IChimeraQtWindow* parent, std::vector<std::string> vertSpeeds,
-											  std::vector<std::string> horSpeeds ){
-	auto& px = pos.rx (), & py = pos.ry ();
+void AndorCameraSettingsControl::initialize ( IChimeraQtWindow* parent, std::vector<std::string> vertSpeeds,
+											  std::vector<std::string> horSpeeds )
+{
+	QVBoxLayout* layout = new QVBoxLayout(this);
+	layout->setContentsMargins(0, 0, 0, 0);
+
 	header = new QLabel ("ANDOR CAMERA SETTINGS", parent);
-	header->setGeometry (px, py, 480, 25);
 	programNow = new QPushButton ("Program Now", parent);
-	programNow->setGeometry (px, py+=25, 480, 25);
 	parent->connect (programNow, &QPushButton::released, parent->andorWin, [parent, this]() {
 			auto settings = getConfigSettings ().andor;
 			parent->andorWin->handlePrepareForAcq (&settings, analysisSettings());
 			parent->andorWin->manualArmCamera ();
 		});
+	layout->addWidget(header, 1);
+	layout->addWidget(programNow, 1);
+
+	QHBoxLayout* layout1 = new QHBoxLayout(this);
+	layout1->setContentsMargins(0, 0, 0, 0);
 	controlAndorCameraCheck = new CQCheckBox ("Control Andor Camera?", parent);
-	controlAndorCameraCheck->setGeometry (px, py += 25, 240, 25);
 	controlAndorCameraCheck->setChecked (true);
 	viewRunningSettings = new QCheckBox ("View Running Settings?", parent);
-	viewRunningSettings->setGeometry (px+240, py, 240, 25);
 	parent->connect (viewRunningSettings, &QCheckBox::stateChanged, [this]() {
 		if (viewRunningSettings->isChecked ()) {
 			// just changed to checked, so the settings should indicate the config settings still. 
@@ -44,12 +48,15 @@ void AndorCameraSettingsControl::initialize ( QPoint& pos, IChimeraQtWindow* par
 			currentlyUneditable = false;
 		}
 		});
+	layout1->addWidget(controlAndorCameraCheck, 0);
+	layout1->addWidget(viewRunningSettings, 0);
 
+	QHBoxLayout* layout2 = new QHBoxLayout(this);
+	layout2->setContentsMargins(0, 0, 0, 0);
 	cameraModeCombo = new CQComboBox (parent);
 	cameraModeCombo->addItem ("Kinetic-Series-Mode");
 	cameraModeCombo->addItem ("Accumulation-Mode");
 	cameraModeCombo->addItem ("Video-Mode");
-	cameraModeCombo->setGeometry (px, py += 25, 240, 25);
 
 	cameraModeCombo->setCurrentIndex (0);
 	parent->connect (cameraModeCombo, qOverload<int> (&QComboBox::currentIndexChanged), 
@@ -61,7 +68,6 @@ void AndorCameraSettingsControl::initialize ( QPoint& pos, IChimeraQtWindow* par
 		});
 	configSettings.andor.acquisitionMode = AndorRunModes::mode::Kinetic;
 	triggerCombo = new CQComboBox (parent);
-	triggerCombo->setGeometry (px + 240, py, 240, 25);
 	triggerCombo->addItems ({ "Internal-Trigger", "External-Trigger","Start-On-Trigger" });
 	triggerCombo->setCurrentIndex (0);
 	parent->connect (triggerCombo, qOverload<int> (&QComboBox::activated), 
@@ -72,9 +78,23 @@ void AndorCameraSettingsControl::initialize ( QPoint& pos, IChimeraQtWindow* par
 			}
 		});
 	configSettings.andor.triggerMode = AndorTriggerMode::mode::External;
+	layout2->addWidget(cameraModeCombo, 0);
+	layout2->addWidget(triggerCombo, 0);
+
+	QHBoxLayout* layout3 = new QHBoxLayout(this);
+	layout3->setContentsMargins(0, 0, 0, 0);
+	frameTransferModeCombo = new CQComboBox(parent);
+	frameTransferModeCombo->setToolTip("Frame Transfer Mode OFF:\n"
+		"Slower than when on. Cleans between images. Mechanical shutter may not be necessary.\n"
+		"Frame Transfer Mode ON:\n"
+		"Faster than when off. Does not clean between images, giving better background.\n"
+		"Mechanical Shutter probably necessary unless imaging continuously.\n"
+		"See iXonEM + hardware guide pg 42.\n");
+	frameTransferModeCombo->addItems({ "FTM: OFF!", "FTM: ON!" });
+	frameTransferModeCombo->setCurrentIndex(0);
+	configSettings.andor.frameTransferMode = 0;
 
 	verticalShiftSpeedCombo = new CQComboBox (parent);
-	verticalShiftSpeedCombo->setGeometry (px, py += 25, 240, 25);
 	for (auto speed : vertSpeeds){ 
 		verticalShiftSpeedCombo->addItem ("VS: " + qstr(speed));
 	}
@@ -82,46 +102,52 @@ void AndorCameraSettingsControl::initialize ( QPoint& pos, IChimeraQtWindow* par
 	configSettings.andor.vertShiftSpeedSetting = 0;
 
 	horizontalShiftSpeedCombo = new CQComboBox (parent);
-	horizontalShiftSpeedCombo->setGeometry (px+240, py, 240, 25);
 	for (auto speed : horSpeeds){
 		horizontalShiftSpeedCombo->addItem ("HS: " + qstr (speed));
 	}
 	horizontalShiftSpeedCombo->setCurrentIndex (0);
 	configSettings.andor.horShiftSpeedSetting = 0;
+	layout3->addWidget(frameTransferModeCombo, 0);
+	layout3->addWidget(verticalShiftSpeedCombo, 0);
+	layout3->addWidget(horizontalShiftSpeedCombo, 0);
 
+	QHBoxLayout* layout4 = new QHBoxLayout(this);
+	layout4->setContentsMargins(0, 0, 0, 0);
 	emGainBtn = new CQPushButton ("Set EM Gain (-1=OFF)", parent);
-	emGainBtn->setGeometry (px, py += 25, 160, 20);
 	parent->connect (emGainBtn, &QPushButton::released, [parent]() {
 			parent->andorWin->handleEmGainChange ();
 		});
 	emGainEdit = new CQLineEdit ("-1", parent);
-	emGainEdit->setGeometry (px + 160, py, 160, 20);
 	emGainEdit->setToolTip( "Set the state & gain of the EM gain of the camera. Enter a negative number to turn EM Gain"
 						   " mode off. The program will immediately change the state of the camera after changing this"
 						   " edit." );
 	//
 	emGainDisplay = new QLabel ("OFF", parent);
-	emGainDisplay->setGeometry (px + 320, py, 160, 20);
 	// initialize settings.
 	configSettings.andor.emGainLevel = 0;
 	configSettings.andor.emGainModeIsOn = false;
+	layout4->addWidget(emGainBtn, 0);
+	layout4->addWidget(emGainEdit, 0);
+	layout4->addWidget(emGainDisplay, 0);
+
+	QHBoxLayout* layout5 = new QHBoxLayout(this);
+	layout5->setContentsMargins(0, 0, 0, 0);
 	setTemperatureButton = new CQPushButton ("Set Camera Temperature (C)", parent);
-	setTemperatureButton->setGeometry (px, py+=20, 270, 25);
 	parent->connect (setTemperatureButton, &QPushButton::released, 
 		[parent]() {
 			parent->andorWin->passSetTemperaturePress ();
 		});
 	temperatureEdit = new CQLineEdit ("0", parent);
-	temperatureEdit->setGeometry (px + 270, py, 80, 25);
-
 	temperatureDisplay = new QLabel ("", parent);
-	temperatureDisplay->setGeometry (px + 350, py, 80, 25);
 	temperatureOffButton = new CQPushButton("OFF", parent);
-	temperatureOffButton->setGeometry (px + 430, py, 50, 25);
-	temperatureMsg = new QLabel ("Temperature control is disabled",parent);
-	temperatureMsg->setGeometry (px, py+=25, 480, 50);
-	py += 50;
-	//
+	layout5->addWidget(setTemperatureButton, 0);
+	layout5->addWidget(temperatureEdit, 0);
+	layout5->addWidget(temperatureDisplay, 0);
+	layout5->addWidget(temperatureOffButton, 0);
+	
+	temperatureMsg = new QLabel("Temperature control is disabled", parent);
+
+
 	picSettingsObj.initialize( pos, parent );
 	imageDimensionsObj.initialize( pos, parent, 1, 480 );
 
@@ -190,8 +216,14 @@ void AndorCameraSettingsControl::updateDisplays () {
 	temperatureEdit->setText (cstr (optionsIn.temperatureSetting));
 	imageDimensionsObj.setImageParametersFromInput (optionsIn.imageSettings);
 
+	verticalShiftSpeedCombo->setCurrentIndex(optionsIn.vertShiftSpeedSetting);
+	horizontalShiftSpeedCombo->setCurrentIndex(optionsIn.horShiftSpeedSetting);
+	frameTransferModeCombo->setCurrentIndex(optionsIn.frameTransferMode);
+
+
 	picSettingsObj.setUnofficialExposures (optionsIn.exposureTimes);
 	picSettingsObj.setUnofficialPicsPerRep (optionsIn.picsPerRepetition);
+
 }
 
 
@@ -232,6 +264,10 @@ unsigned AndorCameraSettingsControl::getVsSpeed () {
 	return verticalShiftSpeedCombo->currentIndex ();
 }
 
+unsigned AndorCameraSettingsControl::getFrameTransferMode() {
+	return frameTransferModeCombo->currentIndex();
+}
+
 void AndorCameraSettingsControl::updateSettings(){
 	if (currentlyUneditable) {
 		return;
@@ -253,6 +289,7 @@ void AndorCameraSettingsControl::updateSettings(){
 
 	configSettings.andor.horShiftSpeedSetting = getHsSpeed ();
 	configSettings.andor.vertShiftSpeedSetting = getVsSpeed ();
+	configSettings.andor.frameTransferMode = getFrameTransferMode();
 }
 
 std::array<softwareAccumulationOption, 4> AndorCameraSettingsControl::getSoftwareAccumulationOptions ( ){
