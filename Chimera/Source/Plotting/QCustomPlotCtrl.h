@@ -50,6 +50,8 @@ private:
 
 	QCPTextElement* title;
 	QCPColorMap* colorMap = nullptr;
+	QCPAxisRect* leftAxisRect = nullptr;
+	QCPAxisRect* bottomAxisRect = nullptr;
 	//const bool narrow;
 	std::vector<int> thresholds;
 	plotStyle style;

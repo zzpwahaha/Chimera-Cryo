@@ -66,6 +66,7 @@ void MOTAnalysisControl::initialize(IChimeraQtWindow* parent)
 			calcViewer[MOTAnalysisType::type::density2d].setStyle(plotStyle::DensityPlot);
 		}
 		calcViewer[tp].init(parent, qstr(MOTAnalysisType::toStr(tp)));
+		calcViewer[tp].plot->setMinimumSize(600, 400);
 		calcViewer[tp].plot->replot();
 	}
 

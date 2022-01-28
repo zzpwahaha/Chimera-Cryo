@@ -98,15 +98,17 @@ class RangeSliderIntg : public QWidget
 {
     Q_OBJECT
 public:
-    RangeSliderIntg(Qt::Orientation ori, RangeSlider::Option handles, QWidget* parent = nullptr);
+    RangeSliderIntg(Qt::Orientation ori, RangeSlider::Option handles);
     ~RangeSliderIntg() {};
 
     void setRange(int low, int upr);
+    // for changing the value of slider and spinbox: eg upperSpinBox()->setValue(max);
     QSpinBox* upperSpinBox() { return upperSB; }
     QSpinBox* lowerSpinBox() { return lowerSB; }
-private:
+
     int getSilderSmlVal();
     int getSilderLrgVal();
+private:
     void setSilderSmlVal(int val);
     void setSilderLrgVal(int val);
     

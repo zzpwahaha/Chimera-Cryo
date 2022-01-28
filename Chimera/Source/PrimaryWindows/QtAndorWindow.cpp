@@ -31,28 +31,68 @@ int QtAndorWindow::getDataCalNum () {
 
 void QtAndorWindow::initializeWidgets (){
 	statBox = new ColorBox(this, mainWin->getDevices());
+	QWidget* centralWidget = new QWidget();
+	setCentralWidget(centralWidget);
+
+	QHBoxLayout* layout = new QHBoxLayout(centralWidget);
+
+	QVBoxLayout* layout1 = new QVBoxLayout(this);
+	layout1->setContentsMargins(0, 0, 0, 0);
 	andor.initializeClass (this, &imageTimes);
 	//statBox->initialize (position, this, 480, mainWin->getDevices (), 2);
 	alerts.alertMainThread (0);
 	alerts.initialize (this);
 	analysisHandler.initialize (this);
 	andorSettingsCtrl.initialize ( this, andor.getVertShiftSpeeds(), andor.getHorShiftSpeeds());
+	alerts.setMaximumWidth(350);
+	analysisHandler.setMaximumSize(350, 300);
+	andorSettingsCtrl.setMaximumWidth(350);
+	layout1->addWidget(&alerts);
+	layout1->addWidget(&analysisHandler);
+	layout1->addWidget(&andorSettingsCtrl);
+	layout1->addStretch(0);
+
+	QVBoxLayout* layout2 = new QVBoxLayout(this);
+	layout2->setContentsMargins(0, 0, 0, 0);
 	stats.initialize (this);
+	layout2->addWidget(&stats);
 	for (auto pltInc : range (6)){
 		mainAnalysisPlots.push_back (new QCustomPlotCtrl(1, plotStyle::BinomialDataPlot, { 0,0,0,0 }, false, false));
 		mainAnalysisPlots.back()->init(this, "INACTIVE");
+		mainAnalysisPlots.back()->plot->setMinimumSize(350, 140);
+		mainAnalysisPlots.back()->plot->setMaximumSize(450, 150);
+		layout2->addWidget(mainAnalysisPlots.back()->plot);
 	}
+	layout2->addStretch(1);
+
+	QVBoxLayout* layout3 = new QVBoxLayout(this);
+	layout3->setContentsMargins(0, 0, 0, 0);
 	timer.initialize (this);
-	pics.initialize (position, 530 * 2, 460 * 2 + 5, this);
+	timer.setMinimumWidth(750);
+	pics.initialize (530 * 2, 460 * 2 + 5, this);
 	// end of literal initialization calls
-	pics.setSinglePicture (andorSettingsCtrl.getConfigSettings ().andor.imageSettings);
+	//pics.setSinglePicture (andorSettingsCtrl.getConfigSettings ().andor.imageSettings);
+	timer.setMaximumHeight(150);
+	layout3->addWidget(&timer);
+	layout3->addWidget(&pics.pictures[0]);
+	//pics.pictures[0].setGeometry(1000, 600, 300, 300);
+	layout3->addStretch();
+
 	andor.setSettings (andorSettingsCtrl.getConfigSettings ().andor);
 
+	centralWidget->setStyleSheet("border: 2px solid  black; ");
+	layout->addLayout(layout1, 0);
+	layout->addLayout(layout2, 0);
+	layout->addLayout(layout3, 0);
+	qDebug() << timer.pos()<< alerts.geometry() << stats.geometry()<<timer.geometry()<<layout3->geometry() << pics.pictures[0].geometry()<< pics.pictures[1].geometry();
+	centralWidget->setStyleSheet("border: 2px solid  black; ");
+	
 	QTimer* timer = new QTimer (this);
 	connect (timer, &QTimer::timeout, [this]() {
 		auto temp = andor.getTemperature ();
 		andorSettingsCtrl.changeTemperatureDisplay (temp); 
 		});
+	
 	timer->start (2000);
 }
 

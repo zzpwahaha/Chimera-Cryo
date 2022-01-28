@@ -148,37 +148,43 @@ void AndorCameraSettingsControl::initialize ( IChimeraQtWindow* parent, std::vec
 	temperatureMsg = new QLabel("Temperature control is disabled", parent);
 
 
-	picSettingsObj.initialize( pos, parent );
-	imageDimensionsObj.initialize( pos, parent, 1, 480 );
+	picSettingsObj.initialize( parent );
+	imageDimensionsObj.initialize( parent);
 
+	QGridLayout* layout6 = new QGridLayout(this);
 	// Accumulation Time
 	accumulationCycleTimeLabel = new QLabel ("Accumulation Cycle Time", parent);
-	accumulationCycleTimeLabel->setGeometry (px, py, 240, 25);
-
 	accumulationCycleTimeEdit = new CQLineEdit ("0.1", parent);
-	accumulationCycleTimeEdit->setGeometry (px + 240, py, 240, 25);
-
 	// Accumulation Number
 	accumulationNumberLabel = new QLabel ("Accumulation #", parent);
-	accumulationNumberLabel->setGeometry (px, py+=25, 240, 25);
 	accumulationNumberEdit = new CQLineEdit ("1", parent);
-	accumulationNumberEdit->setGeometry (px + 240, py, 240, 25);
-
 	// minimum kinetic cycle time (determined by camera)
 	minKineticCycleTimeLabel = new QLabel ("Minimum Kinetic Cycle Time (s)", parent);
-	minKineticCycleTimeLabel->setGeometry (px, py+=25, 240, 25);
-	minKineticCycleTimeDisp = new QLabel ("---", parent);
-	minKineticCycleTimeDisp->setGeometry (px + 240, py, 240, 25);
-
+	minKineticCycleTimeDisp = new QLabel("---", parent);
 	/// Kinetic Cycle Time
 	kineticCycleTimeLabel = new QLabel ("Kinetic Cycle Time (s)", parent);
-	kineticCycleTimeLabel->setGeometry (px, py+=25, 240, 25);
+	kineticCycleTimeEdit = new CQLineEdit("0.1", parent);	
+	layout6->addWidget(accumulationCycleTimeLabel, 0, 0);
+	layout6->addWidget(accumulationCycleTimeEdit, 0, 1);
+	layout6->addWidget(accumulationNumberLabel, 0, 2);
+	layout6->addWidget(accumulationNumberEdit, 0, 3);
+	layout6->addWidget(minKineticCycleTimeLabel, 1, 0);
+	layout6->addWidget(minKineticCycleTimeDisp, 1, 1);
+	layout6->addWidget(kineticCycleTimeLabel, 1, 2);
+	layout6->addWidget(kineticCycleTimeEdit, 1, 3);
 
-	kineticCycleTimeEdit = new CQLineEdit ("0.1", parent);
-	kineticCycleTimeEdit->setGeometry (px+240, py, 240, 25);
-	py += 25;
-	//
-	calControl.initialize( pos, parent );
+	calControl.initialize( parent );
+
+	layout->addLayout(layout1);
+	layout->addLayout(layout2);
+	layout->addLayout(layout3);
+	layout->addLayout(layout4);
+	layout->addLayout(layout5);
+	layout->addWidget(temperatureMsg);
+	layout->addWidget(&picSettingsObj);
+	layout->addWidget(&imageDimensionsObj);
+	layout->addLayout(layout6);
+	layout->addWidget(&calControl);
 	updateWindowEnabledStatus ();
 }
 

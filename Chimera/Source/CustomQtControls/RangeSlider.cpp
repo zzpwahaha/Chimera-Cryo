@@ -368,12 +368,13 @@ void RangeSlider::SetRange(int aMinimum, int mMaximum)
 
 /*******************************************************************************************/
 
-
-RangeSliderIntg::RangeSliderIntg(Qt::Orientation ori, RangeSlider::Option handles, QWidget* aparent)
+// A big lesson learned here 01/28/2022: You should set the parent of contents of the widget to be the widget itself,
+// not the big window that own this widget!!!! This can cause confusion of qt layout when you want to add the widget, which contains
+// no contents and its contents is in the window widget and you can not remember to put those in place.
+RangeSliderIntg::RangeSliderIntg(Qt::Orientation ori, RangeSlider::Option handles)
 {
-    if (aparent == nullptr) {
-        aparent = this;
-    }
+    auto aparent = this;
+
     orientation = ori;
 
     rslider = new RangeSlider(orientation, handles, aparent);
@@ -382,7 +383,7 @@ RangeSliderIntg::RangeSliderIntg(Qt::Orientation ori, RangeSlider::Option handle
     axslid = new QCustomPlot(aparent);
 
 
-    QGridLayout* vRSlayout = new QGridLayout(aparent);
+    QGridLayout* vRSlayout = new QGridLayout();
     QHBoxLayout* vSB1 = new QHBoxLayout();
     QHBoxLayout* vSB2 = new QHBoxLayout();
     vSB1->setContentsMargins(0, 0, 0, 0);
@@ -394,8 +395,23 @@ RangeSliderIntg::RangeSliderIntg(Qt::Orientation ori, RangeSlider::Option handle
     vSB2->addWidget(new QLabel("Lower: "), 0);
     vSB2->addWidget(lowerSB, 1);
 
-    vRSlayout->addLayout(vSB1, 0, 0, 1, 2);
-    vRSlayout->addLayout(vSB2, 1, 0, 1, 2);
+    if (orientation == Qt::Vertical) {
+        QVBoxLayout* layout = new QVBoxLayout(aparent);
+        layout->setContentsMargins(0, 0, 0, 0);
+        vRSlayout->addLayout(vSB1, 0, 0, 1, 2);
+        vRSlayout->addLayout(vSB2, 1, 0, 1, 2);
+        layout->addLayout(vRSlayout);
+        layout->addStretch();
+    }
+    else {
+        QHBoxLayout* layout = new QHBoxLayout(aparent);
+        layout->setContentsMargins(0, 0, 0, 0);
+        vRSlayout->addLayout(vSB1, 0, 0, 1, 2);
+        vRSlayout->addLayout(vSB2, 1, 0, 1, 2);
+        layout->addLayout(vRSlayout);
+        layout->addStretch();
+    }
+
 
     std::array<QCPAxis*,3> axisToHide;
     if (orientation == Qt::Vertical) {

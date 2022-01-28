@@ -11,64 +11,30 @@ ImageDimsControl::ImageDimsControl (std::string whichCam) : camType (whichCam) {
 	isReady = false;
 }
 
-void ImageDimsControl::initialize( QPoint& pos, IChimeraQtWindow* parent, int numRows, int width ) {
-	auto& px = pos.rx (), & py = pos.ry ();
-	auto wi = width * numRows / 6;
+void ImageDimsControl::initialize( IChimeraQtWindow* parent) {
+	QGridLayout* layout = new QGridLayout(this);
 	leftText = new QLabel ("Left", parent);
-	leftText->setGeometry (px, py, wi, 25);
-
 	rightText = new QLabel ("Right (/512)", parent);
-	rightText->setGeometry (px+ wi, py, wi, 25);
-
 	horBinningText = new QLabel ("H. Bin", parent);
-	horBinningText->setGeometry (px + 2 * wi, py, wi, 25);
-	if (numRows == 1) {
-		px += width/2;
-	}
-	else {
-		py += 50;
-	}
 	bottomLabel = new QLabel ("Bottom (/512)", parent);
-	bottomLabel->setGeometry (px, py, wi, 25);
-
 	topLabel = new QLabel ("Top", parent);
-	topLabel->setGeometry (px + wi, py, wi, 25);
-
 	vertBinningText = new QLabel ("V. Bin", parent);
-	vertBinningText->setGeometry (px + 2*wi, py, wi, 25);
-	
-	if (numRows == 1) {
-		px -= width / 2;
-	}
-	else {
-		py -= 50;
-	}
 	leftEdit = new CQLineEdit ("1", parent);
-	leftEdit->setGeometry (px, py+=25, wi, 25);
-
 	rightEdit = new CQLineEdit ("5", parent);
-	rightEdit->setGeometry (px + wi, py, wi, 25);
-
 	horBinningEdit = new CQLineEdit ("1", parent);
-	horBinningEdit->setGeometry (px + 2* wi, py, wi, 25);
-	if (numRows == 1) {
-		px += width / 2;
-	}
-	else {
-		py += 50;
-	}
 	bottomEdit = new CQLineEdit ("1", parent);
-	bottomEdit->setGeometry (px, py, wi, 25);
-
 	topEdit = new CQLineEdit ("5", parent);
-	topEdit->setGeometry (px + wi, py, wi, 25);
-
 	vertBinningEdit = new CQLineEdit ("1", parent);
-	vertBinningEdit->setGeometry (px + 2* wi, py, wi, 25);
-	if (numRows == 1){
-		px -= width / 2;
+	int idx = 0;
+	for (auto l : { leftText ,rightText ,horBinningText,bottomLabel,topLabel,vertBinningText }) {
+		layout->addWidget(l, 0, idx);
+		idx++;
 	}
-	py += 25;
+	idx = 0;
+	for (auto l : { leftEdit ,rightEdit ,horBinningEdit,bottomEdit,topEdit,vertBinningEdit }) {
+		layout->addWidget(l, 1, idx);
+		idx++;
+	}
 }
 
 void ImageDimsControl::saveParams (ConfigStream& saveFile, imageParameters params) {

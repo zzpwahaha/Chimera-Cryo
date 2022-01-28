@@ -6,19 +6,20 @@
 
 
 void ExperimentTimer::initialize( IChimeraQtWindow* parent ){
+	this->setParent(parent);
 	QHBoxLayout* layout = new QHBoxLayout(this);
 	layout->setContentsMargins(0, 0, 0, 0);
-	timeDisplay = new QLabel ("", parent);
+	timeDisplay = new QLabel ("%", this);
 	layout->addWidget(timeDisplay);
 	/// PROGRESS BARS
 	// subseries progress bar
 	QVBoxLayout* layout1 = new QVBoxLayout(this);
 	layout1->setContentsMargins(0, 0, 0, 0);
 	long timerWidth = 550 * 2;
-	variationProgress = new QProgressBar (parent);
+	variationProgress = new QProgressBar (this);
 	variationProgress->setRange (0, 10000);
 	// series progress bar display
-	overallProgress = new QProgressBar (parent);
+	overallProgress = new QProgressBar (this);
 	overallProgress->setRange (0, 10000);
 	layout1->addWidget(variationProgress);
 	layout1->addWidget(overallProgress);

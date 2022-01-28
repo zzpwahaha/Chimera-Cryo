@@ -41,7 +41,7 @@ void PictureStats::initialize( IChimeraQtWindow* parent )
 	for (auto& control : minCounts) {
 		inc++;
 		control = new QLabel ("-", parent);
-		layout1->addWidget(control, inc, 1);
+		layout1->addWidget(control, inc, 2);
 	}
 	/// Average Counts
 	collumnHeaders[3] = new QLabel ("Avg:", parent);
@@ -49,7 +49,7 @@ void PictureStats::initialize( IChimeraQtWindow* parent )
 	for (auto& control : avgCounts) {
 		inc++;
 		control = new QLabel ("-", parent);
-		layout1->addWidget(control, inc, 2);
+		layout1->addWidget(control, inc, 3);
 	}
 	/// Selection Counts
 	collumnHeaders[4] = new QLabel ("Avg:", parent);
@@ -57,11 +57,12 @@ void PictureStats::initialize( IChimeraQtWindow* parent )
 	for (auto& control : selCounts) {
 		inc++;
 		control = new QLabel ("-", parent);
-		layout1->addWidget(control, inc, 3);
+		layout1->addWidget(control, inc, 4);
 	}
 	for (auto idx : range(collumnHeaders.size())) {
 		layout1->addWidget(collumnHeaders[idx], 0, idx);
 	}
+	layout->addLayout(layout1);
 }
 
 

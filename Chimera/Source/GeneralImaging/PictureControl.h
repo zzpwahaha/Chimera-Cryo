@@ -3,13 +3,14 @@
 #include "GeneralImaging/imageParameters.h"
 #include "RealTimeDataAnalysis/atomGrid.h"
 #include "Plotting/PlotCtrl.h"
-#include "CustomQtControls/LongQSlider.h"
+#include <Plotting/QCustomPlotCtrl.h>
+//#include "CustomQtControls/LongQSlider.h"
+#include <CustomQtControls/RangeSlider.h>
 #include "softwareAccumulationOption.h"
 #include <GeneralObjects/Matrix.h>
 #include "QPixmap.h"
 #include <qlabel.h>
 #include "ImageLabel.h"
-
 /*
  * This class manages a single picture displayed on the camera window and the controls associated with that single 
  * picture. Unlike many classes in my program, this is /not/ built to be a singleton. Instead, there should be one 
@@ -23,7 +24,7 @@ class PictureControl : public QWidget{
 	Q_OBJECT
 	public:
 		PictureControl ( bool histogramOption, Qt::TransformationMode mode );
-		void initialize( QPoint loc, int width, int height, IChimeraQtWindow* widget, int picScaleFactorIn=50);
+		void initialize( int width, int height, IChimeraQtWindow* widget, int picScaleFactorIn=50);
 		void handleMouse( QMouseEvent* event );
 		void drawPicNum(unsigned picNum, QPainter& painter);
 		void recalculateGrid( imageParameters newParameters );
@@ -59,8 +60,9 @@ class PictureControl : public QWidget{
 		unsigned accumNum;
 		const bool histOption;
 		std::vector<plotDataVec> horData, vertData;
-		PlotCtrl* horGraph = nullptr;
-		PlotCtrl* vertGraph = nullptr;
+		QCustomPlotCtrl* horGraph = nullptr;
+		QCustomPlotCtrl* vertGraph = nullptr;
+		QCustomPlotCtrl centralDensityPlot;
 		std::tuple<bool, int, int> mostRecentAutoscaleInfo;
 		bool mostRecentSpecialMinSetting;
 		bool mostRecentSpecialMaxSetting;
@@ -89,8 +91,9 @@ class PictureControl : public QWidget{
 		ImageLabel* pictureObject = nullptr;
 		QPixmap* pixmap = nullptr;
 
-		LongQSlider sliderMax;
-		LongQSlider sliderMin;
+		RangeSliderIntg slider;
+		//LongQSlider sliderMax;
+		//LongQSlider sliderMin;
 
 		//Control<CPushButton> myButton;
 		QLabel* coordinatesText = nullptr;

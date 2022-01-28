@@ -6,13 +6,15 @@
 #include <qlineedit.h>
 #include <qcheckbox.h>
 #include <qpushbutton.h>
+#include <qwidget.h>
 /*
 Home of gui options for the camera calibration.
 */
-class CameraCalibration
+class CameraCalibration : public QWidget
 {
+	Q_OBJECT
 	public:
-		void initialize( QPoint& pos, IChimeraQtWindow* parent );
+		void initialize( IChimeraQtWindow* parent );
 		bool autoCal( );
 		bool use( );
 		void setAutoCal(bool option);

@@ -9,16 +9,19 @@
 #include <qlabel.h>
 #include <qlineedit.h>
 #include <CustomQtControls/AutoNotifyCtrls.h>
+#include <qwidget.h>
 
 struct cameraPositions;
 class AndorWindow;
 class MainWindow;
 
 
-class ImageDimsControl{
+class ImageDimsControl : public QWidget
+{
+	Q_OBJECT
 	public:
 		ImageDimsControl(std::string whichCam);
-		void initialize( QPoint& pos, IChimeraQtWindow* parentWindow, int numRows, int width);
+		void initialize( IChimeraQtWindow* parentWindow);
 		imageParameters readImageParameters();
 		void setImageParametersFromInput( imageParameters param );
 		bool checkReady();

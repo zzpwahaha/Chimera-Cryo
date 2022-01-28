@@ -4,9 +4,13 @@
 #include <algorithm>
 #include <numeric>
 #include <boost/lexical_cast.hpp>
+#include <qlayout.h>
 
-PictureControl::PictureControl ( bool histogramOption, Qt::TransformationMode mode) 
-	: histOption( histogramOption ), QWidget (), transformationMode(mode){
+
+PictureControl::PictureControl(bool histogramOption, Qt::TransformationMode mode)
+	: histOption(histogramOption), /*QWidget(), */transformationMode(mode)
+	, slider(Qt::Vertical, RangeSlider::DoubleHandles)
+{
 	active = true;
 	if ( histOption ){
 		horData.resize ( 1 );
@@ -62,7 +66,9 @@ void PictureControl::updatePlotData ( ){
 /*
 * initialize all controls associated with single picture.
 */
-void PictureControl::initialize( QPoint loc, int width, int height, IChimeraQtWindow* parent, int picScaleFactorIn){
+void PictureControl::initialize( int width, int height, IChimeraQtWindow* parent, int picScaleFactorIn){
+	QVBoxLayout* layout = new QVBoxLayout(this);
+	layout->setContentsMargins(0, 0, 0, 0);
 	picScaleFactor = picScaleFactorIn;
 	if ( width < 100 ){
 		thrower ( "Pictures must be greater than 100 in width because this is the size of the max/min"
@@ -72,51 +78,67 @@ void PictureControl::initialize( QPoint loc, int width, int height, IChimeraQtWi
 		thrower ( "Pictures must be greater than 100 in height because this is the minimum height "
 									 "of the max/min controls." );
 	}
-	auto& px = loc.rx (), & py = loc.ry ();
+	QHBoxLayout* layout1 = new QHBoxLayout(this);
+	layout1->setContentsMargins(0, 0, 0, 0);
+	coordinatesText = new QLabel("Coordinates:", this);
+	coordinatesDisp = new QLabel("", this);
+	valueText = new QLabel("; Value", this);
+	valueDisp = new QLabel("", this);
+	layout1->addWidget(coordinatesText);
+	layout1->addWidget(coordinatesDisp);
+	layout1->addWidget(valueText);
+	layout1->addWidget(valueDisp);
+	layout1->addStretch();
+
+
+
 	maxWidth = width;
 	maxHeight = height;
+	QHBoxLayout* layout2 = new QHBoxLayout(this);
+	layout2->setContentsMargins(0, 0, 0, 0);
 	if ( histOption ){
-		QPoint pt{ 300,0 };
-		vertGraph = new PlotCtrl ( 1, plotStyle::VertHist, std::vector<int>(), "", true );
-		vertGraph->init (parent );
-		px += 65;
+		vertGraph = new QCustomPlotCtrl( 1, plotStyle::PicturePlot, std::vector<int>(), "", true );
+		vertGraph->init (parent,"");
 	}
 	if ( histOption ){
-		horGraph = new PlotCtrl ( 1, plotStyle::HistPlot, std::vector<int> ( ), "", true );
-		QPoint pt{ 365, long (860) };
-		horGraph->init(parent);
+		horGraph = new QCustomPlotCtrl( 1, plotStyle::PicturePlot, std::vector<int> ( ), "", true );
+		horGraph->init(parent,"");
 	}
+	QCustomPlotCtrl centralDensityPlot = QCustomPlotCtrl(1, plotStyle::DensityPlotWithHisto, std::vector<int>(), "", true);
+	centralDensityPlot.init(parent,"");
+	centralDensityPlot.plot->setMinimumSize(600, 400);
 	pictureObject = new ImageLabel (parent);
-	pictureObject->setGeometry (px, py, width, height);
-	parent->connect (pictureObject, &ImageLabel::mouseReleased, [this](QMouseEvent* event) {handleMouse (event); });
-	setPictureArea (loc, maxWidth, maxHeight);
+	
+	//pictureObject->setGeometry (px, py, width, height);
+	//parent->connect (pictureObject, &ImageLabel::mouseReleased, [this](QMouseEvent* event) {handleMouse (event); });
+	//setPictureArea (loc, maxWidth, maxHeight);
 
 	std::vector<unsigned char> data (20000);
 	for (auto& pt : data){
 		pt = rand () % 255;
 	}
 	
-	px += unscaledBackgroundArea.right () - unscaledBackgroundArea.left ();
-	sliderMin.initialize(loc, parent, 50, unscaledBackgroundArea.bottom () - unscaledBackgroundArea.top (), "MIN" );
-	sliderMin.setValue ( 0 );
-	parent->connect (sliderMin.slider, &QSlider::valueChanged, [this]() {redrawImage (); });
-	px += 25;
-	sliderMax.initialize ( loc, parent, 50, unscaledBackgroundArea.bottom () - unscaledBackgroundArea.top (), "MAX" );
-	sliderMax.setValue ( 300 );
-	parent->connect (sliderMax.slider, &QSlider::valueChanged, [this]() {redrawImage (); });
-	// reset this.
-	px -= unscaledBackgroundArea.right() - unscaledBackgroundArea.left ();
+	//px += unscaledBackgroundArea.right () - unscaledBackgroundArea.left ();
 	
-	py += height - 25;
-	coordinatesText = new QLabel ("Coordinates:", parent);
-	coordinatesText->setGeometry (px, py, 100, 20);
-	coordinatesDisp = new QLabel ("", parent);
-	coordinatesDisp->setGeometry (px+100, py, 100, 20);
-	valueText = new QLabel ("Value", parent);
-	valueText->setGeometry (px + 200, py, 100, 20);
-	valueDisp = new QLabel ("", parent);
-	valueDisp->setGeometry (px + 300, py, 100, 20);
-	py += 25;
+	//sliderMin.initialize(loc, parent, 50, unscaledBackgroundArea.bottom () - unscaledBackgroundArea.top (), "MIN" );
+	slider.setRange(0, 4096);
+	slider.setMaximumWidth(80);
+	//slider.hide();
+	parent->connect (&slider, &RangeSliderIntg::smlValueChanged, [this]() {redrawImage (); });
+	//px += 25;
+	//sliderMax.initialize ( loc, parent, 50, unscaledBackgroundArea.bottom () - unscaledBackgroundArea.top (), "MAX" );
+	//sliderMax.setValue ( 300 );
+	parent->connect (&slider, &RangeSliderIntg::lrgValueChanged, [this]() {redrawImage (); });
+	// reset this.
+	//px -= unscaledBackgroundArea.right() - unscaledBackgroundArea.left ();
+	layout2->addWidget(centralDensityPlot.plot, 0);
+	layout2->addWidget(&slider, 0);
+	layout2->addStretch();
+
+
+
+	layout->addLayout(layout1);
+	layout->addLayout(layout2);
 }
 
 
@@ -127,8 +149,10 @@ bool PictureControl::isActive(){
 
 
 void PictureControl::setSliderPositions(unsigned min, unsigned max){
-	sliderMin.setValue ( min );
-	sliderMax.setValue ( max );
+	slider.upperSpinBox()->setValue(max);
+	slider.lowerSpinBox()->setValue(min);
+	//sliderMin.setValue ( min );
+	//sliderMax.setValue ( max );
 }
 
 /*
@@ -136,53 +160,53 @@ void PictureControl::setSliderPositions(unsigned min, unsigned max){
  * Sets the unscaled background area and the scaled area.
  */
 void PictureControl::setPictureArea( QPoint loc, int width, int height ){
-	// this is important for the control to know where it should draw controls.
-	auto& sBA = scaledBackgroundArea;
-	auto& px = loc.rx (), & py = loc.ry ();
-	unscaledBackgroundArea = { px, py, px + width, py + height };
-	// reserve some area for the texts.
-	unscaledBackgroundArea.setRight (unscaledBackgroundArea.right () - 100);
-	sBA = unscaledBackgroundArea;
-	/*
-	sBA.left *= width;
-	sBA.right *= width;
-	sBA.top *= height;
-	sBA.bottom *= height;*/
-	if ( horGraph ){
-		//horGraph->setControlLocation ( { scaledBackgroundArea.left, scaledBackgroundArea.bottom }, 
-		//							   scaledBackgroundArea.right - scaledBackgroundArea.left, 65 );
-	}
-	if ( vertGraph ){
-		//vertGraph->setControlLocation ( { scaledBackgroundArea.left - 65, scaledBackgroundArea.bottom },
-		//							      65, scaledBackgroundArea.bottom - scaledBackgroundArea.top );
-	}
-	double widthPicScale;
-	double heightPicScale;
-	auto& uIP = unofficialImageParameters;
-	double w_to_h_ratio = double (uIP.width ()) / uIP.height ();
-	double sba_w = sBA.right () - sBA.left ();
-	double sba_h = sBA.bottom () - sBA.top ();
-	if (w_to_h_ratio > sba_w/sba_h){
-		widthPicScale = 1;
-		heightPicScale = (1.0/ w_to_h_ratio) * (sba_w / sba_h);
-	}
-	else{
-		heightPicScale = 1;
-		widthPicScale = w_to_h_ratio / (sba_w / sba_h);
-	}
+	//// this is important for the control to know where it should draw controls.
+	//auto& sBA = scaledBackgroundArea;
+	//auto& px = loc.rx (), & py = loc.ry ();
+	//unscaledBackgroundArea = { px, py, px + width, py + height };
+	//// reserve some area for the texts.
+	//unscaledBackgroundArea.setRight (unscaledBackgroundArea.right () - 100);
+	//sBA = unscaledBackgroundArea;
+	///*
+	//sBA.left *= width;
+	//sBA.right *= width;
+	//sBA.top *= height;
+	//sBA.bottom *= height;*/
+	//if ( horGraph ){
+	//	//horGraph->setControlLocation ( { scaledBackgroundArea.left, scaledBackgroundArea.bottom }, 
+	//	//							   scaledBackgroundArea.right - scaledBackgroundArea.left, 65 );
+	//}
+	//if ( vertGraph ){
+	//	//vertGraph->setControlLocation ( { scaledBackgroundArea.left - 65, scaledBackgroundArea.bottom },
+	//	//							      65, scaledBackgroundArea.bottom - scaledBackgroundArea.top );
+	//}
+	//double widthPicScale;
+	//double heightPicScale;
+	//auto& uIP = unofficialImageParameters;
+	//double w_to_h_ratio = double (uIP.width ()) / uIP.height ();
+	//double sba_w = sBA.right () - sBA.left ();
+	//double sba_h = sBA.bottom () - sBA.top ();
+	//if (w_to_h_ratio > sba_w/sba_h){
+	//	widthPicScale = 1;
+	//	heightPicScale = (1.0/ w_to_h_ratio) * (sba_w / sba_h);
+	//}
+	//else{
+	//	heightPicScale = 1;
+	//	widthPicScale = w_to_h_ratio / (sba_w / sba_h);
+	//}
 
-	unsigned long picWidth = unsigned long( (sBA.right () - sBA.left())*widthPicScale );
-	unsigned long picHeight = (sBA.bottom() - sBA.top())*heightPicScale;
-	QPoint mid = { (sBA.left () + sBA.right ()) / 2, (sBA.top () + sBA.bottom ()) / 2 };
-	pictureArea.setLeft(mid.x() - picWidth / 2);
-	pictureArea.setRight(mid.x() + picWidth / 2);
-	pictureArea.setTop(mid.y() - picHeight / 2);
-	pictureArea.setBottom(mid.y() + picHeight / 2);
-	
-	if (pictureObject){
-		pictureObject->setGeometry (px, py, width, height);
-		pictureObject->raise ();
-	}
+	//unsigned long picWidth = unsigned long( (sBA.right () - sBA.left())*widthPicScale );
+	//unsigned long picHeight = (sBA.bottom() - sBA.top())*heightPicScale;
+	//QPoint mid = { (sBA.left () + sBA.right ()) / 2, (sBA.top () + sBA.bottom ()) / 2 };
+	//pictureArea.setLeft(mid.x() - picWidth / 2);
+	//pictureArea.setRight(mid.x() + picWidth / 2);
+	//pictureArea.setTop(mid.y() - picHeight / 2);
+	//pictureArea.setBottom(mid.y() + picHeight / 2);
+	//
+	//if (pictureObject){
+	//	pictureObject->setGeometry (px, py, width, height);
+	//	pictureObject->raise ();
+	//}
 }
 
 
@@ -190,9 +214,9 @@ void PictureControl::setPictureArea( QPoint loc, int width, int height ){
  * sure to change the background size before using this.
  * ********/
 void PictureControl::setSliderControlLocs (QPoint pos, int height){
-	sliderMin.reposition ( pos, height);
-	pos.rx() += 25;
-	sliderMax.reposition ( pos, height );
+	//sliderMin.reposition ( pos, height);
+	//pos.rx() += 25;
+	//sliderMax.reposition ( pos, height );
 }
 
 /* used when transitioning between single and multiple pictures. It sets it based on the background size, so make
@@ -211,17 +235,17 @@ void PictureControl::updatePalette( QVector<QRgb> palette ){
  * called when the user changes either the min or max edit.
  */
 void PictureControl::handleEditChange( int id ){
-	if ( id == sliderMax.getEditId() ){
-		sliderMax.handleEdit ( );
-	}
-	if ( id == sliderMin.getEditId() ){
-		sliderMin.handleEdit ( );
-	}
+	//if ( id == sliderMax.getEditId() ){
+	//	sliderMax.handleEdit ( );
+	//}
+	//if ( id == sliderMin.getEditId() ){
+	//	sliderMin.handleEdit ( );
+	//}
 }
 
 
 std::pair<unsigned, unsigned> PictureControl::getSliderLocations(){
-	return { sliderMin.getValue (), sliderMax.getValue() };
+	return { slider.getSilderSmlVal(), slider.getSilderLrgVal() };
 }
 
 
@@ -300,17 +324,14 @@ void PictureControl::setActive( bool activeState )
 	}
 	active = activeState;
 	if (!active){
-		sliderMax.hide ( true );
-		sliderMin.hide (true);
-		//
+		slider.hide();
 		coordinatesText->hide( );
 		coordinatesDisp->hide( );
 		valueText->hide( );
 		valueDisp->hide(  );
 	}
 	else{
-		sliderMax.hide ( false );
-		sliderMin.hide ( false );
+		slider.show();
 		coordinatesText->show();
 		coordinatesDisp->show();
 		valueText->show( );
@@ -348,8 +369,8 @@ void PictureControl::drawBitmap ( const Matrix<long>& picData, std::tuple<bool, 
 	mostRecentPicNum = pictureNumber;
 	mostRecentGrids = grids;
 
-	auto minColor = sliderMin.getValue ( );
-	auto maxColor = sliderMax.getValue ( );
+	auto minColor = slider.getSilderSmlVal( );
+	auto maxColor = slider.getSilderLrgVal( );
 	mostRecentAutoscaleInfo = autoScaleInfo;
 	int pixelsAreaWidth = pictureArea.right () - pictureArea.left () + 1;
 	int pixelsAreaHeight = pictureArea.bottom () - pictureArea.top () + 1;
@@ -362,8 +383,10 @@ void PictureControl::drawBitmap ( const Matrix<long>& picData, std::tuple<bool, 
 		minColor = std::get<1> ( autoScaleInfo );
 	}
 	else{
-		colorRange = sliderMax.getValue ( ) - sliderMin.getValue ( );
-		minColor = sliderMin.getValue ( );
+		colorRange = maxColor - minColor;
+		minColor = minColor;
+		//colorRange = sliderMax.getValue ( ) - sliderMin.getValue ( );
+		//minColor = sliderMin.getValue ( );
 	}
 	// assumes non-zero size...
 	if ( grid.size ( ) == 0 ){

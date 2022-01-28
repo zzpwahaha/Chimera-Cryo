@@ -14,7 +14,7 @@ class PictureManager {
 		void updatePlotData ( );
 		void handleSaveConfig(ConfigStream& saveFile);
 		void handleOpenConfig(ConfigStream& configFile);
-		void initialize( QPoint& loc, int manWidth, int manHeight, IChimeraQtWindow* widget, int scaleFactor=50);
+		void initialize( int manWidth, int manHeight, IChimeraQtWindow* widget, int scaleFactor=50);
 		void drawGrids(QPainter& painter);
 		unsigned getNumberActive( );
 		void setParameters( imageParameters parameters );
@@ -39,8 +39,9 @@ class PictureManager {
 		void resetPictureStorage();
 		const std::string configDelim;
 		void setTransformationMode (Qt::TransformationMode mode);
-	private:
 		std::array<PictureControl, 4> pictures;
+
+	private:
 		std::array<QVector<QRgb>,4> palettes;
 		QVector<QRgb> inferno, greys;
 		QPoint picturesLocation;

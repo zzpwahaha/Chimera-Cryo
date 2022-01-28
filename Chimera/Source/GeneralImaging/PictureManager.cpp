@@ -127,19 +127,19 @@ void PictureManager::setSpecialGreaterThanMax(bool option){
 
 
 void PictureManager::setSinglePicture( imageParameters imageParams){
-	for (unsigned picNum = 0; picNum < 4; picNum++){
-		if (picNum < 1){
-			pictures[picNum].setActive(true);
-		}
-		else{
-			pictures[picNum].setActive(false);
-		}
-	}
-	pictures.front( ).setPictureArea( picturesLocation, picturesWidth, picturesHeight);
-	auto sliderLoc = picturesLocation;
-	sliderLoc.rx() += picturesWidth;
-	pictures.front( ).setSliderControlLocs(sliderLoc, picturesHeight);
-	setParameters( imageParams );
+	//for (unsigned picNum = 0; picNum < 4; picNum++){
+	//	if (picNum < 1){
+	//		pictures[picNum].setActive(true);
+	//	}
+	//	else{
+	//		pictures[picNum].setActive(false);
+	//	}
+	//}
+	//pictures.front( ).setPictureArea( picturesLocation, picturesWidth, picturesHeight);
+	//auto sliderLoc = picturesLocation;
+	//sliderLoc.rx() += picturesWidth;
+	//pictures.front( ).setSliderControlLocs(sliderLoc, picturesHeight);
+	//setParameters( imageParams );
 }
 
 void PictureManager::resetPictureStorage(){
@@ -149,65 +149,60 @@ void PictureManager::resetPictureStorage(){
 }
 
 void PictureManager::setMultiplePictures( imageParameters imageParams, unsigned numberActivePics ){
-	for (unsigned picNum = 0; picNum < 4; picNum++){
-		if (picNum < numberActivePics){
-			pictures[picNum].setActive(true);
-		}
-		else{
-			pictures[picNum].setActive(false);
-		}
-	}
+	//for (unsigned picNum = 0; picNum < 4; picNum++){
+	//	if (picNum < numberActivePics){
+	//		pictures[picNum].setActive(true);
+	//	}
+	//	else{
+	//		pictures[picNum].setActive(false);
+	//	}
+	//}
 
-	QPoint loc = picturesLocation;
-	auto& px = loc.rx (), & py = loc.ry ();
-	// Square: width = 550, height = 440
-	auto picWidth = 950;
-	auto picHeight = 220;
-	//int picWidth = 550;
-	//int picHeight = 420;
-	pictures[0].setPictureArea( loc, picWidth, picHeight );
-	pictures[0].setSliderControlLocs ({ px + picWidth,py }, picHeight);
-	//px += 550;
-	py += picHeight + 25;
-	pictures[1].setPictureArea( loc, picWidth, picHeight );
-	pictures[1].setSliderControlLocs ({ px + picWidth,py }, picHeight);
-	//px -= 550;
-	py += picHeight + 25;
-	pictures[2].setPictureArea( loc, picWidth, picHeight );
-	pictures[2].setSliderControlLocs ({ px + picWidth,py }, picHeight);
-	//px += 550;
-	py += picHeight + 25;
-	pictures[3].setPictureArea( loc, picWidth, picHeight );
-	pictures[3].setSliderControlLocs ({ px + picWidth,py }, picHeight);
-	setParameters( imageParams );
-	for ( auto& pic : pictures ){
-		//pic.setCursorValueLocations( parent );
-	}
-	setPalletes ({ 0,0,0,0 });
+	//QPoint loc = picturesLocation;
+	//auto& px = loc.rx (), & py = loc.ry ();
+	//// Square: width = 550, height = 440
+	//auto picWidth = 950;
+	//auto picHeight = 220;
+	////int picWidth = 550;
+	////int picHeight = 420;
+	//pictures[0].setPictureArea( loc, picWidth, picHeight );
+	//pictures[0].setSliderControlLocs ({ px + picWidth,py }, picHeight);
+	////px += 550;
+	//py += picHeight + 25;
+	//pictures[1].setPictureArea( loc, picWidth, picHeight );
+	//pictures[1].setSliderControlLocs ({ px + picWidth,py }, picHeight);
+	////px -= 550;
+	//py += picHeight + 25;
+	//pictures[2].setPictureArea( loc, picWidth, picHeight );
+	//pictures[2].setSliderControlLocs ({ px + picWidth,py }, picHeight);
+	////px += 550;
+	//py += picHeight + 25;
+	//pictures[3].setPictureArea( loc, picWidth, picHeight );
+	//pictures[3].setSliderControlLocs ({ px + picWidth,py }, picHeight);
+	//setParameters( imageParams );
+	//for ( auto& pic : pictures ){
+	//	//pic.setCursorValueLocations( parent );
+	//}
+	//setPalletes ({ 0,0,0,0 });
 }
 
-void PictureManager::initialize( QPoint& loc, int manWidth, int manHeight, IChimeraQtWindow* widget, int scaleFactor){
-	auto& px = loc.rx (), & py = loc.ry ();
-	picturesLocation = loc;
+void PictureManager::initialize( int manWidth, int manHeight, IChimeraQtWindow* widget, int scaleFactor)
+{
 	picturesWidth = manWidth;
 	picturesHeight = manHeight;
 	// Square: width = 550, height = 440
 	auto width = 1200;
 	auto height = 220;
-	pictures[0].initialize( loc, width, height, widget, scaleFactor);
-	py += height;
-	pictures[1].initialize( loc, width, height, widget, scaleFactor);
-	py += height;
-	pictures[2].initialize( loc, width, height, widget, scaleFactor);
-	py += height;
-	pictures[3].initialize( loc, width, height, widget, scaleFactor);
-	py += height;
+	pictures[0].initialize( width, height, widget, scaleFactor);
+	pictures[1].initialize( width, height, widget, scaleFactor);
+	pictures[2].initialize( width, height, widget, scaleFactor);
+	pictures[3].initialize( width, height, widget, scaleFactor);
 	createPalettes ();
 	for (auto& pic : pictures){
 		pic.updatePalette( inferno );
 	}
 	// initialize to one. This matches the camera settings initialization.
-	setNumberPicturesActive( 1 );
+	//setNumberPicturesActive( 1 );
 }
 
 

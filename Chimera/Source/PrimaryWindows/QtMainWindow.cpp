@@ -139,7 +139,6 @@ void QtMainWindow::initializeWidgets (){
 	layout->addWidget(shortStatus.statusLabel(), 5, 0, 1, 2);
 	layout->addWidget(&errorStatus, 0, 1, 5, 1);
 
-
 	profile.initialize (this); // this and inside it, "handleSelectConfigButton" connect the open config button to openning the config for all windows 
 	notes.initialize (this);
 	repetitionControl.initialize (this);
@@ -153,7 +152,6 @@ void QtMainWindow::initializeWidgets (){
 	layout->addWidget(&mainOptsCtrl, 3, 2);
 	layout->addWidget(&debugger, 4, 2);
 	layout->addWidget(&tempMonitor, 5, 2);
-	
 }
 
 unsigned QtMainWindow::getAutoCalNumber () { return autoCalNum; }

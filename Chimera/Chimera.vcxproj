@@ -331,8 +331,8 @@
     <ClInclude Include="Source\Andor\AndorRunSettings.h" />
     <ClInclude Include="Source\Andor\AndorTemperatureStatus.h" />
     <ClInclude Include="Source\Andor\AndorTriggerModes.h" />
-    <ClInclude Include="Source\Andor\CameraCalibration.h" />
-    <ClInclude Include="Source\Andor\CameraImageDimensions.h" />
+    <QtMoc Include="Source\Andor\CameraCalibration.h" />
+    <QtMoc Include="Source\Andor\CameraImageDimensions.h" />
     <ClInclude Include="Source\Andor\cameraThreadInput.h" />
     <QtMoc Include="Source\Andor\PictureSettingsControl.h" />
     <ClInclude Include="Source\ArbGen\AgilentCore.h" />

@@ -611,6 +611,12 @@
     <QtMoc Include="Source\ExperimentMonitoringAndStatus\ExperimentTimer.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <QtMoc Include="Source\Andor\CameraImageDimensions.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\Andor\CameraCalibration.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\AnalogInput\AiSettings.h">
@@ -662,12 +668,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\Andor\AndorTriggerModes.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Andor\CameraCalibration.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Andor\CameraImageDimensions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\Andor\cameraThreadInput.h">

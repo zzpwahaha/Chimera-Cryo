@@ -38,7 +38,7 @@ void QCustomPlotCtrl::init(IChimeraQtWindow* parent, QString titleIn, unsigned n
 	title = new QCPTextElement(plot, titleIn);
 	plot->plotLayout()->insertRow(0);
 	plot->plotLayout()->addElement(0, 0, title);
-	if (this->style == plotStyle::DensityPlot) {
+	if (this->style == plotStyle::DensityPlot || this->style == plotStyle::DensityPlotWithHisto) {
 		//QCPAxisRect* centerAxisRect = new QCPAxisRect(plot);
 		plot->axisRect()->setupFullAxesBox(true);
 		plot->axisRect()->setRangeZoomFactor(0.95);
@@ -71,12 +71,36 @@ void QCustomPlotCtrl::init(IChimeraQtWindow* parent, QString titleIn, unsigned n
 		intTicker->setScaleStrategy(QCPAxisTickerFixed::ssMultiples);
 		colorMap->keyAxis()->setTicker(QSharedPointer<QCPAxisTickerFixed>(intTicker));
 		colorMap->valueAxis()->setTicker(QSharedPointer<QCPAxisTickerFixed>(intTicker));
+		auto c = \
 		connect(plot, &QCustomPlot::mouseDoubleClick, this, [this]() {
 			colorMap->rescaleAxes();
 			colorMap->rescaleDataRange(true);
 			colorMap->colorScale()->rescaleDataRange(true);
 			plot->yAxis->setScaleRatio(plot->xAxis, 1.0);
 			plot->replot(); });
+		if (this->style == plotStyle::DensityPlotWithHisto) {
+			plot->setInteractions(0x000);
+			disconnect(c);
+			plot->plotLayout()->insertColumn(0);
+			leftAxisRect = new QCPAxisRect(plot);
+			bottomAxisRect = new QCPAxisRect(plot);
+			plot->plotLayout()->addElement(1, 0, leftAxisRect);
+			plot->plotLayout()->addElement(2, 1, bottomAxisRect);
+			leftAxisRect->axis(QCPAxis::atLeft)->setLabelFont(QFont("Times", 10));
+			bottomAxisRect->axis(QCPAxis::atBottom)->setLabelFont(QFont("Times", 10));
+			leftAxisRect->axis(QCPAxis::atRight)->setTickLabels(true);
+			bottomAxisRect->axis(QCPAxis::atTop)->setTickLabels(true);
+			leftAxisRect->axis(QCPAxis::atLeft)->setTicker(QSharedPointer<QCPAxisTickerFixed>(intTicker));
+			bottomAxisRect->axis(QCPAxis::atBottom)->setTicker(QSharedPointer<QCPAxisTickerFixed>(intTicker));
+			leftAxisRect->axis(QCPAxis::atLeft)->setTickLabelRotation(90);
+			leftAxisRect->setupFullAxesBox(false);
+			bottomAxisRect->setupFullAxesBox(false);
+			/*set alignment of three plots + 1 colorbar*/
+			bottomAxisRect->setMarginGroup(QCP::msLeft | QCP::msRight, marginGroup);
+			leftAxisRect->setMarginGroup(QCP::msTop | QCP::msBottom, marginGroup);
+			bottomAxisRect->setMaximumSize(1000, 80);
+			leftAxisRect->setMaximumSize(80, 1000);
+		}
 	}
 	if (this->style == plotStyle::DacPlot || this->style == plotStyle::TtlPlot) {
 		plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectPlottables);
@@ -92,8 +116,7 @@ void QCustomPlotCtrl::init(IChimeraQtWindow* parent, QString titleIn, unsigned n
 		//	});
 	}
 
-
-	plot->setMinimumSize(600, 400);
+	//plot->setMinimumSize(600, 400);
 	resetChart();
 	if (this->style == plotStyle::DensityPlot) {
 		colorMap->data()->setSize(10, 10);
