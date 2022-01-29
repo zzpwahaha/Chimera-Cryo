@@ -51,6 +51,7 @@ class PictureControl : public QWidget{
 			bool includingAnalysisMarkers=true);
 		coordinate selectedLocation;
 		void setTransformationMode (Qt::TransformationMode);
+		void setSliderSize(int size);
 	private:
 		Qt::TransformationMode transformationMode;
 		Ui::PictureControl* ui = nullptr;

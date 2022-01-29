@@ -105,7 +105,8 @@ public:
     // for changing the value of slider and spinbox: eg upperSpinBox()->setValue(max);
     QSpinBox* upperSpinBox() { return upperSB; }
     QSpinBox* lowerSpinBox() { return lowerSB; }
-
+    //set the maximum size of the slider bar, due to the bug in slider and spinbox, the bar will keep increasing. So no auto rescaling in Qt is propriate
+    void setMaxLength(int length);
     int getSilderSmlVal();
     int getSilderLrgVal();
 private:

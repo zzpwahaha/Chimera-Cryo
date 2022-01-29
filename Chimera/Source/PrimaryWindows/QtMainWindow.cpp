@@ -64,7 +64,7 @@ QtMainWindow::QtMainWindow () :
 		auto screen = qApp->screens ()[monitorNum[winCount++] % numMonitors];
 		window->setWindowState ((windowState () & ~Qt::WindowMinimized) | Qt::WindowActive);
 		window->activateWindow ();
-		window->setGeometry(0, 0, 1200, 800);
+		//window->setGeometry(0, 0, 1200, 800);
 		window->showMaximized (); 
 		//window->move (screen->availableGeometry ().topLeft());
 		//window->resize (screen->availableGeometry ().width (), screen->availableGeometry().height());

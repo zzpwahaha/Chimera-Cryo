@@ -104,9 +104,9 @@ void PictureControl::initialize( int width, int height, IChimeraQtWindow* parent
 		horGraph = new QCustomPlotCtrl( 1, plotStyle::PicturePlot, std::vector<int> ( ), "", true );
 		horGraph->init(parent,"");
 	}
-	QCustomPlotCtrl centralDensityPlot = QCustomPlotCtrl(1, plotStyle::DensityPlotWithHisto, std::vector<int>(), "", true);
+	QCustomPlotCtrl centralDensityPlot = QCustomPlotCtrl(1, plotStyle::DensityPlotWithHisto, std::vector<int>(), false, true);
 	centralDensityPlot.init(parent,"");
-	centralDensityPlot.plot->setMinimumSize(600, 400);
+	centralDensityPlot.plot->setMinimumSize(400, 350);
 	pictureObject = new ImageLabel (parent);
 	
 	//pictureObject->setGeometry (px, py, width, height);
@@ -123,6 +123,7 @@ void PictureControl::initialize( int width, int height, IChimeraQtWindow* parent
 	//sliderMin.initialize(loc, parent, 50, unscaledBackgroundArea.bottom () - unscaledBackgroundArea.top (), "MIN" );
 	slider.setRange(0, 4096);
 	slider.setMaximumWidth(80);
+	slider.setMaxLength(800);
 	//slider.hide();
 	parent->connect (&slider, &RangeSliderIntg::smlValueChanged, [this]() {redrawImage (); });
 	//px += 25;
@@ -131,14 +132,15 @@ void PictureControl::initialize( int width, int height, IChimeraQtWindow* parent
 	parent->connect (&slider, &RangeSliderIntg::lrgValueChanged, [this]() {redrawImage (); });
 	// reset this.
 	//px -= unscaledBackgroundArea.right() - unscaledBackgroundArea.left ();
-	layout2->addWidget(centralDensityPlot.plot, 0);
+	layout2->addWidget(centralDensityPlot.plot, 1);
 	layout2->addWidget(&slider, 0);
-	layout2->addStretch();
+	//layout2->addStretch();
 
 
 
 	layout->addLayout(layout1);
 	layout->addLayout(layout2);
+	layout->addStretch();
 }
 
 
@@ -324,17 +326,19 @@ void PictureControl::setActive( bool activeState )
 	}
 	active = activeState;
 	if (!active){
+		this->hide();
 		slider.hide();
-		coordinatesText->hide( );
-		coordinatesDisp->hide( );
-		valueText->hide( );
-		valueDisp->hide(  );
+		coordinatesText->hide();
+		coordinatesDisp->hide();
+		valueText->hide();
+		valueDisp->hide();
 	}
 	else{
+		this->show();
 		slider.show();
 		coordinatesText->show();
 		coordinatesDisp->show();
-		valueText->show( );
+		valueText->show();
 		valueDisp->show();
 	}
 }
@@ -582,5 +586,10 @@ void PictureControl::drawDongles (QPainter& painter, std::vector<atomGrid> grids
  
 void PictureControl::setTransformationMode (Qt::TransformationMode mode) {
 	transformationMode = mode;
+}
+
+void PictureControl::setSliderSize(int size)
+{
+	slider.setMaxLength(size);
 }
 

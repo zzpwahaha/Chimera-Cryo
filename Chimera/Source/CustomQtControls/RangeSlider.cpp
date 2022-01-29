@@ -383,7 +383,7 @@ RangeSliderIntg::RangeSliderIntg(Qt::Orientation ori, RangeSlider::Option handle
     axslid = new QCustomPlot(aparent);
 
 
-    QGridLayout* vRSlayout = new QGridLayout();
+    QGridLayout* vRSlayout = new QGridLayout(this);
     QHBoxLayout* vSB1 = new QHBoxLayout();
     QHBoxLayout* vSB2 = new QHBoxLayout();
     vSB1->setContentsMargins(0, 0, 0, 0);
@@ -400,16 +400,16 @@ RangeSliderIntg::RangeSliderIntg(Qt::Orientation ori, RangeSlider::Option handle
         layout->setContentsMargins(0, 0, 0, 0);
         vRSlayout->addLayout(vSB1, 0, 0, 1, 2);
         vRSlayout->addLayout(vSB2, 1, 0, 1, 2);
-        layout->addLayout(vRSlayout);
-        layout->addStretch();
+        layout->addLayout(vRSlayout,1);
+        //layout->addStretch();
     }
     else {
         QHBoxLayout* layout = new QHBoxLayout(aparent);
         layout->setContentsMargins(0, 0, 0, 0);
         vRSlayout->addLayout(vSB1, 0, 0, 1, 2);
         vRSlayout->addLayout(vSB2, 1, 0, 1, 2);
-        layout->addLayout(vRSlayout);
-        layout->addStretch();
+        layout->addLayout(vRSlayout,1);
+        //layout->addStretch();
     }
 
 
@@ -504,6 +504,16 @@ void RangeSliderIntg::setRange(int low, int upr)
     upperSB->setRange(low, upr);
     lowerSB->setRange(low, upr);
     
+}
+
+void RangeSliderIntg::setMaxLength(int length)
+{
+    if (orientation == Qt::Vertical) {
+        axslid->setMaximumHeight(length);
+    }
+    else {
+        axslid->setMaximumWidth(length);
+    }
 }
 
 /*for vertical, it is in this funny way because I want the upper one to be the larger one,

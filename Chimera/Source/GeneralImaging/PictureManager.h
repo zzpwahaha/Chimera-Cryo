@@ -7,7 +7,9 @@
 #include <fstream>
 #include "PrimaryWindows/IChimeraQtWindow.h"
 
-class PictureManager {
+class PictureManager : public QWidget
+{
+	Q_OBJECT
 	public:
 		PictureManager ( bool histOption, std::string configurationFileDelim, bool autoscaleDefault,
 						 Qt::TransformationMode mode );
@@ -43,6 +45,7 @@ class PictureManager {
 
 	private:
 		std::array<QVector<QRgb>,4> palettes;
+		QGridLayout* picLayout = nullptr;
 		QVector<QRgb> inferno, greys;
 		QPoint picturesLocation;
 		int picturesWidth;
@@ -51,5 +54,7 @@ class PictureManager {
 		bool specialGreaterThanMax;
 		bool specialLessThanMin;
 		bool alwaysShowGrid;
+
+		IChimeraQtWindow* parentWin = nullptr;
 };
 

@@ -3,6 +3,7 @@
 #include "PictureManager.h"
 #include "ConfigurationSystems/ConfigSystem.h"
 #include "Andor/pictureSettingsControl.h"
+#include <PrimaryWindows/QtAndorWindow.h>
 
 PictureManager::PictureManager ( bool histOption, std::string configurationFileDelimiter, bool autoscaleDefault, 
 	Qt::TransformationMode mode)
@@ -127,19 +128,44 @@ void PictureManager::setSpecialGreaterThanMax(bool option){
 
 
 void PictureManager::setSinglePicture( imageParameters imageParams){
-	//for (unsigned picNum = 0; picNum < 4; picNum++){
-	//	if (picNum < 1){
-	//		pictures[picNum].setActive(true);
-	//	}
-	//	else{
-	//		pictures[picNum].setActive(false);
-	//	}
-	//}
+	for (unsigned picNum = 0; picNum < 4; picNum++){
+		if (picNum < 1){
+			pictures[picNum].setActive(true);
+		}
+		else{
+			pictures[picNum].setActive(false);
+		}
+	}
+	if (picLayout != nullptr) {
+		for (auto picNum : range(pictures.size())) {
+			picLayout->removeWidget(&pictures[picNum]);
+		}
+		picLayout->addWidget(&pictures[0], 2, 2);
+		pictures[0].setSliderSize(800);
+		
+	}
+
+	if (parentWin != nullptr) {
+		picLayout->setHorizontalSpacing(0);
+		picLayout->setVerticalSpacing(0);
+		//parentWin->andorWin->showMaximized();
+		this->adjustSize();
+		//this->showMaximized();
+		this->window()->update();
+		this->window()->updateGeometry();
+		//picLayout->update();
+
+		this->window()->adjustSize();
+		QScreen* screen = this->window()->windowHandle()->screen();
+		this->window()->move(screen->availableGeometry().topLeft());
+		this->window()->resize(screen->availableGeometry().width(), screen->availableGeometry().height());
+	}
+	
 	//pictures.front( ).setPictureArea( picturesLocation, picturesWidth, picturesHeight);
 	//auto sliderLoc = picturesLocation;
 	//sliderLoc.rx() += picturesWidth;
 	//pictures.front( ).setSliderControlLocs(sliderLoc, picturesHeight);
-	//setParameters( imageParams );
+	setParameters( imageParams );
 }
 
 void PictureManager::resetPictureStorage(){
@@ -149,15 +175,63 @@ void PictureManager::resetPictureStorage(){
 }
 
 void PictureManager::setMultiplePictures( imageParameters imageParams, unsigned numberActivePics ){
-	//for (unsigned picNum = 0; picNum < 4; picNum++){
-	//	if (picNum < numberActivePics){
-	//		pictures[picNum].setActive(true);
-	//	}
-	//	else{
-	//		pictures[picNum].setActive(false);
-	//	}
-	//}
+	for (unsigned picNum = 0; picNum < 4; picNum++){
+		if (picNum < numberActivePics){
+			pictures[picNum].setActive(true);
+		}
+		else{
+			pictures[picNum].setActive(false);
+		}
+	}
+	if (picLayout != nullptr) {
+		for (auto picNum : range(pictures.size())) {
+			picLayout->removeWidget(&pictures[picNum]);
+			pictures[picNum].setSliderSize(350);//prevent the slider bar from growing indefinitely
+		}
+	}
+	switch (numberActivePics)
+	{
+		case 1:
+			picLayout->addWidget(&pictures[0], 0, 0, 2, 2);
+			break;
+		case 2:
+			picLayout->addWidget(&pictures[0], 0, 0, 1, 2);
+			picLayout->addWidget(&pictures[1], 1, 0, 1, 2);
+			break;
+		case 3:
+			picLayout->addWidget(&pictures[0], 0, 0, 1, 1);
+			picLayout->addWidget(&pictures[1], 0, 1, 1, 1);
+			picLayout->addWidget(&pictures[2], 1, 0, 1, 2);
+			break;
+		case 4:
+			picLayout->addWidget(&pictures[0], 0, 0, 1, 1);
+			picLayout->addWidget(&pictures[1], 0, 1, 1, 1);
+			picLayout->addWidget(&pictures[2], 1, 0, 1, 1);
+			picLayout->addWidget(&pictures[3], 1, 1, 1, 1);
+			break;
+		default:
+			break;
+	}
 
+	if (parentWin != nullptr) {
+		picLayout->setHorizontalSpacing(0);
+		picLayout->setVerticalSpacing(0);
+		this->adjustSize();
+		//this->showMaximized();
+		//parentWin->andorWin->adjustSize();
+		picLayout->update();
+		this->window()->update();
+		this->window()->updateGeometry();
+		QScreen* screen = this->window()->windowHandle()->screen();
+		//parentWin->andorWin->move (screen->availableGeometry ().topLeft());
+		//parentWin->andorWin->resize (screen->availableGeometry ().width (), screen->availableGeometry().height());
+		this->window()->adjustSize();
+		//parentWin->andorWin->showFullScreen();
+		//parentWin->andorWin->setWindowState(Qt::WindowMaximized);
+		this->window()->move(screen->availableGeometry().topLeft());
+		this->window()->resize(screen->availableGeometry().width(), screen->availableGeometry().height());
+		
+	}
 	//QPoint loc = picturesLocation;
 	//auto& px = loc.rx (), & py = loc.ry ();
 	//// Square: width = 550, height = 440
@@ -179,7 +253,7 @@ void PictureManager::setMultiplePictures( imageParameters imageParams, unsigned 
 	//py += picHeight + 25;
 	//pictures[3].setPictureArea( loc, picWidth, picHeight );
 	//pictures[3].setSliderControlLocs ({ px + picWidth,py }, picHeight);
-	//setParameters( imageParams );
+	setParameters( imageParams );
 	//for ( auto& pic : pictures ){
 	//	//pic.setCursorValueLocations( parent );
 	//}
@@ -188,21 +262,30 @@ void PictureManager::setMultiplePictures( imageParameters imageParams, unsigned 
 
 void PictureManager::initialize( int manWidth, int manHeight, IChimeraQtWindow* widget, int scaleFactor)
 {
+	parentWin = widget;
 	picturesWidth = manWidth;
 	picturesHeight = manHeight;
 	// Square: width = 550, height = 440
+	picLayout = new QGridLayout(this);
+	picLayout->setContentsMargins(0, 0, 0, 0);
 	auto width = 1200;
 	auto height = 220;
 	pictures[0].initialize( width, height, widget, scaleFactor);
 	pictures[1].initialize( width, height, widget, scaleFactor);
 	pictures[2].initialize( width, height, widget, scaleFactor);
 	pictures[3].initialize( width, height, widget, scaleFactor);
+	picLayout->addWidget(&pictures[0], 2, 2);
+	//picLayout->addWidget(&pictures[1], 0, 1);
+	//picLayout->addWidget(&pictures[2], 1, 0);
+	//picLayout->addWidget(&pictures[3], 1, 1);
+	picLayout->setHorizontalSpacing(0);
+	picLayout->setVerticalSpacing(0);
 	createPalettes ();
 	for (auto& pic : pictures){
 		pic.updatePalette( inferno );
 	}
 	// initialize to one. This matches the camera settings initialization.
-	//setNumberPicturesActive( 1 );
+	setNumberPicturesActive( 1 );
 }
 
 

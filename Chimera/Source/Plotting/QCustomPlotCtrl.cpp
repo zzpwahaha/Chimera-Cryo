@@ -7,15 +7,18 @@
 #include <qmenu.h>
 #include <qdialogbuttonbox.h>
 #include <AnalogInput/CalibrationManager.h>
-
+#include <qsizepolicy.h>
+int QCustomPlotCtrl::shit = 0;
 QCustomPlotCtrl::QCustomPlotCtrl() :
 	style(plotStyle::GeneralErrorPlot)
 {
+	s = shit++;
 }
 
 QCustomPlotCtrl::QCustomPlotCtrl(unsigned numTraces, plotStyle inStyle, std::vector<int> thresholds_in,
 	bool narrowOpt, bool plotHistOption) :
 	style(inStyle)/*, narrow(narrowOpt)*/ {
+	s = shit++;
 }
 
 QCustomPlotCtrl::~QCustomPlotCtrl() {
@@ -26,7 +29,7 @@ void QCustomPlotCtrl::init(IChimeraQtWindow* parent, QString titleIn, unsigned n
 {
 	plot = new QCustomPlot(parent);
 	plot->setContextMenuPolicy(Qt::CustomContextMenu);
-	parent->connect(plot, &QtCharts::QChartView::customContextMenuRequested,
+	parent->connect(plot, &QCustomPlot::customContextMenuRequested,
 		[this, parent](const QPoint& pos2) {
 			try {
 				handleContextMenu(pos2);
@@ -88,18 +91,46 @@ void QCustomPlotCtrl::init(IChimeraQtWindow* parent, QString titleIn, unsigned n
 			plot->plotLayout()->addElement(2, 1, bottomAxisRect);
 			leftAxisRect->axis(QCPAxis::atLeft)->setLabelFont(QFont("Times", 10));
 			bottomAxisRect->axis(QCPAxis::atBottom)->setLabelFont(QFont("Times", 10));
-			leftAxisRect->axis(QCPAxis::atRight)->setTickLabels(true);
-			bottomAxisRect->axis(QCPAxis::atTop)->setTickLabels(true);
+			//plot->axisRect(1)->axis(QCPAxis::atLeft)->setTickLabels(false);
+			//plot->axisRect(1)->axis(QCPAxis::atBottom)->setTickLabels(false);
+			leftAxisRect->axis(QCPAxis::atRight)->setTickLabels(false);
+			bottomAxisRect->axis(QCPAxis::atTop)->setTickLabels(false);
 			leftAxisRect->axis(QCPAxis::atLeft)->setTicker(QSharedPointer<QCPAxisTickerFixed>(intTicker));
 			bottomAxisRect->axis(QCPAxis::atBottom)->setTicker(QSharedPointer<QCPAxisTickerFixed>(intTicker));
-			leftAxisRect->axis(QCPAxis::atLeft)->setTickLabelRotation(90);
+			//leftAxisRect->axis(QCPAxis::atLeft)->setTickLabelRotation(90);
 			leftAxisRect->setupFullAxesBox(false);
 			bottomAxisRect->setupFullAxesBox(false);
 			/*set alignment of three plots + 1 colorbar*/
 			bottomAxisRect->setMarginGroup(QCP::msLeft | QCP::msRight, marginGroup);
 			leftAxisRect->setMarginGroup(QCP::msTop | QCP::msBottom, marginGroup);
-			bottomAxisRect->setMaximumSize(1000, 80);
-			leftAxisRect->setMaximumSize(80, 1000);
+			bottomAxisRect->setMaximumSize(1500, 10);
+			leftAxisRect->setMaximumSize(10, 2000);
+			//plot->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
+			plot->plotLayout()->setColumnSpacing(10);
+			plot->plotLayout()->setRowSpacing(10);
+			//leftAxisRect->setAutoMargins(QCP::msNone);
+			//bottomAxisRect->setAutoMargins(QCP::msNone);
+			//plot->axisRect(1)->setAutoMargins(QCP::msNone);
+			//plot->axisRect(2)->setAutoMargins(QCP::msNone);
+			leftAxisRect->setMinimumMargins(QMargins(0, 0, 0, 0));
+			//leftAxisRect->setMargins(QMargins(15, 0, 0, 0));
+			//bottomAxisRect->setMargins(QMargins(0, 0, 0, 15));
+			//plot->axisRect(1)->setMargins(QMargins(5, 5, 5, 5));
+			//plot->axisRect(2)->setMargins(QMargins(0, 0, 0, 0));
+			bottomAxisRect->setMinimumMargins(QMargins(0, 0, 0, 0));
+			//title->setMaximumSize(1, 1);
+			//plot->plotLayout()->remove(title);
+			//plot->plotLayout()->
+		}
+		// move newly created axes on "axes" layer and grids on "grid" layer:
+		foreach(QCPAxisRect * rect, plot->axisRects())
+		{
+			foreach(QCPAxis * axis, rect->axes())
+			{
+				axis->setLayer("axes");
+				axis->grid()->setLayer("grid");
+			}
 		}
 	}
 	if (this->style == plotStyle::DacPlot || this->style == plotStyle::TtlPlot) {
@@ -124,6 +155,10 @@ void QCustomPlotCtrl::init(IChimeraQtWindow* parent, QString titleIn, unsigned n
 }
 
 void QCustomPlotCtrl::handleContextMenu(const QPoint& pos) {
+	if (plot == nullptr) {
+		return;
+	}
+	if (s < 0) { return; }
 	QMenu menu;
 	menu.setStyleSheet(chimeraStyleSheets::stdStyleSheet());
 	auto* clear = new QAction("Clear Plot", plot);

@@ -33,13 +33,11 @@ void QtAndorWindow::initializeWidgets (){
 	statBox = new ColorBox(this, mainWin->getDevices());
 	QWidget* centralWidget = new QWidget();
 	setCentralWidget(centralWidget);
-
 	QHBoxLayout* layout = new QHBoxLayout(centralWidget);
 
 	QVBoxLayout* layout1 = new QVBoxLayout(this);
 	layout1->setContentsMargins(0, 0, 0, 0);
 	andor.initializeClass (this, &imageTimes);
-	//statBox->initialize (position, this, 480, mainWin->getDevices (), 2);
 	alerts.alertMainThread (0);
 	alerts.initialize (this);
 	analysisHandler.initialize (this);
@@ -59,8 +57,8 @@ void QtAndorWindow::initializeWidgets (){
 	for (auto pltInc : range (6)){
 		mainAnalysisPlots.push_back (new QCustomPlotCtrl(1, plotStyle::BinomialDataPlot, { 0,0,0,0 }, false, false));
 		mainAnalysisPlots.back()->init(this, "INACTIVE");
-		mainAnalysisPlots.back()->plot->setMinimumSize(350, 140);
-		mainAnalysisPlots.back()->plot->setMaximumSize(450, 150);
+		mainAnalysisPlots.back()->plot->setMinimumSize(350, 130);
+		mainAnalysisPlots.back()->plot->setMaximumSize(450, 140);
 		layout2->addWidget(mainAnalysisPlots.back()->plot);
 	}
 	layout2->addStretch(1);
@@ -72,20 +70,15 @@ void QtAndorWindow::initializeWidgets (){
 	pics.initialize (530 * 2, 460 * 2 + 5, this);
 	// end of literal initialization calls
 	//pics.setSinglePicture (andorSettingsCtrl.getConfigSettings ().andor.imageSettings);
-	timer.setMaximumHeight(150);
+	timer.setMaximumHeight(45);
 	layout3->addWidget(&timer);
-	layout3->addWidget(&pics.pictures[0]);
-	//pics.pictures[0].setGeometry(1000, 600, 300, 300);
+	layout3->addWidget(&pics, 1);
 	layout3->addStretch();
 
 	andor.setSettings (andorSettingsCtrl.getConfigSettings ().andor);
-
-	centralWidget->setStyleSheet("border: 2px solid  black; ");
 	layout->addLayout(layout1, 0);
 	layout->addLayout(layout2, 0);
 	layout->addLayout(layout3, 0);
-	qDebug() << timer.pos()<< alerts.geometry() << stats.geometry()<<timer.geometry()<<layout3->geometry() << pics.pictures[0].geometry()<< pics.pictures[1].geometry();
-	centralWidget->setStyleSheet("border: 2px solid  black; ");
 	
 	QTimer* timer = new QTimer (this);
 	connect (timer, &QTimer::timeout, [this]() {

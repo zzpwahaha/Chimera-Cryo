@@ -380,7 +380,7 @@
     <ClInclude Include="Source\GeneralFlumes\VisaFlume.h" />
     <ClInclude Include="Source\GeneralImaging\csvReader.h" />
     <ClInclude Include="Source\GeneralImaging\imageParameters.h" />
-    <ClInclude Include="Source\GeneralImaging\PictureManager.h" />
+    <QtMoc Include="Source\GeneralImaging\PictureManager.h" />
     <QtMoc Include="Source\GeneralImaging\PictureStats.h" />
     <QtMoc Include="Source\CustomQtControls\RangeSlider.h" />
     <ClInclude Include="Source\GeneralImaging\softwareAccumulationOption.h" />

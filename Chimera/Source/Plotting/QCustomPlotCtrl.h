@@ -28,6 +28,7 @@ typedef std::vector<dataPoint> plotDataVec;
 class QCustomPlotCtrl : public QObject {
 	Q_OBJECT;
 public:
+	static int shit;
 	QCustomPlotCtrl();
 	QCustomPlotCtrl(const QCustomPlotCtrl&) = delete;
 	QCustomPlotCtrl(unsigned numTraces, plotStyle inStyle, std::vector<int> thresholds,
@@ -44,10 +45,10 @@ public:
 	void setTitle(std::string newTitle);
 	void setThresholds(std::vector<int> newThresholds);
 	void handleContextMenu(const QPoint& pos);
-	QCustomPlot* plot;
+	QCustomPlot* plot = nullptr;
 	void setControlLocation(QRect loc);
 private:
-
+	int s;
 	QCPTextElement* title;
 	QCPColorMap* colorMap = nullptr;
 	QCPAxisRect* leftAxisRect = nullptr;
