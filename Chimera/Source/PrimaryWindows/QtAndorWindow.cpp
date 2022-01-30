@@ -75,11 +75,17 @@ void QtAndorWindow::initializeWidgets (){
 	layout3->addWidget(&pics, 1);
 	layout3->addStretch();
 
+
+
 	andor.setSettings (andorSettingsCtrl.getConfigSettings ().andor);
 	layout->addLayout(layout1, 0);
 	layout->addLayout(layout2, 0);
 	layout->addLayout(layout3, 0);
 	
+	//pics.setMultiplePictures(imageParameters(), 4);
+	//pics.setSinglePicture(imageParameters());
+
+
 	QTimer* timer = new QTimer (this);
 	connect (timer, &QTimer::timeout, [this]() {
 		auto temp = andor.getTemperature ();
@@ -116,6 +122,12 @@ void QtAndorWindow::handlePrepareForAcq (AndorRunSettings* lparam, analysisSetti
 void QtAndorWindow::handlePlotPop (unsigned id){
 	for (auto& plt : mainAnalysisPlots)	{
 	}
+}
+
+void QtAndorWindow::refreshPics()
+{
+	pics.setMultiplePictures(andorSettingsCtrl.getConfigSettings().andor.imageSettings, 4);
+	pics.setSinglePicture(andorSettingsCtrl.getConfigSettings().andor.imageSettings);
 }
 
 bool QtAndorWindow::wasJustCalibrated (){

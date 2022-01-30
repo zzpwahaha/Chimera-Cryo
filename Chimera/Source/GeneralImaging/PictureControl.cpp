@@ -90,8 +90,6 @@ void PictureControl::initialize( int width, int height, IChimeraQtWindow* parent
 	layout1->addWidget(valueDisp);
 	layout1->addStretch();
 
-
-
 	maxWidth = width;
 	maxHeight = height;
 	QHBoxLayout* layout2 = new QHBoxLayout(this);
@@ -107,31 +105,17 @@ void PictureControl::initialize( int width, int height, IChimeraQtWindow* parent
 	QCustomPlotCtrl centralDensityPlot = QCustomPlotCtrl(1, plotStyle::DensityPlotWithHisto, std::vector<int>(), false, true);
 	centralDensityPlot.init(parent,"");
 	centralDensityPlot.plot->setMinimumSize(400, 350);
-	pictureObject = new ImageLabel (parent);
-	
-	//pictureObject->setGeometry (px, py, width, height);
+	pictureObject = new ImageLabel (parent);	
 	//parent->connect (pictureObject, &ImageLabel::mouseReleased, [this](QMouseEvent* event) {handleMouse (event); });
-	//setPictureArea (loc, maxWidth, maxHeight);
-
 	std::vector<unsigned char> data (20000);
 	for (auto& pt : data){
 		pt = rand () % 255;
 	}
-	
-	//px += unscaledBackgroundArea.right () - unscaledBackgroundArea.left ();
-	
-	//sliderMin.initialize(loc, parent, 50, unscaledBackgroundArea.bottom () - unscaledBackgroundArea.top (), "MIN" );
 	slider.setRange(0, 4096);
 	slider.setMaximumWidth(80);
 	slider.setMaxLength(800);
-	//slider.hide();
 	parent->connect (&slider, &RangeSliderIntg::smlValueChanged, [this]() {redrawImage (); });
-	//px += 25;
-	//sliderMax.initialize ( loc, parent, 50, unscaledBackgroundArea.bottom () - unscaledBackgroundArea.top (), "MAX" );
-	//sliderMax.setValue ( 300 );
 	parent->connect (&slider, &RangeSliderIntg::lrgValueChanged, [this]() {redrawImage (); });
-	// reset this.
-	//px -= unscaledBackgroundArea.right() - unscaledBackgroundArea.left ();
 	layout2->addWidget(centralDensityPlot.plot, 1);
 	layout2->addWidget(&slider, 0);
 	//layout2->addStretch();

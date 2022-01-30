@@ -69,6 +69,7 @@ QtMainWindow::QtMainWindow () :
 		//window->move (screen->availableGeometry ().topLeft());
 		//window->resize (screen->availableGeometry ().width (), screen->availableGeometry().height());
 	}
+	andorWin->refreshPics();
 	// hide the splash just before the first window requiring input pops up.
 	try	{
 		masterConfig.load (this, auxWin, andorWin);

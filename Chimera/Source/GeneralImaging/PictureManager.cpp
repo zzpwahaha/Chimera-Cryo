@@ -148,23 +148,17 @@ void PictureManager::setSinglePicture( imageParameters imageParams){
 	if (parentWin != nullptr) {
 		picLayout->setHorizontalSpacing(0);
 		picLayout->setVerticalSpacing(0);
-		//parentWin->andorWin->showMaximized();
-		this->adjustSize();
-		//this->showMaximized();
-		this->window()->update();
-		this->window()->updateGeometry();
-		//picLayout->update();
 
-		this->window()->adjustSize();
-		QScreen* screen = this->window()->windowHandle()->screen();
-		this->window()->move(screen->availableGeometry().topLeft());
-		this->window()->resize(screen->availableGeometry().width(), screen->availableGeometry().height());
+		parentWin->setUpdatesEnabled(false);
+		this->adjustSize();
+		parentWin->adjustSize();
+		QScreen* screen = parentWin->windowHandle()->screen();
+		parentWin->move(screen->availableGeometry().topLeft());
+		parentWin->resize(screen->availableGeometry().width(), screen->availableGeometry().height());
+		this->adjustSize();
+		parentWin->setUpdatesEnabled(true);
 	}
 	
-	//pictures.front( ).setPictureArea( picturesLocation, picturesWidth, picturesHeight);
-	//auto sliderLoc = picturesLocation;
-	//sliderLoc.rx() += picturesWidth;
-	//pictures.front( ).setSliderControlLocs(sliderLoc, picturesHeight);
 	setParameters( imageParams );
 }
 
@@ -186,7 +180,7 @@ void PictureManager::setMultiplePictures( imageParameters imageParams, unsigned 
 	if (picLayout != nullptr) {
 		for (auto picNum : range(pictures.size())) {
 			picLayout->removeWidget(&pictures[picNum]);
-			pictures[picNum].setSliderSize(350);//prevent the slider bar from growing indefinitely
+			pictures[picNum].setSliderSize(390);//prevent the slider bar from growing indefinitely
 		}
 	}
 	switch (numberActivePics)
@@ -217,19 +211,15 @@ void PictureManager::setMultiplePictures( imageParameters imageParams, unsigned 
 		picLayout->setHorizontalSpacing(0);
 		picLayout->setVerticalSpacing(0);
 		this->adjustSize();
-		//this->showMaximized();
-		//parentWin->andorWin->adjustSize();
 		picLayout->update();
-		this->window()->update();
-		this->window()->updateGeometry();
-		QScreen* screen = this->window()->windowHandle()->screen();
-		//parentWin->andorWin->move (screen->availableGeometry ().topLeft());
-		//parentWin->andorWin->resize (screen->availableGeometry ().width (), screen->availableGeometry().height());
-		this->window()->adjustSize();
-		//parentWin->andorWin->showFullScreen();
-		//parentWin->andorWin->setWindowState(Qt::WindowMaximized);
-		this->window()->move(screen->availableGeometry().topLeft());
-		this->window()->resize(screen->availableGeometry().width(), screen->availableGeometry().height());
+
+		QScreen* screen = parentWin->windowHandle()->screen();
+		parentWin/*this->window()*/->setUpdatesEnabled(false);
+		parentWin->adjustSize();
+		parentWin->move(screen->availableGeometry().topLeft());
+		parentWin->resize(screen->availableGeometry().width(), screen->availableGeometry().height());
+		this->adjustSize();
+		parentWin->setUpdatesEnabled(true);
 		
 	}
 	//QPoint loc = picturesLocation;
@@ -284,8 +274,10 @@ void PictureManager::initialize( int manWidth, int manHeight, IChimeraQtWindow* 
 	for (auto& pic : pictures){
 		pic.updatePalette( inferno );
 	}
+
 	// initialize to one. This matches the camera settings initialization.
 	setNumberPicturesActive( 1 );
+	
 }
 
 
