@@ -504,7 +504,7 @@ void DataLogger::writeTemperature(std::pair<std::vector<long long>, std::vector<
 		writeDataSet(timedata.first, "TimeEpoch(ms)", subtemp);
 		std::vector<std::string> timeStr;
 		char buffer[128];
-		std::transform(timedata.first.begin(), timedata.first.end(), timeStr.begin(), [&](long long epoch)-> std::string {
+		std::transform(timedata.first.begin(), timedata.first.end(), std::back_inserter(timeStr), [&](long long epoch)-> std::string {
 			strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", localtime(&epoch));
 			return std::string(buffer); });
 		writeDataSet(timeStr, "Datetime", subtemp);
