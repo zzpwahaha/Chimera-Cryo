@@ -42,8 +42,8 @@ void QCustomPlotCtrl::init(IChimeraQtWindow* parent, QString titleIn, unsigned n
 	if (this->style == plotStyle::DensityPlot || this->style == plotStyle::DensityPlotWithHisto) {
 		//QCPAxisRect* centerAxisRect = new QCPAxisRect(plot);
 		centerAxisRect = plot->axisRect();
-		plot->axisRect()->setupFullAxesBox(true);
-		plot->axisRect()->setRangeZoomFactor(0.95);
+		centerAxisRect->setupFullAxesBox(true);
+		centerAxisRect->setRangeZoomFactor(0.95);
 		//plot->plotLayout()->addElement(0, 0, centerAxisRect);
 		/*colorbar*/
 		QCPColorScale* colorScale = new QCPColorScale(plot);
@@ -60,11 +60,11 @@ void QCustomPlotCtrl::init(IChimeraQtWindow* parent, QString titleIn, unsigned n
 		colorScale->setGradient(tmpCG);
 		/*set alignment of plot + 1 colorbar*/
 		QCPMarginGroup* marginGroup = new QCPMarginGroup(plot);
-		plot->axisRect()->setMarginGroup(QCP::msAll, marginGroup);
+		centerAxisRect->setMarginGroup(QCP::msAll, marginGroup);
 		colorScale->setMarginGroup(QCP::msBottom | QCP::msTop, marginGroup);
 		plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
 		/*color map and cmap gradient*/
-		colorMap = new QCPColorMap(plot->xAxis, plot->yAxis);
+		colorMap = new QCPColorMap(centerAxisRect->axis(QCPAxis::atBottom), centerAxisRect->axis(QCPAxis::atLeft));
 		colorMap->setInterpolate(false);
 		colorMap->setColorScale(colorScale);
 		/*setup a ticker for colormap that only gives integer ticks:*/
@@ -149,7 +149,7 @@ void QCustomPlotCtrl::init(IChimeraQtWindow* parent, QString titleIn, unsigned n
 
 	//plot->setMinimumSize(600, 400);
 	resetChart();
-	if (this->style == plotStyle::DensityPlot) {
+	if (this->style == plotStyle::DensityPlot || this->style == plotStyle::DensityPlotWithHisto) {
 		colorMap->data()->setSize(10, 10);
 	}
 }
@@ -291,7 +291,7 @@ QCPGraph* QCustomPlotCtrl::getCalData() {
 
 void QCustomPlotCtrl::removeData() {
 	//plot->clearGraphs();
-	if (this->style != plotStyle::DensityPlot) {
+	if (this->style != plotStyle::DensityPlot && this->style != plotStyle::DensityPlotWithHisto) {
 		plot->clearPlottables();
 	}
 }
@@ -435,6 +435,21 @@ void QCustomPlotCtrl::setData(std::vector<plotDataVec> newData, std::vector<std:
 			}
 		}
 	}
+	else if (style == plotStyle::DensityPlotWithHisto) {
+		if (newData.size() == 0 || !plot) {
+			return;
+		}
+		int Height = newData.size();
+		int Width = newData[0].size();
+		//auto pp = centerAxisRect->plottables().at(0);
+		colorMap->data()->setRange(QCPRange(0, Width - 1), QCPRange(0, Height - 1));
+		colorMap->data()->setSize(Width, Height);
+		for (size_t i = 0; i < Height; i++) {
+			for (size_t j = 0; j < Width; j++) {
+				colorMap->data()->setCell(j, i, newData[i][j].y);
+			}
+		}
+	}
 	else if (style == plotStyle::PicturePlot) {
 		if (newData.size() == 0 || !plot) {
 			return;
@@ -520,7 +535,7 @@ void QCustomPlotCtrl::setStyle(plotStyle newStyle) {
 }
 
 void QCustomPlotCtrl::resetChart() {
-	if (this->style != plotStyle::DensityPlot) {
+	if (this->style != plotStyle::DensityPlot && this->style != plotStyle::DensityPlotWithHisto) {
 		if (!showLegend) {
 			plot->legend->setVisible(false);
 		}
@@ -542,6 +557,14 @@ void QCustomPlotCtrl::resetChart() {
 		colorMap->rescaleDataRange(true);
 		colorMap->colorScale()->rescaleDataRange(true);
 		plot->yAxis->setScaleRatio(plot->xAxis, 1.0);
+	}
+	else if (style == plotStyle::DensityPlotWithHisto) {
+		colorMap->rescaleKeyAxis();
+		colorMap->rescaleDataRange(true);
+		colorMap->colorScale()->rescaleDataRange(true);
+		centerAxisRect->axis(QCPAxis::atLeft)->setScaleRatio(centerAxisRect->axis(QCPAxis::atBottom), 1.0);
+		bottomAxisRect->axis(QCPAxis::atBottom)->setRange(centerAxisRect->axis(QCPAxis::atBottom)->range());
+		leftAxisRect->axis(QCPAxis::atLeft)->setRange(centerAxisRect->axis(QCPAxis::atLeft)->range());
 	}
 	else if (style == plotStyle::DacPlot || style == plotStyle::TtlPlot) {
 		if (autoScale) {
@@ -569,7 +592,7 @@ void QCustomPlotCtrl::resetChart() {
 	plot->xAxis->setTickLabelColor(neutralColor);
 	plot->yAxis->setTickLabelColor(neutralColor);
 	plot->axisRect()->insetLayout()->setInsetAlignment(0, Qt::AlignTop | Qt::AlignLeft);
-	if (this->style != plotStyle::DensityPlot) {
+	if (this->style != plotStyle::DensityPlot || this->style != plotStyle::DensityPlotWithHisto) {
 		auto legendColor = QColor(defs["@StaticBackground"]);
 		legendColor.setAlpha(150);
 		plot->legend->setBrush(legendColor);
@@ -596,3 +619,4 @@ std::vector<double> QCustomPlotCtrl::handleMousePosOnCMap(QMouseEvent* event)
 	vec.insert(vec.end(), { std::floor(x + 0.5), std::floor(y + 0.5), colorMap->data()->data(x, y) });
 	return vec;
 }
+

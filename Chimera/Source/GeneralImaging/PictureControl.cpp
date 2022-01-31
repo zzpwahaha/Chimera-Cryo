@@ -358,18 +358,18 @@ void PictureControl::drawBitmap ( const Matrix<long>& picData, std::tuple<bool, 
 	int pixelsAreaHeight = pictureArea.bottom () - pictureArea.top () + 1;
 	int dataWidth = grid.size ( );
 	// first element containst whether autoscaling or not.
-	long colorRange;
-	if ( std::get<0> ( autoScaleInfo ) ){
-		// third element contains max, second contains min.
-		colorRange = std::get<2> ( autoScaleInfo ) - std::get<1> ( autoScaleInfo );
-		minColor = std::get<1> ( autoScaleInfo );
-	}
-	else{
-		colorRange = maxColor - minColor;
-		minColor = minColor;
-		//colorRange = sliderMax.getValue ( ) - sliderMin.getValue ( );
-		//minColor = sliderMin.getValue ( );
-	}
+	//long colorRange;
+	//if ( std::get<0> ( autoScaleInfo ) ){
+	//	// third element contains max, second contains min.
+	//	colorRange = std::get<2> ( autoScaleInfo ) - std::get<1> ( autoScaleInfo );
+	//	minColor = std::get<1> ( autoScaleInfo );
+	//}
+	//else{
+	//	colorRange = maxColor - minColor;
+	//	minColor = minColor;
+	//	//colorRange = sliderMax.getValue ( ) - sliderMin.getValue ( );
+	//	//minColor = sliderMin.getValue ( );
+	//}
 	// assumes non-zero size...
 	if ( grid.size ( ) == 0 ){
 		thrower  ( "Tried to draw bitmap without setting grid size!" );
@@ -380,61 +380,74 @@ void PictureControl::drawBitmap ( const Matrix<long>& picData, std::tuple<bool, 
 		thrower  ( "Picture data didn't match grid size!" );
 	}
 	
-	float yscale = ( 256.0f ) / (float) colorRange;
-	std::vector<uchar> dataArray2 ( dataWidth * dataHeight, 255 );
-	int iTemp;
-	double dTemp = 1;
-	const int picPaletteSize = 256;
-	for (int heightInc = 0; heightInc < dataHeight; heightInc++){
-		for (int widthInc = 0; widthInc < dataWidth; widthInc++){
-			dTemp = ceil (yscale * double(picData (heightInc, widthInc) - minColor));
-			if (dTemp <= 0)	{
-				// raise value to zero which is the floor of values this parameter can take.
-				iTemp = 1;
-			}
-			else if (dTemp >= picPaletteSize - 1)	{
-				// round to maximum value.
-				iTemp = picPaletteSize - 2;
-			}
-			else{
-				// no rounding or flooring to min or max needed.
-				iTemp = (int)dTemp;
-			}
-			// store the value.
-			dataArray2[widthInc + heightInc * dataWidth] = (unsigned char)iTemp;
+	int width = picData.getCols();
+	int height = picData.getRows();
+	std::vector<plotDataVec> ddvec(height);
+	for (size_t idx = 0; idx < height; idx++)
+	{
+		ddvec[idx].reserve(width);
+		for (size_t idd = 0; idd < width; idd++)
+		{
+			ddvec[idx].push_back(dataPoint{ 0,double(picData(idx,idd)),0 }); // x,y,err
 		}
 	}
-	int sf = picScaleFactor;
-	QImage img (sf * dataWidth, sf * dataHeight, QImage::Format_Indexed8);
-	img.setColorTable (imagePalette);
-	img.fill (0);
-	for (auto rowInc : range(dataHeight)){
-		std::vector<uchar> singleRow (sf * dataWidth);
-		for (auto val : range (dataWidth)){
-			for (auto rep : range (sf)) {
-				singleRow[sf * val + rep] = dataArray2[rowInc * dataWidth + val];
-			}
-		}
-		for (auto repRow : range (sf)){
-			memcpy (img.scanLine (rowInc * sf + repRow), singleRow.data(), img.bytesPerLine ());
-		}
-	}
+	pic.setData(ddvec);
+
+	//float yscale = ( 256.0f ) / (float) colorRange;
+	//std::vector<uchar> dataArray2 ( dataWidth * dataHeight, 255 );
+	//int iTemp;
+	//double dTemp = 1;
+	//const int picPaletteSize = 256;
+	//for (int heightInc = 0; heightInc < dataHeight; heightInc++){
+	//	for (int widthInc = 0; widthInc < dataWidth; widthInc++){
+	//		dTemp = ceil (yscale * double(picData (heightInc, widthInc) - minColor));
+	//		if (dTemp <= 0)	{
+	//			// raise value to zero which is the floor of values this parameter can take.
+	//			iTemp = 1;
+	//		}
+	//		else if (dTemp >= picPaletteSize - 1)	{
+	//			// round to maximum value.
+	//			iTemp = picPaletteSize - 2;
+	//		}
+	//		else{
+	//			// no rounding or flooring to min or max needed.
+	//			iTemp = (int)dTemp;
+	//		}
+	//		// store the value.
+	//		dataArray2[widthInc + heightInc * dataWidth] = (unsigned char)iTemp;
+	//	}
+	//}
+	//int sf = picScaleFactor;
+	//QImage img (sf * dataWidth, sf * dataHeight, QImage::Format_Indexed8);
+	//img.setColorTable (imagePalette);
+	//img.fill (0);
+	//for (auto rowInc : range(dataHeight)){
+	//	std::vector<uchar> singleRow (sf * dataWidth);
+	//	for (auto val : range (dataWidth)){
+	//		for (auto rep : range (sf)) {
+	//			singleRow[sf * val + rep] = dataArray2[rowInc * dataWidth + val];
+	//		}
+	//	}
+	//	for (auto repRow : range (sf)){
+	//		memcpy (img.scanLine (rowInc * sf + repRow), singleRow.data(), img.bytesPerLine ());
+	//	}
+	//}
 	// need to convert to an rgb format in order to draw on top. drawing on top using qpainter isn't supported with the 
 	// indexed format. 
-	img = img.convertToFormat (QImage::Format_RGB888);
-	QPainter painter;
-	painter.begin (&img);
-	drawDongles (painter, grids, pictureNumber, includingAnalysisMarkers);
-	painter.end ();	
-	// seems like this doesn't *quite* work for some reason, hence the extra number here to adjust
-	if (img.width () / img.height () > (pictureObject->width () / pictureObject->height ())-0.1)	{
-		pictureObject->setPixmap (QPixmap::fromImage (img).scaledToWidth (pictureObject->width (), transformationMode));
-	}
-	else {
-		pictureObject->setPixmap (QPixmap::fromImage (img).scaledToHeight (pictureObject->height (), transformationMode));
-	}
-	// update this with the new picture.
-	setHoverValue ( );
+	//img = img.convertToFormat (QImage::Format_RGB888);
+	//QPainter painter;
+	//painter.begin (&img);
+	//drawDongles (painter, grids, pictureNumber, includingAnalysisMarkers);
+	//painter.end ();	
+	//// seems like this doesn't *quite* work for some reason, hence the extra number here to adjust
+	//if (img.width () / img.height () > (pictureObject->width () / pictureObject->height ())-0.1)	{
+	//	pictureObject->setPixmap (QPixmap::fromImage (img).scaledToWidth (pictureObject->width (), transformationMode));
+	//}
+	//else {
+	//	pictureObject->setPixmap (QPixmap::fromImage (img).scaledToHeight (pictureObject->height (), transformationMode));
+	//}
+	// //update this with the new picture.
+	//setHoverValue ( );
 }
 
 void PictureControl::setHoverValue( ){
@@ -448,7 +461,7 @@ void PictureControl::setHoverValue( ){
 void PictureControl::handleMouse (QMouseEvent* event){
 	auto vec = pic.handleMousePosOnCMap(event);
 	coordinatesDisp->setText("( " + qstr(int(vec[0])) + " , " + qstr(int(vec[1])) + " )");
-	valueDisp->setText(qstr(int(vec[0])));
+	valueDisp->setText(qstr(int(vec[2])));
 }
 
 /* 

@@ -310,6 +310,12 @@ void PictureManager::setParameters(imageParameters parameters){
 	}
 }
 
+void PictureManager::setTransformationMode(Qt::TransformationMode mode) {
+	for (auto& pic : pictures) {
+		pic.setTransformationMode(mode);
+	}
+}
+
 void PictureManager::createPalettes( ){
 	// greys
 	palettes[2] = QVector<QRgb>{
@@ -1089,9 +1095,4 @@ void PictureManager::createPalettes( ){
 }
 
 
-void PictureManager::setTransformationMode (Qt::TransformationMode mode) {
-	for (auto& pic : pictures) {
-		pic.setTransformationMode (mode);
-	}
-}
 

@@ -208,6 +208,7 @@ void CalibrationManager::initialize (IChimeraQtWindow* parent, AiSystem* ai_in, 
 	calibrationTable->resizeColumnsToContents ();
 
 	calibrationViewer.init(parent, "Calibration View");
+	calibrationViewer.plot->setMinimumSize(600, 400);
 	calibrationViewer.plot->xAxis->setLabel("Control Voltage (V)");
 	calibrationViewer.plot->yAxis->setLabel("Photodetector Result Voltage (V)");
 
