@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Andor/AndorCameraThreadWorker.h"
 #include <Andor/AndorCameraCore.h>
+#include <qdebug.h>
 
 AndorCameraThreadWorker::AndorCameraThreadWorker (cameraThreadInput* input_){
 	input = input_;
@@ -30,10 +31,10 @@ void AndorCameraThreadWorker::process (){
 		 */
 		 // Also, anytime this gets locked, the count should be reset.
 		 //input->signaler.wait( lock, [input]() { return input->expectingAcquisition; } );
-		while (!input->expectingAcquisition) {
+		/*while (!input->expectingAcquisition) {
 			input->signaler.wait (lock);
-		}
-
+		}*/
+		input->signaler.wait(lock);
 		if (!input->safemode){
 			try	{
 				int status = input->Andor->flume.queryStatus ();
@@ -81,6 +82,7 @@ void AndorCameraThreadWorker::process (){
 		else { // safemode
 			// simulate an actual wait.
 			Sleep (500);
+			qDebug() << "Andor safemode debug: " << std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
 			if (pictureNumber % 2 == 0) {
 				(*input->imageTimes).push_back (std::chrono::high_resolution_clock::now ());
 			}

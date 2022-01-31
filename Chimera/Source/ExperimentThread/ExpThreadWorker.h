@@ -96,6 +96,7 @@ class ExpThreadWorker : public QObject
 			std::vector<parameterType>& vars, std::string& warnings, timeType& operationTime, std::string callingScope);
 		timeType operationTime;
 		HANDLE runningThread;
+	private:
 		std::atomic<bool> isPaused = false;
 		std::atomic<bool> isAborting = false;
 		std::atomic<bool>& experimentIsRunning;
