@@ -182,9 +182,9 @@ void MakoCameraCore::initializeVimba()
         }
 
     }
-    catch (const ChimeraError& e)
+    catch (ChimeraError& e)
     {
-        throwNested(str("Mako <constructor> Exception: ") + e.what());
+        throwNested(str("Mako <constructor> Exception: ") + e.trace());
     }
 }
 

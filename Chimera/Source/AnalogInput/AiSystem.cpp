@@ -81,7 +81,7 @@ void AiSystem::initialize (IChimeraQtWindow* parent)
 			int selection = cbox->currentIndex();
 			core.setAiRange(i, AiChannelRange::which(selection));
 			try { core.updateChannelRange(); }
-			catch (ChimeraError& e) { emit error(e.what()); }
+			catch (ChimeraError& e) { emit error(e.qtrace()); }
 			 });
 
 		for (auto& whichR : AiChannelRange::allRanges) {
@@ -191,7 +191,7 @@ void AiSystem::refreshCurrentValues( ){
 		core.getSingleSnap(getAiSettings().numberMeasurementsToAverage);
 	}
 	catch (ChimeraError& e) {
-		emit error(e.what());
+		emit error(e.qtrace());
 	}
 }
 

@@ -44,7 +44,7 @@ void TemperatureMonitor::initialize(IChimeraQtWindow* parent)
 				timedata = core.dataBroker[idx].queryDataPoint();
 			}
 			catch (ChimeraError& e) {
-				emit warning(qstr("Temperature sensor can not read properly. Please check \n") + e.what());
+				emit warning("Temperature sensor can not read properly. Please check \n" + e.qtrace());
 			}
 			reading[idx]->setText(qstr(timedata.second, 2) + " K");
 		}});

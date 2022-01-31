@@ -118,7 +118,7 @@ void WinSockFlume::write(const char* msg, unsigned len, QByteArray terminator)
 		int err = sendWithCatch(Winsocket, (const char*)buff, len + terminator.size());
 	}
 	catch (ChimeraError& e) {
-		throwNested(str("Error in winSockFlume write:\n") + e.what());
+		throwNested(str("Error in winSockFlume write:\n") + e.trace());
 	}
 
 	//free(buff);

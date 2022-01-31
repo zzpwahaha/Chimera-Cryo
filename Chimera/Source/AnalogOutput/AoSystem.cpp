@@ -301,7 +301,7 @@ void AoSystem::setSingleDac(unsigned dacNumber, double val)
 	catch (ChimeraError& err)
 	{
 		tcp_connect = 1;
-		thrower(err.what());
+		thrower(err.trace());
 	}
 	/*update outputs first and do a standard, single dac command*/
 	outputs[dacNumber].info.currVal = val;

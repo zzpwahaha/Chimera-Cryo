@@ -282,7 +282,7 @@ int ZynqTCP::sendCommand(std::string command)
 	catch (ChimeraError& err)
 	{
 		tcp_connect = 1;
-		throwNested("Unable to connect to server during programming the experiment, Check if Zynq tcp server is started");
+		throwNested("Unable to connect to server during programming the experiment, Check if Zynq tcp server is started" + err.trace());
 		//errBox(err.what()); should not have gui stuff here since this function is used for sending 'init' in exp thread which can not handle gui (qt forbid thread other than main thread handle gui)
 	}
 

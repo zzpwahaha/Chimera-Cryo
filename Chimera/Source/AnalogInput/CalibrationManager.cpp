@@ -574,7 +574,7 @@ void CalibrationManager::standardStartThread (std::vector<std::reference_wrapper
 			updateCalibrationView(cal);
 		}
 		catch (ChimeraError& e) {
-			emit warning("Warning in staring new calibration\n\t"+qstr(e.what()));
+			emit warning("Warning in staring new calibration\n\t"+qstr(e.qtrace()));
 		}
 		calibrationViewer.initializeCalData (cal);
 		});
