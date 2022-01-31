@@ -62,22 +62,32 @@ TemperatureMonitorCore::TemperatureMonitorCore(IChimeraQtWindow* parent)
 	//for (unsigned idx = 0; idx < TEMPMON_NUMBER; idx++) {
 	//	dataBroker.emplace_back(TEMPMON_ID[idx],TEMPMON_SYNTAX[idx]);
 	//}
-	auto shit = InfluxBroker(TEMPMON_ID[1], TEMPMON_SYNTAX[1]);// this is in-place construction, no copy nor move
+	auto shit = InfluxBroker(TEMPMON_ID[1], TEMPMON_SYNTAX[1]);// this is in-place construction, no copy nor move in c++17
 
 	QTime midnight = QTime(23, 59, 59, 999);
-	QTime midnightCreateFolder = QTime(23, 50, 0, 0); // give ten minute ahead to create folder 
+	//QTime midnightCreateFolder = QTime(23, 50, 0, 0); // give ten minute ahead to create folder 
 	QTime now = QTime::currentTime();
 	if (now.msecsTo(midnight) - 60000 < 0) {
 		thrower("Hardworker at midnight!!!! The temperature data is tired and wouldn't want to log between 23:59-24:00"
 			"Maybe try after 24:00, i.e a minite later?");
 	}
-	QTimer::singleShot(now.msecsTo(midnight)-60000/*60sec ahead*/, [this]() {
-		createDataFolder();
-		dumpDataToFile();
-		QTimer* timer = new QTimer(this);
-		QObject::connect(timer, &QTimer::timeout, [this]() {
+	QTimer::singleShot(now.msecsTo(midnight)-60000/*60sec ahead*/, [this, parent]() {
+		try {
 			createDataFolder();
-			dumpDataToFile(); });
+			dumpDataToFile();
+		}
+		catch (ChimeraError& e) {
+			parent->reportErr(e.qtrace());
+		}
+		QTimer* timer = new QTimer(this);
+		QObject::connect(timer, &QTimer::timeout, [this, parent]() {
+			try {
+				createDataFolder();
+				dumpDataToFile();
+			}
+			catch (ChimeraError& e) {
+				parent->reportErr(e.qtrace());
+			} });
 		timer->start(24*60*60*1000);
 		});
 
@@ -114,14 +124,14 @@ void TemperatureMonitorCore::createDataFolder()
 {
 	DataLogger::getDataLocation(DATA_SAVE_LOCATION, todayFoler, fullPath);
 	struct stat info;
-	fullPath += "TemperatureData";
+	fullPath += "TemperatureData"; // with "//" will cause ERROR_ALREADY_EXIT, just go without appending "//"
 	int result = 1;
-	int resultStat = stat(cstr(fullPath), &info);
+	int resultStat = stat(cstr(DATA_SAVE_LOCATION + fullPath), &info);
 	if (resultStat != 0) {
-		result = std::filesystem::create_directories((fullPath).c_str());
+		result = std::filesystem::create_directories((DATA_SAVE_LOCATION + fullPath).c_str());
 	}
 	if (!result) {
-		thrower("ERROR: Failed to create save location for data at location " + fullPath +
+		thrower("ERROR: Failed to create save location for data at location " + DATA_SAVE_LOCATION  + fullPath +
 			". Make sure you have access to it or change the save location. Error: " + str(GetLastError())
 			+ "\r\n");
 	}
@@ -132,7 +142,7 @@ void TemperatureMonitorCore::dumpDataToFile()
 	for (auto idx : range(TEMPMON_NUMBER)) {
 		char buff[128];
 		auto timedata = std::move(dataBroker[idx].getData());
-		std::ofstream ofs(fullPath + TEMPMON_ID[idx] + ".csv", std::ofstream::out);
+		std::ofstream ofs(DATA_SAVE_LOCATION + fullPath + "//" + TEMPMON_ID[idx] + ".csv", std::ofstream::out);
 		ofs << "epochTime(ms)" << ',' << "Temperature(K)" << '\n';
 		for (auto idd : range(timedata.first.size())) {
 			sprintf_s(buff, "%Id64,%f\n", timedata.first[idd], timedata.second[idd]);
