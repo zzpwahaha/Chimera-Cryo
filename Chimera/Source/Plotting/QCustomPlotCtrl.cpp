@@ -8,17 +8,15 @@
 #include <qdialogbuttonbox.h>
 #include <AnalogInput/CalibrationManager.h>
 #include <qsizepolicy.h>
-int QCustomPlotCtrl::shit = 0;
+
 QCustomPlotCtrl::QCustomPlotCtrl() :
 	style(plotStyle::GeneralErrorPlot)
 {
-	s = shit++;
 }
 
 QCustomPlotCtrl::QCustomPlotCtrl(unsigned numTraces, plotStyle inStyle, std::vector<int> thresholds_in,
 	bool narrowOpt, bool plotHistOption) :
 	style(inStyle)/*, narrow(narrowOpt)*/ {
-	s = shit++;
 }
 
 QCustomPlotCtrl::~QCustomPlotCtrl() {
@@ -43,6 +41,7 @@ void QCustomPlotCtrl::init(IChimeraQtWindow* parent, QString titleIn, unsigned n
 	plot->plotLayout()->addElement(0, 0, title);
 	if (this->style == plotStyle::DensityPlot || this->style == plotStyle::DensityPlotWithHisto) {
 		//QCPAxisRect* centerAxisRect = new QCPAxisRect(plot);
+		centerAxisRect = plot->axisRect();
 		plot->axisRect()->setupFullAxesBox(true);
 		plot->axisRect()->setRangeZoomFactor(0.95);
 		//plot->plotLayout()->addElement(0, 0, centerAxisRect);
@@ -107,21 +106,22 @@ void QCustomPlotCtrl::init(IChimeraQtWindow* parent, QString titleIn, unsigned n
 			leftAxisRect->setMaximumSize(10, 2000);
 			//plot->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-			plot->plotLayout()->setColumnSpacing(10);
-			plot->plotLayout()->setRowSpacing(10);
-			//leftAxisRect->setAutoMargins(QCP::msNone);
+			plot->plotLayout()->setColumnSpacing(0);
+			plot->plotLayout()->setRowSpacing(0);
+			//leftAxisRect->setAutoMargins(QCP::msTop | QCP::msBottom);
 			//bottomAxisRect->setAutoMargins(QCP::msNone);
 			//plot->axisRect(1)->setAutoMargins(QCP::msNone);
 			//plot->axisRect(2)->setAutoMargins(QCP::msNone);
 			leftAxisRect->setMinimumMargins(QMargins(0, 0, 0, 0));
 			//leftAxisRect->setMargins(QMargins(15, 0, 0, 0));
 			//bottomAxisRect->setMargins(QMargins(0, 0, 0, 15));
-			//plot->axisRect(1)->setMargins(QMargins(5, 5, 5, 5));
+			plot->axisRect(1)->setMargins(QMargins(5, 5, 5, 5));
 			//plot->axisRect(2)->setMargins(QMargins(0, 0, 0, 0));
 			bottomAxisRect->setMinimumMargins(QMargins(0, 0, 0, 0));
+			plot->axisRect(1)->setMinimumMargins(QMargins(0, 0, 0, 0));
 			//title->setMaximumSize(1, 1);
-			//plot->plotLayout()->remove(title);
-			//plot->plotLayout()->
+			plot->plotLayout()->take(title);
+			plot->plotLayout()->simplify();
 		}
 		// move newly created axes on "axes" layer and grids on "grid" layer:
 		foreach(QCPAxisRect * rect, plot->axisRects())
@@ -155,10 +155,6 @@ void QCustomPlotCtrl::init(IChimeraQtWindow* parent, QString titleIn, unsigned n
 }
 
 void QCustomPlotCtrl::handleContextMenu(const QPoint& pos) {
-	if (plot == nullptr) {
-		return;
-	}
-	if (s < 0) { return; }
 	QMenu menu;
 	menu.setStyleSheet(chimeraStyleSheets::stdStyleSheet());
 	auto* clear = new QAction("Clear Plot", plot);
@@ -176,6 +172,34 @@ void QCustomPlotCtrl::handleContextMenu(const QPoint& pos) {
 				resetChart();
 			});
 		menu.addAction(leg);
+	}
+
+	if (this->style == plotStyle::DensityPlotWithHisto) {
+		auto* side = new QAction("Hide Side Plot", plot);
+		side->setCheckable(true);
+		side->setChecked(!showSidePlot);
+		plot->connect(side, &QAction::triggered, [this, side](bool checked) {
+			if (checked) {
+				leftAxisRect->setVisible(false);
+				bottomAxisRect->setVisible(false);
+				leftAxisRect->layout()->take(leftAxisRect);
+				bottomAxisRect->layout()->take(bottomAxisRect);
+				plot->plotLayout()->simplify();
+				resetChart();
+				showSidePlot = false;
+			}
+			else {
+				leftAxisRect->setVisible(true);
+				bottomAxisRect->setVisible(true);
+				plot->plotLayout()->insertColumn(0);//somehow do not need to insert row
+				plot->plotLayout()->addElement(0, 0, leftAxisRect);
+				plot->plotLayout()->addElement(1, 1, bottomAxisRect);
+				plot->plotLayout()->simplify();
+				resetChart();
+				showSidePlot = true;
+			}
+		});
+		menu.addAction(side);
 	}
 
 	if (this->style == plotStyle::DacPlot || this->style == plotStyle::TtlPlot) {
@@ -558,4 +582,17 @@ void QCustomPlotCtrl::resetChart() {
 
 void QCustomPlotCtrl::setControlLocation(QRect loc) {
 	plot->setGeometry(loc);
+}
+
+std::vector<double> QCustomPlotCtrl::handleMousePosOnCMap(QMouseEvent* event)
+{
+	std::vector<double> vec{};
+	if (style != plotStyle::DensityPlotWithHisto || colorMap == nullptr) {
+		return vec;
+	}
+	//or also use m_colorMap->keyAxis(), they are the same 
+	double x = centerAxisRect->axis(QCPAxis::atBottom)->pixelToCoord(event->pos().x());
+	double y = centerAxisRect->axis(QCPAxis::atLeft)->pixelToCoord(event->pos().y());
+	vec.insert(vec.end(), { std::floor(x + 0.5), std::floor(y + 0.5), colorMap->data()->data(x, y) });
+	return vec;
 }

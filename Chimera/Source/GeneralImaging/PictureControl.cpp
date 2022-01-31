@@ -66,7 +66,7 @@ void PictureControl::updatePlotData ( ){
 /*
 * initialize all controls associated with single picture.
 */
-void PictureControl::initialize( int width, int height, IChimeraQtWindow* parent, int picScaleFactorIn){
+void PictureControl::initialize(std::string name, int width, int height, IChimeraQtWindow* parent, int picScaleFactorIn){
 	QVBoxLayout* layout = new QVBoxLayout(this);
 	layout->setContentsMargins(0, 0, 0, 0);
 	picScaleFactor = picScaleFactorIn;
@@ -80,10 +80,11 @@ void PictureControl::initialize( int width, int height, IChimeraQtWindow* parent
 	}
 	QHBoxLayout* layout1 = new QHBoxLayout(this);
 	layout1->setContentsMargins(0, 0, 0, 0);
-	coordinatesText = new QLabel("Coordinates:", this);
+	coordinatesText = new QLabel("Coordinates: ", this);
 	coordinatesDisp = new QLabel("", this);
-	valueText = new QLabel("; Value", this);
+	valueText = new QLabel("; Value: ", this);
 	valueDisp = new QLabel("", this);
+	layout1->addWidget(new QLabel(qstr(name),this));
 	layout1->addWidget(coordinatesText);
 	layout1->addWidget(coordinatesDisp);
 	layout1->addWidget(valueText);
@@ -94,19 +95,11 @@ void PictureControl::initialize( int width, int height, IChimeraQtWindow* parent
 	maxHeight = height;
 	QHBoxLayout* layout2 = new QHBoxLayout(this);
 	layout2->setContentsMargins(0, 0, 0, 0);
-	if ( histOption ){
-		vertGraph = new QCustomPlotCtrl( 1, plotStyle::PicturePlot, std::vector<int>(), "", true );
-		vertGraph->init (parent,"");
-	}
-	if ( histOption ){
-		horGraph = new QCustomPlotCtrl( 1, plotStyle::PicturePlot, std::vector<int> ( ), "", true );
-		horGraph->init(parent,"");
-	}
-	QCustomPlotCtrl centralDensityPlot = QCustomPlotCtrl(1, plotStyle::DensityPlotWithHisto, std::vector<int>(), false, true);
-	centralDensityPlot.init(parent,"");
-	centralDensityPlot.plot->setMinimumSize(400, 350);
+	pic.setStyle(plotStyle::DensityPlotWithHisto);
+	pic.init(parent,"");
+	pic.plot->setMinimumSize(400, 350);
 	pictureObject = new ImageLabel (parent);	
-	//parent->connect (pictureObject, &ImageLabel::mouseReleased, [this](QMouseEvent* event) {handleMouse (event); });
+	//connect (pictureObject, &ImageLabel::mouseReleased, [this](QMouseEvent* event) {handleMouse (event); });
 	std::vector<unsigned char> data (20000);
 	for (auto& pt : data){
 		pt = rand () % 255;
@@ -116,10 +109,11 @@ void PictureControl::initialize( int width, int height, IChimeraQtWindow* parent
 	slider.setMaxLength(800);
 	parent->connect (&slider, &RangeSliderIntg::smlValueChanged, [this]() {redrawImage (); });
 	parent->connect (&slider, &RangeSliderIntg::lrgValueChanged, [this]() {redrawImage (); });
-	layout2->addWidget(centralDensityPlot.plot, 1);
+	layout2->addWidget(pic.plot, 1);
 	layout2->addWidget(&slider, 0);
-	//layout2->addStretch();
 
+	connect(pic.plot, &QCustomPlot::mouseMove, [this](QMouseEvent* event) {
+		handleMouse(event); });
 
 
 	layout->addLayout(layout1);
@@ -452,24 +446,9 @@ void PictureControl::setHoverValue( ){
 }
 
 void PictureControl::handleMouse (QMouseEvent* event){
-	auto loc = event->windowPos ();
-	unsigned rowCount = 0;
-	unsigned colCount = 0;
-	for ( auto col : grid ){
-		for ( auto box : col ){
-			if (loc.x() < box.right () && loc.x () > box.left () && loc.y() > box.top () && loc.y () < box.bottom ()) {
-				coordinatesDisp->setText( (str( rowCount ) + ", " + str( colCount )).c_str( ) );
-				selectedLocation = { rowCount, colCount };
-				if ( mostRecentImage_m.size( ) != 0 && grid.size( ) != 0 ){
-					setHoverValue( );
-				}
-			}
-			rowCount += 1;
-		}
-		colCount += 1;
-		rowCount = 0;
-	}
-	redrawImage ();
+	auto vec = pic.handleMousePosOnCMap(event);
+	coordinatesDisp->setText("( " + qstr(int(vec[0])) + " , " + qstr(int(vec[1])) + " )");
+	valueDisp->setText(qstr(int(vec[0])));
 }
 
 /* 

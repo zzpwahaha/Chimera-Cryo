@@ -24,7 +24,7 @@ class PictureControl : public QWidget{
 	Q_OBJECT
 	public:
 		PictureControl ( bool histogramOption, Qt::TransformationMode mode );
-		void initialize( int width, int height, IChimeraQtWindow* widget, int picScaleFactorIn=50);
+		void initialize( std::string name, int width, int height, IChimeraQtWindow* widget, int picScaleFactorIn=50);
 		void handleMouse( QMouseEvent* event );
 		void drawPicNum(unsigned picNum, QPainter& painter);
 		void recalculateGrid( imageParameters newParameters );
@@ -61,9 +61,9 @@ class PictureControl : public QWidget{
 		unsigned accumNum;
 		const bool histOption;
 		std::vector<plotDataVec> horData, vertData;
-		QCustomPlotCtrl* horGraph = nullptr;
-		QCustomPlotCtrl* vertGraph = nullptr;
-		QCustomPlotCtrl centralDensityPlot;
+		//QCustomPlotCtrl* horGraph = nullptr;
+		//QCustomPlotCtrl* vertGraph = nullptr;
+		QCustomPlotCtrl pic;
 		std::tuple<bool, int, int> mostRecentAutoscaleInfo;
 		bool mostRecentSpecialMinSetting;
 		bool mostRecentSpecialMaxSetting;

@@ -260,10 +260,10 @@ void PictureManager::initialize( int manWidth, int manHeight, IChimeraQtWindow* 
 	picLayout->setContentsMargins(0, 0, 0, 0);
 	auto width = 1200;
 	auto height = 220;
-	pictures[0].initialize( width, height, widget, scaleFactor);
-	pictures[1].initialize( width, height, widget, scaleFactor);
-	pictures[2].initialize( width, height, widget, scaleFactor);
-	pictures[3].initialize( width, height, widget, scaleFactor);
+	pictures[0].initialize("Pic.1", width, height, widget, scaleFactor);
+	pictures[1].initialize("Pic.2", width, height, widget, scaleFactor);
+	pictures[2].initialize("Pic.3", width, height, widget, scaleFactor);
+	pictures[3].initialize("Pic.4", width, height, widget, scaleFactor);
 	picLayout->addWidget(&pictures[0], 2, 2);
 	//picLayout->addWidget(&pictures[1], 0, 1);
 	//picLayout->addWidget(&pictures[2], 1, 0);

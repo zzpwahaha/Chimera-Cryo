@@ -28,7 +28,6 @@ typedef std::vector<dataPoint> plotDataVec;
 class QCustomPlotCtrl : public QObject {
 	Q_OBJECT;
 public:
-	static int shit;
 	QCustomPlotCtrl();
 	QCustomPlotCtrl(const QCustomPlotCtrl&) = delete;
 	QCustomPlotCtrl(unsigned numTraces, plotStyle inStyle, std::vector<int> thresholds,
@@ -47,10 +46,13 @@ public:
 	void handleContextMenu(const QPoint& pos);
 	QCustomPlot* plot = nullptr;
 	void setControlLocation(QRect loc);
+	//used only in densityWithHisto plot, for showing the value of the mouse point, return x,y,value
+	std::vector<double> handleMousePosOnCMap(QMouseEvent* event);
 private:
 	int s;
 	QCPTextElement* title;
 	QCPColorMap* colorMap = nullptr;
+	QCPAxisRect* centerAxisRect = nullptr;
 	QCPAxisRect* leftAxisRect = nullptr;
 	QCPAxisRect* bottomAxisRect = nullptr;
 	//const bool narrow;
@@ -61,6 +63,8 @@ private:
 	bool showLegend = false;
 	// used for DAC, OFFSETLOCK or TTL plot to determine whether the trace is shown
 	std::vector<std::byte> isShow;
+	// used for DensityPlotWithHisto, to toggle visibility of the bottom and left rect
+	bool showSidePlot = true;
 	bool autoScale = true;
 	// a colormap that I use for plot stuffs.
 	const std::vector<std::array<int, 3>> GIST_RAINBOW_RGB{ { 255 , 0 , 40 },
