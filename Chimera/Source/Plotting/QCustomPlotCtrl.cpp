@@ -559,10 +559,17 @@ void QCustomPlotCtrl::resetChart() {
 		plot->yAxis->setScaleRatio(plot->xAxis, 1.0);
 	}
 	else if (style == plotStyle::DensityPlotWithHisto) {
-		colorMap->rescaleKeyAxis();
+		int width = colorMap->data()->keyRange().size();
+		int height = colorMap->data()->valueRange().size();
+		centerAxisRect->axis(QCPAxis::atLeft)->setScaleRatio(
+			centerAxisRect->axis(QCPAxis::atBottom), height / width);
 		colorMap->rescaleDataRange(true);
 		colorMap->colorScale()->rescaleDataRange(true);
-		centerAxisRect->axis(QCPAxis::atLeft)->setScaleRatio(centerAxisRect->axis(QCPAxis::atBottom), 1.0);
+		colorMap->rescaleAxes();
+
+		width > height ? colorMap->valueAxis()->scaleRange(width / height) :
+			colorMap->keyAxis()->scaleRange(height / width);
+
 		bottomAxisRect->axis(QCPAxis::atBottom)->setRange(centerAxisRect->axis(QCPAxis::atBottom)->range());
 		leftAxisRect->axis(QCPAxis::atLeft)->setRange(centerAxisRect->axis(QCPAxis::atLeft)->range());
 	}

@@ -111,7 +111,12 @@ void TemperatureMonitorCore::normalFinish()
 	for (auto& broker : dataBroker) {
 		broker.experimentEnd();
 		auto timedata = broker.getDataExp();
-		logger.writeTemperature(timedata, broker.identifier);
+		try {
+			logger.writeTemperature(timedata, broker.identifier);
+		}
+		catch (ChimeraError& e) {
+			win->reportErr(qstr("Temperature data abandoned. Due to ") + e.qtrace());
+		}
 	}
 }
 

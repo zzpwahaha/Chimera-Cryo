@@ -424,7 +424,9 @@ void QtAndorWindow::onCameraProgress (int picNumReported){
 		catch (ChimeraError& err){
 			reportErr (err.qtrace ());
 			try {
-				mainWin->pauseExperiment ();
+				if (!mainWin->experimentIsPaused()) {
+					mainWin->pauseExperiment();
+				}
 			}
 			catch (ChimeraError & err2) {
 				reportErr (err2.qtrace ());
