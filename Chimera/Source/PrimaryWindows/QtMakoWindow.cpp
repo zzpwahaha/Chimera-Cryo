@@ -102,6 +102,7 @@ void QtMakoWindow::CMOSChkFinished()
 	}
 }
 
+//Qt::BlockingQueuedConnection, expthread will continue after this call returns
 void QtMakoWindow::prepareWinForAcq(MakoSettings* , CameraInfo info) {
 	try {
 		for (auto& camera : cam) {
