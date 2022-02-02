@@ -609,6 +609,7 @@ void MakoCamera::prepareForExperiment()
         thrower("The CMOS camera " + CameraInfo::toStr(camInfo.camName) + " is set to be Experiment Active but the Picture-Per-Repetion is " + str(core.getRunningSettings().picsPerRep)
             + " which is not greater than or equal to 1");
     }
+    acquisitionStartStopFromCtrler("AcquisitionStart");
 }
 
 void MakoCamera::setMOTCalcActive(bool active)

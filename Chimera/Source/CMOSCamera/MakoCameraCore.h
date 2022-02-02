@@ -77,7 +77,7 @@ private:
 	// official copy.
 	MakoSettings runSettings;
 	MakoSettings expRunSettings;
-    
-
+    //only for prepare experiment, do want the start of camera (if not) happens after setting all parameters and before exp start
+	//MakoCamera* cam = nullptr; // does not work since call start cam from expThread is not ok due to the gui stuff that has to be manipulated in the main thread
 };
 

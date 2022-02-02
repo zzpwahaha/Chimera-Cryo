@@ -69,7 +69,7 @@ private:
     QDialog* makoCtrlDialog;
     QFileDialog* saveFileDialog;
 
-	bool isCamRunning;
+	bool isCamRunning = false;
 
     unsigned int currentRepNumber;
     bool isExpRunning = false;

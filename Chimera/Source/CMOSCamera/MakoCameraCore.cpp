@@ -106,8 +106,9 @@ void MakoCameraCore::calculateVariations(std::vector<parameterType>& params, Exp
     makoCtrl.setSettings(expRunSettings);
     runSettings = expRunSettings;    
     if (experimentActive) {
-        emit threadworker->prepareMako(&expRunSettings, camInfo);
+        emit threadworker->prepareMako(&expRunSettings, camInfo);//Qt::BlockingQueuedConnection
     }
+    
 }
 
 // to disable emitting imageReadyForExp in ImageCalculatingThread

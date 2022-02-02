@@ -263,7 +263,7 @@ void QtMainWindow::startExperimentThread (ExperimentThreadInput* input){
 	expWorker->moveToThread (expThread);
 	connect (expWorker, &ExpThreadWorker::updateBoxColor, this, &QtMainWindow::handleColorboxUpdate);
 	connect (expWorker, &ExpThreadWorker::prepareAndor, andorWin, &QtAndorWindow::handlePrepareForAcq);
-	connect (expWorker, &ExpThreadWorker::prepareMako, makoWin, &QtMakoWindow::prepareWinForAcq);
+	connect (expWorker, &ExpThreadWorker::prepareMako, makoWin, &QtMakoWindow::prepareWinForAcq, Qt::BlockingQueuedConnection);// want expthread wait untill mako set it up
 	connect (expWorker, &ExpThreadWorker::prepareAnalysis, analysisWin, &QtAnalysisWindow::prepareCalcForAcq);
 	connect (expWorker, &ExpThreadWorker::notification, this, &QtMainWindow::handleNotification);
 	connect (expWorker, &ExpThreadWorker::warn, this, &QtMainWindow::onErrorMessage);
