@@ -266,7 +266,7 @@ DoCore& DoSystem::getCore (){
 }
 
 void DoSystem::standardExperimentPrep(unsigned variationInc, double currLoadSkipTime, std::vector<parameterType>& expParams) {
-	core.checkLongTimeRun(variationInc);
+	//core.checkLongTimeRun(variationInc); // not using this now, see formatForFPGA
 	core.organizeTtlCommands(variationInc, { ZYNQ_DEADTIME,getCurrentStatus() });
 	core.findLoadSkipSnapshots(currLoadSkipTime, expParams, variationInc);
 	//convertToFtdiSnaps (variationInc);
