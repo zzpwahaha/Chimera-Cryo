@@ -154,9 +154,9 @@ void DataLogger::initializeDataFiles( std::string specialName, bool checkForCali
 	auto temperatureDataLocation = dataFilesBaseLocation + finalSaveFolder + "Temperature_Data.csv";
 	fopen_s ( &temperatureFile, temperatureDataLocation.c_str(), "r" );
 	if ( !temperatureFile )	{
-		thrower ( "ERROR: The Data logger doesn't see the temperature data for today in the data folder, location:"
-				  + temperatureDataLocation + ". Please make sure that the temperature logger is working correctly "
-				  "before starting an experiment." );
+		//thrower ( "ERROR: The Data logger doesn't see the temperature data for today in the data folder, location:"
+		//		  + temperatureDataLocation + ". Please make sure that the temperature logger is working correctly "
+		//		  "before starting an experiment." );
 	}
 	else{
 		fclose ( temperatureFile );
