@@ -493,6 +493,33 @@ unsigned DoCore::countTriggers (std::pair<unsigned, unsigned> which, unsigned va
 	return count;
 }
 
+// check the time to see if the overall time is longer than one wrap of FPGA max time: 2**32*10ns ~ 42.9s
+// if it does, will insert operation at time 0xFFFFFFFF to force the FPGA timer rewind
+// this should be called before organizeTtlCommands and after calculateVariations/restructureCommands, where ttlCommandList is generated for all variation
+void DoCore::checkLongTimeRun(unsigned variation)
+{
+	// make a copy of the commandList and then sort and will modify the original one if needed
+	std::vector<DoCommand> orderedCommandList(ttlCommandList[variation]);
+	std::sort(orderedCommandList.begin(), orderedCommandList.end(),
+		[variation](DoCommand a, DoCommand b) {return a.time < b.time; });
+	typedef unsigned long long l64;
+	const unsigned int timeConv = 100000; // DIO time given in multiples of 10 ns
+	const l64 rewindTime = l64(1) << 32; // 0xFFFFFFFF + 1, correspond to 32 bit time 
+	int durCounter = l64(orderedCommandList[0].time * timeConv) / rewindTime;
+	if (durCounter > 0) {// the first time stamp is larger than a rewind
+		for (auto idx : range(durCounter)) {// if counter=1, range gives {0}
+			ttlPulseDirect(DIO_REWIND.first, DIO_REWIND.second, double((durCounter + 1) * rewindTime - 1) / timeConv, 2.0 / timeConv, variation);
+		}
+	}
+	for (auto& cmd : orderedCommandList) {
+		if (l64(cmd.time * timeConv) / rewindTime > durCounter) {
+			durCounter++;
+			ttlPulseDirect(DIO_REWIND.first, DIO_REWIND.second, double(durCounter * rewindTime - 1) / timeConv, 2.0 / timeConv, variation);
+		}
+	}
+
+}
+
 
 
 void DoCore::FPGAForceOutput(DOStatus status)
@@ -573,8 +600,9 @@ void DoCore::FPGAForcePulse(DOStatus status, std::vector<std::pair<unsigned, uns
 
 void DoCore::formatForFPGA(UINT variation)
 {
+	typedef unsigned long long l64;
 	int snapIndex = 0;
-	unsigned int timeConv = 100000; // DIO time given in multiples of 10 ns
+	const l64 timeConv = 100000; // DIO time given in multiples of 10 ns
 	std::array<char[DIO_LEN_BYTE_BUF], 1> byte_buf;
 	std::array<bool, size_t(DOGrid::numPERunit)> bankA;
 	std::array<bool, size_t(DOGrid::numPERunit)> bankB;
@@ -587,7 +615,7 @@ void DoCore::formatForFPGA(UINT variation)
 
 	for (auto snapshot : ttlSnapshots[variation])
 	{
-		time = (unsigned int)(snapshot.time * timeConv);
+		time = l64(std::llround(snapshot.time * timeConv)) & l64(0xffffffff);
 
 		//for each DIO bank convert the boolean array to a byte
 		outputA = 0;
@@ -705,7 +733,7 @@ void DoCore::organizeTtlCommands (unsigned variation, DoSnapshot initSnap)
 			timeOrganizer.back ().second.push_back (commandInc);
 			if (commandInc != 0) {
 				//then it must be that the time interval is <10ns, complain it
-				//emit thrower("The time spacing between two ttl change is" + str(fabs(orderedCommandList[commandInc].time - timeOrganizer.back().first)) +
+				//thrower("The time spacing between two ttl change is" + str(fabs(orderedCommandList[commandInc].time - timeOrganizer.back().first)) +
 				//	"ms, which is smaller than 10ns. Aborted \r\n");
 			}
 		}

@@ -1158,7 +1158,7 @@ void ExpThreadWorker::calculateAdoVariations (ExpRuntimeData& runtime) {
 			input->aoSys.standardExperimentPrep (variationInc, runtime.expParams, currLoadSkipTime);
 			input->dds.standardExperimentPrep(variationInc);
 			input->olSys.standardExperimentPrep(variationInc, input->ttls, warnings);
-			input->ttlSys.standardExperimentPrep(variationInc, currLoadSkipTime, runtime.expParams);
+			input->ttlSys.standardExperimentPrep(variationInc, currLoadSkipTime, runtime.expParams);//make sure this is the last one, since offsetlock can insert in ttl sequence 
 			
 			input->ao.checkTimingsWork(variationInc);
 		}

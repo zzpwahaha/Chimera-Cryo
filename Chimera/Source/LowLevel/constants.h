@@ -64,6 +64,7 @@
 	//const int DAC_RAMP_MAX_PTS = 0xffff; // 65535 ???
 	const double DDS_TIME_RESOLUTION = 1.6; // in ms
 	const double DDS_MAX_AMP = 1.25; // in mW
+	const std::pair<unsigned, unsigned> DIO_REWIND = std::make_pair(8 - 1, 7); // used for the long time run rewind, see DoCore::checkLongTimeRun
 
 	const double OL_TIME_RESOLUTION = 0.02; //in ms
 	const std::vector<std::pair<unsigned, unsigned>> OL_TRIGGER_LINE

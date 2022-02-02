@@ -47,6 +47,7 @@ class DoCore
 		std::vector<double> getFinalTimes ();
 		unsigned countTriggers (std::pair<unsigned, unsigned> which, unsigned variation);
 		
+		void checkLongTimeRun(unsigned variation);
 		// returns -1 if not a name.
 		bool isValidTTLName (std::string name);
 		int getNameIdentifier (std::string name, unsigned& row, unsigned& number);
