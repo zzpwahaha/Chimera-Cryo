@@ -16,5 +16,10 @@ pulseon: do8_0 0.001
 %%on: do1_7
 %%
 %
-%t = 10000
-%pulseon: do1_0 0.01
+%t += 1000+x
+%dac: dac0_0 9
+%on: do1_7
+%
+repeat: 10
+	t += 10000
+	pulseon: do5_0 0.01

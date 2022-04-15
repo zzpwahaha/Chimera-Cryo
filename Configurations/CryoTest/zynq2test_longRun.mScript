@@ -1,0 +1,24 @@
+%%%%%%%%%%%%%%%%% Start With 1ms %%%%%%%%%%%%%%%%% 
+t = 1
+pulseon: do1_0 0.01
+%dac: dac0_0 1
+%dac: dac0_2 5
+%dac: dac1_6 2
+%t += 0.1
+%pulseon: do1_0 0.1
+%dacramp: dac0_0 0 6 1
+%dacramp: dac0_2 7 0 5
+%dacramp: dac1_6 3 0 5
+%
+%t += 1000+x
+%dac: dac0_0 9
+%on: do1_7
+%
+repeat: 10
+	t += 1000
+	pulseon: mako2 0.01
+	pulseon: do5_0 0.01
+	dac: dac0_15 5
+	t += 0.0200
+	dac: dac0_15 0
+end

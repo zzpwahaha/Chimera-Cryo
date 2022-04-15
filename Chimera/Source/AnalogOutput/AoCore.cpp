@@ -715,6 +715,10 @@ void AoCore::checkTimingsWork(unsigned variation)
 				continue;
 			}
 			// can't trigger faster than the trigger time.
+			auto tt = (time - secondTime);
+			auto tmp = abs(time - secondTime);
+			auto tmp1 = dacTriggerTime - 2 * DBL_EPSILON;
+			auto t = tmp < tmp1;
 			if (fabs(time - secondTime) < dacTriggerTime - 2*DBL_EPSILON) {
 				thrower("timings are such that the dac system would have to get triggered too fast to follow the"
 					" programming! ");
