@@ -154,6 +154,7 @@ void TemperatureMonitorCore::dumpDataToFile()
 			ofs << buff;
 		}
 		ofs.close();
+		dataBroker[idx].clearNonExpData();
 	}
 
 }
@@ -189,7 +190,7 @@ std::pair<long long, double> InfluxBroker::queryDataPoint()
 {
 	std::vector<influxdb::Point> points = influxPtr->query(syntax);
 	std::chrono::time_point<std::chrono::system_clock> tt = points[0].getTimestamp();
-	long long time = std::chrono::duration_cast<std::chrono::seconds>(tt.time_since_epoch()).count();
+	long long time = std::chrono::duration_cast<std::chrono::seconds>(tt.time_since_epoch()).count() * 10; // somehow need *10 to be ms epoch
 	QMutexLocker locker(&lock);
 	if (!timeStamp.empty() && timeStamp.back() == time) { //https://stackoverflow.com/questions/7925479/if-argument-evaluation-order
 		// not a new point, skip this
@@ -207,6 +208,13 @@ std::pair<long long, double> InfluxBroker::queryDataPoint()
 		timeStampExp.push_back(timeStamp.back());
 	}
 	return std::make_pair(timeStamp.back(), data.back());
+}
+
+void InfluxBroker::clearNonExpData()
+{
+	QMutexLocker locker(&lock);
+	timeStamp.clear();
+	data.clear();
 }
 
 

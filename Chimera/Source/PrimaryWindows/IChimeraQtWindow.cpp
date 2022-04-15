@@ -170,7 +170,21 @@ void IChimeraQtWindow::initializeMenu (){
 		}
 	}
 
-
+	///
+	scriptsM->addSeparator();
+	auto gmg = scriptsM->addMenu("GMOOG Script");
+	auto* newgmoogSc = new QAction("Ne&w GMOOG Script", this);
+	connect(newgmoogSc, &QAction::triggered, [this]() {scriptWin->newGMoogScript(); });
+	gmg->addAction(newgmoogSc);
+	auto* opengmoogSc = new QAction("Op&en GMOOG Script", this);
+	connect(opengmoogSc, &QAction::triggered, [this]() {scriptWin->openGMoogScript(scriptWin); });
+	gmg->addAction(opengmoogSc);
+	auto* savegmoogSc = new QAction("&Save GMOOG Script", this);
+	connect(savegmoogSc, &QAction::triggered, [this]() {scriptWin->saveGMoogScript(); });
+	gmg->addAction(savegmoogSc);
+	auto* savegmoogScAs = new QAction("Save GMOOG Script &As", this);
+	connect(savegmoogScAs, &QAction::triggered, [this]() {scriptWin->saveGMoogScriptAs(scriptWin); });
+	gmg->addAction(savegmoogScAs);
 
 	auto masterSystemsM = menubar->addMenu ("Master Systems");
 	auto* changeIndvDo = new QAction ("View or Change Individual Digital Output Settings", this);

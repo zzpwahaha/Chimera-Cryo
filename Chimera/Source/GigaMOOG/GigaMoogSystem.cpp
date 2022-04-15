@@ -42,6 +42,7 @@ void GigaMoogSystem::initialize(IChimeraQtWindow* win)
 
 	layout->addLayout(layout1, 0);
 	gmoogScript.initialize(win, "GMoog", "GigaMoog Script");
+	gmoogScript.setEnabled(true, false);
 	layout->addWidget(&gmoogScript, 1);
 
 	connect(programNowBtn, &QPushButton::released, this, [this, win]() {

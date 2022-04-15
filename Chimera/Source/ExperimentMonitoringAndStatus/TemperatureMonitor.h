@@ -28,6 +28,7 @@ public:
 	void experimentStart() { experimentOngoing=true; };
 	void experimentEnd() { experimentOngoing = false; };;
 	std::pair<long long,double> queryDataPoint();
+	void clearNonExpData();
 
 
 	const std::string dbAddr = "http://admin:Twizzler@6.1.1.77:8086?db=home";

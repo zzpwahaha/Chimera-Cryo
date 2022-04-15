@@ -19,7 +19,7 @@
 	//constexpr bool DOFTDI_SAFEMODE = true;
 	constexpr bool DDS_SAFEMODE = true;
 	constexpr bool ANDOR_SAFEMODE = true;
-	constexpr bool OFFSETLOCK_SAFEMODE = true/*false*/;
+	constexpr bool OFFSETLOCK_SAFEMODE = /*true*/false;
 	//constexpr bool ANALOG_IN_SAFEMODE = true;
 	#ifdef _DEBUG
 		constexpr bool PYTHON_SAFEMODE = true;
@@ -77,7 +77,7 @@
 	//ArbGens
 	const bool UWAVE_SAFEMODE = true;
 	const bool UWAVE_SAFEMODE_SIG = true;
-	const bool UWAVE_SAFEMODE_AGI = true;
+	const bool UWAVE_SAFEMODE_AGI = false;
 	const int numArbGen = 2;
 	//const std::string UWAVE_AGILENT_ADDRESS = "TCPIP0::10.10.0.5::inst0::INSTR";
 	const std::string UWAVE_AGILENT_ADDRESS = "USB0::0x0957::0x2807::MY57400998::INSTR";
@@ -91,7 +91,7 @@
 
 	//Mako camera
 	const unsigned MAKO_NUMBER = 2;
-	const std::array<bool, MAKO_NUMBER> MAKO_SAFEMODE = { false,false};
+	const std::array<bool, MAKO_NUMBER> MAKO_SAFEMODE = { true,false};
 	const std::array<std::string, MAKO_NUMBER> MAKO_DELIMS = { "MAKO1_CAMERA_SETTING", "MAKO2_CAMERA_SETTING" };
 	const std::array<std::string, MAKO_NUMBER> MAKO_IPADDRS= { "10.10.0.6", "10.10.0.7" };
 	const std::vector<std::pair<unsigned, unsigned>> MAKO_TRIGGER_LINE
@@ -99,14 +99,14 @@
 	/*the first is the label on the box minus 1, has minus'd 1 explicitly and this is not used in the code, just a reminder*/
 
 	//GIGAMOOG
-	const bool GIGAMOOG_SAFEMODE = true;
-	const std::string GIGAMOOG_PORT = "COM6";//temporary
+	const bool GIGAMOOG_SAFEMODE = false;
+	const std::string GIGAMOOG_PORT = "COM5";
 	const int GIGAMOOG_BAUDRATE = 115200;
 
 
 	//Temperature Monitor
 	const unsigned TEMPMON_NUMBER = 2;
-	const std::array<std::string, TEMPMON_NUMBER> TEMPMON_ID{ "Cold_Sheild", "Cold_Finger" };
+	const std::array<std::string, TEMPMON_NUMBER> TEMPMON_ID{ "Cold_Shield", "Cold_Finger" };
 	const std::array<std::string, TEMPMON_NUMBER> TEMPMON_SYNTAX{ 
 		"SELECT \"Cold Shield\" from ColdEdge order by time desc limit 1", 
 		"SELECT \"Cold finger\" from ColdEdge order by time desc limit 1" };

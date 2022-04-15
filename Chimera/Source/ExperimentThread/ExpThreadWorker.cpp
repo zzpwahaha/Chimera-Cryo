@@ -396,6 +396,7 @@ void ExpThreadWorker::loadGMoogScript(std::string scriptAddress, ScriptStream& g
 		thrower("Scripted GigaMoog File \"" + scriptAddress + "\" failed to open!");
 	}
 	gmoogScript << scriptFile.rdbuf();
+	gmoogScript << "\r\n\r\n__END__";
 	gmoogScript.seekg(0);
 	scriptFile.close();
 }

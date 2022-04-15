@@ -63,7 +63,7 @@ void GigaMoogCore::calculateVariations(std::vector<parameterType>& params, ExpTh
 	}
 	/// imporantly, this sizes the relevant structures.
 	gigaMoogCommandList.clear();
-	gigaMoogCommandList.resize(variations);
+	//gigaMoogCommandList.resize(variations);
 	for (auto variationInc : range(variations)) {
 		analyzeMoogScript(fileAddress, params, variationInc);
 	}
@@ -78,7 +78,7 @@ void GigaMoogCore::programVariation(unsigned variation, std::vector<parameterTyp
 void GigaMoogCore::programGMoogNow(std::string fileAddr, std::vector<parameterType> constants)
 {
 	gigaMoogCommandList.clear();
-	gigaMoogCommandList.resize(1);
+	//gigaMoogCommandList.resize(1);
 	analyzeMoogScript(fileAddr, constants, 0);
 	send(gigaMoogCommandList[0]);
 }
