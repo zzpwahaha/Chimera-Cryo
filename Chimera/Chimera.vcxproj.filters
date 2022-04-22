@@ -617,6 +617,9 @@
     <QtMoc Include="Source\Andor\CameraCalibration.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <QtMoc Include="Source\GeneralImaging\PictureManager.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\AnalogInput\AiSettings.h">
@@ -797,9 +800,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\GeneralImaging\imageParameters.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\GeneralImaging\PictureManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\GeneralImaging\softwareAccumulationOption.h">

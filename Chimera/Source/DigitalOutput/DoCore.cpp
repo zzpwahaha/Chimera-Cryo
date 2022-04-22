@@ -559,18 +559,18 @@ void DoCore::FPGAForceOutput(DOStatus status)
 void DoCore::FPGAForcePulse(DOStatus status, std::vector<std::pair<unsigned, unsigned>> rowcol, double dur)
 {
 	resetTtlEvents();
-	sizeDataStructures(2);
+	sizeDataStructures(3);
+	ttlSnapshots[0].push_back({ 0.1, status });
+	for (auto& rc : rowcol)
+	{
+		status[rc.first][rc.second] = !status[rc.first][rc.second];		
+	}
+	ttlSnapshots[0].push_back({ 0.1 + dur, status });
 	for (auto& rc : rowcol)
 	{
 		status[rc.first][rc.second] = !status[rc.first][rc.second];
-		ttlSnapshots[0].push_back({ 0.1, status });
-		status[rc.first][rc.second] = !status[rc.first][rc.second];
 	}
-	for (size_t i = 0; i < rowcol.size(); i++)
-	{
-
-	}
-	ttlSnapshots[0].push_back({ 0.1 + dur, status });
+	ttlSnapshots[0].push_back({ 0.1 + dur + dur, status });
 	formatForFPGA(0);
 	writeTtlDataToFPGA(0, false);
 
@@ -588,6 +588,7 @@ void DoCore::FPGAForcePulse(DOStatus status, std::vector<std::pair<unsigned, uns
 	if (tcp_connect == 0)
 	{
 		zynq_tcp.writeCommand("trigger");
+		Sleep(100);
 		zynq_tcp.writeCommand("disableMod");
 		zynq_tcp.disconnect();
 	}
