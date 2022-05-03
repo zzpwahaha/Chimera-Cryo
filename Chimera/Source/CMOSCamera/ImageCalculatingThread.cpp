@@ -107,7 +107,7 @@ void ImageCalculatingThread::assignValue(const QVector<T>& vec1d, std::string sF
     {
         for (size_t j = 0; j < Width; j++)
         {
-            m_pQCPColormap->data()->setCell(j, i, vec1d.at(i * Width + j));
+            m_pQCPColormap->data()->setCell(j, i, vec1d.at((i + 1) * Width - j - 1));
         }
     }
     
