@@ -46,14 +46,19 @@ void GigaMoogSystem::initialize(IChimeraQtWindow* win)
 	layout->addWidget(&gmoogScript, 1);
 
 	connect(programNowBtn, &QPushButton::released, this, [this, win]() {
+		win->reportStatus("----------------------\r\nSetting GigaMoog... ");
 		try {
 			gmoogScript.checkSave(win->mainWin->getProfileSettings().configLocation, win->mainWin->getRunInfo());
 			std::string fileAddr = gmoogScript.getScriptPathAndName();
-			core.programGMoogNow(fileAddr, win->auxWin->getUsableConstants());
+			core.programGMoogNow(fileAddr, win->auxWin->getUsableConstants(),win->auxWin->getTtlCore(), win->auxWin->getTtlSystem().getCurrentStatus());
 			win->reportStatus(qstr("Programmed GigaMoog " + core.getDelim() + ".\r\n"));
+			win->reportStatus("Finished Setting GigaMoog.\r\n");
 		}
 		catch (ChimeraError& err) {
+			errBox(err.trace());
+			win->reportStatus(": " + err.qtrace() + "\r\n");
 			win->reportErr(qstr("Error while programming GigaMoog " + core.getDelim() + ": " + err.trace() + "\r\n"));
+		win->mainWin->updateConfigurationSavedStatus(false);
 		}});
 }
 

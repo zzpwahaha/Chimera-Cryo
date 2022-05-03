@@ -91,7 +91,7 @@
 
 	//Mako camera
 	const unsigned MAKO_NUMBER = 2;
-	const std::array<bool, MAKO_NUMBER> MAKO_SAFEMODE = { true,false};
+	const std::array<bool, MAKO_NUMBER> MAKO_SAFEMODE = { false,false};
 	const std::array<std::string, MAKO_NUMBER> MAKO_DELIMS = { "MAKO1_CAMERA_SETTING", "MAKO2_CAMERA_SETTING" };
 	const std::array<std::string, MAKO_NUMBER> MAKO_IPADDRS= { "10.10.0.6", "10.10.0.7" };
 	const std::vector<std::pair<unsigned, unsigned>> MAKO_TRIGGER_LINE
@@ -102,7 +102,10 @@
 	const bool GIGAMOOG_SAFEMODE = false;
 	const std::string GIGAMOOG_PORT = "COM5";
 	const int GIGAMOOG_BAUDRATE = 115200;
-
+	const double GM_TRIGGER_TIME = 0.0001; //in ms i.e. 0.1us
+	const std::vector<std::pair<unsigned, unsigned>> GM_TRIGGER_LINE
+		= { std::make_pair(8 - 1,0),std::make_pair(8 - 1,1) }; //load and move
+	/*the first is the label on the box minus 1, has minus'd 1 explicitly and this is not used in the code, just a reminder*/
 
 	//Temperature Monitor
 	const unsigned TEMPMON_NUMBER = 2;

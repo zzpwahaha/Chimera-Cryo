@@ -1,6 +1,7 @@
 #pragma once
 #include "GeneralObjects/IDeviceCore.h"
 #include "GeneralFlumes/BoostAsyncSerial.h" 
+#include "DigitalOutput/DoCore.h"
 #include <GigaMOOG/MessageSender.h>
 
 
@@ -24,7 +25,7 @@ public:
 	void errorFinish() override {};
 	std::string getDelim() override { return configDelim; };
 
-	void programGMoogNow(std::string fileAddr, std::vector<parameterType> constants);
+	void programGMoogNow(std::string fileAddr, std::vector<parameterType> constants, DoCore& doCore, DOStatus dostatus);
 
 private:
 	//Attempt to parse moog script 

@@ -75,12 +75,14 @@ void GigaMoogCore::programVariation(unsigned variation, std::vector<parameterTyp
 	send(gigaMoogCommandList[variation]);
 }
 
-void GigaMoogCore::programGMoogNow(std::string fileAddr, std::vector<parameterType> constants)
+void GigaMoogCore::programGMoogNow(std::string fileAddr, std::vector<parameterType> constants, DoCore& doCore, DOStatus dostatus)
 {
 	gigaMoogCommandList.clear();
 	//gigaMoogCommandList.resize(1);
 	analyzeMoogScript(fileAddr, constants, 0);
 	send(gigaMoogCommandList[0]);
+	Sleep(100);
+	doCore.FPGAForcePulse(dostatus, std::vector<std::pair<unsigned, unsigned>>{GM_TRIGGER_LINE[0]}, GM_TRIGGER_TIME);
 }
 
 void GigaMoogCore::analyzeMoogScript(std::string fileAddr, std::vector<parameterType>& variables, UINT variation)
