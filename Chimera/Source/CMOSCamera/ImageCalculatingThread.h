@@ -35,6 +35,7 @@ public:
 
 private:
     void calcCrossSectionXY();
+    void updateDataMaxMin();
     void fit1dGaussian();
     void fit2dGaussian();
 
@@ -45,6 +46,7 @@ public:
 
 
     QPoint& mousePos() { return m_mousePos; }
+    std::pair<int, int> dataMaxMin() { return std::make_pair(m_datamax, m_datamin); }
     std::pair<int, int> maxWidthHeight() { return std::pair(m_widthMax, m_heightMax); }
     std::pair<int, int> WidthHeight() { return std::pair(m_width, m_height); }
     std::pair<int, int> offsetXY() { return std::pair(m_offsetX, m_offsetY); }
@@ -90,6 +92,8 @@ private:
     int                                       m_widthMax;
     int                                       m_offsetX;
     int                                       m_offsetY;
+    int                                       m_datamax;
+    int                                       m_datamin;
     std::string                               m_format;
     double                                    m_exposureTime;
     double                                    m_cameraGain;

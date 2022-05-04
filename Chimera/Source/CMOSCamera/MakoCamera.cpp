@@ -82,6 +82,7 @@ void MakoCamera::initialize()
     QLabel* framesLabel = new QLabel("frame#", this);
     QPushButton* framerateButton = new QPushButton("FPS", this);
     m_CursorScenePosLabel = new QLabel("pos", this);
+    m_DataMaxMinLabel = new QLabel("Max/Min", this);
     m_ExposureTimeButton = new QPushButton("exposure", this);
     m_CameraGainButton = new QPushButton("gain", this);
     statusbar1->addWidget(m_OperatingStatusLabel);
@@ -90,6 +91,7 @@ void MakoCamera::initialize()
     statusbar1->addWidget(m_TrigOnOffButton);
     statusbar1->addWidget(m_TrigSourceButton);
     statusbar1->addWidget(m_CursorScenePosLabel);
+    statusbar1->addWidget(m_DataMaxMinLabel);
     statusbar2->addWidget(m_ExposureTimeButton);
     statusbar2->addWidget(m_CameraGainButton);
     statusbar2->addWidget(framesLabel);
@@ -153,6 +155,8 @@ void MakoCamera::initialize()
     /*image calc thread*/
     connect(&imgCThread, &ImageCalculatingThread::imageReadyForPlot, this, [this]() {
         viewer.renderImgFromCalcThread(m_aManualCscale->isChecked());
+        auto MaxMin = imgCThread.dataMaxMin();
+        m_DataMaxMinLabel->setText("Max/Min: (" + qstr(MaxMin.first) + "/" + qstr(MaxMin.second) + ")");
         imgCThread.mutex().lock();
         QMouseEvent event(QMouseEvent::None, imgCThread.mousePos(), Qt::NoButton, 0, 0);
         viewer.onSetMousePosInCMap(&event, m_CursorScenePosLabel);

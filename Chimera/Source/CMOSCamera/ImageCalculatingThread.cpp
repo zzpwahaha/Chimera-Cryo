@@ -76,6 +76,13 @@ void ImageCalculatingThread::updateExposureTime()
     }
 }
 
+void ImageCalculatingThread::updateDataMaxMin()
+{
+    QCPRange range = m_pQCPColormap->data()->dataBounds();
+    m_datamax = range.upper;
+    m_datamin = range.lower;
+}
+
 void ImageCalculatingThread::updateCameraGain()
 {
     std::string errorStr("");
@@ -455,6 +462,7 @@ void ImageCalculatingThread::run()
             updateXYOffset();
             calcCrossSectionXY();
             assignValue(m_doubleQVector, m_format, m_height, m_width, m_offsetX, m_offsetY);
+            updateDataMaxMin();
             fit1dGaussian();
             fit2dGaussian();
             if (m_firstStart)

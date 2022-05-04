@@ -90,6 +90,7 @@ private:
     //QPushButton*                        m_FramerateButton;
     //QLabel*                             m_FramesLabel;
     QLabel*                             m_CursorScenePosLabel;
+    QLabel*                             m_DataMaxMinLabel;
     QPushButton*                        m_ExposureTimeButton;
     QPushButton*                        m_CameraGainButton;
 
