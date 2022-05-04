@@ -1,0 +1,221 @@
+#Constants {
+    --StaticBackground: #073642;
+    --ErrorColor: #dc322f;
+    --NeutralTextColor: #c8c8c8;
+    --DefaultFontSize: 11pt;
+    --ActiveColor: #000000;
+    --DarkBackground: #002024;
+    --InteractableBackground: rgb( 40, 40, 40 );
+    --MainTextColor: #6c71c4;
+    --ExpStatusColor: #2aa198;
+}
+QWidget {
+    background: var(--StaticBackground); /*@ErrorColor*/
+    color: var(--ErrorColor);
+}
+
+QMainWindow {
+    background-color: var(--StaticBackground);
+}
+
+QLabel {
+    background: var(--StaticBackground);
+    color: var(--NeutralTextColor);
+    qproperty-alignment: AlignCenter;
+    font: bold var(DefaultFontSize);
+}
+
+QProgressBar {
+    text-align: center;
+    color: #6c71c4;
+    font: bold var(DefaultFontSize);
+    background-color: var(--StaticBackground);
+}
+
+QProgressBar::chunk {
+    background-color: #cb4b16;
+}
+
+QChartView {
+    background: var(--StaticBackground);
+}
+
+QHeaderView::section:checked {
+    background-color: var(--ActiveColor);
+}
+
+QTextEdit [readOnly="true"], QTextEdit:disabled, QPlainTextEdit, QPlainTextEdit[readOnly="true"], QPlainTextEdit:disabled {
+    background: var(--StaticBackground)
+    color: var(--MainTextColor);
+}
+
+QPlainTextEdit#ERROR_STATUS {
+    color: var(--ErrorColor);
+}
+
+QPlainTextEdit#EXPERIMENT_STATUS {
+    color: var(--ExpStatusColor);
+}
+
+
+QSlider::groove:vertical {
+    background: white;
+    position: absolute; /* absolutely position 4px from the left and right of the widget. setting margins on the widget should work too... */
+    left: 12px;
+    right: 12px;
+}
+
+QSlider::handle:vertical {
+    height: 10px;
+    background: var(--InteractableBackground);
+    margin: 0 -8px; /* expand outside the groove */
+}
+
+QTextEdit {
+    background: var(--InteractableBackground);
+    color: var(--MainTextColor);
+    font: normal var(--DefaultFontSize);
+}
+
+QLineEdit {
+    background: var(--InteractableBackground);
+    font: normal var(--DefaultFontSize);
+    color: var(--MainTextColor);
+    border: 1px solid gray;
+}
+
+QLineEdit:disabled, QCheckBox:disabled, QComboBox:disabled, QRadioButton:disabled {
+    background: var(--StaticBackground);
+    color: var(--NeutralTextColor);
+}
+
+QChartView, QComboBox, QRadioButton, QCheckBox, QPushButton, QListView {
+    background: var(--InteractableBackground);
+    color: var(--MainTextColor);
+    font: bold var(--DefaultFontSize);
+}
+
+QTableView::item:selected:!active, QTableView {
+    background: var(--InteractableBackground);
+    color: var(--MainTextColor);
+    font: normal 8pt "Courier New";
+}
+
+QTableView::item:selected {
+    background: car(--ActiveColor);
+    color: var(--MainTextColor)
+    font: bold 8pt "Courier New";
+}
+
+QTableView::item:!enabled {
+    background: rgb(20,20,20);
+}
+
+QTableCornerButton::section, QHeaderView::section {
+    background: var(--StaticBackground);
+    color: var(--NeutralTextColor);
+    qproperty-alignment: AlignCenter;
+    font: bold var(--DefaultFontSize) "Courier New";
+}
+
+QMenuBar {
+    background-color: var(--InteractableBackground);
+    color: rgb(255, 255, 255);
+    font: bold var(--DefaultFontSize);
+}
+
+QMenu, QMenu::item {
+    background-color: var(--InteractableBackground);
+    color: var(--MainTextColor);
+    font: 10pt;
+}
+
+QMenu::item:selected { 
+    background-color: #000000;
+}
+
+QToolTip {
+    border: 1px solid white;
+    background-color: var(--DarkBackground);
+    border-radius: 4px;
+    color: white;
+}
+
+
+QScrollBar:vertical {
+    border: 1px solid rgba(25, 25, 25, 0);
+    background: var(--DarkBackground);
+    width: 15px;
+    margin: 22px 0 22px 0;
+}
+
+QScrollBar::handle:vertical {
+    background: var(--InteractableBackground);
+    min-height: 20px;
+}
+
+QScrollBar::add-line:vertical {
+    border: 2px solid grey;
+    background: var(--InteractableBackground);
+    height: 20px;
+    subcontrol-position: bottom;
+    subcontrol-origin: margin;
+}
+
+QScrollBar::sub-line:vertical {
+    border: 2px solid grey;
+    background: var(--InteractableBackground);
+    height: 20px;
+    subcontrol-position: top;
+    subcontrol-origin: margin;
+}
+
+QScrollBar::up-arrow:vertical, QScrollBar::down-arrow:vertical {
+    border: 2px solid grey;
+    width: 3px;
+    height: 3px;
+    background: black;
+}
+
+QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+    background: none;
+}
+
+QScrollBar:horizontal {
+    border: 1px solid rgb(25,25,25,0);
+    background: var(--DarkBackground);
+    height: 15px;
+    margin: 0px 20px 0 20px;
+}
+
+QScrollBar::handle:horizontal {
+    background: var(--InteractableBackground);
+    min-width: 20px;
+}
+
+QScrollBar::add-line:horizontal {
+    border: 2px solid grey;
+    background: var(--InteractableBackground);
+    width: 20px;
+    subcontrol-position: right;
+    subcontrol-origin: margin;
+}
+
+QScrollBar::sub-line:horizontal {
+    border: 2px solid grey;
+    background: var(--InteractableBackground);
+    width: 20px;
+    subcontrol-position: left;
+    subcontrol-origin: margin;
+}
+
+QScrollBar::left-arrow:horizontal, QScrollBar::right-arrow:horizontal {
+    border: 2px solid grey;
+    width: 3px;
+    height: 3px;
+    background: black;
+}
+
+QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
+    background: none;
+}
