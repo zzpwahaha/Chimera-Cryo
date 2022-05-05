@@ -1,11 +1,11 @@
 #Constants {
-    --StaticBackground: #073642;
+    --StaticBackground: #ffffff;
     --ErrorColor: #dc322f;
     --NeutralTextColor: #c8c8c8;
-    --DefaultFontSize: 11pt;
-    --ActiveColor: #000000;
-    --DarkBackground: #002024;
-    --InteractableBackground: rgb( 40, 40, 40 );
+    --DefaultFontSize: 15pt;
+    --ActiveColor: #e7e301;
+    --DarkBackground: #12e3ff;
+    --InteractableBackground: rgb(199, 156, 156);
     --MainTextColor: #6c71c4;
     --ExpStatusColor: #2aa198;
 }
@@ -45,7 +45,7 @@ QHeaderView::section:checked {
 }
 
 QTextEdit [readOnly="true"], QTextEdit:disabled, QPlainTextEdit, QPlainTextEdit[readOnly="true"], QPlainTextEdit:disabled {
-    background: var(--StaticBackground)
+    background: var(--StaticBackground);
     color: var(--MainTextColor);
 }
 
@@ -103,7 +103,7 @@ QTableView::item:selected:!active, QTableView {
 
 QTableView::item:selected {
     background: car(--ActiveColor);
-    color: var(--MainTextColor)
+    color: var(--MainTextColor);
     font: bold 8pt "Courier New";
 }
 
