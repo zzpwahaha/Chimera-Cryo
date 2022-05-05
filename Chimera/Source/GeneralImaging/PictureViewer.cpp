@@ -19,9 +19,7 @@ PictureViewer::PictureViewer(std::string plotname, QWidget* parent)
     m_QCP->plotLayout()->addElement(0, 0, m_QCPleftAxisRect);
     m_QCP->plotLayout()->addElement(1, 1, m_QCPbottomAxisRect);
     /*note the index of the axrect is labeled with the position, i.e. left=0,cter=1,bottom=2, ignore cbar*/
-    m_QCPbottomAxisRect->axis(QCPAxis::atBottom)->setLabelFont(QFont("Times", 10));
-    m_QCPleftAxisRect->axis(QCPAxis::atLeft)->setLabelFont(QFont("Times", 10));
-    m_QCPcenterAxisRect->axis(QCPAxis::atTop)->setLabelFont(QFont("Times", 10));
+
 
 
     m_QCPcenterAxisRect->setupFullAxesBox(true);
@@ -188,7 +186,7 @@ PictureViewer::PictureViewer(std::string plotname, QWidget* parent)
         tracer->setStyle(QCPItemTracer::tsCircle);
         tracer->setPen(QPen(Qt::red));
         tracer->setBrush(Qt::red);
-        tracer->setSize(7);
+        tracer->setSize(8);
     }
 
     m_QCPtraceTextbottom = new QCPItemText(m_QCP.data());
@@ -200,6 +198,22 @@ PictureViewer::PictureViewer(std::string plotname, QWidget* parent)
     m_QCPtraceTextleft->setClipAxisRect(m_QCPleftAxisRect);
     m_QCPtraceTextleft->setRotation(90);
     m_QCPtraceTextleft->position->setCoords(-12, 0);
+    
+    //set font size
+    QFont vfont = QFont("Times", 12);
+    QFont vfonts = QFont("Times", 10);
+    m_QCPbottomAxisRect->axis(QCPAxis::atBottom)->setLabelFont(vfont);
+    m_QCPleftAxisRect->axis(QCPAxis::atLeft)->setLabelFont(vfont);
+    m_QCPcenterAxisRect->axis(QCPAxis::atTop)->setLabelFont(vfont);
+    m_QCPtraceTextbottom->setFont(vfonts);
+    m_QCPtraceTextleft->setFont(vfonts);
+    m_colorScale->axis()->setTickLabelFont(vfont);
+    for (auto* p : m_QCP->axisRects()) {
+        for (auto* pp : p->axes()) {
+            pp->setTickLabelFont(vfont);
+        }
+    }
+
 
     //connect(m_QCP.data(), &QCustomPlot::mouseMove, this, &PictureViewer::onSetMousePosInCMap);
     //connect(m_QCP.data(), &QCustomPlot::mouseDoubleClick, this, [this]() {

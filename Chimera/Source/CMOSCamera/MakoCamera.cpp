@@ -102,8 +102,11 @@ void MakoCamera::initialize()
         m_ImageBinButtonH,m_ImageBinButtonW,
         m_CameraGainButton,m_ExposureTimeButton,
         framerateButton,m_TrigOnOffButton,m_TrigSourceButton })
-        btn->setStyleSheet("border: none; color: rgb(128, 89, 255); font: 10pt");
-    
+        btn->setStyleSheet("border: none; color: rgb(128, 89, 255); font: 11pt");
+    for (auto& btn : { m_CursorScenePosLabel, m_DataMaxMinLabel, m_OperatingStatusLabel,framesLabel }) {
+        btn->setStyleSheet("font: 11pt");
+    }
+
     layout->addWidget(statusbar1, 0);
     layout->addWidget(statusbar2, 0);
     viewer.setMinimumSize(800, 800);

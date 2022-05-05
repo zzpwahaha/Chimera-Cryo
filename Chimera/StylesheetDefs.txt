@@ -30,12 +30,12 @@ $green:     #859900;
 */
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Dark Solarized
 
-@MainTextColor #6c71c4
+@MainTextColor #000000
 @NeutralTextColor #000000
-@DefaultFontSize 11pt
+@DefaultFontSize 12pt
 @StaticBackground #ffffff
-@InteractableBackground #002b36
-@DarkBackground #002024
+@InteractableBackground rgb(255, 255, 255)
+@DarkBackground #12e3ff
 
 % the reading of the stylesheet doesn't seem to like having a comment being the last thing.
 @ActiveColor #000000
