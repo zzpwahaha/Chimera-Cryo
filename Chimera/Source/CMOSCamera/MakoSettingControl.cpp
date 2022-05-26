@@ -263,7 +263,7 @@ void MakoSettingControl::initialzePreset()
 {
     std::string errstr("");
     std::string modeName = getFeatureValue<std::string>("DeviceModelName", errstr);
-    if (modeName.find("G-319B") != std::string::npos) { // this is a global shutter camera, does not have "SensorShutterMode" feature
+    if (modeName.find("G-319B") != std::string::npos || modeName.find("G-125B") != std::string::npos) { // this is a global shutter camera, does not have "SensorShutterMode" feature
     }
     else {
         setFeatureValue("SensorShutterMode", "GlobalReset", errstr);

@@ -29,7 +29,7 @@ void ConfigSystem::initialize( IChimeraQtWindow* win)
 	QHBoxLayout* layout = new QHBoxLayout(this);
 	layout->setContentsMargins(0, 0, 0, 0);
 	configDisplay = new QLabel ("No Configuruation Selected!", win);
-	configDisplay->setStyleSheet(" QLabel{ font: bold 8pt; }");
+	configDisplay->setStyleSheet(" QLabel{ font: bold 12pt; }");
 	configurationSavedIndicator = new QCheckBox ("Saved?", win);	
 	configurationSavedIndicator->setChecked (true);
 	configurationSavedIndicator->setEnabled(false);
