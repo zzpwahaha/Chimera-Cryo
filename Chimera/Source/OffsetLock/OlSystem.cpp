@@ -84,6 +84,12 @@ bool OlSystem::eventFilter(QObject* obj, QEvent* event) {
 			parentWin->auxWin->SetOls();
 			return true;
 		}
+		else if (event->type() == QEvent::KeyPress) {
+			if (static_cast<QKeyEvent*>(event)->key() == Qt::Key_Enter) {
+				parentWin->auxWin->SetDds();
+				return true;
+			}
+		}
 	}
 	return false;
 }
