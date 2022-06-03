@@ -6,6 +6,8 @@
 #include "MakoCameraCore.h"
 #include "../3rd_Party/qcustomplot/qcustomplot.h"
 #include "GaussianFit.h"
+#include "FrameAverager.h"
+#include <deque>
 #include <utility>
 
 class ImageProcessingThread;
@@ -55,6 +57,7 @@ public:
     double cameraGain() { return m_cameraGain; }
     QVector<double> rawImageDefinite();  /*used in save image*/
     QMutex& mutex() const { return m_pProcessingThread->mutex(); }
+    FrameAverager& averager() { return m_avger; }
 
 signals:
     void imageReadyForPlot();
@@ -103,11 +106,12 @@ private:
 
     bool                                      m_Stopping;
 
-    bool                                      m_doFitting;
-    bool                                      m_doFitting2D;
+    std::atomic<bool>                         m_doFitting;
+    std::atomic<bool>                         m_doFitting2D;
 
     QPoint                                    m_mousePos;
 
+    FrameAverager                             m_avger;
     Gaussian1DFit                             m_gfitBottom;
     Gaussian1DFit                             m_gfitLeft;
     Gaussian2DFit                             m_gfit2D;

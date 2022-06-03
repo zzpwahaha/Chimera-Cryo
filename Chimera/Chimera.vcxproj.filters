@@ -441,6 +441,9 @@
     <ClCompile Include="Source\ExperimentMonitoringAndStatus\TemperatureMonitor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\CMOSCamera\FrameAverager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="3rd_Party\qcustomplot\qcustomplot.h">
@@ -618,6 +621,9 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="Source\GeneralImaging\PictureManager.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\CMOSCamera\FrameAverager.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>

@@ -32,6 +32,7 @@ ImageCalculatingThread::ImageCalculatingThread(
     , m_dataValid(false)
     , m_Stopping(false)
     , m_mousePos(0, 0)
+    , m_avger()
     , m_doFitting(true)
     , m_doFitting2D(false)
     , m_gfitBottom(5, NULL, NULL, 0, 0, 0, 0) /*5 is greater than fit param 4, otherwise will break*/
@@ -456,6 +457,7 @@ void ImageCalculatingThread::run()
             Copy	const Copy& 1	2
             Copy	Copy	2	3*/
         }
+        m_avger.doAverage(m_doubleQVector);
         if (m_dataValid && !m_Stopping && !m_doubleQVector.isEmpty())
         {
             //m_doubleQVector = QVector<double>(m_uint16QVector.begin(), m_uint16QVector.end());

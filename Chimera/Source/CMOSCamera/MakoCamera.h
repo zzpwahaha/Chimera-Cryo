@@ -57,6 +57,7 @@ signals:
 private:
     void initPlotContextMenu();
     void handleStatusButtonClicked(QString featName);
+    void createAvgControlWidget();
 
 
 private:
@@ -89,6 +90,7 @@ private:
     QPushButton*                        m_TrigSourceButton;
     //QPushButton*                        m_FramerateButton;
     //QLabel*                             m_FramesLabel;
+    QPushButton*                        m_avgSetButton;
     QLabel*                             m_CursorScenePosLabel;
     QLabel*                             m_DataMaxMinLabel;
     QPushButton*                        m_ExposureTimeButton;

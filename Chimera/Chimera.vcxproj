@@ -130,6 +130,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Source\CMOSCamera\FrameAverager.cpp" />
     <ClCompile Include="Source\ExperimentMonitoringAndStatus\TemperatureMonitor.cpp" />
     <ClCompile Include="Source\GigaMOOG\GigaMoogCore.cpp" />
     <ClCompile Include="Source\ExperimentMonitoringAndStatus\ExperimentSeqPlotter.cpp" />
@@ -180,6 +181,7 @@
     <QtMoc Include="Source\PrimaryWindows\QtAnalysisWindow.h" />
     <QtMoc Include="Source\ExperimentMonitoringAndStatus\ExperimentSeqPlotter.h" />
     <QtMoc Include="Source\ExperimentMonitoringAndStatus\TemperatureMonitor.h" />
+    <QtMoc Include="Source\CMOSCamera\FrameAverager.h" />
     <ClInclude Include="Source\GigaMOOG\GigaMoogCore.h" />
     <ClInclude Include="Source\GeneralFlumes\BoostAsyncSerial.h" />
     <ClInclude Include="Source\GigaMOOG\GigaMoogSystem.h" />

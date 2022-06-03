@@ -81,6 +81,7 @@ void MakoCamera::initialize()
     imageBinBtnLayout->addWidget(m_ImageBinButtonW);
     QLabel* framesLabel = new QLabel("frame#", this);
     QPushButton* framerateButton = new QPushButton("FPS", this);
+    m_avgSetButton = new QPushButton("Avg", this);
     m_CursorScenePosLabel = new QLabel("pos", this);
     m_DataMaxMinLabel = new QLabel("Max/Min", this);
     m_ExposureTimeButton = new QPushButton("exposure", this);
@@ -96,12 +97,13 @@ void MakoCamera::initialize()
     statusbar2->addWidget(m_CameraGainButton);
     statusbar2->addWidget(framesLabel);
     statusbar2->addWidget(framerateButton);
+    statusbar2->addWidget(m_avgSetButton);
 
     m_OperatingStatusLabel->setStyleSheet("background-color: rgb(0,0, 0); color: rgb(255,255,255)");
     for (auto& btn : { m_ImageSizeButtonX,m_ImageSizeButtonY,m_ImageSizeButtonH ,m_ImageSizeButtonW,
         m_ImageBinButtonH,m_ImageBinButtonW,
         m_CameraGainButton,m_ExposureTimeButton,
-        framerateButton,m_TrigOnOffButton,m_TrigSourceButton })
+        framerateButton,m_TrigOnOffButton,m_TrigSourceButton,m_avgSetButton })
         btn->setStyleSheet("border: none; color: rgb(128, 89, 255); font: 11pt");
     for (auto& btn : { m_CursorScenePosLabel, m_DataMaxMinLabel, m_OperatingStatusLabel,framesLabel }) {
         btn->setStyleSheet("font: 11pt");
@@ -141,6 +143,10 @@ void MakoCamera::initialize()
         handleStatusButtonClicked("ExposureTimeAbs"); });
     connect(framerateButton, &QPushButton::clicked, this, [this]() {
         handleStatusButtonClicked("AcquisitionFrameRateAbs"); });
+    connect(&imgCThread.averager(), &FrameAverager::avgNumberUpdate, this, [this](QString str) {
+        m_avgSetButton->setText("Avg: " + str); });
+    connect(m_avgSetButton, &QPushButton::clicked, this, [this]() {
+        createAvgControlWidget(); });
 
     connect(core.getFrameObs(), &FrameObserver::setCurrentFPS, this,
         [this, framerateButton](const QString& sFPS) {
@@ -249,6 +255,50 @@ void MakoCamera::handleStatusButtonClicked(QString featName)
     
 }
 
+void MakoCamera::createAvgControlWidget()
+{
+    QDialog* wid = new  QDialog(this);
+    wid->setModal(false);
+    auto& avg = imgCThread.averager();
+    QVBoxLayout* layout = new QVBoxLayout(wid);
+    QHBoxLayout* layout1 = new QHBoxLayout(wid);
+    QHBoxLayout* layout2 = new QHBoxLayout(wid);
+    QLabel* avgt = new QLabel("Avg. Type: ");
+    QComboBox* avgtComb = new QComboBox(wid);
+    for (auto t : avg.allType) {
+        avgtComb->addItem(qstr(avg.avgTypeName(t)));
+    }
+    avgtComb->setCurrentIndex(avg.currentAvgType());
+    connect(avgtComb, qOverload<int>(&QComboBox::currentIndexChanged), [this](int idx) {
+        imgCThread.averager().setAvgType(idx); });
+    layout1->addWidget(avgt, 0);
+    layout1->addWidget(avgtComb, 1);
+    layout->addLayout(layout1);
+
+    QLabel* avgn = new QLabel("Avg. Number: ");
+    QLineEdit* avgnLE = new QLineEdit(qstr(avg.avgNumber()));
+    connect(avgnLE, &QLineEdit::returnPressed, [this, avgnLE]() {
+        QString s = avgnLE->text();
+        int val;
+        try {
+            val = boost::lexical_cast<int>(str(s));
+        }
+        catch (boost::bad_lexical_cast&) {
+            errBox("The average number is not valid, please input a positive integer");
+        }
+        if (val > 0) {
+            imgCThread.averager().setAvgNum(val);
+        }
+        else {
+            errBox("The average number is not valid, please input a positive integer");
+        } });
+    layout2->addWidget(avgn, 0);
+    layout2->addWidget(avgnLE, 1);
+    layout->addLayout(layout2);
+
+    wid->show();
+}
+
 
 void MakoCamera::startExp()
 {
@@ -308,6 +358,14 @@ void MakoCamera::initPlotContextMenu()
             aPlotTracer->isChecked() ? tra->setVisible(true) : tra->setVisible(false);
         }
         viewer.plot()->replot(); });
+
+    QAction* aPlotAvg = new QAction("Averaging");
+    aPlotAvg->setCheckable(true);
+    aPlotAvg->setChecked(false);
+    viewer.contextMenu()->addAction(aPlotAvg);
+    connect(aPlotAvg, &QAction::triggered, this, [this, aPlotAvg]() {
+        imgCThread.averager().toggleDoAveraging(aPlotAvg->isChecked());
+        if (!aPlotAvg->isChecked()) m_avgSetButton->setText("Avg: OFF"); });
 
     QAction* aPlotFitter = new QAction("Fitting");
     aPlotFitter->setCheckable(true);
