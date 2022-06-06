@@ -545,8 +545,8 @@ void DoCore::FPGAForceOutput(DOStatus status)
 	if (tcp_connect == 0)
 	{
 		zynq_tcp.writeCommand("trigger");
-		Sleep(100);
-		zynq_tcp.writeCommand("disableMod");
+		//Sleep(100);
+		//zynq_tcp.writeCommand("disableMod");
 		zynq_tcp.disconnect();
 	}
 	else
@@ -588,8 +588,8 @@ void DoCore::FPGAForcePulse(DOStatus status, std::vector<std::pair<unsigned, uns
 	if (tcp_connect == 0)
 	{
 		zynq_tcp.writeCommand("trigger");
-		Sleep(100);
-		zynq_tcp.writeCommand("disableMod");
+		//Sleep(100);
+		//zynq_tcp.writeCommand("disableMod");
 		zynq_tcp.disconnect();
 	}
 	else

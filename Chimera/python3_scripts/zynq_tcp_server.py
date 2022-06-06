@@ -83,17 +83,25 @@ class zynq_tcp_server:
 			self.seq.mod_enable()
 		elif (dev == 'initExp'):
 			self.seq.initExp()
-		elif (dev == 'disableSeq'):
-			self.seq.reset_disable_mod()
+		elif (dev == 'resetSeq'):
+			self.seq.reset_enable_mod()
 		elif (dev == 'disableMod'):
 			self.seq.mod_disable()
+		elif (dev == 'enableMod'):
+			self.seq.mod_enable()
 		elif (dev == 'DAC'):
+			self.seq.mod_disable()
 			self.seq.set_DAC(int(data_split[1]), float(data_split[2]))
+			time.sleep(0.01)
+			self.seq.mod_enable()
 		elif (dev == 'DDS'):
+			# self.seq.mod_disable()
 			if len(data_split)==3:
 				self.seq.set_DDS(int(data_split[1]), float(data_split[2]))
 			elif len(data_split)==4:
 				self.seq.set_DDS(int(data_split[1]), float(data_split[2]),float(data_split[3]))
+			# time.sleep(0.05)
+			# self.seq.mod_enable()
 		elif (dev == 'trigger'):
 			self.seq.soft_trigger()
 		else:

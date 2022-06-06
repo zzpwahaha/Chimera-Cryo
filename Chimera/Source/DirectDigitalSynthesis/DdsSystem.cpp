@@ -404,6 +404,8 @@ void DdsSystem::setDDSs()
 
 	if (tcp_connect == 0)
 	{
+		zynq_tcp.writeCommand("disableMod");
+		Sleep(5);
 		std::ostringstream stringStream;
 		std::string command;
 		for (int line = 0; line < size_t(DDSGrid::total); ++line) {
@@ -414,8 +416,10 @@ void DdsSystem::setDDSs()
 				<< "_" << std::fixed << std::setprecision(numAmplDigits) << outputs[line].info.currAmp;
 			command = stringStream.str();
 			zynq_tcp.writeCommand(command);
-			
+			Sleep(5);
 		}
+		Sleep(5);
+		zynq_tcp.writeCommand("enableMod");
 		zynq_tcp.disconnect();
 	}
 	else

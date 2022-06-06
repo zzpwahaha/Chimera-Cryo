@@ -590,9 +590,10 @@ void AoCore::setGUIDacChange(std::vector<std::vector<AoChannelSnapshot>> channel
 	}
 
 	if (tcp_connect == 0) {
+		Sleep(10);
 		zynq_tcp.writeCommand("trigger");
-		Sleep(100);
-		zynq_tcp.writeCommand("disableMod");
+		//Sleep(100);
+		//zynq_tcp.writeCommand("disableMod");
 		zynq_tcp.disconnect();
 	}
 	else {

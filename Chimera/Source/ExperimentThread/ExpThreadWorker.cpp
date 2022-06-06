@@ -1256,7 +1256,7 @@ void ExpThreadWorker::normalFinish (ExperimentType& expType, bool runMaster,
 	std::chrono::time_point<chronoClock> startTime) {
 	auto exp_t = std::chrono::duration_cast<std::chrono::seconds>((chronoClock::now () - startTime)).count ();
 	
-	input->zynqExp.sendCommand("disableSeq"); 
+	input->zynqExp.sendCommand("resetSeq"); 
 	//input->dds->setDDSs();
 
 	switch (expType) {

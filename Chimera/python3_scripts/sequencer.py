@@ -88,6 +88,8 @@ class sequencer:
 		self.dds2 = AD9959(fifo_devices['AD9959_2'])
 		self.fifo_dac0_seq = AXIS_FIFO(fifo_devices['DAC81416_0_seq'])
 		self.fifo_dac1_seq = AXIS_FIFO(fifo_devices['DAC81416_1_seq'])
+		dds_lock_pll.dds_lock_pll()
+
 		# initialize DDSs
 		self.fifo_dds_atw_seq = AXIS_FIFO(fifo_devices['AD9959_0_seq_atw'])
 		self.fifo_dds_ftw_seq = AXIS_FIFO(fifo_devices['AD9959_0_seq_ftw'])
@@ -101,10 +103,13 @@ class sequencer:
 		self.gpio2 = AXI_GPIO(gpio_devices['axi_gpio_2'])
 		self.fifo_dio_seq = AXIS_FIFO(fifo_devices['GPIO_seq'])
 
+		reset()
+
 	def initExp(self):
 		print('******************************************************************************************************************************************************************')
 		print('initializing experiment')
-		self.mod_disable()
+		self.mod_enable()
+		self.mod_report()
 		reset()
 		dds_lock_pll.dds_lock_pll() 
 
@@ -206,10 +211,12 @@ class sequencer:
 			self.dds0.set_DDS(channel, freq, amp)
 
 	def mod_enable(self):
+		print('mod enabled from zynq')
 		self.gpio2.set_bit(0, channel=1)
 		self.mod_report()
 
 	def mod_disable(self):
+		print('mod disabled from zynq')
 		self.gpio2.clear_bit(0, channel=1)
 
 	def reset_disable_mod(self):
@@ -218,8 +225,20 @@ class sequencer:
 		self.gpio2.write_axi_gpio(0x0000ffff,channel=2)
 		self.mod_disable()
 
+	def reset_enable_mod(self):
+		print('resetting sequencers and enabling mod')
+		self.gpio2.write_axi_gpio(0xffff0000,channel=2)
+		self.gpio2.write_axi_gpio(0x0000ffff,channel=2)
+		self.mod_enable()
+
 	def mod_report(self):
-		print((self.gpio2.read_axi_gpio(channel=1)))
+		status = int(self.gpio2.read_axi_gpio(channel=1).hex(), 16)
+		if status == 1:
+			print('MOD IS ON, CAN RUN SEQUENCER FOR EXPERIMENT OR CHANGE DAC, TTL NOW')
+		elif status == 0:
+			print('MOD IS OFF, CAN UPDATE DDS GUI NOW')
+		else:
+			print('MOD is not in valid state, a low level bug')
 
 	def dac_seq_write_points(self, byte_len, byte_buf, num_snapshots):
 		print('DAC points')
