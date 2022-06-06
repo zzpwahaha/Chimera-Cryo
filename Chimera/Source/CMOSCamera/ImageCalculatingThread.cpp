@@ -32,6 +32,8 @@ ImageCalculatingThread::ImageCalculatingThread(
     , m_dataValid(false)
     , m_Stopping(false)
     , m_mousePos(0, 0)
+    , m_doBkgSubtraction(false)
+    , m_bkgValid(false)
     , m_avger()
     , m_doFitting(true)
     , m_doFitting2D(false)
@@ -145,6 +147,7 @@ void ImageCalculatingThread::StopProcessing()
     
     m_firstStart = true;
     m_dataValid = false;
+    m_bkgValid = false;
     m_avger.toggleDoAveraging(false);
     updateXYOffset();
     updateExposureTime();
@@ -165,6 +168,12 @@ void ImageCalculatingThread::experimentStarted()
 void ImageCalculatingThread::experimentFinished()
 {
     expRunning = false;
+}
+
+void ImageCalculatingThread::setBackground()
+{
+    m_background = std::move(rawImageDefinite());
+    m_bkgValid = true;
 }
 
 /*should only be called in the run, with the guard of mutex and everything properly initialized*/
@@ -228,7 +237,7 @@ void ImageCalculatingThread::setDefaultView()
     //m_pQCP->axisRect(0)->axis(QCPAxis::atLeft)->setRange(m_pQCPleftGraph->keyAxis()->range() - m_pQCPleftGraph->data()->at(0)->key);
 }
 
-QVector<double> ImageCalculatingThread::rawImageDefinite() // used now only in gui saving
+QVector<double> ImageCalculatingThread::rawImageDefinite() // used now only in gui saving and bkg subtraction
 {
     QTime time = QTime::currentTime();
     time.start();
@@ -243,6 +252,7 @@ QVector<double> ImageCalculatingThread::rawImageDefinite() // used now only in g
             return tmp;
         }
     }
+    thrower("Capturing img over timed by 300ms, check the exposure time or check whether the camera is running");
     return tmp;
     
 }
@@ -259,6 +269,15 @@ void ImageCalculatingThread::toggleDoFitting2D(bool dofit)
     m_doFitting2D = dofit;
     if (m_Stopping) { fit2dGaussian(); }
     m_pProcessingThread->mutex().unlock();
+}
+
+void ImageCalculatingThread::toggleBkgSubtraction(bool doSub)
+{
+    m_doBkgSubtraction = doSub;
+    if (!m_doBkgSubtraction) {
+        m_bkgValid = false;
+    }
+    emit backgroundStatus(m_bkgValid);
 }
 
 void ImageCalculatingThread::fit1dGaussian()
@@ -460,6 +479,16 @@ void ImageCalculatingThread::run()
             Copy	Copy	2	3*/
         }
         m_avger.doAverage(m_doubleQVector);
+        if (m_doBkgSubtraction && m_bkgValid) {
+            if (m_background.size() == m_doubleQVector.size()) {
+                std::transform(m_doubleQVector.begin(), m_doubleQVector.end(),
+                    m_background.begin(), m_doubleQVector.begin(), std::minus<double>());
+            }
+            else {
+                m_bkgValid = false;
+                emit backgroundStatus(false);
+            }
+        }
         if (m_dataValid && !m_Stopping && !m_doubleQVector.isEmpty())
         {
             //m_doubleQVector = QVector<double>(m_uint16QVector.begin(), m_uint16QVector.end());

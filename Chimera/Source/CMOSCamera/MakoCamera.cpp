@@ -82,6 +82,7 @@ void MakoCamera::initialize()
     QLabel* framesLabel = new QLabel("frame#", this);
     QPushButton* framerateButton = new QPushButton("FPS", this);
     m_avgSetButton = new QPushButton("Avg", this);
+    auto bkgsubLabel = new QLabel("Bkg. Sub.: Off", this);
     m_CursorScenePosLabel = new QLabel("pos", this);
     m_DataMaxMinLabel = new QLabel("Max/Min", this);
     m_ExposureTimeButton = new QPushButton("exposure", this);
@@ -98,6 +99,7 @@ void MakoCamera::initialize()
     statusbar2->addWidget(framesLabel);
     statusbar2->addWidget(framerateButton);
     statusbar2->addWidget(m_avgSetButton);
+    statusbar2->addWidget(bkgsubLabel);
 
     m_OperatingStatusLabel->setStyleSheet("background-color: rgb(0,0, 0); color: rgb(255,255,255)");
     for (auto& btn : { m_ImageSizeButtonX,m_ImageSizeButtonY,m_ImageSizeButtonH ,m_ImageSizeButtonW,
@@ -105,7 +107,7 @@ void MakoCamera::initialize()
         m_CameraGainButton,m_ExposureTimeButton,
         framerateButton,m_TrigOnOffButton,m_TrigSourceButton,m_avgSetButton })
         btn->setStyleSheet("border: none; color: rgb(128, 89, 255); font: 11pt");
-    for (auto& btn : { m_CursorScenePosLabel, m_DataMaxMinLabel, m_OperatingStatusLabel,framesLabel }) {
+    for (auto& btn : { m_CursorScenePosLabel, m_DataMaxMinLabel, m_OperatingStatusLabel,framesLabel, bkgsubLabel }) {
         btn->setStyleSheet("font: 11pt");
     }
 
@@ -147,6 +149,15 @@ void MakoCamera::initialize()
         m_avgSetButton->setText("Avg: " + str); });
     connect(m_avgSetButton, &QPushButton::clicked, this, [this]() {
         createAvgControlWidget(); });
+    connect(&imgCThread, &ImageCalculatingThread::backgroundStatus, this, [this, bkgsubLabel](bool valid) {
+        bool dobkg = imgCThread.doBkgSubtraction();
+        if (!dobkg) {
+            bkgsubLabel->setText("Bkg. Sub.: Off");
+        }
+        else {
+            bkgsubLabel->setText(valid ? "Bkg. Sub.: On" : "Bkg.Sub. : Invalid Bkg");
+        }
+        });
 
     connect(core.getFrameObs(), &FrameObserver::setCurrentFPS, this,
         [this, framerateButton](const QString& sFPS) {
@@ -359,6 +370,28 @@ void MakoCamera::initPlotContextMenu()
         }
         viewer.plot()->replot(); });
 
+    QMenu* mBkgSub = viewer.contextMenu()->addMenu("Bkg. subtraction");
+    QAction* aBkgSubOnOff = mBkgSub->addAction("Turn on");
+    QAction* aBkgSubSetBkg = mBkgSub->addAction("Set Bkg.");
+    connect(aBkgSubOnOff, &QAction::triggered, [this, aBkgSubOnOff]() {
+        if (aBkgSubOnOff->text() == "Turn on") {
+            aBkgSubOnOff->setText("Turn off");
+            imgCThread.toggleBkgSubtraction(true);
+        }
+        else if (aBkgSubOnOff->text() == "Turn off") {
+            aBkgSubOnOff->setText("Turn on");
+            imgCThread.toggleBkgSubtraction(false);
+        }
+        else errBox("Low-level bug in toggle the background subtraction"); });
+    connect(aBkgSubSetBkg, &QAction::triggered, [this]() {
+        try {
+            imgCThread.setBackground();
+        }
+        catch (ChimeraError& e) {
+            parentWin->reportErr("Capture image for background subtraction failed \n" + e.qtrace());
+        }});
+
+
     QAction* aPlotAvg = new QAction("Averaging");
     aPlotAvg->setCheckable(true);
     aPlotAvg->setChecked(false);
@@ -417,7 +450,13 @@ void MakoCamera::initPlotContextMenu()
     viewer.contextMenu()->addSeparator();
     QAction* aSaveImg = new QAction("Save Image");
     viewer.contextMenu()->addAction(aSaveImg);
-    connect(aSaveImg, &QAction::triggered, [this]() {manualSaveImage(); });
+    connect(aSaveImg, &QAction::triggered, [this]() {
+        try {
+            manualSaveImage();
+        }
+        catch (ChimeraError& e) {
+            parentWin->reportErr("Capture image for saving failed \n" + e.qtrace());
+        } });
 }
 
 void MakoCamera::releaseBuffer()

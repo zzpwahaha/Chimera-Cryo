@@ -34,6 +34,7 @@ public:
     void experimentStarted();
     void experimentFinished();
 
+    void setBackground();
 
 private:
     void calcCrossSectionXY();
@@ -58,17 +59,20 @@ public:
     QVector<double> rawImageDefinite();  /*used in save image*/
     QMutex& mutex() const { return m_pProcessingThread->mutex(); }
     FrameAverager& averager() { return m_avger; }
+    bool doBkgSubtraction() { return m_doBkgSubtraction; }
 
 signals:
     void imageReadyForPlot();
     void imageReadyForExp(const QVector<double>&, int w, int h);
     void currentFormat(QString format);
+    void backgroundStatus(bool valid);
 
 public slots:
     
     void updateMousePos(QMouseEvent* event);
     void toggleDoFitting(bool dofit);
     void toggleDoFitting2D(bool dofit);
+    void toggleBkgSubtraction(bool doSub);
 
 
 private:
@@ -111,6 +115,9 @@ private:
 
     QPoint                                    m_mousePos;
 
+    std::atomic<bool>                         m_doBkgSubtraction;
+    bool                                      m_bkgValid;
+    QVector<double>                           m_background;
     FrameAverager                             m_avger;
     Gaussian1DFit                             m_gfitBottom;
     Gaussian1DFit                             m_gfitLeft;
