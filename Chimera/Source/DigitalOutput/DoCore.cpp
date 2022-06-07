@@ -546,8 +546,6 @@ void DoCore::FPGAForceOutput(DOStatus status)
 	{
 		Sleep(1);
 		zynq_tcp.writeCommand("trigger");
-		Sleep(10);
-		zynq_tcp.writeCommand("resetSeq");
 		zynq_tcp.disconnect();
 	}
 	else
@@ -560,7 +558,7 @@ void DoCore::FPGAForceOutput(DOStatus status)
 void DoCore::FPGAForcePulse(DOStatus status, std::vector<std::pair<unsigned, unsigned>> rowcol, double dur)
 {
 	resetTtlEvents();
-	sizeDataStructures(3);
+	sizeDataStructures(1);
 	ttlSnapshots[0].push_back({ 0.1, status });
 	for (auto& rc : rowcol)
 	{
@@ -576,27 +574,50 @@ void DoCore::FPGAForcePulse(DOStatus status, std::vector<std::pair<unsigned, uns
 	writeTtlDataToFPGA(0, false);
 
 	int tcp_connect;
-	try
-	{
+	try {
 		tcp_connect = zynq_tcp.connectTCP(ZYNQ_ADDRESS);
 	}
-	catch (ChimeraError& err)
-	{
+	catch (ChimeraError& err) {
 		tcp_connect = 1;
 		thrower(err.what());
 	}
 
-	if (tcp_connect == 0)
-	{
+	if (tcp_connect == 0) {
 		Sleep(1);
 		zynq_tcp.writeCommand("trigger");
 		Sleep(10);
 		zynq_tcp.writeCommand("resetSeq");
 		zynq_tcp.disconnect();
 	}
-	else
-	{
-		thrower("connection to zynq failed. can't write DAC data\n");
+	else {
+		thrower("connection to zynq failed. can't write TTL data\n");
+	}
+
+
+	// set up a sequence that will just flush out the current static output so that when dac gui get updated, 
+	// the sequencer does not run the triggering sequence but this static sequence to avoid unexpected triggering 
+	// for example, the gigamood will froze if receive a trigger but not a data beforehand
+	resetTtlEvents();
+	sizeDataStructures(1);
+	ttlSnapshots[0].push_back({ 0.1, status });
+	formatForFPGA(0);
+	Sleep(0.1 + dur + dur);
+	writeTtlDataToFPGA(0, false);
+	try {
+		tcp_connect = zynq_tcp.connectTCP(ZYNQ_ADDRESS);
+	}
+	catch (ChimeraError& err) {
+		tcp_connect = 1;
+		thrower(err.what());
+	}
+
+	if (tcp_connect == 0) {
+		Sleep(1);
+		zynq_tcp.writeCommand("trigger");
+		zynq_tcp.disconnect();
+	}
+	else {
+		thrower("connection to zynq failed. can't write TTL data\n");
 	}
 
 }
