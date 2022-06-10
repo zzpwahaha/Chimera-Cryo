@@ -1,6 +1,20 @@
 %%%%%%%%%%%%%%%%% Start With 1ms %%%%%%%%%%%%%%%%% 
 t = 1
-pulseon: do8_0 0.001
+ddsfreq: scisrcmot 80
+ddsamp: scisrcmot 100
+ddsfreq: dds2_2 80
+ddsamp: dds2_2 100
+pulseon: do1_0 1
+ol: ol0_0 coolingfreq 
+t += 1
+on: srcmottrg 
+dacramp: srcmotamp 10 0 5
+
+t += 3000
+pulseon: do1_1 1
+%ddsamp: dds2_2 0
+
+%pulseon: do8_0 0.001
 %pulseon: do1_0 0.01
 %%dac: dac0_0 1
 %%dac: dac0_2 5
@@ -20,6 +34,6 @@ pulseon: do8_0 0.001
 %dac: dac0_0 9
 %on: do1_7
 %
-repeat: 10
-	t += 10000
-	pulseon: do5_0 0.01
+%repeat: 10
+%	t += 10000
+%	pulseon: do5_0 0.01

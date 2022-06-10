@@ -35,7 +35,7 @@ private:
 
 public:
 	constexpr static double ddsFreqResolution = 500.0 / 0xffffffff; /*32bit, 500MHz clock freq*/
-	constexpr static double ddsAmplResolution = 10.0 / 0x3ff; /*10bit dac 0b1111111111, 10mA max dac current*/
+	constexpr static double ddsAmplResolution = 100.0 / 0x3ff; /*10bit dac 0b1111111111, 10mA max dac current*/
 	const int numFreqDigits = static_cast<int>(abs(round(log10(ddsFreqResolution) - 0.49)));
 	const int numAmplDigits = static_cast<int>(abs(round(log10(ddsAmplResolution) - 0.49)));
 

@@ -76,7 +76,7 @@ void DdsSystem::initialize(IChimeraQtWindow* parent)
 		QGridLayout* layoutGrid = new QGridLayout();
 		//layoutGrid->addWidget(new QLabel(QString("DDS %1").arg(i)), 0, 0, 1, 2);
 		layoutGrid->addWidget(new QLabel(QString("DDS %1: Freq(MHz)").arg(i)), 1, 0, Qt::AlignLeft);
-		layoutGrid->addWidget(new QLabel("Ampl(mA)"), 1, 1,Qt::AlignLeft);
+		layoutGrid->addWidget(new QLabel("Ampl(\%)"), 1, 1,Qt::AlignLeft);
 		for (size_t j = 0; j < size_t(DDSGrid::numPERunit); j++)
 		{
 			auto& out = outputs[i * size_t(DDSGrid::numPERunit) + j];
@@ -391,40 +391,21 @@ void DdsSystem::resetDds()
 
 void DdsSystem::setDDSs()
 {
-	int tcp_connect;
-	try
-	{
-		tcp_connect = zynq_tcp.connectTCP(ZYNQ_ADDRESS);
-	}
-	catch (ChimeraError& err)
-	{
-		tcp_connect = 1;
-		thrower(err.what());
-	}
-
-	if (tcp_connect == 0)
-	{
-		zynq_tcp.writeCommand("disableMod");
-		Sleep(5);
-		std::ostringstream stringStream;
-		std::string command;
-		for (int line = 0; line < size_t(DDSGrid::total); ++line) {
-			
-			stringStream.str("");
-			stringStream << "DDS_" << line 
-				<< "_" << std::fixed << std::setprecision(numFreqDigits) << outputs[line].info.currFreq
-				<< "_" << std::fixed << std::setprecision(numAmplDigits) << outputs[line].info.currAmp;
-			command = stringStream.str();
-			zynq_tcp.writeCommand(command);
-			Sleep(5);
+	try {
+		std::vector<std::vector<DdsChannelSnapshot>> channelSnapShot;
+		channelSnapShot.resize(1);
+		for (unsigned short line = 0; line < size_t(DDSGrid::total); ++line) {
+			channelSnapShot[0].push_back({ 'f',line,1.0 + line/*time in ms*/,
+				outputs[line].info.currFreq ,outputs[line].info.currFreq ,0.0 });
 		}
-		Sleep(5);
-		zynq_tcp.writeCommand("enableMod");
-		zynq_tcp.disconnect();
+		for (unsigned short line = 0; line < size_t(DDSGrid::total); ++line) {
+			channelSnapShot[0].push_back({ 'a',line,1.0 + line/*time in ms*/,
+				outputs[line].info.currAmp ,outputs[line].info.currAmp ,0.0 });
+		}
+		core.setGUIDdsChange(channelSnapShot);
 	}
-	else
-	{
-		thrower("connection to zynq failed. can't update DDS freq values\n");
+	catch (ChimeraError& e) {
+		thrower(e.what());
 	}
 }
 

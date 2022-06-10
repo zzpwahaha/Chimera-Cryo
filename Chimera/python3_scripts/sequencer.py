@@ -1,3 +1,4 @@
+from time import sleep
 from axis_fifo import AXIS_FIFO
 from devices import fifo_devices
 from devices import gpio_devices
@@ -74,7 +75,7 @@ class sequencer:
 		self.ddsUpdateFreq = 50.0 # dds update freq in kHz, not really used, for reminder
 
 		self.ddsFreqRangeConv = 0xffffffff / 500.0  #8589930 # (2^32 - 1)/500 MHz
-		self.ddsAmpRangeConv = 0x3ff/1.25 #818.4 # (2^10 - 1)/1.25 mW
+		self.ddsAmpRangeConv = 0x3ff/100 # (2^10 - 1)/100
 		
 		self.ddsFreqIncMax = 0xfffffffffff # 32 ftw + 12 acc = 44bit
 		self.ddsAmpIncMax = 0x3fffff # 10 atw + 12 acc = 22bit
@@ -91,8 +92,6 @@ class sequencer:
 		dds_lock_pll.dds_lock_pll()
 
 		# initialize DDSs
-		self.fifo_dds_atw_seq = AXIS_FIFO(fifo_devices['AD9959_0_seq_atw'])
-		self.fifo_dds_ftw_seq = AXIS_FIFO(fifo_devices['AD9959_0_seq_ftw'])
 		self.fifo_dds0_atw_seq = AXIS_FIFO(fifo_devices['AD9959_0_seq_atw'])
 		self.fifo_dds0_ftw_seq = AXIS_FIFO(fifo_devices['AD9959_0_seq_ftw'])
 		self.fifo_dds1_atw_seq = AXIS_FIFO(fifo_devices['AD9959_1_seq_atw'])
@@ -108,10 +107,12 @@ class sequencer:
 	def initExp(self):
 		print('******************************************************************************************************************************************************************')
 		print('initializing experiment')
-		self.mod_enable()
-		self.mod_report()
+		self.mod_disable()
 		reset()
 		dds_lock_pll.dds_lock_pll() 
+		self.mod_enable()
+		self.mod_report()
+
 
 	def getWord(self, bytes):
 		return bytes[3] + bytes[2] + bytes[1] + bytes[0]
@@ -155,7 +156,7 @@ class sequencer:
 		#acc_incr    <= gpio_in(25 downto  4);
 		#unused      <= gpio_in( 3 downto  2);
 		#acc_chan    <= gpio_in( 1 downto  0);
-		print('addr', point.address, 'time', point.time, 'start', point.start, 'steps', point.steps, 'incr', point.incr, 'channel', point.chan)
+		# print('addr', point.address, 'time', point.time, 'start', point.start, 'steps', point.steps, 'incr', point.incr, 'channel', point.chan)
 		fifo.write_axis_fifo(b"\x01\x00" + struct.pack('>H', point.address))
 		fifo.write_axis_fifo(struct.pack('>I', point.time))
 		fifo.write_axis_fifo(struct.pack('>I', (point.start << 16) + point.steps))
@@ -218,17 +219,21 @@ class sequencer:
 	def mod_disable(self):
 		print('mod disabled from zynq')
 		self.gpio2.clear_bit(0, channel=1)
+	
+	def reset(self):
+		self.gpio2.write_axi_gpio(0xffff0000,channel=2)
+		self.gpio2.write_axi_gpio(0x0000ffff,channel=2)
 
 	def reset_disable_mod(self):
 		print('disabling mod and resetting sequencers')
-		self.gpio2.write_axi_gpio(0xffff0000,channel=2)
-		self.gpio2.write_axi_gpio(0x0000ffff,channel=2)
+		self.reset()
 		self.mod_disable()
 
 	def reset_enable_mod(self):
 		print('resetting sequencers and enabling mod')
-		self.gpio2.write_axi_gpio(0xffff0000,channel=2)
-		self.gpio2.write_axi_gpio(0x0000ffff,channel=2)
+		self.mod_disable()
+		dds_lock_pll.dds_lock_pll() 
+		self.reset()
 		self.mod_enable()
 
 	def mod_report(self):
@@ -310,8 +315,8 @@ class sequencer:
 				ramp_inc = int((end - s)*1.0 / num_steps * 4096) 
 				# * 1.0 just to avoid zero if end-s < num_steps(this is not true in python3, but in python2 int(2)/int(3)=0), 
 				# 4096=0xfff+1 comes from the 12bit accumulator 
-				print('time',t,'channel', channel, aorf,'start', s,'end', end,'duration', duration, 'num_step',num_steps, 'ramp_inc: ', ramp_inc)
-			if (aorf == 'f'):
+			print('time',t,'channel', channel, aorf,'start', s,'end', end,'duration', duration, 'num_step',num_steps, 'ramp_inc: ', ramp_inc)
+			if (aorf == b'f'):
 				if (ramp_inc < 0):
 					# ramp_inc = int(self.ddsFreqRangeConv + ramp_inc)
 					ramp_inc = int(self.ddsFreqIncMax + ramp_inc)
@@ -323,7 +328,7 @@ class sequencer:
 				else:
 					channel = channel-8
 					ftw_points2.append(DDS_ftw_seq_point(address=len(ftw_points2), time=t, start=s, steps=num_steps, incr=ramp_inc, chan=channel))
-			elif (aorf == 'a'):
+			elif (aorf == b'a'):
 				if (ramp_inc < 0):
 					ramp_inc = int(self.ddsAmpIncMax + ramp_inc)
 				if (channel < 4):
@@ -357,7 +362,7 @@ class sequencer:
 			self.write_ftw_point(self.fifo_dds1_ftw_seq, point)
 		for point in ftw_points2:
 			print("ftw dds2")
-			print(point.address, point.time, point.chan)
+			# print(point.address, point.time, point.chan)
 			self.write_ftw_point(self.fifo_dds2_ftw_seq, point)
 
 		for point in atw_points0:
@@ -371,14 +376,14 @@ class sequencer:
 			self.write_atw_point(self.fifo_dds2_atw_seq, point)
 
 	def dds_seq_write_atw_points(self):
-	    points=[]
-	    #these ramps should complete in just under 64 ms
-	    points.append(DDS_atw_seq_point(address=0,time=   0,start=1023,steps=0,incr=0,chan=0)) #25% to 75%
+		points=[]
+		#these ramps should complete in just under 64 ms
+		points.append(DDS_atw_seq_point(address=0,time=   0,start=1023,steps=0,incr=0,chan=0)) #25% to 75%
 	#    points.append(DDS_atw_seq_point(address=1,time=1000,start=256,steps=1,incr=0,chan=3)) #25% to 75%
-	    points.append(DDS_atw_seq_point(address=1,time=   0,start=0,steps=    0,incr=   0,chan=0))
+		points.append(DDS_atw_seq_point(address=1,time=   0,start=0,steps=    0,incr=   0,chan=0))
 
-	    for point in points:
-	      self.write_atw_point(self.fifo_dds_atw_seq, point)
+		for point in points:
+			self.write_atw_point(self.fifo_dds_atw_seq, point)
 
 	def dds_seq_write_ftw_points(self):
 		points=[]
@@ -435,17 +440,19 @@ class sequencer:
 
 	def dds_read_point(self, snapshot):
 		print(snapshot)
-		snapshot_split = snapshot.split('_')
-		t = int(snapshot_split[0].strip('t'), 16)
-		chan = int(snapshot_split[1].strip('c'), 16)
+		snapshot_split = snapshot.split(b'_')
+		t = int(snapshot_split[0].strip(b't'), 16)
+		chan = int(snapshot_split[1].strip(b'c'), 16)
 		aorf = snapshot_split[2]
-		if (aorf == 'f'):
+		if (aorf == b'f'):
 			ddsConv = self.ddsFreqRangeConv
-		else:
+		elif (aorf == b'a'):
 			ddsConv = self.ddsAmpRangeConv
-		start = int(float(snapshot_split[3].strip('s'))*ddsConv)
-		end = int(float(snapshot_split[4].strip('e'))*ddsConv)
-		duration = int(snapshot_split[5].strip('d').strip('\0'), 16)
+		else:
+			print("invalid dds type. set to 'f' for freq or 'a' for amp")
+		start = int(float(snapshot_split[3].strip(b's'))*ddsConv)
+		end = int(float(snapshot_split[4].strip(b'e'))*ddsConv)
+		duration = int(snapshot_split[5].strip(b'd').strip(b'\0'), 16)
 		return [t, chan, aorf,  start, end, duration]
 
 if __name__ == "__main__":
@@ -487,20 +494,46 @@ if __name__ == "__main__":
 					b't05F78EB0_c0000_s09.0000_e09.0000_d00000000\x00'
 
 
+	byte_buf_dio = b't00002710_b0000610000000000\x00'\
+					b't00004E20_b0000610000C00000\x00'\
+					b't000061A8_b0000610000000000\x00'\
+					b't000186A0_b0000610000000001\x00'\
+					b't00030D40_b0000610000000000\x00'\
+					b't0014B040_b0000610000000010\x00'\
+					b't001636E0_b0000610000000000\x00'
+					# b't11E4B040_b0000610000000010\x00'\
+					# b't11E636E0_b0000610000000000\x00'
+	byte_buf_dac =  b't00030D40_c0006_s10.0000_e00.0398_d00079950\x00'\
+					b't000AA690_c0006_s00.0398_e00.0000_d000007D0\x00'\
+					b't000AAE60_c0006_s00.0000_e00.0000_d00000000\x00'
+	byte_buf_dds =  b't000186A0_c000A_f_s080.000_e080.000_d00000000\x00'\
+					b't000186A0_c000A_a_s100.000_e000.000_d00002710\x00'\
+					b't0010C8E2_c000A_a_s000.000_e000.000_d00000000\x00'
+ 
+
+
 	seq = sequencer()
 	seq.mod_disable()
 	reset()
 	dds_lock_pll.dds_lock_pll()
-	# seq.set_DDS(1, 100, 10)
-	# seq.dds_seq_write_points(46, byte_buf_dds, 1)
-	# time.sleep(0.005)
-	# seq.set_DDS(1, 100, 0)
-	# seq.dds_seq_write_atw_points()
-	#seq.dds_seq_write_ftw_points()
-	# seq.set_DAC(0, -1)
-	# seq.set_DAC(16, 1)
-	# seq.set_DAC(19, 1)
-	seq.dac_seq_write_points(44, byte_buf_dac, 9)
-	seq.dio_seq_write_points(28, byte_buf_dio, 6)
-	seq.mod_enable()
-	trigger()
+	for i in range(1500):
+		# reset()
+
+		# seq.set_DDS(1, 100, 10)
+		# seq.dds_seq_write_points(46, byte_buf_dds, 1)
+		# time.sleep(0.005)
+		# seq.set_DDS(1, 100, 0)
+		# seq.dds_seq_write_atw_points()
+		#seq.dds_seq_write_ftw_points()
+		# seq.set_DAC(0, -1)
+		# seq.set_DAC(16, 1)
+		# seq.set_DAC(19, 1)
+		seq.dac_seq_write_points(44, byte_buf_dac, 3)
+		seq.mod_enable()
+		seq.dio_seq_write_points(28, byte_buf_dio, 7)
+		seq.mod_enable()
+		seq.dds_seq_write_points(46, byte_buf_dds, 3)
+		seq.mod_enable()
+		trigger()
+		print('*****************************************' + str(i) + '******************************************************')
+		sleep(.5)

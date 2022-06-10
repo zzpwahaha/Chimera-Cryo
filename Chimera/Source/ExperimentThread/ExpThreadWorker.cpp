@@ -1257,7 +1257,9 @@ void ExpThreadWorker::normalFinish (ExperimentType& expType, bool runMaster,
 	auto exp_t = std::chrono::duration_cast<std::chrono::seconds>((chronoClock::now () - startTime)).count ();
 	
 	input->zynqExp.sendCommand("resetSeq"); 
-	//input->dds->setDDSs();
+	input->aoSys.setDACs();
+	input->ddsSys.setDDSs();
+	input->ttls.FPGAForceOutput(input->ttlSys.getCurrentStatus());
 
 	switch (expType) {
 	case ExperimentType::AutoCal:

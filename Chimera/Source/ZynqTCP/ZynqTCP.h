@@ -34,7 +34,8 @@ private:
 	SOCKET ConnectSocket;
 
 	const unsigned int timeConv = 100000; // SEQ time given in multiples of 10 ns, 1/DIO_TIME_RESOLUTION
-	const unsigned int timeConvDAC = 100000; 
+	const unsigned int timeConvDAC = 100000; //DAC seq duration is in 10ns, so x100000 to convert ms to 10ns
+	const unsigned int timeConvDDS = 1000; //DDS seq duration is in us, so x1000 to convert ms to us
 	const unsigned int dacRes = 0xffff; //16 bit dac resolution
 
 };

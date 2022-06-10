@@ -825,3 +825,27 @@ void DdsCore::writeDDSs(UINT variation, bool loadSkip)
 		throw("connection to zynq failed. can't write DDS data\n");
 	}
 }
+
+void DdsCore::setGUIDdsChange(std::vector<std::vector<DdsChannelSnapshot>> channelSnapShot)
+{
+	ddsChannelSnapshots.clear();
+	ddsChannelSnapshots = channelSnapShot;
+	writeDDSs(0, true);
+	resetDDSEvents();
+	int tcp_connect;
+	try {
+		tcp_connect = zynq_tcp.connectTCP(ZYNQ_ADDRESS);
+	}
+	catch (ChimeraError& err) {
+		tcp_connect = 1;
+		thrower(err.what());
+	}
+
+	if (tcp_connect == 0) {
+		zynq_tcp.writeCommand("trigger");
+		zynq_tcp.disconnect();
+	}
+	else {
+		thrower("connection to zynq failed. can't write DDS data\n");
+	}
+}

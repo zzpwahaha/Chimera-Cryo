@@ -24,8 +24,8 @@ struct DdsInfo
 
 	double currAmp = 0;
 	double minAmp = 0;
-	double maxAmp = 10;
-	double defaultAmp = 10;
+	double maxAmp = 100;
+	double defaultAmp = 100;
 
 	std::string note = "None";
 };

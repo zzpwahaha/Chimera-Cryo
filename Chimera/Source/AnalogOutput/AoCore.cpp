@@ -575,11 +575,12 @@ void AoCore::writeDacs(unsigned variation, bool loadSkip)
 // channelSnapShot[0] contains changes that need to make for dac channels, do no call this during experiment interpretation.
 void AoCore::setGUIDacChange(std::vector<std::vector<AoChannelSnapshot>> channelSnapShot)
 {
-	dacSnapshots.resize(1); // just to make getNumberEvents happy
+	resetDacEvents();
+	dacSnapshots.resize(1); // just to make getNumberEvents happy, used in AoCore::writeDacs()
 	dacSnapshots[0].resize(channelSnapShot.size());
 	finalDacSnapshots = channelSnapShot;
 	writeDacs(0, true);
-	Sleep(10);
+	resetDacEvents();
 	int tcp_connect;
 	try {
 		tcp_connect = zynq_tcp.connectTCP(ZYNQ_ADDRESS);
@@ -590,7 +591,6 @@ void AoCore::setGUIDacChange(std::vector<std::vector<AoChannelSnapshot>> channel
 	}
 
 	if (tcp_connect == 0) {
-		Sleep(10);
 		zynq_tcp.writeCommand("trigger");
 		zynq_tcp.disconnect();
 	}

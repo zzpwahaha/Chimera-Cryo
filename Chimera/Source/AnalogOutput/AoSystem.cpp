@@ -116,7 +116,7 @@ void AoSystem::handleSaveConfig(ConfigStream& saveFile)
 
 void AoSystem::standardExperimentPrep ( unsigned variationInc, std::vector<parameterType>& expParams, 
 										double currLoadSkipTime ){
-	core.organizeDacCommands(variationInc, { ZYNQ_DEADTIME,getDacValues() });
+	core.organizeDacCommands(variationInc, { ZYNQ_DEADTIME,std::array<double, size_t(AOGrid::total)>{0}/*getDacValues()*/ });
 	core.findLoadSkipSnapshots (currLoadSkipTime, expParams, variationInc);
 	//makeFinalDataFormat (variationInc);
 	core.formatDacForFPGA(variationInc, { ZYNQ_DEADTIME,std::array<double, size_t(AOGrid::total)>{} });

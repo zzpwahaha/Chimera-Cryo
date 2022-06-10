@@ -123,6 +123,7 @@ public:
 	void makeFinalDataFormat(UINT variation);
 	void standardExperimentPrep(UINT variation);
 	void writeDDSs(UINT variation, bool loadSkip);
+	void setGUIDdsChange(std::vector<std::vector<DdsChannelSnapshot>> channelSnapShot);
 
 private:
 	std::array<std::string, size_t(DDSGrid::total)> names;
