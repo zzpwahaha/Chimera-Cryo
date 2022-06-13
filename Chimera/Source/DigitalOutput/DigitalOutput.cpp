@@ -41,6 +41,13 @@ void DigitalOutput::setName ( std::string nameStr )
 	check->setToolTip ( nameStr.c_str());
 }
 
+void DigitalOutput::setExpActiveColor(bool usedInExp, bool expFinished)
+{
+	check->setStyleSheet(usedInExp ? 
+		(expFinished ? "QCheckBox { border: 2px solid rgb(255, 255, 0)}" : "QCheckBox { border: 2px solid rgb(0, 255, 0)}") :
+		"QCheckBox { border: 2px solid rgb(240, 240, 240); }");
+}
+
 void DigitalOutput::setHoldStatus ( bool stat ){
 	holdStatus = stat;
 }

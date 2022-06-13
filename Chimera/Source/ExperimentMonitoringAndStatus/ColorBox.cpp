@@ -50,11 +50,11 @@ void ColorBox::changeColor( std::string delim, std::string color ){
 		if (device.delim == delim){
 			foundMatch = true;
 			device.color = color;
-			device.ctrl->setStyleSheet (("QLabel {background-color: \"" + str(color) + "\"; font: 8pt;}").c_str());
+			device.ctrl->setStyleSheet (("QLabel {background-color: \"" + str(color) + "\"; font: 12pt;}").c_str());
 		}
 	}
 	if (!foundMatch) {
 		boxes.back ().color = color;
-		boxes.back ().ctrl->setStyleSheet (("QLabel {background-color: \"" + str (color) + "\"; font: 8pt;}").c_str ());
+		boxes.back ().ctrl->setStyleSheet (("QLabel {background-color: \"" + str (color) + "\"; font: 12pt;}").c_str ());
 	}
 }

@@ -350,7 +350,7 @@ void QtMainWindow::abortMasterThread (){
 void QtMainWindow::onErrorMessage (QString errMessage, unsigned level){
 	if (str(errMessage) != ""){
 		QApplication::beep ();
-		errorStatus.addStatusText (str(errMessage), level);
+		errorStatus.addStatusText (statusMsg( str(errMessage), level));
 	}
 }
 
@@ -431,7 +431,7 @@ void QtMainWindow::handleColorboxUpdate (QString color, QString systemDelim){
 }
 
 void QtMainWindow::handleNotification (QString txt, unsigned level){
-	mainStatus.addStatusText (str(txt), level);
+	mainStatus.addStatusText (statusMsg( str(txt), level ));
 }
 
 QThread* QtMainWindow::getExpThread () {

@@ -470,6 +470,14 @@ void DdsCore::initializeDataObjects(unsigned variationNum)
 	ddsSnapshots.resize(variationNum);
 }
 
+std::vector<DdsCommand> DdsCore::getDdsCommand(unsigned variation)
+{
+	if (ddsCommandList.size() - 1 < variation) {
+		thrower("Aquiring DDS command out of range");
+	}
+	return ddsCommandList[variation];
+}
+
 void DdsCore::setDDSCommandForm(DdsCommandForm command)
 {
 	ddsCommandFormList.push_back(command);

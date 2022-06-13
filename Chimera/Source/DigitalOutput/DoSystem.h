@@ -65,6 +65,8 @@ class DoSystem : public IChimeraSystem
 
 		void standardExperimentPrep(unsigned variationInc, double currLoadSkipTime, std::vector<parameterType>& expParams);
 
+	signals:
+		void setExperimentActiveColor(std::vector<DoCommand>, bool expFinished);
 
 	private:
 		DoCore core;
@@ -78,4 +80,4 @@ class DoSystem : public IChimeraSystem
 		// tells whether the hold button is down or not.
 		bool holdStatus; 
 };
-
+Q_DECLARE_METATYPE(std::vector<DoCommand>);

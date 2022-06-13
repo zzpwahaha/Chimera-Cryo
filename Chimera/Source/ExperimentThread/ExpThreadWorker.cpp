@@ -54,6 +54,7 @@ void ExpThreadWorker::experimentThreadProcedure () {
 		for (auto& device : input->devices.list) {
 			deviceLoadExpSettings (device, cStream);/*TODO: remove dds from device, and now device only has andor*/
 		}
+		input->numVariations = determineVariationNumber(expRuntime.expParams);
 		/// The Variation Calculation Step.
 		emit notification ("Calculating All Variation Data...\r\n");
 		for (auto& device : input->devices.list) {
@@ -1157,7 +1158,7 @@ void ExpThreadWorker::calculateAdoVariations (ExpRuntimeData& runtime) {
 			double& currLoadSkipTime = loadSkipTimes[variationInc];
 			currLoadSkipTime = convertToTime (loadSkipTime, runtime.expParams, variationInc);
 			input->aoSys.standardExperimentPrep (variationInc, runtime.expParams, currLoadSkipTime);
-			input->dds.standardExperimentPrep(variationInc);
+			input->ddsSys.standardExperimentPrep(variationInc);
 			input->olSys.standardExperimentPrep(variationInc, input->ttls, warnings);
 			input->ttlSys.standardExperimentPrep(variationInc, currLoadSkipTime, runtime.expParams);//make sure this is the last one, since offsetlock can insert in ttl sequence 
 			
@@ -1236,6 +1237,7 @@ void ExpThreadWorker::waitForAndorFinish () {
 
 void ExpThreadWorker::errorFinish (std::atomic<bool>& isAborting, ChimeraError& exception,
 	std::chrono::time_point<chronoClock> startTime) {
+	setExperimentGUIcolor();
 	std::string finMsg;
 	if (isAborting) {
 		emit updateBoxColor ("Grey", "Other");
@@ -1255,10 +1257,11 @@ void ExpThreadWorker::errorFinish (std::atomic<bool>& isAborting, ChimeraError& 
 void ExpThreadWorker::normalFinish (ExperimentType& expType, bool runMaster,
 	std::chrono::time_point<chronoClock> startTime) {
 	auto exp_t = std::chrono::duration_cast<std::chrono::seconds>((chronoClock::now () - startTime)).count ();
-	
+	setExperimentGUIcolor();
 	input->zynqExp.sendCommand("resetSeq"); 
 	input->aoSys.setDACs();
 	input->ddsSys.setDDSs();
+	input->olSys.setOLs(input->ttls, input->ttlSys.getCurrentStatus());
 	input->ttls.FPGAForceOutput(input->ttlSys.getCurrentStatus());
 
 	switch (expType) {
@@ -1360,4 +1363,23 @@ void ExpThreadWorker::loadExperimentRuntime (ConfigStream& config, ExpRuntimeDat
 	runtime.mainOpts = ConfigSystem::stdConfigGetter (config, "MAIN_OPTIONS", MainOptionsControl::getSettingsFromConfig);
 	runtime.repetitions = ConfigSystem::stdConfigGetter (config, "REPETITIONS", Repetitions::getSettingsFromConfig);
 	ParameterSystem::generateKey (runtime.expParams, runtime.mainOpts.randomizeVariations, varRangeInfo);
+}
+
+void ExpThreadWorker::setExperimentGUIcolor()
+{
+	emit input->ttlSys.setExperimentActiveColor(std::vector<DoCommand>(), true);
+	emit input->aoSys.setExperimentActiveColor(std::vector<AoCommand>(), true);
+	emit input->ddsSys.setExperimentActiveColor(std::vector<DdsCommand>(), true);
+	emit input->olSys.setExperimentActiveColor(std::vector<OlCommand>(), true);
+
+	try {
+		emit input->ttlSys.setExperimentActiveColor(input->ttls.getTtlCommand(input->numVariations - 1), true);
+		emit input->aoSys.setExperimentActiveColor(input->ao.getDacCommand(input->numVariations - 1), true);
+		emit input->ddsSys.setExperimentActiveColor(input->dds.getDdsCommand(input->numVariations - 1), true);
+		emit input->olSys.setExperimentActiveColor(input->ol.getOlCommand(input->numVariations - 1), true);
+	}
+	catch (ChimeraError& e) {
+		emit warn("Error happens when resetting the GUI edit colors \n" + e.qtrace());
+	}
+
 }

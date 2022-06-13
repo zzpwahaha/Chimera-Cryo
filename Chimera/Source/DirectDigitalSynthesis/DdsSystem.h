@@ -27,6 +27,7 @@
 #include "ZynqTCP/ZynqTCP.h"
 
 class DdsSystem : public IChimeraSystem{	
+	Q_OBJECT
 	public:
 		// THIS CLASS IS NOT COPYABLE.
 		DdsSystem& operator=(const DdsSystem&) = delete;
@@ -58,6 +59,7 @@ class DdsSystem : public IChimeraSystem{
 		//void prepareForce();
 		//void initializeDataObjects(unsigned cmdNum);
 		void setDDSs();
+		void relockPLL();
 		//void resetDdsEvents();
 		void updateEdits();
 		std::string getName(int ddsNumber);
@@ -72,8 +74,10 @@ class DdsSystem : public IChimeraSystem{
 		void updateCoreNames();
 		//void updateDdsValues();
 
+		void standardExperimentPrep(unsigned variation);
 
-
+	signals:
+		void setExperimentActiveColor(std::vector<DdsCommand>, bool expFinished);
 
 	private:
 		QLabel* ddsHeader;
@@ -107,4 +111,4 @@ class DdsSystem : public IChimeraSystem{
 
 		
 };
-
+Q_DECLARE_METATYPE(std::vector<DdsCommand>);

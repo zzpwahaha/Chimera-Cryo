@@ -54,6 +54,7 @@ class DoCore
 		void organizeTtlCommands (unsigned variation, DoSnapshot initSnap = { 0,0 });
 
 		unsigned long getNumberEvents (unsigned variation);
+		std::vector<DoCommand> getTtlCommand(unsigned variation);
 
 		void resetTtlEvents ();
 

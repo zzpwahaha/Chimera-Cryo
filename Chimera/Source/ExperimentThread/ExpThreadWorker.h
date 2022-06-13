@@ -78,6 +78,7 @@ class ExpThreadWorker : public QObject
 		void startRep (unsigned repInc, unsigned variationInc, bool skip);
 		//std::string abortString;
 		void loadExperimentRuntime (ConfigStream& config, ExpRuntimeData& runtime);
+		void setExperimentGUIcolor();
 
 		/* IDeviceCore functionality wrappers */
 		void deviceLoadExpSettings (IDeviceCore& device, ConfigStream& cStream);

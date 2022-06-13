@@ -153,6 +153,7 @@ void DoSystem::initialize(IChimeraQtWindow* parent) {
 		{
 			auto& out = outputs(row, number);
 			out.initialize(parent);
+			out.setExpActiveColor(false);
 			names[row * size_t(DOGrid::numPERunit) + number] = "do" + str(row + 1) + "_" + str(number); /*default name, always accepted by script*/
 			out.setName(names[row * size_t(DOGrid::numPERunit) + number]);
 			
@@ -169,15 +170,23 @@ void DoSystem::initialize(IChimeraQtWindow* parent) {
 				});
 			DOsubGridLayout->addWidget(out.check);
 		}
-		DOsubGridLayout->setSpacing(8);
+		DOsubGridLayout->setSpacing(0);
 		DOGridLayout->addLayout(DOsubGridLayout, runningCount % 3, 2 - runningCount / 3);
 	}
 	core.setNames(names);
-	DOGridLayout->setHorizontalSpacing(20);
+	DOGridLayout->setHorizontalSpacing(12);
 	DOGridLayout->setVerticalSpacing(12);
 	layout->addLayout(DOGridLayout);
 
-
+	connect(this, &DoSystem::setExperimentActiveColor, this, [this](std::vector<DoCommand> ttlCommand, bool expFinished) {
+		if (ttlCommand.empty()) {
+			for (auto& out : outputs) {
+				out.setExpActiveColor(false);
+			}
+		}
+		for (const auto& dcmd : ttlCommand) {
+			outputs(dcmd.line.first, dcmd.line.second).setExpActiveColor(true, expFinished);
+		} });
 
 }
 
@@ -267,6 +276,7 @@ DoCore& DoSystem::getCore (){
 
 void DoSystem::standardExperimentPrep(unsigned variationInc, double currLoadSkipTime, std::vector<parameterType>& expParams) {
 	//core.checkLongTimeRun(variationInc); // not using this now, see formatForFPGA
+	emit setExperimentActiveColor(core.getTtlCommand(variationInc), false);
 	core.organizeTtlCommands(variationInc, { ZYNQ_DEADTIME,getCurrentStatus() });
 	core.findLoadSkipSnapshots(currLoadSkipTime, expParams, variationInc);
 	//convertToFtdiSnaps (variationInc);

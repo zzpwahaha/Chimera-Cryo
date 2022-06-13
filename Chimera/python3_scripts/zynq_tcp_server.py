@@ -89,6 +89,10 @@ class zynq_tcp_server:
 			self.seq.mod_disable()
 		elif (dev == 'enableMod'):
 			self.seq.mod_enable()
+		elif (dev == 'lockPLL'):
+			self.seq.mod_disable()
+			self.seq.lock_PLL()
+			self.seq.mod_enable()
 		elif (dev == 'DAC'):
 			self.seq.mod_disable()
 			self.seq.set_DAC(int(data_split[1]), float(data_split[2]))

@@ -166,6 +166,15 @@ void AnalogOutput::disable ( ){
 	edit->setEnabled (false);
 }
 
+void AnalogOutput::setExpActiveColor(bool usedInExp, bool expFinished)
+{
+	for (auto check : { edit }) {
+		check->setStyleSheet(usedInExp ?
+			(expFinished ? "QLineEdit { background: rgb(255, 255, 0)}" : "QLineEdit { background: rgb(0, 255, 0)}") :
+			"QLineEdit { background: rgb(255, 255, 255)}");
+	}
+}
+
 double AnalogOutput::checkBound(double dacVal)
 {
 	if (dacVal > info.maxVal)

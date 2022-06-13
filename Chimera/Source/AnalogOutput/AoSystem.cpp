@@ -116,12 +116,12 @@ void AoSystem::handleSaveConfig(ConfigStream& saveFile)
 
 void AoSystem::standardExperimentPrep ( unsigned variationInc, std::vector<parameterType>& expParams, 
 										double currLoadSkipTime ){
+	emit setExperimentActiveColor(std::move(core.getDacCommand(variationInc)), false);
 	core.organizeDacCommands(variationInc, { ZYNQ_DEADTIME,std::array<double, size_t(AOGrid::total)>{0}/*getDacValues()*/ });
 	core.findLoadSkipSnapshots (currLoadSkipTime, expParams, variationInc);
 	//makeFinalDataFormat (variationInc);
 	core.formatDacForFPGA(variationInc, { ZYNQ_DEADTIME,std::array<double, size_t(AOGrid::total)>{} });
 }
-
 
 
 
@@ -196,7 +196,15 @@ void AoSystem::initialize( IChimeraQtWindow* parent )
 	}
 	layout->addLayout(AOGridLayout);
 	core.setNames(dacNames);
-
+	connect(this, &AoSystem::setExperimentActiveColor, this, [this](std::vector<AoCommand> dacCommand, bool expFinished) {
+		if (dacCommand.empty()) {
+			for (auto& out : outputs) {
+				out.setExpActiveColor(false);
+			}
+		}
+		for (const auto& dcmd : dacCommand) {
+			outputs[dcmd.line].setExpActiveColor(true, expFinished);
+		}});
 }
 
 bool AoSystem::eventFilter (QObject* obj, QEvent* event){

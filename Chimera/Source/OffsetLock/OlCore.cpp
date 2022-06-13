@@ -89,6 +89,14 @@ void OlCore::initializeDataObjects(unsigned variationNum)
 	olChannelSnapshots.resize(variationNum);
 }
 
+std::vector<OlCommand> OlCore::getOlCommand(unsigned variation)
+{
+	if (olCommandList.size() - 1 < variation) {
+		thrower("Aquiring OL command out of range");
+	}
+	return olCommandList[variation];
+}
+
 void OlCore::setOLCommandForm(OlCommandForm command)
 {
 	olCommandFormList.push_back(command);

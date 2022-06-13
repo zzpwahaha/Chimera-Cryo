@@ -75,6 +75,15 @@ void OlSystem::initialize(IChimeraQtWindow* parent)
 	layout->addLayout(OLGridLayout);
 	core.setNames(olNames);
 
+	connect(this, &OlSystem::setExperimentActiveColor, this, [this](std::vector<OlCommand> olCommand, bool expFinished) {
+		if (olCommand.empty()) {
+			for (auto& out : outputs) {
+				out.setExpActiveColor(false);
+			}
+		}
+		for (const auto& dcmd : olCommand) {
+			outputs[dcmd.line].setExpActiveColor(true, expFinished);
+		} });
 }
 
 bool OlSystem::eventFilter(QObject* obj, QEvent* event) {
@@ -292,6 +301,7 @@ void OlSystem::setOlStatusNoForceOut(std::array<double, size_t(OLGrid::total)> s
 
 void OlSystem::standardExperimentPrep(unsigned variation, DoCore& doCore, std::string& warning)
 {
+	emit setExperimentActiveColor(core.getOlCommand(variation), false);
 	core.organizeOLCommands(variation, { ZYNQ_DEADTIME,getOlValues() }, warning);
 	core.makeFinalDataFormat(variation, doCore);
 }

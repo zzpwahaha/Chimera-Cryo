@@ -444,6 +444,9 @@
     <ClCompile Include="Source\CMOSCamera\FrameAverager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\ExperimentMonitoringAndStatus\StatusOptionsWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="3rd_Party\qcustomplot\qcustomplot.h">
@@ -626,6 +629,18 @@
     <QtMoc Include="Source\CMOSCamera\FrameAverager.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <QtMoc Include="Source\AnalogOutput\AoSystem.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\DirectDigitalSynthesis\DdsSystem.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\OffsetLock\OlSystem.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\ExperimentMonitoringAndStatus\StatusOptionsWindow.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\AnalogInput\AiSettings.h">
@@ -653,9 +668,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\AnalogOutput\AoStructures.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\AnalogOutput\AoSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\Andor\AndorCameraCore.h">
@@ -755,9 +767,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\DirectDigitalSynthesis\DdsOutput.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\DirectDigitalSynthesis\DdsSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\DirectDigitalSynthesis\DdsSystemStructures.h">
@@ -880,9 +889,6 @@
     <ClInclude Include="Source\OffsetLock\OlStructure.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\OffsetLock\OlSystem.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Source\ParameterSystem\Expression.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -997,5 +1003,13 @@
     <ClInclude Include="Source\GigaMOOG\GigaMoogCore.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Source\ExperimentMonitoringAndStatus\StatusControlOptions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <QtUic Include="Source\ExperimentMonitoringAndStatus\StatusControlOptionDlg.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
   </ItemGroup>
 </Project>

@@ -300,6 +300,15 @@ void DdsOutput::disable() {
 	editFreq->setEnabled(false);
 }
 
+void DdsOutput::setExpActiveColor(bool usedInExp, bool expFinished)
+{
+	for (auto check : { editFreq,editAmp }) {
+		check->setStyleSheet(usedInExp ? 
+			(expFinished ? "QLineEdit { background: rgb(255, 255, 0)}" : "QLineEdit { background: rgb(0, 255, 0)}") :
+			"QLineEdit { background: rgb(255, 255, 255)}");
+	}
+}
+
 std::pair<double, double> DdsOutput::checkBound(double valF, double valA)
 {
 	if (valF > info.maxFreq)

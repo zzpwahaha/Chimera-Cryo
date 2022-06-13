@@ -581,7 +581,7 @@ void DoCore::FPGAForcePulse(DOStatus status, std::vector<std::pair<unsigned, uns
 		tcp_connect = 1;
 		thrower(err.what());
 	}
-	Sleep(15); // somehow has to wait 50ms, have to sleep for this amount of time to make TCP connect smoothly??????,  same for ExpThreadWorker::startRep zzp 2022/06/10 very annoying
+	Sleep(15); // somehow has to wait 15ms, have to sleep for this amount of time to make TCP connect smoothly??????,  same for ExpThreadWorker::startRep zzp 2022/06/10 very annoying
 	if (tcp_connect == 0) {
 		zynq_tcp.writeCommand("trigger");
 		zynq_tcp.disconnect();
@@ -817,6 +817,14 @@ void DoCore::organizeTtlCommands (unsigned variation, DoSnapshot initSnap)
 unsigned long DoCore::getNumberEvents (unsigned variation)
 {
 	return ttlSnapshots [variation].size ();
+}
+
+std::vector<DoCommand> DoCore::getTtlCommand(unsigned variation)
+{
+	if (ttlCommandList.size() - 1 < variation) {
+		thrower("Aquiring TTL command out of range");
+	}
+	return ttlCommandList[variation];
 }
 
 std::array<std::string, size_t(DOGrid::total)> DoCore::getAllNames () { return names; }

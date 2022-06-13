@@ -8,6 +8,8 @@
 #include <CustomQtControls/AutoNotifyCtrls.h>
 #include <PrimaryWindows/IChimeraQtWindow.h>
 #include <qplaintextedit.h>
+#include <queue>
+#include <ExperimentMonitoringAndStatus/StatusControlOptions.h>
 
 class StatusControl : public QWidget
 {
@@ -19,16 +21,27 @@ class StatusControl : public QWidget
 	};
 	public:
 		void initialize(IChimeraQtWindow* parent, std::string headerText, std::vector<std::string> textColors);
-		void addStatusText(std::string text, unsigned level = 0);
-		void addStatusText (std::string text, std::string color);
+		void addStatusText(statusMsg newMsg);
 		void clear();
 		void appendTimebar();
+		void redrawControl();
+
 	private:
-		QLabel* header;
-		QLabel* debugLevelLabel;
-		CQLineEdit* debugLevelEdit;
-		QPlainTextEdit* edit;
-		unsigned currentLevel=-1;
-		QPushButton* clearBtn;
+		void addStatusToQue(statusMsg newMsg);
+		void addHtmlStatusText(std::string text, std::string colorStr);
+		void addPlainText(std::string text);
+		void addPlainStatusTextInner(statusMsg newMsg);
+		void addHtmlStatusTextInner(statusMsg newMsg);
+
+
+	private:
+		QLabel* header = nullptr;
+		QTextEdit* edit = nullptr;
+		StatusControlOptions opts;
+		QPushButton* clearBtn = nullptr;
+		QPushButton* redrawBtn = nullptr;
+		QPushButton* options = nullptr;
+
 		std::vector<std::string> colors;
+		std::deque<statusMsg> msgHistory;
 };

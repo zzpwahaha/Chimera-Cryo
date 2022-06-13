@@ -20,7 +20,7 @@ public:
 	void setName(std::string name);
 	void setNote(std::string note);
 	void disable();
-	
+	void setExpActiveColor(bool usedInExp, bool expFinished = false);
 
 	OlInfo info;
 

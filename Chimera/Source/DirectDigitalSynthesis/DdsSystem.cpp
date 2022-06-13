@@ -57,6 +57,9 @@ void DdsSystem::initialize(IChimeraQtWindow* parent)
 	zeroDdsButton = new CQPushButton("Zero DDSs", parent);
 	zeroDdsButton->setToolTip("Press this button to turn off all DDS");
 	parent->connect(zeroDdsButton, &QPushButton::released, [parent]() { parent->auxWin->zeroDds(); });
+	QPushButton* relockPLLButton = new QPushButton("Relock PLL", parent);
+	relockPLLButton->setToolTip("Press this button to relock the PLL in the DDS system");
+	parent->connect(relockPLLButton, &QPushButton::released, [parent]() { parent->auxWin->relockPLL(); });
 	// 
 	quickChange = new CQCheckBox("Quick-Change", parent);
 	quickChange->setChecked(false);
@@ -65,6 +68,7 @@ void DdsSystem::initialize(IChimeraQtWindow* parent)
 
 	layoutBtn->addWidget(ddsSetButton, 0);
 	layoutBtn->addWidget(zeroDdsButton, 0);
+	layoutBtn->addWidget(relockPLLButton , 0);
 	layoutBtn->addWidget(quickChange, 0);
 
 	layout->addLayout(layoutBtn);
@@ -89,6 +93,15 @@ void DdsSystem::initialize(IChimeraQtWindow* parent)
 	layout->addLayout(layout1, 0);
 
 	//resetDds();
+	connect(this, &DdsSystem::setExperimentActiveColor, this, [this](std::vector<DdsCommand> ddsCommand, bool expFinished) {
+		if (ddsCommand.empty()) {
+			for (auto& out : outputs) {
+				out.setExpActiveColor(false);
+			}
+		}
+		for (const auto& dcmd : ddsCommand) {
+			outputs[dcmd.line].setExpActiveColor(true, expFinished);
+		} });
 }
 
 
@@ -409,6 +422,26 @@ void DdsSystem::setDDSs()
 	}
 }
 
+void DdsSystem::relockPLL()
+{
+	int tcp_connect;
+	try {
+		tcp_connect = zynq_tcp.connectTCP(ZYNQ_ADDRESS);
+	}
+	catch (ChimeraError& err) {
+		tcp_connect = 1;
+		errBox(err.what());
+	}
+
+	if (tcp_connect == 0) {
+		zynq_tcp.writeCommand("lockPLL");
+		zynq_tcp.disconnect();
+	}
+	else {
+		throw("connection to zynq failed. can't lock DDS PLLs\n");
+	}
+}
+
 
 
 void DdsSystem::updateEdits()
@@ -458,6 +491,12 @@ void DdsSystem::updateCoreNames()
 		names_[i] = outputs[i].info.name;
 	}
 	core.setNames(names_);
+}
+
+void DdsSystem::standardExperimentPrep(unsigned variation)
+{
+	emit setExperimentActiveColor(core.getDdsCommand(variation), false);
+	core.standardExperimentPrep(variation);
 }
 
 

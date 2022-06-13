@@ -40,6 +40,14 @@ unsigned long AoCore::getNumberEvents(unsigned variation)
 	return dacSnapshots[variation].size();
 }
 
+std::vector<AoCommand> AoCore::getDacCommand(unsigned variation)
+{
+	if (dacCommandList.size() - 1 < variation) {
+		thrower("Aquiring DAC command out of range");
+	}
+	return dacCommandList[variation];
+}
+
 
 
 

@@ -131,6 +131,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Source\CMOSCamera\FrameAverager.cpp" />
+    <ClCompile Include="Source\ExperimentMonitoringAndStatus\StatusOptionsWindow.cpp" />
     <ClCompile Include="Source\ExperimentMonitoringAndStatus\TemperatureMonitor.cpp" />
     <ClCompile Include="Source\GigaMOOG\GigaMoogCore.cpp" />
     <ClCompile Include="Source\ExperimentMonitoringAndStatus\ExperimentSeqPlotter.cpp" />
@@ -182,6 +183,8 @@
     <QtMoc Include="Source\ExperimentMonitoringAndStatus\ExperimentSeqPlotter.h" />
     <QtMoc Include="Source\ExperimentMonitoringAndStatus\TemperatureMonitor.h" />
     <QtMoc Include="Source\CMOSCamera\FrameAverager.h" />
+    <ClInclude Include="Source\ExperimentMonitoringAndStatus\StatusControlOptions.h" />
+    <QtMoc Include="Source\ExperimentMonitoringAndStatus\StatusOptionsWindow.h" />
     <ClInclude Include="Source\GigaMOOG\GigaMoogCore.h" />
     <ClInclude Include="Source\GeneralFlumes\BoostAsyncSerial.h" />
     <ClInclude Include="Source\GigaMOOG\GigaMoogSystem.h" />
@@ -324,7 +327,7 @@
     <ClInclude Include="Source\AnalogOutput\AnalogOutput.h" />
     <ClInclude Include="Source\AnalogOutput\AoCore.h" />
     <ClInclude Include="Source\AnalogOutput\AoStructures.h" />
-    <ClInclude Include="Source\AnalogOutput\AoSystem.h" />
+    <QtMoc Include="Source\AnalogOutput\AoSystem.h" />
     <ClInclude Include="Source\Andor\AndorCameraCore.h" />
     <QtMoc Include="Source\Andor\AndorCameraSettingsControl.h" />
     <ClInclude Include="Source\Andor\AndorFlume.h" />
@@ -362,7 +365,7 @@
     <ClInclude Include="Source\DigitalOutput\DoStructures.h" />
     <ClInclude Include="Source\DirectDigitalSynthesis\DdsCore.h" />
     <ClInclude Include="Source\DirectDigitalSynthesis\DdsOutput.h" />
-    <ClInclude Include="Source\DirectDigitalSynthesis\DdsSystem.h" />
+    <QtMoc Include="Source\DirectDigitalSynthesis\DdsSystem.h" />
     <ClInclude Include="Source\DirectDigitalSynthesis\DdsSystemStructures.h" />
     <ClInclude Include="Source\ExcessDialogs\openWithExplorer.h" />
     <ClInclude Include="Source\ExcessDialogs\saveWithExplorer.h" />
@@ -409,7 +412,7 @@
     <ClInclude Include="Source\OffsetLock\OffsetLockOutput.h" />
     <ClInclude Include="Source\OffsetLock\OlCore.h" />
     <ClInclude Include="Source\OffsetLock\OlStructure.h" />
-    <ClInclude Include="Source\OffsetLock\OlSystem.h" />
+    <QtMoc Include="Source\OffsetLock\OlSystem.h" />
     <ClInclude Include="Source\ParameterSystem\Expression.h" />
     <ClInclude Include="Source\ParameterSystem\ParameterSystemStructures.h" />
     <ClInclude Include="Source\Plotting\dataPoint.h" />
@@ -464,6 +467,9 @@
     <QtMoc Include="Source\ConfigurationSystems\ConfigSystem.h" />
     <QtMoc Include="Source\Andor\AndorCameraThreadWorker.h" />
     <QtMoc Include="Source\AnalogInput\CalibrationThreadWorker.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtUic Include="Source\ExperimentMonitoringAndStatus\StatusControlOptionDlg.ui" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

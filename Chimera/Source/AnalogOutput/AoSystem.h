@@ -30,6 +30,7 @@ class MainWindow;
  */
 class AoSystem : public IChimeraSystem 
 {
+	Q_OBJECT
 	public:
 		// THIS CLASS IS NOT COPYABLE.
 		AoSystem& operator=(const AoSystem&) = delete;
@@ -81,6 +82,11 @@ class AoSystem : public IChimeraSystem
 		void setDACs();
 		void setSingleDac(unsigned dacNumber, double val); // used for calibration, can not have gui stuff
 		bool IsquickChange() { return quickChange->isChecked(); }
+	
+	signals:
+		void setExperimentActiveColor(std::vector<AoCommand>, bool expFinished);
+
+
 	private:
 
 
@@ -103,5 +109,5 @@ class AoSystem : public IChimeraSystem
 		const int numDigits = static_cast<int>(abs(round(log10(dacResolution) - 0.49)));
 
 };
-
+Q_DECLARE_METATYPE(std::vector<AoCommand>);
 

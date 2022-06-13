@@ -27,11 +27,17 @@ int main (int argc, char** argv) {
 	qRegisterMetaType<calSettings> ();
 	qRegisterMetaType<parameterType> ();
 	qRegisterMetaType<std::vector<parameterType>> ();
+	qRegisterMetaType<statusMsg>();
 	qRegisterMetaType<size_t>("size_t");
 
 	qRegisterMetaType<CameraInfo>();
 	qRegisterMetaType<AndorRunSettings>();
 	qRegisterMetaType<MakoSettings*>();
+
+	qRegisterMetaType<std::vector<AoCommand>>();
+	qRegisterMetaType<std::vector<DoCommand>>();
+	qRegisterMetaType<std::vector<DdsCommand>>();
+	qRegisterMetaType<std::vector<OlCommand>>();
 
 	QtMainWindow* mainWinQt = new QtMainWindow ();
 	mainWinQt->show ();

@@ -22,6 +22,7 @@ public:
 	AoInfo info;
 	void setName ( std::string name );
 	void disable ( );
+	void setExpActiveColor(bool usedInExp, bool expFinished = false);
 	double checkBound(double dacVal);
 
 	QHBoxLayout* getLayout() const { return layout; }

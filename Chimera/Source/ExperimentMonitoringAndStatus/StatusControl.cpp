@@ -3,6 +3,7 @@
 #include "StatusControl.h"
 #include <PrimaryWindows/IChimeraQtWindow.h>
 #include <qlayout.h>
+#include "StatusOptionsWindow.h"
 
 void StatusControl::initialize(IChimeraQtWindow* parent, std::string headerText, std::vector<std::string> textColors)
 {
@@ -19,70 +20,138 @@ void StatusControl::initialize(IChimeraQtWindow* parent, std::string headerText,
 	colors = textColors;
 	//defaultColor = textColor;
 	header = new QLabel (headerText.c_str (), parent);	
-	debugLevelLabel = new QLabel ("Debug Level", parent);	
-	debugLevelEdit = new CQLineEdit (parent);
-	debugLevelEdit->setText ("-1");
-	parent->connect (debugLevelEdit, &QLineEdit::textChanged, [this]() {
+	options = new QPushButton("Options", parent);
+	connect(options, &QPushButton::pressed, [this, parent]() {
 		try {
-			currentLevel = boost::lexical_cast<unsigned>(str (debugLevelEdit->text ()));
+			// edit existing plot file using the plot designer.
+			StatusOptionsWindow dialog = StatusOptionsWindow(parent, &opts, msgHistory);
+			dialog.setStyleSheet(chimeraStyleSheets::stdStyleSheet());
+			dialog.exec();
+			// resize history
+			while (msgHistory.size() > opts.historyLength) {
+				msgHistory.pop_front();
+			}
 		}
-		catch (boost::bad_lexical_cast&) {
-			currentLevel = 0;
-		}
-		addStatusText ("Changed Debug Level to \"" + str (currentLevel) + "\"\n");
+		catch (ChimeraError& err) {
+			errBox(err.trace());
+		}});
+
+	redrawBtn = new QPushButton("Fancy Redraw", parent);
+	redrawBtn->connect(redrawBtn, &QPushButton::pressed, [this]() {
+		redrawControl();
 		});
+
 	clearBtn = new QPushButton (parent);
 	clearBtn->setText ("Clear");
-	edit = new QPlainTextEdit (parent);
+	edit = new QTextEdit (parent);
 	edit->setReadOnly(true);
 	edit->setStyleSheet("QPlainTextEdit { color: " + qstr(textColors[0]) + "; }");
 	parent->connect(clearBtn, &QPushButton::released, [this]() {clear(); });
 
 	layout1->addWidget(header, 0);
-	layout1->addWidget(debugLevelLabel, 1);
-	layout1->addWidget(debugLevelEdit, 0);
+	layout1->addWidget(options, 0);
+	layout1->addWidget(redrawBtn, 0);
 	layout1->addWidget(clearBtn, 0);
 	layout->addLayout(layout1, 0);
 	layout->addWidget(edit, 1);
-
+	
 }
 
-void StatusControl::addStatusText (std::string text, unsigned level){
-	if (colors.size () == 0) {
+void StatusControl::addStatusToQue(statusMsg newMsg) {
+	msgHistory.push_back(newMsg);
+	if (msgHistory.size() > opts.historyLength) {
+		msgHistory.pop_front();
+	}
+}
+
+void StatusControl::redrawControl() {
+	edit->clear();
+	for (auto msg : msgHistory) {
+		// importantly add here without re-adding to queue. 
+		addHtmlStatusTextInner(msg);
+	}
+}
+
+void StatusControl::addStatusText(statusMsg msg) {
+	addStatusToQue(msg);
+	addPlainStatusTextInner(msg);
+}
+
+void StatusControl::addPlainStatusTextInner(statusMsg msg) {
+	indvOption indvOpt;
+	for (auto keyv : opts.indvOptions.keys()) {
+		if (msg.systemDelim == keyv) {
+			indvOpt = opts.indvOptions.value(keyv);
+		}
+	}
+	if (opts.debugLvl >= msg.baseLevel + indvOpt.debugLvlOffset && indvOpt.show) {
+		std::string finText = str(msg.msg);
+		if (opts.showOrigin) {
+			finText = "[" + str(msg.systemDelim) + "]: " + finText;
+		}
+		for (auto lvl : range(msg.baseLevel)) {
+			// visual indication of what level a message is.
+			finText = ">" + finText;
+		}
+		addPlainText(finText);
+	}
+}
+
+void StatusControl::addHtmlStatusTextInner(statusMsg msg) {
+	if (colors.size() == 0) {
 		return;
 	}
-	if (currentLevel >= level) {
-		for (auto lvl : range (level)) {
+	indvOption indvOpt;
+	for (auto keyv : opts.indvOptions.keys()) {
+		if (msg.systemDelim == keyv) {
+			indvOpt = opts.indvOptions.value(keyv);
+		}
+	}
+	if (opts.debugLvl >= msg.baseLevel + indvOpt.debugLvlOffset && indvOpt.show) {
+		std::string finText = str(msg.msg);
+		if (opts.showOrigin) {
+			finText = "[" + str(msg.systemDelim) + "]: " + finText;
+		}
+		for (auto lvl : range(msg.baseLevel)) {
 			// visual indication of what level a message is.
-			text = "> " + text;
+			finText = ">" + finText;
 		}
-		if (level >= colors.size ()) {
-			addStatusText (text, colors.back ());
+		if (finText.substr(0, 11) == "**********") {
+			addHtmlStatusText(finText, "#FFFFFF");
 		}
-		else {
-			addStatusText (text, colors[level]);
-		}
+		addHtmlStatusText(finText, msg.baseLevel > colors.size() ? colors.back() : colors[msg.baseLevel]);
 	}
 }
 
-void StatusControl::addStatusText(std::string text, std::string color){
+void StatusControl::addHtmlStatusText(std::string text, std::string color) {
 	QString htmlTxt = ("<font color = \"" + color + "\">" + text + "</font>").c_str();
-	htmlTxt.replace ("\r", "");
-	htmlTxt.replace ("\n", "<br/>");
-
 	//e.g. <font color = "red">This is some text!< / font>
-	//edit->appendHtml (htmlTxt);
-	edit->moveCursor (QTextCursor::End);
-	//edit->textCursor ().insertHtml (htmlTxt);
-	//edit->insertHtml (htmlTxt);
-	edit->insertPlainText (qstr(text));
-	//edit->appendPlainText (qstr (text));
-	edit->moveCursor (QTextCursor::End);
+	htmlTxt.replace("\r", "");
+	htmlTxt.replace("\n", "<br/>");
+	// html is weird and doesn't have proper tab support. 
+	htmlTxt.replace("\t", "&nbsp;&nbsp;&nbsp;&nbsp;");
+	// de-emphasize the location information.
+	htmlTxt.replace("{", "</font><font color = \"#000000\">{");
+	htmlTxt.replace("}", qstr("}</font><font color = \"" + color + "\">"));
+	/*if (htmlTxt.lastIndexOf("@ Location:") != -1) {
+		htmlTxt.replace("@ Location:", "</font><font color = \"#000000\">@ Location:");
+	}*/
+	edit->moveCursor(QTextCursor::End);
+	edit->textCursor().insertHtml(htmlTxt);
+	edit->moveCursor(QTextCursor::End);
+}
+
+void StatusControl::addPlainText(std::string text) {
+	if (!edit) {
+		return;
+	}
+	edit->insertPlainText(qstr(text));
+	edit->moveCursor(QTextCursor::End);
 }
 
 void StatusControl::clear() {
-	edit->clear ();
-	addStatusText("******************************\r\n", "#FFFFFF");
+	edit->clear();
+	addHtmlStatusText("**************CLEARED****************\r\n", "#FFFFFF");
 }
 
 
@@ -93,6 +162,8 @@ void StatusControl::appendTimebar() {
 	std::string timeStr = "(" + str(currentTime.tm_year + 1900) + ":" + str(currentTime.tm_mon + 1) + ":"
 		+ str(currentTime.tm_mday) + ") " + str(currentTime.tm_hour) + ":"
 		+ str(currentTime.tm_min) + ":" + str(currentTime.tm_sec);
-	addStatusText("\r\n**********" + timeStr + "**********\r\n", "#FFFFFF");
+	statusMsg timebarMsg;
+	timebarMsg.msg = qstr("\r\n**********" + timeStr + "**********\r\n");
+	addStatusText(timebarMsg);
 }
 

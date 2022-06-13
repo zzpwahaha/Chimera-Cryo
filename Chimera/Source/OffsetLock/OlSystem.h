@@ -12,6 +12,7 @@
 
 class OlSystem : public IChimeraSystem
 {
+	Q_OBJECT
 public:
 	// THIS CLASS IS NOT COPYABLE.
 	OlSystem& operator=(const OlSystem&) = delete;
@@ -59,6 +60,9 @@ public:
 	
 	bool IsquickChange() { return quickChange->isChecked(); }
 
+signals:
+	void setExperimentActiveColor(std::vector<OlCommand>, bool expFinished);
+
 private:
 	QLabel* olTitle;
 	CQPushButton* olSetButton;
@@ -76,4 +80,5 @@ private:
 	static constexpr double olFreqResolution = OffsetLockOutput::olFreqResolution; /*12 bit N + 25bit FRAC, 50MHz phase-freq detector frequency*/
 	const int numDigits = static_cast<int>(abs(round(log10(olFreqResolution) - 0.49)));
 };
+Q_DECLARE_METATYPE(std::vector<OlCommand>);
 

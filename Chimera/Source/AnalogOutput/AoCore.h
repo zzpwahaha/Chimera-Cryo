@@ -29,6 +29,7 @@ public:
 	unsigned getNumberSnapshots(unsigned variation);
 	std::vector<std::vector<AoSnapshot>> getSnapshots();
 	unsigned long getNumberEvents(unsigned variation);
+	std::vector<AoCommand> getDacCommand(unsigned variation);
 
 	std::string getDacSequenceMessage(unsigned variation);
 	std::vector<std::vector<plotDataVec>> getPlotData(unsigned var);

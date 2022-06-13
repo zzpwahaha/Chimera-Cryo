@@ -298,6 +298,19 @@ void QtAuxiliaryWindow::zeroOls() {
 	}
 }
 
+void QtAuxiliaryWindow::relockPLL()
+{
+	try {
+		dds.relockPLL();
+		reportStatus("Relock'd PLL of DDS system.\n");
+	}
+	catch (ChimeraError& exception) {
+		errBox(exception.trace());
+		reportStatus("Failed to Relock PLL of DDS system!!!\n");
+		reportErr(exception.qtrace());
+	}
+}
+
 DoSystem& QtAuxiliaryWindow::getTtlSystem (){
 	return ttlBoard;
 }

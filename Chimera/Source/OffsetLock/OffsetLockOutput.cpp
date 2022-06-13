@@ -181,3 +181,12 @@ void OffsetLockOutput::setNote(std::string note) {
 void OffsetLockOutput::disable() {
 	editFreq->setEnabled(false);
 }
+
+void OffsetLockOutput::setExpActiveColor(bool usedInExp, bool expFinished)
+{
+	for (auto check : { editFreq }) {
+		check->setStyleSheet(usedInExp ? 
+			(expFinished ? "QLineEdit { background: rgb(255, 255, 0)}" : "QLineEdit { background: rgb(0, 255, 0)}") :
+			"QLineEdit { background: rgb(255, 255, 255)}");
+	}
+}

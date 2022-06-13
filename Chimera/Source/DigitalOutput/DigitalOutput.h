@@ -20,6 +20,7 @@ class DigitalOutput
 
 		void set ( bool status, bool updateDisplay=true );
 		void setName ( std::string nameStr );
+		void setExpActiveColor(bool usedInExp, bool expFinished = false);
 		
 		bool holdStatus;
 		void setHoldStatus ( bool stat );

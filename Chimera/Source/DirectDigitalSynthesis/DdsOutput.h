@@ -22,6 +22,7 @@ public:
 	DdsInfo info;
 	void setName(std::string name);
 	void disable();
+	void setExpActiveColor(bool usedInExp, bool expFinished = false);
 	std::pair<double, double> checkBound(double valF, double valA);
 
 	QHBoxLayout* getLayout() const { return layout; }

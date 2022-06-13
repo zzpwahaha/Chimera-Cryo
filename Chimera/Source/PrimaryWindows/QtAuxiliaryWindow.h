@@ -82,6 +82,8 @@ class QtAuxiliaryWindow : public IChimeraQtWindow{
 		void zeroDacs ();
 		void zeroDds();
 		void zeroOls();
+
+		void relockPLL();
 	 
 		std::vector<parameterType> getAllParams ();
 

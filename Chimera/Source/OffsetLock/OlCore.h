@@ -27,6 +27,7 @@ public:
 
 	void resetOLEvents();
 	void initializeDataObjects(unsigned variationNum);
+	std::vector<OlCommand> getOlCommand(unsigned variation);
 	void setOLCommandForm(OlCommandForm command);
 	void handleOLScriptCommand(OlCommandForm command, std::string name, std::vector<parameterType>& vars);
 	void organizeOLCommands(unsigned variation, OlSnapshot initSnap, std::string& warning);

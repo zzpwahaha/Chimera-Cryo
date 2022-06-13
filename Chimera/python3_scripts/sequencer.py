@@ -236,6 +236,9 @@ class sequencer:
 		self.reset()
 		self.mod_enable()
 
+	def lock_PLL(self):
+		dds_lock_pll.dds_lock_pll()
+
 	def mod_report(self):
 		status = int(self.gpio2.read_axi_gpio(channel=1).hex(), 16)
 		if status == 1:
@@ -510,13 +513,14 @@ if __name__ == "__main__":
 					b't000186A0_c000A_a_s100.000_e000.000_d00002710\x00'\
 					b't0010C8E2_c000A_a_s000.000_e000.000_d00000000\x00'
  
-
+	byte_buf_dds =  b't000186A0_c0000_f_s080.000_e080.000_d00000000\x00t00030D40_c0001_f_s080.000_e080.000_d00000000\x00t000493E0_c0002_f_s200.000_e200.000_d00000000\x00t00061A80_c0003_f_s080.000_e080.000_d00000000\x00t0007A120_c0004_f_s080.000_e080.000_d00000000\x00t000927C0_c0005_f_s080.000_e080.000_d00000000\x00t000AAE60_c0006_f_s080.000_e080.000_d00000000\x00t000C3500_c0007_f_s080.000_e080.000_d00000000\x00t000DBBA0_c0008_f_s080.000_e080.000_d00000000\x00t000F4240_c0009_f_s080.000_e080.000_d00000000\x00t0010C8E0_c000A_f_s080.000_e080.000_d00000000\x00t00124F80_c000B_f_s080.000_e080.000_d00000000\x00t000186A0_c0000_a_s100.000_e100.000_d00000000\x00t00030D40_c0001_a_s100.000_e100.000_d00000000\x00t000493E0_c0002_a_s100.000_e100.000_d00000000\x00t00061A80_c0003_a_s100.000_e100.000_d00000000\x00t0007A120_c0004_a_s100.000_e100.000_d00000000\x00t000927C0_c0005_a_s100.000_e100.000_d00000000\x00t000AAE60_c0006_a_s100.000_e100.000_d00000000\x00t000C3500_c0007_a_s100.000_e100.000_d00000000\x00t000DBBA0_c0008_a_s100.000_e100.000_d00000000\x00t000F4240_c0009_a_s100.000_e100.000_d00000000\x00t0010C8E0_c000A_a_s100.000_e100.000_d00000000\x00t00124F80_c000B_a_s100.000_e100.000_d00000000\x00'
+	#24
 
 	seq = sequencer()
 	seq.mod_disable()
 	reset()
 	dds_lock_pll.dds_lock_pll()
-	for i in range(1500):
+	for i in range(1):
 		# reset()
 
 		# seq.set_DDS(1, 100, 10)
@@ -532,7 +536,7 @@ if __name__ == "__main__":
 		seq.mod_enable()
 		seq.dio_seq_write_points(28, byte_buf_dio, 7)
 		seq.mod_enable()
-		seq.dds_seq_write_points(46, byte_buf_dds, 3)
+		seq.dds_seq_write_points(46, byte_buf_dds, 24)
 		seq.mod_enable()
 		trigger()
 		print('*****************************************' + str(i) + '******************************************************')

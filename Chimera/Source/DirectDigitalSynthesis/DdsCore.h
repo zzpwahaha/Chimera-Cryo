@@ -115,6 +115,7 @@ public:
 
 	void resetDDSEvents();
 	void initializeDataObjects(unsigned variationNum);
+	std::vector<DdsCommand> getDdsCommand(unsigned variation);
 	void setDDSCommandForm(DdsCommandForm command);
 	void handleDDSScriptCommand(DdsCommandForm command, std::string name, std::vector<parameterType>& vars);
 	void calculateVariations(std::vector<parameterType>& variables, ExpThreadWorker* threadworker, 
