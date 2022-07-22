@@ -295,7 +295,7 @@ void OlCore::organizeOLCommands(unsigned variation, OlSnapshot initSnap, std::st
 				timeOgzer.push_back({ tE.time, tE });
 			}
 			else {
-				if (fabs(timeOgzer.back().second.endValue - tE.value) > 2 * DBL_EPSILON)
+				if (fabs(timeOgzer.back().second.endValue - tE.value) > 2 * olFreqResolution)
 				{
 					
 					warning += "Warning from OffsetLock: output(" + OlCore::getName(tE.line)
@@ -323,8 +323,8 @@ void OlCore::organizeOLCommands(unsigned variation, OlSnapshot initSnap, std::st
 					warning += "Warning from OffsetLock: output(" + OlCore::getName(tE.line)
 						+ "), the time between two consecutive event point t=" + str(timeOgzer.back().first, 3) + " and t="
 						+ str(tE.time, 3) + " is below the offset lock resolution: " + str(OL_TIME_RESOLUTION, 3)
-						+ "ms. Have make the later time exact " + str(OL_TIME_RESOLUTION, 3) + "ms away\r\n";
-					timeOgzer.push_back({ timeOgzer.back().first + OL_TIME_RESOLUTION, tE });
+						+ "ms. Have make the later time exact " + str(3*OL_TIME_RESOLUTION, 3) + "ms away\r\n";
+					timeOgzer.push_back({ timeOgzer.back().first + 3*OL_TIME_RESOLUTION, tE });
 				}
 			}
 
