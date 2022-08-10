@@ -1319,7 +1319,7 @@ void MakoSettingControl::createIntSliderSpinBox(const QModelIndex item)
 
     m_IntSpinSliderWidget->show();
     
-}
+}   
 
 void MakoSettingControl::onIntSliderReleased()
 {

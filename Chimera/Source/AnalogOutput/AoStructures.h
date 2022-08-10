@@ -17,7 +17,7 @@ struct AoInfo
 {
 	double currVal = 0;
 	std::string name = "";
-	double minVal = -10;
+	double minVal = -9.9999;
 	double maxVal = 10;
 	double defaultVal = 0;
 	// notes are purely cosmetic. Can be used e.g. to store calibration curves for VCOs or detailed reminders about 

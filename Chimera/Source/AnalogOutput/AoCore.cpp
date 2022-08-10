@@ -587,7 +587,12 @@ void AoCore::setGUIDacChange(std::vector<std::vector<AoChannelSnapshot>> channel
 	dacSnapshots.resize(1); // just to make getNumberEvents happy, used in AoCore::writeDacs()
 	dacSnapshots[0].resize(channelSnapShot.size());
 	finalDacSnapshots = channelSnapShot;
-	writeDacs(0, true);
+	try {
+		writeDacs(0, true);
+	}
+	catch (ChimeraError& e) {
+		thrower("GUI sending data to DAC failed: \r\n" + e.trace());
+	}
 	resetDacEvents();
 	int tcp_connect;
 	try {
