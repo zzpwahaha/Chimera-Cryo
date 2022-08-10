@@ -1237,7 +1237,14 @@ void ExpThreadWorker::waitForAndorFinish () {
 
 void ExpThreadWorker::errorFinish (std::atomic<bool>& isAborting, ChimeraError& exception,
 	std::chrono::time_point<chronoClock> startTime) {
-	setExperimentGUIcolor();
+	//setExperimentGUIcolor();
+	input->zynqExp.sendCommand("resetSeq");
+	input->aoSys.setDACs();
+	input->ddsSys.setDDSs();
+	input->olSys.setOLs(input->ttls, input->ttlSys.getCurrentStatus());
+	input->ttls.FPGAForceOutput(input->ttlSys.getCurrentStatus());
+	input->ddsSys.relockPLL();
+
 	std::string finMsg;
 	if (isAborting) {
 		emit updateBoxColor ("Grey", "Other");
@@ -1263,6 +1270,7 @@ void ExpThreadWorker::normalFinish (ExperimentType& expType, bool runMaster,
 	input->ddsSys.setDDSs();
 	input->olSys.setOLs(input->ttls, input->ttlSys.getCurrentStatus());
 	input->ttls.FPGAForceOutput(input->ttlSys.getCurrentStatus());
+	input->ddsSys.relockPLL();
 
 	switch (expType) {
 	case ExperimentType::AutoCal:
@@ -1380,6 +1388,9 @@ void ExpThreadWorker::setExperimentGUIcolor()
 	}
 	catch (ChimeraError& e) {
 		emit warn("Error happens when resetting the GUI edit colors \n" + e.qtrace());
+	}
+	catch (...) {
+		emit warn("Error happens when resetting the GUI edit colors \n");
 	}
 
 }
