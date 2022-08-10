@@ -19,7 +19,7 @@
 QtMainWindow::QtMainWindow () : 
 	profile (PROFILES_PATH, this),
 	masterConfig (MASTER_CONFIGURATION_FILE_ADDRESS),
-	tempMonitor(this)
+	tempMonitor(this, TEMPMON_SAFEMODE)
 {
 	
 	startupTimes.push_back (chronoClock::now ());

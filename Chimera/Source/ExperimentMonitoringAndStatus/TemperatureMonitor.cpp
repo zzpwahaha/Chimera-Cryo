@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "TemperatureMonitor.h"
+#include <InfluxDBException.h>
 #include <qlayout.h>
 #include <qtimer.h>
 #include <qdatetime.h>
@@ -10,9 +11,9 @@
 #include <PrimaryWindows/IChimeraQtWindow.h>
 #include <PrimaryWindows/QtAndorWindow.h>
 
-TemperatureMonitor::TemperatureMonitor(IChimeraQtWindow* parent_in)
+TemperatureMonitor::TemperatureMonitor(IChimeraQtWindow* parent_in, bool safemode)
 	: IChimeraSystem(parent_in)
-	, core(parent_in)
+	, core(parent_in, safemode)
 	, name{ new QLabel(this) ,new QLabel(this) }
 	, reading{ new QLabel(this) ,new QLabel(this) }
 {
@@ -38,7 +39,7 @@ void TemperatureMonitor::initialize(IChimeraQtWindow* parent)
 	}
 	QTimer* timer = new QTimer(this);
 	QObject::connect(timer, &QTimer::timeout, [this]() {
-		std::pair<long long, double> timedata;
+		std::pair<long long, double> timedata{0,-1.0};
 		for (auto idx : range(TEMPMON_NUMBER)) {
 			try {
 				timedata = core.dataBroker[idx].queryDataPoint();
@@ -46,23 +47,26 @@ void TemperatureMonitor::initialize(IChimeraQtWindow* parent)
 			catch (ChimeraError& e) {
 				emit warning("Temperature sensor can not read properly. Please check \n" + e.qtrace());
 			}
+			catch (influxdb::ConnectionError& e) {
+				emit warning("Temperature sensor can not read properly. Please check \n" + qstr(e.what()));
+			}
 			reading[idx]->setText(qstr(timedata.second, 2) + " K");
 		}});
 	timer->start(150000/*2.5min*60*1e3*/); // every 2.5min to query a data that updates every 5min to avoid some rounding issue in time
 
 }
 
-TemperatureMonitorCore::TemperatureMonitorCore(IChimeraQtWindow* parent)
+TemperatureMonitorCore::TemperatureMonitorCore(IChimeraQtWindow* parent, bool safemode)
 	: dataBroker{ 
-	InfluxBroker(TEMPMON_ID[0],TEMPMON_SYNTAX[0]),
-	InfluxBroker(TEMPMON_ID[1],TEMPMON_SYNTAX[1]) }//array aggregation, no copy or move involved
+	InfluxBroker(TEMPMON_ID[0],TEMPMON_SYNTAX[0], safemode),
+	InfluxBroker(TEMPMON_ID[1],TEMPMON_SYNTAX[1], safemode) }//array aggregation, no copy or move involved
 {
 	this->setParent(parent);
 	//dataBroker.reserve(TEMPMON_NUMBER);
 	//for (unsigned idx = 0; idx < TEMPMON_NUMBER; idx++) {
 	//	dataBroker.emplace_back(TEMPMON_ID[idx],TEMPMON_SYNTAX[idx]);
 	//}
-	auto shit = InfluxBroker(TEMPMON_ID[1], TEMPMON_SYNTAX[1]);// this is in-place construction, no copy nor move in c++17
+	auto shit = InfluxBroker(TEMPMON_ID[1], TEMPMON_SYNTAX[1], safemode);// this is in-place construction, no copy nor move in c++17
 
 	QTime midnight = QTime(23, 59, 59, 999);
 	//QTime midnightCreateFolder = QTime(23, 50, 0, 0); // give ten minute ahead to create folder 
@@ -159,7 +163,8 @@ void TemperatureMonitorCore::dumpDataToFile()
 
 }
 
-InfluxBroker::InfluxBroker(std::string identifier, std::string syntax) :
+InfluxBroker::InfluxBroker(std::string identifier, std::string syntax, bool safemode) :
+	safemode(safemode),
 	identifier(identifier),
 	syntax(syntax), 
 	experimentOngoing(false)
@@ -188,6 +193,16 @@ void InfluxBroker::experimentPrep()
 
 std::pair<long long, double> InfluxBroker::queryDataPoint()
 {
+	if (safemode) {
+		data.push_back(-1.0);
+		timeStamp.push_back(1);
+
+		if (experimentOngoing) {
+			dataExp.push_back(data.back());
+			timeStampExp.push_back(timeStamp.back());
+		}
+		return std::make_pair(timeStamp.back(), data.back());
+	}
 	std::vector<influxdb::Point> points = influxPtr->query(syntax);
 	std::chrono::time_point<std::chrono::system_clock> tt = points[0].getTimestamp();
 	long long time = std::chrono::duration_cast<std::chrono::seconds>(tt.time_since_epoch()).count() * 10; // somehow need *10 to be ms epoch

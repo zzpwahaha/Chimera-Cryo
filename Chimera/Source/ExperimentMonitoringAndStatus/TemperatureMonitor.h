@@ -15,7 +15,7 @@ class TemperatureMonitorCore;
 class InfluxBroker
 {
 public:
-	InfluxBroker(std::string identifier, std::string syntax);
+	InfluxBroker(std::string identifier, std::string syntax, bool safemode);
 	InfluxBroker(const InfluxBroker&) = delete;
 	InfluxBroker& operator=(const InfluxBroker&) = delete;
 	//InfluxBroker(InfluxBroker&&) noexcept = default;
@@ -31,12 +31,12 @@ public:
 	void clearNonExpData();
 
 
-	const std::string dbAddr = "http://admin:Twizzler@6.1.1.77:8086?db=home";
+	const std::string dbAddr = "http://admin:Twizzler@6.1.1.93:8086?db=monitoring";
 	const std::string syntax;
 	const std::string identifier;
 
 private:
-
+	const bool safemode;
 	std::unique_ptr<influxdb::InfluxDB> influxPtr;
 	std::atomic<bool> experimentOngoing; 
 	QMutex lock; // not movable!
@@ -53,7 +53,7 @@ class TemperatureMonitorCore : public IDeviceCore
 {
 	Q_OBJECT
 public:
-	TemperatureMonitorCore(IChimeraQtWindow* parent);
+	TemperatureMonitorCore(IChimeraQtWindow* parent, bool safemode);
 	void loadExpSettings(ConfigStream& stream) override;
 	void logSettings(DataLogger& logger, ExpThreadWorker* threadworker) override {};
 	void calculateVariations(std::vector<parameterType>& params, ExpThreadWorker* threadworker) override {};
@@ -82,7 +82,7 @@ public:
 	// THIS CLASS IS NOT COPYABLE.
 	TemperatureMonitor& operator=(const TemperatureMonitor&) = delete;
 	TemperatureMonitor(const TemperatureMonitor&) = delete;
-	TemperatureMonitor(IChimeraQtWindow* parent_in);
+	TemperatureMonitor(IChimeraQtWindow* parent_in, bool safemode);
 	void initialize(IChimeraQtWindow* parent);
 	TemperatureMonitorCore& getCore() { return core; };
 
