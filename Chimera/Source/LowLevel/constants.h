@@ -69,7 +69,7 @@
 	const double OL_TIME_RESOLUTION = 0.02; //in ms
 	const std::vector<std::pair<unsigned, unsigned>> OL_TRIGGER_LINE
 		= { std::make_pair(3 - 1,6),std::make_pair(3 - 1,7) }; /*the first is the label on the box minus 1, has minus'd 1 explicitly */
-	const double OL_TRIGGER_TIME = 0.05; //in ms i.e. 50us
+	const double OL_TRIGGER_TIME = 0.01; //in ms i.e. 50us
 
 	//#define DDS_FPGA_ADDRESS "FT1I6IBSB"; //Device Serial: FT1I6IBS, Use FT1I6IBSB in C++ to select Channel B
 
@@ -91,7 +91,7 @@
 
 	//Mako camera
 	const unsigned MAKO_NUMBER = 2;
-	const std::array<bool, MAKO_NUMBER> MAKO_SAFEMODE = { false,false};
+	const std::array<bool, MAKO_NUMBER> MAKO_SAFEMODE = { true,false};
 	const std::array<std::string, MAKO_NUMBER> MAKO_DELIMS = { "MAKO1_CAMERA_SETTING", "MAKO2_CAMERA_SETTING" };
 	const std::array<std::string, MAKO_NUMBER> MAKO_IPADDRS= { "10.10.0.6", "10.10.0.7" };
 	const std::vector<std::pair<unsigned, unsigned>> MAKO_TRIGGER_LINE
@@ -108,6 +108,7 @@
 	/*the first is the label on the box minus 1, has minus'd 1 explicitly and this is not used in the code, just a reminder*/
 
 	//Temperature Monitor
+	const bool TEMPMON_SAFEMODE = false;
 	const unsigned TEMPMON_NUMBER = 2;
 	const std::array<std::string, TEMPMON_NUMBER> TEMPMON_ID{ "Cold_Shield", "Cold_Finger" };
 	const std::array<std::string, TEMPMON_NUMBER> TEMPMON_SYNTAX{ 

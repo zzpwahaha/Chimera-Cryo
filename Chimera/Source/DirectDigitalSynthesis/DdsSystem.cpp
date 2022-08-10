@@ -475,10 +475,10 @@ void DdsSystem::setNote(int ddsNumber, std::string note)
 void DdsSystem::setAmpMinMax(int ddsNumber, double min, double max)
 {
 	if (!(min <= max)) {
-		thrower("Min dac value must be less than max dac value.");
+		thrower("Min dds value must be less than max dds value.");
 	}
-	if (min < 0 || min > 10 || max < 0 || max > 10) {
-		thrower("Min and max dds amplitude values must be withing [0,10].");
+	if (min < 0 || min > 100 || max < 0 || max > 100) {
+		thrower("Min and max dds amplitude values must be within [0,100].");
 	}
 	outputs[ddsNumber].info.minAmp = min;
 	outputs[ddsNumber].info.maxAmp = max;

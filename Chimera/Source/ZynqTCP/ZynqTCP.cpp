@@ -205,8 +205,8 @@ int ZynqTCP::writeDACs(std::vector<AoChannelSnapshot> dacChannelSnapshots)
 		start = snapshot.dacValue;
 		end = snapshot.dacEndValue;
 		duration = (unsigned int)(snapshot.dacRampTime * timeConvDAC + 0.5);
-
-		sprintf_s(byte_buf, DAC_LEN_BYTE_BUF, "t%08X_c%04X_s%07.4f_e%07.4f_d%08X", time, channel, start, end, duration);
+		
+		sprintf_s(byte_buf, DAC_LEN_BYTE_BUF, "t%08X_c%04X_s%07.4f_e%07.4f_d%08X", time, channel, start, end, duration);	
 		int err2 = sendWithCatch(ConnectSocket, byte_buf, DAC_LEN_BYTE_BUF, 0);
 		if (err2 == 1) { 
 			return 1; 
