@@ -113,8 +113,9 @@ bool DdsSystem::eventFilter(QObject* obj, QEvent* event) {
 			parentWin->auxWin->SetDds();
 			return true;
 		}
-		else if (event->type() == QEvent::KeyPress) {
-			if (static_cast<QKeyEvent*>(event)->key() == Qt::Key_Enter) {
+		else if (event->type() == QEvent::KeyPress && out.isEdit(obj)) {
+			if (static_cast<QKeyEvent*>(event)->key() == Qt::Key_Enter ||
+				static_cast<QKeyEvent*>(event)->key() == Qt::Key_Return) {
 				parentWin->auxWin->SetDds();
 				return true;
 			}

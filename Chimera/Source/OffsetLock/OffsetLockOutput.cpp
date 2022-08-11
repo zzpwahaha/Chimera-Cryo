@@ -190,3 +190,8 @@ void OffsetLockOutput::setExpActiveColor(bool usedInExp, bool expFinished)
 			"QLineEdit { background: rgb(255, 255, 255)}");
 	}
 }
+
+bool OffsetLockOutput::isEdit(QObject* obj)
+{
+	return obj==editFreq;
+}

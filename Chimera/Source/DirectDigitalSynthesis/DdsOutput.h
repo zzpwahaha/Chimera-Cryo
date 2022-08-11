@@ -24,7 +24,7 @@ public:
 	void disable();
 	void setExpActiveColor(bool usedInExp, bool expFinished = false);
 	std::pair<double, double> checkBound(double valF, double valA);
-
+	bool isEdit(QObject* obj);
 	QHBoxLayout* getLayout() const { return layout; }
 private:
 	unsigned ddsNum;

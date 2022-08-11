@@ -507,7 +507,7 @@ void AoCore::findLoadSkipSnapshots(double time, std::vector<parameterType>& vari
 
 void AoCore::formatDacForFPGA(UINT variation, AoSnapshot initSnap)
 {
-	std::array<double, size_t(AOGrid::total)> dacValuestmp = initSnap.dacValues;
+	//std::array<double, size_t(AOGrid::total)> dacValuestmp = initSnap.dacValues;
 	for (int i = 0; i < dacSnapshots[variation].size(); ++i)
 	{
 		AoSnapshot snapshotPrev;
@@ -520,10 +520,11 @@ void AoCore::formatDacForFPGA(UINT variation, AoSnapshot initSnap)
 		if (i == 0) {
 			for (int j = 0; j < size_t(AOGrid::total); ++j)
 			{
-				if (snapshot.dacValues[j] != dacValuestmp[j] ||
-					(snapshot.dacValues[j] == dacValuestmp[j] && snapshot.dacRampTimes[j] != 0)) {
-					channels.push_back(j);
-				}
+				//if (snapshot.dacValues[j] != dacValuestmp[j] ||
+				//	(snapshot.dacValues[j] == dacValuestmp[j] && snapshot.dacRampTimes[j] != 0)) {
+				//	channels.push_back(j);
+				//}
+				channels.push_back(j);
 			}
 		}
 		else {

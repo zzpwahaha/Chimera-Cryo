@@ -24,7 +24,7 @@ public:
 	void disable ( );
 	void setExpActiveColor(bool usedInExp, bool expFinished = false);
 	double checkBound(double dacVal);
-
+	bool isEdit(QObject* obj);
 	QHBoxLayout* getLayout() const { return layout; }
 private:
 	unsigned dacNum;

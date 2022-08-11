@@ -23,7 +23,7 @@ public:
 	void setExpActiveColor(bool usedInExp, bool expFinished = false);
 
 	OlInfo info;
-
+	bool isEdit(QObject* obj);
 	QHBoxLayout* getLayout() const { return layout; }
 private:
 	unsigned olNum;

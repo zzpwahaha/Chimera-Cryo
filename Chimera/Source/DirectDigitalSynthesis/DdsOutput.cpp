@@ -331,3 +331,8 @@ std::pair<double, double> DdsOutput::checkBound(double valF, double valA)
 
 	return std::pair<double, double>(valF,valA);
 }
+
+bool DdsOutput::isEdit(QObject* obj)
+{
+	return (editFreq == obj) || (editAmp == obj);
+}

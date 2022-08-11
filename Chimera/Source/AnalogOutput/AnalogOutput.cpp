@@ -190,3 +190,8 @@ double AnalogOutput::checkBound(double dacVal)
 		return dacVal;
 	}
 }
+
+bool AnalogOutput::isEdit(QObject* obj)
+{
+	return obj == edit;
+}
