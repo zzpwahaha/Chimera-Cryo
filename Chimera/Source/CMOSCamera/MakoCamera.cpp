@@ -13,8 +13,8 @@ MakoCamera::MakoCamera(CameraInfo camInfo, IChimeraQtWindow* parent)
     : IChimeraSystem(parent)
     , core(camInfo)
     , viewer(core.CameraName(), this)
-    , imgCThread(SP_DECL(FrameObserver)(core.getFrameObs()), core, camInfo.safemode,
-        viewer.plot(), viewer.cmap(), viewer.bottomPlot(), viewer.leftPlot())
+    , imgCThread(core.getFrameObs(), core, false,
+        viewer)
     , camInfo(camInfo)
     , saveFileDialog(nullptr)
 {
@@ -159,10 +159,10 @@ void MakoCamera::initialize()
         }
         });
 
-    connect(core.getFrameObs(), &FrameObserver::setCurrentFPS, this,
+    connect(core.getFrameObs().get(), &FrameObserver::setCurrentFPS, this,
         [this, framerateButton](const QString& sFPS) {
             framerateButton->setText(" FPS: " + sFPS + " "); });
-    connect(core.getFrameObs(), &FrameObserver::setFrameCounter, this,
+    connect(core.getFrameObs().get(), &FrameObserver::setFrameCounter, this,
         [this, framesLabel](unsigned int nNumberOfFrames) {
             framesLabel->setText("Frames: " + qstr(nNumberOfFrames) + " "); });
     connect(&core.getMakoCtrl(), &MakoSettingControl::acquisitionStartStop, this,

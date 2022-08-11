@@ -35,6 +35,7 @@ MakoCameraCore::~MakoCameraCore()
     releaseBuffer();
     cameraPtr->Close();
     m_VimbaSystem.Shutdown();
+    qDebug() << "finish dctor of mako core";
 }
 
 void MakoCameraCore::logSettings(DataLogger& log, ExpThreadWorker* threadworker)

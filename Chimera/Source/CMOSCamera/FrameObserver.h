@@ -46,6 +46,7 @@ class FrameObserver : public QObject, public AVT::VmbAPI::IFrameObserver
         const unsigned int MAX_FRAMES_TO_COUNT = 5;
 
     private:
+        QMutex                              m_StoppingLock;
         typedef QSharedPointer<unsigned char>   FrameDataPtr;
 
         FPSCounter                              m_FPSCamera;
@@ -57,6 +58,5 @@ class FrameObserver : public QObject, public AVT::VmbAPI::IFrameObserver
 
         ImageProcessingThread               m_imgPThread;   // Image processing thread
         bool                                m_IsStopping;
-        QMutex                              m_StoppingLock;
             
 };
