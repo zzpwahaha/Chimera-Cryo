@@ -12,6 +12,7 @@
 struct mainOptions{
 	bool dontActuallyGenerate=false;
 	bool randomizeVariations=false;
+	bool repetitionFirst = false;
 	bool delayAutoCal = false;
 	unsigned atomSkipThreshold=UINT_MAX;
 };
@@ -30,6 +31,7 @@ class MainOptionsControl : public QWidget
 	private:
 		QLabel* header;
 		QCheckBox* randomizeVariationsButton;
+		QCheckBox* repetitionFirstButton;
 		QCheckBox* delayAutoCal;
 		QLabel* atomThresholdForSkipText;
 		QLineEdit* atomThresholdForSkipEdit;

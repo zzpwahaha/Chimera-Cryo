@@ -729,6 +729,7 @@ void MakoCamera::handleExpImage(QVector<double> img, int width, int height)
     try {
         auto* andorWin = parentWin->andorWin;
         currentRepNumber++;
+        auto RepVar = core.getCurrentRepVarNumber();
         m_OperatingStatusLabel->setText("Exp Running" + qstr(currentRepNumber));
         if (core.getRunningSettings().triggerMode == CMOSTrigger::mode::ContinuousSoftware) {
             // don't write data if continuous, that's a recipe for disaster.
@@ -737,7 +738,7 @@ void MakoCamera::handleExpImage(QVector<double> img, int width, int height)
             return;
         }
         if (MOTCalcActive) {
-            emit imgReadyForAnalysis(img, width, height, currentRepNumber - 1);
+            emit imgReadyForAnalysis(img, width, height, RepVar.first, RepVar.second);
         }
         andorWin->getLogger().writeMakoPic(img.toStdVector(), width, height, camInfo.camName);
 

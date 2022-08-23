@@ -351,10 +351,11 @@ void DataLogger::logError ( H5::Exception& err ){
 This function is for logging things that are readbtn from the configuration file and otherwise obtained inside the 
 main experiment thread, but not associated with a particular device. Not much should be logged here. 
 */
-void DataLogger::logMasterRuntime ( unsigned repNumber,  std::vector<parameterType> allParams){
+void DataLogger::logMasterRuntime ( unsigned repNumber, bool repFirst, std::vector<parameterType> allParams){
 	try{
 		H5::Group runtimeGroup ( file.createGroup ( "/Master-Runtime" ) );
 		writeDataSet ( repNumber, "Repetitions", runtimeGroup );
+		writeDataSet ( repFirst, "Repetitions-First", runtimeGroup);
 		logParameters ( allParams, runtimeGroup );
 	}
 	catch ( ChimeraError& ){

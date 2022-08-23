@@ -66,7 +66,7 @@ void MOTAnalysisControl::initialize(IChimeraQtWindow* parent)
 			calcViewer[MOTAnalysisType::type::density2d].setStyle(plotStyle::DensityPlot);
 		}
 		calcViewer[tp].init(parent, qstr(MOTAnalysisType::toStr(tp)));
-		calcViewer[tp].plot->setMinimumSize(600, 400);
+		calcViewer[tp].plot->setMinimumSize(600, 350);
 		calcViewer[tp].plot->replot();
 	}
 
@@ -264,20 +264,20 @@ void MOTAnalysisControl::prepareMOTAnalysis(MakoCamera*& cam)
 	}
 }
 
-void MOTAnalysisControl::handleNewPlotData1D(std::vector<double> val, std::vector<double> stdev, int currentNum) 
+void MOTAnalysisControl::handleNewPlotData1D(std::vector<double> val, std::vector<double> stdev, int var)
 {
-	incomeOrder.push_back(currentNum);
+	//incomeOrder.push_back(currentNum);
 	size_t dim1 = xKeysList.back().keyValues.size();
 	for (size_t idx = 0; idx < val.size(); idx++) {
 		auto typ = MOTAnalysisType::allTypes[idx];
-		plotData1D[typ][currentNum % dim1] = val[idx];
-		plotStdev1D[typ][currentNum % dim1] = stdev[idx];
+		plotData1D[typ][var] = val[idx];
+		plotStdev1D[typ][var] = stdev[idx];
 	}
 	updatePlotData1D();
 
 }
 
-void MOTAnalysisControl::handleNewPlotData2D(std::vector<double> val, int width, int height, int currentNum)
+void MOTAnalysisControl::handleNewPlotData2D(std::vector<double> val, int width, int height, int var)
 {
 	if (width2D != width || height2D != height) {
 		errBox("MOTAnalysis see a discrepency in the image width and size. The size expected from"
@@ -294,11 +294,11 @@ void MOTAnalysisControl::handleNewPlotData2D(std::vector<double> val, int width,
 			ddvec[idx].push_back(dataPoint{ 0,val[idx * width + idd],0 }); // x,y,err
 		}
 	}
-	int var = currentNum % xKeysList.back().keyValues.size();
+	//int var = currentNum % xKeysList.back().keyValues.size();
 	if (xKeyValCombo->currentIndex() == var) {
 		calcViewer[MOTAnalysisType::type::density2d].setData(ddvec);
 	}
-	plotData2D[currentNum % xKeysList.back().keyValues.size()] = val;
+	plotData2D[var] = val;
 }
 
 void MOTAnalysisControl::updatePlotData1D()

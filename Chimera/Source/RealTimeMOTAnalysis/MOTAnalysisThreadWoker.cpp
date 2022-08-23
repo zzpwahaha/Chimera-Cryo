@@ -15,26 +15,33 @@ void MOTAnalysisThreadWoker::init()
 {
 	for (auto type : MOTAnalysisType::allTypes) {
 		if (type != MOTAnalysisType::type::density2d) {
-			result1d.insert({ type,std::vector<double>() });
-			result1d[type].reserve(input.camSet.totalPictures());
+			//result1d.insert({ type,std::vector<double>() });
+			//result1d[type].reserve(input.camSet.totalPictures());
+			result2d.insert({ type,std::vector<std::vector<double>>() });
+			result2d[type].resize(input.camSet.variations);
+			for (auto& vec : result2d[type]) {
+				vec.reserve(input.camSet.repsPerVar);
+			}
 		}
 	}
 	density2d = std::vector<std::vector<double>>(input.camSet.variations, std::vector<double>());
 	for (auto vec : density2d) {
 		vec.reserve(input.camSet.dims.size());
 	}
+	//resultCounter = std::vector<size_t>(input.camSet.variations, 0);
 }
 
-void MOTAnalysisThreadWoker::handleNewImg(QVector<double> img, int width, int height, size_t currentNum)
+void MOTAnalysisThreadWoker::handleNewImg(QVector<double> img, int width, int height, size_t rep, size_t var)
 {	
-	resultOrder.insert({ currentNum, result1d[MOTAnalysisType::type::min].size() });
-	size_t var = currentNum % input.camSet.variations;
-	size_t rep = currentNum / input.camSet.variations;
+	//resultCounter[var]++;
+	//resultOrder.insert({ currentNum, result1d[MOTAnalysisType::type::min].size() });
+	//size_t var = currentNum % input.camSet.variations;
+	//size_t rep = currentNum / input.camSet.variations;
 
 	//do calculation
 	auto it = std::minmax_element(img.begin(), img.end());
-	result1d[MOTAnalysisType::type::min].push_back(*(it.first));
-	result1d[MOTAnalysisType::type::max].push_back(*(it.second));
+	result2d[MOTAnalysisType::type::min][var].push_back(*(it.first));
+	result2d[MOTAnalysisType::type::max][var].push_back(*(it.second));
 	
 	std::vector<double> CrxX = std::vector<double>(width, 0.0);
 	for (size_t idx = 0; idx < width; idx++) {
@@ -53,15 +60,15 @@ void MOTAnalysisThreadWoker::handleNewImg(QVector<double> img, int width, int he
 	QFuture<std::vector<double>> futurey = QtConcurrent::run(this, &MOTAnalysisThreadWoker::fit1dGaussian, CrxY);
 	std::vector<double> fitx = futurex.result();
 	std::vector<double> fity = futurey.result();
-	result1d[MOTAnalysisType::type::meanx].push_back(fitx[2]);
-	result1d[MOTAnalysisType::type::sigmax].push_back(std::abs(fitx[4]));
-	result1d[MOTAnalysisType::type::meany].push_back(fity[2]);
-	result1d[MOTAnalysisType::type::sigmay].push_back(std::abs(fity[4]));
-	result1d[MOTAnalysisType::type::amplitude].push_back((fitx[0] + fity[0]) / 2);
+	result2d[MOTAnalysisType::type::meanx][var].push_back(fitx[2]);
+	result2d[MOTAnalysisType::type::sigmax][var].push_back(std::abs(fitx[4]));
+	result2d[MOTAnalysisType::type::meany][var].push_back(fity[2]);
+	result2d[MOTAnalysisType::type::sigmay][var].push_back(std::abs(fity[4]));
+	result2d[MOTAnalysisType::type::amplitude][var].push_back((fitx[0] + fity[0]) / 2);
 
 	double sum = std::accumulate(img.begin(), img.end(), 0.0);
 	sum -= img.size() * *(it.first);
-	result1d[MOTAnalysisType::type::atomNum].push_back(sum);
+	result2d[MOTAnalysisType::type::atomNum][var].push_back(sum);
 	// perform average for 2d density
 	if (density2d[var].empty()) {
 		density2d[var] = img.toStdVector();
@@ -71,38 +78,70 @@ void MOTAnalysisThreadWoker::handleNewImg(QVector<double> img, int width, int he
 		std::transform(den.begin(), den.end(), img.begin(), den.begin(), [rep](double old, double n3w) {
 			return (old * (rep) + n3w) / (rep * 1.0); });
 	}
-	emit newPlotData2D(density2d[var], width, height, currentNum);
+	emit newPlotData2D(density2d[var], width, height, var);
 
-	//check if one variation is finished and is able to do statistics for 1d result
-	std::vector<size_t> trueIdx;
-	for (size_t idx = 0; idx < rep + 1; idx++) {
-		trueIdx.push_back(resultOrder[var + input.camSet.variations * idx]);
+
+	if (rep != result2d[MOTAnalysisType::allTypes[0]][var].size() - 1) {
+		emit error("MOT analysis repetition number is inconsistent with stored result size \n"
+			"A low level bug! \r\n");
+		return;
 	}
+
+	//check if this variation is finished and is able to do statistics for 1d result
 	std::vector<double> mean;
-	for (auto& [key, val] : result1d) {
-		double tmp = 0.0;
-		for (auto trueid : trueIdx) {
-			tmp += val[trueid];
-		}
-		mean.push_back(tmp / (trueIdx.size()));
+	for (auto& [key, val] : result2d) {
+		double tmp = std::accumulate(val[var].begin(), val[var].end(), 0.0);
+		mean.push_back(tmp / (val[var].size()));
 	}
 	if (rep) { // the very first round is finished, able to do statistics
 		std::vector<double> stdev;
-		for (size_t idx = 0; idx < result1d.size(); idx++)
+		for (size_t idx = 0; idx < result2d.size(); idx++)// loop through all analysis types
 		{
 			double tmp = 0.0;
-			for (auto trueid : trueIdx) {
-				tmp += (result1d[MOTAnalysisType::allTypes[idx]][trueid] - mean[idx])
-					* (result1d[MOTAnalysisType::allTypes[idx]][trueid] - mean[idx]);
+			for (auto num : result2d[MOTAnalysisType::allTypes[idx]][var]) {
+				tmp += (num - mean[idx]) * (num - mean[idx]);
 			}
-			stdev.push_back(sqrt( tmp / (trueIdx.size()-1) ));
+			stdev.push_back(sqrt(tmp / (result2d[MOTAnalysisType::allTypes[idx]][var].size() - 1)));
 		}
-		emit newPlotData1D(mean, stdev, currentNum);
+		emit newPlotData1D(mean, stdev, var);
 	}
 	else {
-		emit newPlotData1D(mean, std::vector<double>(mean.size(), 0.0), currentNum);
+		emit newPlotData1D(mean, std::vector<double>(mean.size(), 0.0), var);
 	}
 
+	////check if one variation is finished and is able to do statistics for 1d result
+	//std::vector<size_t> trueIdx;
+	//for (size_t idx = 0; idx < rep + 1; idx++) {
+	//	trueIdx.push_back(resultOrder[var + input.camSet.variations * idx]);
+	//}
+	//std::vector<double> mean;
+	//for (auto& [key, val] : result1d) {
+	//	double tmp = 0.0;
+	//	for (auto trueid : trueIdx) {
+	//		tmp += val[trueid];
+	//	}
+	//	mean.push_back(tmp / (trueIdx.size()));
+	//}
+	//if (rep) { // the very first round is finished, able to do statistics
+	//	std::vector<double> stdev;
+	//	for (size_t idx = 0; idx < result1d.size(); idx++)
+	//	{
+	//		double tmp = 0.0;
+	//		for (auto trueid : trueIdx) {
+	//			tmp += (result1d[MOTAnalysisType::allTypes[idx]][trueid] - mean[idx])
+	//				* (result1d[MOTAnalysisType::allTypes[idx]][trueid] - mean[idx]);
+	//		}
+	//		stdev.push_back(sqrt( tmp / (trueIdx.size()-1) ));
+	//	}
+	//	emit newPlotData1D(mean, stdev, currentNum);
+	//}
+	//else {
+	//	emit newPlotData1D(mean, std::vector<double>(mean.size(), 0.0), currentNum);
+	//}
+	size_t currentNum = 0;
+	for (auto val : result2d[MOTAnalysisType::allTypes[0]]) {
+		currentNum += val.size();
+	}
 	if (currentNum == input.camSet.totalPictures()) {
 		emit finished();
 	}

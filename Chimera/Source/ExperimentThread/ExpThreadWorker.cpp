@@ -49,7 +49,7 @@ void ExpThreadWorker::experimentThreadProcedure () {
 		loadExperimentRuntime (cStream, expRuntime);
 		if (input->expType != ExperimentType::LoadMot) {
 			emit notification ("Loading Master Runtime...\n", 1);
-			input->logger.logMasterRuntime (expRuntime.repetitions, expRuntime.expParams);
+			input->logger.logMasterRuntime (expRuntime.repetitions, expRuntime.mainOpts.repetitionFirst, expRuntime.expParams);
 		}
 		for (auto& device : input->devices.list) {
 			deviceLoadExpSettings (device, cStream);/*TODO: remove dds from device, and now device only has andor*/
@@ -79,35 +79,59 @@ void ExpThreadWorker::experimentThreadProcedure () {
 
 		/// Begin experiment 
 		std::vector<double> finaltimes = input->ttls.getFinalTimes();
-		//for (const auto& variationInc : range (determineVariationNumber (expRuntime.expParams))) {
-		//	initVariation (variationInc, expRuntime.expParams);
-		//	emit notification ("Programming Devices for Variation...\n");
-		//	//for (auto& device : input->devices.list) {
-		//	//	deviceProgramVariation (device, expRuntime.expParams, variationInc);
-		//	//}
-		//	emit notification ("Running Experiment.\n");
-		//	for (const auto& repInc : range (expRuntime.repetitions)) {
-		//		handlePause (isPaused, isAborting);
-		//		emit notification(qstr("Starting Repetition #" + qstr(repInc) + "\n"), 2);
-		//		startRep (repInc, variationInc, input->skipNext == nullptr ? false : input->skipNext->load ());
-		//		Sleep(finaltimes[variationInc]);//wait 500ms between rep, added temporarily by zzp 20210225
-		//	}
-		//}
 
-		for (const auto& repInc : range(expRuntime.repetitions)) {
-			emit notification(qstr("Starting Repetition #" + qstr(repInc) + "\n"), 0);
-			emit repUpdate(repInc);
+		if (expRuntime.mainOpts.repetitionFirst) {
+			emit notification("Experiment programmed to be running " + qstr(expRuntime.repetitions) +
+				" repetition first and then run it for all " + qstr(determineVariationNumber(expRuntime.expParams)) + " variations \r\n");
+
 			for (const auto& variationInc : range(determineVariationNumber(expRuntime.expParams))) {
-				emit notification("Programming Devices for Variation...\n", 2);
+				initVariation(variationInc, expRuntime.expParams);
+				emit notification("Programming Devices for Variation...#" + qstr(variationInc) + "\n");
 				for (auto& device : input->devices.list) {
 					deviceProgramVariation(device, expRuntime.expParams, variationInc);
 				}
-				initVariation(variationInc, expRuntime.expParams);
-				handlePause(isPaused, isAborting);
-				startRep(repInc, variationInc, input->skipNext == nullptr ? false : input->skipNext->load());
-				Sleep(finaltimes[variationInc]);//wait 500ms between rep, added temporarily by zzp 20210225
+				emit notification("Running Experiment.\n");
+				for (const auto& repInc : range(expRuntime.repetitions)) {
+					handlePause(isPaused, isAborting);
+					// for toggling the rep/var
+					auto makocams = input->devices.getDevicesByClass<MakoCameraCore>();
+					for (auto& cam : makocams) {
+						cam.get().setCurrentRepVarNumber(repInc, variationInc);
+					}
+					// end for toggling the rep/var
+					emit notification(qstr("Starting Repetition #" + qstr(repInc) + "\n"), 2);
+					startRep(repInc, variationInc, input->skipNext == nullptr ? false : input->skipNext->load());
+					Sleep(finaltimes[variationInc]+10);//wait 500ms between rep, added temporarily by zzp 20210225
+				}
 			}
 		}
+		else {
+			emit notification("Experiment programmed to be running " + qstr(determineVariationNumber(expRuntime.expParams)) +
+				" variation first and then repeat it for " + qstr(expRuntime.repetitions) + " repetitions \r\n");
+
+			for (const auto& repInc : range(expRuntime.repetitions)) {
+				emit notification(qstr("Starting Repetition #" + qstr(repInc) + "\n"), 0);
+				emit repUpdate(repInc);
+				for (const auto& variationInc : range(determineVariationNumber(expRuntime.expParams))) {
+					emit notification("Programming Devices for Variation...\n", 2);
+					for (auto& device : input->devices.list) {
+						deviceProgramVariation(device, expRuntime.expParams, variationInc);
+					}
+					initVariation(variationInc, expRuntime.expParams);
+					handlePause(isPaused, isAborting);
+					// for toggling the rep/var
+					auto makocams = input->devices.getDevicesByClass<MakoCameraCore>();
+					for (auto& cam : makocams) {
+						cam.get().setCurrentRepVarNumber(repInc, variationInc);
+					}
+					// end for toggling the rep/var
+					startRep(repInc, variationInc, input->skipNext == nullptr ? false : input->skipNext->load());
+					Sleep(finaltimes[variationInc]+10);//wait 500ms between rep, added temporarily by zzp 20210225
+				}
+			}
+		}
+
+
 
 		waitForAndorFinish ();
 		for (auto& device : input->devices.list) {
@@ -1239,11 +1263,20 @@ void ExpThreadWorker::errorFinish (std::atomic<bool>& isAborting, ChimeraError& 
 	std::chrono::time_point<chronoClock> startTime) {
 	//setExperimentGUIcolor();
 	input->zynqExp.sendCommand("resetSeq");
-	input->aoSys.setDACs();
-	input->ddsSys.setDDSs();
-	input->olSys.setOLs(input->ttls, input->ttlSys.getCurrentStatus());
+	Sleep(50);
+	input->zynqExp.sendCommand("resetSeq");
+	Sleep(50);
 	input->ttls.FPGAForceOutput(input->ttlSys.getCurrentStatus());
+	Sleep(50);
+	input->aoSys.setDACs();
+	Sleep(50);
+	input->ddsSys.setDDSs();
+	Sleep(50);
+	input->olSys.setOLs(input->ttls, input->ttlSys.getCurrentStatus());
+	Sleep(50);
 	input->ddsSys.relockPLL();
+	Sleep(100);
+	input->ttls.FPGAForceOutput(input->ttlSys.getCurrentStatus());
 
 	std::string finMsg;
 	if (isAborting) {
@@ -1266,11 +1299,18 @@ void ExpThreadWorker::normalFinish (ExperimentType& expType, bool runMaster,
 	auto exp_t = std::chrono::duration_cast<std::chrono::seconds>((chronoClock::now () - startTime)).count ();
 	setExperimentGUIcolor();
 	input->zynqExp.sendCommand("resetSeq"); 
-	input->aoSys.setDACs();
-	input->ddsSys.setDDSs();
-	input->olSys.setOLs(input->ttls, input->ttlSys.getCurrentStatus());
+	Sleep(50);
 	input->ttls.FPGAForceOutput(input->ttlSys.getCurrentStatus());
+	Sleep(50);
+	input->aoSys.setDACs();
+	Sleep(50);
+	input->ddsSys.setDDSs();
+	Sleep(50);
+	input->olSys.setOLs(input->ttls, input->ttlSys.getCurrentStatus());
+	Sleep(50);
 	input->ddsSys.relockPLL();
+	Sleep(100);
+	input->ttls.FPGAForceOutput(input->ttlSys.getCurrentStatus());
 
 	switch (expType) {
 	case ExperimentType::AutoCal:

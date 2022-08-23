@@ -27,7 +27,7 @@ void MOTAnalysisSystem::prepareMOTAnalysis()
 	for (auto pt : camPts) {
 		if (pt != nullptr && std::find(camExp.begin(), camExp.end(), pt) == camExp.end()) {
 			camExp.push_back(pt);
-			emit notification("get MAKO as" + qstr(pt));
+			emit notification("get MAKO as" + qstr(pt->getMakoCore().CameraName()) + "\r\n");
 		}
 	}
 	if (camExp.size() > MAKO_NUMBER) {
@@ -67,6 +67,8 @@ void MOTAnalysisSystem::prepareMOTAnalysis(int idx)
 	connect(makoCam, &MakoCamera::imgReadyForAnalysis, MOTCalc, &MOTAnalysisThreadWoker::handleNewImg);
 	connect(MOTCalc, &MOTAnalysisThreadWoker::newPlotData1D, &MOTCtrl, &MOTAnalysisControl::handleNewPlotData1D);
 	connect(MOTCalc, &MOTAnalysisThreadWoker::newPlotData2D, &MOTCtrl, &MOTAnalysisControl::handleNewPlotData2D);
+
+	connect(MOTCalc, &MOTAnalysisThreadWoker::error, this->parentWin, &IChimeraQtWindow::reportErr);
 
 	thread->start();
 

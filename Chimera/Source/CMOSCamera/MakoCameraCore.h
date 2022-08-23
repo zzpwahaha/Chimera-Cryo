@@ -4,6 +4,7 @@
 #include "MakoWrapper.h"
 #include "MakoSettingControl.h"
 #include "CMOSSetting.h"
+#include <utility>
 
 class MakoCameraCore : public IDeviceCore
 {
@@ -51,6 +52,8 @@ public:
 
 	void setPicsPerRep(int picsperrep);
 
+	void setCurrentRepVarNumber(size_t rep, size_t var);
+	std::pair<size_t, size_t> getCurrentRepVarNumber();
 
 	std::string CameraName() { return cameraName; }
 	MakoSettingControl& getMakoCtrl() { return makoCtrl; }
@@ -79,5 +82,9 @@ private:
 	MakoSettings expRunSettings;
     //only for prepare experiment, do want the start of camera (if not) happens after setting all parameters and before exp start
 	//MakoCamera* cam = nullptr; // does not work since call start cam from expThread is not ok due to the gui stuff that has to be manipulated in the main thread
+
+	size_t currentRepNumber;
+	size_t currentVarNumber;
+
 };
 

@@ -27,7 +27,7 @@ class DataLogger : public IChimeraSystem {
 	public:
 		DataLogger(std::string systemLocation, IChimeraQtWindow* parent);
 		~DataLogger( );
-		void logMasterRuntime ( unsigned repNumber, std::vector<parameterType> params );
+		void logMasterRuntime ( unsigned repNumber, bool repFirst, std::vector<parameterType> params );
 		void logError ( H5::Exception& err );
 		void initializeDataFiles( std::string specialName="", bool needsCal=true);
 		void writeAndorPic( Matrix<long> image, imageParameters dims );

@@ -52,7 +52,7 @@ public slots:
     void finishExp();
 
 signals:
-    void imgReadyForAnalysis(QVector<double> img, int width, int height, size_t currentNum);
+    void imgReadyForAnalysis(QVector<double> img, int width, int height, size_t rep, size_t var);
 
 private:
     void initPlotContextMenu();

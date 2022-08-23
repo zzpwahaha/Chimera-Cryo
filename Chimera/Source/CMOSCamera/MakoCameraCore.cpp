@@ -10,6 +10,8 @@ MakoCameraCore::MakoCameraCore(CameraInfo camInfo)
     : m_VimbaSystem(AVT::VmbAPI::VimbaSystem::GetInstance())
     , makoCtrl()
     , camInfo(camInfo)
+    , currentRepNumber(0)
+    , currentVarNumber(0)
 {
     if (camInfo.safemode) {
         return;
@@ -591,4 +593,15 @@ void MakoCameraCore::setPicsPerRep(int picsperrep)
     runSettings.picsPerRep = picsperrep;
     expRunSettings.picsPerRep = picsperrep;
     makoCtrl.setPicsPerRep(picsperrep);
+}
+
+void MakoCameraCore::setCurrentRepVarNumber(size_t rep, size_t var)
+{
+    currentRepNumber = rep;
+    currentVarNumber = var;
+}
+
+std::pair<size_t, size_t> MakoCameraCore::getCurrentRepVarNumber()
+{
+    return std::pair<size_t, size_t>(currentRepNumber, currentVarNumber);
 }

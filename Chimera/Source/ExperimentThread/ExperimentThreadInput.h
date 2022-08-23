@@ -5,6 +5,7 @@
 #include "AnalogOutput/AoSystem.h"
 #include "DirectDigitalSynthesis/DdsSystem.h"
 #include "OffsetLock/OlSystem.h"
+#include "CMOSCamera/MakoCamera.h"
 
 #include "ParameterSystem/ParameterSystem.h"
 #include "MiscellaneousExperimentOptions/DebugOptionsControl.h"

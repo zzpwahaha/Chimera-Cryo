@@ -27,8 +27,8 @@ public:
 	void prepareMOTAnalysis(MakoCamera*& cam); // for experiment
 
 public slots:
-	void handleNewPlotData1D(std::vector<double> val, std::vector<double> stdev, int currentNum); // all in MOTAnalysisType except density2d
-	void handleNewPlotData2D(std::vector<double> val, int width, int height, int currentNum); // now only for density2d
+	void handleNewPlotData1D(std::vector<double> val, std::vector<double> stdev, int var); // all in MOTAnalysisType except density2d
+	void handleNewPlotData2D(std::vector<double> val, int width, int height, int var); // now only for density2d
 
 private:
 	void updatePlotData1D();

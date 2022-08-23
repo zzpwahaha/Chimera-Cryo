@@ -17,11 +17,15 @@ void MainOptionsControl::initialize( IChimeraQtWindow* parent )
 	auto configUpdate = [parent]() {parent->configUpdated (); };
 	randomizeVariationsButton = new QCheckBox ("Randomize Variations?", parent);
 	parent->connect (randomizeVariationsButton, &QCheckBox::stateChanged, configUpdate);
+	repetitionFirstButton = new QCheckBox("Repetition First?", parent);
+	parent->connect(repetitionFirstButton, &QCheckBox::stateChanged, configUpdate);
+
 	delayAutoCal = new QCheckBox ("Delay Auto-Calibration", parent);
 	delayAutoCal->setChecked(true);
 
 	layout->addWidget(header, 0);
 	layout->addWidget(randomizeVariationsButton, 0);
+	layout->addWidget(repetitionFirstButton, 0);
 	layout->addWidget(delayAutoCal, 0);
 
 	QHBoxLayout* layout1 = new QHBoxLayout();
@@ -29,7 +33,7 @@ void MainOptionsControl::initialize( IChimeraQtWindow* parent )
 	atomThresholdForSkipText = new QLabel ("Atom Threshold for Load Skip:", parent);
 	atomThresholdForSkipEdit = new QLineEdit ("-1", parent);
 	parent->connect (atomThresholdForSkipEdit, &QLineEdit::textChanged, configUpdate);
-	currentOptions.randomizeVariations = true;
+	currentOptions.randomizeVariations = false;
 	layout1->addWidget(atomThresholdForSkipText, 0);
 	layout1->addWidget(atomThresholdForSkipEdit, 1);
 
@@ -40,6 +44,7 @@ void MainOptionsControl::initialize( IChimeraQtWindow* parent )
 void MainOptionsControl::handleSaveConfig(ConfigStream& saveFile){
 	saveFile << "MAIN_OPTIONS"
 			 << "\n/*Randomize Variations?*/ " << randomizeVariationsButton->isChecked()
+			 << "\n/*Repetition First Over Variation?*/ " << repetitionFirstButton->isChecked()
 			 << "\n/*Atom Threshold for Load Skip*/ " << str(atomThresholdForSkipEdit->text());
 	saveFile << "\nEND_MAIN_OPTIONS\n";
 }
@@ -47,6 +52,7 @@ void MainOptionsControl::handleSaveConfig(ConfigStream& saveFile){
 mainOptions MainOptionsControl::getSettingsFromConfig (ConfigStream& openFile ){
 	mainOptions options;
 	openFile >> options.randomizeVariations;
+	openFile >> options.repetitionFirst;
 	std::string txt;
 	openFile >> txt;
 	try{
@@ -63,11 +69,13 @@ mainOptions MainOptionsControl::getSettingsFromConfig (ConfigStream& openFile ){
 void MainOptionsControl::setOptions ( mainOptions opts ){
 	currentOptions = opts;
 	randomizeVariationsButton->setChecked( currentOptions.randomizeVariations );
+	repetitionFirstButton->setChecked(currentOptions.repetitionFirst);
 	atomThresholdForSkipEdit->setText( cstr ( currentOptions.atomSkipThreshold ) );
 }
 
 mainOptions MainOptionsControl::getOptions(){
 	currentOptions.randomizeVariations = randomizeVariationsButton->isChecked();
+	currentOptions.repetitionFirst= repetitionFirstButton->isChecked();
 	currentOptions.delayAutoCal = delayAutoCal->isChecked ();
 	try{
 		currentOptions.atomSkipThreshold = boost::lexical_cast<unsigned long>( str( atomThresholdForSkipEdit->text() ) );
