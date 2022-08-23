@@ -295,18 +295,17 @@ void OlCore::organizeOLCommands(unsigned variation, OlSnapshot initSnap, std::st
 				timeOgzer.push_back({ tE.time, tE });
 			}
 			else {
-				if (fabs(timeOgzer.back().second.endValue - tE.value) > 2 * olFreqResolution)
-				{
-					
-					warning += "Warning from OffsetLock: output(" + OlCore::getName(tE.line)
-						+ "), the frequency between two consecutive event point t=" + str(timeOgzer.back().first, 3)
-						+ ", endfreq=" + str(timeOgzer.back().second.endValue, 3) + " and t=" + str(tE.time, 6) + ", startfreq="
-						+ str(tE.value, 3) + " are not the same. Have bridged it with a command inserted at t="
-						+ str(tE.time + OL_TIME_RESOLUTION, 3) + "\r\n";
-
-					timeOgzer.push_back({ tE.time,
-						OlCommand{channel,tE.time,timeOgzer.back().second.endValue,tE.value,1,OL_TIME_RESOLUTION} });
-				}
+				/// 2022/08/23 ZZP, seems like do not need this artificial bridge
+				//if (fabs(timeOgzer.back().second.endValue - tE.value) > 2 * olFreqResolution)
+				//{
+				//	warning += "Warning from OffsetLock: output(" + OlCore::getName(tE.line)
+				//		+ "), the frequency between two consecutive event point t=" + str(timeOgzer.back().first, 3)
+				//		+ ", endfreq=" + str(timeOgzer.back().second.endValue, 3) + " and t=" + str(tE.time, 6) + ", startfreq="
+				//		+ str(tE.value, 3) + " are not the same. Have bridged it with a command inserted at t="
+				//		+ str(tE.time + OL_TIME_RESOLUTION, 3) + "\r\n";
+				//	timeOgzer.push_back({ tE.time,
+				//		OlCommand{channel,tE.time,timeOgzer.back().second.endValue,tE.value,1,OL_TIME_RESOLUTION} });
+				//}
 				// because the events are sorted by time, the time organizer will already be sorted by time, and therefore I 
 				// just need to check the back value's time.
 				double timediff = (tE.time - timeOgzer.back().first); //had better be positive, otherwise indicating a bridge is inserted perviously
