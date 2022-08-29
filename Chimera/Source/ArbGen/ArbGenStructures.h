@@ -38,12 +38,14 @@ struct squareInfo : public generalArbGenOutputInfo {
 	// not used yet // ?!?!
 	Expression dutyCycle;
 	Expression phase;
+	bool burstMode = false;
 };
 
 
 struct sineInfo : public generalArbGenOutputInfo {
 	Expression frequency;
 	Expression amplitude;
+	bool burstMode = false;
 };
 
 

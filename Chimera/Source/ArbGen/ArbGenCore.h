@@ -22,6 +22,7 @@ public:
 	void initialize();
 	std::string getDelim() { return configDelim; }
 	bool connected();
+	void reconnectFlume();
 	std::pair<unsigned, unsigned> getTriggerLine();
 	std::string getDeviceIdentity();
 	void logSettings(DataLogger& log, ExpThreadWorker* threadworker);

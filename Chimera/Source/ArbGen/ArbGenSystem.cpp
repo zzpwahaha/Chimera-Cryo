@@ -114,8 +114,18 @@ void ArbGenSystem::initialize(std::string headerText, IChimeraQtWindow* win)
 		}
 	});
 	channelButtonsGroup->addButton (channel2Button);
+
+	QPushButton* reconnectButton = new QPushButton("Reconnect", this);
+	connect(reconnectButton, &QPushButton::released, this, [this, win]() {
+		try {
+			pCore->reconnectFlume();
+		}
+		catch (ChimeraError& e) {
+			win->reportErr("Reconecting to " + qstr(pCore->configDelim) + "failed, check cable connection.\r\n" + e.qtrace());
+		}});
 	layout1->addWidget(channel1Button, 1);
 	layout1->addWidget(channel2Button, 1);
+	layout1->addWidget(reconnectButton, 1);
 	layout->addLayout(layout1, 0);
 
 
@@ -236,12 +246,14 @@ void ArbGenSystem::readGuiSettings(int chan ){
 		case ArbGenChannelMode::which::Sine:
 			stream >> currentGuiInfo.channel[chani].sine.frequency;
 			stream >> currentGuiInfo.channel[chani].sine.amplitude;
+			currentGuiInfo.channel[chani].sine.burstMode = burstButton->isChecked();
 			currentGuiInfo.channel[chani].sine.useCal = calibratedButton->isChecked ( );
 			break;
 		case ArbGenChannelMode::which::Square:
 			stream >> currentGuiInfo.channel[chani].square.frequency;
 			stream >> currentGuiInfo.channel[chani].square.amplitude;
 			stream >> currentGuiInfo.channel[chani].square.offset;
+			currentGuiInfo.channel[chani].square.burstMode = burstButton->isChecked();
 			currentGuiInfo.channel[chani].square.useCal = calibratedButton->isChecked ( );
 			break;
 		case ArbGenChannelMode::which::Preloaded:
@@ -254,7 +266,7 @@ void ArbGenSystem::readGuiSettings(int chan ){
 			currentGuiInfo.channel[chani].scriptedArb.useCal = calibratedButton->isChecked ( );
 			break;
 		default:
-			thrower ( "unknown agilent option" );
+			thrower ( "unknown ArbGen option" );
 	}
 }
 
@@ -295,19 +307,32 @@ void ArbGenSystem::updateSettingsDisplay(int chan, std::string configPath, RunIn
 			arbGenScript.setScriptText("");
 			arbGenScript.setEnabled ( false, false );
 			settingCombo->setCurrentIndex( 0 );
+			for (auto& but : { calibratedButton ,burstButton ,syncedButton }) {
+				but->setChecked(false);
+				but->setDisabled(true);
+			}
 			break;
 		case ArbGenChannelMode::which::Output_Off:
 			arbGenScript.reset ( );
 			arbGenScript.setScriptText("");
 			arbGenScript.setEnabled ( false, false );
 			settingCombo->setCurrentIndex ( 1 );
+			for (auto& but : { calibratedButton ,burstButton ,syncedButton }) {
+				but->setChecked(false);
+				but->setDisabled(true);
+			}
 			break;
 		case ArbGenChannelMode::which::DC:
 			arbGenScript.reset ( );
 			arbGenScript.setScriptText(currentGuiInfo.channel[chan].dc.dcLevel.expressionStr);
 			settingCombo->setCurrentIndex ( 2 );
 			calibratedButton->setChecked( currentGuiInfo.channel[chan].dc.useCal );
+			burstButton->setChecked(false);
+			burstButton->setDisabled(true);
 			arbGenScript.setEnabled ( true, false );
+			for (auto& but : { calibratedButton ,syncedButton }) {
+				but->setDisabled(false);
+			}
 			break;
 		case ArbGenChannelMode::which::Sine:
 			arbGenScript.reset ( );
@@ -315,7 +340,12 @@ void ArbGenSystem::updateSettingsDisplay(int chan, std::string configPath, RunIn
 										 + currentGuiInfo.channel[chan].sine.amplitude.expressionStr);
 			settingCombo->setCurrentIndex ( 3 );
 			calibratedButton->setChecked( currentGuiInfo.channel[chan].sine.useCal );
+			burstButton->setChecked(currentGuiInfo.channel[chan].sine.burstMode);
+			burstButton->setEnabled(true);
 			arbGenScript.setEnabled ( true, false );
+			for (auto& but : { calibratedButton ,burstButton ,syncedButton }) {
+				but->setDisabled(false);
+			}
 			break;
 		case ArbGenChannelMode::which::Square:
 			arbGenScript.reset ( );
@@ -323,8 +353,13 @@ void ArbGenSystem::updateSettingsDisplay(int chan, std::string configPath, RunIn
 										 + currentGuiInfo.channel[chan].square.amplitude.expressionStr + " " 
 										 + currentGuiInfo.channel[chan].square.offset.expressionStr );
 			calibratedButton->setChecked( currentGuiInfo.channel[chan].square.useCal );
+			burstButton->setChecked(currentGuiInfo.channel[chan].square.burstMode);
+			burstButton->setEnabled(true);
 			arbGenScript.setEnabled ( true, false );
 			settingCombo->setCurrentIndex (4);
+			for (auto& but : { calibratedButton ,burstButton ,syncedButton }) {
+				but->setDisabled(false);
+			}
 			break;
 		case ArbGenChannelMode::which::Preloaded:
 			arbGenScript.reset ( );
@@ -333,6 +368,9 @@ void ArbGenSystem::updateSettingsDisplay(int chan, std::string configPath, RunIn
 			burstButton->setChecked (currentGuiInfo.channel[chan].preloadedArb.burstMode);
 			arbGenScript.setEnabled ( true, false );
 			settingCombo->setCurrentIndex (5);
+			for (auto& but : { calibratedButton ,burstButton ,syncedButton }) {
+				but->setDisabled(false);
+			}
 			break;
 		case ArbGenChannelMode::which::Script:
 			// clear it in case the file fails to open.
@@ -342,6 +380,9 @@ void ArbGenSystem::updateSettingsDisplay(int chan, std::string configPath, RunIn
 			calibratedButton->setChecked( currentGuiInfo.channel[chan].scriptedArb.useCal );
 			arbGenScript.setEnabled ( true, false );
 			settingCombo->setCurrentIndex (6);
+			for (auto& but : { calibratedButton ,burstButton ,syncedButton }) {
+				but->setDisabled(false);
+			}
 			break;
 		default:
 			thrower ( "unrecognized agilent setting: " + ArbGenChannelMode::toStr(currentGuiInfo.channel[chan].option));
@@ -426,10 +467,12 @@ void ArbGenSystem::handleSavingConfig(ConfigStream& saveFile, std::string config
 		saveFile << "\n/*DC Calibrated:*/\t\t\t\t" << channel.dc.useCal;
 		saveFile << "\n/*Sine Amplitude:*/\t\t\t\t" << channel.sine.amplitude;
 		saveFile << "\n/*Sine Freq:*/\t\t\t\t\t" << channel.sine.frequency;
+		saveFile << "\n/*Sine Burst:*/\t\t\t\t\t" << channel.sine.burstMode;
 		saveFile << "\n/*Sine Calibrated:*/\t\t\t" << channel.sine.useCal;
 		saveFile << "\n/*Square Amplitude:*/\t\t\t" << channel.square.amplitude;
 		saveFile << "\n/*Square Freq:*/\t\t\t\t" << channel.square.frequency;
 		saveFile << "\n/*Square Offset:*/\t\t\t\t" << channel.square.offset;
+		saveFile << "\n/*Square Burst:*/\t\t\t\t" << channel.square.burstMode;
 		saveFile << "\n/*Square Calibrated:*/\t\t\t" << channel.square.useCal;
 		saveFile << "\n/*Preloaded Arb Address:*/\t\t" << channel.preloadedArb.address;
 		saveFile << "\n/*Preloaded Arb Calibrated:*/\t" << channel.preloadedArb.useCal;

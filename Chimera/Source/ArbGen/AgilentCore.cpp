@@ -276,6 +276,14 @@ void AgilentCore::setSquare (int channel, squareInfo info, unsigned var){
 		visaFlume.write ("SOURCE" + str (channel) + ":APPLY:SQUARE " + str (info.frequency.getValue (var)) + " KHZ, "
 			+ str (convertPowerToSetPoint (info.amplitude.getValue (var), info.useCal, calibrations[channel - 1])) + " VPP, "
 			+ str (convertPowerToSetPoint (info.offset.getValue (var), info.useCal, calibrations[channel - 1])) + " V");
+		if (info.burstMode) {
+			visaFlume.write("BURST:MODE GATED");
+			visaFlume.write("BURST:GATE:POLARITY NORMAL");
+			visaFlume.write("BURST:PHASE 0");
+			visaFlume.write("BURST:STATE ON");
+		}
+
+	
 	}
 	catch (ChimeraError&) {
 		throwNested ("Seen while programming Square Wave for channel " + str (channel) + " (1-indexed).");
@@ -288,8 +296,16 @@ void AgilentCore::setSine (int channel, sineInfo info, unsigned var){
 		thrower ("Bad value for channel in setSine! Channel shoulde be 1 or 2.");
 	}
 	try {
-	visaFlume.write ("SOURCE" + str (channel) + ":APPLY:SINUSOID " + str (info.frequency.getValue(var)) + " KHZ, "
-		+ str (convertPowerToSetPoint (info.amplitude.getValue(var), info.useCal, calibrations[channel - 1])) + " VPP");
+		auto sStr = "SOURCE" + str(channel);
+		visaFlume.write ("SOURCE" + str (channel) + ":APPLY:SINUSOID " + str (info.frequency.getValue(var)) + " KHZ, "
+			+ str (convertPowerToSetPoint (info.amplitude.getValue(var), info.useCal, calibrations[channel - 1])) + " VPP");
+		if (info.burstMode) {
+			visaFlume.write("BURST:MODE GATED");
+			visaFlume.write("BURST:GATE:POLARITY NORMAL");
+			visaFlume.write("BURST:PHASE 0");
+			visaFlume.write("BURST:STATE ON");
+		}
+
 	}
 	catch (ChimeraError&) {
 		throwNested ("Seen while programming Sine Wave for channel " + str(channel) + " (1-indexed).");

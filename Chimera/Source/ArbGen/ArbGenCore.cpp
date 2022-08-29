@@ -228,6 +228,12 @@ bool ArbGenCore::connected() {
 	return isConnected;
 }
 
+void ArbGenCore::reconnectFlume()
+{
+	visaFlume.open();
+
+}
+
 
 void ArbGenCore::convertInputToFinalSettings(unsigned chan, deviceOutputInfo& info, std::vector<parameterType>& params) {
 	unsigned totalVariations = (params.size() == 0) ? 1 : params.front().keyValues.size();
@@ -321,7 +327,7 @@ deviceOutputInfo ArbGenCore::getSettingsFromConfig(ConfigStream& file) {
 		try {
 			/*channel.option = file.ver < Version ("4.2") ?
 				ArbGenChannelMode::which (boost::lexical_cast<int>(input) + 2) : ArbGenChannelMode::fromStr (input);*/
-			ArbGenChannelMode::fromStr(input);
+			channel.option = ArbGenChannelMode::fromStr(input);
 		}
 		catch (boost::bad_lexical_cast&) {
 			throwNested("Bad channel " + str(chanInc + 1) + " option!");
@@ -335,6 +341,7 @@ deviceOutputInfo ArbGenCore::getSettingsFromConfig(ConfigStream& file) {
 		//}
 		readFunc(file, channel.sine.amplitude.expressionStr);
 		readFunc(file, channel.sine.frequency.expressionStr);
+		file >> channel.sine.burstMode;
 		//if (file.ver > Version ("2.3")){
 		file >> channel.sine.useCal;
 		file.get();
@@ -342,6 +349,7 @@ deviceOutputInfo ArbGenCore::getSettingsFromConfig(ConfigStream& file) {
 		readFunc(file, channel.square.amplitude.expressionStr);
 		readFunc(file, channel.square.frequency.expressionStr);
 		readFunc(file, channel.square.offset.expressionStr);
+		file >> channel.square.burstMode;
 		//if (file.ver > Version ("2.3")){
 		file >> channel.square.useCal;
 		file.get();
