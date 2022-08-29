@@ -1,5 +1,6 @@
 #include <stdafx.h>
 #include <GeneralFlumes/QtSerialFlume.h>
+#include <Windows.h>
 
 QtSerialFlume::QtSerialFlume(bool safemode_option, std::string portAddress_)
 	: safemode(safemode_option)
@@ -69,7 +70,7 @@ std::string QtSerialFlume::read ()
 	}
 	/*have to use this funny way to get the feedback properly. May be don't have to have the feedback*/
 	bool dataready = false;
-	for (size_t i = 0; i < 500; i++) {
+	for (size_t i = 0; i < 1000; i++) {
 		if (port.waitForReadyRead(10) || port.bytesAvailable() != 0) {
 			dataready = true;
 			break;
@@ -101,5 +102,6 @@ std::string QtSerialFlume::read ()
 std::string QtSerialFlume::query(std::string msg) 
 {
 	write(msg);
+	Sleep(10);
 	return read();
 }
