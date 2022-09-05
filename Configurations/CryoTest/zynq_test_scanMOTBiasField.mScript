@@ -1,0 +1,34 @@
+%%%%%%%%%%%%%%%%% Start With 1ms %%%%%%%%%%%%%%%%% 
+t = 1
+ddsfreq: TARep 80
+ddsamp: TARep 100
+
+%ddsfreq: SciSrcMOT 80
+%ddsamp: SciSrcMOT 100
+
+%for dipole push rep, this rep is 80MHz detuned
+ddsfreq: PrbRep 80
+ddsamp: PrbRep 100
+
+on: TARepTrg
+on: SrcMOTTrg
+on: SciMOTTrg 
+on: DipolePushTrg
+on: DipolePushRepTrg
+
+dac: TARepAmp 10
+dac: SrcMOTAmp 10
+dac: SciMOTAmp 7 
+dac: DipolePushAmp 10
+dac: DipolePushRepAmp 10 
+
+ol: ol_cooling 1225
+ol: ol_repump 5282
+
+dac: MOTCoil 7
+dac: BiasCoilX 0.04+bias_x
+dac: BiasCoilY 0.1+bias_y
+dac: BiasCoilZ -0.11+bias_z
+
+t = 1000-0.01
+pulseon: do1_0 0.01

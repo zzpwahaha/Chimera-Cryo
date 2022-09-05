@@ -85,7 +85,7 @@
 	const std::string RAMP_LOCATION = str(CODE_ROOT) + "\\Ramp_Files\\";
 
 	//Analog in 
-	const bool AI_SAFEMODE = true;
+	const bool AI_SAFEMODE = false;
 	const std::string AI_SOCKET_ADDRESS = "10.10.0.10";
 	const std::string AI_SOCKET_PORT = "80";
 

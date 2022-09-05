@@ -1,12 +1,39 @@
 % set DAC, channel, amp, freq, phase
-set DAC0 0 85 98 30
-set DAC1 0 85 98 0
+%set DAC0 0 78 98 30
+%set DAC1 0 78 98 0
 
-%set DAC0 0 8 98 30
-%set DAC1 0 8 98 0
+%set DAC0 0 1 98 30
+%set DAC1 0 1 98 0
 
 
-%%%%%%%%%%%%%Full angle%%%%%%%%%%%%
+%%%%%%%%%%%%% Full angle 1W 5 tones %%%%%%%%%%%%
+set DAC0 0 35.2 87.7 36.0
+set DAC0 1 35.4 92.85 144.0
+set DAC0 2 35.9 98.0 324.0
+set DAC0 3 36.0 103.15 216.0
+set DAC0 4 36.5 108.3 180.0
+
+set DAC1 0 34.0 87.7 36.0
+set DAC1 1 34.7 92.85 144.0
+set DAC1 2 35.5 98.0 324.0
+set DAC1 3 36.0 103.15 216.0
+set DAC1 4 37.0 108.3 180.0
+
+
+
+%%%%%%%%%%%%% Full angle 1W 3 tones %%%%%%%%%%%%
+%set DAC0 0 49 87 60
+%set DAC1 0 49 87 60
+%
+%set DAC0 1 49 96 240
+%set DAC1 1 49 96 240
+%
+%set DAC0 2 49 105 180
+%set DAC1 2 49 105 180
+%
+
+
+%%%%%%%%%%%%% Full angle 1W %%%%%%%%%%%%
 %set DAC0 0 49 98 240
 %set DAC1 0 49 98 240
 %
@@ -17,7 +44,16 @@ set DAC1 0 85 98 0
 %set DAC1 2 49 116 180
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
+%%%%%%%%%%%%% Full angle lower power %%%%%%%%%%%%
+%set DAC0 0 30 98 240
+%set DAC1 0 30 98 240
+%
+%set DAC0 1 30 80 60
+%set DAC1 1 30 80 60
+%
+%set DAC0 2 30 116 180
+%set DAC1 2 30 116 180
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %set DAC0 0 100 120 0
 %set DAC1 0 100 125 0

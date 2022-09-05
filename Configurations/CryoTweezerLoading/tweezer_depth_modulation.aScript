@@ -1,0 +1,2 @@
+ramp lin 0 5 20 oncewaittrig #
+%modpulse gaussian 0 5 10 5 0.01 0 10 oncewaittrig #
