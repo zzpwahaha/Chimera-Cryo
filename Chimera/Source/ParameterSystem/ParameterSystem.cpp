@@ -578,11 +578,27 @@ void ParameterSystem::generateKey( std::vector<parameterType>& parameters, bool 
 	for ( auto& keyElem : randomizerMultiKey.values ){
 		keyElem = count++;
 	}
+	std::vector<int> MultiKeyValueCopy(randomizerMultiKey.values);
+	std::vector<size_t> shuffleIndex;
+	std::vector<size_t> shuffleIndexReverse;
 	if ( randomizeVariationsOption ){
 		std::random_device rng;
 		std::mt19937 twister( rng( ) );
 		std::shuffle( randomizerMultiKey.values.begin( ), randomizerMultiKey.values.end( ), twister );
 	}
+	std::transform(MultiKeyValueCopy.cbegin(), MultiKeyValueCopy.cend(),
+		std::back_inserter(shuffleIndexReverse),
+		[&](double vOriginal) {
+			auto pos = std::find(randomizerMultiKey.values.begin(), randomizerMultiKey.values.end(), vOriginal);
+			size_t dis = std::distance(randomizerMultiKey.values.begin(), pos);
+			return dis; });
+	std::transform(randomizerMultiKey.values.cbegin(), randomizerMultiKey.values.cend(), 
+		std::back_inserter(shuffleIndex),
+		[&](double vRandom) {
+			auto pos = std::find(MultiKeyValueCopy.begin(), MultiKeyValueCopy.end(), vRandom);
+			size_t dis = std::distance(MultiKeyValueCopy.begin(), pos);
+			return dis; });
+
 	// initialize this to one so that constants always get at least one value.
 	int totalSize = 1;
 	for (auto variableInc : range (variableIndexes.size ())){
@@ -649,6 +665,8 @@ void ParameterSystem::generateKey( std::vector<parameterType>& parameters, bool 
 		}
 		variable.keyValues = tempKeyRandomized.values;
 		variable.valuesVary = true;
+		variable.shuffleIndex = shuffleIndex;
+		variable.shuffleIndexReverse = shuffleIndexReverse;
 		totalSize = tempKeyRandomized.values.size ();
 	}
 	// now add all constant objects.
@@ -656,6 +674,8 @@ void ParameterSystem::generateKey( std::vector<parameterType>& parameters, bool 
 		if ( param.constant ){
 			param.keyValues.clear ( );
 			param.keyValues.resize( totalSize, param.constantValue );
+			param.shuffleIndex = shuffleIndex;
+			param.shuffleIndexReverse = shuffleIndexReverse;
 			param.valuesVary = false;
 		}
 	}

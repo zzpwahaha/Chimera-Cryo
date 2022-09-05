@@ -96,7 +96,8 @@ void ExpThreadWorker::experimentThreadProcedure () {
 					// for toggling the rep/var
 					auto makocams = input->devices.getDevicesByClass<MakoCameraCore>();
 					for (auto& cam : makocams) {
-						cam.get().setCurrentRepVarNumber(repInc, variationInc);
+						cam.get().setCurrentRepVarNumber(repInc, expRuntime.expParams.front().shuffleIndex[variationInc]);
+						// have to do it in this funny way instead of letting MOTAnalyzer generate rand itself is because the randomization is random, so xyplot can only get non-randomized version and get the index of randomization through the expParams
 					}
 					// end for toggling the rep/var
 					emit notification(qstr("Starting Repetition #" + qstr(repInc) + "\n"), 2);
@@ -122,7 +123,7 @@ void ExpThreadWorker::experimentThreadProcedure () {
 					// for toggling the rep/var
 					auto makocams = input->devices.getDevicesByClass<MakoCameraCore>();
 					for (auto& cam : makocams) {
-						cam.get().setCurrentRepVarNumber(repInc, variationInc);
+						cam.get().setCurrentRepVarNumber(repInc, expRuntime.expParams.front().shuffleIndex[variationInc]);
 					}
 					// end for toggling the rep/var
 					startRep(repInc, variationInc, input->skipNext == nullptr ? false : input->skipNext->load());
@@ -229,7 +230,8 @@ void ExpThreadWorker::analyzeMasterScript (DoCore& ttls, AoCore& ao, DdsCore& dd
 			}
 			else {
 				word = (word == "") ? "[EMPTY-STRING]" : word;
-				thrower ("unrecognized master script command: \"" + word + "\"");
+				thrower ("unrecognized master script command: \"" + word + "\" around \r\n" + 
+					currentMasterScript.getline());
 			}
 			word = "";
 			currentMasterScript >> word;

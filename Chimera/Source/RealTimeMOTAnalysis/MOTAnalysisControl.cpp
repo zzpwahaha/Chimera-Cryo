@@ -11,6 +11,7 @@
 #include <qcheckbox.h>
 #include <qlabel.h>
 #include <qlayout.h>
+#include <qtconcurrentrun.h>
 
 
 
@@ -96,7 +97,8 @@ void MOTAnalysisControl::initialize(IChimeraQtWindow* parent)
 			makoCam = this->parentWin->makoWin->getMakoCam(idx);} });
 	connect(calcActive, &QCheckBox::stateChanged, this, [this](int checked) {
 		int makoidx = makoSrcCombo->currentIndex();
-		makoCam = this->parentWin->makoWin->getMakoCam(makoidx); });
+		makoCam = this->parentWin->makoWin->getMakoCam(makoidx); 
+		if (checked) updateXYKeys(); });
 	connect(twoDScanActive, &QCheckBox::stateChanged, this, [this,xkeyvalL,ykeyvalL](int checked) {
 		yKeyCombo->setEnabled(checked);
 		if (MOTAnalysisType::allTypes[MOTCalcCombo->currentIndex()] == MOTAnalysisType::type::density2d) {
@@ -198,11 +200,16 @@ void MOTAnalysisControl::initialize(IChimeraQtWindow* parent)
 
 void MOTAnalysisControl::updateXYKeys()
 {
-	std::vector<parameterType> params = this->parentWin->auxWin->getConfigs().getAllVariables();
+	if (!(calcActive->isChecked())) {
+		return;
+	}
+	auto& paramCtrl = this->parentWin->auxWin->getConfigs();
+	std::vector<parameterType> params = paramCtrl.getAllVariables();
 	if (params.empty()) {
 		return;
 	}
-	ScanRangeInfo rginfo = this->parentWin->auxWin->getConfigs().getRangeInfo();
+	ScanRangeInfo rginfo = paramCtrl.getRangeInfo();
+	//QFuture<void> future = QtConcurrent::run(&paramCtrl, &ParameterSystem::generateKey, params, false, rginfo);
 	ParameterSystem::generateKey(params, false, rginfo);
 	xKeyCombo->clear();
 	yKeyCombo->clear();

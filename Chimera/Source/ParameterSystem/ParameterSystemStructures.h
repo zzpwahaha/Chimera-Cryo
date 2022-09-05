@@ -142,6 +142,10 @@ struct parameterType {
 	std::vector<double> keyValues;
 	// this might just be redundant with constant above...
 	bool valuesVary=false;
+	// reverse of shuffle index for randomize variation, shuffle index is such that unshuffled_paramkey[shuffle_idx] = shuffled_paramkey
+	// reversed means that shuffled_paramkey[shuffle_idx_rev] = unshuffled_paramkey
+	std::vector<size_t> shuffleIndex;
+	std::vector<size_t> shuffleIndexReverse;
 	std::string parameterScope = GLOBAL_PARAMETER_SCOPE;
 
 	bool operator==( const parameterType& v ){
