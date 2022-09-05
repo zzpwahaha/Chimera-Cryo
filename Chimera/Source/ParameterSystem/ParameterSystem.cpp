@@ -16,22 +16,23 @@
 #include <GeneralObjects/ChimeraStyleSheets.h>
 
 
-ParameterSystem::ParameterSystem (IChimeraQtWindow* parent, std::string configurationFileDelimiter ) : 
-	IChimeraSystem(parent), configDelim ( configurationFileDelimiter ),
-paramModel(configurationFileDelimiter=="GLOBAL_PARAMETERS"){ }
+ParameterSystem::ParameterSystem(IChimeraQtWindow* parent, std::string configurationFileDelimiter) :
+	IChimeraSystem(parent), configDelim(configurationFileDelimiter),
+	paramModel(configurationFileDelimiter == "GLOBAL_PARAMETERS"),
+	dragMoveEnable(false){ }
 
 void ParameterSystem::handleContextMenu (const QPoint& pos){
 	auto index = parametersView->indexAt (pos);
 	QMenu menu;
 	menu.setStyleSheet (chimeraStyleSheets::stdStyleSheet ());
-	auto* deleteAction = new QAction ("Delete This Parameter", parametersView);
+	auto* deleteAction = new QAction ("Delete This Parameter", &menu);
 	parametersView->connect (deleteAction, &QAction::triggered,
 		[this, index]() {
 			auto params = this->paramModel.getParams ();
 			params.erase (params.begin () + index.row ());
 			paramModel.setParams (params);
 		});
-	auto* newParam = new QAction ("New Parameter", parametersView);
+	auto* newParam = new QAction ("New Parameter", &menu);
 	parametersView->connect (newParam, &QAction::triggered,
 		[this]() {
 			auto params = paramModel.getParams ();
@@ -39,7 +40,7 @@ void ParameterSystem::handleContextMenu (const QPoint& pos){
 			paramModel.setParams (params);
 		});
 
-	auto* toggleInclusivity = new QAction ("Toggle Inclusivity", parametersView);
+	auto* toggleInclusivity = new QAction ("Toggle Inclusivity", &menu);
 	parametersView->connect (toggleInclusivity, &QAction::triggered,
 		[this, index]() {
 			auto rangeInfo = paramModel.getRangeInfo ();
@@ -56,18 +57,43 @@ void ParameterSystem::handleContextMenu (const QPoint& pos){
 			paramModel.setRangeInfo (rangeInfo);
 		});
 
-	auto* addRange = new QAction ("Add Range", parametersView);
+	auto* addRange = new QAction ("Add Range", &menu);
 	parametersView->connect (addRange, &QAction::triggered, [this, index]() {
 		auto rangeInfo = paramModel.getRangeInfo ();
 		auto scanDim = paramModel.getParams ()[index.row ()].scanDimension;
 		paramModel.setVariationRangeNumber (rangeInfo.numRanges (scanDim) + 1, scanDim);
 		});
-	auto* rmRange = new QAction ("Remove Range", parametersView);
+	auto* rmRange = new QAction ("Remove Range", &menu);
 	parametersView->connect (rmRange, &QAction::triggered, [this, index]() {
 		auto rangeInfo = paramModel.getRangeInfo ();
 		auto scanDim = paramModel.getParams ()[index.row ()].scanDimension;
 		paramModel.setVariationRangeNumber (rangeInfo.numRanges (scanDim) - 1, scanDim);
 		});
+	// change the selection type from item to rows, so that the drag and drop can work properly, 
+	// having it checked shouldn't affect anything other than that the whole row will be selceted when click on one item
+	auto* dragDropTgl = new QAction("Toggle Drag & Drop", &menu);
+	dragDropTgl->setCheckable(true);
+	dragDropTgl->setChecked(dragMoveEnable);
+	parametersView->connect(dragDropTgl, &QAction::triggered, [this, dragDropTgl]() {
+		dragMoveEnable = dragDropTgl->isChecked();
+		if (dragMoveEnable) {
+			parametersView->setDragEnabled(true);
+			parametersView->setAcceptDrops(true);
+			parametersView->setDropIndicatorShown(true);
+			parametersView->setDragDropMode(QAbstractItemView::DragDrop);
+			parametersView->setDragDropOverwriteMode(false);
+			parametersView->setDefaultDropAction(Qt::MoveAction);
+			parametersView->setSelectionMode(QAbstractItemView::ExtendedSelection);
+			parametersView->setSelectionBehavior(QAbstractItemView::SelectRows);
+		}
+		else {
+			parametersView->setDragEnabled(false);
+			parametersView->setAcceptDrops(false);
+			parametersView->setSelectionMode(QAbstractItemView::SingleSelection);
+			parametersView->setSelectionBehavior(QAbstractItemView::SelectItems);
+		}
+		});
+
 	//for (auto* action : {addRange, rmRange, deleteAction, toggleInclusivity, newParam}){
 	//	parametersView->connect (action, &QAction::triggered, 
 	//							 (IChimeraQtWindow*)(parametersView->parentWidget()), &IChimeraQtWindow::configUpdated);
@@ -89,6 +115,16 @@ void ParameterSystem::handleContextMenu (const QPoint& pos){
 		}
 	}
 	menu.addAction (newParam);
+	menu.addAction(dragDropTgl);
+
+	//// for test
+	//auto* test = new QAction("Test generateKey", &menu);
+	//parametersView->connect(test, &QAction::triggered, [this, index]() {
+	//	auto allPara = getAllParams();
+	//	generateKey(allPara, true, getRangeInfo());
+	//	});
+	//menu.addAction(test);
+
 	menu.exec (parametersView->mapToGlobal (pos));	
 }
 

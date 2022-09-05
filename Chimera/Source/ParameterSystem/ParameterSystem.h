@@ -103,6 +103,7 @@ private:
 		ParameterSysType paramSysType;
 		ParameterModel paramModel;
 
+		bool dragMoveEnable;
 	Q_SIGNALS:
 		void paramsChanged ();
 };

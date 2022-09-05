@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "ParameterModel.h"
 #include <boost/lexical_cast.hpp>
+#include <qmimedata.h>
+#include <qdebug.h>
 
 ParameterModel::ParameterModel (bool isGlobal_, QObject* parent)
     : QAbstractTableModel (parent), isGlobal(isGlobal_){
@@ -142,9 +144,9 @@ Qt::ItemFlags ParameterModel::flags (const QModelIndex& index) const {
     if (index.column () == 1 && !isGlobal || // the "const. / var. option is togglable, not editable.
 		(index.column() >= preRangeColumns && parameters[index.row()].constant) || // variation values for constants
 		index.column() == 3 && !isGlobal && !parameters[index.row()].constant) { // const value for variables
-        return QAbstractTableModel::flags (index);
+        return QAbstractTableModel::flags(index) | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled;;
     }
-	return Qt::ItemIsEditable | QAbstractTableModel::flags (index);
+    return Qt::ItemIsEditable | QAbstractTableModel::flags(index) | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled;
 };
 
 bool ParameterModel::setData (const QModelIndex& index, const QVariant& value, int role){
@@ -203,6 +205,7 @@ bool ParameterModel::setData (const QModelIndex& index, const QVariant& value, i
             // hmm
         }
         emit paramsChanged ();
+        emit dataChanged(index, index);
         return true;
     }
     return false;
@@ -303,4 +306,152 @@ void ParameterModel::setVariationRangeNumber (int num, unsigned short dimNumber)
     }
     setParams (parameters);
     setRangeInfo (rangeInfo);
+}
+
+Qt::DropActions ParameterModel::supportedDropActions() const
+{
+    return Qt::DropActions() | Qt::MoveAction;
+}
+
+QMimeData* ParameterModel::mimeData(const QModelIndexList& indexes) const
+{
+    QMimeData* mimeData = new QMimeData();
+    QByteArray encodedData;
+
+    QDataStream stream(&encodedData, QIODevice::WriteOnly);
+    std::vector<int> idxList;
+    int lastRow = -1;
+    for (const QModelIndex& index : indexes) {
+        if (index.isValid()) {
+            int row = index.row();
+            if (lastRow != row) {
+                // only store the data if the row is different
+                lastRow = row;
+                idxList.push_back(row);
+            }
+        }
+    }
+    std::sort(idxList.begin(), idxList.end()); // sort the index in ascending order so that it does not dependen on the order of click
+    for (int id : idxList) {
+        stream << id;
+    }
+
+
+    mimeData->setData("parameters/parameterIdx", encodedData);
+    return mimeData;
+}
+
+QStringList ParameterModel::mimeTypes() const
+{
+    QStringList types;
+    types << "parameters/parameterIdx";
+    return types;
+}
+
+bool ParameterModel::insertRows(int row, int count, const QModelIndex& parent)
+{
+    qDebug() << "bool ParameterModel::insertRows(int row, int count, const QModelIndex& parent) get called" <<
+        "This should never happen";
+    /// should never need to invole this
+
+    //if ((row != -1) && (count > 0)) {
+    //    beginInsertRows(parent, row, row + count - 1);
+    //    for (int i = 0; i != count; i++)
+    //        dataList.emplace(dataList.begin() + row, columnCount());
+    //    endInsertRows();
+    //    emit dataChanged(index(row, 0), index(row + count - 1, columnCount()));
+    //    emit layoutChanged();
+    //    return true;
+    //}
+    //else {
+    //    return false;
+    //}
+    //return true;
+    return false;
+}
+
+bool ParameterModel::removeRows(int row, int count, const QModelIndex& parent)
+{
+    if ((row != -1) && (count > 0)) {
+        beginRemoveRows(parent, row, row + count - 1);
+        parameters.erase(parameters.begin() + row, parameters.begin() + row + count);
+        endRemoveRows();
+        return true;
+    }
+    else {
+        return false;
+    }
+}
+
+bool ParameterModel::moveRows(const QModelIndex& sourceParent, int sourceRow, int count, const QModelIndex& destinationParent, int destinationChild)
+{
+    qDebug() << "bool ParameterModel::moveRows(const QModelIndex& sourceParent, int sourceRow, int count, const QModelIndex& destinationParent, int destinationChild) get called" <<
+        "This should never happen";
+    /// should never need to invole this
+    //std::exit(-1);
+    //if ((sourceRow != -1) && (destinationChild != -1) && (count > 0)) {
+    //    if ((destinationChild >= sourceRow) && (destinationChild < sourceRow + count)) // destination is in the middle of origin range, so reject
+    //        return false;
+    //    beginMoveRows(sourceParent, sourceRow, sourceRow + count - 1, destinationParent, destinationChild);
+    //    dataList.insert(dataList.begin() + destinationChild, dataList.begin() + sourceRow, dataList.begin() + sourceRow + count);
+    //    dataList.erase(dataList.begin() + sourceRow, dataList.begin() + sourceRow + count);
+    //    endMoveRows();
+    //    emit dataChanged(index(sourceRow, 0), index(sourceRow + count - 1, columnCount()));
+    //    emit dataChanged(index(destinationChild, 0), index(destinationChild + count - 1, columnCount()));
+    //    emit layoutChanged();
+    //    return true;
+    //}
+    //else {
+    //    return false;
+    //}
+    return false;
+}
+
+bool ParameterModel::dropMimeData(const QMimeData* data, Qt::DropAction action, int row, int column, const QModelIndex& parent)
+{
+    if (!data->hasFormat("parameters/parameterIdx"))
+        return false;
+    if (action == Qt::IgnoreAction)
+        return true;
+    if (column > 0) // column will be -1 for row drag and move
+        return false;
+    int endRow;
+    if (parent.isValid()) // row was dropped directly on an item (parent)
+    {
+        // If we apply dropMimeData without any modifications,
+        // the data overwrites the given row.
+        // However, we would like to insert the data *after* the given row.
+        endRow = parent.row() + 1;
+    }
+    else {
+        if (row < 0)
+            endRow = parameters.size();
+        else
+            endRow = qMin(row, int(parameters.size()));
+    }
+
+
+    QByteArray encodedData = data->data("parameters/parameterIdx");
+    QDataStream stream(&encodedData, QIODevice::ReadOnly);
+
+    std::vector<std::pair<size_t, parameterType>> dataListInsert;
+    // the index in stream should already be sorted in mimeData() function
+    // need to store the moved params into dataListInsert first and then insert it into the parameters 
+    // so that the insertion would not cause the index being wrong for the later insertion
+    while (!stream.atEnd()) {
+        int idx;
+        stream >> idx;
+        dataListInsert.push_back(std::make_pair(idx, parameters[idx]));
+    }
+
+    for (auto& d : dataListInsert) {
+        beginInsertRows(QModelIndex(), endRow, endRow);
+        parameters.insert(parameters.begin() + endRow, d.second);
+        endInsertRows();
+        endRow++;
+    }
+
+
+
+    return true;
 }
