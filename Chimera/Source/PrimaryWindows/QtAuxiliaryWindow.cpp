@@ -179,8 +179,11 @@ void QtAuxiliaryWindow::windowOpenConfig (ConfigStream& configFile){
 	try{
 		ConfigSystem::standardOpenConfig (configFile, configParamCtrl.configDelim, &configParamCtrl);
 		ConfigSystem::standardOpenConfig (configFile, ttlBoard.getCore().getDelim(), &ttlBoard);
+		Sleep(10);
 		ConfigSystem::standardOpenConfig (configFile, aoSys.getCore().getDelim(), &aoSys);
+		Sleep(50);
 		ConfigSystem::standardOpenConfig (configFile, dds.getDelim (), &dds);
+		Sleep(50);
 		ConfigSystem::standardOpenConfig(configFile, olSys.getDelim(), &olSys);
 		ConfigSystem::standardOpenConfig(configFile, aiSys.getDelim(), &aiSys);
 		ConfigSystem::standardOpenConfig(configFile, calManager.systemDelim, &calManager);
