@@ -45,7 +45,7 @@ typedef enum {
 // Minimum recommended length of the Controller Card Model buffer parameter
 #define AT_CONTROLLER_CARD_MODEL_LEN 80
 // ===================================
-
+		
 // ===================================
 // DDG Lite Definitions
 // ===================================
@@ -105,6 +105,7 @@ typedef struct ANDORCAPS
 	ULONG ulPCICard;
 	ULONG ulEMGainCapability;
 	ULONG ulFTReadModes;
+	ULONG ulFeatures2;
 } AndorCapabilities;
 	
 typedef struct COLORDEMOSAICINFO
@@ -152,6 +153,7 @@ unsigned int WINAPI GetAvailableCameras(long * totalCameras);
 unsigned int WINAPI GetBackground(at_32 * arr, unsigned long size);
 unsigned int WINAPI GetBaselineClamp(int * state);
 unsigned int WINAPI GetBitDepth(int channel, int * depth);
+unsigned int WINAPI GetBitsPerPixel(int readout_index, int index, int * value);
 unsigned int WINAPI GetCameraEventStatus(DWORD * camStatus);
 unsigned int WINAPI GetCameraHandle(long cameraIndex, long * cameraHandle);
 unsigned int WINAPI GetCameraInformation(int index, long * information);
@@ -196,6 +198,7 @@ unsigned int WINAPI GetDICameraInfo(void * info);
 unsigned int WINAPI GetEMAdvanced(int * state);
 unsigned int WINAPI GetEMCCDGain(int * gain);
 unsigned int WINAPI GetEMGainRange(int * low, int * high);
+unsigned int WINAPI GetESDEventStatus(DWORD * camStatus);
 unsigned int WINAPI GetExternalTriggerTermination(at_u32 * puiTermination);
 unsigned int WINAPI GetFastestRecommendedVSSpeed(int * index, float * speed);
 unsigned int WINAPI GetFIFOUsage(int * FIFOusage);
@@ -237,7 +240,7 @@ unsigned int WINAPI GetNewData(at_32 * arr, unsigned long size);
 unsigned int WINAPI GetNewData16(WORD * arr, unsigned long size);
 unsigned int WINAPI GetNewData8(unsigned char * arr, unsigned long size);
 unsigned int WINAPI GetNewFloatData(float * arr, unsigned long size);
-unsigned int WINAPI GetNumberADChannels(int * axes);
+unsigned int WINAPI GetNumberADChannels(int * channels);
 unsigned int WINAPI GetNumberAmp(int * amp);
 unsigned int WINAPI GetNumberAvailableImages(at_32 * first, at_32 * last);
 unsigned int WINAPI GetNumberDDGExternalOutputs(at_u32 * puiCount);
@@ -247,6 +250,7 @@ unsigned int WINAPI GetNumberHorizontalSpeeds(int * number);
 unsigned int WINAPI GetNumberHSSpeeds(int channel, int typ, int * speeds);
 unsigned int WINAPI GetNumberMissedExternalTriggers(unsigned int first, unsigned int last, WORD * arr, unsigned int size);
 unsigned int WINAPI GetIRIGData(unsigned char * _uc_irigData, unsigned int _ui_index);
+unsigned int WINAPI GetMetaData(unsigned char * data, unsigned int _ui_index);
 unsigned int WINAPI GetNumberNewImages(long * first, long * last);
 unsigned int WINAPI GetNumberPhotonCountingDivisions(at_u32 * noOfDivisions);
 unsigned int WINAPI GetNumberPreAmpGains(int * noGains);
@@ -262,6 +266,7 @@ unsigned int WINAPI GetPhysicalDMAAddress(unsigned long * Address1, unsigned lon
 unsigned int WINAPI GetPixelSize(float * xSize, float * ySize);
 unsigned int WINAPI GetPreAmpGain(int index, float * gain);
 unsigned int WINAPI GetPreAmpGainText(int index, char * name, int length);
+unsigned int WINAPI GetCurrentPreAmpGain(int * index, char * name, int length);
 unsigned int WINAPI GetDualExposureTimes(float * exposure1, float * exposure2);
 unsigned int WINAPI GetQE(char * sensor, float wavelength, unsigned int mode, float * QE);
 unsigned int WINAPI GetReadOutTime(float * ReadOutTime);
@@ -312,10 +317,11 @@ unsigned int WINAPI IsInternalMechanicalShutter(int * InternalShutter);
 unsigned int WINAPI IsPreAmpGainAvailable(int channel, int amplifier, int index, int pa, int * status);
 unsigned int WINAPI IsReadoutFlippedByAmplifier(int iAmplifier, int * iFlipped);
 unsigned int WINAPI IsTriggerModeAvailable(int iTriggerMode);
-unsigned int WINAPI Merge(const at_32 * arr, long nOrder, long nPoint, long nPixel, float * coeff, long fit, long eHorizontalBinning, at_32 * output, float * start, float * step_Renamed);
+unsigned int WINAPI Merge(const at_32 * arr, long nOrder, long nPoint, long nPixel, float * coeff, long fit, long hbin, at_32 * output, float * start, float * step_Renamed);
 unsigned int WINAPI OutAuxPort(int port, int state);
 unsigned int WINAPI PrepareAcquisition(void);
 unsigned int WINAPI SaveAsBmp(const char * path, const char * palette, long ymin, long ymax);
+unsigned int WINAPI SaveAsCalibratedSif(char * path, int x_data_type, int x_unit, float * x_cal, float rayleighWavelength);
 unsigned int WINAPI SaveAsCommentedSif(char * path, char * comment);
 unsigned int WINAPI SaveAsEDF(char * szPath, int iMode);
 unsigned int WINAPI SaveAsFITS(char * szFileTitle, int typ);
@@ -333,12 +339,15 @@ unsigned int WINAPI SetAcqStatusEvent(HANDLE statusEvent);
 unsigned int WINAPI SetAcquisitionMode(int mode);
 unsigned int WINAPI SetSensorPortMode(int mode);
 unsigned int WINAPI SelectSensorPort(int port);
+unsigned int WINAPI SetSizeOfCircularBufferMegaBytes(unsigned long sizeMB);
+unsigned int WINAPI SelectDualSensorPort(int port);
 unsigned int WINAPI SetAcquisitionType(int typ);
 unsigned int WINAPI SetADChannel(int channel);
 unsigned int WINAPI SetAdvancedTriggerModeState(int iState);
 unsigned int WINAPI SetBackground(at_32 * arr, unsigned long size);
 unsigned int WINAPI SetBaselineClamp(int state);
 unsigned int WINAPI SetBaselineOffset(int offset);
+unsigned int WINAPI SetBitsPerPixel(int state);
 unsigned int WINAPI SetCameraLinkMode(int mode);
 unsigned int WINAPI SetCameraStatusEnable(DWORD Enable);
 unsigned int WINAPI SetChargeShifting(unsigned int NumberRows, unsigned int NumberRepeats);
@@ -387,6 +396,7 @@ unsigned int WINAPI SetDDGVariableGateStep(int mode, double p1, double p2);
 unsigned int WINAPI SetDelayGenerator(int board, short address, int typ);
 unsigned int WINAPI SetDMAParameters(int MaxImagesPerDMA, float SecondsPerDMA);
 unsigned int WINAPI SetDriverEvent(HANDLE driverEvent);
+unsigned int WINAPI SetESDEvent(HANDLE esdEvent);
 unsigned int WINAPI SetEMAdvanced(int state);
 unsigned int WINAPI SetEMCCDGain(int gain);
 unsigned int WINAPI SetEMClockCompensation(int EMClockCompensationFlag);
@@ -395,8 +405,8 @@ unsigned int WINAPI SetExposureTime(float time);
 unsigned int WINAPI SetExternalTriggerTermination(at_u32 uiTermination);
 unsigned int WINAPI SetFanMode(int mode);
 unsigned int WINAPI SetFastExtTrigger(int mode);
-unsigned int WINAPI SetFastKinetics(int exposedRows, int seriesLength, float time, int mode, int eHorizontalBinning, int eVerticalBinning);
-unsigned int WINAPI SetFastKineticsEx(int exposedRows, int seriesLength, float time, int mode, int eHorizontalBinning, int eVerticalBinning, int offset);
+unsigned int WINAPI SetFastKinetics(int exposedRows, int seriesLength, float time, int mode, int hbin, int vbin);
+unsigned int WINAPI SetFastKineticsEx(int exposedRows, int seriesLength, float time, int mode, int hbin, int vbin, int offset);
 unsigned int WINAPI SetFastKineticsStorageMode(int mode);
 unsigned int WINAPI SetFastKineticsTimeScanMode(int rows, int tracks, int mode);
 unsigned int WINAPI SetFilterMode(int mode);
@@ -405,7 +415,7 @@ unsigned int WINAPI SetFKVShiftSpeed(int index);
 unsigned int WINAPI SetFPDP(int state);
 unsigned int WINAPI SetFrameTransferMode(int mode);
 unsigned int WINAPI SetFrontEndEvent(HANDLE driverEvent);
-unsigned int WINAPI SetFullImage(int eHorizontalBinning, int eVerticalBinning);
+unsigned int WINAPI SetFullImage(int hbin, int vbin);
 unsigned int WINAPI SetFVBHBin(int bin);
 unsigned int WINAPI SetGain(int gain);
 unsigned int WINAPI SetGate(float delay, float width, float stepRenamed);
@@ -413,11 +423,12 @@ unsigned int WINAPI SetGateMode(int gatemode);
 unsigned int WINAPI SetHighCapacity(int state);
 unsigned int WINAPI SetHorizontalSpeed(int index);
 unsigned int WINAPI SetHSSpeed(int typ, int index);
-unsigned int WINAPI SetImage(int eHorizontalBinning, int eVerticalBinning, int eLeftImageBorder, int eRightImageBorder, int eTopImageBorder, int eBottomImageBorder);
+unsigned int WINAPI SetImage(int hbin, int vbin, int hstart, int hend, int vstart, int vend);
 unsigned int WINAPI SetImageFlip(int iHFlip, int iVFlip);
 unsigned int WINAPI SetImageRotate(int iRotate);
-unsigned int WINAPI SetIsolatedCropMode(int active, int cropheight, int cropwidth, int eVerticalBinning, int eHorizontalBinning);
-unsigned int WINAPI SetIsolatedCropModeEx(int active, int cropheight, int cropwidth, int eVerticalBinning, int eHorizontalBinning, int cropleft, int cropbottom);
+unsigned int WINAPI SetIsolatedCropMode(int active, int cropheight, int cropwidth, int vbin, int hbin);
+unsigned int WINAPI SetIsolatedCropModeEx(int active, int cropheight, int cropwidth, int vbin, int hbin, int cropleft, int cropbottom);
+unsigned int WINAPI SetIsolatedCropModeType(int type);
 unsigned int WINAPI SetKineticCycleTime(float time);
 unsigned int WINAPI SetMCPGain(int gain);
 unsigned int WINAPI SetMCPGating(int gating);
@@ -434,6 +445,7 @@ unsigned int WINAPI SetNumberKinetics(int number);
 unsigned int WINAPI SetNumberPrescans(int iNumber);
 unsigned int WINAPI SetOutputAmplifier(int typ);
 unsigned int WINAPI SetOverlapMode(int mode);
+unsigned int WINAPI SetOverTempEvent(HANDLE tempEvent);
 unsigned int WINAPI SetPCIMode(int mode, int value);
 unsigned int WINAPI SetPhotonCounting(int state);
 unsigned int WINAPI SetPhotonCountingThreshold(long min, long max);
@@ -485,6 +497,7 @@ unsigned int WINAPI WaitForAcquisitionTimeOut(int iTimeOutMs);
 unsigned int WINAPI WhiteBalance(WORD * wRed, WORD * wGreen, WORD * wBlue, float * fRelR, float * fRelB, WhiteBalanceInfo * info);
 
 unsigned int WINAPI OA_Initialize(const char * const pcFilename, unsigned int uiFileNameLen);
+unsigned int WINAPI OA_IsPreSetModeAvailable(const char * const pcModeName);
 unsigned int WINAPI OA_EnableMode(const char * const pcModeName);
 unsigned int WINAPI OA_GetModeAcqParams(const char * const pcModeName, char * const pcListOfParams);
 unsigned int WINAPI OA_GetUserModeNames(char * pcListOfModes);
@@ -613,6 +626,7 @@ unsigned int WINAPI PostProcessDataAveraging(at_32 * pInputImage, at_32 * pOutpu
 #define DRV_BINNING_ERROR 20099
 #define DRV_INVALID_AMPLIFIER 20100
 #define DRV_INVALID_COUNTCONVERT_MODE 20101
+#define DRV_USB_INTERRUPT_ENDPOINT_TIMEOUT 20102
 
 #define DRV_ERROR_NOCAMERA 20990
 #define DRV_NOT_SUPPORTED 20991
@@ -659,6 +673,7 @@ unsigned int WINAPI PostProcessDataAveraging(at_32 * pInputImage, at_32 * pOutpu
 #define DRV_OA_MODE_DOES_NOT_EXIST 20193
 #define DRV_OA_CAMERA_NOT_SUPPORTED 20194
 #define DRV_OA_FAILED_TO_GET_MODE 20195
+#define DRV_OA_CAMERA_NOT_AVAILABLE 20196
 
 #define DRV_PROCESSING_FAILED 20211
 
@@ -669,6 +684,7 @@ unsigned int WINAPI PostProcessDataAveraging(at_32 * pInputImage, at_32 * pOutpu
 #define AC_ACQMODE_FRAMETRANSFER 16
 #define AC_ACQMODE_FASTKINETICS 32
 #define AC_ACQMODE_OVERLAP 64
+#define AC_ACQMODE_TDI 0x80
 
 #define AC_READMODE_FULLIMAGE 1
 #define AC_READMODE_SUBIMAGE 2
@@ -686,6 +702,8 @@ unsigned int WINAPI PostProcessDataAveraging(at_32 * pInputImage, at_32 * pOutpu
 #define AC_TRIGGERMODE_EXTERNALEXPOSURE 32
 #define AC_TRIGGERMODE_INVERTED 0x40
 #define AC_TRIGGERMODE_EXTERNAL_CHARGESHIFTING 0x80
+#define AC_TRIGGERMODE_EXTERNAL_RISING 0x0100
+#define AC_TRIGGERMODE_EXTERNAL_PURGE 0x0200
 
 // Deprecated for AC_TRIGGERMODE_EXTERNALEXPOSURE
 #define AC_TRIGGERMODE_BULB 32
@@ -719,7 +737,9 @@ unsigned int WINAPI PostProcessDataAveraging(at_32 * pInputImage, at_32 * pOutpu
 #define AC_CAMERATYPE_ALTA 26
 #define AC_CAMERATYPE_ALTAF 27
 #define AC_CAMERATYPE_IKONXL 28
-#define AC_CAMERATYPE_RES1 29
+#define AC_CAMERATYPE_CMOS_GEN2 29
+#define AC_CAMERATYPE_ISTAR_SCMOS 30
+#define AC_CAMERATYPE_IKONLR 31
 
 #define AC_PIXELMODE_8BIT 1
 #define AC_PIXELMODE_14BIT 2
@@ -762,6 +782,7 @@ unsigned int WINAPI PostProcessDataAveraging(at_32 * pInputImage, at_32 * pOutpu
 #define AC_SETFUNCTION_EXTENDED_CROP_MODE 0x10000000
 #define AC_SETFUNCTION_SUPERKINETICS 0x20000000
 #define AC_SETFUNCTION_TIMESCAN 0x40000000
+#define AC_SETFUNCTION_CROPMODETYPE 0x80000000
 
 // Deprecated for AC_SETFUNCTION_MCPGAIN
 #define AC_SETFUNCTION_GAIN 8
@@ -827,6 +848,10 @@ unsigned int WINAPI PostProcessDataAveraging(at_32 * pInputImage, at_32 * pOutpu
 #define AC_EMGAIN_12BIT 2
 #define AC_EMGAIN_LINEAR12 4
 #define AC_EMGAIN_REAL12 8
+
+#define AC_FEATURES2_ESD_EVENTS 1
+#define AC_FEATURES2_DUAL_PORT_CONFIGURATION 2
+#define AC_FEATURES2_OVERTEMP_EVENTS 4
 
 
 #ifdef __cplusplus
