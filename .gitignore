@@ -17,9 +17,9 @@ bld/
 !Chimera/3rd_Party/**/*.lib
 !Chimera/3rd_Party/**/*.dll
 !Chimera/3rd_Party/myBoost/**
-Chimera/3rd_Party/Andor/Lib/*
+!Chimera/3rd_Party/Andor/Lib/*
 !Chimera/3rd_Party/Andor/Lib/.gitkeep
-Chimera/3rd_Party/DM/Lib/*
+!Chimera/3rd_Party/DM/Lib/*
 !Chimera/3rd_Party/DM/Lib/.gitkeep
 Chimera/*.dll
 
