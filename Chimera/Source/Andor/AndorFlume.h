@@ -10,6 +10,7 @@ class AndorFlume{
 		AndorFlume (const AndorFlume&) = delete;
 
 		AndorFlume ( bool safemode_option );
+		~AndorFlume();
 		void initialize ( );
 		void setVSSpeed (int index);
 		unsigned getNumberVSSpeeds ();
@@ -60,6 +61,36 @@ class AndorFlume{
 		void getSerialNumber ( int& num );
 		std::string getHeadModel ( );
 		void andorErrorChecker ( int errorCode, bool SDK3 = false );
+
+		void isImplemented(AT_WC* Feature, AT_BOOL* Implemented);
+		void isReadOnly(AT_WC* Feature, AT_BOOL* ReadOnly);
+		void isReadable(AT_WC* Feature, AT_BOOL* Readable);
+		void isWritable(AT_WC* Feature, AT_BOOL* Writable);
+		void setInt(AT_WC* Feature, AT_64 Value);
+		void getInt(AT_WC* Feature, AT_64* Value);
+		void getIntMax(AT_WC* Feature, AT_64* MaxValue);
+		void getIntMin(AT_WC* Feature, AT_64* MinValue);
+		void setFloat(AT_WC* Feature, double Value);
+		void getFloat(AT_WC* Feature, double* Value);
+		void getFloatMax(AT_WC* Feature, double* MaxValue);
+		void getFloatMin(AT_WC* Feature, double* MinValue);
+		void setBool(AT_WC* Feature, AT_BOOL Value);
+		void getBool(AT_WC* Feature, AT_BOOL* Value);
+		void setEnumIndex(AT_WC* Feature, int Value);
+		void setEnumString(AT_WC* Feature, AT_WC* String);
+		void getEnumIndex(AT_WC* Feature, int* Value);
+		void getEnumCount(AT_WC* Feature, int* Count);
+		void isEnumIndexAvailable(AT_WC* Feature, int Index, AT_BOOL* Available);
+		void isEnumIndexImplemented(AT_WC* Feature, int Index, AT_BOOL* Implemented);
+		void getEnumStringByIndex(AT_WC* Feature, int Index, AT_WC* String, int StringLength);
+		void command(AT_WC* Feature);
+		void setString(AT_WC* Feature, AT_WC* Value);
+		void getString(AT_WC* Feature, AT_WC* Value, int StringLength);
+		void getStringMaxLength(AT_WC* Feature, int* MaxStringLength);
+		void queueBuffer(AT_U8* Ptr, int PtrSize);
+		void waitBuffer(AT_U8** Ptr, int* PtrSize, unsigned int Timeout);
+		void flush();
 	private:
 		const bool safemode;
+		AT_H camHndl;
 };

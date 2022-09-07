@@ -19,6 +19,12 @@ void AndorFlume::initialize ( ){
 	if ( !safemode ){
 		andorErrorChecker ( Initialize ( aBuffer ) );
 		andorErrorChecker(AT_InitialiseLibrary(), true);
+		AT_64 iNumberDevices = 0;
+		AT_GetInt(AT_HANDLE_SYSTEM, L"Device Count", &iNumberDevices);
+		if (iNumberDevices <= 0) {
+			thrower("No cameras detected");
+		}
+		andorErrorChecker(AT_Open(0, &camHndl));
 	}
 
 	
@@ -477,6 +483,174 @@ void AndorFlume::andorErrorChecker ( int errorCode, bool SDK3){
 	/// So no throw is considered success.
 	if ( (errorMessage != "DRV_SUCCESS") && (errorMessage != "AT_SUCCESS") ){
 		thrower ( errorMessage );
+	}
+}
+
+void AndorFlume::isImplemented(AT_WC* Feature, AT_BOOL* Implemented) {
+	if (!safemode) {
+		andorErrorChecker(AT_IsImplemented(camHndl, Feature, Implemented), true);
+	}
+}
+
+void AndorFlume::isReadOnly(AT_WC* Feature, AT_BOOL* ReadOnly) {
+	if (!safemode) {
+		andorErrorChecker(AT_IsReadOnly(camHndl, Feature, ReadOnly), true);
+	}
+}
+
+void AndorFlume::isReadable(AT_WC* Feature, AT_BOOL* Readable) {
+	if (!safemode) {
+		andorErrorChecker(AT_IsReadable(camHndl, Feature, Readable), true);
+	}
+}
+
+void AndorFlume::isWritable(AT_WC* Feature, AT_BOOL* Writable) {
+	if (!safemode) {
+		andorErrorChecker(AT_IsWritable(camHndl, Feature, Writable), true);
+	}
+}
+
+void AndorFlume::setInt(AT_WC* Feature, AT_64 Value) {
+	if (!safemode) {
+		andorErrorChecker(AT_SetInt(camHndl, Feature, Value), true);
+	}
+}
+
+void AndorFlume::getInt(AT_WC* Feature, AT_64* Value) {
+	if (!safemode) {
+		andorErrorChecker(AT_GetInt(camHndl, Feature, Value), true);
+	}
+}
+
+void AndorFlume::getIntMax(AT_WC* Feature, AT_64* MaxValue) {
+	if (!safemode) {
+		andorErrorChecker(AT_GetIntMax(camHndl, Feature, MaxValue), true);
+	}
+}
+
+void AndorFlume::getIntMin(AT_WC* Feature, AT_64* MinValue) {
+	if (!safemode) {
+		andorErrorChecker(AT_GetIntMin(camHndl, Feature, MinValue), true);
+	}
+}
+
+void AndorFlume::setFloat(AT_WC* Feature, double Value) {
+	if (!safemode) {
+		andorErrorChecker(AT_SetFloat(camHndl, Feature, Value), true);
+	}
+}
+
+void AndorFlume::getFloat(AT_WC* Feature, double* Value) {
+	if (!safemode) {
+		andorErrorChecker(AT_GetFloat(camHndl, Feature, Value), true);
+	}
+}
+
+void AndorFlume::getFloatMax(AT_WC* Feature, double* MaxValue) {
+	if (!safemode) {
+		andorErrorChecker(AT_GetFloatMax(camHndl, Feature, MaxValue), true);
+	}
+}
+
+void AndorFlume::getFloatMin(AT_WC* Feature, double* MinValue) {
+	if (!safemode) {
+		andorErrorChecker(AT_GetFloatMin(camHndl, Feature, MinValue), true);
+	}
+}
+
+void AndorFlume::setBool(AT_WC* Feature, AT_BOOL Value) {
+	if (!safemode) {
+		andorErrorChecker(AT_SetBool(camHndl, Feature, Value), true);
+	}
+}
+
+void AndorFlume::getBool(AT_WC* Feature, AT_BOOL* Value) {
+	if (!safemode) {
+		andorErrorChecker(AT_GetBool(camHndl, Feature, Value), true);
+	}
+}
+
+void AndorFlume::setEnumIndex(AT_WC* Feature, int Value) {
+	if (!safemode) {
+		andorErrorChecker(AT_SetEnumIndex(camHndl, Feature, Value), true);
+	}
+}
+
+void AndorFlume::setEnumString(AT_WC* Feature, AT_WC* String) {
+	if (!safemode) {
+		andorErrorChecker(AT_SetEnumString(camHndl, Feature, String), true);
+	}
+}
+
+void AndorFlume::getEnumIndex(AT_WC* Feature, int* Value) {
+	if (!safemode) {
+		andorErrorChecker(AT_GetEnumIndex(camHndl, Feature, Value), true);
+	}
+}
+
+void AndorFlume::getEnumCount(AT_WC* Feature, int* Count) {
+	if (!safemode) {
+		andorErrorChecker(AT_GetEnumCount(camHndl, Feature, Count), true);
+	}
+}
+
+void AndorFlume::isEnumIndexAvailable(AT_WC* Feature, int Index, AT_BOOL* Available) {
+	if (!safemode) {
+		andorErrorChecker(AT_IsEnumIndexAvailable(camHndl, Feature, Index, Available), true);
+	}
+}
+
+void AndorFlume::isEnumIndexImplemented(AT_WC* Feature, int Index, AT_BOOL* Implemented) {
+	if (!safemode) {
+		andorErrorChecker(AT_IsEnumIndexImplemented(camHndl, Feature, Index, Implemented), true);
+	}
+}
+
+void AndorFlume::getEnumStringByIndex(AT_WC* Feature, int Index, AT_WC* String, int StringLength) {
+	if (!safemode) {
+		andorErrorChecker(AT_GetEnumStringByIndex(camHndl, Feature, Index, String, StringLength), true);
+	}
+}
+
+void AndorFlume::command(AT_WC* Feature) {
+	if (!safemode) {
+		andorErrorChecker(AT_Command(camHndl, Feature), true);
+	}
+}
+
+void AndorFlume::setString(AT_WC* Feature, AT_WC* Value) {
+	if (!safemode) {
+		andorErrorChecker(AT_SetString(camHndl, Feature, Value), true);
+	}
+}
+
+void AndorFlume::getString(AT_WC* Feature, AT_WC* Value, int StringLength) {
+	if (!safemode) {
+		andorErrorChecker(AT_GetString(camHndl, Feature, Value, StringLength), true);
+	}
+}
+
+void AndorFlume::getStringMaxLength(AT_WC* Feature, int* MaxStringLength) {
+	if (!safemode) {
+		andorErrorChecker(AT_GetStringMaxLength(camHndl, Feature, MaxStringLength), true);
+	}
+}
+
+void AndorFlume::queueBuffer(AT_U8* Ptr, int PtrSize) {
+	if (!safemode) {
+		andorErrorChecker(AT_QueueBuffer(camHndl, Ptr, PtrSize), true);
+	}
+}
+
+void AndorFlume::waitBuffer(AT_U8** Ptr, int* PtrSize, unsigned int Timeout) {
+	if (!safemode) {
+		andorErrorChecker(AT_WaitBuffer(camHndl, Ptr, PtrSize, Timeout), true);
+	}
+}
+
+void AndorFlume::flush() {
+	if (!safemode) {
+		andorErrorChecker(AT_Flush(camHndl), true);
 	}
 }
 
