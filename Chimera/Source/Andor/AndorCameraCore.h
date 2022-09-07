@@ -10,6 +10,7 @@
 #include <RealTimeDataAnalysis/analysisSettings.h>
 #include <Andor/cameraThreadInput.h>
 #include "ATMCD32D.h"
+#include "atcore.h" 
 #include <string>
 #include <process.h>
 #include <mutex>

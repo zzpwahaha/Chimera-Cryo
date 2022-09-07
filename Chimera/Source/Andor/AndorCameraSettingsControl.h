@@ -87,8 +87,8 @@ class AndorCameraSettingsControl : public QWidget
 		CQComboBox* cameraModeCombo;
 
 		CQComboBox* frameTransferModeCombo = nullptr;
-		CQComboBox* verticalShiftSpeedCombo;
-		CQComboBox* horizontalShiftSpeedCombo;
+		//CQComboBox* verticalShiftSpeedCombo;
+		//CQComboBox* horizontalShiftSpeedCombo;
 
 		QLabel* emGainLabel;
 		CQLineEdit* emGainEdit = nullptr;

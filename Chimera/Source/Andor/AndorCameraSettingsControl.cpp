@@ -94,22 +94,23 @@ void AndorCameraSettingsControl::initialize ( IChimeraQtWindow* parent, std::vec
 	frameTransferModeCombo->setCurrentIndex(0);
 	configSettings.andor.frameTransferMode = 0;
 
-	verticalShiftSpeedCombo = new CQComboBox (parent);
-	for (auto speed : vertSpeeds){ 
-		verticalShiftSpeedCombo->addItem ("VS: " + qstr(speed));
-	}
-	verticalShiftSpeedCombo->setCurrentIndex (1);
-	configSettings.andor.vertShiftSpeedSetting = 0;
+	//verticalShiftSpeedCombo = new CQComboBox (parent);
+	//for (auto speed : vertSpeeds){ 
+	//	verticalShiftSpeedCombo->addItem ("VS: " + qstr(speed));
+	//}
+	//verticalShiftSpeedCombo->setCurrentIndex (1);
+	//configSettings.andor.vertShiftSpeedSetting = 0;
 
-	horizontalShiftSpeedCombo = new CQComboBox (parent);
-	for (auto speed : horSpeeds){
-		horizontalShiftSpeedCombo->addItem ("HS: " + qstr (speed));
-	}
-	horizontalShiftSpeedCombo->setCurrentIndex (0);
-	configSettings.andor.horShiftSpeedSetting = 0;
+	//horizontalShiftSpeedCombo = new CQComboBox (parent);
+	//for (auto speed : horSpeeds){
+	//	horizontalShiftSpeedCombo->addItem ("HS: " + qstr (speed));
+	//}
+	//horizontalShiftSpeedCombo->setCurrentIndex (0);
+	//configSettings.andor.horShiftSpeedSetting = 0;
+
 	layout3->addWidget(frameTransferModeCombo, 0);
-	layout3->addWidget(verticalShiftSpeedCombo, 0);
-	layout3->addWidget(horizontalShiftSpeedCombo, 0);
+	//layout3->addWidget(verticalShiftSpeedCombo, 0);
+	//layout3->addWidget(horizontalShiftSpeedCombo, 0);
 
 	QHBoxLayout* layout4 = new QHBoxLayout(this);
 	layout4->setContentsMargins(0, 0, 0, 0);
@@ -222,8 +223,8 @@ void AndorCameraSettingsControl::updateDisplays () {
 	temperatureEdit->setText (cstr (optionsIn.temperatureSetting));
 	imageDimensionsObj.setImageParametersFromInput (optionsIn.imageSettings);
 
-	verticalShiftSpeedCombo->setCurrentIndex(optionsIn.vertShiftSpeedSetting);
-	horizontalShiftSpeedCombo->setCurrentIndex(optionsIn.horShiftSpeedSetting);
+	//verticalShiftSpeedCombo->setCurrentIndex(optionsIn.vertShiftSpeedSetting);
+	//horizontalShiftSpeedCombo->setCurrentIndex(optionsIn.horShiftSpeedSetting);
 	frameTransferModeCombo->setCurrentIndex(optionsIn.frameTransferMode);
 
 
@@ -263,11 +264,13 @@ void AndorCameraSettingsControl::updateTriggerMode( ){
 }
 
 unsigned AndorCameraSettingsControl::getHsSpeed () {
-	return horizontalShiftSpeedCombo->currentIndex ();
+	//return horizontalShiftSpeedCombo->currentIndex ();
+	return -1;
 }
 
 unsigned AndorCameraSettingsControl::getVsSpeed () {
-	return verticalShiftSpeedCombo->currentIndex ();
+	//return verticalShiftSpeedCombo->currentIndex ();
+	return -1;
 }
 
 unsigned AndorCameraSettingsControl::getFrameTransferMode() {

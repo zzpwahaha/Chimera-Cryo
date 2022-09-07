@@ -3,6 +3,13 @@
 
 AndorFlume::AndorFlume ( bool safemode_option ) : safemode( safemode_option ){}
 
+AndorFlume::~AndorFlume()
+{
+	if (!safemode) {
+		andorErrorChecker(AT_FinaliseLibrary(), true);
+	}
+}
+
 
 void AndorFlume::initialize ( ){
 	char aBuffer[ 256 ];
@@ -11,7 +18,10 @@ void AndorFlume::initialize ( ){
 	GetCurrentDirectory ( 256, aBuffer );
 	if ( !safemode ){
 		andorErrorChecker ( Initialize ( aBuffer ) );
+		andorErrorChecker(AT_InitialiseLibrary(), true);
 	}
+
+	
 }
 
 
@@ -318,9 +328,10 @@ std::string AndorFlume::getHeadModel ( ){
 	return str ( nameChars );
 }
 
-std::string AndorFlume::getErrorMsg (int errCode) {
+std::string AndorFlume::getErrorMsg (int errCode, bool SDK3) {
 	std::string errorMessage = "uninitialized";
-	switch (errCode){
+	if (!SDK3) {
+		switch (errCode) {
 		case 20001: errorMessage = "DRV_ERROR_CODES";					break;
 		case 20002:	errorMessage = "DRV_SUCCESS";						break;
 		case 20003:	errorMessage = "DRV_VXDNOTINSTALLED";				break;
@@ -406,14 +417,66 @@ std::string AndorFlume::getErrorMsg (int errCode) {
 			errorMessage = "UNKNOWN ERROR MESSAGE RETURNED FROM CAMERA FUNCTION!";
 			break;
 		}
+		}
 	}
+	else {
+		switch (errCode) {
+		case   0: errorMessage = "AT_SUCCESS";                        break;
+		case   1: errorMessage = "AT_ERR_NOTINITIALISED";             break;
+		case   2: errorMessage = "AT_ERR_NOTIMPLEMENTED";             break;
+		case   3: errorMessage = "AT_ERR_READONLY";                   break;
+		case   4: errorMessage = "AT_ERR_NOTREADABLE";                break;
+		case   5: errorMessage = "AT_ERR_NOTWRITABLE";                break;
+		case   6: errorMessage = "AT_ERR_OUTOFRANGE";                 break;
+		case   7: errorMessage = "AT_ERR_INDEXNOTAVAILABLE";          break;
+		case   8: errorMessage = "AT_ERR_INDEXNOTIMPLEMENTED";        break;
+		case   9: errorMessage = "AT_ERR_EXCEEDEDMAXSTRINGLENGTH";    break;
+		case  10: errorMessage = "AT_ERR_CONNECTION";                 break;
+		case  11: errorMessage = "AT_ERR_NODATA";                     break;
+		case  12: errorMessage = "AT_ERR_INVALIDHANDLE";              break;
+		case  13: errorMessage = "AT_ERR_TIMEDOUT";                   break;
+		case  14: errorMessage = "AT_ERR_BUFFERFULL";                 break;
+		case  15: errorMessage = "AT_ERR_INVALIDSIZE";                break;
+		case  16: errorMessage = "AT_ERR_INVALIDALIGNMENT";           break;
+		case  17: errorMessage = "AT_ERR_COMM";                       break;
+		case  18: errorMessage = "AT_ERR_STRINGNOTAVAILABLE";         break;
+		case  19: errorMessage = "AT_ERR_STRINGNOTIMPLEMENTED";       break;
+		case  20: errorMessage = "AT_ERR_NULL_FEATURE";               break;
+		case  21: errorMessage = "AT_ERR_NULL_HANDLE";                break;
+		case  22: errorMessage = "AT_ERR_NULL_IMPLEMENTED_VAR";       break;
+		case  23: errorMessage = "AT_ERR_NULL_READABLE_VAR";          break;
+		case  24: errorMessage = "AT_ERR_NULL_READONLY_VAR";          break;
+		case  25: errorMessage = "AT_ERR_NULL_WRITABLE_VAR";          break;
+		case  26: errorMessage = "AT_ERR_NULL_MINVALUE";              break;
+		case  27: errorMessage = "AT_ERR_NULL_MAXVALUE";              break;
+		case  28: errorMessage = "AT_ERR_NULL_VALUE";                 break;
+		case  29: errorMessage = "AT_ERR_NULL_STRING";                break;
+		case  30: errorMessage = "AT_ERR_NULL_COUNT_VAR";             break;
+		case  31: errorMessage = "AT_ERR_NULL_ISAVAILABLE_VAR";       break;
+		case  32: errorMessage = "AT_ERR_NULL_MAXSTRINGLENGTH";       break;
+		case  33: errorMessage = "AT_ERR_NULL_EVCALLBACK";            break;
+		case  34: errorMessage = "AT_ERR_NULL_QUEUE_PTR";             break;
+		case  35: errorMessage = "AT_ERR_NULL_WAIT_PTR";              break;
+		case  36: errorMessage = "AT_ERR_NULL_PTRSIZE";               break;
+		case  37: errorMessage = "AT_ERR_NOMEMORY";                   break;
+		case  38: errorMessage = "AT_ERR_DEVICEINUSE";                break;
+		case  39: errorMessage = "AT_ERR_DEVICENOTFOUND";             break;
+		case 100: errorMessage = "AT_ERR_HARDWARE_OVERFLOW";          break;
+		default: {
+			errorMessage = "UNKNOWN ERROR MESSAGE RETURNED FROM CAMERA FUNCTION!";
+			break;
+		}
+		}
+	}
+
 	return errorMessage;
 }
 
-void AndorFlume::andorErrorChecker ( int errorCode ){
-	auto errorMessage = getErrorMsg (errorCode);
+void AndorFlume::andorErrorChecker ( int errorCode, bool SDK3){
+	auto errorMessage = getErrorMsg (errorCode, SDK3);
 	/// So no throw is considered success.
-	if ( errorMessage != "DRV_SUCCESS" ){
+	if ( (errorMessage != "DRV_SUCCESS") && (errorMessage != "AT_SUCCESS") ){
 		thrower ( errorMessage );
 	}
 }
+

@@ -1,5 +1,6 @@
 #pragma once
 #include "ATMCD32D.h"
+#include "atcore.h"
 #include <GeneralObjects/Matrix.h>
 
 class AndorFlume{
@@ -24,7 +25,7 @@ class AndorFlume{
 		void setDMAParameters ( int maxImagesPerDMA, float secondsPerDMA );
 		void waitForAcquisition ( );
 		int getTemperature ( int& temp );
-		std::string getErrorMsg (int errCode);
+		std::string getErrorMsg (int errCode, bool SDK3 = false);
 		void getAdjustedRingExposureTimes ( int size, float* timesArray );
 		void setNumberKinetics ( int number );
 		void getTemperatureRange ( int& min, int& max );
@@ -58,7 +59,7 @@ class AndorFlume{
 		void getCapabilities ( AndorCapabilities& caps );
 		void getSerialNumber ( int& num );
 		std::string getHeadModel ( );
-		void andorErrorChecker ( int errorCode );
+		void andorErrorChecker ( int errorCode, bool SDK3 = false );
 	private:
 		const bool safemode;
 };
