@@ -634,6 +634,11 @@ void ParameterSystem::generateKey( std::vector<parameterType>& parameters, bool 
 			auto pos = std::find(MultiKeyValueCopy.begin(), MultiKeyValueCopy.end(), vRandom);
 			size_t dis = std::distance(MultiKeyValueCopy.begin(), pos);
 			return dis; });
+	if (shuffleIndex.size() == 0) {
+		// means there is nothing changing in the experiment, all params are constant
+		shuffleIndex = std::vector<size_t>({ 1 });
+		shuffleIndexReverse = std::vector<size_t>({ 1 });
+	}
 
 	// initialize this to one so that constants always get at least one value.
 	int totalSize = 1;
