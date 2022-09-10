@@ -16,9 +16,22 @@ def printAndorFunctionHeader():
         function_params = re.search('\((.+?)\)', text).group(1).split(',')[1:]
         function_name = re.search(' (.+?)\(', text).group(1)
         function_name = lower_first(function_name.split('_')[-1])
-        print('void {:s}'.format(function_name)+'('+', '.join(['{:s}'.format(p) for p in function_params])+');')
+        print('void {:<25s}'.format(function_name)+'('+', '.join(['const{:s}'.format(p) if "Feature" in p else '{:s}'.format(p)  for p in function_params])+');')
 
     # text = 'int AT_IsImplemented(AT_H Hndl, AT_WC* Feature, AT_BOOL* Implemented);'
+
+def printAndorFunctionHeaderConst():
+    lower_first = lambda s: s[:1].lower() + s[1:] if s else ''
+
+    with open('./andorFunctionConst.txt') as f:
+        contents = f.readlines()
+    for text in contents:
+        function_params = re.search('\((.+?)\)', text).group(1).split(',')[1:]
+        function_name = re.search(' (.+?)\(', text).group(1)
+        function_name = lower_first(function_name.split('_')[-1]).split(' ')[-1]
+        print('void {:<25s}'.format(function_name)+'('+', '.join(['{:s}'.format(p)  for p in function_params])+');')
+
+
 
 def printAndorFunction():
     lower_first = lambda s: s[:1].lower() + s[1:] if s else ''
@@ -33,7 +46,7 @@ def printAndorFunction():
         function_params_notype_withhandle = [cameraHandel] + function_params_raw_notype[1:]
         function_name_bare = re.search(' (.+?)\(', text).group(1)
         function_name = lower_first(function_name_bare.split('_')[-1])
-        print('void AndorFlume::{:s}'.format(function_name)+'('+', '.join(['{:s}'.format(p) for p in function_params])+') {')
+        print('void AndorFlume::{:s}'.format(function_name)+'('+', '.join(['const{:s}'.format(p) if "Feature" in p else '{:s}'.format(p) for p in function_params])+') {')
         print('\tif (!safemode) {')
         print("\t\tandorErrorChecker( {:s}".format(function_name_bare) + '(' +', '.join(['{:s}'.format(p) for p in function_params_notype_withhandle])+'), true );' )
         print('\t}')
@@ -41,11 +54,39 @@ def printAndorFunction():
         print()
     # text = 'int AT_IsImplemented(AT_H Hndl, AT_WC* Feature, AT_BOOL* Implemented);'
 
+def printAndorFunctionConst():
+    lower_first = lambda s: s[:1].lower() + s[1:] if s else ''
+    cameraHandel = 'camHndl'
 
+    with open('./andorFunctionConst.txt') as f:
+        contents = f.readlines()
+    for text in contents:
+        function_params_raw = re.search('\((.+?)\)', text).group(1).split(',')
+        function_params = function_params_raw[1:]
+        function_params_raw_notype = [fp.split(' ')[-1] for fp in function_params_raw]
+        function_params_notype_withhandle = [cameraHandel] + function_params_raw_notype[1:]
+        function_name_bare = re.search(' (.+?)\(', text).group(1)
+        function_name = lower_first(function_name_bare.split('_')[-1])
+        print('void AndorFlume::{:s}'.format(function_name)+'('+', '.join(['{:s}'.format(p) for p in function_params])+') {')
+        print('\tif (!safemode) {')
+        print("\t\tandorErrorChecker( {:s}".format(function_name_bare.split(' ')[-1]) + '(' +', '.join(['{:s}'.format(p) for p in function_params_notype_withhandle])+'), true );' )
+        print('\t}')
+        print('}')
+        print()
+    # text = 'int AT_IsImplemented(AT_H Hndl, AT_WC* Feature, AT_BOOL* Implemented);'
 
 if __name__ == '__main__':
     # printAndorErrorCode();
     # printAndorFunctionHeader();
-    printAndorFunction();
+    # printAndorFunction();
+    # printAndorFunctionConst();
+    printAndorFunctionHeaderConst()
+
+
+
+    # text = "int AT_EXP_CONV AT_GetIntMax(AT_H Hndl, const AT_WC* Feature, AT_64* MaxValue);"
+    # result = re.search(' (.+?)\(', text) #.group(1)
+    # g = result.groups()
+    # print(result.groups())
 
 
