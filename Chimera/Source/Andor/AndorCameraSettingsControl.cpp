@@ -54,10 +54,9 @@ void AndorCameraSettingsControl::initialize ( IChimeraQtWindow* parent, std::vec
 	QHBoxLayout* layout2 = new QHBoxLayout(this);
 	layout2->setContentsMargins(0, 0, 0, 0);
 	cameraModeCombo = new CQComboBox (parent);
-	cameraModeCombo->addItem ("Kinetic-Series-Mode");
-	cameraModeCombo->addItem ("Accumulation-Mode");
-	cameraModeCombo->addItem ("Video-Mode");
-
+	for (auto mode : AndorRunModes::allModes) {
+		cameraModeCombo->addItem(qstr(AndorRunModes::toStr(mode)));
+	}
 	cameraModeCombo->setCurrentIndex (0);
 	parent->connect (cameraModeCombo, qOverload<int> (&QComboBox::currentIndexChanged), 
 		[this, parent]() {
@@ -66,9 +65,12 @@ void AndorCameraSettingsControl::initialize ( IChimeraQtWindow* parent, std::vec
 				updateWindowEnabledStatus ();
 			}
 		});
-	configSettings.andor.acquisitionMode = AndorRunModes::mode::Kinetic;
+	configSettings.andor.acquisitionMode = AndorRunModes::mode::Single;
+	
 	triggerCombo = new CQComboBox (parent);
-	triggerCombo->addItems ({ "Internal-Trigger", "External-Trigger","Start-On-Trigger" });
+	for (auto mode : AndorTriggerMode::allModes) {
+		triggerCombo->addItem(qstr(AndorTriggerMode::toStr(mode)));
+	}
 	triggerCombo->setCurrentIndex (0);
 	parent->connect (triggerCombo, qOverload<int> (&QComboBox::activated), 
 		[this, parent]() {
@@ -83,16 +85,16 @@ void AndorCameraSettingsControl::initialize ( IChimeraQtWindow* parent, std::vec
 
 	QHBoxLayout* layout3 = new QHBoxLayout(this);
 	layout3->setContentsMargins(0, 0, 0, 0);
-	frameTransferModeCombo = new CQComboBox(parent);
-	frameTransferModeCombo->setToolTip("Frame Transfer Mode OFF:\n"
-		"Slower than when on. Cleans between images. Mechanical shutter may not be necessary.\n"
-		"Frame Transfer Mode ON:\n"
-		"Faster than when off. Does not clean between images, giving better background.\n"
-		"Mechanical Shutter probably necessary unless imaging continuously.\n"
-		"See iXonEM + hardware guide pg 42.\n");
-	frameTransferModeCombo->addItems({ "FTM: OFF!", "FTM: ON!" });
-	frameTransferModeCombo->setCurrentIndex(0);
-	configSettings.andor.frameTransferMode = 0;
+	//frameTransferModeCombo = new CQComboBox(parent);
+	//frameTransferModeCombo->setToolTip("Frame Transfer Mode OFF:\n"
+	//	"Slower than when on. Cleans between images. Mechanical shutter may not be necessary.\n"
+	//	"Frame Transfer Mode ON:\n"
+	//	"Faster than when off. Does not clean between images, giving better background.\n"
+	//	"Mechanical Shutter probably necessary unless imaging continuously.\n"
+	//	"See iXonEM + hardware guide pg 42.\n");
+	//frameTransferModeCombo->addItems({ "FTM: OFF!", "FTM: ON!" });
+	//frameTransferModeCombo->setCurrentIndex(0);
+	//configSettings.andor.frameTransferMode = 0;
 
 	//verticalShiftSpeedCombo = new CQComboBox (parent);
 	//for (auto speed : vertSpeeds){ 
@@ -108,28 +110,28 @@ void AndorCameraSettingsControl::initialize ( IChimeraQtWindow* parent, std::vec
 	//horizontalShiftSpeedCombo->setCurrentIndex (0);
 	//configSettings.andor.horShiftSpeedSetting = 0;
 
-	layout3->addWidget(frameTransferModeCombo, 0);
+	//layout3->addWidget(frameTransferModeCombo, 0);
 	//layout3->addWidget(verticalShiftSpeedCombo, 0);
 	//layout3->addWidget(horizontalShiftSpeedCombo, 0);
 
-	QHBoxLayout* layout4 = new QHBoxLayout(this);
-	layout4->setContentsMargins(0, 0, 0, 0);
-	emGainBtn = new CQPushButton ("Set EM Gain (-1=OFF)", parent);
-	parent->connect (emGainBtn, &QPushButton::released, [parent]() {
-			parent->andorWin->handleEmGainChange ();
-		});
-	emGainEdit = new CQLineEdit ("-1", parent);
-	emGainEdit->setToolTip( "Set the state & gain of the EM gain of the camera. Enter a negative number to turn EM Gain"
-						   " mode off. The program will immediately change the state of the camera after changing this"
-						   " edit." );
-	//
-	emGainDisplay = new QLabel ("OFF", parent);
-	// initialize settings.
-	configSettings.andor.emGainLevel = 0;
-	configSettings.andor.emGainModeIsOn = false;
-	layout4->addWidget(emGainBtn, 0);
-	layout4->addWidget(emGainEdit, 0);
-	layout4->addWidget(emGainDisplay, 0);
+	//QHBoxLayout* layout4 = new QHBoxLayout(this);
+	//layout4->setContentsMargins(0, 0, 0, 0);
+	//emGainBtn = new CQPushButton ("Set EM Gain (-1=OFF)", parent);
+	//parent->connect (emGainBtn, &QPushButton::released, [parent]() {
+	//		parent->andorWin->handleEmGainChange ();
+	//	});
+	//emGainEdit = new CQLineEdit ("-1", parent);
+	//emGainEdit->setToolTip( "Set the state & gain of the EM gain of the camera. Enter a negative number to turn EM Gain"
+	//					   " mode off. The program will immediately change the state of the camera after changing this"
+	//					   " edit." );
+	////
+	//emGainDisplay = new QLabel ("OFF", parent);
+	//// initialize settings.
+	//configSettings.andor.emGainLevel = 0;
+	//configSettings.andor.emGainModeIsOn = false;
+	//layout4->addWidget(emGainBtn, 0);
+	//layout4->addWidget(emGainEdit, 0);
+	//layout4->addWidget(emGainDisplay, 0);
 
 	QHBoxLayout* layout5 = new QHBoxLayout(this);
 	layout5->setContentsMargins(0, 0, 0, 0);
@@ -179,7 +181,7 @@ void AndorCameraSettingsControl::initialize ( IChimeraQtWindow* parent, std::vec
 	layout->addLayout(layout1);
 	layout->addLayout(layout2);
 	layout->addLayout(layout3);
-	layout->addLayout(layout4);
+	//layout->addLayout(layout4);
 	layout->addLayout(layout5);
 	layout->addWidget(temperatureMsg);
 	layout->addWidget(&picSettingsObj);
@@ -194,7 +196,7 @@ void AndorCameraSettingsControl::initialize ( IChimeraQtWindow* parent, std::vec
 // buttons should be on or off.
 void AndorCameraSettingsControl::cameraIsOn(bool state){
 	// Can't change em gain mode or camera settings once started.
-	emGainEdit->setEnabled( !state );
+	//emGainEdit->setEnabled( !state );
 	setTemperatureButton->setEnabled ( !state );
 	temperatureOffButton->setEnabled ( !state );
 }
@@ -225,7 +227,7 @@ void AndorCameraSettingsControl::updateDisplays () {
 
 	//verticalShiftSpeedCombo->setCurrentIndex(optionsIn.vertShiftSpeedSetting);
 	//horizontalShiftSpeedCombo->setCurrentIndex(optionsIn.horShiftSpeedSetting);
-	frameTransferModeCombo->setCurrentIndex(optionsIn.frameTransferMode);
+	//frameTransferModeCombo->setCurrentIndex(optionsIn.frameTransferMode);
 
 
 	picSettingsObj.setUnofficialExposures (optionsIn.exposureTimes);
@@ -274,7 +276,8 @@ unsigned AndorCameraSettingsControl::getVsSpeed () {
 }
 
 unsigned AndorCameraSettingsControl::getFrameTransferMode() {
-	return frameTransferModeCombo->currentIndex();
+	//return frameTransferModeCombo->currentIndex();
+	return -1;
 }
 
 void AndorCameraSettingsControl::updateSettings(){
@@ -289,16 +292,16 @@ void AndorCameraSettingsControl::updateSettings(){
 	configSettings.andor.picsPerRepetition =	picSettingsObj.getPicsPerRepetition( );
 	
 	configSettings.andor.imageSettings = readImageParameters( );
-	configSettings.andor.kineticCycleTime = getKineticCycleTime( );
+	//configSettings.andor.kineticCycleTime = getKineticCycleTime( );
 	configSettings.andor.accumulationTime = getAccumulationCycleTime( );
 	configSettings.andor.accumulationNumber = getAccumulationNumber( );
 
 	updateCameraMode( );
 	updateTriggerMode( );
 
-	configSettings.andor.horShiftSpeedSetting = getHsSpeed ();
-	configSettings.andor.vertShiftSpeedSetting = getVsSpeed ();
-	configSettings.andor.frameTransferMode = getFrameTransferMode();
+	//configSettings.andor.horShiftSpeedSetting = getHsSpeed ();
+	//configSettings.andor.vertShiftSpeedSetting = getVsSpeed ();
+	//configSettings.andor.frameTransferMode = getFrameTransferMode();
 }
 
 std::array<softwareAccumulationOption, 4> AndorCameraSettingsControl::getSoftwareAccumulationOptions ( ){
@@ -317,14 +320,14 @@ AndorRunSettings AndorCameraSettingsControl::getRunningSettings () {
 AndorCameraSettings AndorCameraSettingsControl::getCalibrationSettings( ){
 	AndorCameraSettings callOptions;
 	callOptions.andor.acquisitionMode = AndorRunModes::mode::Kinetic;
-	callOptions.andor.emGainLevel = 0;
-	callOptions.andor.emGainModeIsOn = false;
+	//callOptions.andor.emGainLevel = 0;
+	//callOptions.andor.emGainModeIsOn = false;
 	callOptions.andor.exposureTimes = { float(10e-3) };
 	// want to calibrate the image area to be used in the experiment, so...
 	callOptions.andor.imageSettings = imageDimensionsObj.readImageParameters( );
 	callOptions.andor.kineticCycleTime = 10e-3f;
 	callOptions.andor.picsPerRepetition = 1;
-	callOptions.andor.readMode = 4;
+	//callOptions.andor.readMode = 4;
 	callOptions.andor.repetitionsPerVariation = 100;
 	callOptions.andor.showPicsInRealTime = false;
 	callOptions.andor.temperatureSetting = -60;
@@ -341,49 +344,49 @@ bool AndorCameraSettingsControl::getUseCal( ){
 	return calControl.use( );
 }
 
-void AndorCameraSettingsControl::setEmGain( bool emGainCurrentlyOn, int currentEmGainLevel ){
-	auto emGainText = emGainEdit->text();
-	if ( emGainText == "" ){
-		// set to off.
-		emGainText = "-1";
-	}
-	int emGain;
-	try{
-		emGain = boost::lexical_cast<int>(str(emGainText));
-	}
-	catch ( boost::bad_lexical_cast&){
-		throwNested("ERROR: Couldn't convert EM Gain text to integer! Aborting!");
-	}
-	// < 0 corresponds to NOT USING EM GAIN (using conventional gain).
-	if (emGain < 0){
-		configSettings.andor.emGainModeIsOn = false;
-		configSettings.andor.emGainLevel = 0;
-		emGainDisplay->setText("OFF");
-	}
-	else{
-		configSettings.andor.emGainModeIsOn = true;
-		configSettings.andor.emGainLevel = emGain;
-		emGainDisplay->setText(cstr("Gain: X" + str(configSettings.andor.emGainLevel)));
-	}
-	// Change the andor settings.
-	std::string promptMsg = "";
-	if ( emGainCurrentlyOn != configSettings.andor.emGainModeIsOn ){
-		promptMsg += "Set Andor EM Gain State to " + str(configSettings.andor.emGainModeIsOn ? "ON" : "OFF");
-	}
-	if ( currentEmGainLevel != configSettings.andor.emGainLevel ){
-		if ( promptMsg != "" ){
-			promptMsg += ", ";
-		}
-		promptMsg += "Set Andor EM Gain Level to " + str(configSettings.andor.emGainLevel);
-	}
-	if ( promptMsg != "" ){
-		promptMsg += "?";
-		auto result = QMessageBox::question (nullptr, "Andor Settings", qstr(promptMsg));
-		if ( result == QMessageBox::No ){
-			thrower ( "Aborting camera settings update at EM Gain update!" );
-		}
-	}
-}
+//void AndorCameraSettingsControl::setEmGain( bool emGainCurrentlyOn, int currentEmGainLevel ){
+//	auto emGainText = emGainEdit->text();
+//	if ( emGainText == "" ){
+//		// set to off.
+//		emGainText = "-1";
+//	}
+//	int emGain;
+//	try{
+//		emGain = boost::lexical_cast<int>(str(emGainText));
+//	}
+//	catch ( boost::bad_lexical_cast&){
+//		throwNested("ERROR: Couldn't convert EM Gain text to integer! Aborting!");
+//	}
+//	// < 0 corresponds to NOT USING EM GAIN (using conventional gain).
+//	if (emGain < 0){
+//		configSettings.andor.emGainModeIsOn = false;
+//		configSettings.andor.emGainLevel = 0;
+//		emGainDisplay->setText("OFF");
+//	}
+//	else{
+//		configSettings.andor.emGainModeIsOn = true;
+//		configSettings.andor.emGainLevel = emGain;
+//		emGainDisplay->setText(cstr("Gain: X" + str(configSettings.andor.emGainLevel)));
+//	}
+//	// Change the andor settings.
+//	std::string promptMsg = "";
+//	if ( emGainCurrentlyOn != configSettings.andor.emGainModeIsOn ){
+//		promptMsg += "Set Andor EM Gain State to " + str(configSettings.andor.emGainModeIsOn ? "ON" : "OFF");
+//	}
+//	if ( currentEmGainLevel != configSettings.andor.emGainLevel ){
+//		if ( promptMsg != "" ){
+//			promptMsg += ", ";
+//		}
+//		promptMsg += "Set Andor EM Gain Level to " + str(configSettings.andor.emGainLevel);
+//	}
+//	if ( promptMsg != "" ){
+//		promptMsg += "?";
+//		auto result = QMessageBox::question (nullptr, "Andor Settings", qstr(promptMsg));
+//		if ( result == QMessageBox::No ){
+//			thrower ( "Aborting camera settings update at EM Gain update!" );
+//		}
+//	}
+//}
 
 void AndorCameraSettingsControl::setVariationNumber(unsigned varNumber){
 	AndorRunSettings& andorSettings = configSettings.andor;
@@ -484,8 +487,8 @@ void AndorCameraSettingsControl::handleSaveConfig(ConfigStream& saveFile){
 	saveFile << "CAMERA_SETTINGS\n";
 	saveFile << "/*Control Andor:*/\t\t\t" << configSettings.andor.controlCamera << "\n";
 	saveFile << "/*Trigger Mode:*/\t\t\t" << AndorTriggerMode::toStr(configSettings.andor.triggerMode) << "\n";
-	saveFile << "/*EM-Gain Is On:*/\t\t\t" << configSettings.andor.emGainModeIsOn << "\n";
-	saveFile << "/*EM-Gain Level:*/\t\t\t" << configSettings.andor.emGainLevel << "\n";
+	//saveFile << "/*EM-Gain Is On:*/\t\t\t" << configSettings.andor.emGainModeIsOn << "\n";
+	//saveFile << "/*EM-Gain Level:*/\t\t\t" << configSettings.andor.emGainLevel << "\n";
 	saveFile << "/*Acquisition Mode:*/\t\t" << AndorRunModes::toStr (configSettings.andor.acquisitionMode) << "\n";
 	saveFile << "/*Kinetic Cycle Time:*/\t\t" << configSettings.andor.kineticCycleTime << "\n";
 	saveFile << "/*Accumulation Time:*/\t\t" << configSettings.andor.accumulationTime << "\n";
@@ -497,8 +500,8 @@ void AndorCameraSettingsControl::handleSaveConfig(ConfigStream& saveFile){
 		saveFile << exposure << " ";
 	}
 	saveFile << "\n/*Andor Pics Per Rep:*/\t\t" << configSettings.andor.picsPerRepetition;
-	saveFile << "\n/*Horizontal Shift Speed*/\t" << configSettings.andor.horShiftSpeedSetting;
-	saveFile << "\n/*Vertical Shift Speed*/\t" << configSettings.andor.vertShiftSpeedSetting;
+	//saveFile << "\n/*Horizontal Shift Speed*/\t" << configSettings.andor.horShiftSpeedSetting;
+	//saveFile << "\n/*Vertical Shift Speed*/\t" << configSettings.andor.vertShiftSpeedSetting;
 	saveFile << "\nEND_CAMERA_SETTINGS\n";
 	picSettingsObj.handleSaveConfig(saveFile);
 	imageDimensionsObj.handleSave (saveFile);
@@ -516,28 +519,28 @@ void AndorCameraSettingsControl::updateCameraMode( ){
 	if ( sel == -1 ){
 		return;
 	}
-	std::string txt (str(cameraModeCombo->currentText ()));
-	if ( txt == AndorRunModes::toStr (AndorRunModes::mode::Video) || txt == "Video Mode" ){
-		configSettings.andor.acquisitionMode = AndorRunModes::mode::Video;
-		configSettings.andor.repetitionsPerVariation = INT_MAX;
-	}
-	else if ( txt == AndorRunModes::toStr ( AndorRunModes::mode::Kinetic ) || txt == "Kinetic Series Mode" ){
-		configSettings.andor.acquisitionMode = AndorRunModes::mode::Kinetic;
-	}
-	else if ( txt == AndorRunModes::toStr ( AndorRunModes::mode::Accumulate ) 
-		|| txt == "Accumulate Mode" || txt == "Accumulation Mode" ){
-		configSettings.andor.acquisitionMode = AndorRunModes::mode::Accumulate;
-	}
-	else{
-		thrower  ( "ERROR: unrecognized combo for andor run mode text???" );
-	}
+	//std::string txt (str(cameraModeCombo->currentText()));
+	configSettings.andor.acquisitionMode = AndorRunModes::fromStr(str(cameraModeCombo->currentText()));
+	//if ( txt == AndorRunModes::toStr (AndorRunModes::mode::Single)){
+	//	configSettings.andor.acquisitionMode = AndorRunModes::mode::Single;
+	//	//configSettings.andor.repetitionsPerVariation = INT_MAX;
+	//}
+	//else if ( txt == AndorRunModes::toStr ( AndorRunModes::mode::Kinetic )){
+	//	configSettings.andor.acquisitionMode = AndorRunModes::mode::Kinetic;
+	//}
+	//else if ( txt == AndorRunModes::toStr ( AndorRunModes::mode::Accumulate )){
+	//	configSettings.andor.acquisitionMode = AndorRunModes::mode::Accumulate;
+	//}
+	//else{
+	//	thrower  ( "ERROR: unrecognized combo for andor run mode text???" );
+	//}
 }
 
 void AndorCameraSettingsControl::updateWindowEnabledStatus (){
 	controlAndorCameraCheck->setEnabled (!viewRunningSettings->isChecked ());
 	cameraModeCombo->setEnabled (!viewRunningSettings->isChecked ());
-	emGainEdit->setEnabled (!viewRunningSettings->isChecked ());
-	emGainBtn->setEnabled (!viewRunningSettings->isChecked ());
+	//emGainEdit->setEnabled (!viewRunningSettings->isChecked ());
+	//emGainBtn->setEnabled (!viewRunningSettings->isChecked ());
 	triggerCombo->setEnabled (!viewRunningSettings->isChecked ());
 
 	auto settings = getConfigSettings ();
@@ -545,7 +548,7 @@ void AndorCameraSettingsControl::updateWindowEnabledStatus (){
 		&& !viewRunningSettings->isChecked ());
 	accumulationNumberEdit->setEnabled (settings.andor.acquisitionMode == AndorRunModes::mode::Accumulate 
 		&& !viewRunningSettings->isChecked ());
-	kineticCycleTimeEdit->setEnabled (settings.andor.acquisitionMode == AndorRunModes::mode::Video 
+	kineticCycleTimeEdit->setEnabled (settings.andor.acquisitionMode == AndorRunModes::mode::Kinetic 
 		&& !viewRunningSettings->isChecked ());
 	
 	imageDimensionsObj.updateEnabledStatus (viewRunningSettings->isChecked ());

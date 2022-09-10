@@ -35,7 +35,7 @@ class AndorCameraSettingsControl : public QWidget
 						 std::vector<std::string> horSpeeds );
 		void updateSettings( );
 		void updateMinKineticCycleTime( double time );
-		void setEmGain( bool currentlyOn, int currentEmGainLevel );
+		//void setEmGain( bool currentlyOn, int currentEmGainLevel );
 		void updateWindowEnabledStatus ();
 		void handlePictureSettings();
 		void updateTriggerMode( );
@@ -86,14 +86,14 @@ class AndorCameraSettingsControl : public QWidget
 		// 
 		CQComboBox* cameraModeCombo;
 
-		CQComboBox* frameTransferModeCombo = nullptr;
+		//CQComboBox* frameTransferModeCombo = nullptr;
 		//CQComboBox* verticalShiftSpeedCombo;
 		//CQComboBox* horizontalShiftSpeedCombo;
 
-		QLabel* emGainLabel;
-		CQLineEdit* emGainEdit = nullptr;
-		CQPushButton* emGainBtn = nullptr;
-		QLabel* emGainDisplay;
+		//QLabel* emGainLabel;
+		//CQLineEdit* emGainEdit = nullptr;
+		//CQPushButton* emGainBtn = nullptr;
+		//QLabel* emGainDisplay;
 		CQComboBox* triggerCombo = nullptr;
 		// Temperature
 		CQPushButton* setTemperatureButton = nullptr;

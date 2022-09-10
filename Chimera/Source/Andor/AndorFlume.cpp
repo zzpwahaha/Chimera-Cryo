@@ -204,7 +204,13 @@ void AndorFlume::setRingExposureTimes ( int sizeOfTimesArray, float* arrayOfTime
 
 void AndorFlume::setImage ( int hBin, int vBin, int lBorder, int rBorder, int tBorder, int bBorder ){
 	if ( !safemode ){
-		andorErrorChecker ( SetImage ( hBin, vBin, lBorder, rBorder, tBorder, bBorder ) );
+		//andorErrorChecker ( SetImage ( hBin, vBin, lBorder, rBorder, tBorder, bBorder ) );
+		setInt(L"AOIHBin", hBin);
+		setInt(L"AOIWidth", rBorder - lBorder + 1);
+		setInt(L"AOILeft", lBorder);
+		setInt(L"AOIVBin", vBin);
+		setInt(L"AOIHeight", bBorder - tBorder + 1);
+		setInt(L"AOITop", tBorder);
 	}
 }
 
@@ -237,13 +243,16 @@ int AndorFlume::queryStatus ( ){
 
 void AndorFlume::startAcquisition ( ){
 	if ( !safemode ){
-		andorErrorChecker ( StartAcquisition ( ) );
+		//andorErrorChecker ( StartAcquisition ( ) );
+		command(L"Acquisition Start");
 	}
 }
 
 void AndorFlume::abortAcquisition ( ){
 	if ( !safemode ){
-		andorErrorChecker ( AbortAcquisition ( ) );
+		//andorErrorChecker ( AbortAcquisition ( ) );
+		command(L"AcquisitionStop");
+		flush();
 	}
 }
 
@@ -495,12 +504,6 @@ void AndorFlume::isImplemented(const AT_WC* Feature, AT_BOOL* Implemented) {
 	}
 }
 
-void AndorFlume::isReadOnly(const AT_WC* Feature, AT_BOOL* ReadOnly) {
-	if (!safemode) {
-		andorErrorChecker(AT_IsReadOnly(camHndl, Feature, ReadOnly), true);
-	}
-}
-
 void AndorFlume::isReadable(const AT_WC* Feature, AT_BOOL* Readable) {
 	if (!safemode) {
 		andorErrorChecker(AT_IsReadable(camHndl, Feature, Readable), true);
@@ -510,6 +513,12 @@ void AndorFlume::isReadable(const AT_WC* Feature, AT_BOOL* Readable) {
 void AndorFlume::isWritable(const AT_WC* Feature, AT_BOOL* Writable) {
 	if (!safemode) {
 		andorErrorChecker(AT_IsWritable(camHndl, Feature, Writable), true);
+	}
+}
+
+void AndorFlume::isReadOnly(const AT_WC* Feature, AT_BOOL* ReadOnly) {
+	if (!safemode) {
+		andorErrorChecker(AT_IsReadOnly(camHndl, Feature, ReadOnly), true);
 	}
 }
 
@@ -579,7 +588,7 @@ void AndorFlume::setEnumIndex(const AT_WC* Feature, int Value) {
 	}
 }
 
-void AndorFlume::setEnumString(const AT_WC* Feature, AT_WC* String) {
+void AndorFlume::setEnumString(const AT_WC* Feature, const AT_WC* String) {
 	if (!safemode) {
 		andorErrorChecker(AT_SetEnumString(camHndl, Feature, String), true);
 	}
@@ -591,7 +600,7 @@ void AndorFlume::getEnumIndex(const AT_WC* Feature, int* Value) {
 	}
 }
 
-void AndorFlume::getEnumCount(const AT_WC* Feature, int* Count) {
+void AndorFlume::getEnumCount(const  AT_WC* Feature, int* Count) {
 	if (!safemode) {
 		andorErrorChecker(AT_GetEnumCount(camHndl, Feature, Count), true);
 	}
@@ -621,15 +630,15 @@ void AndorFlume::command(const AT_WC* Feature) {
 	}
 }
 
-void AndorFlume::setString(const AT_WC* Feature, AT_WC* Value) {
+void AndorFlume::setString(const AT_WC* Feature, const AT_WC* String) {
 	if (!safemode) {
-		andorErrorChecker(AT_SetString(camHndl, Feature, Value), true);
+		andorErrorChecker(AT_SetString(camHndl, Feature, String), true);
 	}
 }
 
-void AndorFlume::getString(const AT_WC* Feature, AT_WC* Value, int StringLength) {
+void AndorFlume::getString(const AT_WC* Feature, AT_WC* String, int StringLength) {
 	if (!safemode) {
-		andorErrorChecker(AT_GetString(camHndl, Feature, Value, StringLength), true);
+		andorErrorChecker(AT_GetString(camHndl, Feature, String, StringLength), true);
 	}
 }
 
@@ -656,4 +665,3 @@ void AndorFlume::flush() {
 		andorErrorChecker(AT_Flush(camHndl), true);
 	}
 }
-

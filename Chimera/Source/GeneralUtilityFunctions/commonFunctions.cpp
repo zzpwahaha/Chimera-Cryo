@@ -253,6 +253,7 @@ namespace commonFunctions{
 		try {
 			AllExperimentInput input;
 			input.masterInput = new ExperimentThreadInput ( win );
+			input.masterInput->profile = win->mainWin->getProfileSettings();
 			win->auxWin->fillMasterThreadInput (input.masterInput);
 			win->andorWin->loadCameraCalSettings( input );
 			win->mainWin->loadCameraCalSettings( input.masterInput );

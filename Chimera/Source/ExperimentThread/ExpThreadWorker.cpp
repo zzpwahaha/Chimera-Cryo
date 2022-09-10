@@ -1243,7 +1243,7 @@ void ExpThreadWorker::initVariation (unsigned variationInc,std::vector<parameter
 			emit notification (qstr(param.name + ": " + str (param.keyValues[variationInc], 12) + "\r\n"), 2);
 		}
 	}
-	waitForAndorFinish ();
+	//waitForAndorFinish ();
 	bool skipOption = input->skipNext == nullptr ? false : input->skipNext->load ();
 	if (true /*runMaster*/) { /*input->ttls.ftdi_write (variationInc, skipOption);*/ }
 	handleDebugPlots(input->ttls, input->ao, input->ol, variationInc);
@@ -1252,8 +1252,8 @@ void ExpThreadWorker::initVariation (unsigned variationInc,std::vector<parameter
 void ExpThreadWorker::waitForAndorFinish () {
 	auto& andorCamera = input->devices.getSingleDevice<AndorCameraCore> ();
 	while (true) {
-		if (andorCamera.queryStatus () == DRV_ACQUIRING) {
-			Sleep (1000);
+		if (andorCamera.isRunning()/*andorCamera.queryStatus () == DRV_ACQUIRING*/) {
+			Sleep (10);
 			emit notification ("Waiting for Andor camera to finish acquisition...\n");
 			if (isAborting) { thrower (abortString); }
 		}

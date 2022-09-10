@@ -9,21 +9,22 @@
 // this structure contains all of the main options which are necessary to set when starting a camera acquisition. All
 // of these settings should be possibly modified by the user of the UI.
 struct AndorRunSettings{
-	unsigned horShiftSpeedSetting = 0;
-	unsigned vertShiftSpeedSetting = 0;
+	//unsigned horShiftSpeedSetting = 0;
+	//unsigned vertShiftSpeedSetting = 0;
 
 	imageParameters imageSettings;
 	bool controlCamera = true;
 	//
-	bool emGainModeIsOn = false;
-	int emGainLevel = 0;
-	int readMode = 4;
-	AndorRunModes::mode acquisitionMode = AndorRunModes::mode::Kinetic;
+	//bool emGainModeIsOn = false;
+	//int emGainLevel = 0;
+	//int readMode = 4;
+	AndorRunModes::mode acquisitionMode = AndorRunModes::mode::Single;
 	// 1 means frame transfer mode on, 0 means non-frame transfer mode.
-	int frameTransferMode = 0;
+	//int frameTransferMode = 0;
 	AndorTriggerMode::mode triggerMode = AndorTriggerMode::mode::External;
 	bool showPicsInRealTime = false;
 	//
+	double exposureTime = 0.001;
 	float kineticCycleTime = 0.1f;
 	float accumulationTime = 0;
 	int accumulationNumber = 1;
@@ -35,7 +36,7 @@ struct AndorRunSettings{
 	unsigned __int64 totalPicsInVariation();
 	// this is an int to reflect that the final number that's programmed to the camera is an int
 	int totalPicsInExperiment();
-	int temperatureSetting = 25;
+	int temperatureSetting = 0;
 };
 
 /*

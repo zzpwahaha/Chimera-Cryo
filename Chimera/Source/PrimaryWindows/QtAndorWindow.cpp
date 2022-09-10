@@ -41,7 +41,7 @@ void QtAndorWindow::initializeWidgets (){
 	alerts.alertMainThread (0);
 	alerts.initialize (this);
 	analysisHandler.initialize (this);
-	andorSettingsCtrl.initialize ( this, andor.getVertShiftSpeeds(), andor.getHorShiftSpeeds());
+	andorSettingsCtrl.initialize ( this, std::vector<std::string>()/*andor.getVertShiftSpeeds()*/, std::vector<std::string>()/*andor.getHorShiftSpeeds()*/);
 	alerts.setMaximumWidth(350);
 	analysisHandler.setMaximumSize(350, 300);
 	andorSettingsCtrl.setMaximumWidth(350);
@@ -158,27 +158,27 @@ void QtAndorWindow::handleImageDimsEdit (){
 	}
 }
 
-void QtAndorWindow::handleEmGainChange (){
-	try {
-		auto runSettings = andor.getAndorRunSettings ();
-		andorSettingsCtrl.setEmGain (runSettings.emGainModeIsOn, runSettings.emGainLevel);
-		auto settings = andorSettingsCtrl.getConfigSettings ();
-		runSettings.emGainModeIsOn = settings.andor.emGainModeIsOn;
-		runSettings.emGainLevel = settings.andor.emGainLevel;
-		andor.setSettings (runSettings);
-		// and immediately change the EM gain mode.
-		try	{
-			andor.setGainMode ();
-		}
-		catch (ChimeraError& err){
-			// this can happen e.g. if the camera is aquiring.
-			reportErr (qstr (err.trace ()));
-		}
-	}
-	catch (ChimeraError err){
-		reportErr (qstr (err.trace ()));
-	}
-}
+//void QtAndorWindow::handleEmGainChange (){
+//	try {
+//		auto runSettings = andor.getAndorRunSettings ();
+//		andorSettingsCtrl.setEmGain (runSettings.emGainModeIsOn, runSettings.emGainLevel);
+//		auto settings = andorSettingsCtrl.getConfigSettings ();
+//		runSettings.emGainModeIsOn = settings.andor.emGainModeIsOn;
+//		runSettings.emGainLevel = settings.andor.emGainLevel;
+//		andor.setSettings (runSettings);
+//		// and immediately change the EM gain mode.
+//		try	{
+//			andor.setGainMode ();
+//		}
+//		catch (ChimeraError& err){
+//			// this can happen e.g. if the camera is aquiring.
+//			reportErr (qstr (err.trace ()));
+//		}
+//	}
+//	catch (ChimeraError err){
+//		reportErr (qstr (err.trace ()));
+//	}
+//}
 
 
 std::string QtAndorWindow::getSystemStatusString (){
@@ -258,7 +258,7 @@ void QtAndorWindow::abortCameraRun (){
 		// simulate as if you needed to abort.
 		status = DRV_ACQUIRING;
 	}
-	if (status == DRV_ACQUIRING){
+	if (true/*status == DRV_ACQUIRING*/){
 		andor.abortAcquisition ();
 		timer.setTimerDisplay ("Aborted");
 		andor.setIsRunningState (false);
@@ -290,7 +290,7 @@ void QtAndorWindow::abortCameraRun (){
 			reportErr (qstr (err.trace ()));
 		}
 
-		if (andor.getAndorRunSettings ().acquisitionMode != AndorRunModes::mode::Video){
+		if (true/*andor.getAndorRunSettings ().acquisitionMode != AndorRunModes::mode::Video*/){
 			auto answer = QMessageBox::question(this, qstr("Delete Data?"), qstr("Acquisition Aborted. Delete Data "
 				"file (data_" + str (dataHandler.getDataFileNumber ()) + ".h5) for this run?"));
 			if (answer == QMessageBox::Yes){
@@ -313,8 +313,8 @@ bool QtAndorWindow::cameraIsRunning (){
 }
 
 void QtAndorWindow::onCameraProgress (int picNumReported){
-	currentPictureNum++;
 	unsigned picNum = currentPictureNum;
+	currentPictureNum++;
 	if (picNum % 2 == 1){
 		mainThreadStartTimes.push_back (std::chrono::high_resolution_clock::now ());
 	}
@@ -323,17 +323,21 @@ void QtAndorWindow::onCameraProgress (int picNumReported){
 		// last picture.
 		picNum = curSettings.totalPicsInExperiment();
 	}
-	if (picNumReported != currentPictureNum && picNumReported != -1){
-		if (curSettings.acquisitionMode != AndorRunModes::mode::Video){
-			//reportErr ( "WARNING: picture number reported by andor isn't matching the"
-			//								  "camera window record?!?!?!?!?" );
-		}
+	if (picNumReported != picNum && picNumReported != -1){
+		//if (curSettings.acquisitionMode != AndorRunModes::mode::Video){
+		//	//reportErr ( "WARNING: picture number reported by andor isn't matching the"
+		//	//								  "camera window record?!?!?!?!?" );
+		//}
+		reportErr("WARNING: picture number reported by andor isn't matching the"
+			"camera window record?!?!?!?!?");
 	}
 	// need to call this before acquireImageData().
 	andor.updatePictureNumber (picNum);
 	std::vector<Matrix<long>> rawPicData;
 	try	{
 		rawPicData = andor.acquireImageData ();
+		rawPicData[0].updateString();
+		andor.queueBuffers();
 	}
 	catch (ChimeraError& err){
 		reportErr (qstr (err.trace ()));
@@ -355,7 +359,7 @@ void QtAndorWindow::onCameraProgress (int picNumReported){
 	if (picNum % 2 == 1){
 		imageGrabTimes.push_back (std::chrono::high_resolution_clock::now ());
 	}
-	emit newImage ({ picNum, calPicData[(picNum - 1) % curSettings.picsPerRepetition] }); 
+	emit newImage ({ picNum, calPicData[(picNum/* - 1*/) % curSettings.picsPerRepetition] }); 
 
 	auto picsToDraw = andorSettingsCtrl.getImagesToDraw (calPicData);
 	try
@@ -414,11 +418,11 @@ void QtAndorWindow::onCameraProgress (int picNumReported){
 		}
 	}
 	// write the data to the file.
-	if (curSettings.acquisitionMode != AndorRunModes::mode::Video){
+	if (true/*curSettings.acquisitionMode != AndorRunModes::mode::Video*/){
 		try	{
 			// important! write the original raw data, not the pic-to-draw, which can be a difference pic, or the calibrated
 			// pictures, which can have the background subtracted.
-			dataHandler.writeAndorPic ( rawPicData[(picNum - 1) % curSettings.picsPerRepetition],
+			dataHandler.writeAndorPic ( rawPicData[(picNum/* - 1*/) % curSettings.picsPerRepetition],
 									    curSettings.imageSettings );
 		}
 		catch (ChimeraError& err){
@@ -434,6 +438,10 @@ void QtAndorWindow::onCameraProgress (int picNumReported){
 		}
 	}
 	mostRecentPicNum = picNum;
+
+	if (picNum == curSettings.totalPicsInExperiment() - 1) {
+		andor.onFinish();
+	}
 }
 
 void QtAndorWindow::handleSetAnalysisPress (){

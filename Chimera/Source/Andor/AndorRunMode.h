@@ -8,9 +8,9 @@ struct AndorRunModes
 {
 	enum class mode
 	{
-		Video = 5,
-		Kinetic = 3,
-		Accumulate = 2
+		Single = 1,
+		Kinetic = 2,
+		Accumulate = 3
 	};
 	static const std::array<mode, 3> allModes;
 	static std::string toStr ( mode m );

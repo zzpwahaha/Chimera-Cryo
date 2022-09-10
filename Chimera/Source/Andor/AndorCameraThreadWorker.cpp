@@ -31,16 +31,16 @@ void AndorCameraThreadWorker::process (){
 		 */
 		 // Also, anytime this gets locked, the count should be reset.
 		 //input->signaler.wait( lock, [input]() { return input->expectingAcquisition; } );
-		/*while (!input->expectingAcquisition) {
+		while (!input->expectingAcquisition) {
 			input->signaler.wait (lock);
-		}*/
-		input->signaler.wait(lock);
+		}
+		//input->signaler.wait(lock);
 		if (!input->safemode){
 			try	{
-				int status = input->Andor->flume.queryStatus ();
-				if (status == DRV_IDLE && armed) {
+				//int status = input->Andor->flume.queryStatus ();
+				if (pictureNumber == input->Andor->runSettings.totalPicsInExperiment() && armed) {
 					// get the last picture. acquisition is over so getAcquisitionProgress returns 0.
-					if (input->Andor->isCalibrating ()) {
+					if (false/*input->Andor->isCalibrating ()*/) {
 						//input->comm->sendCameraCalProgress (-1);
 						// signal the end to the main thread.
 						//input->comm->sendCameraCalFin ();
@@ -48,29 +48,32 @@ void AndorCameraThreadWorker::process (){
 					}
 					else {
 						//emit pictureTaken (-1);
-						emit acquisitionFinished ();
+						//emit acquisitionFinished ();
 						// make sure the thread waits when it hits the condition variable.
-						//input->expectingAcquisition = false;
+						input->expectingAcquisition = false;
+						pictureNumber = 0;
 						armed = false;
 					}
 				}
 				else{
-					input->Andor->flume.waitForAcquisition ();
+					//input->Andor->flume.waitForAcquisition ();
+					input->Andor->waitForAcquisition(pictureNumber);
 					if (pictureNumber % 2 == 0) {
 						(*input->imageTimes).push_back (std::chrono::high_resolution_clock::now ());
 					}
 					armed = true;
-					try {
-						input->Andor->flume.getAcquisitionProgress (pictureNumber);
-					}
-					catch (ChimeraError& exception) {
-						//input->comm->sendError (exception.trace ());
-					}
-					if (input->Andor->isCalibrating ()) {
+					//try {
+					//	input->Andor->flume.getAcquisitionProgress (pictureNumber);
+					//}
+					//catch (ChimeraError& exception) {
+					//	//input->comm->sendError (exception.trace ());
+					//}
+					if (false/*input->Andor->isCalibrating ()*/) {
 						//input->comm->sendCameraCalProgress (pictureNumber);
 					}
 					else {
 						emit pictureTaken (pictureNumber);
+						pictureNumber++;
 						//input->comm->sendCameraProgress (pictureNumber);
 					}
 				}

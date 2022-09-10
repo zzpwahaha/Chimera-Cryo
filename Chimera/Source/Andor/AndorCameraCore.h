@@ -51,7 +51,7 @@ class AndorCameraCore : public IDeviceCore{
 		bool isRunning();
 		void setIsRunningState( bool state );
 		void updatePictureNumber( unsigned __int64 newNumber );
-		void setGainMode();
+		//void setGainMode();
 		void changeTemperatureSetting(bool temperatureControlOff);
 
 		//static unsigned __stdcall cameraThread( void* voidPtr );		
@@ -72,13 +72,19 @@ class AndorCameraCore : public IDeviceCore{
 		void programVariation (unsigned variationInc, std::vector<parameterType>& params, ExpThreadWorker* threadworker);
 		std::vector<std::string> getVertShiftSpeeds ();
 		std::vector<std::string> getHorShiftSpeeds ();
+
+
+		void waitForAcquisition(int pictureNumber);
+		void queueBuffers();
+		//void onFinish(); // Finish from acquisition, also signal waitAndorToFinish
+
 	private:
 		
 		void setAccumulationCycleTime ( );
 		void setAcquisitionMode ( );
-		void setFrameTransferMode ( );
+		//void setFrameTransferMode ( );
 		void setKineticCycleTime ( );
-		void setReadMode ( );
+		//void setReadMode ( );
 		int mostRecentTemp=20;
 
 		bool calInProgress = false;
@@ -92,7 +98,7 @@ class AndorCameraCore : public IDeviceCore{
 		AndorFlume flume;
 		const bool safemode;
 		// 
-		bool cameraIsRunning;
+		std::atomic<bool> cameraIsRunning;
 		// set either of these to true in order to break corresponding threads out of their loops.
 		bool plotThreadExitIndicator;
 		bool cameraThreadExitIndicator = false;
@@ -107,4 +113,10 @@ class AndorCameraCore : public IDeviceCore{
 		cameraThreadInput threadInput;
 
 		friend class AndorCameraThreadWorker;
+
+		std::vector<unsigned char*> acqBuffers;
+		const int numberOfAcqBuffers = 10;
+		const int numberOfImageBuffers = 10;
+		std::vector<unsigned char*> tempImageBuffers;
+		int bufferSize;
 };
