@@ -97,7 +97,7 @@ class AndorCameraSettingsControl : public QWidget
 		CQComboBox* triggerCombo = nullptr;
 		// Temperature
 		CQPushButton* setTemperatureButton = nullptr;
-		CQPushButton* temperatureOffButton = nullptr;
+		//CQPushButton* temperatureOffButton = nullptr;
 		CQLineEdit* temperatureEdit = nullptr;
 		QLabel* temperatureDisplay;
 		QLabel* temperatureMsg;

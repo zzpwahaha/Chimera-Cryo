@@ -142,11 +142,11 @@ void AndorCameraSettingsControl::initialize ( IChimeraQtWindow* parent, std::vec
 		});
 	temperatureEdit = new CQLineEdit ("0", parent);
 	temperatureDisplay = new QLabel ("", parent);
-	temperatureOffButton = new CQPushButton("OFF", parent);
+	//temperatureOffButton = new CQPushButton("OFF", parent);
 	layout5->addWidget(setTemperatureButton, 0);
 	layout5->addWidget(temperatureEdit, 0);
 	layout5->addWidget(temperatureDisplay, 0);
-	layout5->addWidget(temperatureOffButton, 0);
+	//layout5->addWidget(temperatureOffButton, 0);
 	
 	temperatureMsg = new QLabel("Temperature control is disabled", parent);
 
@@ -198,7 +198,7 @@ void AndorCameraSettingsControl::cameraIsOn(bool state){
 	// Can't change em gain mode or camera settings once started.
 	//emGainEdit->setEnabled( !state );
 	setTemperatureButton->setEnabled ( !state );
-	temperatureOffButton->setEnabled ( !state );
+	//temperatureOffButton->setEnabled ( !state );
 }
 
 void AndorCameraSettingsControl::setConfigSettings (AndorRunSettings inputSettings) {
