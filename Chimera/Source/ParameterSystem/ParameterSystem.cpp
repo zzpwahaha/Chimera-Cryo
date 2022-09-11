@@ -117,13 +117,13 @@ void ParameterSystem::handleContextMenu (const QPoint& pos){
 	menu.addAction (newParam);
 	menu.addAction(dragDropTgl);
 
-	//// for test
-	//auto* test = new QAction("Test generateKey", &menu);
-	//parametersView->connect(test, &QAction::triggered, [this, index]() {
-	//	auto allPara = getAllParams();
-	//	generateKey(allPara, true, getRangeInfo());
-	//	});
-	//menu.addAction(test);
+	// for test
+	auto* test = new QAction("Test generateKey", &menu);
+	parametersView->connect(test, &QAction::triggered, [this, index]() {
+		auto allPara = getAllParams();
+		generateKey(allPara, true, getRangeInfo());
+		});
+	menu.addAction(test);
 
 	menu.exec (parametersView->mapToGlobal (pos));	
 }
@@ -704,6 +704,10 @@ void ParameterSystem::generateKey( std::vector<parameterType>& parameters, bool 
 		variable.shuffleIndex = shuffleIndex;
 		variable.shuffleIndexReverse = shuffleIndexReverse;
 		totalSize = tempKeyRandomized.values.size ();
+	}
+	if (totalSize == 1) { // for no variation
+		shuffleIndex = std::vector<size_t>(1, 1);
+		shuffleIndexReverse = std::vector<size_t>(1, 1);
 	}
 	// now add all constant objects.
 	for ( parameterType& param : parameters){

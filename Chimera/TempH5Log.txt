@@ -1,0 +1,34 @@
+HDF5-DIAG: Error detected in HDF5 (1.10.1) thread 0:
+  #000: C:\CMake-hdf5-1.10.1\hdf5-1.10.1\src\H5F.c line 783 in H5Fclose(): decrementing file ID failed
+    major: Object atom
+    minor: Unable to close file
+  #001: C:\CMake-hdf5-1.10.1\hdf5-1.10.1\src\H5I.c line 1352 in H5I_dec_app_ref(): can't decrement ID ref count
+    major: Object atom
+    minor: Unable to decrement reference count
+  #002: C:\CMake-hdf5-1.10.1\hdf5-1.10.1\src\H5Fint.c line 1708 in H5F_close(): can't close file
+    major: File accessibilty
+    minor: Unable to close file
+  #003: C:\CMake-hdf5-1.10.1\hdf5-1.10.1\src\H5Fint.c line 1882 in H5F_try_close(): problems closing file
+    major: File accessibilty
+    minor: Unable to close file
+  #004: C:\CMake-hdf5-1.10.1\hdf5-1.10.1\src\H5Fint.c line 966 in H5F__dest(): low level truncate failed
+    major: File accessibilty
+    minor: Write failed
+  #005: C:\CMake-hdf5-1.10.1\hdf5-1.10.1\src\H5FD.c line 1776 in H5FD_truncate(): driver truncate request failed
+    major: Virtual File Layer
+    minor: Can't update object
+  #006: C:\CMake-hdf5-1.10.1\hdf5-1.10.1\src\H5FDsec2.c line 888 in H5FD_sec2_truncate(): unable to extend file properly
+    major: Low-level I/O
+    minor: Seek failed
+  #007: C:\CMake-hdf5-1.10.1\hdf5-1.10.1\src\H5Fint.c line 885 in H5F__dest(): unable to flush cached data (phase 2)
+    major: File accessibilty
+    minor: Unable to flush data from cache
+  #008: C:\CMake-hdf5-1.10.1\hdf5-1.10.1\src\H5Fint.c line 1578 in H5F__flush_phase2(): low level truncate failed
+    major: File accessibilty
+    minor: Write failed
+  #009: C:\CMake-hdf5-1.10.1\hdf5-1.10.1\src\H5FD.c line 1776 in H5FD_truncate(): driver truncate request failed
+    major: Virtual File Layer
+    minor: Can't update object
+  #010: C:\CMake-hdf5-1.10.1\hdf5-1.10.1\src\H5FDsec2.c line 888 in H5FD_sec2_truncate(): unable to extend file properly
+    major: Low-level I/O
+    minor: Seek failed
