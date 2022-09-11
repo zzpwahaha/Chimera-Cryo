@@ -110,7 +110,7 @@ void PictureSettingsControl::initialize( IChimeraQtWindow* parent ){
 	}
 	/// software accumulation mode
 	softwareAccumulationLabel = new QLabel ("Software Accum:", parent);
-	layout2->addWidget(displayTypeLabel, 6, 0);
+	layout2->addWidget(softwareAccumulationLabel, 6, 0);
 	for ( auto picInc : range ( 4 ) ) {
 		softwareAccumulateAll[picInc] = new CQCheckBox("All?", parent);
 		softwareAccumulateAll[ picInc ]->setChecked( 0 );

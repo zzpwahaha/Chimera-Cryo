@@ -250,15 +250,15 @@ void PictureManager::setMultiplePictures( imageParameters imageParams, unsigned 
 	//setPalletes ({ 0,0,0,0 });
 }
 
-void PictureManager::initialize( int manWidth, int manHeight, IChimeraQtWindow* widget, int scaleFactor)
+void PictureManager::initialize( IChimeraQtWindow* widget, int scaleFactor)
 {
 	parentWin = widget;
-	picturesWidth = manWidth;
-	picturesHeight = manHeight;
+	//picturesWidth = manWidth;
+	//picturesHeight = manHeight;
 	// Square: width = 550, height = 440
 	picLayout = new QGridLayout(this);
 	picLayout->setContentsMargins(0, 0, 0, 0);
-	auto width = 1200;
+	auto width = 1100;
 	auto height = 220;
 	pictures[0].initialize("Pic.1", width, height, widget, scaleFactor);
 	pictures[1].initialize("Pic.2", width, height, widget, scaleFactor);

@@ -42,9 +42,9 @@ void QtAndorWindow::initializeWidgets (){
 	alerts.initialize (this);
 	analysisHandler.initialize (this);
 	andorSettingsCtrl.initialize ( this, std::vector<std::string>()/*andor.getVertShiftSpeeds()*/, std::vector<std::string>()/*andor.getHorShiftSpeeds()*/);
-	alerts.setMaximumWidth(350);
-	analysisHandler.setMaximumSize(350, 300);
-	andorSettingsCtrl.setMaximumWidth(350);
+	alerts.setMaximumWidth(450);
+	analysisHandler.setMaximumSize(450, 300);
+	andorSettingsCtrl.setMaximumWidth(450);
 	layout1->addWidget(&alerts);
 	layout1->addWidget(&analysisHandler);
 	layout1->addWidget(&andorSettingsCtrl);
@@ -67,7 +67,7 @@ void QtAndorWindow::initializeWidgets (){
 	layout3->setContentsMargins(0, 0, 0, 0);
 	timer.initialize (this);
 	timer.setMinimumWidth(750);
-	pics.initialize (530 * 2, 460 * 2 + 5, this);
+	pics.initialize (this);
 	// end of literal initialization calls
 	//pics.setSinglePicture (andorSettingsCtrl.getConfigSettings ().andor.imageSettings);
 	timer.setMaximumHeight(45);
