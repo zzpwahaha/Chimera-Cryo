@@ -42,11 +42,13 @@ class AndorCameraCore : public IDeviceCore{
 		void setTemperature();
 		void setExposures();
 		void setImageParametersToCamera();
-		void setScanNumber();
-		double getMinKineticCycleTime( );
+		double setFrameRate();
+		//double getMinKineticCycleTime( );
+		double getMaxFrameRate();
 		void checkAcquisitionTimings(float& kinetic, float& accumulation, std::vector<float>& exposures);
-		void setNumberAccumulations(bool isKinetic);
 		void setCameraTriggerMode();
+		void setCameraGainMode();
+		void setCameraBinningMode();
 		void onFinish();
 		bool isRunning();
 		void setIsRunningState( bool state );
@@ -79,11 +81,12 @@ class AndorCameraCore : public IDeviceCore{
 		//void onFinish(); // Finish from acquisition, also signal waitAndorToFinish
 
 	private:
-		
-		void setAccumulationCycleTime ( );
+		//void setScanNumber();
+		//void setNumberAccumulations(bool isKinetic);
+		//void setAccumulationCycleTime ( );
 		void setAcquisitionMode ( );
 		//void setFrameTransferMode ( );
-		void setKineticCycleTime ( );
+		//void setKineticCycleTime ( );
 		//void setReadMode ( );
 		int mostRecentTemp=20;
 

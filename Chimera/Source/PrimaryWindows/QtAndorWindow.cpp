@@ -205,7 +205,7 @@ void QtAndorWindow::windowOpenConfig (ConfigStream& configFile){
 	try	{
 		ConfigSystem::stdGetFromConfig (configFile, andor, camSettings);
 		andorSettingsCtrl.setConfigSettings (camSettings);
-		andorSettingsCtrl.updateImageDimSettings (camSettings.imageSettings);
+		andorSettingsCtrl.setImageParameters (camSettings.imageSettings);
 		andorSettingsCtrl.updateRunSettingsFromPicSettings ();
 	}
 	catch (ChimeraError& err){
@@ -259,7 +259,8 @@ void QtAndorWindow::abortCameraRun (){
 		status = DRV_ACQUIRING;
 	}
 	if (true/*status == DRV_ACQUIRING*/){
-		andor.abortAcquisition ();
+		//andor.abortAcquisition ();
+		andor.onFinish();
 		timer.setTimerDisplay ("Aborted");
 		andor.setIsRunningState (false);
 		// close the plotting thread.
@@ -704,6 +705,10 @@ bool QtAndorWindow::wantsAutoPause (){
 }
 
 void QtAndorWindow::completeCruncherStart () {
+	if ((mainWin->getExpThread() == nullptr) || (mainWin->getExpThread()->isFinished())) {
+		// then this is called from ProgramNow in AndorWindow
+		return;
+	}
 	auto* cruncherInput = new atomCruncherInput;
 	cruncherInput->plotterActive = plotThreadActive;
 	cruncherInput->imageDims = andorSettingsCtrl.getRunningSettings ().imageSettings;
@@ -843,7 +848,8 @@ std::string QtAndorWindow::getStartMessage (){
 	dialogMsg += "Image Settings:\r\n\t" + str (currentImageParameters.left) + " - " + str (currentImageParameters.right) + ", "
 		+ str (currentImageParameters.bottom) + " - " + str (currentImageParameters.top) + "\r\n";
 	dialogMsg += "\r\n";
-	dialogMsg += "Kintetic Cycle Time:\r\n\t" + str (andrSttngs.kineticCycleTime) + "\r\n";
+	dialogMsg += "FrameRate:\r\n\t" + str (andrSttngs.frameRate) + "\r\n";
+	//dialogMsg += "Kintetic Cycle Time:\r\n\t" + str (andrSttngs.kineticCycleTime) + "\r\n";
 	dialogMsg += "Pictures per Repetition:\r\n\t" + str (andrSttngs.picsPerRepetition) + "\r\n";
 	dialogMsg += "Repetitions per Variation:\r\n\t" + str (andrSttngs.totalPicsInVariation ()) + "\r\n";
 	dialogMsg += "Variations per Experiment:\r\n\t" + str (andrSttngs.totalVariations) + "\r\n";
@@ -976,6 +982,10 @@ void QtAndorWindow::handleBumpAnalysis (profileSettings finishedProfile) {
 
 NewPythonHandler* QtAndorWindow::getPython() {
 	return &pythonHandler;
+}
+
+void QtAndorWindow::manualProgramCameraSetting()
+{
 }
 
 void QtAndorWindow::handleTransformationModeChange () {

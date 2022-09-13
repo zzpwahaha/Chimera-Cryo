@@ -1253,7 +1253,7 @@ void ExpThreadWorker::waitForAndorFinish () {
 	auto& andorCamera = input->devices.getSingleDevice<AndorCameraCore> ();
 	while (true) {
 		if (andorCamera.isRunning()/*andorCamera.queryStatus () == DRV_ACQUIRING*/) {
-			Sleep (10);
+			Sleep (100);
 			emit notification ("Waiting for Andor camera to finish acquisition...\n");
 			if (isAborting) { thrower (abortString); }
 		}

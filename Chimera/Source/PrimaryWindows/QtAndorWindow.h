@@ -105,6 +105,9 @@ class QtAndorWindow : public IChimeraQtWindow{
 		void manualArmCamera ();
 		NewPythonHandler* getPython ();
 
+		// for programming the camera setting before the experiment run so that the settings are the settings that read back from andor
+		void manualProgramCameraSetting();
+
 	private:
         Ui::QtAndorWindow* ui;
 

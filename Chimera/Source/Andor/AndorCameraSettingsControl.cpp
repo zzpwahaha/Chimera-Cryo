@@ -77,14 +77,95 @@ void AndorCameraSettingsControl::initialize ( IChimeraQtWindow* parent, std::vec
 			if (!viewRunningSettings->isChecked ()) {
 				updateTriggerMode ();
 				updateWindowEnabledStatus ();
+				auto& andorCore = parent->andorWin->getCamera();
+				updateSettings();
+				andorCore.setSettings(configSettings.andor);
+				try {
+					andorCore.setCameraTriggerMode();
+				}
+				catch (ChimeraError& e) {
+					parent->reportErr(e.qtrace());
+				}
 			}
 		});
 	configSettings.andor.triggerMode = AndorTriggerMode::mode::External;
+
+	gainCombo = new CQComboBox(parent);
+	for (auto mode : AndorGainMode::allModes) {
+		gainCombo->addItem(qstr(AndorGainMode::toStr(mode)));
+	}
+	gainCombo->setCurrentIndex(0);
+	parent->connect(gainCombo, qOverload<int>(&QComboBox::activated),
+		[this, parent]() {
+			if (!viewRunningSettings->isChecked()) {
+				updateGainMode();
+				updateWindowEnabledStatus();
+				auto& andorCore = parent->andorWin->getCamera();
+				updateSettings();
+				andorCore.setSettings(configSettings.andor);
+				try {
+					andorCore.setCameraGainMode();
+				}
+				catch (ChimeraError& e) {
+					parent->reportErr(e.qtrace());
+				}
+			}
+		});
+	configSettings.andor.gainMode = AndorGainMode::mode::FastestFrameRate;
+
+	//binningCombo = new CQComboBox(parent);
+	//for (auto mode : AndorBinningMode::allModes) {
+	//	binningCombo->addItem(qstr(AndorBinningMode::toStr(mode)));
+	//}
+	//binningCombo->setCurrentIndex(0);
+	//parent->connect(binningCombo, qOverload<int>(&QComboBox::activated),
+	//	[this, parent]() {
+	//		if (!viewRunningSettings->isChecked()) {
+	//			updateBinningMode();
+	//			updateWindowEnabledStatus();
+	//			auto& andorCore = parent->andorWin->getCamera();
+	//			updateSettings();
+	//			andorCore.setSettings(configSettings.andor);
+	//			try {
+	//				andorCore.setCameraBinningMode();
+	//			}
+	//			catch (ChimeraError& e) {
+	//				parent->reportErr(e.qtrace());
+	//			}
+	//		}
+	//	});
+	//configSettings.andor.binningMode = AndorBinningMode::mode::oneByOne;
+
 	layout2->addWidget(cameraModeCombo, 0);
 	layout2->addWidget(triggerCombo, 0);
+	layout2->addWidget(gainCombo, 0);
 
 	QHBoxLayout* layout3 = new QHBoxLayout(this);
 	layout3->setContentsMargins(0, 0, 0, 0);
+
+	frameRateLabel = new QLabel("Frame Rate: ", parent);
+	frameRateEdit = new CQLineEdit(parent);
+	maxframeRateLabel = new QLabel("Max: -1", parent);
+	connect(frameRateEdit, &CQLineEdit::returnPressed, [this, parent]() {
+		auto& andorCore = parent->andorWin->getCamera();
+		updateMaxFrameRate(andorCore.getMaxFrameRate());
+		updateSettings();
+		andorCore.setSettings(configSettings.andor);
+		try {
+			configSettings.andor.frameRate = andorCore.setFrameRate();
+		}
+		catch (ChimeraError& e) {
+			parent->reportErr(e.qtrace());
+		}
+		currentlyRunningSettings.frameRate = configSettings.andor.frameRate;
+		});
+
+	layout3->addWidget(frameRateLabel, 0);
+	layout3->addWidget(frameRateEdit, 0);
+	layout3->addWidget(maxframeRateLabel, 0);
+
+	//QHBoxLayout* layout3 = new QHBoxLayout(this);
+	//layout3->setContentsMargins(0, 0, 0, 0);
 	//frameTransferModeCombo = new CQComboBox(parent);
 	//frameTransferModeCombo->setToolTip("Frame Transfer Mode OFF:\n"
 	//	"Slower than when on. Cleans between images. Mechanical shutter may not be necessary.\n"
@@ -152,29 +233,29 @@ void AndorCameraSettingsControl::initialize ( IChimeraQtWindow* parent, std::vec
 
 
 	picSettingsObj.initialize( parent );
-	imageDimensionsObj.initialize( parent);
+	imageDimensionsObj.initialize(parent);
 
 	QGridLayout* layout6 = new QGridLayout(this);
-	// Accumulation Time
-	accumulationCycleTimeLabel = new QLabel ("Accumulation Cycle Time", parent);
-	accumulationCycleTimeEdit = new CQLineEdit ("0.1", parent);
-	// Accumulation Number
-	accumulationNumberLabel = new QLabel ("Accumulation #", parent);
-	accumulationNumberEdit = new CQLineEdit ("1", parent);
-	// minimum kinetic cycle time (determined by camera)
-	minKineticCycleTimeLabel = new QLabel ("Minimum Kinetic Cycle Time (s)", parent);
-	minKineticCycleTimeDisp = new QLabel("---", parent);
-	/// Kinetic Cycle Time
-	kineticCycleTimeLabel = new QLabel ("Kinetic Cycle Time (s)", parent);
-	kineticCycleTimeEdit = new CQLineEdit("0.1", parent);	
-	layout6->addWidget(accumulationCycleTimeLabel, 0, 0);
-	layout6->addWidget(accumulationCycleTimeEdit, 0, 1);
-	layout6->addWidget(accumulationNumberLabel, 0, 2);
-	layout6->addWidget(accumulationNumberEdit, 0, 3);
-	layout6->addWidget(minKineticCycleTimeLabel, 1, 0);
-	layout6->addWidget(minKineticCycleTimeDisp, 1, 1);
-	layout6->addWidget(kineticCycleTimeLabel, 1, 2);
-	layout6->addWidget(kineticCycleTimeEdit, 1, 3);
+	//// Accumulation Time
+	//accumulationCycleTimeLabel = new QLabel ("Accumulation Cycle Time", parent);
+	//accumulationCycleTimeEdit = new CQLineEdit ("0.1", parent);
+	//// Accumulation Number
+	//accumulationNumberLabel = new QLabel ("Accumulation #", parent);
+	//accumulationNumberEdit = new CQLineEdit ("1", parent);
+	//// minimum kinetic cycle time (determined by camera)
+	//minKineticCycleTimeLabel = new QLabel ("Minimum Kinetic Cycle Time (s)", parent);
+	//minKineticCycleTimeDisp = new QLabel("---", parent);
+	///// Kinetic Cycle Time
+	//kineticCycleTimeLabel = new QLabel ("Kinetic Cycle Time (s)", parent);
+	//kineticCycleTimeEdit = new CQLineEdit("0.1", parent);	
+	//layout6->addWidget(accumulationCycleTimeLabel, 0, 0);
+	//layout6->addWidget(accumulationCycleTimeEdit, 0, 1);
+	//layout6->addWidget(accumulationNumberLabel, 0, 2);
+	//layout6->addWidget(accumulationNumberEdit, 0, 3);
+	//layout6->addWidget(minKineticCycleTimeLabel, 1, 0);
+	//layout6->addWidget(minKineticCycleTimeDisp, 1, 1);
+	//layout6->addWidget(kineticCycleTimeLabel, 1, 2);
+	//layout6->addWidget(kineticCycleTimeEdit, 1, 3);
 
 	calControl.initialize( parent );
 
@@ -184,8 +265,8 @@ void AndorCameraSettingsControl::initialize ( IChimeraQtWindow* parent, std::vec
 	//layout->addLayout(layout4);
 	layout->addLayout(layout5);
 	layout->addWidget(temperatureMsg);
-	layout->addWidget(&picSettingsObj);
 	layout->addWidget(&imageDimensionsObj);
+	layout->addWidget(&picSettingsObj);
 	layout->addLayout(layout6);
 	layout->addWidget(&calControl);
 	updateWindowEnabledStatus ();
@@ -209,8 +290,9 @@ void AndorCameraSettingsControl::setConfigSettings (AndorRunSettings inputSettin
 void AndorCameraSettingsControl::updateDisplays () {
 	auto optionsIn = viewRunningSettings->isChecked () ? currentlyRunningSettings : configSettings.andor;
 	controlAndorCameraCheck->setChecked (optionsIn.controlCamera);
-	kineticCycleTimeEdit->setText (cstr (optionsIn.kineticCycleTime));
-	accumulationCycleTimeEdit->setText (cstr (optionsIn.accumulationTime));
+	frameRateEdit->setText(qstr(optionsIn.frameRate));
+	//kineticCycleTimeEdit->setText (qstr (optionsIn.kineticCycleTime));
+	//accumulationCycleTimeEdit->setText (qstr (optionsIn.accumulationTime));
 	int ind = cameraModeCombo->findText (AndorRunModes::toStr (optionsIn.acquisitionMode).c_str ());
 	if (ind != -1) {
 		cameraModeCombo->setCurrentIndex (ind);
@@ -219,10 +301,18 @@ void AndorCameraSettingsControl::updateDisplays () {
 	if (ind != -1) {
 		triggerCombo->setCurrentIndex (ind);
 	}
-	kineticCycleTimeEdit->setText (cstr (optionsIn.kineticCycleTime));
-	accumulationCycleTimeEdit->setText (cstr (optionsIn.accumulationTime * 1000.0));
-	accumulationNumberEdit->setText (cstr (optionsIn.accumulationNumber));
-	temperatureEdit->setText (cstr (optionsIn.temperatureSetting));
+	ind = gainCombo->findText(AndorGainMode::toStr(optionsIn.gainMode).c_str());
+	if (ind != -1) {
+		gainCombo->setCurrentIndex(ind);
+	}
+	//ind = binningCombo->findText(AndorBinningMode::toStr(optionsIn.binningMode).c_str());
+	//if (ind != -1) {
+	//	binningCombo->setCurrentIndex(ind);
+	//}
+	//kineticCycleTimeEdit->setText (qstr (optionsIn.kineticCycleTime));
+	//accumulationCycleTimeEdit->setText (qstr (optionsIn.accumulationTime * 1000.0));
+	//accumulationNumberEdit->setText (qstr (optionsIn.accumulationNumber));
+	temperatureEdit->setText (qstr (optionsIn.temperatureSetting));
 	imageDimensionsObj.setImageParametersFromInput (optionsIn.imageSettings);
 
 	//verticalShiftSpeedCombo->setCurrentIndex(optionsIn.vertShiftSpeedSetting);
@@ -292,12 +382,15 @@ void AndorCameraSettingsControl::updateSettings(){
 	configSettings.andor.picsPerRepetition =	picSettingsObj.getPicsPerRepetition( );
 	
 	configSettings.andor.imageSettings = readImageParameters( );
+	configSettings.andor.frameRate = getFrameRate();
 	//configSettings.andor.kineticCycleTime = getKineticCycleTime( );
-	configSettings.andor.accumulationTime = getAccumulationCycleTime( );
-	configSettings.andor.accumulationNumber = getAccumulationNumber( );
+	//configSettings.andor.accumulationTime = getAccumulationCycleTime( );
+	//configSettings.andor.accumulationNumber = getAccumulationNumber( );
 
 	updateCameraMode( );
 	updateTriggerMode( );
+	updateGainMode();
+	//updateBinningMode();
 
 	//configSettings.andor.horShiftSpeedSetting = getHsSpeed ();
 	//configSettings.andor.vertShiftSpeedSetting = getVsSpeed ();
@@ -325,7 +418,8 @@ AndorCameraSettings AndorCameraSettingsControl::getCalibrationSettings( ){
 	callOptions.andor.exposureTimes = { float(10e-3) };
 	// want to calibrate the image area to be used in the experiment, so...
 	callOptions.andor.imageSettings = imageDimensionsObj.readImageParameters( );
-	callOptions.andor.kineticCycleTime = 10e-3f;
+	callOptions.andor.frameRate = 10.0;
+	//callOptions.andor.kineticCycleTime = 10e-3f;
 	callOptions.andor.picsPerRepetition = 1;
 	//callOptions.andor.readMode = 4;
 	callOptions.andor.repetitionsPerVariation = 100;
@@ -405,8 +499,12 @@ void AndorCameraSettingsControl::setRepsPerVariation(unsigned repsPerVar){
 }
 
 void AndorCameraSettingsControl::changeTemperatureDisplay( AndorTemperatureStatus stat ){
-	temperatureDisplay->setText ( cstr ( stat.temperatureSetting ) );
-	temperatureMsg->setText ( cstr ( stat.msg ) );
+	temperatureDisplay->setText ( qstr( stat.temperatureSetting ) );
+	temperatureMsg->setText (  qstr( stat.msg ) );
+	QString colorcode = QVariant(stat.colorCode).toString();
+	for (auto l : { temperatureDisplay ,temperatureMsg }) {
+		l->setStyleSheet("QLabel { background-color :" + colorcode + " ; }");
+	}
 }
 
 void AndorCameraSettingsControl::updateRunSettingsFromPicSettings( ){
@@ -422,61 +520,78 @@ void AndorCameraSettingsControl::handlePictureSettings(){
 	updateRunSettingsFromPicSettings( );
 }
 
-double AndorCameraSettingsControl::getKineticCycleTime( ){
-	if (!kineticCycleTimeEdit) {
+double AndorCameraSettingsControl::getFrameRate()
+{
+	if (!frameRateEdit) {
 		return 0;
 	}
 	try{
-		configSettings.andor.kineticCycleTime = boost::lexical_cast<float>( str(kineticCycleTimeEdit->text ()) );
-		kineticCycleTimeEdit->setText( cstr( configSettings.andor.kineticCycleTime ) );
+		configSettings.andor.frameRate = boost::lexical_cast<float>( str(frameRateEdit->text ()) );
+		frameRateEdit->setText( qstr( configSettings.andor.frameRate) );
 	}
 	catch ( boost::bad_lexical_cast& ){
-		configSettings.andor.kineticCycleTime = 0.1f;
-		kineticCycleTimeEdit->setText ( cstr( configSettings.andor.kineticCycleTime ) );
-		throwNested( "Please enter a valid float for the kinetic cycle time." );
+		configSettings.andor.frameRate = 10.0;
+		frameRateEdit->setText ( qstr( configSettings.andor.frameRate) );
+		throwNested( "Please enter a valid double for the frame rate." );
 	}
-	return configSettings.andor.kineticCycleTime;
+	return configSettings.andor.frameRate;
 }
 
-double AndorCameraSettingsControl::getAccumulationCycleTime( ){
-	if (!accumulationCycleTimeEdit){
-		return 0;
-	}
-	try	{
-		configSettings.andor.accumulationTime = boost::lexical_cast<float>( str(accumulationCycleTimeEdit->text ()) );
-		accumulationCycleTimeEdit->setText( cstr( configSettings.andor.accumulationTime ) );
-	}
-	catch ( boost::bad_lexical_cast& ){
-		configSettings.andor.accumulationTime = 0.1f;
-		accumulationCycleTimeEdit->setText( cstr( configSettings.andor.accumulationTime ) );
-		throwNested( "Please enter a valid float for the accumulation cycle time." );
-	}
-	return configSettings.andor.accumulationTime;
-}
-
-unsigned AndorCameraSettingsControl::getAccumulationNumber( ){
-	if (!accumulationNumberEdit){
-		return 0;
-	}
-	try	{
-		configSettings.andor.accumulationNumber = boost::lexical_cast<long>( str(accumulationNumberEdit->text ()) );
-		accumulationNumberEdit->setText( cstr( configSettings.andor.accumulationNumber ) );
-	}
-	catch ( boost::bad_lexical_cast& ){
-		configSettings.andor.accumulationNumber = 1;
-		accumulationNumberEdit->setText( cstr( configSettings.andor.accumulationNumber ) );
-		throwNested( "Please enter a valid float for the Accumulation number." );
-	}
-	return configSettings.andor.accumulationNumber;
-}
+//double AndorCameraSettingsControl::getKineticCycleTime( ){
+//	if (!kineticCycleTimeEdit) {
+//		return 0;
+//	}
+//	try{
+//		configSettings.andor.kineticCycleTime = boost::lexical_cast<float>( str(kineticCycleTimeEdit->text ()) );
+//		kineticCycleTimeEdit->setText( cstr( configSettings.andor.kineticCycleTime ) );
+//	}
+//	catch ( boost::bad_lexical_cast& ){
+//		configSettings.andor.kineticCycleTime = 0.1f;
+//		kineticCycleTimeEdit->setText ( cstr( configSettings.andor.kineticCycleTime ) );
+//		throwNested( "Please enter a valid float for the kinetic cycle time." );
+//	}
+//	return configSettings.andor.kineticCycleTime;
+//}
+//
+//double AndorCameraSettingsControl::getAccumulationCycleTime( ){
+//	if (!accumulationCycleTimeEdit){
+//		return 0;
+//	}
+//	try	{
+//		configSettings.andor.accumulationTime = boost::lexical_cast<float>( str(accumulationCycleTimeEdit->text ()) );
+//		accumulationCycleTimeEdit->setText( cstr( configSettings.andor.accumulationTime ) );
+//	}
+//	catch ( boost::bad_lexical_cast& ){
+//		configSettings.andor.accumulationTime = 0.1f;
+//		accumulationCycleTimeEdit->setText( cstr( configSettings.andor.accumulationTime ) );
+//		throwNested( "Please enter a valid float for the accumulation cycle time." );
+//	}
+//	return configSettings.andor.accumulationTime;
+//}
+//
+//unsigned AndorCameraSettingsControl::getAccumulationNumber( ){
+//	if (!accumulationNumberEdit){
+//		return 0;
+//	}
+//	try	{
+//		configSettings.andor.accumulationNumber = boost::lexical_cast<long>( str(accumulationNumberEdit->text ()) );
+//		accumulationNumberEdit->setText( cstr( configSettings.andor.accumulationNumber ) );
+//	}
+//	catch ( boost::bad_lexical_cast& ){
+//		configSettings.andor.accumulationNumber = 1;
+//		accumulationNumberEdit->setText( cstr( configSettings.andor.accumulationNumber ) );
+//		throwNested( "Please enter a valid float for the Accumulation number." );
+//	}
+//	return configSettings.andor.accumulationNumber;
+//}
 
 void AndorCameraSettingsControl::updatePicSettings ( andorPicSettingsGroup settings ){
 	picSettingsObj.updateAllSettings ( settings );
 }
 
-void AndorCameraSettingsControl::updateImageDimSettings( imageParameters settings ){
-	imageDimensionsObj.setImageParametersFromInput ( settings );
-}
+//void AndorCameraSettingsControl::updateImageDimSettings( imageParameters settings ){
+//	imageDimensionsObj.setImageParametersFromInput ( settings );
+//}
 
 andorPicSettingsGroup AndorCameraSettingsControl::getPictureSettingsFromConfig (ConfigStream& configFile ){
 	return PictureSettingsControl::getPictureSettingsFromConfig ( configFile );
@@ -490,9 +605,11 @@ void AndorCameraSettingsControl::handleSaveConfig(ConfigStream& saveFile){
 	//saveFile << "/*EM-Gain Is On:*/\t\t\t" << configSettings.andor.emGainModeIsOn << "\n";
 	//saveFile << "/*EM-Gain Level:*/\t\t\t" << configSettings.andor.emGainLevel << "\n";
 	saveFile << "/*Acquisition Mode:*/\t\t" << AndorRunModes::toStr (configSettings.andor.acquisitionMode) << "\n";
-	saveFile << "/*Kinetic Cycle Time:*/\t\t" << configSettings.andor.kineticCycleTime << "\n";
-	saveFile << "/*Accumulation Time:*/\t\t" << configSettings.andor.accumulationTime << "\n";
-	saveFile << "/*Accumulation Number:*/\t" << configSettings.andor.accumulationNumber << "\n";
+	saveFile << "/*Gain Mode:*/\t\t\t\t" << AndorGainMode::toStr(configSettings.andor.gainMode) << "\n";
+	saveFile << "/*Frame Rate:*/\t\t\t\t" << configSettings.andor.frameRate << "\n";
+	//saveFile << "/*Kinetic Cycle Time:*/\t\t" << configSettings.andor.kineticCycleTime << "\n";
+	//saveFile << "/*Accumulation Time:*/\t\t" << configSettings.andor.accumulationTime << "\n";
+	//saveFile << "/*Accumulation Number:*/\t" << configSettings.andor.accumulationNumber << "\n";
 	saveFile << "/*Camera Temperature:*/\t\t" << configSettings.andor.temperatureSetting << "\n";
 	saveFile << "/*Number of Exposures:*/\t" << configSettings.andor.exposureTimes.size ( ) 
 			 << "\n/*Exposure Times:*/\t\t\t";
@@ -536,28 +653,62 @@ void AndorCameraSettingsControl::updateCameraMode( ){
 	//}
 }
 
+void AndorCameraSettingsControl::updateGainMode()
+{
+	if (currentlyUneditable) {
+		return;
+	}
+	int sel = gainCombo->currentIndex();
+	if (sel == -1) {
+		return;
+	}
+	configSettings.andor.gainMode = AndorGainMode::fromStr(str(gainCombo->currentText()));
+}
+
+//void AndorCameraSettingsControl::updateBinningMode()
+//{
+//	if (currentlyUneditable) {
+//		return;
+//	}
+//	int sel = binningCombo->currentIndex();
+//	if (sel == -1) {
+//		return;
+//	}
+//	configSettings.andor.binningMode = AndorBinningMode::fromStr(str(binningCombo->currentText()));
+//	//imageDimensionsObj.setBinningMode(configSettings.andor.binningMode);
+//}
+
 void AndorCameraSettingsControl::updateWindowEnabledStatus (){
 	controlAndorCameraCheck->setEnabled (!viewRunningSettings->isChecked ());
 	cameraModeCombo->setEnabled (!viewRunningSettings->isChecked ());
 	//emGainEdit->setEnabled (!viewRunningSettings->isChecked ());
 	//emGainBtn->setEnabled (!viewRunningSettings->isChecked ());
 	triggerCombo->setEnabled (!viewRunningSettings->isChecked ());
+	gainCombo->setEnabled(!viewRunningSettings->isChecked());
+	//binningCombo->setEnabled(!viewRunningSettings->isChecked());
 
 	auto settings = getConfigSettings ();
-	accumulationCycleTimeEdit->setEnabled(settings.andor.acquisitionMode == AndorRunModes::mode::Accumulate 
-		&& !viewRunningSettings->isChecked ());
-	accumulationNumberEdit->setEnabled (settings.andor.acquisitionMode == AndorRunModes::mode::Accumulate 
-		&& !viewRunningSettings->isChecked ());
-	kineticCycleTimeEdit->setEnabled (settings.andor.acquisitionMode == AndorRunModes::mode::Kinetic 
-		&& !viewRunningSettings->isChecked ());
+	frameRateEdit->setEnabled(settings.andor.triggerMode == AndorTriggerMode::mode::Internal
+		&& !viewRunningSettings->isChecked());
+	//accumulationCycleTimeEdit->setEnabled(settings.andor.acquisitionMode == AndorRunModes::mode::Accumulate 
+	//	&& !viewRunningSettings->isChecked ());
+	//accumulationNumberEdit->setEnabled (settings.andor.acquisitionMode == AndorRunModes::mode::Accumulate 
+	//	&& !viewRunningSettings->isChecked ());
+	//kineticCycleTimeEdit->setEnabled (settings.andor.acquisitionMode == AndorRunModes::mode::Kinetic 
+	//	&& !viewRunningSettings->isChecked ());
 	
 	imageDimensionsObj.updateEnabledStatus (viewRunningSettings->isChecked ());
 	picSettingsObj.setEnabledStatus (viewRunningSettings->isChecked ());
 
 }
 
-void AndorCameraSettingsControl::updateMinKineticCycleTime( double time ){
-	minKineticCycleTimeDisp->setText( cstr( time ) );
+//void AndorCameraSettingsControl::updateMinKineticCycleTime( double time ){
+//	minKineticCycleTimeDisp->setText( cstr( time ) );
+//}
+
+void AndorCameraSettingsControl::updateMaxFrameRate(double framerate)
+{
+	maxframeRateLabel->setText("Max: " + qstr(framerate, 3));
 }
 
 imageParameters AndorCameraSettingsControl::readImageParameters(){
@@ -579,8 +730,8 @@ void AndorCameraSettingsControl::checkIfReady(){
 		thrower ("ERROR: Please set the number of pictures per repetition to a positive non-zero value.");
 	}
 	if ( configSettings.andor.acquisitionMode == AndorRunModes::mode::Kinetic ){
-		if ( configSettings.andor.kineticCycleTime == 0 && configSettings.andor.triggerMode == AndorTriggerMode::mode::Internal ){
-			thrower ("ERROR: Since you are running in internal trigger mode, please Set a kinetic cycle time.");
+		if ( configSettings.andor.frameRate == 0 && configSettings.andor.triggerMode == AndorTriggerMode::mode::Internal ){
+			thrower ("ERROR: Since you are running in internal trigger mode, please Set a frame rate.");
 		}
 		if ( configSettings.andor.repetitionsPerVariation <= 0 ){
 			thrower ("ERROR: Please set the \"Repetitions Per Variation\" variable to a positive non-zero value.");
@@ -589,14 +740,14 @@ void AndorCameraSettingsControl::checkIfReady(){
 			thrower ("ERROR: Please set the number of variations to a positive non-zero value.");
 		}
 	}
-	if ( configSettings.andor.acquisitionMode == AndorRunModes::mode::Accumulate ){
-		if ( configSettings.andor.accumulationNumber <= 0 ){
-			thrower ("ERROR: Please set the current Accumulation Number to a positive non-zero value.");
-		}
-		if ( configSettings.andor.accumulationTime <= 0 ){
-			thrower ("ERROR: Please set the current Accumulation Time to a positive non-zero value.");
-		}
-	}
+	//if ( configSettings.andor.acquisitionMode == AndorRunModes::mode::Accumulate ){
+	//	if ( configSettings.andor.accumulationNumber <= 0 ){
+	//		thrower ("ERROR: Please set the current Accumulation Number to a positive non-zero value.");
+	//	}
+	//	if ( configSettings.andor.accumulationTime <= 0 ){
+	//		thrower ("ERROR: Please set the current Accumulation Time to a positive non-zero value.");
+	//	}
+	//}
 }
 
 void AndorCameraSettingsControl::handelSaveMasterConfig ( std::stringstream& configFile ){

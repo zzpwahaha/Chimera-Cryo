@@ -11,12 +11,12 @@ ImageDimsControl::ImageDimsControl (std::string whichCam) : camType (whichCam) {
 	isReady = false;
 }
 
-void ImageDimsControl::initialize( IChimeraQtWindow* parent) {
+void ImageDimsControl::initialize(/*CQComboBox* binningCombo, */IChimeraQtWindow* parent) {
 	QGridLayout* layout = new QGridLayout(this);
 	leftText = new QLabel ("Left", parent);
-	rightText = new QLabel ("Right (/512)", parent);
+	rightText = new QLabel ("Right (/2048)", parent);
 	horBinningText = new QLabel ("H. Bin", parent);
-	bottomLabel = new QLabel ("Bottom (/512)", parent);
+	bottomLabel = new QLabel ("Bottom (/2048)", parent);
 	topLabel = new QLabel ("Top", parent);
 	vertBinningText = new QLabel ("V. Bin", parent);
 	leftEdit = new CQLineEdit ("1", parent);
@@ -25,16 +25,22 @@ void ImageDimsControl::initialize( IChimeraQtWindow* parent) {
 	bottomEdit = new CQLineEdit ("1", parent);
 	topEdit = new CQLineEdit ("5", parent);
 	vertBinningEdit = new CQLineEdit ("1", parent);
+	
+	//binningLabel = new QLabel("Bin. Opts", parent);
+
+
 	int idx = 0;
-	for (auto l : { leftText ,rightText ,horBinningText,bottomLabel,topLabel,vertBinningText }) {
+	for (auto l : { leftText ,rightText ,horBinningText,bottomLabel,topLabel,vertBinningText, /*binningLabel*/}) {
 		layout->addWidget(l, 0, idx);
 		idx++;
 	}
 	idx = 0;
-	for (auto l : { leftEdit ,rightEdit ,horBinningEdit,bottomEdit,topEdit,vertBinningEdit }) {
+	for (auto l : { leftEdit ,rightEdit ,horBinningEdit,bottomEdit,topEdit,vertBinningEdit, }) {
 		layout->addWidget(l, 1, idx);
 		idx++;
 	}
+	//layout->addWidget(binningCombo, 1, idx);
+	//binningComboCopy = binningCombo;
 }
 
 void ImageDimsControl::saveParams (ConfigStream& saveFile, imageParameters params) {
@@ -47,6 +53,11 @@ void ImageDimsControl::saveParams (ConfigStream& saveFile, imageParameters param
 			 << "\n/*V-Bin:*/ " << params.verticalBinning
 			 << "\nEND_CAMERA_IMAGE_DIMENSIONS\n";
 }
+
+//void ImageDimsControl::setBinningMode(AndorBinningMode::mode mode)
+//{
+//	binningMode = mode;
+//}
 
 void ImageDimsControl::handleSave(ConfigStream& saveFile ){
 	saveParams (saveFile, readImageParameters());
@@ -107,8 +118,11 @@ imageParameters ImageDimsControl::readImageParameters(){
 		isReady = false;
 		throwNested ( "Bottom border argument not an integer!\r\n" );
 	}
+	//int sel = binningComboCopy->currentIndex();
+	//auto binningMode = AndorBinningMode::fromStr(str(binningComboCopy->currentText()));
 	try	{
 		params.horizontalBinning = boost::lexical_cast<int>( str(horBinningEdit->text()) );
+		//params.horizontalBinning = AndorBinningMode::toInt(binningMode);
 	}
 	catch ( boost::bad_lexical_cast&) {
 		isReady = false;
@@ -116,6 +130,7 @@ imageParameters ImageDimsControl::readImageParameters(){
 	}
 	try	{
 		params.verticalBinning = boost::lexical_cast<int>( str(vertBinningEdit->text()) );
+		//params.horizontalBinning = AndorBinningMode::toInt(binningMode);
 	}
 	catch ( boost::bad_lexical_cast&) {
 		isReady = false;

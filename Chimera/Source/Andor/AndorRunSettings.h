@@ -3,6 +3,8 @@
 #include "GeneralImaging/imageParameters.h"
 #include "Andor/AndorRunMode.h"
 #include "Andor/AndorTriggerModes.h"
+#include "Andor/AndorGainMode.h"
+#include "Andor/AndorBinningMode.h"
 #include <string>
 #include <vector>
 
@@ -22,12 +24,15 @@ struct AndorRunSettings{
 	// 1 means frame transfer mode on, 0 means non-frame transfer mode.
 	//int frameTransferMode = 0;
 	AndorTriggerMode::mode triggerMode = AndorTriggerMode::mode::External;
+	AndorGainMode::mode gainMode = AndorGainMode::mode::FastestFrameRate;
+	AndorBinningMode::mode binningMode = AndorBinningMode::mode::oneByOne;
 	bool showPicsInRealTime = false;
 	//
 	double exposureTime = 0.001;
-	float kineticCycleTime = 0.1f;
-	float accumulationTime = 0;
-	int accumulationNumber = 1;
+	double frameRate = 10.0;
+	//float kineticCycleTime = 0.1f;
+	//float accumulationTime = 0;
+	//int accumulationNumber = 1;
 	std::vector<float> exposureTimes = { 0.026f };
 	//
 	unsigned picsPerRepetition=1;

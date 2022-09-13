@@ -254,7 +254,7 @@ void PictureControl::recalculateGrid(imageParameters newParameters){
 		widthPicScale = double(unofficialImageParameters.width()) / unofficialImageParameters.height();
 	}*/
 	auto& uIP = unofficialImageParameters;
-	double w_to_h_ratio = double (uIP.width ()) / uIP.height ();
+	double w_to_h_ratio = double (uIP.widthBinned ()) / uIP.heightBinned ();
 	auto& sBA = scaledBackgroundArea;
 	double sba_w = sBA.right () - sBA.left ();
 	double sba_h = sBA.bottom () - sBA.top ();
@@ -276,9 +276,9 @@ void PictureControl::recalculateGrid(imageParameters newParameters){
 	pictureArea.setTop (mid.y () - height / 2);
 	pictureArea.setBottom (mid.y () + height / 2);
 
-	grid.resize(newParameters.width());
+	grid.resize(newParameters.widthBinned());
 	for (unsigned colInc = 0; colInc < grid.size(); colInc++){
-		grid[colInc].resize(newParameters.height());
+		grid[colInc].resize(newParameters.heightBinned());
 		for (unsigned rowInc = 0; rowInc < grid[colInc].size(); rowInc++){
 			// for all 4 pictures...
 			grid[colInc][rowInc].setLeft(int(pictureArea.left()

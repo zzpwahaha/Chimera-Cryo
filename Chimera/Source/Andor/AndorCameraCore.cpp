@@ -43,6 +43,8 @@ AndorRunSettings AndorCameraCore::getSettingsFromConfig (ConfigStream& configFil
 	//configFile >> tempSettings.emGainLevel;
 	txt = configFile.getline ();
 	tempSettings.acquisitionMode = AndorRunModes::fromStr(txt);
+	txt = configFile.getline();
+	tempSettings.gainMode= AndorGainMode::fromStr(txt);
 	//if (txt == AndorRunModes::toStr (AndorRunModes::mode::Video) || txt == "Video Mode"){
 	//	tempSettings.acquisitionMode = AndorRunModes::mode::Video;
 	//	tempSettings.repetitionsPerVariation = INT_MAX;
@@ -56,9 +58,10 @@ AndorRunSettings AndorCameraCore::getSettingsFromConfig (ConfigStream& configFil
 	//else{
 	//	thrower ("ERROR: Unrecognized camera mode: " + txt);
 	//}
-	configFile >> tempSettings.kineticCycleTime;
-	configFile >> tempSettings.accumulationTime;
-	configFile >> tempSettings.accumulationNumber;
+	configFile >> tempSettings.frameRate;
+	//configFile >> tempSettings.kineticCycleTime;
+	//configFile >> tempSettings.accumulationTime;
+	//configFile >> tempSettings.accumulationNumber;
 	configFile >> tempSettings.temperatureSetting;
 	unsigned numExposures = 0;
 	configFile >> numExposures;
@@ -76,10 +79,22 @@ AndorRunSettings AndorCameraCore::getSettingsFromConfig (ConfigStream& configFil
 AndorCameraCore::AndorCameraCore( bool safemode_opt ) : safemode( safemode_opt ), flume( safemode_opt ){
 	//runSettings.emGainModeIsOn = false;
 	flume.initialize( );
-	flume.setBaselineClamp( 1 );
-	flume.setBaselineOffset( 0 );
-	flume.setDMAParameters( 1, 0.0001f );
+	//flume.setBaselineClamp( 1 );
+	//flume.setBaselineOffset( 0 );
+	//flume.setDMAParameters( 1, 0.0001f );
 
+	//Set the camera to continuously acquires frames 
+	flume.setEnumString(L"CycleMode", L"Continuous");
+	flume.setEnumString(L"TriggerSource", L"D-Type Connector");
+	flume.setEnumString(L"PixelEncoding", L"Mono16");
+
+	flume.setEnumString(L"FrameGenMode", L"Off");
+	//Set the camera AUX out to show if any pixel row is being exposed
+	flume.setEnumString(L"IOSelector", L"Aux Out 1");
+	flume.setEnumString(L"AuxiliaryOutSource", L"FireAny");
+	flume.setEnumString(L"IOSelector", L"Aux Out 2");
+	flume.setEnumString(L"AuxOutSourceTwo", L"ExternalShutterControl");
+	flume.setEnumString(L"FanSpeed", L"On");
 
 }
 
@@ -122,11 +137,16 @@ void AndorCameraCore::pauseThread(){
  */
 void AndorCameraCore::onFinish(){
 	//threadInput.signaler.notify_all();
-	flume.command(L"Acquisition Stop");
-	flume.flush();
+	try {
+		flume.abortAcquisition();
+	}
+	catch (ChimeraError& e) {
+		/*should I catch? zzp 2022/09/12*/
+	}
 
-	//Free the allocated buffer s
-	for (int i = 0; i < numberOfAcqBuffers; i++) {
+
+	//Free the allocated buffers 
+	for (int i = 0; i < acqBuffers.size(); i++) {
 		delete[] acqBuffers[i];
 	}
 	cameraIsRunning = false;
@@ -206,6 +226,10 @@ void AndorCameraCore::armCamera( double& minKineticCycleTime ){
 	if (runSettings.triggerMode != AndorTriggerMode::mode::ExternalExposure) {
 		setExposures();
 	}
+	if (runSettings.triggerMode == AndorTriggerMode::mode::Internal) {
+		setFrameRate();
+	}
+	//setCameraBinningMode();
 	setImageParametersToCamera();
 	// Set Mode-Specific Parameters
 	if (runSettings.acquisitionMode == AndorRunModes::mode::Single){
@@ -214,24 +238,25 @@ void AndorCameraCore::armCamera( double& minKineticCycleTime ){
 		/// TODO: set this properly
 	}
 	else if (runSettings.acquisitionMode == AndorRunModes::mode::Kinetic){
-		setKineticCycleTime();
-		setScanNumber();
+		//setKineticCycleTime();
+		//setScanNumber();
 		// set this to 1.
-		setNumberAccumulations(true);
+		//setNumberAccumulations(true);
 		//setFrameTransferMode ( );
 	}
 	else if (runSettings.acquisitionMode == AndorRunModes::mode::Accumulate){
-		setAccumulationCycleTime();
-		setNumberAccumulations(false);
+		//setAccumulationCycleTime();
+		//setNumberAccumulations(false);
 	}
 	//setGainMode();
 	setCameraTriggerMode();
+	setCameraGainMode();
 
 
 	currentPictureNumber = 0;
 	cameraIsRunning = true;
 	//cameraIsArmed = true;
-	flume.setEnumString(L"Pixel Encoding", L"Mono16");
+
 	AT_64 ImageSizeBytes;
 	flume.getInt(L"Image Size Bytes", &ImageSizeBytes);
 	bufferSize = static_cast<int>(ImageSizeBytes);
@@ -246,10 +271,6 @@ void AndorCameraCore::armCamera( double& minKineticCycleTime ){
 		flume.queueBuffer(acqBuffers[i], bufferSize);
 	}
 
-	//Set the camera to continuously acquires frames 
-	flume.setEnumString(L"CycleMode", L"Continuous");
-	//Set the camera AUX out to show if any pixel row is being exposed
-	flume.setEnumString(L"AuxiliaryOutSource", L"FireAny");
 	flume.startAcquisition();
 
 
@@ -322,8 +343,8 @@ std::vector<Matrix<long>> AndorCameraCore::acquireImageData (){
 			repImages.resize (runSettings.showPicsInRealTime ? 1 : runSettings.picsPerRepetition);
 		}
 		auto& imSettings = runSettings.imageSettings;
-		Matrix<long> tempImage (imSettings.width (), imSettings.height (), 0);
-		repImages[experimentPictureNumber] = Matrix<long> (imSettings.height (), imSettings.width (), 0);
+		Matrix<long> tempImage (imSettings.widthBinned (), imSettings.heightBinned (), 0);
+		repImages[experimentPictureNumber] = Matrix<long> (imSettings.heightBinned (), imSettings.widthBinned (), 0);
 		if (!safemode){
 			try	{
 				//flume.getOldestImage(tempImage);
@@ -361,7 +382,7 @@ std::vector<Matrix<long>> AndorCameraCore::acquireImageData (){
 				std::normal_distribution<> dist (180, 20);
 				std::normal_distribution<> dist2 (350, 100);
 				tempImage.data[imageVecInc] = dist (e2) + 10;
-				if (((imageVecInc / imSettings.width ()) % 2 == 1) && ((imageVecInc % imSettings.width ()) % 2 == 1)){
+				if (((imageVecInc / imSettings.widthBinned ()) % 2 == 1) && ((imageVecInc % imSettings.widthBinned()) % 2 == 1)){
 					// can have an atom here.
 					if (unsigned (rand ()) % 300 > imageVecInc + 50){
 						// use the exposure time and em gain level 
@@ -405,10 +426,22 @@ void AndorCameraCore::setCameraTriggerMode(){
 	flume.setEnumString(L"TriggerMode", w_str(trgmode.c_str()).c_str());
 }
 
+void AndorCameraCore::setCameraGainMode()
+{
+	std::string gainmode = AndorGainMode::toStr(runSettings.gainMode);
+	flume.setEnumString(L"GainMode", w_str(gainmode.c_str()).c_str());
+}
+
+void AndorCameraCore::setCameraBinningMode()
+{
+	std::string binningmode = AndorBinningMode::toStr(runSettings.binningMode);
+	flume.setEnumString(L"AOIBinning", w_str(binningmode.c_str()).c_str());
+}
+
 
 void AndorCameraCore::setTemperature(){
 	// Get the current temperature
-	if (runSettings.temperatureSetting < -60 || runSettings.temperatureSetting > 25){
+	if (runSettings.temperatureSetting < -45 || runSettings.temperatureSetting > 25){
 		auto answer = QMessageBox::question(nullptr, "Temperature Warning!", "Warning: The selected temperature is "
 			"outside the \"normal\" temperature range of the camera (-60 through 25 C). Proceed anyways?");
 		if (answer == QMessageBox::No){
@@ -433,40 +466,52 @@ void AndorCameraCore::setExposures(){
 	//	thrower ("ERROR: Invalid size for vector of exposure times, value of " + str(runSettings.exposureTimes.size()) + ".");
 	//}
 	flume.setFloat(L"ExposureTime", runSettings.exposureTime);
+	double expo;
+	flume.getFloat(L"ExposureTime", &expo);
+	runSettings.exposureTime = expo;
 }
 
 
 void AndorCameraCore::setImageParametersToCamera(){
 	auto& im = runSettings.imageSettings;
-	//if (((im.bottom - im.top + 1) % im.verticalBinning) != 0) {
-	//	qDebug() << "(bottom - top + 1) % vertical binning must be 0!";
-	//}
-	//if (((im.right - im.left + 1) % im.horizontalBinning) != 0) {
-	//	qDebug () << "(right - left + 1) % horizontal binning must be 0!";
-	//}
+	if (((im.top - im.bottom + 1) % im.verticalBinning) != 0) {
+		qDebug() << "(bottom - top + 1) % vertical binning must be 0!";
+		thrower("(bottom - top + 1) % vertical binning must be 0!");
+	}
+	if (((im.right - im.left + 1) % im.horizontalBinning) != 0) {
+		qDebug () << "(right - left + 1) % horizontal binning must be 0!";
+		thrower("(right - left + 1) % horizontal binning must be 0!");
+	}
 	flume.setImage(im.verticalBinning, im.horizontalBinning, im.left, im.right, im.bottom, im.top);
 	//flume.setImage( im.verticalBinning, im.horizontalBinning, im.bottom, im.top,  im.left, im.right );
 }
 
-
-void AndorCameraCore::setKineticCycleTime(){
-	flume.setKineticCycleTime(runSettings.kineticCycleTime);
-}
-
-
-void AndorCameraCore::setScanNumber()
+double AndorCameraCore::setFrameRate()
 {
-	if (runSettings.totalPicsInExperiment() == 0 && runSettings.totalPicsInVariation() != 0){
-		// all is good. The first variable has not been set yet.
-	}
-	else if (runSettings.totalPicsInVariation() == 0){
-		thrower ("ERROR: Scan Number Was Zero.\r\n");
-	}
-	else{
-		//flume.setNumberKinetics(int(runSettings.totalPicsInExperiment()));
-		flume.setNumberKinetics ( int ( runSettings.totalPicsInVariation ( ) ) );
-	}
+	flume.setFloat(L"FrameRate", runSettings.frameRate);
+	double fr;
+	flume.getFloat(L"FrameRate", &fr);
+	runSettings.frameRate = fr;
+	return fr;
 }
+
+//void AndorCameraCore::setKineticCycleTime(){
+//	flume.setKineticCycleTime(runSettings.kineticCycleTime);
+//}
+
+//void AndorCameraCore::setScanNumber()
+//{
+//	if (runSettings.totalPicsInExperiment() == 0 && runSettings.totalPicsInVariation() != 0){
+//		// all is good. The first variable has not been set yet.
+//	}
+//	else if (runSettings.totalPicsInVariation() == 0){
+//		thrower ("ERROR: Scan Number Was Zero.\r\n");
+//	}
+//	else{
+//		//flume.setNumberKinetics(int(runSettings.totalPicsInExperiment()));
+//		flume.setNumberKinetics ( int ( runSettings.totalPicsInVariation ( ) ) );
+//	}
+//}
 
 
 //void AndorCameraCore::setFrameTransferMode(){
@@ -528,24 +573,24 @@ void AndorCameraCore::checkAcquisitionTimings(float& kinetic, float& accumulatio
 	kinetic = tempKineticTime;
 }
 
-void AndorCameraCore::setAccumulationCycleTime(){
-	flume.setAccumulationCycleTime(runSettings.accumulationTime);
-}
-
-void AndorCameraCore::setNumberAccumulations(bool isKinetic){
-	std::string errMsg;
-	if (isKinetic){
-		// right now, kinetic series mode always has one accumulation. could add this feature later if desired to do 
-		// both kinetic and accumulation. Not sure there's actually much of a reason to use accumulations. 
-		//setNumberAccumulations(true); // ???
-		flume.setAccumulationNumber(1);
-	}
-	else{
-		// ???
-		// setNumberAccumulations(false); // ???
-		flume.setAccumulationNumber(runSettings.accumulationNumber);
-	}
-}
+//void AndorCameraCore::setAccumulationCycleTime(){
+//	flume.setAccumulationCycleTime(runSettings.accumulationTime);
+//}
+//
+//void AndorCameraCore::setNumberAccumulations(bool isKinetic){
+//	std::string errMsg;
+//	if (isKinetic){
+//		// right now, kinetic series mode always has one accumulation. could add this feature later if desired to do 
+//		// both kinetic and accumulation. Not sure there's actually much of a reason to use accumulations. 
+//		//setNumberAccumulations(true); // ???
+//		flume.setAccumulationNumber(1);
+//	}
+//	else{
+//		// ???
+//		// setNumberAccumulations(false); // ???
+//		flume.setAccumulationNumber(runSettings.accumulationNumber);
+//	}
+//}
 
 
 //void AndorCameraCore::setGainMode(){
@@ -577,7 +622,7 @@ void AndorCameraCore::setNumberAccumulations(bool isKinetic){
 void AndorCameraCore::changeTemperatureSetting(bool turnTemperatureControlOff){
 	int minimumAllowedTemp, maximumAllowedTemp;
 	// the default, in case the program is in safemode.
-	minimumAllowedTemp = -60;
+	minimumAllowedTemp = -45;
 	maximumAllowedTemp = 25;
 	// check if temp is in valid range
 	flume.getTemperatureRange(minimumAllowedTemp, maximumAllowedTemp);
@@ -614,21 +659,27 @@ AndorTemperatureStatus AndorCameraCore::getTemperature ( ){
 		// if not stable this won't get changed.
 		if (stat.andorRawMsg != "DRV_ACQUIRING") {
 			mostRecentTemp = stat.temperature;
+			stat.colorCode = QColor("chocolate");
 		}
 		if (stat.andorRawMsg == "DRV_TEMPERATURE_STABILIZED") {
-			stat.msg = "Temperature has stabilized at " + str (stat.temperature) + " (C)\r\n";
+			stat.msg = "Temperature has stabilized at " + str (stat.temperature) + " (C)";
+			stat.colorCode = QColor("lawngreen");
 		}
 		else if (stat.andorRawMsg == "DRV_TEMPERATURE_NOT_REACHED") {
-			stat.msg = "Set temperature not yet reached. Current temperature is " + str (stat.temperature) + " (C)\r\n";
+			stat.msg = "Set temperature not yet reached. Current temperature is " + str (stat.temperature) + " (C)";
+			stat.colorCode = QColor("hotpink");
 		}
 		else if (stat.andorRawMsg == "DRV_TEMPERATURE_NOT_STABILIZED") {
 			stat.msg = "Temperature of " + str (stat.temperature) + " (C) reached but not stable.";
+			stat.colorCode = QColor("orange");
 		}
 		else if (stat.andorRawMsg == "DRV_TEMPERATURE_DRIFT") {
 			stat.msg = "Temperature had stabilized but has since drifted. Temperature: " + str (stat.temperature);
+			stat.colorCode = QColor("gold");
 		}
 		else if (stat.andorRawMsg == "DRV_TEMPERATURE_OFF") {
 			stat.msg = "Temperature control is off. Temperature: " + str (stat.temperature);
+			stat.colorCode = QColor("sienna");
 		}
 		else if (stat.andorRawMsg == "DRV_ACQUIRING") {
 			// doesn't change color of temperature control. This way the color of the control represents the state of
@@ -636,13 +687,16 @@ AndorTemperatureStatus AndorCameraCore::getTemperature ( ){
 			// completely stabilize or not.
 			stat.msg = "Camera is Acquiring data. No updates are available. \r\nMost recent temperature: "
 				+ str (mostRecentTemp);
+			stat.colorCode = QColor("chocolate");
 		}
 		else if (stat.andorRawMsg == "SAFEMODE") {
 			stat.msg = "Device is running in Safemode... No Real Temperature Data is available.";
+			stat.colorCode = QColor("lightgreen");
 		}
 		else {
 			stat.msg = "Unexpected Temperature Message: " + stat.andorRawMsg + ". Temperature: "
 				+ str (stat.temperature);
+			stat.colorCode = QColor("indianred");
 		}
 	}
 	catch ( ChimeraError& ){
@@ -659,15 +713,22 @@ bool AndorCameraCore::isRunning ( ){
 	return cameraIsRunning;
 }
 
-double AndorCameraCore::getMinKineticCycleTime ( ){
-	// get the currently set kinetic cycle time.
-	float minKineticCycleTime, dummy1, dummy2;
-	flume.setKineticCycleTime ( 0 );
-	flume.getAcquisitionTimes ( dummy1, dummy2, minKineticCycleTime );
+//double AndorCameraCore::getMinKineticCycleTime ( ){
+//	// get the currently set kinetic cycle time.
+//	float minKineticCycleTime, dummy1, dummy2;
+//	flume.setKineticCycleTime ( 0 );
+//	flume.getAcquisitionTimes ( dummy1, dummy2, minKineticCycleTime );
+//
+//	// re-set whatever's currently in the settings.
+//	setKineticCycleTime ( );
+//	return minKineticCycleTime;
+//}
 
-	// re-set whatever's currently in the settings.
-	setKineticCycleTime ( );
-	return minKineticCycleTime;
+double AndorCameraCore::getMaxFrameRate()
+{
+	double maxFrameR;
+	flume.getFloatMax(L"FrameRate", &maxFrameR);
+	return maxFrameR;
 }
 
 void AndorCameraCore::setIsRunningState ( bool state ){
@@ -782,7 +843,8 @@ void AndorCameraCore::normalFinish (){
 
 void AndorCameraCore::errorFinish (){
 	try	{
-		abortAcquisition ();
+		//abortAcquisition ();
+		onFinish();
 	}
 	catch (ChimeraError &) { /*Probably just idle.*/ }
 }

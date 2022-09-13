@@ -439,7 +439,7 @@ void DataLogger::writeAndorPic( Matrix<long> image, imageParameters dims){
 	// MUST initialize status
 	// starting coordinates of writebtn area in the h5 file of the array of picture data points.
 	hsize_t offset[] = { currentAndorPicNumber++, 0, 0 };
-	hsize_t slabdim[3] = { 1, dims.width(), dims.height() };
+	hsize_t slabdim[3] = { 1, dims.widthBinned(), dims.heightBinned() };
 	try{
 		if (AndorPicureSetDataSpace.getId () == -1) {
 			hsize_t dims[3];
@@ -462,7 +462,7 @@ void DataLogger::writeAndorPic( Matrix<long> image, imageParameters dims){
 		auto fullE = getFullError (err);
 		auto fn = file.getFileName ();
 		throwNested ( "Failed to write andor pic data to HDF5 file! Filename: \""+ fn + "\", currentAndorPicNumber: " 
-					  + str(currentAndorPicNumber) + ", Error: " + str(err.getDetailMsg()) + "\n""; Full error:" 
+					  + str(currentAndorPicNumber-1) + ", Error: " + str(err.getDetailMsg()) + "\n""; Full error:" 
 			+ fullE);
 	}
 }

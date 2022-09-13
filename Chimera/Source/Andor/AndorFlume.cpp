@@ -206,10 +206,10 @@ void AndorFlume::setImage ( int hBin, int vBin, int lBorder, int rBorder, int tB
 	if ( !safemode ){
 		//andorErrorChecker ( SetImage ( hBin, vBin, lBorder, rBorder, tBorder, bBorder ) );
 		setInt(L"AOIHBin", hBin);
-		setInt(L"AOIWidth", rBorder - lBorder + 1);
+		setInt(L"AOIWidth", (rBorder - lBorder + 1) / hBin);
 		setInt(L"AOILeft", lBorder);
 		setInt(L"AOIVBin", vBin);
-		setInt(L"AOIHeight", bBorder - tBorder + 1);
+		setInt(L"AOIHeight", (bBorder - tBorder + 1) / vBin);
 		setInt(L"AOITop", tBorder);
 	}
 }
