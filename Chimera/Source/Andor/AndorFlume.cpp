@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "AndorFlume.h"
+#include <qdebug.h>
 
 AndorFlume::AndorFlume ( bool safemode_option ) : safemode( safemode_option ){}
 
@@ -211,6 +212,12 @@ void AndorFlume::setImage ( int hBin, int vBin, int lBorder, int rBorder, int tB
 		setInt(L"AOIVBin", vBin);
 		setInt(L"AOIHeight", (bBorder - tBorder + 1) / vBin);
 		setInt(L"AOITop", tBorder);
+
+		AT_64 Width, Height;
+		getInt(L"AOIWidth", &Width);
+		getInt(L"AOIHeight", &Height);
+		qDebug() << "Andor Imaging parameter for AndorFlume::setImage (hb,vb,l,r,t,b) = " << hBin << vBin << lBorder << rBorder << tBorder << bBorder;
+		qDebug() << "Set ROI in Andor " << (rBorder - lBorder + 1) / hBin << ", " << (bBorder - tBorder + 1) / vBin << "\r\n" << "and the read back is " << Width << "," << Height;
 	}
 }
 
@@ -244,7 +251,7 @@ int AndorFlume::queryStatus ( ){
 void AndorFlume::startAcquisition ( ){
 	if ( !safemode ){
 		//andorErrorChecker ( StartAcquisition ( ) );
-		command(L"Acquisition Start");
+		command(L"AcquisitionStart");
 	}
 }
 

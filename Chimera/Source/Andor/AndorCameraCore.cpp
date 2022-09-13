@@ -348,11 +348,13 @@ std::vector<Matrix<long>> AndorCameraCore::acquireImageData (){
 			: (((currentPictureNumber) % runSettings.totalPicsInVariation ()) % runSettings.picsPerRepetition);
 		if (experimentPictureNumber == 0){
 			repImages.clear ();
-			repImages.resize (runSettings.showPicsInRealTime ? 1 : runSettings.picsPerRepetition);
+			//repImages.resize (runSettings.showPicsInRealTime ? 1 : runSettings.picsPerRepetition);
 		}
+		repImages.push_back(Matrix<long>());
+
 		auto& imSettings = runSettings.imageSettings;
-		Matrix<long> tempImage (imSettings.widthBinned (), imSettings.heightBinned (), 0);
-		repImages[experimentPictureNumber] = Matrix<long> (imSettings.heightBinned (), imSettings.widthBinned (), 0);
+		Matrix<long> tempImage(imSettings.heightBinned(), imSettings.widthBinned(), 0);
+		repImages[experimentPictureNumber] = Matrix<long>(imSettings.heightBinned(), imSettings.widthBinned(), 0);
 		if (!safemode){
 			try	{
 				//flume.getOldestImage(tempImage);
@@ -373,8 +375,8 @@ std::vector<Matrix<long>> AndorCameraCore::acquireImageData (){
 				}
 			}
 			catch (ChimeraError &)	{
-				// let the blank image roll through to keep the image numbers going sensibly.
-				//throwNested ("Error while calling getOldestImage.");
+				// let the blank image roll through to keep the image numbers going sensibly. // ??? WTF zzp 20220913
+				throwNested ("Error while calling getOldestImage.");
 			}
 			// immediately rotate
 			for (auto imageVecInc : range(repImages[experimentPictureNumber].size ())){
@@ -490,7 +492,7 @@ void AndorCameraCore::setImageParametersToCamera(){
 		qDebug () << "(right - left + 1) % horizontal binning must be 0!";
 		thrower("(right - left + 1) % horizontal binning must be 0!");
 	}
-	flume.setImage(im.verticalBinning, im.horizontalBinning, im.left, im.right, im.bottom, im.top);
+	flume.setImage(im.horizontalBinning, im.verticalBinning, im.left, im.right, im.bottom, im.top);
 	//flume.setImage( im.verticalBinning, im.horizontalBinning, im.bottom, im.top,  im.left, im.right );
 }
 

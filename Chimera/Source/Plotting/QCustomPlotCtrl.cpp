@@ -554,9 +554,13 @@ void QCustomPlotCtrl::resetChart() {
 		plot->xAxis->rescale();
 	}
 	else if (style == plotStyle::DensityPlot) {
+		int width = colorMap->data()->keyRange().size();
+		int height = colorMap->data()->valueRange().size();
 		colorMap->rescaleDataRange(true);
 		colorMap->colorScale()->rescaleDataRange(true);
-		plot->yAxis->setScaleRatio(plot->xAxis, 1.0);
+		//plot->yAxis->setScaleRatio(plot->xAxis, 1.0);
+		width > height ? centerAxisRect->axis(QCPAxis::atLeft)->setScaleRatio(centerAxisRect->axis(QCPAxis::atBottom), 1.0) :
+			centerAxisRect->axis(QCPAxis::atBottom)->setScaleRatio(centerAxisRect->axis(QCPAxis::atLeft), 1.0);
 	}
 	else if (style == plotStyle::DensityPlotWithHisto) {
 		int width = colorMap->data()->keyRange().size();
@@ -567,8 +571,11 @@ void QCustomPlotCtrl::resetChart() {
 		colorMap->colorScale()->rescaleDataRange(true);
 		colorMap->rescaleAxes();
 
-		width > height ? colorMap->valueAxis()->scaleRange(width / height) :
-			colorMap->keyAxis()->scaleRange(height / width);
+		//width > height ? colorMap->valueAxis()->scaleRange(width / height) :
+		//	colorMap->keyAxis()->scaleRange(height / width);
+		width > height ? centerAxisRect->axis(QCPAxis::atLeft)->setScaleRatio(centerAxisRect->axis(QCPAxis::atBottom), 1.0) :
+			centerAxisRect->axis(QCPAxis::atBottom)->setScaleRatio(centerAxisRect->axis(QCPAxis::atLeft), 1.0);
+		
 
 		bottomAxisRect->axis(QCPAxis::atBottom)->setRange(centerAxisRect->axis(QCPAxis::atBottom)->range());
 		leftAxisRect->axis(QCPAxis::atLeft)->setRange(centerAxisRect->axis(QCPAxis::atLeft)->range());
@@ -599,7 +606,7 @@ void QCustomPlotCtrl::resetChart() {
 	plot->xAxis->setTickLabelColor(neutralColor);
 	plot->yAxis->setTickLabelColor(neutralColor);
 	plot->axisRect()->insetLayout()->setInsetAlignment(0, Qt::AlignTop | Qt::AlignLeft);
-	if (this->style != plotStyle::DensityPlot || this->style != plotStyle::DensityPlotWithHisto) {
+	if (this->style == plotStyle::DensityPlot || this->style == plotStyle::DensityPlotWithHisto) {
 		auto legendColor = QColor(defs["@StaticBackground"]);
 		legendColor.setAlpha(150);
 		plot->legend->setBrush(legendColor);
