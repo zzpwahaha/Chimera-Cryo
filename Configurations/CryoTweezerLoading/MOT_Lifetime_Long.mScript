@@ -1,0 +1,86 @@
+%%%%%%%%%%%%%%%%% Start With 1ms %%%%%%%%%%%%%%%%% 
+t = 1
+pulseon: DO1_0 10
+pulseon: GMLoadTrg 0.003
+t += 1
+ddsfreq: dds0_0 80
+ddsamp: dds0_0 100
+t += 1
+ddsfreq: SciSrcMOT 80
+ddsamp: SciSrcMOT 100
+t += 1
+% dipole push is in external rf source for now
+%for dipole push rep, this rep is 80MHz detuned
+ddsfreq: Prb 100
+ddsamp: Prb 100
+t += 1
+ddsfreq: dds0_3 80
+ddsamp: dds0_3 100
+
+t += 1
+ddsfreq: TARep 80 %also used for tweezer AOM
+ddsamp: TARep 100
+t += 1
+ddsfreq: PrbRep 80
+ddsamp: PrbRep 100
+t += 1
+ddsfreq: PrbRep_tmp 80
+ddsamp: PrbRep_tmp 100
+t += 1
+ddsfreq: dds2_3 80
+ddsamp: dds2_3 100
+
+
+on: TARepTrg
+on: SrcMOTTrg
+on: SciMOTTrg 
+on: DipolePushTrg
+on: PrbRepTrg
+off: PrbTrg
+off: TweezerHold
+on: xyzMOTShutter
+on: DipolePushShutter
+off: PrbShutter 
+
+
+dac: TARepAmp 5
+dac: SrcMOTAmp 10
+dac: SciMOTAmp 6.8 
+dac: DipolePushAmp 4.4
+dac: TweezerIntensity twz_intensity %Converison is 38.7mW per 1V Aug/1/2022 
+dac: PrbRepAmp 10
+dac: PrbAmp 2.5 
+
+ol: ol_cooling 1214
+%t += 0.05
+ol: ol_repump 5272
+
+dac: MOTCoil mot_gradient
+dac: BiasCoilX bias_x %0.04
+dac: BiasCoilY bias_y %0.4
+dac: BiasCoilZ bias_z %0.0
+
+t = t_loading %1000
+
+%%%%%%%%%%%%%%  Turn off 2D MOT  %%%%%%%%%%%%%%%
+off: SrcMOTTrg
+off: DipolePushTrg
+off: DipolePushShutter
+pulseon: DO1_0 1
+
+%%%%%%%%%%%%%%  Mako Trigger  %%%%%%%%%%%%%%%%%%
+repeat: 99
+	pulseon: Mako2 1
+	t += 1000
+end
+
+
+%%%%%%%%%%%%%%  END Sequence  %%%%%%%%%%%%%%%%%%
+t += 100
+pulseon: DO1_0 0.5
+
+
+
+
+
+
