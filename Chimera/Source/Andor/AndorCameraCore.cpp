@@ -271,6 +271,14 @@ void AndorCameraCore::armCamera( double& minKineticCycleTime ){
 		flume.queueBuffer(acqBuffers[i], bufferSize);
 	}
 
+	flume.setEnumString(L"CycleMode", L"Continuous");
+	flume.setEnumString(L"TriggerSource", L"D-Type Connector");
+	flume.setEnumString(L"PixelEncoding", L"Mono16");
+	flume.setEnumString(L"IOSelector", L"Aux Out 1");
+	flume.setEnumString(L"AuxiliaryOutSource", L"FireAny");
+	flume.setEnumString(L"IOSelector", L"Aux Out 2");
+	flume.setEnumString(L"AuxOutSourceTwo", L"ExternalShutterControl");
+
 	flume.startAcquisition();
 
 
@@ -754,9 +762,9 @@ void AndorCameraCore::logSettings (DataLogger& log, ExpThreadWorker* threadworke
 		hsize_t rank1[] = { 1 };
 		// pictures. These are permanent members of the class for speed during the writing process.	
 		if (expRunSettings.acquisitionMode == AndorRunModes::mode::Single) {
-			hsize_t setDims[] = { unsigned __int64 (expRunSettings.totalPicsInExperiment ()), expRunSettings.imageSettings.width (),
-				expRunSettings.imageSettings.height () };
-			hsize_t picDims[] = { 1, expRunSettings.imageSettings.width (), expRunSettings.imageSettings.height () };
+			hsize_t setDims[] = { unsigned __int64 (expRunSettings.totalPicsInExperiment ()), expRunSettings.imageSettings.widthBinned (),
+				expRunSettings.imageSettings.heightBinned () };
+			hsize_t picDims[] = { 1, expRunSettings.imageSettings.widthBinned (), expRunSettings.imageSettings.heightBinned () };
 			log.AndorPicureSetDataSpace = H5::DataSpace (3, setDims);
 			log.AndorPicDataSpace = H5::DataSpace (3, picDims);
 			log.AndorPictureDataset = andorGroup.createDataSet ( "Pictures", H5::PredType::NATIVE_LONG, 

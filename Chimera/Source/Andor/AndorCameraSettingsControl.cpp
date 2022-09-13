@@ -104,11 +104,14 @@ void AndorCameraSettingsControl::initialize ( IChimeraQtWindow* parent, std::vec
 				updateSettings();
 				andorCore.setSettings(configSettings.andor);
 				try {
+					andorCore.setImageParametersToCamera();
 					andorCore.setCameraGainMode();
 				}
 				catch (ChimeraError& e) {
 					parent->reportErr(e.qtrace());
 				}
+				currentlyRunningSettings.frameRate = configSettings.andor.frameRate;
+				updateMaxFrameRate(andorCore.getMaxFrameRate());
 			}
 		});
 	configSettings.andor.gainMode = AndorGainMode::mode::FastestFrameRate;
@@ -148,16 +151,17 @@ void AndorCameraSettingsControl::initialize ( IChimeraQtWindow* parent, std::vec
 	maxframeRateLabel = new QLabel("Max: -1", parent);
 	connect(frameRateEdit, &CQLineEdit::returnPressed, [this, parent]() {
 		auto& andorCore = parent->andorWin->getCamera();
-		updateMaxFrameRate(andorCore.getMaxFrameRate());
 		updateSettings();
 		andorCore.setSettings(configSettings.andor);
 		try {
+			andorCore.setImageParametersToCamera();
 			configSettings.andor.frameRate = andorCore.setFrameRate();
 		}
 		catch (ChimeraError& e) {
 			parent->reportErr(e.qtrace());
 		}
 		currentlyRunningSettings.frameRate = configSettings.andor.frameRate;
+		updateMaxFrameRate(andorCore.getMaxFrameRate());
 		});
 
 	layout3->addWidget(frameRateLabel, 0);

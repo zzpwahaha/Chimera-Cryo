@@ -10,6 +10,7 @@
 #include <RealTimeDataAnalysis/AtomCruncherWorker.h>
 #include <ExperimentThread/ExpThreadWorker.h>
 #include <QThread.h>
+#include <qelapsedtimer.h>
 #include <qdebug.h>
 
 
@@ -314,6 +315,8 @@ bool QtAndorWindow::cameraIsRunning (){
 }
 
 void QtAndorWindow::onCameraProgress (int picNumReported){
+	auto timerE = QElapsedTimer();
+	timerE.start();
 	unsigned picNum = currentPictureNum;
 	currentPictureNum++;
 	if (picNum % 2 == 1){
@@ -334,10 +337,11 @@ void QtAndorWindow::onCameraProgress (int picNumReported){
 	}
 	// need to call this before acquireImageData().
 	andor.updatePictureNumber (picNum);
+	qDebug() << "Start to acquired Image data and queued Buffers for image " << picNum << " at time " << timerE.elapsed() << " ms";
 	std::vector<Matrix<long>> rawPicData;
 	try	{
 		rawPicData = andor.acquireImageData ();
-		rawPicData[0].updateString();
+		//rawPicData[0].updateString(); // only for debugging purposes, very resource heavy
 		andor.queueBuffers();
 	}
 	catch (ChimeraError& err){
@@ -345,6 +349,7 @@ void QtAndorWindow::onCameraProgress (int picNumReported){
 		mainWin->pauseExperiment ();
 		return;
 	}
+	qDebug() << "acquired Image data and queued Buffers for image " << picNum << " at time " << timerE.elapsed() << " ms";
 	std::vector<Matrix<long>> calPicData (rawPicData.size ());
 	if (andorSettingsCtrl.getUseCal () && avgBackground.size () == rawPicData.front ().size ()){
 		for (auto picInc : range (rawPicData.size ())){
@@ -361,7 +366,7 @@ void QtAndorWindow::onCameraProgress (int picNumReported){
 		imageGrabTimes.push_back (std::chrono::high_resolution_clock::now ());
 	}
 	emit newImage ({ picNum, calPicData[(picNum/* - 1*/) % curSettings.picsPerRepetition] }); 
-
+	qDebug() << "send Image data for drawing for image " << picNum << " at time " << timerE.elapsed() << " ms";
 	auto picsToDraw = andorSettingsCtrl.getImagesToDraw (calPicData);
 	try
 	{
@@ -419,6 +424,7 @@ void QtAndorWindow::onCameraProgress (int picNumReported){
 		}
 	}
 	// write the data to the file.
+	qDebug() << "write image to file for image " << picNum << " at time " << timerE.elapsed() << " ms";
 	if (true/*curSettings.acquisitionMode != AndorRunModes::mode::Video*/){
 		try	{
 			// important! write the original raw data, not the pic-to-draw, which can be a difference pic, or the calibrated
@@ -439,7 +445,7 @@ void QtAndorWindow::onCameraProgress (int picNumReported){
 		}
 	}
 	mostRecentPicNum = picNum;
-
+	qDebug() << "finish write image to file for image " << picNum << " at time " << timerE.elapsed() << " ms";
 	if (picNum == curSettings.totalPicsInExperiment() - 1) {
 		andor.onFinish();
 	}

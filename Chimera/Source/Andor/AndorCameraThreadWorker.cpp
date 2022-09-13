@@ -61,6 +61,7 @@ void AndorCameraThreadWorker::process (){
 					if (pictureNumber % 2 == 0) {
 						(*input->imageTimes).push_back (std::chrono::high_resolution_clock::now ());
 					}
+					qDebug() << "From Worker thread: get image number" << pictureNumber << " at " << (*input->imageTimes).back().time_since_epoch().count() - (*input->imageTimes)[0].time_since_epoch().count();
 					armed = true;
 					//try {
 					//	input->Andor->flume.getAcquisitionProgress (pictureNumber);
