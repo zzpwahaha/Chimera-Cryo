@@ -252,6 +252,7 @@ void AndorFlume::startAcquisition ( ){
 	if ( !safemode ){
 		//andorErrorChecker ( StartAcquisition ( ) );
 		command(L"AcquisitionStart");
+		qDebug() << "Andor Acquisition started";
 	}
 }
 
@@ -260,6 +261,7 @@ void AndorFlume::abortAcquisition ( ){
 		//andorErrorChecker ( AbortAcquisition ( ) );
 		command(L"AcquisitionStop");
 		flush();
+		qDebug() << "Andor Acquisition stopped";
 	}
 }
 

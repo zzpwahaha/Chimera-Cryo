@@ -19,7 +19,9 @@ QtAndorWindow::QtAndorWindow (QWidget* parent) : IChimeraQtWindow (parent),
 	dataHandler (DATA_SAVE_LOCATION, this),
 	andor (ANDOR_SAFEMODE),
 	pics (false, "ANDOR_PICTURE_MANAGER", false, Qt::SmoothTransformation),
-	analysisHandler (this){
+	analysisHandler (this),
+	realTimePic(true) // not sure why need this var, seems never changed
+{
 	
 	setWindowTitle ("Andor Window");
 }
@@ -43,10 +45,11 @@ void QtAndorWindow::initializeWidgets (){
 	alerts.initialize (this);
 	analysisHandler.initialize (this);
 	andorSettingsCtrl.initialize ( this, std::vector<std::string>()/*andor.getVertShiftSpeeds()*/, std::vector<std::string>()/*andor.getHorShiftSpeeds()*/);
-	alerts.setMaximumWidth(450);
-	analysisHandler.setMaximumSize(450, 300);
-	andorSettingsCtrl.setMaximumWidth(450);
-	layout1->addWidget(&alerts);
+	alerts.setMaximumWidth(850);
+	alerts.setMaximumHeight(50);
+	analysisHandler.setMaximumSize(850, 600);
+	andorSettingsCtrl.setMaximumWidth(850);
+	//layout1->addWidget(&alerts);
 	layout1->addWidget(&analysisHandler);
 	layout1->addWidget(&andorSettingsCtrl);
 	layout1->addStretch(0);
@@ -261,7 +264,16 @@ void QtAndorWindow::abortCameraRun (){
 	}
 	if (true/*status == DRV_ACQUIRING*/){
 		//andor.abortAcquisition ();
+		// since the abortion can happen when the threadworker is waitForAcquisition, need to queue a buffer for it to get out of the wait
+		// if has a trigger for andor, also need to attach a trigger for it
+		andor.updatePictureNumber(currentPictureNum + 1);
+		andor.setIsRunningState(false);
+		andor.queueBuffers();
+		Sleep(20);
+		//auxWin->getTtlCore().FPGAForcePulse(auxWin->getTtlSystem().getCurrentStatus(), ANDOR_TRIGGER_LINE, 0.5);
+		Sleep(600); // just for  4fps during test, when run exp, probably not need this long
 		andor.onFinish();
+		qDebug() << "Andor camera acquisition aborted, does WaitForAcquisition automatically release the hold? Tested and the answer is NO!";
 		timer.setTimerDisplay ("Aborted");
 		andor.setIsRunningState (false);
 		// close the plotting thread.
@@ -315,6 +327,8 @@ bool QtAndorWindow::cameraIsRunning (){
 }
 
 void QtAndorWindow::onCameraProgress (int picNumReported){
+	//andor.setExpRunningExposure(); 
+	//andor.queueBuffers();
 	auto timerE = QElapsedTimer();
 	timerE.start();
 	unsigned picNum = currentPictureNum;
@@ -337,11 +351,12 @@ void QtAndorWindow::onCameraProgress (int picNumReported){
 	}
 	// need to call this before acquireImageData().
 	andor.updatePictureNumber (picNum);
-	qDebug() << "Start to acquired Image data and queued Buffers for image " << picNum << " at time " << timerE.elapsed() << " ms";
+	qDebug() << "Start to acquired Image data" << picNum << "and queued Buffers for image " << (picNum + 1) << " at time " << timerE.elapsed() << " ms";
 	std::vector<Matrix<long>> rawPicData;
 	try	{
 		rawPicData = andor.acquireImageData ();
 		//rawPicData[0].updateString(); // only for debugging purposes, very resource heavy
+		andor.setExpRunningExposure(); // may be this need to be brought to the start of this function so that it is most efficient for image requeue
 		andor.queueBuffers();
 	}
 	catch (ChimeraError& err){

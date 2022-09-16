@@ -84,6 +84,7 @@ AndorCameraCore::AndorCameraCore( bool safemode_opt ) : safemode( safemode_opt )
 	//flume.setDMAParameters( 1, 0.0001f );
 
 	//Set the camera to continuously acquires frames 
+	flume.setBool(L"SpuriousNoiseFilter", AT_FALSE);
 	flume.setEnumString(L"CycleMode", L"Continuous");
 	flume.setEnumString(L"TriggerSource", L"D-Type Connector");
 	flume.setEnumString(L"PixelEncoding", L"Mono16");
@@ -141,13 +142,15 @@ void AndorCameraCore::onFinish(){
 		flume.abortAcquisition();
 	}
 	catch (ChimeraError& e) {
-		/*should I catch? zzp 2022/09/12*/
+		thrower("Error in aborting andor camera acquisition \r\n" + e.trace());
 	}
 
 
 	//Free the allocated buffers 
 	for (int i = 0; i < acqBuffers.size(); i++) {
-		delete[] acqBuffers[i];
+		//delete[] acqBuffers[i];
+		acqBuffers[i].clear();
+		tempImageBuffers[i] = nullptr;
 	}
 	cameraIsRunning = false;
 	threadInput.expectingAcquisition = false;
@@ -201,7 +204,7 @@ void AndorCameraCore::waitForAcquisition(int pictureNumber)
 
 void AndorCameraCore::queueBuffers()
 {
-	flume.queueBuffer(acqBuffers[currentPictureNumber % numberOfAcqBuffers], bufferSize);
+	flume.queueBuffer(acqBuffers[currentPictureNumber % numberOfAcqBuffers].data(), bufferSize);
 }
 
 /* 
@@ -224,7 +227,9 @@ void AndorCameraCore::armCamera( double& minKineticCycleTime ){
 	setAcquisitionMode();
 	//setReadMode();
 	if (runSettings.triggerMode != AndorTriggerMode::mode::ExternalExposure) {
-		setExposures();
+		setExposures(0);
+		qDebug() << "Set ExpRunningExposure to" << runSettings.exposureTimes[0];
+		qDebug() << "Now exposure time is" << runSettings.exposureTime;
 	}
 	if (runSettings.triggerMode == AndorTriggerMode::mode::Internal) {
 		setFrameRate();
@@ -261,15 +266,19 @@ void AndorCameraCore::armCamera( double& minKineticCycleTime ){
 	flume.getInt(L"Image Size Bytes", &ImageSizeBytes);
 	bufferSize = static_cast<int>(ImageSizeBytes);
 	//Allocate a number of memory buffers to store frames
-	acqBuffers.resize(numberOfAcqBuffers);
-	tempImageBuffers.resize(numberOfImageBuffers);
+	//acqBuffers.resize(numberOfAcqBuffers);
+	//tempImageBuffers.resize(numberOfImageBuffers);
 
 	for (int i = 0; i < numberOfAcqBuffers; i++) {
-		acqBuffers[i] = new unsigned char[bufferSize];
+		//acqBuffers[i] = new unsigned char[bufferSize];
+		acqBuffers[i].clear();
+		acqBuffers[i].resize(bufferSize);
+		tempImageBuffers[i] = nullptr;
 	}
-	for (int i = 0; i < numberOfAcqBuffers; i++) {
-		flume.queueBuffer(acqBuffers[i], bufferSize);
-	}
+	//for (int i = 0; i < numberOfAcqBuffers; i++) {
+	//	flume.queueBuffer(acqBuffers[i].data(), bufferSize);
+	//}
+	flume.queueBuffer(acqBuffers[0].data(), bufferSize);
 
 	flume.setEnumString(L"CycleMode", L"Continuous");
 	flume.setEnumString(L"TriggerSource", L"D-Type Connector");
@@ -438,8 +447,29 @@ void AndorCameraCore::setCameraTriggerMode(){
 
 void AndorCameraCore::setCameraGainMode()
 {
+	wchar_t tmp[1024];
+	int enumidx;
+	flume.getEnumIndex(L"PixelEncoding", &enumidx);
+	flume.getEnumStringByIndex(L"PixelEncoding", enumidx, tmp, 1024);
+	qDebug() << "Get the PxielEncoding before set the gain mode" << QString::fromWCharArray(tmp);
+
 	std::string gainmode = AndorGainMode::toStr(runSettings.gainMode);
 	flume.setEnumString(L"GainMode", w_str(gainmode.c_str()).c_str());
+
+	flume.getEnumIndex(L"GainMode", &enumidx);
+	flume.getEnumStringByIndex(L"GainMode", enumidx, tmp, 1024);
+	qDebug() << "Get the GainMode after set the gain mode" << QString::fromWCharArray(tmp);
+
+	flume.getEnumIndex(L"PixelEncoding", &enumidx);
+	flume.getEnumStringByIndex(L"PixelEncoding", enumidx, tmp, 1024);
+	qDebug() << "Get the PxielEncoding after set the gain mode" << QString::fromWCharArray(tmp);
+
+	flume.setEnumString(L"PixelEncoding", L"Mono16"); // prevent from andor auto changing pixel encoding, see sdk3 manual 4.6
+
+	flume.getEnumIndex(L"PixelEncoding", &enumidx);
+	flume.getEnumStringByIndex(L"PixelEncoding", enumidx, tmp, 1024);
+	qDebug() << "Get the PxielEncoding after set the gain mode after set the encoding to Mono16" << QString::fromWCharArray(tmp);
+
 }
 
 void AndorCameraCore::setCameraBinningMode()
@@ -468,17 +498,27 @@ void AndorCameraCore::setTemperature(){
 //}
 
 
-void AndorCameraCore::setExposures(){
+void AndorCameraCore::setExposures(int expoIdx){
 	//if (runSettings.exposureTimes.size() > 0 && runSettings.exposureTimes.size() <= 16){
 	//	flume.setRingExposureTimes(runSettings.exposureTimes.size(), runSettings.exposureTimes.data());
 	//}
 	//else{
 	//	thrower ("ERROR: Invalid size for vector of exposure times, value of " + str(runSettings.exposureTimes.size()) + ".");
 	//}
-	flume.setFloat(L"ExposureTime", runSettings.exposureTime);
+	flume.setFloat(L"ExposureTime", runSettings.exposureTimes[expoIdx]);
 	double expo;
 	flume.getFloat(L"ExposureTime", &expo);
 	runSettings.exposureTime = expo;
+	runSettings.exposureTimes[expoIdx] = expo;
+}
+
+void AndorCameraCore::setExpRunningExposure()
+{
+	if (runSettings.triggerMode != AndorTriggerMode::mode::ExternalExposure) {
+		setExposures((currentPictureNumber + 1) % expRunSettings.picsPerRepetition); // set exposure for the next image
+	}
+	qDebug() << "Set ExpRunningExposure to" << runSettings.exposureTimes[(currentPictureNumber + 1) % expRunSettings.picsPerRepetition];
+	qDebug() << "Now exposure time is" << runSettings.exposureTime;
 }
 
 
@@ -792,9 +832,10 @@ void AndorCameraCore::logSettings (DataLogger& log, ExpThreadWorker* threadworke
 			thrower ("Failed to initialize AndorPictureDataset???");
 		}
 		log.andorDataSetShouldBeValid = true;
-		log.writeDataSet (int (expRunSettings.acquisitionMode), "Camera-Mode", andorGroup);
+		log.writeDataSet (AndorRunModes::toStr(expRunSettings.acquisitionMode), "Camera-Mode", andorGroup);
 		log.writeDataSet (expRunSettings.exposureTimes, "Exposure-Times", andorGroup);
 		log.writeDataSet (AndorTriggerMode::toStr (expRunSettings.triggerMode), "Trigger-Mode", andorGroup);
+		log.writeDataSet (AndorGainMode::toStr(expRunSettings.gainMode), "Gain-Mode", andorGroup);
 		//log.writeDataSet (expRunSettings.emGainModeIsOn, "EM-Gain-Mode-On", andorGroup);
 		//if (expRunSettings.emGainModeIsOn) {
 		//	log.writeDataSet (expRunSettings.emGainLevel, "EM-Gain-Level", andorGroup);

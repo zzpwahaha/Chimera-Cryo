@@ -72,6 +72,13 @@ void AndorCameraThreadWorker::process (){
 					if (false/*input->Andor->isCalibrating ()*/) {
 						//input->comm->sendCameraCalProgress (pictureNumber);
 					}
+					else if (!input->Andor->cameraIsRunning) {
+						// aborted by user
+						input->expectingAcquisition = false;
+						pictureNumber = 0;
+						armed = false;
+						qDebug() << "CameraThreadWorker aborted from user by awakening it again from the waitForAcquisition";
+					}
 					else {
 						emit pictureTaken (pictureNumber);
 						pictureNumber++;

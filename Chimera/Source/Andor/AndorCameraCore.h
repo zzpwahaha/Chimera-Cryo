@@ -40,7 +40,8 @@ class AndorCameraCore : public IDeviceCore{
 		std::vector<Matrix<long>> acquireImageData();
 		void preparationChecks ();
 		void setTemperature();
-		void setExposures();
+		void setExposures(int expoIdx);
+		void setExpRunningExposure(); // called during experiment in QtAdnorWindow::OnCameraProgress
 		void setImageParametersToCamera();
 		double setFrameRate();
 		//double getMinKineticCycleTime( );
@@ -117,9 +118,10 @@ class AndorCameraCore : public IDeviceCore{
 
 		friend class AndorCameraThreadWorker;
 
-		std::vector<unsigned char*> acqBuffers;
-		const int numberOfAcqBuffers = 10;
-		const int numberOfImageBuffers = 10;
-		std::vector<unsigned char*> tempImageBuffers;
+		//std::vector<unsigned char*> acqBuffers;
+		static const int numberOfAcqBuffers = 10;
+		static const int numberOfImageBuffers = 10;
+		std::array<std::vector<unsigned char>, numberOfAcqBuffers> acqBuffers;
+		std::array<unsigned char*, numberOfImageBuffers> tempImageBuffers;
 		int bufferSize;
 };
