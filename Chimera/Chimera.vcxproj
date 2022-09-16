@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|x64">
@@ -130,6 +130,8 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Source\Andor\AndorBinningMode.cpp" />
+    <ClCompile Include="Source\Andor\AndorGainMode.cpp" />
     <ClCompile Include="Source\CMOSCamera\FrameAverager.cpp" />
     <ClCompile Include="Source\ExperimentMonitoringAndStatus\StatusOptionsWindow.cpp" />
     <ClCompile Include="Source\ExperimentMonitoringAndStatus\TemperatureMonitor.cpp" />
@@ -183,6 +185,8 @@
     <QtMoc Include="Source\ExperimentMonitoringAndStatus\ExperimentSeqPlotter.h" />
     <QtMoc Include="Source\ExperimentMonitoringAndStatus\TemperatureMonitor.h" />
     <QtMoc Include="Source\CMOSCamera\FrameAverager.h" />
+    <ClInclude Include="Source\Andor\AndorBinningMode.h" />
+    <ClInclude Include="Source\Andor\AndorGainMode.h" />
     <ClInclude Include="Source\ExperimentMonitoringAndStatus\StatusControlOptions.h" />
     <QtMoc Include="Source\ExperimentMonitoringAndStatus\StatusOptionsWindow.h" />
     <ClInclude Include="Source\GigaMOOG\GigaMoogCore.h" />
