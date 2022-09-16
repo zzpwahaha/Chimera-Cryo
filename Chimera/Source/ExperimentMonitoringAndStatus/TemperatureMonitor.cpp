@@ -11,11 +11,15 @@
 #include <PrimaryWindows/IChimeraQtWindow.h>
 #include <PrimaryWindows/QtAndorWindow.h>
 
+const std::array<InfluxDataType::mode, 2> allModes = {
+	InfluxDataType::mode::Temperature,
+	InfluxDataType::mode::Pressure };
+
 TemperatureMonitor::TemperatureMonitor(IChimeraQtWindow* parent_in, bool safemode)
 	: IChimeraSystem(parent_in)
 	, core(parent_in, safemode)
-	, name{ new QLabel(this) ,new QLabel(this) }
-	, reading{ new QLabel(this) ,new QLabel(this) }
+	, name{ new QLabel(this) ,new QLabel(this), new QLabel(this) }
+	, reading{ new QLabel(this) ,new QLabel(this), new QLabel(this) }
 {
 }
 
@@ -25,8 +29,8 @@ void TemperatureMonitor::initialize(IChimeraQtWindow* parent)
 		std::string identifier(core.dataBroker[id].identifier);
 		std::replace(identifier.begin(), identifier.end(), '_', ' ');
 		name[id]->setText(qstr(identifier)+": ");
-		name[id]->setStyleSheet("QLabel {font: bold 24pt;}");
-		reading[id]->setStyleSheet("QLabel {font: bold 24pt;}");
+		name[id]->setStyleSheet("QLabel {font: bold 20pt;}");
+		reading[id]->setStyleSheet("QLabel {font: bold 20pt;}");
 	}
 	QVBoxLayout* layout = new QVBoxLayout(this);
 	std::array<QHBoxLayout*, TEMPMON_NUMBER> lay;
@@ -50,23 +54,35 @@ void TemperatureMonitor::initialize(IChimeraQtWindow* parent)
 			catch (influxdb::ConnectionError& e) {
 				emit warning("Temperature sensor can not read properly. Please check \n" + qstr(e.what()));
 			}
-			reading[idx]->setText(qstr(timedata.second, 2) + " K");
+			switch (core.dataBroker[idx].dataMode)
+			{
+			case InfluxDataType::mode::Temperature:
+				reading[idx]->setText(qstr(timedata.second, 2) + " K");
+				break;
+			case InfluxDataType::mode::Pressure:
+				reading[idx]->setText(qstr(timedata.second, 2, false, false, false, true) + " mBar");
+				break;
+			default:
+				break;
+			}
+
 		}});
-	timer->start(150000/*2.5min*60*1e3*/); // every 2.5min to query a data that updates every 5min to avoid some rounding issue in time
+	timer->start(60000/*1min*60*1e3*/); // every 1min to query a data that updates every 2min to avoid some rounding issue in time
 
 }
 
 TemperatureMonitorCore::TemperatureMonitorCore(IChimeraQtWindow* parent, bool safemode)
 	: dataBroker{ 
-	InfluxBroker(TEMPMON_ID[0],TEMPMON_SYNTAX[0], safemode),
-	InfluxBroker(TEMPMON_ID[1],TEMPMON_SYNTAX[1], safemode) }//array aggregation, no copy or move involved
+	InfluxBroker(TEMPMON_ID[0],TEMPMON_SYNTAX[0], InfluxDataType::mode::Temperature, safemode),
+	InfluxBroker(TEMPMON_ID[1],TEMPMON_SYNTAX[1], InfluxDataType::mode::Temperature, safemode),
+	InfluxBroker(TEMPMON_ID[2],TEMPMON_SYNTAX[2], InfluxDataType::mode::Pressure, safemode) }//array aggregation, no copy or move involved
 {
 	this->setParent(parent);
 	//dataBroker.reserve(TEMPMON_NUMBER);
 	//for (unsigned idx = 0; idx < TEMPMON_NUMBER; idx++) {
 	//	dataBroker.emplace_back(TEMPMON_ID[idx],TEMPMON_SYNTAX[idx]);
 	//}
-	auto shit = InfluxBroker(TEMPMON_ID[1], TEMPMON_SYNTAX[1], safemode);// this is in-place construction, no copy nor move in c++17
+	auto shit = InfluxBroker(TEMPMON_ID[1], TEMPMON_SYNTAX[1], InfluxDataType::mode::Temperature, safemode);// this is in-place construction, no copy nor move in c++17
 
 	QTime midnight = QTime(23, 59, 59, 999);
 	//QTime midnightCreateFolder = QTime(23, 50, 0, 0); // give ten minute ahead to create folder 
@@ -95,7 +111,7 @@ TemperatureMonitorCore::TemperatureMonitorCore(IChimeraQtWindow* parent, bool sa
 		timer->start(24*60*60*1000);
 		});
 
-
+	experimentActive = !safemode;
 	
 }
 
@@ -115,11 +131,27 @@ void TemperatureMonitorCore::normalFinish()
 	for (auto& broker : dataBroker) {
 		broker.experimentEnd();
 		auto timedata = broker.getDataExp();
-		try {
-			logger.writeTemperature(timedata, broker.identifier);
-		}
-		catch (ChimeraError& e) {
-			win->reportErr(qstr("Temperature data abandoned. Due to ") + e.qtrace());
+		switch (broker.dataMode)
+		{
+		case InfluxDataType::mode::Temperature:
+			try {
+				logger.writeTemperature(timedata, broker.identifier);
+			}
+			catch (ChimeraError& e) {
+				win->reportErr(qstr("Temperature data abandoned. Due to ") + e.qtrace());
+			}
+			break;
+		case InfluxDataType::mode::Pressure:
+			try {
+				logger.writePressure(timedata, broker.identifier);
+			}
+			catch (ChimeraError& e) {
+				win->reportErr(qstr("Pressure data abandoned. Due to ") + e.qtrace());
+			}
+			break;
+		default:
+			win->reportErr(qstr("Influx data mode is neither Temperature nor Pressure? A low level bug!"));
+			break;
 		}
 	}
 }
@@ -163,8 +195,9 @@ void TemperatureMonitorCore::dumpDataToFile()
 
 }
 
-InfluxBroker::InfluxBroker(std::string identifier, std::string syntax, bool safemode) :
+InfluxBroker::InfluxBroker(std::string identifier, std::string syntax, InfluxDataType::mode mode, bool safemode) :
 	safemode(safemode),
+	dataMode(mode),
 	identifier(identifier),
 	syntax(syntax), 
 	experimentOngoing(false)
@@ -205,7 +238,7 @@ std::pair<long long, double> InfluxBroker::queryDataPoint()
 	}
 	std::vector<influxdb::Point> points = influxPtr->query(syntax);
 	std::chrono::time_point<std::chrono::system_clock> tt = points[0].getTimestamp();
-	long long time = std::chrono::duration_cast<std::chrono::seconds>(tt.time_since_epoch()).count() * 10; // somehow need *10 to be ms epoch
+	long long time = std::chrono::duration_cast<std::chrono::seconds>(tt.time_since_epoch()).count(); // somehow need *10 to be ms epoch. somehow do not need *10 again zzp 09/16/2022
 	QMutexLocker locker(&lock);
 	if (!timeStamp.empty() && timeStamp.back() == time) { //https://stackoverflow.com/questions/7925479/if-argument-evaluation-order
 		// not a new point, skip this

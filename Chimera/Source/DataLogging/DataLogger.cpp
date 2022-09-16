@@ -490,7 +490,7 @@ void DataLogger::writeMakoPic(std::vector<double> image, int width, int height, 
 void DataLogger::writeTemperature(std::pair<std::vector<long long>, std::vector<double>> timedata, std::string identifier)
 {
 	if (fileIsOpen == false) {
-		thrower("Tried to write to h5 file (for andor pic), but the file is closed!\r\n");
+		thrower("Tried to write to h5 file (for temperature), but the file is closed!\r\n");
 	}
 	try {
 		H5::Group temperature;
@@ -515,6 +515,38 @@ void DataLogger::writeTemperature(std::pair<std::vector<long long>, std::vector<
 	catch (H5::Exception& err) {
 		auto fullE = getFullError(err);
 		throwNested("ERROR: Failed to log Temperature data in HDF5 file: detail:" + err.getDetailMsg()
+			+ "; Full error:" + fullE);
+	}
+}
+
+void DataLogger::writePressure(std::pair<std::vector<long long>, std::vector<double>> timedata, std::string identifier)
+{
+	if (fileIsOpen == false) {
+		thrower("Tried to write to h5 file (for pressure), but the file is closed!\r\n");
+	}
+	try {
+		H5::Group temperature;
+		try {
+			temperature = file.openGroup("PressureData");
+		}
+		catch (H5::Exception& e) {
+			/* group does not exists, create it */
+			temperature = file.createGroup("PressureData");
+		}
+		H5::Group subtemp = temperature.createGroup(identifier);
+		writeDataSet(timedata.first, "TimeEpoch(ms)", subtemp);
+		std::vector<std::string> timeStr;
+		char buffer[128];
+		std::transform(timedata.first.begin(), timedata.first.end(), std::back_inserter(timeStr), [&](long long epoch)-> std::string {
+			strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", localtime(&epoch));
+			return std::string(buffer); });
+		writeDataSet(timeStr, "Datetime", subtemp);
+		writeDataSet(timedata.second, "Pressure(mBar)", subtemp);
+
+	}
+	catch (H5::Exception& err) {
+		auto fullE = getFullError(err);
+		throwNested("ERROR: Failed to log Pressure data in HDF5 file: detail:" + err.getDetailMsg()
 			+ "; Full error:" + fullE);
 	}
 }

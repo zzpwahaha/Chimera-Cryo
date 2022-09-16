@@ -33,6 +33,7 @@ class DataLogger : public IChimeraSystem {
 		void writeAndorPic( Matrix<long> image, imageParameters dims );
 		void writeMakoPic(std::vector<double> image, int width, int height, CameraInfo::name name);
 		void writeTemperature(std::pair<std::vector<long long>, std::vector<double>> timedata, std::string identifier );
+		void writePressure(std::pair<std::vector<long long>, std::vector<double>> timedata, std::string identifier);
 		void writeVolts ( unsigned currentVoltNumber, std::vector<float64> data );
 		void assertCalibrationFilesExist ();
 		void logMasterInput( ExperimentThreadInput* input );
