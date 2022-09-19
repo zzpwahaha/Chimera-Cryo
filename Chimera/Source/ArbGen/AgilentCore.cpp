@@ -357,6 +357,7 @@ void AgilentCore::setDefault (int channel){
 		// turn it to the default voltage...
 		std::string setPointString = str (convertPowerToSetPoint (AGILENT_DEFAULT_POWER, true, calibrations[channel - 1]));
 		visaFlume.write ("SOURce" + str (channel) + ":APPLy:DC DEF, DEF, " + setPointString + " V");
+		outputOff(channel);
 	}
 	catch (ChimeraError &) {
 		throwNested ("Seen while programming default voltage.");

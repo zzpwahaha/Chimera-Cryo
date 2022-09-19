@@ -189,6 +189,7 @@ void SiglentCore::setDefault(int channel) {
 		// turn it to the default voltage...
 		std::string setPointString = str(convertPowerToSetPoint(SIGLENT_DEFAULT_POWER, true, calibrations[channel - 1]));
 		visaFlume.write("C" + str(channel) + ":BSWV WVTP,DC,OFST," + setPointString + "V");
+		outputOff(channel);
 	}
 	catch (ChimeraError&) {
 		throwNested("Seen while programming default voltage.");

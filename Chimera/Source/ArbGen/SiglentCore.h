@@ -59,7 +59,7 @@ public:
 
 
 private:
-	const int SIGLENT_DEFAULT_POWER = 10;
+	const int SIGLENT_DEFAULT_POWER = 0;
 	//const std::string configDelim;
 	//deviceOutputInfo expRunSettings;
 	//const unsigned long sampleRate;

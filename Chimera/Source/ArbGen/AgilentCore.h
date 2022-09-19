@@ -71,7 +71,7 @@ class AgilentCore : public ArbGenCore {
 
 
 	private:
-		const int AGILENT_DEFAULT_POWER = 10;
+		const int AGILENT_DEFAULT_POWER = 0;
 		//const std::string configDelim;
 		//deviceOutputInfo expRunSettings;
 		//const unsigned long sampleRate;
