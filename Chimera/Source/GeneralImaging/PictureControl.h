@@ -34,6 +34,8 @@ class PictureControl : public QWidget{
 						 bool specialMin, bool specialMax, std::vector<atomGrid> grids, unsigned pictureNumber, 
 						 bool includingAnalysisMarkers);
 		void setSliderPositions(unsigned min, unsigned max);
+		void setSliderSize(int size);
+		void setSliderRange(unsigned min, unsigned max);
 		void drawGrid(QPainter& painter);
 		void drawCircle(coordinate selectedLocation, QPainter& painter);
 		void setSoftwareAccumulationOption ( softwareAccumulationOption opt );
@@ -51,7 +53,7 @@ class PictureControl : public QWidget{
 			bool includingAnalysisMarkers=true);
 		coordinate selectedLocation;
 		void setTransformationMode (Qt::TransformationMode);
-		void setSliderSize(int size);
+
 	private:
 		Qt::TransformationMode transformationMode;
 		Ui::PictureControl* ui = nullptr;

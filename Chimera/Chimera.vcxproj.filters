@@ -447,6 +447,12 @@
     <ClCompile Include="Source\ExperimentMonitoringAndStatus\StatusOptionsWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Andor\AndorGainMode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Andor\AndorBinningMode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="3rd_Party\qcustomplot\qcustomplot.h">
@@ -1004,6 +1010,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\ExperimentMonitoringAndStatus\StatusControlOptions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Andor\AndorGainMode.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Andor\AndorBinningMode.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -144,7 +144,7 @@ void PictureManager::setSinglePicture( imageParameters imageParams){
 		pictures[0].setSliderSize(800);
 		
 	}
-
+	pictures[0].setSliderRange(0, (1 << 16) - 1);
 	if (parentWin != nullptr) {
 		picLayout->setHorizontalSpacing(0);
 		picLayout->setVerticalSpacing(0);
@@ -182,6 +182,9 @@ void PictureManager::setMultiplePictures( imageParameters imageParams, unsigned 
 			picLayout->removeWidget(&pictures[picNum]);
 			pictures[picNum].setSliderSize(390);//prevent the slider bar from growing indefinitely
 		}
+	}
+	for (auto picNum : range(pictures.size())) {
+		pictures[picNum].setSliderRange(0, (1 << 16) - 1);
 	}
 	switch (numberActivePics)
 	{

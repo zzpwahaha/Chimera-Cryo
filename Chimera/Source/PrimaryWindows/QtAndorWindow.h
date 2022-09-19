@@ -67,7 +67,7 @@ class QtAndorWindow : public IChimeraQtWindow{
 		void armCameraWindow (AndorRunSettings* settings);
 		int getDataCalNum ();
 		std::string getStartMessage ();
-		void handlePictureSettings ();
+		void handlePictureSettings (bool changePicsLayout);
 		bool cameraIsRunning ();
 		void abortCameraRun ();
 		void handleAutoscaleSelection ();

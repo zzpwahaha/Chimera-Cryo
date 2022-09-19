@@ -107,8 +107,12 @@ void PictureControl::initialize(std::string name, int width, int height, IChimer
 	slider.setRange(0, 4096);
 	slider.setMaximumWidth(80);
 	slider.setMaxLength(800);
-	parent->connect (&slider, &RangeSliderIntg::smlValueChanged, [this]() {redrawImage (); });
-	parent->connect (&slider, &RangeSliderIntg::lrgValueChanged, [this]() {redrawImage (); });
+	parent->connect (&slider, &RangeSliderIntg::smlValueChanged, [this]() {
+		pic.setColorScaleRange(slider.getSilderSmlVal(), slider.getSilderLrgVal());
+		pic.resetChart(); });
+	parent->connect (&slider, &RangeSliderIntg::lrgValueChanged, [this]() {
+		pic.setColorScaleRange(slider.getSilderSmlVal(), slider.getSilderLrgVal());
+		pic.resetChart(); });
 	layout2->addWidget(pic.plot, 1);
 	layout2->addWidget(&slider, 0);
 
@@ -133,6 +137,16 @@ void PictureControl::setSliderPositions(unsigned min, unsigned max){
 	slider.lowerSpinBox()->setValue(min);
 	//sliderMin.setValue ( min );
 	//sliderMax.setValue ( max );
+}
+
+void PictureControl::setSliderSize(int size)
+{
+	slider.setMaxLength(size);
+}
+
+void PictureControl::setSliderRange(unsigned min, unsigned max)
+{
+	slider.setRange(min, max);
 }
 
 /*
@@ -564,8 +578,4 @@ void PictureControl::setTransformationMode (Qt::TransformationMode mode) {
 	transformationMode = mode;
 }
 
-void PictureControl::setSliderSize(int size)
-{
-	slider.setMaxLength(size);
-}
 
