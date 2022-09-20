@@ -213,6 +213,41 @@ void PictureControl::setSliderControlLocs (QPoint pos, int height){
 	//sliderMax.reposition ( pos, height );
 }
 
+void PictureControl::calculateSoftwareAccumulation(const Matrix<long>& picData)
+{
+	if (saOption.accumNum == 1) {
+		accumPicResult = picData; // this is calling assignment operator T& operator=(const T& t), which return a ref
+		return;
+	}
+	// doing software accumulation
+	if (accumPicDatas.size() == 0) {
+		accumPicDatas.push_back(picData);
+		accumPicResult = Matrix<long>(picData); // this is calling copy-ctor, accumPicResult=picData is calling assignment operator T& operator=(const T& t), which return a ref
+		accumNum++;
+	}
+	else {
+		if (saOption.accumAll) {
+			for (auto idx : range(accumPicResult.data.size())) {
+				accumPicResult.data[idx] += picData.data[idx];
+			}
+			accumNum++;
+		}
+		else {
+			for (auto idx : range(accumPicResult.size())) {
+				accumPicResult.data[idx] = accumPicResult.data[idx] + picData.data[idx]
+					- (accumPicDatas.size() == saOption.accumNum ? accumPicDatas.front().data[idx] : 0);
+			}
+			if (accumPicDatas.size() == saOption.accumNum) {
+				accumPicDatas.pop_front();
+				accumNum--;
+			}
+			accumPicDatas.push_back(picData);
+			accumNum++;
+		}
+	}
+
+}
+
 /* used when transitioning between single and multiple pictures. It sets it based on the background size, so make
 * sure to change the background size before using this.
 * ********/
@@ -351,7 +386,8 @@ void PictureControl::resetStorage(){
 
 void PictureControl::setSoftwareAccumulationOption ( softwareAccumulationOption opt ){
 	saOption = opt;
-	accumPicData.clear ( );
+	accumPicDatas.clear ( );
+	accumPicResult.data.clear();
 	accumNum = 0;
 }
 
@@ -394,15 +430,17 @@ void PictureControl::drawBitmap ( const Matrix<long>& picData, std::tuple<bool, 
 		thrower  ( "Picture data didn't match grid size!" );
 	}
 	
-	int width = picData.getCols();
-	int height = picData.getRows();
+	calculateSoftwareAccumulation(picData);
+
+	int width = accumPicResult.getCols();
+	int height = accumPicResult.getRows();
 	std::vector<plotDataVec> ddvec(height);
 	for (size_t idx = 0; idx < height; idx++)
 	{
 		ddvec[idx].reserve(width);
 		for (size_t idd = 0; idd < width; idd++)
 		{
-			ddvec[idx].push_back(dataPoint{ 0,double(picData(idx,idd)),0 }); // x,y,err
+			ddvec[idx].push_back(dataPoint{ 0,double(accumPicResult(idx,idd)),0 }); // x,y,err
 		}
 	}
 	pic.setData(ddvec);

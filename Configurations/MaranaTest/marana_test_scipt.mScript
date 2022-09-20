@@ -1,4 +1,4 @@
 t = 1
 pulseon: DO1_0 1
-t = 1000
+t = 230
 pulseon: DO1_0 1
