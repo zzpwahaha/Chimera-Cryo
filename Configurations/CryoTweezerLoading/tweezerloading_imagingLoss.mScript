@@ -45,13 +45,13 @@ off: PrbShutter
 
 dac: TARepAmp 10
 dac: SrcMOTAmp 10
-dac: SciMOTAmp 6.5 
+dac: SciMOTAmp 6.8 
 dac: DipolePushAmp 4.4
 dac: TweezerIntensity twz_intensity %Converison is 38.7mW per 1V Aug/1/2022 
 dac: PrbRepAmp 10
 dac: PrbAmp 2.5 
 
-ol: ol_cooling 1216
+ol: ol_cooling 1214
 ol: ol_repump 5282
 
 dac: MOTCoil mot_gradient
@@ -143,8 +143,11 @@ t += t_twz_imaging+10
 %t += 10+15
 %dacramp: TweezerIntensity twz_int_low twz_intensity 10 
 %t += 10
+%dac: TweezerIntensity 0.03
+%t += 3
+%dac: TweezerIntensity twz_intensity
 %%%%%%%%%%%%%%%%% After Image TWIZZER %%%%%%%%%
-
+dacramp: TweezerIntensity twz_intensity twz_int_lifetime 10 
 off: PrbShutter
 on: xyzMOTShutter
 ol: ol_cooling pgc_twz_olcool
@@ -160,9 +163,11 @@ on: SciMOTTrg
 t += t_lifetime-15 %t_pgc_twz
 off: SciMOTTrg
 off: xyzMOTShutter
+dacramp: TweezerIntensity twz_int_lifetime twz_intensity 10 
 t += -(t_lifetime-15)  %-t_pgc_twz
 t += -4
 %t += -(10+10+15)
+%t += -3
 t += -(t_twz_imaging+10)
 
 %%%%%%%%%%%%%%%% Repetitive Twz PGC %%%%%%%%

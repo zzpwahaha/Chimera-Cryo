@@ -71,6 +71,7 @@ pulseon: DO1_0 1
 %%%%%%%%%%%%%%  Mako Trigger  %%%%%%%%%%%%%%%%%%
 repeat: 99
 	pulseon: Mako2 1
+	pulseon: DO1_0 1
 	t += 1000
 end
 
