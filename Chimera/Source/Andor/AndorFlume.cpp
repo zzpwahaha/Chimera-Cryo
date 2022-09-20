@@ -1,7 +1,16 @@
 #include "stdafx.h"
 #include "AndorFlume.h"
+#include <qdebug.h>
 
 AndorFlume::AndorFlume ( bool safemode_option ) : safemode( safemode_option ){}
+
+AndorFlume::~AndorFlume()
+{
+	if (!safemode) {
+		andorErrorChecker(AT_Close(camHndl), true);
+		andorErrorChecker(AT_FinaliseLibrary(), true);
+	}
+}
 
 
 void AndorFlume::initialize ( ){
@@ -10,8 +19,19 @@ void AndorFlume::initialize ( ){
 	//... later... not sure what driver files this was referring to.
 	GetCurrentDirectory ( 256, aBuffer );
 	if ( !safemode ){
-		andorErrorChecker ( Initialize ( aBuffer ) );
+		andorErrorChecker ( Initialize ( aBuffer ) ); // for EMCCD
+		// for SDK3
+		andorErrorChecker(AT_InitialiseLibrary(), true);
+		AT_64 iNumberDevices = 0;
+		andorErrorChecker(AT_GetInt(AT_HANDLE_SYSTEM, L"Device Count", &iNumberDevices), true);
+		if (iNumberDevices <= 0) {
+			thrower("No cameras detected");
+		}
+		andorErrorChecker(AT_Open(0, &camHndl), true); //open first camera, almost always only have one andor connected
+		setBool(L"SpuriousNoiseFilter", AT_FALSE);
 	}
+
+	
 }
 
 
@@ -185,7 +205,19 @@ void AndorFlume::setRingExposureTimes ( int sizeOfTimesArray, float* arrayOfTime
 
 void AndorFlume::setImage ( int hBin, int vBin, int lBorder, int rBorder, int tBorder, int bBorder ){
 	if ( !safemode ){
-		andorErrorChecker ( SetImage ( hBin, vBin, lBorder, rBorder, tBorder, bBorder ) );
+		//andorErrorChecker ( SetImage ( hBin, vBin, lBorder, rBorder, tBorder, bBorder ) );
+		setInt(L"AOIHBin", hBin);
+		setInt(L"AOIWidth", (rBorder - lBorder + 1) / hBin);
+		setInt(L"AOILeft", lBorder);
+		setInt(L"AOIVBin", vBin);
+		setInt(L"AOIHeight", (bBorder - tBorder + 1) / vBin);
+		setInt(L"AOITop", tBorder);
+
+		AT_64 Width, Height;
+		getInt(L"AOIWidth", &Width);
+		getInt(L"AOIHeight", &Height);
+		qDebug() << "Andor Imaging parameter for AndorFlume::setImage (hb,vb,l,r,t,b) = " << hBin << vBin << lBorder << rBorder << tBorder << bBorder;
+		qDebug() << "Set ROI in Andor " << (rBorder - lBorder + 1) / hBin << ", " << (bBorder - tBorder + 1) / vBin << "\r\n" << "and the read back is " << Width << "," << Height;
 	}
 }
 
@@ -218,13 +250,18 @@ int AndorFlume::queryStatus ( ){
 
 void AndorFlume::startAcquisition ( ){
 	if ( !safemode ){
-		andorErrorChecker ( StartAcquisition ( ) );
+		//andorErrorChecker ( StartAcquisition ( ) );
+		command(L"AcquisitionStart");
+		qDebug() << "Andor Acquisition started";
 	}
 }
 
 void AndorFlume::abortAcquisition ( ){
 	if ( !safemode ){
-		andorErrorChecker ( AbortAcquisition ( ) );
+		//andorErrorChecker ( AbortAcquisition ( ) );
+		command(L"AcquisitionStop");
+		flush();
+		qDebug() << "Andor Acquisition stopped";
 	}
 }
 
@@ -318,9 +355,10 @@ std::string AndorFlume::getHeadModel ( ){
 	return str ( nameChars );
 }
 
-std::string AndorFlume::getErrorMsg (int errCode) {
+std::string AndorFlume::getErrorMsg (int errCode, bool SDK3) {
 	std::string errorMessage = "uninitialized";
-	switch (errCode){
+	if (!SDK3) {
+		switch (errCode) {
 		case 20001: errorMessage = "DRV_ERROR_CODES";					break;
 		case 20002:	errorMessage = "DRV_SUCCESS";						break;
 		case 20003:	errorMessage = "DRV_VXDNOTINSTALLED";				break;
@@ -406,14 +444,233 @@ std::string AndorFlume::getErrorMsg (int errCode) {
 			errorMessage = "UNKNOWN ERROR MESSAGE RETURNED FROM CAMERA FUNCTION!";
 			break;
 		}
+		}
 	}
+	else {
+		switch (errCode) {
+		case   0: errorMessage = "AT_SUCCESS";                        break;
+		case   1: errorMessage = "AT_ERR_NOTINITIALISED";             break;
+		case   2: errorMessage = "AT_ERR_NOTIMPLEMENTED";             break;
+		case   3: errorMessage = "AT_ERR_READONLY";                   break;
+		case   4: errorMessage = "AT_ERR_NOTREADABLE";                break;
+		case   5: errorMessage = "AT_ERR_NOTWRITABLE";                break;
+		case   6: errorMessage = "AT_ERR_OUTOFRANGE";                 break;
+		case   7: errorMessage = "AT_ERR_INDEXNOTAVAILABLE";          break;
+		case   8: errorMessage = "AT_ERR_INDEXNOTIMPLEMENTED";        break;
+		case   9: errorMessage = "AT_ERR_EXCEEDEDMAXSTRINGLENGTH";    break;
+		case  10: errorMessage = "AT_ERR_CONNECTION";                 break;
+		case  11: errorMessage = "AT_ERR_NODATA";                     break;
+		case  12: errorMessage = "AT_ERR_INVALIDHANDLE";              break;
+		case  13: errorMessage = "AT_ERR_TIMEDOUT";                   break;
+		case  14: errorMessage = "AT_ERR_BUFFERFULL";                 break;
+		case  15: errorMessage = "AT_ERR_INVALIDSIZE";                break;
+		case  16: errorMessage = "AT_ERR_INVALIDALIGNMENT";           break;
+		case  17: errorMessage = "AT_ERR_COMM";                       break;
+		case  18: errorMessage = "AT_ERR_STRINGNOTAVAILABLE";         break;
+		case  19: errorMessage = "AT_ERR_STRINGNOTIMPLEMENTED";       break;
+		case  20: errorMessage = "AT_ERR_NULL_FEATURE";               break;
+		case  21: errorMessage = "AT_ERR_NULL_HANDLE";                break;
+		case  22: errorMessage = "AT_ERR_NULL_IMPLEMENTED_VAR";       break;
+		case  23: errorMessage = "AT_ERR_NULL_READABLE_VAR";          break;
+		case  24: errorMessage = "AT_ERR_NULL_READONLY_VAR";          break;
+		case  25: errorMessage = "AT_ERR_NULL_WRITABLE_VAR";          break;
+		case  26: errorMessage = "AT_ERR_NULL_MINVALUE";              break;
+		case  27: errorMessage = "AT_ERR_NULL_MAXVALUE";              break;
+		case  28: errorMessage = "AT_ERR_NULL_VALUE";                 break;
+		case  29: errorMessage = "AT_ERR_NULL_STRING";                break;
+		case  30: errorMessage = "AT_ERR_NULL_COUNT_VAR";             break;
+		case  31: errorMessage = "AT_ERR_NULL_ISAVAILABLE_VAR";       break;
+		case  32: errorMessage = "AT_ERR_NULL_MAXSTRINGLENGTH";       break;
+		case  33: errorMessage = "AT_ERR_NULL_EVCALLBACK";            break;
+		case  34: errorMessage = "AT_ERR_NULL_QUEUE_PTR";             break;
+		case  35: errorMessage = "AT_ERR_NULL_WAIT_PTR";              break;
+		case  36: errorMessage = "AT_ERR_NULL_PTRSIZE";               break;
+		case  37: errorMessage = "AT_ERR_NOMEMORY";                   break;
+		case  38: errorMessage = "AT_ERR_DEVICEINUSE";                break;
+		case  39: errorMessage = "AT_ERR_DEVICENOTFOUND";             break;
+		case 100: errorMessage = "AT_ERR_HARDWARE_OVERFLOW";          break;
+		default: {
+			errorMessage = "UNKNOWN ERROR MESSAGE RETURNED FROM CAMERA FUNCTION!";
+			break;
+		}
+		}
+	}
+
 	return errorMessage;
 }
 
-void AndorFlume::andorErrorChecker ( int errorCode ){
-	auto errorMessage = getErrorMsg (errorCode);
+void AndorFlume::andorErrorChecker ( int errorCode, bool SDK3){
+	auto errorMessage = getErrorMsg (errorCode, SDK3);
 	/// So no throw is considered success.
-	if ( errorMessage != "DRV_SUCCESS" ){
+	if ( (errorMessage != "DRV_SUCCESS") && (errorMessage != "AT_SUCCESS") ){
 		thrower ( errorMessage );
+	}
+}
+
+void AndorFlume::isImplemented(const AT_WC* Feature, AT_BOOL* Implemented) {
+	if (!safemode) {
+		andorErrorChecker(AT_IsImplemented(camHndl, Feature, Implemented), true);
+	}
+}
+
+void AndorFlume::isReadable(const AT_WC* Feature, AT_BOOL* Readable) {
+	if (!safemode) {
+		andorErrorChecker(AT_IsReadable(camHndl, Feature, Readable), true);
+	}
+}
+
+void AndorFlume::isWritable(const AT_WC* Feature, AT_BOOL* Writable) {
+	if (!safemode) {
+		andorErrorChecker(AT_IsWritable(camHndl, Feature, Writable), true);
+	}
+}
+
+void AndorFlume::isReadOnly(const AT_WC* Feature, AT_BOOL* ReadOnly) {
+	if (!safemode) {
+		andorErrorChecker(AT_IsReadOnly(camHndl, Feature, ReadOnly), true);
+	}
+}
+
+void AndorFlume::setInt(const AT_WC* Feature, AT_64 Value) {
+	if (!safemode) {
+		andorErrorChecker(AT_SetInt(camHndl, Feature, Value), true);
+	}
+}
+
+void AndorFlume::getInt(const AT_WC* Feature, AT_64* Value) {
+	if (!safemode) {
+		andorErrorChecker(AT_GetInt(camHndl, Feature, Value), true);
+	}
+}
+
+void AndorFlume::getIntMax(const AT_WC* Feature, AT_64* MaxValue) {
+	if (!safemode) {
+		andorErrorChecker(AT_GetIntMax(camHndl, Feature, MaxValue), true);
+	}
+}
+
+void AndorFlume::getIntMin(const AT_WC* Feature, AT_64* MinValue) {
+	if (!safemode) {
+		andorErrorChecker(AT_GetIntMin(camHndl, Feature, MinValue), true);
+	}
+}
+
+void AndorFlume::setFloat(const AT_WC* Feature, double Value) {
+	if (!safemode) {
+		andorErrorChecker(AT_SetFloat(camHndl, Feature, Value), true);
+	}
+}
+
+void AndorFlume::getFloat(const AT_WC* Feature, double* Value) {
+	if (!safemode) {
+		andorErrorChecker(AT_GetFloat(camHndl, Feature, Value), true);
+	}
+}
+
+void AndorFlume::getFloatMax(const AT_WC* Feature, double* MaxValue) {
+	if (!safemode) {
+		andorErrorChecker(AT_GetFloatMax(camHndl, Feature, MaxValue), true);
+	}
+}
+
+void AndorFlume::getFloatMin(const AT_WC* Feature, double* MinValue) {
+	if (!safemode) {
+		andorErrorChecker(AT_GetFloatMin(camHndl, Feature, MinValue), true);
+	}
+}
+
+void AndorFlume::setBool(const AT_WC* Feature, AT_BOOL Value) {
+	if (!safemode) {
+		andorErrorChecker(AT_SetBool(camHndl, Feature, Value), true);
+	}
+}
+
+void AndorFlume::getBool(const AT_WC* Feature, AT_BOOL* Value) {
+	if (!safemode) {
+		andorErrorChecker(AT_GetBool(camHndl, Feature, Value), true);
+	}
+}
+
+void AndorFlume::setEnumIndex(const AT_WC* Feature, int Value) {
+	if (!safemode) {
+		andorErrorChecker(AT_SetEnumIndex(camHndl, Feature, Value), true);
+	}
+}
+
+void AndorFlume::setEnumString(const AT_WC* Feature, const AT_WC* String) {
+	if (!safemode) {
+		andorErrorChecker(AT_SetEnumString(camHndl, Feature, String), true);
+	}
+}
+
+void AndorFlume::getEnumIndex(const AT_WC* Feature, int* Value) {
+	if (!safemode) {
+		andorErrorChecker(AT_GetEnumIndex(camHndl, Feature, Value), true);
+	}
+}
+
+void AndorFlume::getEnumCount(const  AT_WC* Feature, int* Count) {
+	if (!safemode) {
+		andorErrorChecker(AT_GetEnumCount(camHndl, Feature, Count), true);
+	}
+}
+
+void AndorFlume::isEnumIndexAvailable(const AT_WC* Feature, int Index, AT_BOOL* Available) {
+	if (!safemode) {
+		andorErrorChecker(AT_IsEnumIndexAvailable(camHndl, Feature, Index, Available), true);
+	}
+}
+
+void AndorFlume::isEnumIndexImplemented(const AT_WC* Feature, int Index, AT_BOOL* Implemented) {
+	if (!safemode) {
+		andorErrorChecker(AT_IsEnumIndexImplemented(camHndl, Feature, Index, Implemented), true);
+	}
+}
+
+void AndorFlume::getEnumStringByIndex(const AT_WC* Feature, int Index, AT_WC* String, int StringLength) {
+	if (!safemode) {
+		andorErrorChecker(AT_GetEnumStringByIndex(camHndl, Feature, Index, String, StringLength), true);
+	}
+}
+
+void AndorFlume::command(const AT_WC* Feature) {
+	if (!safemode) {
+		andorErrorChecker(AT_Command(camHndl, Feature), true);
+	}
+}
+
+void AndorFlume::setString(const AT_WC* Feature, const AT_WC* String) {
+	if (!safemode) {
+		andorErrorChecker(AT_SetString(camHndl, Feature, String), true);
+	}
+}
+
+void AndorFlume::getString(const AT_WC* Feature, AT_WC* String, int StringLength) {
+	if (!safemode) {
+		andorErrorChecker(AT_GetString(camHndl, Feature, String, StringLength), true);
+	}
+}
+
+void AndorFlume::getStringMaxLength(const AT_WC* Feature, int* MaxStringLength) {
+	if (!safemode) {
+		andorErrorChecker(AT_GetStringMaxLength(camHndl, Feature, MaxStringLength), true);
+	}
+}
+
+void AndorFlume::queueBuffer(AT_U8* Ptr, int PtrSize) {
+	if (!safemode) {
+		andorErrorChecker(AT_QueueBuffer(camHndl, Ptr, PtrSize), true);
+	}
+}
+
+void AndorFlume::waitBuffer(AT_U8** Ptr, int* PtrSize, unsigned int Timeout) {
+	if (!safemode) {
+		andorErrorChecker(AT_WaitBuffer(camHndl, Ptr, PtrSize, Timeout), true);
+	}
+}
+
+void AndorFlume::flush() {
+	if (!safemode) {
+		andorErrorChecker(AT_Flush(camHndl), true);
 	}
 }

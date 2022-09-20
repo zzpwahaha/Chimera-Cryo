@@ -36,6 +36,13 @@ struct imageParameters{
 	}
 
 	/* in units of # of binned pixels */
+	unsigned widthBinned() {
+		if (this->horizontalBinning == 0) {
+			thrower("ERROR: In imageParameters.width(), horizontalBinning was zero!");
+		}
+		return horRawPixelNum() / this->horizontalBinning;
+	}
+
 	unsigned width ( ){ 
 		if ( this->horizontalBinning == 0 ){
 			thrower ( "ERROR: In imageParameters.width(), horizontalBinning was zero!" );
@@ -43,6 +50,13 @@ struct imageParameters{
 		return horRawPixelNum() /*/ this->horizontalBinning*/;
 	}
 	/* in units of # of binned pixels */
+	unsigned heightBinned() {
+		if (this->verticalBinning == 0) {
+			thrower("ERROR: In imageParameters.width(), verticalBinning was zero!");
+		}
+		return vertRawPixelNum() / this->verticalBinning;
+	}
+
 	unsigned height( ){
 		if ( this->verticalBinning == 0 ){
 			thrower ( "ERROR: In imageParameters.width(), verticalBinning was zero!" );
@@ -50,6 +64,10 @@ struct imageParameters{
 		return vertRawPixelNum() /*/ this->verticalBinning*/;
 	}
 	/* in units of # of binned pixels */
+	unsigned sizeBinned() {
+		return this->widthBinned() * this->heightBinned();
+	}
+
 	unsigned size ( ){
 		return this->width ( ) * this->height ( );
 	}
@@ -89,11 +107,11 @@ struct imageParameters{
 			thrower ( errstr + "top <= 0" + currValues ( ) );
 		}
 		if ( cam == "andor" ){
-			if ( right > 512 ){
-				thrower ( errstr + "right > 512" + currValues ( ) );
+			if ( right > 2048 ){
+				thrower ( errstr + "right > 2048" + currValues ( ) );
 			}
-			if ( bottom > 512 ){
-				thrower ( errstr + "bottom > 512" + currValues ( ) );
+			if ( bottom > 2048 ){
+				thrower ( errstr + "bottom > 2048" + currValues ( ) );
 			}
 		}
 		if ( cam == "mako" ){

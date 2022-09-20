@@ -16,7 +16,7 @@ class PictureManager : public QWidget
 		void updatePlotData ( );
 		void handleSaveConfig(ConfigStream& saveFile);
 		void handleOpenConfig(ConfigStream& configFile);
-		void initialize( int manWidth, int manHeight, IChimeraQtWindow* widget, int scaleFactor=50);
+		void initialize(IChimeraQtWindow* widget, int scaleFactor=50);
 		void drawGrids(QPainter& painter);
 		unsigned getNumberActive( );
 		void setParameters( imageParameters parameters );

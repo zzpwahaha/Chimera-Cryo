@@ -11,6 +11,7 @@
 #include "QPixmap.h"
 #include <qlabel.h>
 #include "ImageLabel.h"
+#include <deque>
 /*
  * This class manages a single picture displayed on the camera window and the controls associated with that single 
  * picture. Unlike many classes in my program, this is /not/ built to be a singleton. Instead, there should be one 
@@ -30,10 +31,13 @@ class PictureControl : public QWidget{
 		void recalculateGrid( imageParameters newParameters );
 		void setPictureArea( QPoint loc, int width, int height );
 		void setSliderControlLocs(QPoint pos, int height);
+		void calculateSoftwareAccumulation(const Matrix<long>& picData);
 		void drawBitmap (const Matrix<long>& picData, std::tuple<bool, int, int> autoscaleInfo, 
 						 bool specialMin, bool specialMax, std::vector<atomGrid> grids, unsigned pictureNumber, 
 						 bool includingAnalysisMarkers);
 		void setSliderPositions(unsigned min, unsigned max);
+		void setSliderSize(int size);
+		void setSliderRange(unsigned min, unsigned max);
 		void drawGrid(QPainter& painter);
 		void drawCircle(coordinate selectedLocation, QPainter& painter);
 		void setSoftwareAccumulationOption ( softwareAccumulationOption opt );
@@ -51,13 +55,15 @@ class PictureControl : public QWidget{
 			bool includingAnalysisMarkers=true);
 		coordinate selectedLocation;
 		void setTransformationMode (Qt::TransformationMode);
-		void setSliderSize(int size);
+
 	private:
 		Qt::TransformationMode transformationMode;
 		Ui::PictureControl* ui = nullptr;
 		int picScaleFactor;
 		softwareAccumulationOption saOption;
-		std::vector<double> accumPicData;
+		//std::vector<double> accumPicData;
+		std::deque<Matrix<long>> accumPicDatas;
+		Matrix<long> accumPicResult;
 		unsigned accumNum;
 		const bool histOption;
 		std::vector<plotDataVec> horData, vertData;

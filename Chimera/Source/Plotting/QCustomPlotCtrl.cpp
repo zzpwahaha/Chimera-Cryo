@@ -81,6 +81,7 @@ void QCustomPlotCtrl::init(IChimeraQtWindow* parent, QString titleIn, unsigned n
 			plot->yAxis->setScaleRatio(plot->xAxis, 1.0);
 			plot->replot(); });
 		if (this->style == plotStyle::DensityPlotWithHisto) {
+			autoScale = false;
 			plot->setInteractions(0x000);
 			disconnect(c);
 			plot->plotLayout()->insertColumn(0);
@@ -157,15 +158,15 @@ void QCustomPlotCtrl::init(IChimeraQtWindow* parent, QString titleIn, unsigned n
 void QCustomPlotCtrl::handleContextMenu(const QPoint& pos) {
 	QMenu menu;
 	menu.setStyleSheet(chimeraStyleSheets::stdStyleSheet());
-	auto* clear = new QAction("Clear Plot", plot);
+	auto* clear = new QAction("Clear Plot", &menu);
 	plot->connect(clear, &QAction::triggered,
 		[this]() {
 			plot->clearGraphs();
 			plot->replot();
 		});
 	menu.addAction(clear);
-	if (this->style != plotStyle::DensityPlot) {
-		auto* leg = new QAction("Toggle Legend", plot);
+	if (this->style != plotStyle::DensityPlot && this->style != plotStyle::DensityPlotWithHisto) {
+		auto* leg = new QAction("Toggle Legend", &menu);
 		plot->connect(leg, &QAction::triggered,
 			[this]() {
 				showLegend = !showLegend;
@@ -175,7 +176,7 @@ void QCustomPlotCtrl::handleContextMenu(const QPoint& pos) {
 	}
 
 	if (this->style == plotStyle::DensityPlotWithHisto) {
-		auto* side = new QAction("Hide Side Plot", plot);
+		auto* side = new QAction("Hide Side Plot", &menu);
 		side->setCheckable(true);
 		side->setChecked(!showSidePlot);
 		plot->connect(side, &QAction::triggered, [this, side](bool checked) {
@@ -200,10 +201,17 @@ void QCustomPlotCtrl::handleContextMenu(const QPoint& pos) {
 			}
 		});
 		menu.addAction(side);
+
+		auto* autos = new QAction("Disable Auto Scale", &menu);
+		autos->setCheckable(true);
+		autos->setChecked(!autoScale);
+		plot->connect(autos, &QAction::triggered, [this, autos]() {
+			autoScale = !autos->isChecked(); });
+		menu.addAction(autos);
 	}
 
 	if (this->style == plotStyle::DacPlot || this->style == plotStyle::TtlPlot) {
-		auto* tra = new QAction("Toggle Traces", plot);
+		auto* tra = new QAction("Toggle Traces", &menu);
 		plot->connect(tra, &QAction::triggered, [this]() {
 			auto graphs = plot->axisRect()->graphs();
 			if (graphs.size() != isShow.size()) {
@@ -248,7 +256,7 @@ void QCustomPlotCtrl::handleContextMenu(const QPoint& pos) {
 			diag->move(p.x() - diag->width() / 2, p.y() - diag->height() / 2); // show will update the diag size
 			});
 		menu.addAction(tra);
-		auto* autos = new QAction("Disable Auto Scale", plot);
+		auto* autos = new QAction("Disable Auto Scale", &menu);
 		autos->setCheckable(true);
 		autos->setChecked(!autoScale);
 		plot->connect(autos, &QAction::triggered, [this, autos]() {
@@ -554,21 +562,32 @@ void QCustomPlotCtrl::resetChart() {
 		plot->xAxis->rescale();
 	}
 	else if (style == plotStyle::DensityPlot) {
-		colorMap->rescaleDataRange(true);
-		colorMap->colorScale()->rescaleDataRange(true);
-		plot->yAxis->setScaleRatio(plot->xAxis, 1.0);
+		int width = colorMap->data()->keyRange().size();
+		int height = colorMap->data()->valueRange().size();
+		if (autoScale) {
+			colorMap->rescaleDataRange(true);
+			colorMap->colorScale()->rescaleDataRange(true);
+		}
+		//plot->yAxis->setScaleRatio(plot->xAxis, 1.0);
+		width > height ? centerAxisRect->axis(QCPAxis::atLeft)->setScaleRatio(centerAxisRect->axis(QCPAxis::atBottom), 1.0) :
+			centerAxisRect->axis(QCPAxis::atBottom)->setScaleRatio(centerAxisRect->axis(QCPAxis::atLeft), 1.0);
 	}
 	else if (style == plotStyle::DensityPlotWithHisto) {
 		int width = colorMap->data()->keyRange().size();
 		int height = colorMap->data()->valueRange().size();
 		centerAxisRect->axis(QCPAxis::atLeft)->setScaleRatio(
 			centerAxisRect->axis(QCPAxis::atBottom), height / width);
-		colorMap->rescaleDataRange(true);
-		colorMap->colorScale()->rescaleDataRange(true);
+		if (autoScale) {
+			colorMap->rescaleDataRange(true);
+			colorMap->colorScale()->rescaleDataRange(true);
+		}
 		colorMap->rescaleAxes();
 
-		width > height ? colorMap->valueAxis()->scaleRange(width / height) :
-			colorMap->keyAxis()->scaleRange(height / width);
+		//width > height ? colorMap->valueAxis()->scaleRange(width / height) :
+		//	colorMap->keyAxis()->scaleRange(height / width);
+		width > height ? centerAxisRect->axis(QCPAxis::atLeft)->setScaleRatio(centerAxisRect->axis(QCPAxis::atBottom), 1.0) :
+			centerAxisRect->axis(QCPAxis::atBottom)->setScaleRatio(centerAxisRect->axis(QCPAxis::atLeft), 1.0);
+		
 
 		bottomAxisRect->axis(QCPAxis::atBottom)->setRange(centerAxisRect->axis(QCPAxis::atBottom)->range());
 		leftAxisRect->axis(QCPAxis::atLeft)->setRange(centerAxisRect->axis(QCPAxis::atLeft)->range());
@@ -599,7 +618,7 @@ void QCustomPlotCtrl::resetChart() {
 	plot->xAxis->setTickLabelColor(neutralColor);
 	plot->yAxis->setTickLabelColor(neutralColor);
 	plot->axisRect()->insetLayout()->setInsetAlignment(0, Qt::AlignTop | Qt::AlignLeft);
-	if (this->style != plotStyle::DensityPlot || this->style != plotStyle::DensityPlotWithHisto) {
+	if (this->style == plotStyle::DensityPlot || this->style == plotStyle::DensityPlotWithHisto) {
 		auto legendColor = QColor(defs["@StaticBackground"]);
 		legendColor.setAlpha(150);
 		plot->legend->setBrush(legendColor);
@@ -625,5 +644,13 @@ std::vector<double> QCustomPlotCtrl::handleMousePosOnCMap(QMouseEvent* event)
 	double y = centerAxisRect->axis(QCPAxis::atLeft)->pixelToCoord(event->pos().y());
 	vec.insert(vec.end(), { std::floor(x + 0.5), std::floor(y + 0.5), colorMap->data()->data(x, y) });
 	return vec;
+}
+
+void QCustomPlotCtrl::setColorScaleRange(int lower, int upper)
+{
+	if (colorMap != nullptr) {
+		auto cs = colorMap->colorScale();
+		cs->setDataRange(QCPRange(lower, upper));
+	}
 }
 

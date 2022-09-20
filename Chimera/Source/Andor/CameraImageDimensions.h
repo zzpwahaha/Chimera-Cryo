@@ -21,7 +21,7 @@ class ImageDimsControl : public QWidget
 	Q_OBJECT
 	public:
 		ImageDimsControl(std::string whichCam);
-		void initialize( IChimeraQtWindow* parentWindow);
+		void initialize(/*CQComboBox* binningCombo, */IChimeraQtWindow* parentWindow);
 		imageParameters readImageParameters();
 		void setImageParametersFromInput( imageParameters param );
 		bool checkReady();
@@ -31,6 +31,7 @@ class ImageDimsControl : public QWidget
 		const std::string camType;
 		void updateEnabledStatus (bool viewRunning);
 		void saveParams (ConfigStream& saveFile, imageParameters params);
+		//void setBinningMode(AndorBinningMode::mode mode);
 	private:
 		QLabel* leftText = nullptr;
 		QLabel* rightText = nullptr;
@@ -44,6 +45,12 @@ class ImageDimsControl : public QWidget
 		CQLineEdit* bottomEdit = nullptr;
 		CQLineEdit* topEdit = nullptr;
 		CQLineEdit* vertBinningEdit = nullptr;
+
+		//QLabel* binningLabel = nullptr;
+		//CQComboBox* binningComboCopy = nullptr;
+		// just for imageParameters, the actual control is from the AndorCameraSettingsControl class
+		//AndorBinningMode::mode binningMode;
+
 		bool isReady;
 		imageParameters currentImageParameters;
 };

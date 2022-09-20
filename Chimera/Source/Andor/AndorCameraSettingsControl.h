@@ -34,8 +34,9 @@ class AndorCameraSettingsControl : public QWidget
 		void initialize( IChimeraQtWindow* parent, std::vector<std::string> vertSpeeds, 
 						 std::vector<std::string> horSpeeds );
 		void updateSettings( );
-		void updateMinKineticCycleTime( double time );
-		void setEmGain( bool currentlyOn, int currentEmGainLevel );
+		//void updateMinKineticCycleTime( double time );
+		void updateMaxFrameRate(double framerate);
+		//void setEmGain( bool currentlyOn, int currentEmGainLevel );
 		void updateWindowEnabledStatus ();
 		void handlePictureSettings();
 		void updateTriggerMode( );
@@ -44,13 +45,15 @@ class AndorCameraSettingsControl : public QWidget
 		void checkIfReady();
 		void cameraIsOn( bool state );
 		void updateCameraMode( );
+		void updateGainMode();
+		//void updateBinningMode();
 		AndorCameraSettings getConfigSettings();
 		AndorCameraSettings getCalibrationSettings( );
 		bool getAutoCal( );
 		bool getUseCal( );
 		void setImageParameters(imageParameters newSettings);
 		void setRunSettings(AndorRunSettings inputSettings);
-		void updateImageDimSettings ( imageParameters settings );
+		//void updateImageDimSettings ( imageParameters settings );
 		void updatePicSettings ( andorPicSettingsGroup settings );
 		void updateDisplays ();
 		static andorPicSettingsGroup getPictureSettingsFromConfig (ConfigStream& configFile);
@@ -58,7 +61,7 @@ class AndorCameraSettingsControl : public QWidget
 		void handelSaveMasterConfig(std::stringstream& configFile);
 		void handleOpenMasterConfig(ConfigStream& configFile, QtAndorWindow* camWin);
 		std::vector<Matrix<long>> getImagesToDraw( const std::vector<Matrix<long>>& rawData  );
-		const imageParameters fullResolution = { 1,512,1,512,1,1 };
+		const imageParameters fullResolution = { 1,2048,1,2048,1,1 };
 		std::array<softwareAccumulationOption, 4> getSoftwareAccumulationOptions ( );
 		Qt::TransformationMode getTransformationMode ();
 		void setConfigSettings (AndorRunSettings inputSettings);
@@ -70,43 +73,51 @@ class AndorCameraSettingsControl : public QWidget
 
 		AndorRunSettings currentlyRunningSettings;
 		bool currentlyUneditable = false;
-		double getKineticCycleTime( );
-		double getAccumulationCycleTime( );
-		unsigned getAccumulationNumber( );
+		double getFrameRate();
+		//double getKineticCycleTime( );
+		//double getAccumulationCycleTime( );
+		//unsigned getAccumulationNumber( );
 		imageParameters readImageParameters( );
 		QLabel* header;
 		QPushButton* programNow;
 		QCheckBox* viewRunningSettings;
 		CQCheckBox* controlAndorCameraCheck;
 		// Hardware Accumulation Parameters
-		QLabel* accumulationCycleTimeLabel;
-		CQLineEdit* accumulationCycleTimeEdit = nullptr;
-		QLabel* accumulationNumberLabel;
-		CQLineEdit* accumulationNumberEdit = nullptr;
+		//QLabel* accumulationCycleTimeLabel;
+		//CQLineEdit* accumulationCycleTimeEdit = nullptr;
+		//QLabel* accumulationNumberLabel;
+		//CQLineEdit* accumulationNumberEdit = nullptr;
 		// 
 		CQComboBox* cameraModeCombo;
 
-		CQComboBox* frameTransferModeCombo = nullptr;
-		CQComboBox* verticalShiftSpeedCombo;
-		CQComboBox* horizontalShiftSpeedCombo;
+		//CQComboBox* frameTransferModeCombo = nullptr;
+		//CQComboBox* verticalShiftSpeedCombo;
+		//CQComboBox* horizontalShiftSpeedCombo;
 
-		QLabel* emGainLabel;
-		CQLineEdit* emGainEdit = nullptr;
-		CQPushButton* emGainBtn = nullptr;
-		QLabel* emGainDisplay;
+		//QLabel* emGainLabel;
+		//CQLineEdit* emGainEdit = nullptr;
+		//CQPushButton* emGainBtn = nullptr;
+		//QLabel* emGainDisplay;
 		CQComboBox* triggerCombo = nullptr;
+		CQComboBox* gainCombo = nullptr;
+		//CQComboBox* binningCombo = nullptr;
 		// Temperature
 		CQPushButton* setTemperatureButton = nullptr;
-		CQPushButton* temperatureOffButton = nullptr;
+		//CQPushButton* temperatureOffButton = nullptr;
 		CQLineEdit* temperatureEdit = nullptr;
 		QLabel* temperatureDisplay;
 		QLabel* temperatureMsg;
 
+		// FrameRate
+		QLabel* frameRateLabel = nullptr;
+		CQLineEdit* frameRateEdit = nullptr;
+		QLabel* maxframeRateLabel = nullptr;
+		
 		// Kinetic Cycle Time
-		CQLineEdit* kineticCycleTimeEdit = nullptr;
-		QLabel* kineticCycleTimeLabel = nullptr;
-		QLabel* minKineticCycleTimeDisp = nullptr;
-		QLabel* minKineticCycleTimeLabel = nullptr;
+		//CQLineEdit* kineticCycleTimeEdit = nullptr;
+		//QLabel* kineticCycleTimeLabel = nullptr;
+		//QLabel* minKineticCycleTimeDisp = nullptr;
+		//QLabel* minKineticCycleTimeLabel = nullptr;
 		// two subclassed groups.
 		ImageDimsControl imageDimensionsObj;
 		PictureSettingsControl picSettingsObj;

@@ -10,6 +10,7 @@
 #include <RealTimeDataAnalysis/AtomCruncherWorker.h>
 #include <ExperimentThread/ExpThreadWorker.h>
 #include <QThread.h>
+#include <qelapsedtimer.h>
 #include <qdebug.h>
 
 
@@ -18,7 +19,9 @@ QtAndorWindow::QtAndorWindow (QWidget* parent) : IChimeraQtWindow (parent),
 	dataHandler (DATA_SAVE_LOCATION, this),
 	andor (ANDOR_SAFEMODE),
 	pics (false, "ANDOR_PICTURE_MANAGER", false, Qt::SmoothTransformation),
-	analysisHandler (this){
+	analysisHandler (this),
+	realTimePic(true) // not sure why need this var, seems never changed
+{
 	
 	setWindowTitle ("Andor Window");
 }
@@ -41,11 +44,12 @@ void QtAndorWindow::initializeWidgets (){
 	alerts.alertMainThread (0);
 	alerts.initialize (this);
 	analysisHandler.initialize (this);
-	andorSettingsCtrl.initialize ( this, andor.getVertShiftSpeeds(), andor.getHorShiftSpeeds());
-	alerts.setMaximumWidth(350);
-	analysisHandler.setMaximumSize(350, 300);
-	andorSettingsCtrl.setMaximumWidth(350);
-	layout1->addWidget(&alerts);
+	andorSettingsCtrl.initialize ( this, std::vector<std::string>()/*andor.getVertShiftSpeeds()*/, std::vector<std::string>()/*andor.getHorShiftSpeeds()*/);
+	alerts.setMaximumWidth(850);
+	alerts.setMaximumHeight(50);
+	analysisHandler.setMaximumSize(850, 600);
+	andorSettingsCtrl.setMaximumWidth(850);
+	//layout1->addWidget(&alerts);
 	layout1->addWidget(&analysisHandler);
 	layout1->addWidget(&andorSettingsCtrl);
 	layout1->addStretch(0);
@@ -67,7 +71,7 @@ void QtAndorWindow::initializeWidgets (){
 	layout3->setContentsMargins(0, 0, 0, 0);
 	timer.initialize (this);
 	timer.setMinimumWidth(750);
-	pics.initialize (530 * 2, 460 * 2 + 5, this);
+	pics.initialize (this);
 	// end of literal initialization calls
 	//pics.setSinglePicture (andorSettingsCtrl.getConfigSettings ().andor.imageSettings);
 	timer.setMaximumHeight(45);
@@ -158,27 +162,27 @@ void QtAndorWindow::handleImageDimsEdit (){
 	}
 }
 
-void QtAndorWindow::handleEmGainChange (){
-	try {
-		auto runSettings = andor.getAndorRunSettings ();
-		andorSettingsCtrl.setEmGain (runSettings.emGainModeIsOn, runSettings.emGainLevel);
-		auto settings = andorSettingsCtrl.getConfigSettings ();
-		runSettings.emGainModeIsOn = settings.andor.emGainModeIsOn;
-		runSettings.emGainLevel = settings.andor.emGainLevel;
-		andor.setSettings (runSettings);
-		// and immediately change the EM gain mode.
-		try	{
-			andor.setGainMode ();
-		}
-		catch (ChimeraError& err){
-			// this can happen e.g. if the camera is aquiring.
-			reportErr (qstr (err.trace ()));
-		}
-	}
-	catch (ChimeraError err){
-		reportErr (qstr (err.trace ()));
-	}
-}
+//void QtAndorWindow::handleEmGainChange (){
+//	try {
+//		auto runSettings = andor.getAndorRunSettings ();
+//		andorSettingsCtrl.setEmGain (runSettings.emGainModeIsOn, runSettings.emGainLevel);
+//		auto settings = andorSettingsCtrl.getConfigSettings ();
+//		runSettings.emGainModeIsOn = settings.andor.emGainModeIsOn;
+//		runSettings.emGainLevel = settings.andor.emGainLevel;
+//		andor.setSettings (runSettings);
+//		// and immediately change the EM gain mode.
+//		try	{
+//			andor.setGainMode ();
+//		}
+//		catch (ChimeraError& err){
+//			// this can happen e.g. if the camera is aquiring.
+//			reportErr (qstr (err.trace ()));
+//		}
+//	}
+//	catch (ChimeraError err){
+//		reportErr (qstr (err.trace ()));
+//	}
+//}
 
 
 std::string QtAndorWindow::getSystemStatusString (){
@@ -205,7 +209,7 @@ void QtAndorWindow::windowOpenConfig (ConfigStream& configFile){
 	try	{
 		ConfigSystem::stdGetFromConfig (configFile, andor, camSettings);
 		andorSettingsCtrl.setConfigSettings (camSettings);
-		andorSettingsCtrl.updateImageDimSettings (camSettings.imageSettings);
+		andorSettingsCtrl.setImageParameters (camSettings.imageSettings);
 		andorSettingsCtrl.updateRunSettingsFromPicSettings ();
 	}
 	catch (ChimeraError& err){
@@ -258,8 +262,18 @@ void QtAndorWindow::abortCameraRun (){
 		// simulate as if you needed to abort.
 		status = DRV_ACQUIRING;
 	}
-	if (status == DRV_ACQUIRING){
-		andor.abortAcquisition ();
+	if (true/*status == DRV_ACQUIRING*/){
+		//andor.abortAcquisition ();
+		// since the abortion can happen when the threadworker is waitForAcquisition, need to queue a buffer for it to get out of the wait
+		// if has a trigger for andor, also need to attach a trigger for it
+		andor.updatePictureNumber(currentPictureNum + 1);
+		andor.setIsRunningState(false);
+		andor.queueBuffers();
+		Sleep(20);
+		//auxWin->getTtlCore().FPGAForcePulse(auxWin->getTtlSystem().getCurrentStatus(), ANDOR_TRIGGER_LINE, 0.5);
+		Sleep(600); // just for  4fps during test, when run exp, probably not need this long
+		andor.onFinish();
+		qDebug() << "Andor camera acquisition aborted, does WaitForAcquisition automatically release the hold? Tested and the answer is NO!";
 		timer.setTimerDisplay ("Aborted");
 		andor.setIsRunningState (false);
 		// close the plotting thread.
@@ -290,7 +304,7 @@ void QtAndorWindow::abortCameraRun (){
 			reportErr (qstr (err.trace ()));
 		}
 
-		if (andor.getAndorRunSettings ().acquisitionMode != AndorRunModes::mode::Video){
+		if (true/*andor.getAndorRunSettings ().acquisitionMode != AndorRunModes::mode::Video*/){
 			auto answer = QMessageBox::question(this, qstr("Delete Data?"), qstr("Acquisition Aborted. Delete Data "
 				"file (data_" + str (dataHandler.getDataFileNumber ()) + ".h5) for this run?"));
 			if (answer == QMessageBox::Yes){
@@ -313,8 +327,12 @@ bool QtAndorWindow::cameraIsRunning (){
 }
 
 void QtAndorWindow::onCameraProgress (int picNumReported){
-	currentPictureNum++;
+	//andor.setExpRunningExposure(); 
+	//andor.queueBuffers();
+	auto timerE = QElapsedTimer();
+	timerE.start();
 	unsigned picNum = currentPictureNum;
+	currentPictureNum++;
 	if (picNum % 2 == 1){
 		mainThreadStartTimes.push_back (std::chrono::high_resolution_clock::now ());
 	}
@@ -323,23 +341,30 @@ void QtAndorWindow::onCameraProgress (int picNumReported){
 		// last picture.
 		picNum = curSettings.totalPicsInExperiment();
 	}
-	if (picNumReported != currentPictureNum && picNumReported != -1){
-		if (curSettings.acquisitionMode != AndorRunModes::mode::Video){
-			//reportErr ( "WARNING: picture number reported by andor isn't matching the"
-			//								  "camera window record?!?!?!?!?" );
-		}
+	if (picNumReported != picNum && picNumReported != -1){
+		//if (curSettings.acquisitionMode != AndorRunModes::mode::Video){
+		//	//reportErr ( "WARNING: picture number reported by andor isn't matching the"
+		//	//								  "camera window record?!?!?!?!?" );
+		//}
+		reportErr("WARNING: picture number reported by andor isn't matching the"
+			"camera window record?!?!?!?!?");
 	}
 	// need to call this before acquireImageData().
 	andor.updatePictureNumber (picNum);
+	qDebug() << "Start to acquired Image data" << picNum << "and queued Buffers for image " << (picNum + 1) << " at time " << timerE.elapsed() << " ms";
 	std::vector<Matrix<long>> rawPicData;
 	try	{
 		rawPicData = andor.acquireImageData ();
+		//rawPicData[0].updateString(); // only for debugging purposes, very resource heavy
+		andor.setExpRunningExposure(); // may be this need to be brought to the start of this function so that it is most efficient for image requeue
+		andor.queueBuffers();
 	}
 	catch (ChimeraError& err){
 		reportErr (qstr (err.trace ()));
 		mainWin->pauseExperiment ();
 		return;
 	}
+	qDebug() << "acquired Image data and queued Buffers for image " << picNum << " at time " << timerE.elapsed() << " ms";
 	std::vector<Matrix<long>> calPicData (rawPicData.size ());
 	if (andorSettingsCtrl.getUseCal () && avgBackground.size () == rawPicData.front ().size ()){
 		for (auto picInc : range (rawPicData.size ())){
@@ -355,8 +380,8 @@ void QtAndorWindow::onCameraProgress (int picNumReported){
 	if (picNum % 2 == 1){
 		imageGrabTimes.push_back (std::chrono::high_resolution_clock::now ());
 	}
-	emit newImage ({ picNum, calPicData[(picNum - 1) % curSettings.picsPerRepetition] }); 
-
+	emit newImage ({ picNum, calPicData[(picNum/* - 1*/) % curSettings.picsPerRepetition] }); 
+	qDebug() << "send Image data for drawing for image " << picNum << " at time " << timerE.elapsed() << " ms";
 	auto picsToDraw = andorSettingsCtrl.getImagesToDraw (calPicData);
 	try
 	{
@@ -414,11 +439,12 @@ void QtAndorWindow::onCameraProgress (int picNumReported){
 		}
 	}
 	// write the data to the file.
-	if (curSettings.acquisitionMode != AndorRunModes::mode::Video){
+	qDebug() << "write image to file for image " << picNum << " at time " << timerE.elapsed() << " ms";
+	if (true/*curSettings.acquisitionMode != AndorRunModes::mode::Video*/){
 		try	{
 			// important! write the original raw data, not the pic-to-draw, which can be a difference pic, or the calibrated
 			// pictures, which can have the background subtracted.
-			dataHandler.writeAndorPic ( rawPicData[(picNum - 1) % curSettings.picsPerRepetition],
+			dataHandler.writeAndorPic ( rawPicData[(picNum/* - 1*/) % curSettings.picsPerRepetition],
 									    curSettings.imageSettings );
 		}
 		catch (ChimeraError& err){
@@ -434,6 +460,10 @@ void QtAndorWindow::onCameraProgress (int picNumReported){
 		}
 	}
 	mostRecentPicNum = picNum;
+	qDebug() << "finish write image to file for image " << picNum << " at time " << timerE.elapsed() << " ms";
+	if (picNum == curSettings.totalPicsInExperiment() - 1) {
+		andor.onFinish();
+	}
 }
 
 void QtAndorWindow::handleSetAnalysisPress (){
@@ -587,15 +617,19 @@ void QtAndorWindow::assertDataFileClosed () {
 	dataHandler.assertClosed ();
 }
 
-void QtAndorWindow::handlePictureSettings (){
+void QtAndorWindow::handlePictureSettings (bool changePicsLayout){
 	selectedPixel = { 0,0 };
+	unsigned picsperrep = andorSettingsCtrl.getConfigSettings().andor.picsPerRepetition;
 	andorSettingsCtrl.handlePictureSettings ();
-	if (andorSettingsCtrl.getConfigSettings ().andor.picsPerRepetition == 1){
-		pics.setSinglePicture (andorSettingsCtrl.getConfigSettings ().andor.imageSettings);
-	}
-	else{
-		pics.setMultiplePictures (andorSettingsCtrl.getConfigSettings ().andor.imageSettings,
-								  andorSettingsCtrl.getConfigSettings ().andor.picsPerRepetition);
+	if (changePicsLayout) {
+		// not changing pics number, do not need to touch the layout
+		if (andorSettingsCtrl.getConfigSettings().andor.picsPerRepetition == 1) {
+			pics.setSinglePicture(andorSettingsCtrl.getConfigSettings().andor.imageSettings);
+		}
+		else {
+			pics.setMultiplePictures(andorSettingsCtrl.getConfigSettings().andor.imageSettings,
+				andorSettingsCtrl.getConfigSettings().andor.picsPerRepetition);
+		}
 	}
 	pics.resetPictureStorage ();
 	std::array<int, 4> nums = andorSettingsCtrl.getConfigSettings ().palleteNumbers;
@@ -696,6 +730,10 @@ bool QtAndorWindow::wantsAutoPause (){
 }
 
 void QtAndorWindow::completeCruncherStart () {
+	if ((mainWin->getExpThread() == nullptr) || (mainWin->getExpThread()->isFinished())) {
+		// then this is called from ProgramNow in AndorWindow
+		return;
+	}
 	auto* cruncherInput = new atomCruncherInput;
 	cruncherInput->plotterActive = plotThreadActive;
 	cruncherInput->imageDims = andorSettingsCtrl.getRunningSettings ().imageSettings;
@@ -835,7 +873,8 @@ std::string QtAndorWindow::getStartMessage (){
 	dialogMsg += "Image Settings:\r\n\t" + str (currentImageParameters.left) + " - " + str (currentImageParameters.right) + ", "
 		+ str (currentImageParameters.bottom) + " - " + str (currentImageParameters.top) + "\r\n";
 	dialogMsg += "\r\n";
-	dialogMsg += "Kintetic Cycle Time:\r\n\t" + str (andrSttngs.kineticCycleTime) + "\r\n";
+	dialogMsg += "FrameRate:\r\n\t" + str (andrSttngs.frameRate) + "\r\n";
+	//dialogMsg += "Kintetic Cycle Time:\r\n\t" + str (andrSttngs.kineticCycleTime) + "\r\n";
 	dialogMsg += "Pictures per Repetition:\r\n\t" + str (andrSttngs.picsPerRepetition) + "\r\n";
 	dialogMsg += "Repetitions per Variation:\r\n\t" + str (andrSttngs.totalPicsInVariation ()) + "\r\n";
 	dialogMsg += "Variations per Experiment:\r\n\t" + str (andrSttngs.totalVariations) + "\r\n";
@@ -968,6 +1007,10 @@ void QtAndorWindow::handleBumpAnalysis (profileSettings finishedProfile) {
 
 NewPythonHandler* QtAndorWindow::getPython() {
 	return &pythonHandler;
+}
+
+void QtAndorWindow::manualProgramCameraSetting()
+{
 }
 
 void QtAndorWindow::handleTransformationModeChange () {

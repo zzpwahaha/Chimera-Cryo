@@ -46,8 +46,10 @@ public:
 	void handleContextMenu(const QPoint& pos);
 	QCustomPlot* plot = nullptr;
 	void setControlLocation(QRect loc);
+
 	//used only in densityWithHisto plot, for showing the value of the mouse point, return x,y,value
 	std::vector<double> handleMousePosOnCMap(QMouseEvent* event);
+	void setColorScaleRange(int lower, int upper); // for set color range of colormap
 private:
 	int s;
 	QCPTextElement* title;
@@ -65,7 +67,7 @@ private:
 	std::vector<std::byte> isShow;
 	// used for DensityPlotWithHisto, to toggle visibility of the bottom and left rect
 	bool showSidePlot = true;
-	bool autoScale = true;
+	bool autoScale = true; // used in ttl/dac and in colormap (colorbar auto scale)
 	// a colormap that I use for plot stuffs.
 	const std::vector<std::array<int, 3>> GIST_RAINBOW_RGB{ { 255 , 0 , 40 },
 							{ 255 , 0 , 35 },

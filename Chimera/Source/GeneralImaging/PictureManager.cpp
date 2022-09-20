@@ -144,7 +144,7 @@ void PictureManager::setSinglePicture( imageParameters imageParams){
 		pictures[0].setSliderSize(800);
 		
 	}
-
+	pictures[0].setSliderRange(0, (1 << 16) - 1);
 	if (parentWin != nullptr) {
 		picLayout->setHorizontalSpacing(0);
 		picLayout->setVerticalSpacing(0);
@@ -182,6 +182,9 @@ void PictureManager::setMultiplePictures( imageParameters imageParams, unsigned 
 			picLayout->removeWidget(&pictures[picNum]);
 			pictures[picNum].setSliderSize(390);//prevent the slider bar from growing indefinitely
 		}
+	}
+	for (auto picNum : range(pictures.size())) {
+		pictures[picNum].setSliderRange(0, (1 << 16) - 1);
 	}
 	switch (numberActivePics)
 	{
@@ -250,15 +253,15 @@ void PictureManager::setMultiplePictures( imageParameters imageParams, unsigned 
 	//setPalletes ({ 0,0,0,0 });
 }
 
-void PictureManager::initialize( int manWidth, int manHeight, IChimeraQtWindow* widget, int scaleFactor)
+void PictureManager::initialize( IChimeraQtWindow* widget, int scaleFactor)
 {
 	parentWin = widget;
-	picturesWidth = manWidth;
-	picturesHeight = manHeight;
+	//picturesWidth = manWidth;
+	//picturesHeight = manHeight;
 	// Square: width = 550, height = 440
 	picLayout = new QGridLayout(this);
 	picLayout->setContentsMargins(0, 0, 0, 0);
-	auto width = 1200;
+	auto width = 1100;
 	auto height = 220;
 	pictures[0].initialize("Pic.1", width, height, widget, scaleFactor);
 	pictures[1].initialize("Pic.2", width, height, widget, scaleFactor);

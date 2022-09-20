@@ -1,5 +1,6 @@
 #pragma once
 #include "ATMCD32D.h"
+#include "atcore.h"
 #include <GeneralObjects/Matrix.h>
 
 class AndorFlume{
@@ -9,6 +10,7 @@ class AndorFlume{
 		AndorFlume (const AndorFlume&) = delete;
 
 		AndorFlume ( bool safemode_option );
+		~AndorFlume();
 		void initialize ( );
 		void setVSSpeed (int index);
 		unsigned getNumberVSSpeeds ();
@@ -24,7 +26,7 @@ class AndorFlume{
 		void setDMAParameters ( int maxImagesPerDMA, float secondsPerDMA );
 		void waitForAcquisition ( );
 		int getTemperature ( int& temp );
-		std::string getErrorMsg (int errCode);
+		std::string getErrorMsg (int errCode, bool SDK3 = false);
 		void getAdjustedRingExposureTimes ( int size, float* timesArray );
 		void setNumberKinetics ( int number );
 		void getTemperatureRange ( int& min, int& max );
@@ -58,7 +60,38 @@ class AndorFlume{
 		void getCapabilities ( AndorCapabilities& caps );
 		void getSerialNumber ( int& num );
 		std::string getHeadModel ( );
-		void andorErrorChecker ( int errorCode );
+		void andorErrorChecker ( int errorCode, bool SDK3 = false );
+
+		//baisc wrapper of andor sdk3 funtionality with errorCheck and safemodeCheck
+		void isImplemented            ( const AT_WC* Feature,  AT_BOOL* Implemented);
+		void isReadable               ( const AT_WC* Feature,  AT_BOOL* Readable);
+		void isWritable               ( const AT_WC* Feature,  AT_BOOL* Writable);
+		void isReadOnly               ( const AT_WC* Feature,  AT_BOOL* ReadOnly);
+		void setInt                   ( const AT_WC* Feature,  AT_64 Value);
+		void getInt                   ( const AT_WC* Feature,  AT_64* Value);
+		void getIntMax                ( const AT_WC* Feature,  AT_64* MaxValue);
+		void getIntMin                ( const AT_WC* Feature,  AT_64* MinValue);
+		void setFloat                 ( const AT_WC* Feature,  double Value);
+		void getFloat                 ( const AT_WC* Feature,  double* Value);
+		void getFloatMax              ( const AT_WC* Feature,  double* MaxValue);
+		void getFloatMin              ( const AT_WC* Feature,  double* MinValue);
+		void setBool                  ( const AT_WC* Feature,  AT_BOOL Value);
+		void getBool                  ( const AT_WC* Feature,  AT_BOOL* Value);
+		void setEnumIndex             ( const AT_WC* Feature,  int Value);
+		void setEnumString            ( const AT_WC* Feature,  const AT_WC* String);
+		void getEnumIndex             ( const AT_WC* Feature,  int* Value);
+		void getEnumCount             (const  AT_WC* Feature,  int* Count);
+		void isEnumIndexAvailable     ( const AT_WC* Feature,  int Index,  AT_BOOL* Available);
+		void isEnumIndexImplemented   ( const AT_WC* Feature,  int Index,  AT_BOOL* Implemented);
+		void getEnumStringByIndex     ( const AT_WC* Feature,  int Index,  AT_WC* String,  int StringLength);
+		void command                  ( const AT_WC* Feature);
+		void setString                ( const AT_WC* Feature,  const AT_WC* String);
+		void getString                ( const AT_WC* Feature,  AT_WC* String,  int StringLength);
+		void getStringMaxLength       ( const AT_WC* Feature,  int* MaxStringLength);
+		void queueBuffer              ( AT_U8* Ptr,  int PtrSize);
+		void waitBuffer               ( AT_U8** Ptr,  int* PtrSize,  unsigned int Timeout);
+		void flush                    ();
 	private:
 		const bool safemode;
+		AT_H camHndl;
 };

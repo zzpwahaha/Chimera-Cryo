@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include <string>
+#include <qcolor.h>
 
 struct AndorTemperatureStatus
 {
@@ -7,4 +8,5 @@ struct AndorTemperatureStatus
 	int temperatureSetting;
 	std::string andorRawMsg;
 	std::string msg;
+	QColor colorCode;
 };

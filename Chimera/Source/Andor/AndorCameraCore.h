@@ -10,6 +10,7 @@
 #include <RealTimeDataAnalysis/analysisSettings.h>
 #include <Andor/cameraThreadInput.h>
 #include "ATMCD32D.h"
+#include "atcore.h" 
 #include <string>
 #include <process.h>
 #include <mutex>
@@ -39,18 +40,21 @@ class AndorCameraCore : public IDeviceCore{
 		std::vector<Matrix<long>> acquireImageData();
 		void preparationChecks ();
 		void setTemperature();
-		void setExposures();
+		void setExposures(int expoIdx);
+		void setExpRunningExposure(); // called during experiment in QtAdnorWindow::OnCameraProgress
 		void setImageParametersToCamera();
-		void setScanNumber();
-		double getMinKineticCycleTime( );
+		double setFrameRate();
+		//double getMinKineticCycleTime( );
+		double getMaxFrameRate();
 		void checkAcquisitionTimings(float& kinetic, float& accumulation, std::vector<float>& exposures);
-		void setNumberAccumulations(bool isKinetic);
 		void setCameraTriggerMode();
+		void setCameraGainMode();
+		void setCameraBinningMode();
 		void onFinish();
 		bool isRunning();
 		void setIsRunningState( bool state );
 		void updatePictureNumber( unsigned __int64 newNumber );
-		void setGainMode();
+		//void setGainMode();
 		void changeTemperatureSetting(bool temperatureControlOff);
 
 		//static unsigned __stdcall cameraThread( void* voidPtr );		
@@ -71,13 +75,20 @@ class AndorCameraCore : public IDeviceCore{
 		void programVariation (unsigned variationInc, std::vector<parameterType>& params, ExpThreadWorker* threadworker);
 		std::vector<std::string> getVertShiftSpeeds ();
 		std::vector<std::string> getHorShiftSpeeds ();
+
+
+		void waitForAcquisition(int pictureNumber);
+		void queueBuffers();
+		//void onFinish(); // Finish from acquisition, also signal waitAndorToFinish
+
 	private:
-		
-		void setAccumulationCycleTime ( );
+		//void setScanNumber();
+		//void setNumberAccumulations(bool isKinetic);
+		//void setAccumulationCycleTime ( );
 		void setAcquisitionMode ( );
-		void setFrameTransferMode ( );
-		void setKineticCycleTime ( );
-		void setReadMode ( );
+		//void setFrameTransferMode ( );
+		//void setKineticCycleTime ( );
+		//void setReadMode ( );
 		int mostRecentTemp=20;
 
 		bool calInProgress = false;
@@ -91,7 +102,7 @@ class AndorCameraCore : public IDeviceCore{
 		AndorFlume flume;
 		const bool safemode;
 		// 
-		bool cameraIsRunning;
+		std::atomic<bool> cameraIsRunning;
 		// set either of these to true in order to break corresponding threads out of their loops.
 		bool plotThreadExitIndicator;
 		bool cameraThreadExitIndicator = false;
@@ -106,4 +117,11 @@ class AndorCameraCore : public IDeviceCore{
 		cameraThreadInput threadInput;
 
 		friend class AndorCameraThreadWorker;
+
+		//std::vector<unsigned char*> acqBuffers;
+		static const int numberOfAcqBuffers = 10;
+		static const int numberOfImageBuffers = 10;
+		std::array<std::vector<unsigned char>, numberOfAcqBuffers> acqBuffers;
+		std::array<unsigned char*, numberOfImageBuffers> tempImageBuffers;
+		int bufferSize;
 };

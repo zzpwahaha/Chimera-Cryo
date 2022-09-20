@@ -8,9 +8,11 @@ struct AndorTriggerMode{
 	enum class mode	{
 		External,
 		Internal,
-		StartOnTrigger
+		Software,
+		ExternalStart,
+		ExternalExposure
 	};
-	static const std::array<mode,3> allModes;
+	static const std::array<mode,5> allModes;
 	static std::string toStr ( mode m );
 	static mode fromStr ( std::string txt );
 	//std::string AndorTriggerModeText ( AndorTriggerMode mode );

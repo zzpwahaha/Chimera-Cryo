@@ -21,22 +21,24 @@ void PictureSettingsControl::initialize( IChimeraQtWindow* parent ){
 	QVBoxLayout* layout = new QVBoxLayout(this);
 	layout->setContentsMargins(0, 0, 0, 0);
 
-	auto handleChange = [this, parent]() {
+	auto handleChange = [this, parent](bool changePicsLayout) {
 		try {
 			if (parent->andorWin) {
-				parent->andorWin->handlePictureSettings ();
+				parent->andorWin->handlePictureSettings (changePicsLayout);
 			}
 		}
 		catch (ChimeraError& err){
 			parent->reportErr (err.qtrace());
 		}
 	};
+	auto handleChangeNoGui = [this, handleChange]() { handleChange(false); };
+	auto handleChangeGui = [this, handleChange]() { handleChange(true); };
 
 	QHBoxLayout* layout1 = new QHBoxLayout(this);
 	layout1->setContentsMargins(0, 0, 0, 0);
 	picScaleFactorLabel = new QLabel("Pic. Scale Factor:", parent);
 	picScaleFactorEdit = new QLineEdit("50", parent);
-	parent->connect(picScaleFactorEdit, &QLineEdit::textChanged, handleChange);
+	parent->connect(picScaleFactorEdit, &QLineEdit::textChanged, handleChangeNoGui);
 
 	transfModeLabel = new QLabel ("Qt Image Transformation Mode:", parent);
 	transformationModeCombo = new CQComboBox (parent);
@@ -63,7 +65,7 @@ void PictureSettingsControl::initialize( IChimeraQtWindow* parent ){
 	for (auto picInc : range (4)) {
 		totalNumberChoice[picInc] = new CQRadioButton ("", parent);
 		totalNumberChoice[picInc]->setChecked (picInc == 0);
-		parent->connect (totalNumberChoice[picInc], &QRadioButton::toggled, handleChange);
+		parent->connect (totalNumberChoice[picInc], &QRadioButton::toggled, handleChangeGui);
 		layout2->addWidget(totalNumberChoice[picInc], 1, picInc + 1);
 	}
 	/// Exposure Times
@@ -71,7 +73,7 @@ void PictureSettingsControl::initialize( IChimeraQtWindow* parent ){
 	layout2->addWidget(exposureLabel, 2, 0);
 	for ( auto picInc : range(4) ) {
 		exposureEdits[picInc] = new CQLineEdit (parent);
-		parent->connect (exposureEdits[picInc], &QLineEdit::textChanged, handleChange);
+		parent->connect (exposureEdits[picInc], &QLineEdit::textChanged, handleChangeNoGui);
 		layout2->addWidget(exposureEdits[picInc], 2, picInc + 1);
 	}
 	setUnofficialExposures(std::vector<float>(4, 10 / 1000.0f));
@@ -81,7 +83,7 @@ void PictureSettingsControl::initialize( IChimeraQtWindow* parent ){
 	layout2->addWidget(thresholdLabel, 3, 0);
 	for ( auto picInc : range(4) ) {
 		thresholdEdits[picInc] = new CQLineEdit ("100", parent);
-		parent->connect (thresholdEdits[picInc], &QLineEdit::textChanged, handleChange);
+		parent->connect (thresholdEdits[picInc], &QLineEdit::textChanged, handleChangeNoGui);
 		currentPicSettings.thresholds[ picInc ] = { 100 };
 		layout2->addWidget(thresholdEdits[picInc], 3, picInc + 1);
 	}
@@ -92,7 +94,7 @@ void PictureSettingsControl::initialize( IChimeraQtWindow* parent ){
 	for ( auto picInc : range(4) ){
 		colormapCombos[picInc] = new CQComboBox (parent);
 		colormapCombos[picInc]->addItems ({ "Dark Viridis","Inferno","Black & White", "Red-Black-Blue" });
-		parent->connect (colormapCombos[picInc], qOverload<int>(&QComboBox::activated), handleChange);
+		parent->connect (colormapCombos[picInc], qOverload<int>(&QComboBox::activated), handleChangeGui);
 		colormapCombos[picInc]->setCurrentIndex( 0 );
 		currentPicSettings.colors[picInc] = 0;
 		layout2->addWidget(colormapCombos[picInc], 4, picInc + 1);
@@ -103,20 +105,20 @@ void PictureSettingsControl::initialize( IChimeraQtWindow* parent ){
 	for ( auto picInc : range ( 4 ) ) {
 		displayTypeCombos[picInc] = new CQComboBox (parent);
 		displayTypeCombos[picInc]->addItems ({"Normal","Dif: 1", "Dif: 2", "Dif: 3", "Dif: 4"});
-		parent->connect (displayTypeCombos[picInc], qOverload<int> (&QComboBox::activated), handleChange);
+		parent->connect (displayTypeCombos[picInc], qOverload<int> (&QComboBox::activated), handleChangeGui);
 		displayTypeCombos[ picInc ]->setCurrentIndex ( 0 );
 		currentPicSettings.colors[ picInc ] = 0;
 		layout2->addWidget(displayTypeCombos[picInc], 5, picInc + 1);
 	}
 	/// software accumulation mode
 	softwareAccumulationLabel = new QLabel ("Software Accum:", parent);
-	layout2->addWidget(displayTypeLabel, 6, 0);
+	layout2->addWidget(softwareAccumulationLabel, 6, 0);
 	for ( auto picInc : range ( 4 ) ) {
 		softwareAccumulateAll[picInc] = new CQCheckBox("All?", parent);
 		softwareAccumulateAll[ picInc ]->setChecked( 0 );
-		parent->connect (softwareAccumulateAll[picInc], &QCheckBox::stateChanged, handleChange);
+		parent->connect (softwareAccumulateAll[picInc], &QCheckBox::stateChanged, handleChangeGui);
 		softwareAccumulateNum[picInc] = new CQLineEdit ("1", parent);
-		parent->connect (softwareAccumulateNum[picInc], &QLineEdit::textChanged, handleChange);
+		parent->connect (softwareAccumulateNum[picInc], &QLineEdit::textChanged, handleChangeGui);
 		QHBoxLayout* tmp = new QHBoxLayout(this);
 		tmp->addWidget(softwareAccumulateAll[picInc], 0);
 		tmp->addWidget(softwareAccumulateNum[picInc], 1);

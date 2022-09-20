@@ -51,7 +51,7 @@ class QtAndorWindow : public IChimeraQtWindow{
 		/// auxiliary functions.
 		dataPoint getMainAnalysisResult ();
 		void checkCameraIdle ();
-		void handleEmGainChange ();
+		//void handleEmGainChange ();
 		void fillMasterThreadInput (ExperimentThreadInput* input);
 		DataLogger& getLogger ();
 		std::string getSystemStatusString ();
@@ -67,7 +67,7 @@ class QtAndorWindow : public IChimeraQtWindow{
 		void armCameraWindow (AndorRunSettings* settings);
 		int getDataCalNum ();
 		std::string getStartMessage ();
-		void handlePictureSettings ();
+		void handlePictureSettings (bool changePicsLayout);
 		bool cameraIsRunning ();
 		void abortCameraRun ();
 		void handleAutoscaleSelection ();
@@ -104,6 +104,9 @@ class QtAndorWindow : public IChimeraQtWindow{
 		void handleTransformationModeChange ();
 		void manualArmCamera ();
 		NewPythonHandler* getPython ();
+
+		// for programming the camera setting before the experiment run so that the settings are the settings that read back from andor
+		void manualProgramCameraSetting();
 
 	private:
         Ui::QtAndorWindow* ui;
