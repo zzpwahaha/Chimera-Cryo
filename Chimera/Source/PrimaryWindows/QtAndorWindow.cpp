@@ -45,11 +45,10 @@ void QtAndorWindow::initializeWidgets (){
 	alerts.initialize (this);
 	analysisHandler.initialize (this);
 	andorSettingsCtrl.initialize ( this, std::vector<std::string>()/*andor.getVertShiftSpeeds()*/, std::vector<std::string>()/*andor.getHorShiftSpeeds()*/);
-	alerts.setMaximumWidth(850);
-	alerts.setMaximumHeight(50);
-	analysisHandler.setMaximumSize(850, 600);
-	andorSettingsCtrl.setMaximumWidth(850);
-	//layout1->addWidget(&alerts);
+	alerts.setMaximumWidth(450);
+	analysisHandler.setMaximumSize(450, 300);
+	andorSettingsCtrl.setMaximumWidth(450);
+	layout1->addWidget(&alerts);
 	layout1->addWidget(&analysisHandler);
 	layout1->addWidget(&andorSettingsCtrl);
 	layout1->addStretch(0);

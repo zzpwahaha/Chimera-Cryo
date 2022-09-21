@@ -191,6 +191,7 @@ andorPicSettingsGroup PictureSettingsControl::getPictureSettingsFromConfig (Conf
 	for ( auto& opt : fileSettings.saOpts ){
 		configFile >> opt.accumAll >> opt.accumNum;
 	}
+	configFile >> fileSettings.picScaleFactor;
 	return fileSettings;
 }
 

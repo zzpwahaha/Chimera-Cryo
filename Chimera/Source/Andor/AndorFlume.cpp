@@ -67,6 +67,9 @@ int AndorFlume::getTemperature ( int& temp ){
 		return GetTemperature (&temp);
 		//andorErrorChecker ( GetTemperature ( &temp ) );
 	}
+	else {
+		return -1;
+	}
 }
 
 //

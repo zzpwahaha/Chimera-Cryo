@@ -211,6 +211,13 @@ void AndorCameraCore::queueBuffers()
  * Large function which initializes a given camera image run.
  */
 void AndorCameraCore::armCamera( double& minKineticCycleTime ){
+	if (safemode) {
+		return;
+	}
+	if (cameraIsRunning) {
+		qDebug() << "Camera is running in sequence with picture number" << currentPictureNumber << ". Pass AndorCameraCore::armCamera from deviceProgramVariaton";
+		return;
+	}
 	/// Set a bunch of parameters.
 	// Set to 1 MHz readout rate in both cases
 	//flume.setADChannel(1);

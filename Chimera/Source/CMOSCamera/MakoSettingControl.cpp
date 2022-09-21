@@ -2133,6 +2133,9 @@ void MakoSettingControl::setSettings(MakoSettings newSettings)
 
 void MakoSettingControl::updateCurrentSettings()
 {
+    if (m_pCam == nullptr) {
+        return; //means in SAFEMODE
+    }
     FeaturePtr feature;
     double dval = 0;
     VmbInt64_t ival = 0;
