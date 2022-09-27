@@ -45,13 +45,13 @@ off: PrbShutter
 
 dac: TARepAmp 5
 dac: SrcMOTAmp 10
-dac: SciMOTAmp 6.8 
-dac: DipolePushAmp 4.4
+dac: SciMOTAmp 7.0 %6.8 
+dac: DipolePushAmp 4.0 %4.4
 dac: TweezerIntensity twz_intensity %Converison is 38.7mW per 1V Aug/1/2022 
 dac: PrbRepAmp 10
 dac: PrbAmp 2.5 
 
-ol: ol_cooling 1214
+ol: ol_cooling 1212 %1214
 %t += 0.05
 ol: ol_repump 5272
 

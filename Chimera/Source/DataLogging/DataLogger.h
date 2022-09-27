@@ -69,6 +69,7 @@ class DataLogger : public IChimeraSystem {
 		H5::DataSet writeDataSet (std::vector<double> data, std::string name, H5::Group& group);
 		H5::DataSet writeDataSet (std::vector<float> data, std::string name, H5::Group& group);
 		H5::DataSet writeDataSet (std::vector<long long> data, std::string name, H5::Group& group);
+		H5::DataSet writeDataSet (std::vector<unsigned __int64> data, std::string name, H5::Group& group);
 		H5::DataSet writeDataSet (std::string data, std::string name, H5::Group& group);
 		H5::DataSet writeDataSet (std::vector<std::string> dataVec, std::string name, H5::Group& group);
 		void writeAttribute (double data, std::string name, H5::DataSet& dset);

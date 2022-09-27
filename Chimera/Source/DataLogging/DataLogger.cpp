@@ -417,6 +417,8 @@ void DataLogger::logParameters( const std::vector<parameterType>& parameters, H5
 		writeDataSet (param.parameterScope, "Scope", indvParam);
 		writeDataSet (param.constantValue, "Constant Value", indvParam);
 		writeDataSet (param.keyValues, "Key Values", indvParam);
+		writeDataSet (param.shuffleIndex, "Shuffle Index", indvParam);
+		writeDataSet (param.shuffleIndexReverse, "Shuffle Index Reverse", indvParam);
 		writeDataSet (param.constant, "Is Constant", indvParam);
 		writeDataSet (param.active, "Is Active", indvParam);
 		writeDataSet (param.overwritten, "Is Overwritten", indvParam);
@@ -774,6 +776,22 @@ H5::DataSet DataLogger::writeDataSet(std::vector<long long> dataVec, std::string
 	catch (H5::Exception& err) {
 		auto fullE = getFullError(err);
 		throwNested("ERROR: error while writing long long vector data set to H5 File. Dataset name was " + name
+			+ ". Error was :\r\n" + err.getDetailMsg() + "; Full error:" + fullE);
+	}
+}
+
+H5::DataSet DataLogger::writeDataSet(std::vector<unsigned __int64> dataVec, std::string name, H5::Group& group) {
+	try {
+		hsize_t rank1[] = { 1 };
+		rank1[0] = dataVec.size();
+		H5::DataSet dset = group.createDataSet(cstr(name), H5::PredType::NATIVE_ULLONG, H5::DataSpace(1, rank1));
+		// get from the key file
+		dset.write(dataVec.data(), H5::PredType::NATIVE_ULLONG);
+		return dset;
+	}
+	catch (H5::Exception& err) {
+		auto fullE = getFullError(err);
+		throwNested("ERROR: error while writing unsigned long long vector data set to H5 File. Dataset name was " + name
 			+ ". Error was :\r\n" + err.getDetailMsg() + "; Full error:" + fullE);
 	}
 }

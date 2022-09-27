@@ -1,4 +1,17 @@
 t = 1
 pulseon: DO1_0 1
-t = 230
+t += 200
+pulseon: DO1_0 1
+pulseon: PIXIS_trg 10
+t += 200
+pulseon: DO1_0 1
+pulseon: PIXIS_trg 1
+t += 200
+pulseon: DO1_0 1
+pulseon: PIXIS_trg 100
+t += 200
+pulseon: DO1_0 1
+pulseon: PIXIS_trg 1
+
+t += 200
 pulseon: DO1_0 1
