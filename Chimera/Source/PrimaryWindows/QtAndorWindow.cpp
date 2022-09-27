@@ -616,20 +616,18 @@ void QtAndorWindow::assertDataFileClosed () {
 	dataHandler.assertClosed ();
 }
 
-void QtAndorWindow::handlePictureSettings (bool changePicsLayout){
+void QtAndorWindow::handlePictureSettings (){
 	selectedPixel = { 0,0 };
 	unsigned picsperrep = andorSettingsCtrl.getConfigSettings().andor.picsPerRepetition;
 	andorSettingsCtrl.handlePictureSettings ();
-	if (changePicsLayout) {
-		// not changing pics number, do not need to touch the layout
-		if (andorSettingsCtrl.getConfigSettings().andor.picsPerRepetition == 1) {
-			pics.setSinglePicture(andorSettingsCtrl.getConfigSettings().andor.imageSettings);
-		}
-		else {
-			pics.setMultiplePictures(andorSettingsCtrl.getConfigSettings().andor.imageSettings,
-				andorSettingsCtrl.getConfigSettings().andor.picsPerRepetition);
-		}
+	if (andorSettingsCtrl.getConfigSettings().andor.picsPerRepetition == 1) {
+		pics.setSinglePicture(andorSettingsCtrl.getConfigSettings().andor.imageSettings);
 	}
+	else {
+		pics.setMultiplePictures(andorSettingsCtrl.getConfigSettings().andor.imageSettings,
+			andorSettingsCtrl.getConfigSettings().andor.picsPerRepetition);
+	}
+	
 	pics.resetPictureStorage ();
 	std::array<int, 4> nums = andorSettingsCtrl.getConfigSettings ().palleteNumbers;
 	pics.setPalletes (nums);

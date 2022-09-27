@@ -43,6 +43,7 @@ class PictureManager : public QWidget
 		void setTransformationMode (Qt::TransformationMode mode);
 		std::array<PictureControl, 4> pictures;
 
+
 	private:
 		std::array<QVector<QRgb>,4> palettes;
 		QGridLayout* picLayout = nullptr;

@@ -128,6 +128,23 @@ void PictureManager::setSpecialGreaterThanMax(bool option){
 
 
 void PictureManager::setSinglePicture( imageParameters imageParams){
+	setParameters(imageParams);
+	// check if already the right image setup, if true, then ignore the following gui manipulation
+	unsigned numberActivePics = 1;
+	bool allActive = true;
+	bool allNotActive = true;
+	for (unsigned picNum = 0; picNum < 4; picNum++) {
+		if (picNum < numberActivePics) {
+			allActive = allActive && (pictures[picNum].isActive());
+		}
+		else {
+			allNotActive = allNotActive && (!pictures[picNum].isActive());
+		}
+	}
+	if (allActive && allNotActive) {
+		return;
+	}
+
 	for (unsigned picNum = 0; picNum < 4; picNum++){
 		if (picNum < 1){
 			pictures[picNum].setActive(true);
@@ -144,7 +161,6 @@ void PictureManager::setSinglePicture( imageParameters imageParams){
 		pictures[0].setSliderSize(800);
 		
 	}
-	pictures[0].setSliderRange(0, (1 << 16) - 1);
 	if (parentWin != nullptr) {
 		picLayout->setHorizontalSpacing(0);
 		picLayout->setVerticalSpacing(0);
@@ -158,8 +174,7 @@ void PictureManager::setSinglePicture( imageParameters imageParams){
 		this->adjustSize();
 		parentWin->setUpdatesEnabled(true);
 	}
-	
-	setParameters( imageParams );
+
 }
 
 void PictureManager::resetPictureStorage(){
@@ -169,6 +184,22 @@ void PictureManager::resetPictureStorage(){
 }
 
 void PictureManager::setMultiplePictures( imageParameters imageParams, unsigned numberActivePics ){
+	setParameters(imageParams);
+	// check if already the right image setup, if true, then ignore the following gui manipulation
+	bool allActive = true;
+	bool allNotActive = true;
+	for (unsigned picNum = 0; picNum < 4; picNum++) {
+		if (picNum < numberActivePics) {
+			allActive = allActive && (pictures[picNum].isActive());
+		}
+		else {
+			allNotActive = allNotActive && (!pictures[picNum].isActive());
+		}
+	}
+	if (allActive && allNotActive) {
+		return;
+	}
+	
 	for (unsigned picNum = 0; picNum < 4; picNum++){
 		if (picNum < numberActivePics){
 			pictures[picNum].setActive(true);
@@ -182,9 +213,6 @@ void PictureManager::setMultiplePictures( imageParameters imageParams, unsigned 
 			picLayout->removeWidget(&pictures[picNum]);
 			pictures[picNum].setSliderSize(390);//prevent the slider bar from growing indefinitely
 		}
-	}
-	for (auto picNum : range(pictures.size())) {
-		pictures[picNum].setSliderRange(0, (1 << 16) - 1);
 	}
 	switch (numberActivePics)
 	{
@@ -246,7 +274,7 @@ void PictureManager::setMultiplePictures( imageParameters imageParams, unsigned 
 	//py += picHeight + 25;
 	//pictures[3].setPictureArea( loc, picWidth, picHeight );
 	//pictures[3].setSliderControlLocs ({ px + picWidth,py }, picHeight);
-	setParameters( imageParams );
+
 	//for ( auto& pic : pictures ){
 	//	//pic.setCursorValueLocations( parent );
 	//}
@@ -276,8 +304,8 @@ void PictureManager::initialize( IChimeraQtWindow* widget, int scaleFactor)
 	createPalettes ();
 	for (auto& pic : pictures){
 		pic.updatePalette( inferno );
+		pic.setSliderRange(0, (1 << 16) - 1);
 	}
-
 	// initialize to one. This matches the camera settings initialization.
 	setNumberPicturesActive( 1 );
 	

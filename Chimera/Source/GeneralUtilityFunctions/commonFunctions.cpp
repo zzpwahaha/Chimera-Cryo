@@ -9,6 +9,7 @@
 #include "PrimaryWindows/QtAuxiliaryWindow.h"
 #include "PrimaryWindows/QtScriptWindow.h"
 #include "PrimaryWindows/IChimeraQtWindow.h"
+#include <ExperimentThread/ExpThreadWorker.h>
 #include "ExperimentThread/ExperimentType.h"
 #include "ExperimentThread/autoCalConfigInfo.h"
 #include <QDateTime.h>
@@ -76,6 +77,10 @@ namespace commonFunctions{
 						commonFunctions::abortMaster (win);
 						masterAborted = true;
 					}
+					//while (mainWin->expIsRunning()) { // wait for all device in expThread to finish
+					//	Sleep(100);
+					//	mainWin->reportStatus("Waiting for ExpThread to finish aborting ... ", 1);
+					//};
 					andorWin->assertOff ();
 					andorWin->assertDataFileClosed ();
 				}
@@ -90,6 +95,18 @@ namespace commonFunctions{
 						status = "ANDOR";
 						commonFunctions::abortCamera (win);
 						andorAborted = true;
+					}
+					else {
+						auto answer = QMessageBox::question(andorWin, qstr("Delete Data?"), qstr("Acquisition Aborted. Delete Data "
+							"file (data_" + str(andorWin->getLogger().getDataFileNumber()) + ".h5) for this run?"));
+						if (answer == QMessageBox::Yes) {
+							try {
+								andorWin->getLogger().deleteFile();
+							}
+							catch (ChimeraError& err) {
+								andorWin->reportErr(qstr(err.trace()));
+							}
+						}
 					}
 				}
 				catch (ChimeraError & err) {

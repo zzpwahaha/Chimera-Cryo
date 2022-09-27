@@ -57,7 +57,6 @@ void AndorCameraSettingsControl::initialize ( IChimeraQtWindow* parent, std::vec
 	for (auto mode : AndorRunModes::allModes) {
 		cameraModeCombo->addItem(qstr(AndorRunModes::toStr(mode)));
 	}
-	cameraModeCombo->setCurrentIndex (0);
 	parent->connect (cameraModeCombo, qOverload<int> (&QComboBox::currentIndexChanged), 
 		[this, parent]() {
 			if (!viewRunningSettings->isChecked ()) {
@@ -65,14 +64,14 @@ void AndorCameraSettingsControl::initialize ( IChimeraQtWindow* parent, std::vec
 				updateWindowEnabledStatus ();
 			}
 		});
+	cameraModeCombo->setCurrentIndex(0);
 	configSettings.andor.acquisitionMode = AndorRunModes::mode::Single;
 	
 	triggerCombo = new CQComboBox (parent);
 	for (auto mode : AndorTriggerMode::allModes) {
 		triggerCombo->addItem(qstr(AndorTriggerMode::toStr(mode)));
 	}
-	triggerCombo->setCurrentIndex (0);
-	parent->connect (triggerCombo, qOverload<int> (&QComboBox::activated), 
+	parent->connect (triggerCombo, qOverload<int> (&QComboBox::currentIndexChanged),
 		[this, parent]() {
 			if (!viewRunningSettings->isChecked ()) {
 				updateTriggerMode ();
@@ -80,6 +79,15 @@ void AndorCameraSettingsControl::initialize ( IChimeraQtWindow* parent, std::vec
 				auto& andorCore = parent->andorWin->getCamera();
 				updateSettings();
 				andorCore.setSettings(configSettings.andor);
+				if (configSettings.andor.triggerMode == AndorTriggerMode::mode::Internal) {
+					frameRateEdit->setEnabled(true);
+					frameRateEdit->setStyleSheet("QLineEdit { background: rgb(255, 255, 255); }");
+				}
+				else {
+					frameRateEdit->setEnabled(false);
+					frameRateEdit->setStyleSheet("QLineEdit { background: rgb(204, 204, 204); }");
+				}
+				picSettingsObj.toggleExposureTimeEditGui(!(configSettings.andor.triggerMode == AndorTriggerMode::mode::ExternalExposure));
 				try {
 					andorCore.setCameraTriggerMode();
 				}
@@ -88,14 +96,14 @@ void AndorCameraSettingsControl::initialize ( IChimeraQtWindow* parent, std::vec
 				}
 			}
 		});
+	triggerCombo->setCurrentIndex(0);
 	configSettings.andor.triggerMode = AndorTriggerMode::mode::External;
 
 	gainCombo = new CQComboBox(parent);
 	for (auto mode : AndorGainMode::allModes) {
 		gainCombo->addItem(qstr(AndorGainMode::toStr(mode)));
 	}
-	gainCombo->setCurrentIndex(0);
-	parent->connect(gainCombo, qOverload<int>(&QComboBox::activated),
+	parent->connect(gainCombo, qOverload<int>(&QComboBox::currentIndexChanged),
 		[this, parent]() {
 			if (!viewRunningSettings->isChecked()) {
 				updateGainMode();
@@ -114,6 +122,7 @@ void AndorCameraSettingsControl::initialize ( IChimeraQtWindow* parent, std::vec
 				updateMaxFrameRate(andorCore.getMaxFrameRate());
 			}
 		});
+	gainCombo->setCurrentIndex(0);
 	configSettings.andor.gainMode = AndorGainMode::mode::FastestFrameRate;
 
 	//binningCombo = new CQComboBox(parent);
@@ -274,6 +283,10 @@ void AndorCameraSettingsControl::initialize ( IChimeraQtWindow* parent, std::vec
 	layout->addLayout(layout6);
 	layout->addWidget(&calControl);
 	updateWindowEnabledStatus ();
+
+	emit cameraModeCombo->currentIndexChanged(0);
+	emit triggerCombo->currentIndexChanged(0);
+	emit gainCombo->currentIndexChanged(0);
 }
 
 

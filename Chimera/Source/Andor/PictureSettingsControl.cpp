@@ -21,24 +21,24 @@ void PictureSettingsControl::initialize( IChimeraQtWindow* parent ){
 	QVBoxLayout* layout = new QVBoxLayout(this);
 	layout->setContentsMargins(0, 0, 0, 0);
 
-	auto handleChange = [this, parent](bool changePicsLayout) {
+	auto handleChange = [this, parent]() {
 		try {
 			if (parent->andorWin) {
-				parent->andorWin->handlePictureSettings (changePicsLayout);
+				parent->andorWin->handlePictureSettings ();
 			}
 		}
 		catch (ChimeraError& err){
 			parent->reportErr (err.qtrace());
 		}
 	};
-	auto handleChangeNoGui = [this, handleChange]() { handleChange(false); };
-	auto handleChangeGui = [this, handleChange]() { handleChange(true); };
+	//auto handleChangeNoGui = [this, handleChange]() { handleChange(false); };
+	//auto handleChangeGui = [this, handleChange]() { handleChange(true); };
 
 	QHBoxLayout* layout1 = new QHBoxLayout(this);
 	layout1->setContentsMargins(0, 0, 0, 0);
 	picScaleFactorLabel = new QLabel("Pic. Scale Factor:", parent);
 	picScaleFactorEdit = new QLineEdit("50", parent);
-	parent->connect(picScaleFactorEdit, &QLineEdit::textChanged, handleChangeNoGui);
+	parent->connect(picScaleFactorEdit, &QLineEdit::textChanged, handleChange);
 
 	transfModeLabel = new QLabel ("Qt Image Transformation Mode:", parent);
 	transformationModeCombo = new CQComboBox (parent);
@@ -65,7 +65,7 @@ void PictureSettingsControl::initialize( IChimeraQtWindow* parent ){
 	for (auto picInc : range (4)) {
 		totalNumberChoice[picInc] = new CQRadioButton ("", parent);
 		totalNumberChoice[picInc]->setChecked (picInc == 0);
-		parent->connect (totalNumberChoice[picInc], &QRadioButton::toggled, handleChangeGui);
+		parent->connect (totalNumberChoice[picInc], &QRadioButton::toggled, handleChange);
 		layout2->addWidget(totalNumberChoice[picInc], 1, picInc + 1);
 	}
 	/// Exposure Times
@@ -73,7 +73,7 @@ void PictureSettingsControl::initialize( IChimeraQtWindow* parent ){
 	layout2->addWidget(exposureLabel, 2, 0);
 	for ( auto picInc : range(4) ) {
 		exposureEdits[picInc] = new CQLineEdit (parent);
-		parent->connect (exposureEdits[picInc], &QLineEdit::textChanged, handleChangeNoGui);
+		parent->connect (exposureEdits[picInc], &QLineEdit::textChanged, handleChange);
 		layout2->addWidget(exposureEdits[picInc], 2, picInc + 1);
 	}
 	setUnofficialExposures(std::vector<float>(4, 10 / 1000.0f));
@@ -83,7 +83,7 @@ void PictureSettingsControl::initialize( IChimeraQtWindow* parent ){
 	layout2->addWidget(thresholdLabel, 3, 0);
 	for ( auto picInc : range(4) ) {
 		thresholdEdits[picInc] = new CQLineEdit ("100", parent);
-		parent->connect (thresholdEdits[picInc], &QLineEdit::textChanged, handleChangeNoGui);
+		parent->connect (thresholdEdits[picInc], &QLineEdit::textChanged, handleChange);
 		currentPicSettings.thresholds[ picInc ] = { 100 };
 		layout2->addWidget(thresholdEdits[picInc], 3, picInc + 1);
 	}
@@ -94,7 +94,7 @@ void PictureSettingsControl::initialize( IChimeraQtWindow* parent ){
 	for ( auto picInc : range(4) ){
 		colormapCombos[picInc] = new CQComboBox (parent);
 		colormapCombos[picInc]->addItems ({ "Dark Viridis","Inferno","Black & White", "Red-Black-Blue" });
-		parent->connect (colormapCombos[picInc], qOverload<int>(&QComboBox::activated), handleChangeGui);
+		parent->connect (colormapCombos[picInc], qOverload<int>(&QComboBox::activated), handleChange);
 		colormapCombos[picInc]->setCurrentIndex( 0 );
 		currentPicSettings.colors[picInc] = 0;
 		layout2->addWidget(colormapCombos[picInc], 4, picInc + 1);
@@ -105,7 +105,7 @@ void PictureSettingsControl::initialize( IChimeraQtWindow* parent ){
 	for ( auto picInc : range ( 4 ) ) {
 		displayTypeCombos[picInc] = new CQComboBox (parent);
 		displayTypeCombos[picInc]->addItems ({"Normal","Dif: 1", "Dif: 2", "Dif: 3", "Dif: 4"});
-		parent->connect (displayTypeCombos[picInc], qOverload<int> (&QComboBox::activated), handleChangeGui);
+		parent->connect (displayTypeCombos[picInc], qOverload<int> (&QComboBox::activated), handleChange);
 		displayTypeCombos[ picInc ]->setCurrentIndex ( 0 );
 		currentPicSettings.colors[ picInc ] = 0;
 		layout2->addWidget(displayTypeCombos[picInc], 5, picInc + 1);
@@ -116,9 +116,9 @@ void PictureSettingsControl::initialize( IChimeraQtWindow* parent ){
 	for ( auto picInc : range ( 4 ) ) {
 		softwareAccumulateAll[picInc] = new CQCheckBox("All?", parent);
 		softwareAccumulateAll[ picInc ]->setChecked( 0 );
-		parent->connect (softwareAccumulateAll[picInc], &QCheckBox::stateChanged, handleChangeGui);
+		parent->connect (softwareAccumulateAll[picInc], &QCheckBox::stateChanged, handleChange);
 		softwareAccumulateNum[picInc] = new CQLineEdit ("1", parent);
-		parent->connect (softwareAccumulateNum[picInc], &QLineEdit::textChanged, handleChangeGui);
+		parent->connect (softwareAccumulateNum[picInc], &QLineEdit::textChanged, handleChange);
 		QHBoxLayout* tmp = new QHBoxLayout(this);
 		tmp->addWidget(softwareAccumulateAll[picInc], 0);
 		tmp->addWidget(softwareAccumulateNum[picInc], 1);
@@ -417,5 +417,22 @@ int PictureSettingsControl::getPicScaleFactor() {
 	}
 	catch (boost::bad_lexical_cast& err) {
 		thrower("Failed to convert picture scale factor to integer!");
+	}
+}
+
+
+void PictureSettingsControl::toggleExposureTimeEditGui(bool enable)
+{
+	if (enable) {
+		for (auto* eEdit : exposureEdits) {
+			eEdit->setEnabled(true);
+			eEdit->setStyleSheet("QLineEdit { background: rgb(255, 255, 255); }");
+		}
+	}
+	else {
+		for (auto* eEdit : exposureEdits) {
+			eEdit->setEnabled(false);
+			eEdit->setStyleSheet("QLineEdit { background: rgb(204, 204, 204); }");
+		}
 	}
 }

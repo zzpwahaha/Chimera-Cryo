@@ -890,7 +890,7 @@ void AndorCameraCore::calculateVariations (std::vector<parameterType>& params, E
 }
 
 void AndorCameraCore::programVariation (unsigned variationInc, std::vector<parameterType>& params, ExpThreadWorker* threadworker){
-	if (experimentActive){
+	if (experimentActive && (!threadworker->getAbortStatus())){
 		double kinTime;
 		armCamera (kinTime);
 	}

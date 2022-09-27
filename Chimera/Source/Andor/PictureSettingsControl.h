@@ -54,6 +54,8 @@ class PictureSettingsControl : public QWidget
 		static andorPicSettingsGroup getPictureSettingsFromConfig (ConfigStream& configFile );
 		Qt::TransformationMode getTransformationMode ();
 		void setEnabledStatus (bool viewRunningSettings);
+
+		void toggleExposureTimeEditGui(bool enable);
 	private:
 		// the internal memory of the settings here is somewhat redundant with the gui objects. It'd probably be better
 		// if this didn't exist and all the getters just converted straight from the gui objects, but that's a 
