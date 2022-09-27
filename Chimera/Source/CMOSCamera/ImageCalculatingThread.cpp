@@ -4,6 +4,7 @@
 #include <utility>
 #include <numeric>
 #include <array>
+#include <qdebug.h>
 
 using AVT::VmbAPI::Frame;
 using AVT::VmbAPI::FramePtr;
@@ -443,6 +444,7 @@ void ImageCalculatingThread::fit2dGaussian()
 
 void ImageCalculatingThread::run()
 {
+    unsigned int counter = 0;
     while (!m_Stopping)
     {
         
@@ -451,6 +453,7 @@ void ImageCalculatingThread::run()
         {
             bool notTimeout = m_pProcessingThread->calcWait().wait(&m_pProcessingThread->mutex(), 2000);
             if (expRunning && !notTimeout) {
+                qDebug() << "Mako ImageCalculatingThread::run -> see a time out event" << counter;
                 m_pProcessingThread->mutex().unlock();
                 continue;
             }
@@ -467,6 +470,8 @@ void ImageCalculatingThread::run()
         m_pProcessingThread->mutex().unlock();
         
         if (expActive && expRunning) {
+            qDebug() << "Mako ImageCalculatingThread::run -> get a image ready for experiment" << counter;
+            counter++;
             emit imageReadyForExp(m_doubleQVector, m_width, m_height);
             // will call copy ctor for const reference see https://embeddeduse.com/2013/06/29/copied-or-not-copied-arguments-signals-slots/
             /*SIGNAL	SLOT	DIRECT	QUEUED

@@ -147,6 +147,12 @@ void QCustomPlotCtrl::init(IChimeraQtWindow* parent, QString titleIn, unsigned n
 		//connect(plot, &QCustomPlot::plottableClick, this, [this](QCPAbstractPlottable* p, int dataIndex) {
 		//	});
 	}
+	if (this->style == plotStyle::GeneralErrorPlot) {
+		autoScale = false;
+		connect(plot, &QCustomPlot::mouseDoubleClick, this, [this]() {
+			plot->rescaleAxes();
+			plot->replot(); });
+	}
 
 	//plot->setMinimumSize(600, 400);
 	resetChart();
@@ -279,7 +285,25 @@ void QCustomPlotCtrl::handleContextMenu(const QPoint& pos) {
 		}
 
 	}
+	if (this->style == plotStyle::GeneralErrorPlot) {
+		auto* autos = menu.addAction("Disable Auto Scale");
+		autos->setCheckable(true);
+		autos->setChecked(!autoScale);
+		plot->connect(autos, &QAction::triggered, [this, autos]() {
+			autoScale = !autos->isChecked(); });
 
+		auto* zoom = menu.addAction("Enable Scroll Zoom");
+		zoom->setCheckable(true);
+		zoom->setChecked(QCP::iRangeZoom& plot->interactions() ? true : false);
+		plot->connect(zoom, &QAction::triggered, [this, zoom]() {
+			if (zoom->isChecked()) {
+				plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectPlottables);
+				plot->axisRect()->setRangeZoomFactor(0.95);
+			}
+			else {
+				plot->setInteractions(0x000);
+			} });
+	}
 	
 	menu.exec(plot->mapToGlobal(pos));
 }

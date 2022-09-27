@@ -93,13 +93,6 @@ void ExpThreadWorker::experimentThreadProcedure () {
 				emit notification("Running Experiment.\n");
 				for (const auto& repInc : range(expRuntime.repetitions)) {
 					handlePause(isPaused, isAborting);
-					// for toggling the rep/var
-					auto makocams = input->devices.getDevicesByClass<MakoCameraCore>();
-					for (auto& cam : makocams) {
-						cam.get().setCurrentRepVarNumber(repInc, expRuntime.expParams.front().shuffleIndex[variationInc]);
-						// have to do it in this funny way instead of letting MOTAnalyzer generate rand itself is because the randomization is random, so xyplot can only get non-randomized version and get the index of randomization through the expParams
-					}
-					// end for toggling the rep/var
 					emit notification(qstr("Starting Repetition #" + qstr(repInc) + "\n"), 2);
 					startRep(repInc, variationInc, input->skipNext == nullptr ? false : input->skipNext->load());
 					Sleep(finaltimes[variationInc]+10);//wait 500ms between rep, added temporarily by zzp 20210225
@@ -115,17 +108,12 @@ void ExpThreadWorker::experimentThreadProcedure () {
 				emit repUpdate(repInc);
 				for (const auto& variationInc : range(determineVariationNumber(expRuntime.expParams))) {
 					emit notification("Programming Devices for Variation...\n", 2);
+					qDebug() << "Programming Devices for Variation"<< variationInc;
 					for (auto& device : input->devices.list) {
 						deviceProgramVariation(device, expRuntime.expParams, variationInc);
 					}
 					initVariation(variationInc, expRuntime.expParams);
 					handlePause(isPaused, isAborting);
-					// for toggling the rep/var
-					auto makocams = input->devices.getDevicesByClass<MakoCameraCore>();
-					for (auto& cam : makocams) {
-						cam.get().setCurrentRepVarNumber(repInc, expRuntime.expParams.front().shuffleIndex[variationInc]);
-					}
-					// end for toggling the rep/var
 					startRep(repInc, variationInc, input->skipNext == nullptr ? false : input->skipNext->load());
 					Sleep(finaltimes[variationInc]+10);//wait 500ms between rep, added temporarily by zzp 20210225
 				}

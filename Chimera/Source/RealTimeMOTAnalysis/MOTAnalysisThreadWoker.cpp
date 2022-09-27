@@ -37,7 +37,7 @@ void MOTAnalysisThreadWoker::handleNewImg(QVector<double> img, int width, int he
 	//resultOrder.insert({ currentNum, result1d[MOTAnalysisType::type::min].size() });
 	//size_t var = currentNum % input.camSet.variations;
 	//size_t rep = currentNum / input.camSet.variations;
-
+	qDebug() << "MOTAnalysisThreadWoker::handleNewImg -> Receive experiment pictures for rep/var: " << rep << var;
 	//do calculation
 	auto it = std::minmax_element(img.begin(), img.end());
 	result2d[MOTAnalysisType::type::min][var].push_back(*(it.first));
@@ -84,6 +84,7 @@ void MOTAnalysisThreadWoker::handleNewImg(QVector<double> img, int width, int he
 	if (rep != result2d[MOTAnalysisType::allTypes[0]][var].size() - 1) {
 		emit error("MOT analysis repetition number is inconsistent with stored result size \n"
 			"A low level bug! \r\n");
+		qDebug() << "MOTAnalysisThreadWoker::handleNewImg -> Receive experiment pictures for rep/var: " << rep << var << "But, MOT analysis repetition number is inconsistent with stored result size" << result2d[MOTAnalysisType::allTypes[0]][var].size() - 1;
 		return;
 	}
 

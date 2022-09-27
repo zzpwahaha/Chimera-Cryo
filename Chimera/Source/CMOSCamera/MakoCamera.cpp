@@ -8,6 +8,7 @@
 #include <qlayout.h>
 #include <qpushbutton.h>
 #include <qaction.h>
+#include <qdebug.h>
 
 MakoCamera::MakoCamera(CameraInfo camInfo, IChimeraQtWindow* parent)
     : IChimeraSystem(parent)
@@ -728,8 +729,9 @@ void MakoCamera::handleExpImage(QVector<double> img, int width, int height)
     }
     try {
         auto* andorWin = parentWin->andorWin;
+        auto RepVar = core.getCurrentRepVarNumber(currentRepNumber);
+        qDebug() << "MakoCamera::handleExpImage -> Get experiment pictures for rep/var: " << RepVar << "with image num:" << currentRepNumber;
         currentRepNumber++;
-        auto RepVar = core.getCurrentRepVarNumber();
         m_OperatingStatusLabel->setText("Exp Running" + qstr(currentRepNumber));
         if (core.getRunningSettings().triggerMode == CMOSTrigger::mode::ContinuousSoftware) {
             // don't write data if continuous, that's a recipe for disaster.
@@ -749,7 +751,7 @@ void MakoCamera::handleExpImage(QVector<double> img, int width, int height)
             m_OperatingStatusLabel->setText("Exp Finished");
             // tell the andor window that the basler camera finished so that the data file can be handled appropriately.
             //mainWin->getComm ()->sendBaslerFin ();
-            parentWin->makoWin->CMOSChkFinished();
+            //parentWin->makoWin->CMOSChkFinished();
         }
     }
     catch (ChimeraError& err) {

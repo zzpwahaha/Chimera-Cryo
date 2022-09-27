@@ -6,6 +6,7 @@
 #include <QTextStream>
 #include <math.h>
 #include <windows.h>
+#include <qdebug.h>
 
 void FrameObserver::Stopping()
 {
@@ -90,6 +91,7 @@ void FrameObserver::FrameReceived ( const AVT::VmbAPI::FramePtr frame  )
             }
         }
         emit setCurrentFPS( fps );
+        qDebug() << "FrameObserver::FrameReceived -> get a frame from MAKO API with cameraFrameID" << camera_frame_id << ", and frameCounter" << m_nFramesCounter;
         setFrame( frame );
     }
     m_pCam->QueueFrame(frame);

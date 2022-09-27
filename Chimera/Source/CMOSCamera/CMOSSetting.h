@@ -84,7 +84,9 @@ struct MakoSettings {
 	imageParameters dims; // mako do not do binning
 	unsigned picsPerRep;
 	unsigned repsPerVar;
+	bool repFirst;
 	unsigned variations;
+	std::vector<size_t> variationShuffleIndex; // used for randomize variation case, to look up the true variation
 	unsigned totalPictures() { return picsPerRep * repsPerVar * variations; }
 };
 

@@ -3,6 +3,7 @@
 #include "ConfigurationSystems/ConfigSystem.h"
 #include <ExperimentThread/ExpThreadWorker.h>
 #include "MiscellaneousExperimentOptions/Repetitions.h"
+#include "MiscellaneousExperimentOptions/MainOptionsControl.h"
 #include <DataLogging/DataLogger.h>
 #include <qdebug.h>
 
@@ -10,8 +11,6 @@ MakoCameraCore::MakoCameraCore(CameraInfo camInfo)
     : m_VimbaSystem(AVT::VmbAPI::VimbaSystem::GetInstance())
     , makoCtrl()
     , camInfo(camInfo)
-    , currentRepNumber(0)
-    , currentVarNumber(0)
 {
     if (camInfo.safemode) {
         return;
@@ -94,6 +93,9 @@ void MakoCameraCore::loadExpSettings(ConfigStream& stream) {
     ConfigSystem::stdGetFromConfig(stream, *this, expRunSettings, Version("1.0"));
     expRunSettings.repsPerVar = ConfigSystem::stdConfigGetter(stream, "REPETITIONS",
         Repetitions::getSettingsFromConfig);
+    mainOptions mainOpts = ConfigSystem::stdConfigGetter(stream, "MAIN_OPTIONS",
+        MainOptionsControl::getSettingsFromConfig);
+    expRunSettings.repFirst = mainOpts.repetitionFirst;
     experimentActive = expRunSettings.expActive;
     if (experimentActive) {
         emit makoStarted();
@@ -106,6 +108,7 @@ void MakoCameraCore::calculateVariations(std::vector<parameterType>& params, Exp
         return;
     }
     expRunSettings.variations = (params.size() == 0 ? 1 : params.front().keyValues.size());
+    expRunSettings.variationShuffleIndex = params.front().shuffleIndex;
     makoCtrl.setSettings(expRunSettings);
     runSettings = expRunSettings;    
     if (experimentActive) {
@@ -595,13 +598,25 @@ void MakoCameraCore::setPicsPerRep(int picsperrep)
     makoCtrl.setPicsPerRep(picsperrep);
 }
 
-void MakoCameraCore::setCurrentRepVarNumber(size_t rep, size_t var)
-{
-    currentRepNumber = rep;
-    currentVarNumber = var;
-}
+//void MakoCameraCore::setCurrentRepVarNumber(size_t rep, size_t var)
+//{
+//    currentRepNumber = rep;
+//    currentVarNumber = var;
+//}
 
-std::pair<size_t, size_t> MakoCameraCore::getCurrentRepVarNumber()
+std::pair<size_t, size_t> MakoCameraCore::getCurrentRepVarNumber(unsigned int currentPicNumber)
 {
-    return std::pair<size_t, size_t>(currentRepNumber, currentVarNumber);
+    size_t currentRepNumber, currentVarNumber;
+    if (expRunSettings.repFirst) {
+        currentVarNumber = (currentPicNumber / expRunSettings.picsPerRep) / expRunSettings.repsPerVar;
+        currentRepNumber = (currentPicNumber / expRunSettings.picsPerRep) % expRunSettings.repsPerVar;
+    }
+    else {
+        currentRepNumber = (currentPicNumber / expRunSettings.picsPerRep) / expRunSettings.variations;
+        currentVarNumber = (currentPicNumber / expRunSettings.picsPerRep) % expRunSettings.variations;
+    }
+    if (expRunSettings.variationShuffleIndex.size() < currentVarNumber) {
+        thrower("MakoCamera variationShuffleIndex size" + str(expRunSettings.variationShuffleIndex.size()) + " is smaller than currentVarNumber" + str(currentVarNumber) + "A low level bug!");
+    }
+    return std::pair<size_t, size_t>(currentRepNumber, expRunSettings.variationShuffleIndex[currentVarNumber]);
 }
