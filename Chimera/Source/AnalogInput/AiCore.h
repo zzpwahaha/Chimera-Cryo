@@ -37,7 +37,7 @@ public:
 
 public:
 	const std::string configDelim{ "AI-SYSTEM" };
-	const QByteArray terminator = QByteArray("#\0", 2);
+	const QByteArray terminator = QByteArray("#", 1);
 	const QByteArray placeholder = QByteArray(1, '*');
 
 private:
