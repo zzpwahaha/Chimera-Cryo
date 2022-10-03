@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "WinSockFlume.h"
+#include <qdebug.h>
 
 
 WinSockFlume::WinSockFlume(bool safemode_option, std::string hostAddress_, std::string hostPort_)
@@ -109,19 +110,15 @@ int WinSockFlume::sendWithCatch(const SOCKET& socket, const char* byte_buf, int 
 
 void WinSockFlume::write(const char* msg, unsigned len, QByteArray terminator)
 {
-	//char* buff = (char*)malloc(len + terminator.size());
-	//memmove(buff, msg, len);
-	//memmove(buff + len, (const char*)terminator, terminator.size());
 	try {
 		QByteArray buff = QByteArray(msg, len);
 		buff.append(terminator);
 		int err = sendWithCatch(Winsocket, (const char*)buff, len + terminator.size());
+		qDebug() << "Send WinSockFlume message: " << buff;
 	}
 	catch (ChimeraError& e) {
 		throwNested(str("Error in winSockFlume write:\n") + e.trace());
 	}
-
-	//free(buff);
 }
 
 void WinSockFlume::write(QByteArray ba, QByteArray terminator)
@@ -154,7 +151,7 @@ QByteArray WinSockFlume::readTillFull(unsigned size)
 {
 	QByteArray rc;
 	//unsigned bytesRemaining = size;
-	for (size_t i = 0; i < 200; i++)
+	for (size_t i = 0; i < 2000; i++)
 	{
 		QByteArray tmp(size, Qt::Initialization::Uninitialized);
 
@@ -181,13 +178,14 @@ QByteArray WinSockFlume::readTillFull(unsigned size)
 		//}
 		rc.append((const char*)tmp, recvLen);
 		if (rc.size() >= size) {
+			qDebug() << "Finish WinSockFlume::readTillFull in " << i + 1 << "round";
 			break;
 		}
 		Sleep(1);
 	}
 	if (rc.size() != size) {
 		thrower("Data size " + str(rc.size()) + " is not expected as " + str(size) 
-			+ " in socket " +  hostAddress + "port, " + hostPort+ " after 500 ms.");
+			+ " in socket " +  hostAddress + "port, " + hostPort+ " after 2000 ms.");
 	}
 	return rc;
 }
@@ -195,14 +193,16 @@ QByteArray WinSockFlume::readTillFull(unsigned size)
 QByteArray WinSockFlume::read(unsigned size)
 {
 	QByteArray tmp(size, Qt::Initialization::Uninitialized);
-	int timeout_ms = 2;
+	int timeout_ms = 500;
 	setsockopt(Winsocket, SOL_SOCKET, SO_RCVTIMEO, (const char*)&timeout_ms, sizeof(timeout_ms));
 	int recvLen = recv(Winsocket, tmp.data(), size, 0);
-	int test;
+	int test = sizeof(timeout_ms);
 	if (SOCKET_ERROR == getsockopt(Winsocket, SOL_SOCKET, SO_RCVTIMEO, (char*)&timeout_ms, &test)) {
+		int errCode = WSAGetLastError();
 		close();
-		thrower("Error in TCP receiving data with error code" + str(WSAGetLastError()));
+		thrower("Error in TCP receiving data with error code " + str(errCode));
 	}
 	tmp.truncate(recvLen);
+	qDebug() << "Read WinSockFlume message: " << tmp;
 	return tmp;
 }

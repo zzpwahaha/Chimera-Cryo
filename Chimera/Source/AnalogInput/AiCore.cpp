@@ -2,6 +2,8 @@
 #include "AiCore.h"
 #include <Windows.h>
 #include <sstream>
+#include <qelapsedtimer.h>
+#include <qdebug.h>
 
 AiCore::AiCore() 
 	: socket(AI_SAFEMODE, AI_SOCKET_ADDRESS, AI_SOCKET_PORT)
@@ -39,9 +41,14 @@ void AiCore::updateChannelRange()
 		}
 	}
 	try {
+		QElapsedTimer timerE;
+		timerE.start();
 		socket.open();
+		qDebug() << "After open the port, time at" << timerE.elapsed() << "ms";
 		socket.write(QByteArray::fromStdString(std::string("(rng,") + (char*)buff + ")"), terminator);
+		qDebug() << "After write the port, time at" << timerE.elapsed() << "ms";
 		std::string rc = socket.read();
+		qDebug() << "After read the port, time at" << timerE.elapsed() << "ms";
 		socket.close();
 		if (str(rc, 13, false, true).find("Error") != std::string::npos) {
 			thrower("Error in updating range in Analoge in. \r\n" + rc);
@@ -76,12 +83,18 @@ void AiCore::getSingleSnap(unsigned n_to_avg)
 	if (epty[0] || epty[1]) { epty[0] ? onChannel.insert(onChannel.begin(), 0) : onChannel.push_back(size_t(AIGrid::numPERunit) - 1); }
 
 	//socket.resetConnection();
+	QElapsedTimer timerE;
+	timerE.start();
 	socket.open();
+	qDebug() << "After open the port, time at" << timerE.elapsed() << "ms";
 	socket.write(QByteArray("(") + placeholder + QByteArray(buff, 2) + QByteArray(",")
 		+ QByteArray::fromStdString(str(n_to_avg)) + QByteArray(")"), terminator);
+	qDebug() << "After write the port, time at" << timerE.elapsed() << "ms";
 	Sleep(5);
 	socket.resetConnection();
+	qDebug() << "After Sleep for 5ms and reset connection, time at" << timerE.elapsed() << "ms";
 	socket.write("(trg, )", terminator);
+	qDebug() << "After write the port, time at" << timerE.elapsed() << "ms";
 	QByteArray rc;
 	Sleep(20);
 	try {
@@ -89,6 +102,7 @@ void AiCore::getSingleSnap(unsigned n_to_avg)
 		//rc = socket.readAll();
 		//rc = std::move(socket.readRaw());
 		rc = std::move(socket.readTillFull(n_chnl * n_to_avg * 2));
+		qDebug() << "After Sleep for 20ms and read all data, time at" << timerE.elapsed() << "ms";
 		socket.close();
 	}
 	catch (ChimeraError& e) {
