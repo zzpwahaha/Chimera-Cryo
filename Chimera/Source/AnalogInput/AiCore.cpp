@@ -198,3 +198,19 @@ void AiCore::setAiRange(unsigned channel, AiChannelRange::which range)
 {
 	aiValues[channel].status.range = range;
 }
+
+void AiCore::setName(int aiNumber, std::string name)
+{
+	if (name == "") {
+		// no empty names allowed.
+		return;
+	}
+	std::transform(name.begin(), name.end(), name.begin(), ::tolower);
+	aiValues[aiNumber].name = name;
+}
+
+void AiCore::setNote(int aiNumber, std::string note)
+{
+	aiValues[aiNumber].note = note;
+}
+

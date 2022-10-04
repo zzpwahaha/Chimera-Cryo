@@ -18,7 +18,7 @@ AiChannelRange::which AiChannelRange::fromStr(std::string rowStr)
 			return w;
 		}
 	}
-	thrower("Failed to convert string to Agilent Channel Mode!");
+	thrower("Failed to convert string to AI Channel Range Mode!");
 	return which::off;
 }
 
@@ -38,6 +38,43 @@ std::string AiChannelRange::toStr(which m)
 	}
 	thrower("Faied to convert Ai range to string!");
 	return "";
+}
+
+int AiChannelRange::toInt(which m)
+{
+	if (m == AiChannelRange::which::off)
+	{
+		return 0;
+	}
+	else if (m == AiChannelRange::which::quarter)
+	{
+		return 1;
+	}
+	else if (m == AiChannelRange::which::half)
+	{
+		return 2;
+	}
+	else if (m == AiChannelRange::which::full)
+	{
+		return 3;
+	}
+	else
+	{
+		throw;
+	}
+}
+
+AiChannelRange::which AiChannelRange::fromInt(int idx)
+{
+	for (auto w : allRanges)
+	{
+		if (idx == toInt(w))
+		{
+			return w;
+		}
+	}
+	thrower("Failed to convert int to AI Channel Range Mode!");
+	return which::off;
 }
 
 double AiChannelRange::scales(which m)

@@ -453,6 +453,12 @@
     <ClCompile Include="Source\Andor\AndorBinningMode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\ExcessDialogs\AiSettingsDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\AnalogInput\AiOutput.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="3rd_Party\qcustomplot\qcustomplot.h">
@@ -645,6 +651,9 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="Source\ExperimentMonitoringAndStatus\StatusOptionsWindow.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\ExcessDialogs\AiSettingsDialog.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
@@ -1016,6 +1025,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\Andor\AndorBinningMode.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\AnalogInput\AiOutput.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

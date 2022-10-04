@@ -202,6 +202,10 @@ void IChimeraQtWindow::initializeMenu (){
 	auto* changeIndvOl = new QAction("View or Change Individual OffsetLock Settings", this);
 	connect(changeIndvOl, &QAction::triggered, [this, cmnMsg]() {auxWin->ViewOrChangeOLNames(); });
 	masterSystemsM->addAction(changeIndvOl);
+
+	auto* changeIndvAi = new QAction("View or Change Individual Analog Input Settings", this);
+	connect(changeIndvAi, &QAction::triggered, [this, cmnMsg]() {auxWin->ViewOrChangeAINames(); });
+	masterSystemsM->addAction(changeIndvAi);
 	
 	auto helpM = menubar->addMenu ("Help");
 	helpM->addAction ("General Information_X");

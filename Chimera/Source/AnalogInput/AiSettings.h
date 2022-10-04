@@ -26,6 +26,8 @@ struct AiChannelRange
 	static const std::array<which, 4> allRanges;
 	static std::string toStr(which m);
 	static which fromStr(std::string txt);
+	static int toInt(which m);
+	static which fromInt(int idx);
 	static double scales(which m);
 	double scales();
 	static unsigned short codes(which m);
@@ -36,4 +38,6 @@ struct AiValue {
 	double mean = 0.0;
 	double std = 0.0;
 	AiChannelRange status;
+	std::string name = "";
+	std::string note = "None";
 };

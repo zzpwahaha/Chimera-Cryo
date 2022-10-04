@@ -20,36 +20,10 @@ std::string AiSystem::getSystemStatus( ){
 }
 
 void AiSystem::refreshDisplays( ){
-	for ( auto dispInc : range(voltDisplays.size())){
+	for ( auto dispInc : range(outputs.size())){
 		auto mean = core.getAiVals()[dispInc].mean;
 		auto std = core.getAiVals()[dispInc].std;
-		int numDigitStd;
-		if (int(std) == 0) { // a decimal number
-			if (std < adcResolution / 10.0) { //e.g. std = 0.0
-				numDigitStd = 4;
-			}
-			else {
-				numDigitStd = static_cast<int>(abs(round(log10(std) - 0.49)));
-			}
-		}
-		else {
-			numDigitStd = std / 10.0 < 1.0 ? 1 : 2; // can be at most 10, so do not bother higher digit
-		}
-		numDigitStd = numDigitStd > 4 ? 4 : numDigitStd;
-		qDebug() << "AiSystem::refreshDisplays for disp" << dispInc << "mean, std = " << mean << std;
-		/*align to left, give a space for sign, [sign]xx.xx...(x), 8 is the standard length of +10.0000*/
-		int sz = snprintf(nullptr, 0, "% -*.*f(%-.0f)\r\n", 8 - numDigits + numDigitStd - 1, numDigitStd, 
-			mean, std * pow(10, int(std) == 0 ? numDigitStd : numDigitStd - 1));
-		std::vector<char> buf(sz + 1);
-		snprintf(buf.data(), sz, "% -*.*f(%-.0f)\r\n", 8 - numDigits + numDigitStd - 1, numDigitStd, 
-			mean, std * pow(10, int(std) == 0 ? numDigitStd : numDigitStd - 1));
-		std::vector<char> buff(11 + 1); /*11 is the length of +10.0000(0)*/
-		snprintf(buff.data(), 11, "%-11s", buf.data());
-		voltDisplays[dispInc]->setText(buff.data());
-
-		//voltDisplays[dispInc]->setText(qstr(core.getAiVals()[dispInc].mean, numDigits)
-		//	+ "(" + qstr(core.getAiVals()[dispInc].std * pow(10.0, numDigits), 0) + ")");
-		aiCombox[dispInc]->setCurrentIndex(int(core.getAiVals()[dispInc].status.range));
+		outputs[dispInc].setValueDisplay(mean, std);
 	}
 
 }
@@ -99,53 +73,8 @@ void AiSystem::initialize (IChimeraQtWindow* parent)
 	unsigned x = 4, y =4;
 	for (size_t i = 0; i < size_t(AIGrid::total); i++)
 	{
-		auto& cbox = aiCombox[i];
-		QHBoxLayout* lay = new QHBoxLayout();
-		lay->setContentsMargins(0, 0, 0, 0);
-		cbox = new CQComboBox(parent);
-		cbox->setMaximumWidth(50);
-
-		for (auto& whichR : AiChannelRange::allRanges) {
-			cbox->addItem(AiChannelRange::toStr(whichR).c_str());
-		}
-		lay->addWidget(cbox, 0);
-
-		QLabel* label = new QLabel(qstr(chnlStr[i / size_t(AIGrid::numPERunit)] + str(i % size_t(AIGrid::numPERunit))));
-		QFont font = label->font();
-		font.setUnderline(true);
-		label->setFont(font);
-		lay->addWidget(label, 0);
-
-		voltDisplays[i] = new QLabel(qstr(0.0, numDigits), parent);
-		lay->addWidget(voltDisplays[i], 0);
-		lay->addStretch(1);
-
-		parent->connect(cbox, qOverload<int>(&QComboBox::activated), [parent, this, i, cbox](int) {
-			int selection = cbox->currentIndex();
-			core.setAiRange(i, AiChannelRange::which(selection));
-			try { core.updateChannelRange(); }
-			catch (ChimeraError& e) { emit error(e.qtrace()); }
-			switch (AiChannelRange::which(selection))
-			{
-			case AiChannelRange::which::off:
-				voltDisplays[i]->setStyleSheet("QLabel { background-color : rgb(240,240,240); }");
-				break;
-			case AiChannelRange::which::quarter:
-				voltDisplays[i]->setStyleSheet("QLabel { background-color :" + QVariant(QColor("lightgreen")).toString() + " ; }");
-				break;
-			case AiChannelRange::which::half:
-				voltDisplays[i]->setStyleSheet("QLabel { background-color :" + QVariant(QColor("darkseagreen")).toString() + " ; }");
-				break;
-			case AiChannelRange::which::full:
-				voltDisplays[i]->setStyleSheet("QLabel { background-color :" + QVariant(QColor("limegreen")).toString() + " ; }");
-				break;
-			default:
-				break;
-			}
-			
-			});
-
-		AIGridLayout->addLayout(lay, 2 * (i % size_t(AIGrid::numPERunit)) / x, (2 * i + i / size_t(AIGrid::numPERunit)) % x);
+		outputs[i].initialize(this, i);
+		AIGridLayout->addLayout(outputs[i].getLayout(), 2 * (i % size_t(AIGrid::numPERunit)) / x, (2 * i + i / size_t(AIGrid::numPERunit)) % x);
 	}
 	//this->setStyleSheet("border: 2px solid  black;");
 	layout->addLayout(AIGridLayout);
@@ -197,8 +126,13 @@ AiSettings AiSystem::getSettingsFromConfig (ConfigStream& file){
 	file >> settings.queryContinuously;
 	file >> settings.numberMeasurementsToAverage;
 	file >> settings.continuousModeInterval;
+	for (size_t idx = 0; idx < size_t(AIGrid::total); idx++) {
+		file >> outputs[idx].info.name;
+	}
+	for (size_t idx = 0; idx < size_t(AIGrid::total); idx++) {
+		file >> outputs[idx].info.note;
+	}
 	core.getSettingsFromConfig(file);
-	
 	return settings;
 }
 
@@ -209,6 +143,14 @@ void AiSystem::handleSaveConfig (ConfigStream& file){
 		<< "\n/*Query Continuously?*/ " << settings.queryContinuously
 		<< "\n/*Average Number:*/ " << settings.numberMeasurementsToAverage
 		<< "\n/*Contiuous Mode Interval:*/ " << settings.continuousModeInterval;
+	file << "\n/*Ai Names:*/ ";
+	for (size_t idx = 0; idx < size_t(AIGrid::total); idx++) {
+		file << outputs[idx].info.name << " ";
+	}
+	file << "\n/*Ai Notes:*/ ";
+	for (size_t idx = 0; idx < size_t(AIGrid::total); idx++) {
+		file << outputs[idx].info.note << " ";
+	}
 	core.saveSettingsToConfig(file);
 	file << "\nEND_" + core.configDelim + "\n";
 }
@@ -216,7 +158,42 @@ void AiSystem::handleSaveConfig (ConfigStream& file){
 void AiSystem::handleOpenConfig(ConfigStream& file)
 {
 	setAiSettings(getSettingsFromConfig(file));
+	core.updateChannelRange(); // for the hardware
+	for (size_t idx = 0; idx < size_t(AIGrid::total); idx++) { // for front-end display
+		const AiValue& aiVal = core.getAiVals()[idx];
+		outputs[idx].info = aiVal;
+		outputs[idx].setRangeCombo();
+		outputs[idx].updateDisplayColor();
+	}
 	refreshDisplays();
+}
+
+void AiSystem::setName(int aiNumber, std::string name)
+{
+	outputs[aiNumber].setName(name);
+}
+
+void AiSystem::setNote(int aiNumber, std::string note)
+{
+	outputs[aiNumber].setNote(note);
+}
+
+std::string AiSystem::getName(int aiNumber)
+{
+	return outputs[aiNumber].info.name;
+}
+
+std::string AiSystem::getNote(int aiNumber)
+{
+	return outputs[aiNumber].info.note;
+}
+
+void AiSystem::updateCoreNames()
+{
+	for (size_t idx = 0; idx < size_t(AIGrid::total); idx++) { 
+		core.setName(idx, outputs[idx].info.name);
+		core.setNote(idx, outputs[idx].info.note);
+	}
 }
 
 void AiSystem::setAiSettings (AiSettings settings){

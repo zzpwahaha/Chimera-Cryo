@@ -103,6 +103,8 @@ void QtAuxiliaryWindow::initializeWidgets (){
 		AOdialog = new AoSettingsDialog(&aoSys);
 		DDSdialog = new DdsSettingsDialog(&dds);
 		OLdialog = new OlSettingsDialog(&olSys);
+		AIdialog = new AiSettingsDialog(&aiSys);
+
 		connect(DOdialog, &doChannelInfoDialog::updateSyntaxHighLight, [this]() {this->scriptWin->updateDoAoDdsNames(); });
 		connect(AOdialog, &AoSettingsDialog::updateSyntaxHighLight, [this]() {this->scriptWin->updateDoAoDdsNames(); });
 		connect(DDSdialog, &DdsSettingsDialog::updateSyntaxHighLight, [this]() {this->scriptWin->updateDoAoDdsNames(); });
@@ -598,6 +600,13 @@ void QtAuxiliaryWindow::ViewOrChangeOLNames()
 	OLdialog->updateAllEdits();
 	OLdialog->setStyleSheet(chimeraStyleSheets::stdStyleSheet());
 	OLdialog->show();
+}
+
+void QtAuxiliaryWindow::ViewOrChangeAINames()
+{
+	AIdialog->updateAllEdits();
+	AIdialog->setStyleSheet(chimeraStyleSheets::stdStyleSheet());
+	AIdialog->show();
 }
 
 std::string QtAuxiliaryWindow::getOtherSystemStatusMsg (){

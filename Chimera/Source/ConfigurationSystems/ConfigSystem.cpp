@@ -106,6 +106,7 @@ void ConfigSystem::openConfigFromPath( std::string pathToConfig, IChimeraQtWindo
 		win->auxWin->windowOpenConfig(cStream );
 		win->makoWin->windowOpenConfig(cStream);
 		win->mainWin->windowOpenConfig(cStream );
+		win->scriptWin->updateDoAoDdsNames();
 	}
 	catch ( ChimeraError& err ){
 		errBox( "ERROR: Unhandled error while opening configuration files!\n\n" + err.trace() );

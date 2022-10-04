@@ -2,7 +2,7 @@
 #pragma once
 #include "LowLevel/constants.h"
 #include "AiCore.h"
-#include "AnalogInput/AiSettings.h"
+#include "AnalogInput/AiOutput.h"
 #include "GeneralObjects/IChimeraSystem.h"
 #include "ConfigurationSystems/Version.h"
 #include "Scripts/ScriptStream.h"
@@ -48,13 +48,19 @@ class AiSystem : public IChimeraSystem{
 		void handleOpenConfig(ConfigStream& file);
 		std::string getDelim () { return core.configDelim; }
 
+		void setName(int aiNumber, std::string name);
+		void setNote(int aiNumber, std::string note);
+		std::string getName(int aiNumber);
+		std::string getNote(int aiNumber);
+		void updateCoreNames();
+
 		AiCore& getCore() { return core; }
 
 
 	private:
 		AiCore core;
-		std::array<QLabel*, size_t(AIGrid::total)> voltDisplays; /*A0-A7,B0-B7*/
-		std::array<CQComboBox*, size_t(AIGrid::total)> aiCombox;
+		std::array<AiOutput, size_t(AIGrid::total)> outputs; /*A0-A7,B0-B7*/
+		//std::array<CQComboBox*, size_t(AIGrid::total)> aiCombox;
 
 		CQPushButton* getValuesButton;
 		CQCheckBox* continuousQueryCheck;

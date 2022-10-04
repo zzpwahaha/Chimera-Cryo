@@ -9,7 +9,7 @@
 class OffsetLockOutput
 {
 public:
-	class OffsetLockOutput();
+	OffsetLockOutput();
 	void initialize(IChimeraQtWindow* parent, int whichOL);
 	void handleEdit(bool roundToDacPrecision = false);
 	void updateEdit(bool roundToDacPrecision = false);

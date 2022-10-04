@@ -29,6 +29,7 @@
 #include "ExcessDialogs/AoSettingsDialog.h"
 #include "ExcessDialogs/DdsSettingsDialog.h"
 #include "ExcessDialogs/OlSettingsDialog.h"
+#include "ExcessDialogs/AiSettingsDialog.h"
 
 #include <QMainWindow>
 #include <QTimer>
@@ -54,6 +55,7 @@ class QtAuxiliaryWindow : public IChimeraQtWindow{
 		void ViewOrChangeDACNames();
 		void ViewOrChangeDDSNames();
 		void ViewOrChangeOLNames();
+		void ViewOrChangeAINames();
 		void passRoundToDac ();
 		std::string getOtherSystemStatusMsg ();
 
@@ -124,6 +126,7 @@ class QtAuxiliaryWindow : public IChimeraQtWindow{
 		AoSettingsDialog* AOdialog;
 		DdsSettingsDialog* DDSdialog;
 		OlSettingsDialog* OLdialog;
+		AiSettingsDialog* AIdialog;
 
 		std::vector<PlotCtrl*> aoPlots;
 		std::vector<PlotCtrl*> ttlPlots;
