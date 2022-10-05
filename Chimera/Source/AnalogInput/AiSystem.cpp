@@ -159,7 +159,8 @@ void AiSystem::handleOpenConfig(ConfigStream& file)
 {
 	setAiSettings(getSettingsFromConfig(file));
 	core.updateChannelRange(); // for the hardware
-	for (size_t idx = 0; idx < size_t(AIGrid::total); idx++) { // for front-end display
+	updateCoreNames();
+	for (size_t idx = 0; idx < size_t(AIGrid::total); idx++) { // for front-end display of range
 		const AiValue& aiVal = core.getAiVals()[idx];
 		outputs[idx].info = aiVal;
 		outputs[idx].setRangeCombo();
