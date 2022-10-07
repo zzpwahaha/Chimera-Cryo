@@ -12,13 +12,13 @@ class ExperimentTimer : public QWidget
 	Q_OBJECT
 	public:
 		void initialize( IChimeraQtWindow* parent );
-		void update( unsigned __int64 currentRepNumber, unsigned __int64 repsPerVariation, unsigned __int64 numberOfVariations, 
-					 unsigned picsPerRep );
+		void update( unsigned __int64 currentExpNumber, unsigned __int64 repsPerVariation, unsigned __int64 numberOfVariations, 
+					 unsigned picsPerRep, bool repFirst );
 		void setTimerDisplay( std::string newText );
 	private:
 		QLabel* timeDisplay;
+		QProgressBar* repetitionProgress;
 		QProgressBar* variationProgress;
-		QProgressBar* overallProgress;
 		long long firstTime;
 		std::vector<double> recentDataPoints;
 };

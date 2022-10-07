@@ -394,9 +394,10 @@ void QtAndorWindow::onCameraProgress (int picNumReported){
 			pics.drawBitmap (picsToDraw.back (), minMax, picNum % curSettings.picsPerRepetition,
 				analysisHandler.getRunningSettings ().grids, picNum, 
 				analysisHandler.getRunningSettings ().displayGridOption, painter);
-
-			timer.update (picNum / curSettings.picsPerRepetition, curSettings.repetitionsPerVariation,
-				curSettings.totalVariations, curSettings.picsPerRepetition);
+			
+			timer.update(picNum / curSettings.picsPerRepetition, curSettings.repetitionsPerVariation,
+				curSettings.totalVariations, curSettings.picsPerRepetition, curSettings.repFirst);
+			
 		}
 		else if (picNum % curSettings.picsPerRepetition == 0){
 			int counter = 0;
@@ -425,7 +426,7 @@ void QtAndorWindow::onCameraProgress (int picNumReported){
 				counter++;
 			}
 			timer.update (picNum / curSettings.picsPerRepetition, curSettings.repetitionsPerVariation,
-				curSettings.totalVariations, curSettings.picsPerRepetition);
+				curSettings.totalVariations, curSettings.picsPerRepetition, curSettings.repFirst);
 		}
 	}
 	catch (ChimeraError& err){
