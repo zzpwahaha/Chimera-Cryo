@@ -77,7 +77,7 @@ class AndorCameraCore : public IDeviceCore{
 		std::vector<std::string> getHorShiftSpeeds ();
 
 
-		void waitForAcquisition(int pictureNumber);
+		void waitForAcquisition(int pictureNumber, unsigned int timeout = AT_INFINITE);
 		void queueBuffers();
 		//void onFinish(); // Finish from acquisition, also signal waitAndorToFinish
 

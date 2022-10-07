@@ -95,7 +95,7 @@ AndorCameraCore::AndorCameraCore( bool safemode_opt ) : safemode( safemode_opt )
 	flume.setEnumString(L"AuxiliaryOutSource", L"FireAny");
 	flume.setEnumString(L"IOSelector", L"Aux Out 2");
 	flume.setEnumString(L"AuxOutSourceTwo", L"ExternalShutterControl");
-	flume.setEnumString(L"FanSpeed", L"On");
+	flume.setEnumString(L"FanSpeed", L"Off");
 
 }
 
@@ -114,9 +114,12 @@ void AndorCameraCore::initializeClass(IChimeraQtWindow* parent, chronoTimes* ima
 
 	parent->andorWin->connect (worker, &AndorCameraThreadWorker::pictureTaken,
 							   parent->andorWin, &QtAndorWindow::onCameraProgress);
+	parent->andorWin->connect(worker, &AndorCameraThreadWorker::error,
+		parent->andorWin, &QtAndorWindow::reportErr);
 
-	parent->mainWin->connect (thread, SIGNAL (started ()), worker, SLOT (process ()));
-	parent->mainWin->connect (thread, SIGNAL (finished ()), thread, SLOT (deleteLater ()));
+	parent->mainWin->connect (thread, &QThread::started, worker, &AndorCameraThreadWorker::process);
+	parent->mainWin->connect (thread, &QThread::finished, thread, &QObject::deleteLater);
+	parent->mainWin->connect(thread, &QThread::finished, worker, &QObject::deleteLater);
 	thread->start (QThread::TimeCriticalPriority);
 
 }
@@ -197,9 +200,9 @@ std::vector<std::string> AndorCameraCore::getHorShiftSpeeds () {
 	return speeds;
 }
 
-void AndorCameraCore::waitForAcquisition(int pictureNumber)
+void AndorCameraCore::waitForAcquisition(int pictureNumber, unsigned int timeout)
 {
-	flume.waitBuffer(&tempImageBuffers[(pictureNumber) % numberOfImageBuffers], &bufferSize, AT_INFINITE);
+	flume.waitBuffer(&tempImageBuffers[(pictureNumber) % numberOfImageBuffers], &bufferSize, timeout);
 }
 
 void AndorCameraCore::queueBuffers()
@@ -876,6 +879,9 @@ void AndorCameraCore::loadExpSettings (ConfigStream& stream){
 	ConfigSystem::stdGetFromConfig (stream, *this, expRunSettings);
 	expRunSettings.repetitionsPerVariation = ConfigSystem::stdConfigGetter (stream, "REPETITIONS", 
 																			 Repetitions::getSettingsFromConfig);
+	mainOptions mainOpts = ConfigSystem::stdConfigGetter(stream, "MAIN_OPTIONS",
+														MainOptionsControl::getSettingsFromConfig);
+	expRunSettings.repFirst = mainOpts.repetitionFirst;
 	expAnalysisSettings = ConfigSystem::stdConfigGetter (stream, "DATA_ANALYSIS", 
 														  DataAnalysisControl::getAnalysisSettingsFromFile); 
 	experimentActive = expRunSettings.controlCamera;

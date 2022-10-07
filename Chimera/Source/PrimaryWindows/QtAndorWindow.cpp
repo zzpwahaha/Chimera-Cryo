@@ -265,14 +265,14 @@ void QtAndorWindow::abortCameraRun (){
 		//andor.abortAcquisition ();
 		// since the abortion can happen when the threadworker is waitForAcquisition, need to queue a buffer for it to get out of the wait
 		// if has a trigger for andor, also need to attach a trigger for it
-		andor.updatePictureNumber(currentPictureNum + 1);
-		andor.setIsRunningState(false);
-		andor.queueBuffers();
-		Sleep(20);
-		//auxWin->getTtlCore().FPGAForcePulse(auxWin->getTtlSystem().getCurrentStatus(), ANDOR_TRIGGER_LINE, 0.5);
-		Sleep(600); // just for  4fps during test, when run exp, probably not need this long
+		//andor.updatePictureNumber(currentPictureNum + 1);
+		//andor.setIsRunningState(false);
+		//andor.queueBuffers();
+		//Sleep(20);
+		////auxWin->getTtlCore().FPGAForcePulse(auxWin->getTtlSystem().getCurrentStatus(), ANDOR_TRIGGER_LINE, 0.5);
+		//Sleep(600); // just for  4fps during test, when run exp, probably not need this long
 		andor.onFinish();
-		qDebug() << "Andor camera acquisition aborted, does WaitForAcquisition automatically release the hold? Tested and the answer is NO!";
+		qDebug() << "QtAndorWindow::abortCameraRun: Andor camera acquisition aborted, does WaitForAcquisition automatically release the hold? Tested and the answer is NO!";
 		timer.setTimerDisplay ("Aborted");
 		andor.setIsRunningState (false);
 		// close the plotting thread.

@@ -56,8 +56,29 @@ void AndorCameraThreadWorker::process (){
 					}
 				}
 				else{
-					//input->Andor->flume.waitForAcquisition ();
-					input->Andor->waitForAcquisition(pictureNumber);
+					while (true) {
+						try {
+							input->Andor->waitForAcquisition(pictureNumber, 1000);
+						}
+						catch (ChimeraError& e) {
+							if (e.whatBare() == "AT_ERR_TIMEDOUT") {
+								if (input->Andor->cameraIsRunning) {
+									qDebug() << "input->Andor->waitForAcquisition time out for 1000ms, camera still running, will re-wait for acquisition";
+									continue;
+								}
+								else {
+									qDebug() << "input->Andor->waitForAcquisition time out for 1000ms, camera NOT running, will abort and reset pic counter";
+									input->expectingAcquisition = false;
+									pictureNumber = 0;
+									armed = false;
+								}
+							}
+							else {
+								emit error("AndorThreadWorker error: \r\n input->Andor->waitForAcquisition error \r\n" + e.qtrace(), 0);
+							}
+						}
+						break;
+					}
 					if (pictureNumber % 2 == 0) {
 						(*input->imageTimes).push_back (std::chrono::high_resolution_clock::now ());
 					}
