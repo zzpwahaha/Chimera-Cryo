@@ -128,9 +128,11 @@ AiSettings AiSystem::getSettingsFromConfig (ConfigStream& file){
 	file >> settings.continuousModeInterval;
 	for (size_t idx = 0; idx < size_t(AIGrid::total); idx++) {
 		file >> outputs[idx].info.name;
+		outputs[idx].setName(outputs[idx].info.name);
 	}
 	for (size_t idx = 0; idx < size_t(AIGrid::total); idx++) {
 		file >> outputs[idx].info.note;
+		outputs[idx].setNote(outputs[idx].info.note);
 	}
 	core.getSettingsFromConfig(file);
 	return settings;
