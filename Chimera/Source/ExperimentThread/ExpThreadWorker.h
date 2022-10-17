@@ -55,7 +55,7 @@ class ExpThreadWorker : public QObject
 		bool handleOlCommands(std::string word, ScriptStream& stream, std::vector<parameterType>& params,
 			OlCore& ol, std::string scope, timeType& operationTime);
 		bool handleFunctionCall (std::string word, ScriptStream& stream, std::vector<parameterType>& params,
-			DoCore& ttls, AoCore& ao, std::string& warnings, std::string callingFunction, timeType& operationTime);
+			DoCore& ttls, AoCore& ao, DdsCore& dds, OlCore& ol, std::string& warnings, std::string callingFunction, timeType& operationTime);
 		static bool handleVariableDeclaration (std::string word, ScriptStream& stream, std::vector<parameterType>& params,
 			std::string scope, std::string& warnings);
 		static bool handleVectorizedValsDeclaration (std::string word, ScriptStream& stream,
@@ -93,7 +93,7 @@ class ExpThreadWorker : public QObject
 		// the master script file contents get dumped into this.
 		const std::string functionsFolderLocation = FUNCTIONS_FOLDER_LOCATION;
 		// called by analyzeMasterScript functions only.
-		void analyzeFunction (std::string function, std::vector<std::string> args, DoCore& ttls, AoCore& ao,
+		void analyzeFunction (std::string function, std::vector<std::string> args, DoCore& ttls, AoCore& ao, DdsCore& dds, OlCore& ol,
 			std::vector<parameterType>& vars, std::string& warnings, timeType& operationTime, std::string callingScope);
 		timeType operationTime;
 		HANDLE runningThread;

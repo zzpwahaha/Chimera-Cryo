@@ -147,6 +147,17 @@ void IChimeraQtWindow::initializeMenu (){
 	auto* saveMasterAs = new QAction ("Save Master Script &As", this);
 	connect (saveMasterAs, &QAction::triggered, [this, cmnMsg]() {cmnMsg (ID_MASTERSCRIPT_SAVEAS, this); });
 	masterSc->addAction (saveMasterAs);
+
+	/// FUNCTIONS
+	auto masterFn = scriptsM->addMenu("Function");
+	auto* newMasterFn = masterFn->addAction("Ne&w Master Function");
+	connect(newMasterFn, &QAction::triggered, [this, cmnMsg]() {cmnMsg(ID_MASTERSCRIPT_NEWFUNCTION, this); });
+	//auto* openMasterFn = masterFn->addAction("Op&en Master Function", this);
+	//connect(openMasterFn, &QAction::triggered, [this, cmnMsg]() {cmnMsg(ID_MASTERSCRIPT_SAVEFUNCTION, this); });
+	auto* saveMasterFn = masterFn->addAction("&Save Master Function");
+	connect(saveMasterFn, &QAction::triggered, [this, cmnMsg]() {cmnMsg(ID_MASTERSCRIPT_SAVEFUNCTION, this); });
+	//auto* saveMasterAsFn = masterFn->addAction("Save Master Function &As", this);
+	//connect(saveMasterAsFn, &QAction::triggered, [this, cmnMsg]() {cmnMsg(ID_MASTERSCRIPT_SAVEAS, this); });
 	
 	///
 	scriptsM->addSeparator();

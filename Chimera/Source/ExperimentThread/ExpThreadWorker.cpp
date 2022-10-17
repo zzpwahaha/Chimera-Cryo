@@ -185,7 +185,7 @@ void ExpThreadWorker::analyzeMasterScript (DoCore& ttls, AoCore& ao, DdsCore& dd
 			else if (word == "rsg:") {
 				thrower ("\"rsg:\" command is deprecated! Please use the microwave system listview instead.");
 			}
-			else if (handleFunctionCall (word, currentMasterScript, vars, ttls, ao, warnings,
+			else if (handleFunctionCall (word, currentMasterScript, vars, ttls, ao, dds, ol, warnings,
 				PARENT_PARAMETER_SCOPE, operationTime)) {
 			}
 			else if (word == "repeat:") {
@@ -235,7 +235,7 @@ void ExpThreadWorker::analyzeMasterScript (DoCore& ttls, AoCore& ao, DdsCore& dd
 
 
 void ExpThreadWorker::analyzeFunction (std::string function, std::vector<std::string> args, DoCore& ttls,
-	AoCore& ao, std::vector<parameterType>& params, std::string& warnings, timeType& operationTime,
+	AoCore& ao, DdsCore& dds, OlCore& ol, std::vector<parameterType>& params, std::string& warnings, timeType& operationTime,
 	std::string callingScope) {
 	/// load the file
 	std::fstream functionFile;
@@ -299,6 +299,8 @@ void ExpThreadWorker::analyzeFunction (std::string function, std::vector<std::st
 			else if (handleVariableDeclaration (word, functionStream, params, scope, warnings)) {}
 			else if (handleDoCommands (word, functionStream, params, ttls, scope, operationTime)) {}
 			else if (handleAoCommands (word, functionStream, params, ao, ttls, scope, operationTime)) {}
+			else if (handleDdsCommands(word, functionStream, params, dds, scope, operationTime)) {}
+			else if (handleOlCommands(word, functionStream, params, ol, scope, operationTime)) {}
 			else if (word == "callcppcode") {
 				// and that's it... 
 				callCppCodeFunction ();
@@ -308,7 +310,7 @@ void ExpThreadWorker::analyzeFunction (std::string function, std::vector<std::st
 				thrower ("\"rsg:\" command is deprecated! Please use the microwave system listview instead.");
 			}
 			/// deal with function calls.
-			else if (handleFunctionCall (word, functionStream, params, ttls, ao, warnings, function, operationTime)) {}
+			else if (handleFunctionCall (word, functionStream, params, ttls, ao, dds, ol, warnings, function, operationTime)) {}
 			else if (word == "repeat:") {
 				std::string repeatStr;
 				functionStream >> repeatStr;
@@ -1093,7 +1095,7 @@ void ExpThreadWorker::checkTriggerNumbers (std::vector<parameterType>& expParams
 }
 
 bool ExpThreadWorker::handleFunctionCall (std::string word, ScriptStream& stream, std::vector<parameterType>& vars,
-	DoCore& ttls, AoCore& ao, std::string& warnings,
+	DoCore& ttls, AoCore& ao, DdsCore& dds, OlCore& ol, std::string& warnings,
 	std::string callingFunction, timeType& operationTime) {
 	if (word != "call") {
 		return false;
@@ -1128,7 +1130,7 @@ bool ExpThreadWorker::handleFunctionCall (std::string word, ScriptStream& stream
 			" infinite recursion\r\n");
 	}
 	try {
-		analyzeFunction (functionName, args, ttls, ao, vars, warnings, operationTime, callingFunction);
+		analyzeFunction (functionName, args, ttls, ao, dds, ol, vars, warnings, operationTime, callingFunction);
 	}
 	catch (ChimeraError&) {
 		throwNested ("Error handling Function call to function " + functionName + ".");
