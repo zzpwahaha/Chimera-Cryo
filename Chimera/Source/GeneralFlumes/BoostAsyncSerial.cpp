@@ -2,6 +2,8 @@
 #include "BoostAsyncSerial.h"
 
 BoostAsyncSerial::BoostAsyncSerial(std::string portID, int baudrate)
+	: portID(portID)
+	, baudrate(baudrate)
 {
 	if (!GIGAMOOG_SAFEMODE) {
 		port_ = std::make_unique<boost::asio::serial_port>(io_service_);
@@ -25,8 +27,9 @@ BoostAsyncSerial::BoostAsyncSerial(
 	int character_size,
 	boost::asio::serial_port_base::stop_bits::type stop_bits,
 	boost::asio::serial_port_base::parity::type parity,
-	boost::asio::serial_port_base::flow_control::type flow_control
-)
+	boost::asio::serial_port_base::flow_control::type flow_control) 
+	: portID(portID)
+	, baudrate(baudrate)
 {
 	port_ = std::make_unique<boost::asio::serial_port>(io_service_);
 
@@ -105,6 +108,46 @@ void BoostAsyncSerial::write(std::vector<int> data)
 	std::cout << "\n";
 
 	boost::asio::write(*port_, boost::asio::buffer(converted));
+}
+
+void BoostAsyncSerial::disconnect()
+{
+	if (GIGAMOOG_SAFEMODE) {
+		return;
+	}
+	if (io_service_.stopped()) {
+		thrower("io_service_ is already stopped. Can not disconnect again");
+	}
+	io_service_.stop();
+	if (port_) {
+		port_->cancel();
+		port_->close();
+	}
+	io_thread.join();
+	port_.reset();
+	work.reset();
+	io_service_.stop();
+	io_service_.reset();
+}
+
+void BoostAsyncSerial::reconnect()
+{
+	if (GIGAMOOG_SAFEMODE) {
+		return;
+	}
+	if (!io_service_.stopped()) {
+		thrower("io_service_ is already running. Can not connect again");
+	}
+	port_ = std::make_unique<boost::asio::serial_port>(io_service_);
+	port_->open(portID);
+	port_->set_option(boost::asio::serial_port_base::baud_rate(baudrate));
+	port_->set_option(boost::asio::serial_port_base::character_size(8));
+	port_->set_option(boost::asio::serial_port_base::stop_bits(boost::asio::serial_port_base::stop_bits::one));
+	port_->set_option(boost::asio::serial_port_base::parity(boost::asio::serial_port_base::parity::none));
+	port_->set_option(boost::asio::serial_port_base::flow_control(boost::asio::serial_port_base::flow_control::none));
+
+	io_thread = boost::thread(boost::bind(&BoostAsyncSerial::run, this));
+	read();
 }
 
 void BoostAsyncSerial::read()

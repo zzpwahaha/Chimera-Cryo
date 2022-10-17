@@ -34,13 +34,21 @@ void GigaMoogSystem::initialize(IChimeraQtWindow* win)
 	QLabel* header = new QLabel("GIGAMOOG", win);
 	expActive = new CQCheckBox("Exp. Active?", win);
 	QPushButton* programNowBtn = new QPushButton("Program", win);
+	QPushButton* disconnectBtn= new QPushButton("Disconnect", win);
+	QPushButton* reconnectBtn = new QPushButton("Reconnect", win);
 	QHBoxLayout* layout1 = new QHBoxLayout();
 	layout1->setContentsMargins(0, 0, 0, 0);
 	layout1->addWidget(header, 1);
-	layout1->addWidget(expActive, 0);
-	layout1->addWidget(programNowBtn, 0);
+	QHBoxLayout* layout2 = new QHBoxLayout();
+	layout2->setContentsMargins(0, 0, 0, 0);
+	layout2->addWidget(disconnectBtn, 0);
+	layout2->addWidget(reconnectBtn, 0);
+	layout2->addWidget(programNowBtn, 0);
+	layout2->addWidget(expActive, 0);
+
 
 	layout->addLayout(layout1, 0);
+	layout->addLayout(layout2, 0);
 	gmoogScript.initialize(win, "GMoog", "GigaMoog Script");
 	gmoogScript.setEnabled(true, false);
 	layout->addWidget(&gmoogScript, 1);
@@ -60,6 +68,18 @@ void GigaMoogSystem::initialize(IChimeraQtWindow* win)
 			win->reportErr(qstr("Error while programming GigaMoog " + core.getDelim() + ": " + err.trace() + "\r\n"));
 		win->mainWin->updateConfigurationSavedStatus(false);
 		}});
+
+	connect(disconnectBtn, &QPushButton::released, this, [this, win]() {
+		win->reportStatus("----------------------\r\nDisconnect GigaMoog... ");
+		try {
+			core.disconnect();
+			win->reportStatus("Disconnected GigaMoog \r\n");
+		}
+		catch (ChimeraError& err) {
+			//errBox(err.trace());
+			win->reportErr(": " + err.qtrace() + "\r\n");
+		}
+		});
 }
 
 void GigaMoogSystem::handleSaveConfig(ConfigStream& saveFile)
