@@ -1,7 +1,7 @@
 // created by Mark O. Brown
 #pragma once
 #include "nidaqmx2.h"
-
+#include <ExperimentThread/ExpRuntimeData.h>
 #include "RealTimeDataAnalysis/DataAnalysisControl.h"					  
 #include "Andor/CameraImageDimensions.h"
 #include "Andor/AndorRunSettings.h"
@@ -27,7 +27,7 @@ class DataLogger : public IChimeraSystem {
 	public:
 		DataLogger(std::string systemLocation, IChimeraQtWindow* parent);
 		~DataLogger( );
-		void logMasterRuntime ( unsigned repNumber, bool repFirst, std::vector<parameterType> params );
+		void logMasterRuntime ( const ExpRuntimeData& expRuntime);
 		void logError ( H5::Exception& err );
 		void initializeDataFiles( std::string specialName="", bool needsCal=true);
 		void writeAndorPic( Matrix<long> image, imageParameters dims );

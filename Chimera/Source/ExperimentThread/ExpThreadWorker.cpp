@@ -49,7 +49,7 @@ void ExpThreadWorker::experimentThreadProcedure () {
 		loadExperimentRuntime (cStream, expRuntime);
 		if (input->expType != ExperimentType::LoadMot) {
 			emit notification ("Loading Master Runtime...\n", 1);
-			input->logger.logMasterRuntime (expRuntime.repetitions, expRuntime.mainOpts.repetitionFirst, expRuntime.expParams);
+			input->logger.logMasterRuntime (expRuntime);
 		}
 		for (auto& device : input->devices.list) {
 			deviceLoadExpSettings (device, cStream);/*TODO: remove dds from device, and now device only has andor*/
@@ -234,7 +234,7 @@ void ExpThreadWorker::analyzeMasterScript (DoCore& ttls, AoCore& ao, DdsCore& dd
 }
 
 
-void ExpThreadWorker::analyzeFunction (std::string function, std::vector<std::string> args, DoCore& ttls,
+void ExpThreadWorker::analyzeFunction (std::string function, std::vector<std::string> args, DoCore& ttls, 
 	AoCore& ao, DdsCore& dds, OlCore& ol, std::vector<parameterType>& params, std::string& warnings, timeType& operationTime,
 	std::string callingScope) {
 	/// load the file

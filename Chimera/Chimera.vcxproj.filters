@@ -1030,6 +1030,9 @@
     <ClInclude Include="Source\AnalogInput\AiOutput.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Source\ExperimentThread\ExpRuntimeData.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="Source\ExperimentMonitoringAndStatus\StatusControlOptionDlg.ui">

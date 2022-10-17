@@ -193,6 +193,7 @@
     <ClInclude Include="Source\Andor\AndorGainMode.h" />
     <ClInclude Include="Source\ExperimentMonitoringAndStatus\StatusControlOptions.h" />
     <QtMoc Include="Source\ExperimentMonitoringAndStatus\StatusOptionsWindow.h" />
+    <ClInclude Include="Source\ExperimentThread\ExpRuntimeData.h" />
     <ClInclude Include="Source\GigaMOOG\GigaMoogCore.h" />
     <ClInclude Include="Source\GeneralFlumes\BoostAsyncSerial.h" />
     <ClInclude Include="Source\GigaMOOG\GigaMoogSystem.h" />

@@ -1,18 +1,13 @@
 #pragma once
 
 #include <ExperimentThread/ExperimentThreadInput.h>
+#include <ExperimentThread/ExpRuntimeData.h>
 #include <MiscellaneousExperimentOptions/debugInfo.h>
 #include <qobject.h>
 #include <string>
 #include <memory>
 
 struct baslerSettings;
-struct ExpRuntimeData {
-	unsigned repetitions = 1;
-	mainOptions mainOpts;
-	ScriptStream masterScript;
-	std::vector<parameterType> expParams;
-};
 
 class ExpThreadWorker : public QObject 
 {
