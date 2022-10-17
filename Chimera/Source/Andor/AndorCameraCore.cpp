@@ -381,7 +381,14 @@ std::vector<Matrix<long>> AndorCameraCore::acquireImageData (){
 				flume.getInt(L"AOIStride", &Stride);
 				flume.getInt(L"AOIWidth", &Width);
 				flume.getInt(L"AOIHeight", &Height);
-
+				if (tempImageBuffers[currentPictureNumber % numberOfImageBuffers] == nullptr) {
+					if (cameraIsRunning == true) {
+						throwNested("Andor camera image buffer is empty. Lowlevel bug???");
+					}
+					else {
+						qDebug() << "AndorCameraCore::acquireImageData: Andor camera aborted, tried to retrieve the last image but the buffer is already cleaned. Nothing to worry about";
+					}
+				}
 				for (AT_64 Row = 0; Row < Height; Row++) {
 					//Cast the raw image buffer to a 16-bit array. 
 					//...Assumes the PixelEncoding is 16-bit. 
@@ -526,9 +533,9 @@ void AndorCameraCore::setExpRunningExposure()
 {
 	if (runSettings.triggerMode != AndorTriggerMode::mode::ExternalExposure) {
 		setExposures((currentPictureNumber + 1) % expRunSettings.picsPerRepetition); // set exposure for the next image
+		qDebug() << "Set ExpRunningExposure to" << runSettings.exposureTimes[(currentPictureNumber + 1) % expRunSettings.picsPerRepetition];
+		qDebug() << "Now exposure time is" << runSettings.exposureTime;
 	}
-	qDebug() << "Set ExpRunningExposure to" << runSettings.exposureTimes[(currentPictureNumber + 1) % expRunSettings.picsPerRepetition];
-	qDebug() << "Now exposure time is" << runSettings.exposureTime;
 }
 
 
