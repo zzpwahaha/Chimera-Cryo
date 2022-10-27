@@ -28,6 +28,8 @@ void CalibrationThreadWorker::runAll () {
 	unsigned count = 0;
 	// made this asynchronous to facilitate updating gui while 
 	emit updateBoxColor("Green", "AI-SYSTEM");
+	DOStatus doInitStatus = input.ttls->getCurrentStatus();
+	auto aoInitStatus = input.ao->getDacValues();
 	for (auto& cal : input.calibrations) {
 		try {
 			calibrate (cal, count);
@@ -39,8 +41,8 @@ void CalibrationThreadWorker::runAll () {
 		Sleep (200);
 		count++;
 	}
-	input.ttls->zeroBoard ();
-	input.ao->zeroDacs (/*input.ttls->getCore (), { 0, input.ttls->getCurrentStatus () }*/);
+	input.ttls->setTtlStatus(doInitStatus);
+	input.ao->setDacStatus(aoInitStatus);
 	emit updateBoxColor("Gray", "AI-SYSTEM");
 }
 

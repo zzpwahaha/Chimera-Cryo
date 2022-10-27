@@ -43,7 +43,8 @@ class DoSystem : public IChimeraSystem
 		void zeroBoard();
 		void handleTTLPress (DigitalOutput& out);
 		void handleHoldPress();
-		void setTtlStatusNoForceOut(std::array< std::array<bool, size_t(DOGrid::numPERunit)>, size_t(DOGrid::numOFunit) > status);
+		void setTtlStatus(DOStatus status);
+		void setTtlStatusNoForceOut(DOStatus status);
 		//bool getFtFlumeSafemode ();
 
 		std::pair<unsigned, unsigned> getTtlBoardSize();
@@ -58,7 +59,7 @@ class DoSystem : public IChimeraSystem
 		void updateDefaultTtl(unsigned row, unsigned column, bool state);
 		bool getDefaultTtl(unsigned row, unsigned column);
 
-		std::array< std::array<bool, size_t(DOGrid::numPERunit)>, size_t(DOGrid::numOFunit) > getCurrentStatus( );
+		DOStatus getCurrentStatus( );
 
 		allDigitalOutputs& getDigitalOutputs();
 		DoCore& getCore ();

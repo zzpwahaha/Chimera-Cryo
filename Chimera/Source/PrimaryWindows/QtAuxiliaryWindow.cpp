@@ -409,7 +409,7 @@ void QtAuxiliaryWindow::handleNormalFin () {
 		SetDacs();
 		SetDds();
 		SetOls();
-		ttlBoard.setTtlStatusNoForceOut (ttlBoard.getCore().getFinalSnapshot ());
+		ttlBoard.setTtlStatus (ttlBoard.getCore().getFinalSnapshot ());
 	}
 	catch (ChimeraError& e) { 
 		reportErr("Error in setting the GUI settings after experiment finished: \n\t" + qstr(e.trace()));

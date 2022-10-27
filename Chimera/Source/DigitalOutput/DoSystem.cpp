@@ -68,8 +68,13 @@ void DoSystem::handleOpenConfig(ConfigStream& openFile)
 	
 }
 
+void DoSystem::setTtlStatus(DOStatus status)
+{
+	setTtlStatusNoForceOut(status);
+	core.FPGAForceOutput(getCurrentStatus());
+}
 
-void DoSystem::setTtlStatusNoForceOut(std::array< std::array<bool, size_t(DOGrid::numPERunit)>, size_t(DOGrid::numOFunit) > status)
+void DoSystem::setTtlStatusNoForceOut(DOStatus status)
 {
 	for ( auto rowInc : range(status.size()) ){
 		for ( auto numInc : range(status[rowInc].size()) ){
@@ -227,7 +232,7 @@ void DoSystem::handleHoldPress(){
 	}
 }
 
-std::array< std::array<bool, size_t(DOGrid::numPERunit)>, size_t(DOGrid::numOFunit) > DoSystem::getCurrentStatus()
+DOStatus DoSystem::getCurrentStatus()
 {
 	std::array< std::array<bool, size_t(DOGrid::numPERunit)>, size_t(DOGrid::numOFunit) > currentStatus;
 	for ( auto& out : outputs )

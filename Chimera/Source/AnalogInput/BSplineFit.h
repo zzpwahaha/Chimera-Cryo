@@ -50,7 +50,7 @@ private:
 
 	gsl_bspline_workspace* bw;
 	gsl_multifit_linear_workspace* mw;
-	unsigned orderBSpline; // order of B spline, gives a polynomial of order = orderBSpline-1
+	unsigned orderBSpline; // order of B spline, gives a polynomial of order = orderBSpline-1. The common case of cibic B-splines is given by k = 4
 	unsigned dataSize; // number of data points to be fit
 	unsigned nBreak; // number of break points, including left and right end points
 	unsigned nBasis; // number of basis function in the interval = nbreak - 2 + orderBSpline

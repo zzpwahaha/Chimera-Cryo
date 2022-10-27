@@ -23,6 +23,8 @@ void CalibrationManager::initialize (IChimeraQtWindow* parent, AiSystem* ai_in, 
 	this->setMaximumWidth(1300);
 	
 	calsHeader = new QLabel ("CALIBRATION MANAGER", parent);
+	calsHeader->setToolTip("Ctrl Pts (V)'s format is \"[initVal finVal) numVals\" where \"[\" and \")\" can be either brackets or parenthesis for inclusive "
+		"and exclusive endpoints, or it's just a list of values for arbitrary values. ");
 	layout->addWidget(calsHeader, 0);
 
 	QHBoxLayout* layout1 = new QHBoxLayout(this);
@@ -578,7 +580,7 @@ void CalibrationManager::standardStartThread (std::vector<std::reference_wrapper
 			emit warning("Warning in staring new calibration\n\t"+qstr(e.qtrace()));
 		}
 		calibrationViewer.initializeCalData (cal);
-		});
+		}, Qt::QueuedConnection);
 	connect (threadWorker, &CalibrationThreadWorker::newCalibrationDataPoint, this, [this](QPointF pt) {
 			auto* chartData = calibrationViewer.getCalData ();
 			chartData->addData(pt.x(), pt.y());

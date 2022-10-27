@@ -61,8 +61,9 @@ class AoSystem : public IChimeraSystem
 		void handleSetDacsButtonPress( bool useDefault=false );
 		void zeroDacs();
 
-		/*below two seems need to be delete 2/16/2021 zzp*/
+		void setDacStatus(std::array<double, size_t(AOGrid::total)> status);
 		void setDacStatusNoForceOut(std::array<double, size_t(AOGrid::total)> status);
+		/*below two seems need to be delete 2/16/2021 zzp*/
 		void prepareDacForceChange(int line, double voltage);
 	
 
