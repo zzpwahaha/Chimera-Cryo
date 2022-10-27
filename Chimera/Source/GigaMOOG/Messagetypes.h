@@ -39,45 +39,6 @@ public:
 		mParameters[key] = value;
 	}
 
-	//TODO: template previously not working when compiling in release mode. Solved with overloads below, but then miraculously compiles. 
-
-	//void set(const std::string& key, const int& value)
-	//{
-	//	if (exists(key))
-	//		thrower("Duplicate key");
-
-	//	mParameters[key] = value;
-	//}
-	//void set(const std::string& key, const MessageDestination& value)
-	//{
-	//	if (exists(key))
-	//		thrower("Duplicate key");
-
-	//	mParameters[key] = value;
-	//}
-	//void set(const std::string& key, const MessageDAC& value)
-	//{
-	//	if (exists(key))
-	//		thrower("Duplicate key");
-
-	//	mParameters[key] = value;
-	//}
-	//void set(const std::string& key, const MessageSetting& value)
-	//{
-	//	if (exists(key))
-	//		thrower("Duplicate key");
-
-	//	mParameters[key] = value;
-	//}
-	//void set(const std::string& key, const double& value)
-	//{
-	//	if (exists(key))
-	//		thrower("Duplicate key");
-
-	//	mParameters[key] = value;
-	//}
-
-
 	template<typename T> const T& get(const std::string& key)const
 	{
 		if (!exists(key))
@@ -123,7 +84,8 @@ public:
 	static unsigned long long int getFTW(double frequency) {
 		//36-bit DDS
 		//1 MHz = 223696213.33333333333333333333333 FTW
-		double MHz = 223696213.33333333333333333333333;
+		// 2.5*2**28/3 ?
+		double MHz = 223696213.33333333333333333333333; 
 		return (unsigned long long int)(frequency * MHz);
 	}
 };
