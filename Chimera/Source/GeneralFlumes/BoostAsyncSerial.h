@@ -32,6 +32,7 @@ private:
 	const std::string portID;
 	const int baudrate;
 	boost::asio::io_service io_service_;
+	//std::unique_ptr<boost::asio::io_service> io_service_;
 	std::unique_ptr<boost::asio::serial_port> port_;
 	
 	void read();
@@ -49,6 +50,8 @@ private:
 
 	boost::function<void(uint8_t)> read_callback_;
 
-	std::unique_ptr<boost::asio::io_service::work> work;	
+	//std::unique_ptr<boost::asio::io_service::work> work;
+	typedef boost::asio::executor_work_guard<boost::asio::io_context::executor_type> work_guard;
+	std::unique_ptr<work_guard> work;
 };
 

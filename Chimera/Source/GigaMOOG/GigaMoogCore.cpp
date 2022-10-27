@@ -85,6 +85,16 @@ void GigaMoogCore::programGMoogNow(std::string fileAddr, std::vector<parameterTy
 	doCore.FPGAForcePulse(dostatus, std::vector<std::pair<unsigned, unsigned>>{GM_TRIGGER_LINE[0]}, GM_TRIGGER_TIME);
 }
 
+void GigaMoogCore::disconnectPort()
+{
+	fpga.disconnect();
+}
+
+void GigaMoogCore::reconnectPort()
+{
+	fpga.reconnect();
+}
+
 void GigaMoogCore::analyzeMoogScript(std::string fileAddr, std::vector<parameterType>& variables, UINT variation)
 {
 	ScriptStream currentMoogScript;

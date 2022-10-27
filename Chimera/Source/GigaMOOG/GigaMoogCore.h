@@ -26,7 +26,8 @@ public:
 	std::string getDelim() override { return configDelim; };
 
 	void programGMoogNow(std::string fileAddr, std::vector<parameterType> constants, DoCore& doCore, DOStatus dostatus);
-
+	void disconnectPort();
+	void reconnectPort();
 private:
 	//Attempt to parse moog script 
 	void analyzeMoogScript(std::string fileAddr, std::vector<parameterType>& variables, UINT variation);

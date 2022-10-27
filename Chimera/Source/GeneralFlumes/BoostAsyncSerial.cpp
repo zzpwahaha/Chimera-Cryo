@@ -6,6 +6,7 @@ BoostAsyncSerial::BoostAsyncSerial(std::string portID, int baudrate)
 	, baudrate(baudrate)
 {
 	if (!GIGAMOOG_SAFEMODE) {
+		//io_service_ = std::make_unique<boost::asio::io_service>(boost::asio::io_service());
 		port_ = std::make_unique<boost::asio::serial_port>(io_service_);
 
 		port_->open(portID);
@@ -115,19 +116,36 @@ void BoostAsyncSerial::disconnect()
 	if (GIGAMOOG_SAFEMODE) {
 		return;
 	}
-	if (io_service_.stopped()) {
-		thrower("io_service_ is already stopped. Can not disconnect again");
+	if (!port_) {
+		thrower("port_ is already closed. Can not disconnect again");
 	}
-	io_service_.stop();
-	if (port_) {
-		port_->cancel();
-		port_->close();
+	try {
+		io_service_.stop();
+		if (port_) {
+			port_->cancel();
+			boost::system::error_code ec;
+			port_->close(ec);
+			auto s = ec.message();
+		}
+		if (port_->is_open()) {
+			thrower("After port->close(), the port is still open??");
+		}
 	}
+	catch (boost::system::system_error& ex) {
+		throwNested(ex.what());
+	}
+	//io_service_.post([this]() {
+	//	io_service_.stop();
+	//	port_->close();
+	//	work->reset(); });
+	//port_.reset();
+	//work.reset();
+	//io_service_.restart();
+	//io_thread.detach();
+	work->reset();
+	//io_thread.interrupt();
 	io_thread.join();
-	port_.reset();
-	work.reset();
-	io_service_.stop();
-	io_service_.reset();
+	io_service_.restart();
 }
 
 void BoostAsyncSerial::reconnect()
@@ -135,11 +153,18 @@ void BoostAsyncSerial::reconnect()
 	if (GIGAMOOG_SAFEMODE) {
 		return;
 	}
-	if (!io_service_.stopped()) {
-		thrower("io_service_ is already running. Can not connect again");
+	if (port_ && port_->is_open()/*io_service_.stopped()*/) {
+		thrower("port_ is already open. Can not connect again");
 	}
+	io_service_.restart();
+
 	port_ = std::make_unique<boost::asio::serial_port>(io_service_);
-	port_->open(portID);
+	try {
+		port_->open(portID);
+	}
+	catch (boost::system::system_error& ex) {
+		throwNested(ex.what());
+	}
 	port_->set_option(boost::asio::serial_port_base::baud_rate(baudrate));
 	port_->set_option(boost::asio::serial_port_base::character_size(8));
 	port_->set_option(boost::asio::serial_port_base::stop_bits(boost::asio::serial_port_base::stop_bits::one));
@@ -164,6 +189,8 @@ void BoostAsyncSerial::read()
 
 void BoostAsyncSerial::run()
 {
-	work = std::make_unique<boost::asio::io_service::work>(io_service_);
+	//work = std::make_unique<boost::asio::io_service::work>(io_service_);
+	//work = boost::asio::make_work_guard(io_service_); // assigment operator is private, but not for copy. 
+	work = std::make_unique<work_guard>(boost::asio::make_work_guard(io_service_));
 	io_service_.run();
 }

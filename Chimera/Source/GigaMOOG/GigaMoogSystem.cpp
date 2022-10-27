@@ -72,8 +72,20 @@ void GigaMoogSystem::initialize(IChimeraQtWindow* win)
 	connect(disconnectBtn, &QPushButton::released, this, [this, win]() {
 		win->reportStatus("----------------------\r\nDisconnect GigaMoog... ");
 		try {
-			core.disconnect();
+			core.disconnectPort();
 			win->reportStatus("Disconnected GigaMoog \r\n");
+		}
+		catch (ChimeraError& err) {
+			//errBox(err.trace());
+			win->reportErr(": " + err.qtrace() + "\r\n");
+		}
+		});
+
+	connect(reconnectBtn, &QPushButton::released, this, [this, win]() {
+		win->reportStatus("----------------------\r\nReconnect GigaMoog... ");
+		try {
+			core.reconnectPort();
+			win->reportStatus("Reconnected GigaMoog \r\n");
 		}
 		catch (ChimeraError& err) {
 			//errBox(err.trace());
