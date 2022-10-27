@@ -37,6 +37,7 @@
 	const std::string DEFAULT_SCRIPT_FOLDER_PATH = str (CODE_ROOT) + "\\Default-Scripts\\";
 	const std::string ACTUAL_CODE_FOLDER_PATH = str (CODE_ROOT) + "\\Chimera\\";
 	const std::string PROFILES_PATH = str (CODE_ROOT) + "\\Profiles\\";
+	const std::string CONFIGURATION_PATH = str(CODE_ROOT) + "\\Configurations\\";
 
 	//const std::string DATA_SAVE_LOCATION = "J:\\Data Repository\\New Data Repository\\";
 	const std::string DATA_SAVE_LOCATION = "C:\\Chimera\\Chimera-Cryo\\tmpDataSave\\";
@@ -92,7 +93,7 @@
 
 	//Mako camera
 	const unsigned MAKO_NUMBER = 2;
-	const std::array<bool, MAKO_NUMBER> MAKO_SAFEMODE = { true,false};
+	const std::array<bool, MAKO_NUMBER> MAKO_SAFEMODE = { true,true};
 	const std::array<std::string, MAKO_NUMBER> MAKO_DELIMS = { "MAKO1_CAMERA_SETTING", "MAKO2_CAMERA_SETTING" };
 	const std::array<std::string, MAKO_NUMBER> MAKO_IPADDRS= { "10.10.0.6", "10.10.0.7" };
 	const std::vector<std::pair<unsigned, unsigned>> MAKO_TRIGGER_LINE

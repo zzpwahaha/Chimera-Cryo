@@ -214,7 +214,7 @@ void QtScriptWindow::openArbGenScript(ArbGenEnum::name name, IChimeraQtWindow* p
 		arbGens[(int)name].verifyScriptable();
 		updateConfigurationSavedStatus(false);
 		arbGens[(int)name].checkSave(getProfile().configLocation, mainWin->getRunInfo());
-		std::string openFileName = openWithExplorer(parent, Script::ARBGEN_SCRIPT_EXTENSION);
+		std::string openFileName = openWithExplorer(parent, Script::ARBGEN_SCRIPT_EXTENSION, CONFIGURATION_PATH);
 		arbGens[(int)name].arbGenScript.openParentScript(openFileName, getProfile().configLocation, 
 			mainWin->getRunInfo());
 		arbGens[(int)name].arbGenScript.updateScriptNameText(getProfile().configLocation);
@@ -284,7 +284,7 @@ void QtScriptWindow::windowOpenConfig (ConfigStream& configFile){
 			auto answer = QMessageBox::question(this, "Open Failed", "ERROR: Failed to open master script file: "
 				+ qstr(masterName) + ", with error \r\n" + err.qtrace() + "\r\nAttempt to find file yourself?");
 			if (answer == QMessageBox::Yes) {
-				openMasterScript(openWithExplorer(nullptr, "mScript"));
+				openMasterScript(openWithExplorer(nullptr, "mScript", CONFIGURATION_PATH));
 			}
 		}
 
@@ -296,7 +296,7 @@ void QtScriptWindow::windowOpenConfig (ConfigStream& configFile){
 			auto answer = QMessageBox::question(this, "Open Failed", "ERROR: Failed to open master script file: "
 				+ qstr(gigaMoog.scriptAddress) + ", with error \r\n" + err.qtrace() + "\r\nAttempt to find file yourself?");
 			if (answer == QMessageBox::Yes) {
-				openGMoogScript(openWithExplorer(nullptr, "gScript"));
+				openGMoogScript(openWithExplorer(nullptr, "gScript", CONFIGURATION_PATH));
 			}
 		}
 		for (auto name : ArbGenEnum::allAgs) {
@@ -329,7 +329,7 @@ void QtScriptWindow::newMasterScript (){
 void QtScriptWindow::openMasterScript (IChimeraQtWindow* parent){
 	try	{
 		masterScript.checkSave (getProfile ().configLocation, mainWin->getRunInfo());
-		std::string openName = openWithExplorer (parent, Script::MASTER_SCRIPT_EXTENSION);
+		std::string openName = openWithExplorer (parent, Script::MASTER_SCRIPT_EXTENSION, CONFIGURATION_PATH);
 		masterScript.openParentScript (openName, getProfile ().configLocation, mainWin->getRunInfo());
 		updateConfigurationSavedStatus (false);
 		masterScript.updateScriptNameText (getProfile ().configLocation);
@@ -403,7 +403,7 @@ void QtScriptWindow::openGMoogScript(IChimeraQtWindow* parent)
 {
 	try {
 		gigaMoog.gmoogScript.checkSave(getProfile().configLocation, mainWin->getRunInfo());
-		std::string openName = openWithExplorer(parent, Script::GMOOG_SCRIPT_EXTENSION);
+		std::string openName = openWithExplorer(parent, Script::GMOOG_SCRIPT_EXTENSION, CONFIGURATION_PATH);
 		gigaMoog.gmoogScript.openParentScript(openName, getProfile().configLocation, mainWin->getRunInfo());
 		updateConfigurationSavedStatus(false);
 		gigaMoog.gmoogScript.updateScriptNameText(getProfile().configLocation);

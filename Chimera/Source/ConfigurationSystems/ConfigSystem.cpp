@@ -331,7 +331,7 @@ void ConfigSystem::handleSelectConfigButton(IChimeraQtWindow* win){
 			return;
 		}
 	}
-	std::string fileaddress = openWithExplorer( win, CONFIG_EXTENSION );
+	std::string fileaddress = openWithExplorer( win, CONFIG_EXTENSION, CONFIGURATION_PATH);
 	if (fileaddress == "") {
 		return; // canceled
 	}
