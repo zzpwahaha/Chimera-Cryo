@@ -1,0 +1,55 @@
+%%%%%%%%%%%%%%%%% Start With 1ms %%%%%%%%%%%%%%%%% 
+t = 1
+call CryoMOTLoadingPGC()
+
+%%%%%%%%%%%%%%%  TOF  %%%%%%%%%%%%%%%%%%
+off: SciMOTTrg
+off: xyzMOTShutter
+off: PrbShutter 
+t += t_tof
+pulseon: DO1_0 1
+
+%%%%%%%%%%%%%%  PGC in Tweezer %%%%%%%%%%%%%%%%%%
+% change the field/laser freq parameter here because the previous section is TOF and no light is on
+t += -4
+on: xyzMOTShutter
+ol: ol_cooling pgc_twz_olcool
+ol: ol_repump pgc_twz_olrepump
+dac: BiasCoilX pgc_twz_bias_x
+dac: BiasCoilY pgc_twz_bias_y 
+dac: BiasCoilZ pgc_twz_bias_z
+dac: SciMOTAmp pgc_twz_cool_amp
+dac: TARepAmp pgc_twz_rep_amp
+t += 4
+
+on: SciMOTTrg
+t += t_pgc_twz
+pulseon: DO1_0 1
+off: SciMOTTrg
+off: xyzMOTShutter 
+% note the t_pgc_twz should be smaller than 100
+t += -t_pgc_twz
+t += 100
+
+
+%%%%%%%%%%%%%%  Image TWIZZER  %%%%%%%%%%%%%%%%%%
+% change the field/laser freq parameter here because the previous section is dark, i.e. 100-t_pgc_twz is larger than 4
+t += -4
+on: PrbShutter
+ol: ol_cooling probe_olcool
+ol: ol_repump probe_olrepump
+dac: BiasCoilX pgc_img_bias_x
+dac: BiasCoilY pgc_img_bias_y
+dac: BiasCoilZ pgc_img_bias_z
+dac: PrbAmp probe_cool_amp
+dac: PrbrepAmp probe_repump_amp
+t += 4
+
+pulseon: pixis_trg t_twz_imaging
+t += 7
+pulseon: PrbTrg t_twz_imaging
+pulseon: DO1_0 1
+
+%%%%%%%%%%%%%%  END Sequence  %%%%%%%%%%%%%%%%%%
+t += 100
+pulseon: DO1_0 0.5

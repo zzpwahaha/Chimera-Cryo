@@ -1,92 +1,6 @@
 %%%%%%%%%%%%%%%%% Start With 1ms %%%%%%%%%%%%%%%%% 
 t = 1
-pulseon: DO1_0 10
-pulseon: GMLoadTrg 0.003
-t += 1
-ddsfreq: dds0_0 80
-ddsamp: dds0_0 100
-t += 1
-ddsfreq: SciSrcMOT 80
-ddsamp: SciSrcMOT 100
-t += 1
-% dipole push is in external rf source for now
-%for dipole push rep, this rep is 80MHz detuned
-ddsfreq: Prb 100
-ddsamp: Prb 100
-t += 1
-ddsfreq: dds0_3 80
-ddsamp: dds0_3 100
-
-t += 1
-ddsfreq: TARep 80 %also used for tweezer AOM
-ddsamp: TARep 100
-t += 1
-ddsfreq: PrbRep 80
-ddsamp: PrbRep 100
-t += 1
-ddsfreq: PrbRep_tmp 80
-ddsamp: PrbRep_tmp 100
-t += 1
-ddsfreq: dds2_3 80
-ddsamp: dds2_3 100
-
-
-on: TARepTrg
-on: SrcMOTTrg
-on: SciMOTTrg 
-on: DipolePushTrg
-on: PrbRepTrg
-off: PrbTrg
-off: TweezerHold
-on: xyzMOTShutter
-on: DipolePushShutter
-off: PrbShutter 
-
-
-dac: TARepAmp 10
-dac: SrcMOTAmp 5 %10
-dac: SciMOTAmp 6.8 
-dac: DipolePushAmp 4.4
-dac: TweezerIntensity twz_intensity %Converison is 38.7mW per 1V Aug/1/2022 
-dac: PrbRepAmp 10
-dac: PrbAmp 2.5 
-
-ol: ol_cooling 1216
-ol: ol_repump 5282
-
-dac: MOTCoil mot_gradient
-dac: BiasCoilX bias_x %0.04
-dac: BiasCoilY bias_y %0.4
-dac: BiasCoilZ bias_z %0.0
-
-t = t_loading %1000
-off: SrcMOTTrg
-off: DipolePushTrg
-off: DipolePushShutter
-dac: MOTCoil 0
-pulseon: DO1_0 1
-
-% attempt to move the MOT, maybe needed for the future
-%t += -20
-%dac: BiasCoilX shift_bias_x
-%dac: BiasCoilY shift_bias_y
-%dac: BiasCoilZ shift_bias_z
-%ol: ol_cooling shift_olcool
-%t += 20
-
-
-
-%%%%%%%%%%%%%%  PGC  %%%%%%%%%%%%%%%%%%
-on: SciMOTTrg
-ol: ol_cooling pgc_olcool
-ol: ol_repump pgc_olrepump
-dac: BiasCoilX pgc_bias_x
-dac: BiasCoilY pgc_bias_y 
-dac: BiasCoilZ pgc_bias_z
-dac: SciMOTAmp pgc_cool_amp
-dac: TARepAmp pgc_rep_amp
-t += t_pgc_cool_time
-pulseon: DO1_0 1
+call CryoMOTLoadingPGC()
 
 %%%%%%%%%%%%%%%  TOF  %%%%%%%%%%%%%%%%%%
 off: SciMOTTrg
@@ -131,7 +45,7 @@ dac: PrbAmp probe_cool_amp
 dac: PrbrepAmp probe_repump_amp
 t += 4
 
-pulseon: pixis_trg 1
+pulseon: pixis_trg t_twz_imaging
 t += 7
 pulseon: PrbTrg t_twz_imaging
 pulseon: DO1_0 1
@@ -143,9 +57,14 @@ t += t_twz_imaging+10
 %t += 10+15
 %dacramp: TweezerIntensity twz_int_low twz_intensity 10 
 %t += 10
-%dac: TweezerIntensity 0.03
+%dac: TweezerIntensity 0.13
 %t += 3
 %dac: TweezerIntensity twz_intensity
+
+%dacramp: TweezerIntensity twz_intensity 0.03 10 
+%t += 10+15
+%dacramp: TweezerIntensity 0.03 twz_intensity 10 
+%t += 10
 %%%%%%%%%%%%%%%%% After Image TWIZZER %%%%%%%%%
 dacramp: TweezerIntensity twz_intensity twz_int_lifetime 10 
 off: PrbShutter
@@ -190,12 +109,12 @@ t += t_lifetime
 
 %%%%%%%%%%%%% clean up camera %%%%%%%%%%%%%
 %% t_lifetime at least 600ms+600ms
-t += -600
-pulseon: pixis_trg 1
-pulseoff: SciMOTTrg 30
-pulseon: DO1_0 1
-t += 600
-
+%t += -600
+%pulseon: pixis_trg 1
+%pulseoff: SciMOTTrg 30
+%pulseon: DO1_0 1
+%t += 600
+%
 %%%%%%%%%%%%%%% Second Twizzer Image
 % note the previous section should have at least 4 ms dark interval
 t += -4
@@ -212,7 +131,7 @@ dac: PrbrepAmp probe_repump_amp
 t += 4
 
 
-pulseon: pixis_trg 1
+pulseon: pixis_trg t_twz_imaging
 t += 7
 pulseon: PrbTrg t_twz_imaging
 pulseon: DO1_0 1
