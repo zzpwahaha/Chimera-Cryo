@@ -670,8 +670,6 @@ void CalibrationManager::determineCalMinMax (calResult& res) {
 }
 
 void CalibrationManager::updateCalibrationView (calSettings& cal) {
-	QElapsedTimer et;
-	et.start();
 	std::vector<plotDataVec> plotData;
 	plotData.resize (3);
 	cal.result.ctrlVals = calPtTextToVals (cal.ctrlPtString);
@@ -684,7 +682,7 @@ void CalibrationManager::updateCalibrationView (calSettings& cal) {
 		dataPoint dp{ cal.result.ctrlVals[num] , cal.result.resVals[num] };
 		plotData[0].push_back (dp);
 	}
-	qDebug() << "After set the first data vec at " << et.elapsed();
+
 	int numfitpts = 400;
 	plotData[1].clear();
 	plotData[1].reserve (numfitpts);
@@ -705,7 +703,8 @@ void CalibrationManager::updateCalibrationView (calSettings& cal) {
 		//plotData[1][pnum].x = cal.result.bsfit.calculateY(plotData[1][pnum].y);
 		runningVal += (cal.result.calmax +1.0- cal.result.calmin) / (numfitpts - 1);
 	}
-	qDebug() << "After set the sec data vec at " << et.elapsed();
+	std::sort(plotData[1].begin(), plotData[1].end(), [](dataPoint p1, dataPoint p2) {return p1.y < p2.y; }); // ascending order for y
+
 	numfitpts = 350;
 	plotData[2].clear();
 	plotData[2].resize(numfitpts);
@@ -723,11 +722,11 @@ void CalibrationManager::updateCalibrationView (calSettings& cal) {
 			runningVal += (cal.historicalResult.calmax - cal.historicalResult.calmin) / (numfitpts - 1);
 		}
 	}
-	qDebug() << "After set the third data vec at " << et.elapsed();
+	std::sort(plotData[2].begin(), plotData[2].end(), [](dataPoint p1, dataPoint p2) {return p1.y < p2.y; });
+
 	calibrationViewer.resetChart ();
 	calibrationViewer.setTitle ("Calibration View: " + cal.result.calibrationName);
 	calibrationViewer.setData (plotData);
-	qDebug() << "After set the data to plotter" << et.elapsed();
 }
 
 double CalibrationManager::calibrationFunction (double val, calResult& res, IChimeraSystem* parent, bool boundaryCheck) {

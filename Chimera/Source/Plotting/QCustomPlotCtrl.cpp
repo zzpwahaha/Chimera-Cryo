@@ -369,26 +369,24 @@ void QCustomPlotCtrl::setData(std::vector<plotDataVec> newData, std::vector<std:
 		plot->graph(0)->setData(calXdata, calYdata);
 		// second line
 		auto& newLineData2 = newData[1];
-		QVector<double> fitXdata, fitYdata;
+		QCPCurve* curve1 = new QCPCurve(plot->xAxis, plot->yAxis);
+		QVector<QCPCurveData> fitData;
 		for (auto count : range(newLineData2.size())) {
-			fitXdata.append(newLineData2[count].x);
-			fitYdata.append(newLineData2[count].y);
+			fitData.push_back(QCPCurveData(count, newLineData2[count].x, newLineData2[count].y));
 		}
-		plot->addGraph();
-		plot->graph(1)->setPen(QColor(Qt::red));
-		plot->graph(1)->setData(fitXdata, fitYdata);
-		plot->graph(1)->setName("Fit");
+		curve1->data()->set(fitData);
+		curve1->setPen(QPen(QBrush(QColor(Qt::red)), 1.5));
+		curve1->setName("Fit");
 		// third line
 		auto& newLineData3 = newData[2];
-		QVector<double> histCalXdata, histCalYdata;
+		QCPCurve* curve2 = new QCPCurve(plot->xAxis, plot->yAxis);
+		QVector<QCPCurveData> histCalData;
 		for (auto count : range(newLineData3.size())) {
-			histCalXdata.append(newLineData3[count].x);
-			histCalYdata.append(newLineData3[count].y);
+			histCalData.push_back(QCPCurveData(count, newLineData3[count].x, newLineData3[count].y));
 		}
-		plot->addGraph();
-		plot->graph(2)->setName("Historical Fit");
-		plot->graph(2)->setPen(QColor("orange"));
-		plot->graph(2)->setData(histCalXdata, histCalYdata);
+		curve2->data()->set(histCalData);
+		curve2->setPen(QPen(QBrush(QColor("orange")), 1.5));
+		curve2->setName("Historical Fit");
 	}
 	else if (style == plotStyle::BinomialDataPlot || style == plotStyle::GeneralErrorPlot) {
 		if (newData.size() == 0 || !plot) {
