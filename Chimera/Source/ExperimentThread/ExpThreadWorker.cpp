@@ -729,12 +729,16 @@ bool ExpThreadWorker::handleDoCommands (std::string word, ScriptStream& stream, 
 bool ExpThreadWorker::handleAoCommands (std::string word, ScriptStream& stream,	std::vector<parameterType>& params, AoCore& ao, DoCore& ttls,
 	std::string scope, timeType& operationTime) {
 	if (word == "cao:") {
+		// zzp 10/28/2022 - I think this is not used in any of B232's code and we can deprecate this keyword
+		// for calibrated dac output, the syntax should be 
+		// dac: dac_name { dac_value cal_name }
+
 		// calibrated analog out. Right now, the code doesn't having a variable calibration setting, as this would
 		// require the calibration to... do something funny. 
 		AoCommandForm command;
 		std::string dacName, calibrationName, calibratedVal;
 		stream >> calibrationName >> dacName >> calibratedVal;
-
+		command.finalVal = calibratedVal;
 		command.finalVal.assertValid (params, scope);
 		command.time = operationTime;
 		command.commandName = "dac:";
