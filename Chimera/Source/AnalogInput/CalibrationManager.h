@@ -27,8 +27,8 @@ class CalibrationManager : public IChimeraSystem {
 
 		static void determineCalMinMax (calResult& res);
 		void handleContextMenu (const QPoint& pos);
-		static std::string calTtlConfigToString (std::vector<std::pair<unsigned, unsigned> > ttlConfig);
-		static std::string calDacConfigToString (std::vector<std::pair<unsigned, double>> aoConfig);
+		std::string calTtlConfigToString (std::vector<std::pair<unsigned, unsigned> > ttlConfig);
+		std::string calDacConfigToString (std::vector<std::pair<unsigned, double>> aoConfig);
 		void initialize (IChimeraQtWindow* parent, AiSystem* ai, AoSystem* ao, DoSystem* ttls_in,
 			std::vector<std::reference_wrapper<ArbGenCore>> arbGensIn, NewPythonHandler* python_in);
 		void runAllThreaded ();
@@ -44,7 +44,8 @@ class CalibrationManager : public IChimeraSystem {
 		void standardStartThread (std::vector<std::reference_wrapper<calSettings>> calibrations);
 		void refreshListview ();
 		static std::vector<double> calPtTextToVals (QString qtxt);
-		//static double calibrationFunction (double val, calResult calibration, IChimeraSystem* parent = nullptr);
+		// no boundary check is only used in setting the plot of the calibration, in the experiment, the boundary check should always be on
+		static double calibrationFunction (double val, calResult& calibration, IChimeraSystem* parent = nullptr, bool boundaryCheck = true);
 		
 	public:
 		const std::string systemDelim = "CALIBRATION_MANAGER";

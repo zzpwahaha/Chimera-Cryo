@@ -214,3 +214,18 @@ void AiCore::setNote(int aiNumber, std::string note)
 	aiValues[aiNumber].note = note;
 }
 
+int AiCore::getAiIdentifier(std::string name)
+{
+	std::array<std::string, 2> chnlStr = { "a","b" };
+	for (auto adcInc : range(size_t(AIGrid::total)))
+	{
+		auto dacName = str(aiValues[adcInc].name, 13, false, true);
+		// check names set by user and check standard names which are always acceptable
+		if (name == dacName || name == "adc_" + str(chnlStr[adcInc / size_t(AIGrid::numPERunit)]) 
+			+ str(adcInc % size_t(AIGrid::numPERunit)) ) {
+			return adcInc;
+		}
+	}
+	// not an identifier.
+	return -1;
+}

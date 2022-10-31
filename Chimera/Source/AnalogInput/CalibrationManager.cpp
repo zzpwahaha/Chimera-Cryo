@@ -11,6 +11,9 @@
 #include <qapplication.h>
 #include <qlayout.h>
 
+#include <qelapsedtimer.h>
+#include <qdebug.h>
+
 CalibrationManager::CalibrationManager (IChimeraQtWindow* parent) : IChimeraSystem (parent), 
 calibrationViewer(1, plotStyle::CalibrationPlot,std::vector<int>(),false,false) {}
 
@@ -23,8 +26,18 @@ void CalibrationManager::initialize (IChimeraQtWindow* parent, AiSystem* ai_in, 
 	this->setMaximumWidth(1300);
 	
 	calsHeader = new QLabel ("CALIBRATION MANAGER", parent);
-	calsHeader->setToolTip("Ctrl Pts (V)'s format is \"[initVal finVal) numVals\" where \"[\" and \")\" can be either brackets or parenthesis for inclusive "
-		"and exclusive endpoints, or it's just a list of values for arbitrary values. ");
+	calsHeader->setToolTip("Calibration Tooltips:\n"
+		"\n\t-Ctrl Pts (V)'s format is \"[initVal finVal) numVals\" where \"[\" and \")\" can be either brackets or parenthesis for inclusive "
+		"\n\t and exclusive endpoints, or it's just a list of values for arbitrary values. "
+		"\n\t-orderBSpline: order of B spline, gives a polynomial of order = orderBSpline-1. The common case of cibic B-splines is given by k = 4"
+		"\n\t-dataSize: number of data points to be fit"
+		"\n\t-nBreak:number of break points, including left and right end points"
+		"\n\t-nBasis: number of basis function in the interval = nbreak - 2 + orderBSpline"
+		"\n\t note this is the same as the number of parameter in the final linear least square fitting"
+		"\n\t when orderBSpline = 1, nBasis = nBreak-1, i.e. nBreak-1 step function fill"
+		"\n\t in each interval. When orderBSpline increase, the basis function number also increase"
+		"\n\t since the basis function is now extending over several interval and the left/right boundary will"
+		"\n\t see tails of basis function whose center point is outside the total range");
 	layout->addWidget(calsHeader, 0);
 
 	QHBoxLayout* layout1 = new QHBoxLayout(this);
@@ -96,21 +109,30 @@ void CalibrationManager::initialize (IChimeraQtWindow* parent, AiSystem* ai_in, 
 					break;
 				}
 				case 2: {
-					unsigned inputChan = boost::lexical_cast<unsigned>(str(qtxt));
-					cal.aiInChan = inputChan / size_t(AIGrid::numOFunit) + size_t(AIGrid::numPERunit) * (inputChan % size_t(AIGrid::numOFunit));
+					std::string qtxtLowercase = str(qtxt.toStdString(), 13, false, true);
+					int inputChan = ai->getCore().getAiIdentifier(qtxtLowercase);
+					if (inputChan == -1) {
+						errBox("Error in trying to set the calibration adc input channel: the input name is invalid.");
+					}
+					else {
+						cal.aiInChan = inputChan;
+					}
 					break;
 				}
-				case 3:
+				case 3: {
 					if (cal.useAg) {
 						break;
 					}
-					try {
-						cal.aoControlChannel = boost::lexical_cast<unsigned>(str (qtxt));
+					std::string qtxtLowercase = str(qtxt.toStdString(), 13, false, true);
+					int aoControlChannel = ao->getCore().getDacIdentifier(qtxtLowercase);
+					if (aoControlChannel == -1) {
+						errBox("Error in trying to set the calibration dac output control channel: the input name is invalid.");
 					}
-					catch (boost::bad_lexical_cast &) {
-						emit error ("Error Trying to set analog output channel!");
+					else {
+						cal.aoControlChannel = aoControlChannel;
 					}
 					break;
+				}
 				case 4: {
 					if (qtxt == "" || !cal.useAg) {
 						break;
@@ -137,23 +159,24 @@ void CalibrationManager::initialize (IChimeraQtWindow* parent, AiSystem* ai_in, 
 				}
 				case 6: {
 					std::stringstream tmpStream (cstr (qtxt));
-					std::string rowTxt;
+					std::string ttlTxt;
 					cal.ttlConfig.clear ();
-					std::pair<unsigned, unsigned> ttl;
-					tmpStream >> ttl.first;
-					tmpStream >> ttl.second;
-					cal.ttlConfig.push_back (ttl);
-					//while (tmpStream >> rowTxt) {
-					//	try {
-					//		std::pair<unsigned, unsigned> ttl;
-					//		ttl.first = DoRows::fromStr (rowTxt);
-					//		tmpStream >> ttl.second;
-					//		cal.ttlConfig.push_back (ttl);
-					//	}
-					//	catch (ChimeraError&) {
-					//		errBox ("Error In trying to set the calibration ttl config!");
-					//	}
-					//}
+					while (tmpStream >> ttlTxt) {
+						try {
+							std::pair<unsigned, unsigned> ttl;
+							std::string ttlTxtLowercase = str(ttlTxt, 13, false, true);
+							int res = ttls->getCore().getNameIdentifier(ttlTxtLowercase, ttl.first, ttl.second);
+							if (res == -1) {
+								errBox("Error in trying to set the calibration ttl config: the input name is invalid.");
+							}
+							else {
+								cal.ttlConfig.push_back(ttl);
+							}
+						}
+						catch (ChimeraError&) {
+							errBox ("Error In trying to set the calibration ttl config!");
+						}
+					}
 					break;
 				}
 				case 7: {
@@ -162,14 +185,17 @@ void CalibrationManager::initialize (IChimeraQtWindow* parent, AiSystem* ai_in, 
 					cal.aoConfig.clear ();
 					while (tmpStream >> dacIdTxt) {
 						try {
-							auto id = AoCore::getBasicDacIdentifier(dacIdTxt);
+							std::string dacTxtLowercase = str(dacIdTxt, 13, false, true);
+							auto id = ao->getCore().getDacIdentifier(dacTxtLowercase);
 							if (id == -1) {
-								thrower("Dac Identifier \"" + dacIdTxt + "\" failed to convert to a basic dac id!");
+								errBox("Dac Identifier \"" + dacIdTxt + "\" failed to convert to a dac id!");
 							}
-							std::pair<unsigned, double> dacSetting;
-							dacSetting.first = id;
-							tmpStream >> dacSetting.second;
-							cal.aoConfig.push_back(dacSetting);
+							else {
+								std::pair<unsigned, double> dacSetting;
+								dacSetting.first = id;
+								tmpStream >> dacSetting.second;
+								cal.aoConfig.push_back(dacSetting);
+							}
 						}
 						catch (ChimeraError&) {
 							errBox("Error In trying to set the calibration dac config!");
@@ -320,15 +346,15 @@ void CalibrationManager::handleSaveMasterConfig (std::stringstream& configStream
 void CalibrationManager::handleSaveMasterConfigIndvCal(std::stringstream& configStream, calSettings& cal) 
 {
 	configStream << "\n/*Calibration Name: */ " << cal.result.calibrationName
-		<< "\n/*Analog Input Chanel: */ " << cal.aiInChan
-		<< "\n/*Analog Output Control Chanel: */ " << cal.aoControlChannel
+		<< "\n/*Analog Input Chanel: */ " << ai->getName(cal.aiInChan)
+		<< "\n/*Analog Output Control Chanel: */ " << ao->getName(cal.aoControlChannel)
 		<< "\n/*Control Values: */ " << str(cal.ctrlPtString)
 		<< "\n/*Calibration Active: */ " << cal.active
 		<< "\n/*TTL Config Size: */ " << cal.ttlConfig.size () 
 		<< "\n/*ttl config: */ " << calTtlConfigToString (cal.ttlConfig)
 		<< "\n/*Analog Output Config Size: */ " << cal.aoConfig.size () << "\n/*Analog Output Config: */ ";
 	for (auto& dac : cal.aoConfig) {
-		configStream << dac.first << " " << dac.second << " ";
+		configStream << ao->getName(dac.first) << " " << dac.second << " ";
 	}
 	configStream << "\n/*Data Point Average Number: */ " << cal.avgNum
 		<< "\n/*Use Agilent: */" << cal.useAg
@@ -407,24 +433,38 @@ void CalibrationManager::handleOpenMasterConfigIndvResult (ConfigStream& configS
 calSettings CalibrationManager::handleOpenMasterConfigIndvCal (ConfigStream& configStream) {
 	calSettings tmpInfo;
 	try {
+		std::string configValue;
 		configStream >> tmpInfo.result.calibrationName;
-		configStream >> tmpInfo.aiInChan >> tmpInfo.aoControlChannel;
+		configStream >> configValue;
+		tmpInfo.aiInChan = ai->getCore().getAiIdentifier(configValue);
+		if (tmpInfo.aiInChan == -1) {
+			thrower("Failed to convert Analog in name: \"" + configValue + "\"");
+		}
+		configStream >> configValue;
+		tmpInfo.aoControlChannel = ao->getCore().getDacIdentifier(configValue);
+		if (tmpInfo.aoControlChannel == -1) {
+			thrower("Failed to convert Analog out control name: \"" + configValue + "\"");
+		}
 		tmpInfo.ctrlPtString = qstr (configStream.getline ());
 		configStream >> tmpInfo.active;
 		unsigned numSettings;
 		configStream >> numSettings;
 		tmpInfo.ttlConfig.resize (numSettings);
 		for (auto& ttl : tmpInfo.ttlConfig) {
-			//std::string rowStr;
-			configStream >> ttl.first >> ttl.second;
-			//ttl.first = DoRows::fromStr (rowStr);
+			configStream >> configValue;
+			int res = ttls->getCore().getNameIdentifier(configValue, ttl.first, ttl.second);
+			if (res == -1) {
+				thrower("Failed to convert TTL config name: \"" + configValue + "\"");
+			}
 		}
 		configStream >> numSettings;
 		tmpInfo.aoConfig.resize (numSettings);
-		for (auto& ao : tmpInfo.aoConfig) {
-			unsigned dacID;
-			configStream >> dacID >> ao.second;
-			ao.first = dacID;
+		for (auto& aoc : tmpInfo.aoConfig) {
+			configStream >> configValue >> aoc.second;
+			aoc.first = ao->getCore().getDacIdentifier(configValue);
+			if (aoc.first == -1) {
+				thrower("Failed to convert AO config name: \"" + configValue + "\"");
+			}
 		}
 		configStream >> tmpInfo.avgNum;
 		std::string whichAgString;
@@ -436,8 +476,8 @@ calSettings CalibrationManager::handleOpenMasterConfigIndvCal (ConfigStream& con
 		handleOpenMasterConfigIndvResult (configStream, tmpInfo.historicalResult);
 		
 	}
-	catch (ChimeraError&) {
-		throwNested ("Failed to load Calibration named " + tmpInfo.result.calibrationName + "!");
+	catch (ChimeraError& e) {
+		throwNested (e.trace() + "\nFailed to load Calibration named " + tmpInfo.result.calibrationName + "!");
 	}
 	return tmpInfo;
 }
@@ -490,11 +530,10 @@ void CalibrationManager::addCalToListview (calSettings& cal) {
 	setItemExtra (0);
 	calibrationTable->setItem (row, 1, new QTableWidgetItem (cal.ctrlPtString));
 	setItemExtra (1);
-	unsigned aichan = (cal.aiInChan % size_t(AIGrid::numPERunit)) * size_t(AIGrid::numOFunit) + cal.aiInChan / size_t(AIGrid::numPERunit);
-	calibrationTable->setItem (row, 2, new QTableWidgetItem (str(aichan, precision).c_str()));
+	calibrationTable->setItem (row, 2, new QTableWidgetItem (ai->getName(cal.aiInChan).c_str()));
 	setItemExtra (2);
 	
-	calibrationTable->setItem (row, 3, new QTableWidgetItem (cal.useAg ? "---" : qstr (cal.aoControlChannel)));
+	calibrationTable->setItem (row, 3, new QTableWidgetItem (cal.useAg ? "---" : ao->getName(cal.aoControlChannel).c_str()));
 	calibrationTable->item (row, 3)->setFlags (cal.useAg || !cal.active ?
 		calibrationTable->item (row, 3)->flags () & ~Qt::ItemIsEnabled
 		: calibrationTable->item (row, 3)->flags () | Qt::ItemIsEnabled);
@@ -525,8 +564,8 @@ void CalibrationManager::addCalToListview (calSettings& cal) {
 
 std::string CalibrationManager::calDacConfigToString (std::vector<std::pair<unsigned, double>> aoConfig) {
 	std::string aoString;
-	for (auto ao : aoConfig) {
-		aoString += "dac" + str (ao.first) + " " + str (ao.second, 4) + " ";
+	for (auto aoc : aoConfig) {
+		aoString += ao->getName(aoc.first) + " " + str (aoc.second, 4) + " ";
 	}
 	return aoString;
 }
@@ -534,7 +573,7 @@ std::string CalibrationManager::calDacConfigToString (std::vector<std::pair<unsi
 std::string CalibrationManager::calTtlConfigToString (std::vector<std::pair<unsigned, unsigned> > ttlConfig) {
 	std::string digitalOutConfigString;
 	for (auto val : ttlConfig) {
-		digitalOutConfigString += str(val.first) + " " + str (val.second) + " ";
+		digitalOutConfigString += ttls->getName(val.first, val.second) + " ";
 	}
 	return digitalOutConfigString;
 }
@@ -584,7 +623,7 @@ void CalibrationManager::standardStartThread (std::vector<std::reference_wrapper
 	connect (threadWorker, &CalibrationThreadWorker::newCalibrationDataPoint, this, [this](QPointF pt) {
 			auto* chartData = calibrationViewer.getCalData ();
 			chartData->addData(pt.x(), pt.y());
-			calibrationViewer.plot->rescaleAxes(true);
+			calibrationViewer.plot->rescaleAxes();
 			calibrationViewer.plot->replot();
 			//*chartData << pt;
 		});
@@ -603,9 +642,14 @@ void CalibrationManager::standardStartThread (std::vector<std::reference_wrapper
 }
 
 void CalibrationManager::calibrateThreaded (calSettings& cal, unsigned which) {
+	QElapsedTimer et;
+	et.start();
 	std::vector<std::reference_wrapper<calSettings>> calInput;
+	qDebug() << "before pushing back all input at " << et.elapsed();
 	calInput.push_back (cal);
+	qDebug() << "after pushing back all input at " << et.elapsed();
 	standardStartThread (calInput);
+	qDebug() << "after preparing thread" << et.elapsed();
 }
 
 void CalibrationManager::determineCalMinMax (calResult& res) {
@@ -623,6 +667,8 @@ void CalibrationManager::determineCalMinMax (calResult& res) {
 }
 
 void CalibrationManager::updateCalibrationView (calSettings& cal) {
+	QElapsedTimer et;
+	et.start();
 	std::vector<plotDataVec> plotData;
 	plotData.resize (3);
 	cal.result.ctrlVals = calPtTextToVals (cal.ctrlPtString);
@@ -635,19 +681,31 @@ void CalibrationManager::updateCalibrationView (calSettings& cal) {
 		dataPoint dp{ cal.result.ctrlVals[num] , cal.result.resVals[num] };
 		plotData[0].push_back (dp);
 	}
-	int numfitpts = 300;
-	plotData[1].resize (numfitpts);
-
+	qDebug() << "After set the first data vec at " << et.elapsed();
+	int numfitpts = 400;
+	plotData[1].clear();
+	plotData[1].reserve (numfitpts);
+	double xCtrlMin = 0.0;
+	double xCtrlMax = 0.0;
 	double runningVal= cal.result.calmin-0.5;
-	for (auto pnum : range (plotData[1].size ())) {
-		plotData[1][pnum].y = runningVal;
-		//plotData[1][pnum].x = calibrationFunction (plotData[1][pnum].y, cal.result, this);
-		plotData[1][pnum].x = cal.result.bsfit.calculateY(plotData[1][pnum].y);
+	if (!cal.result.ctrlVals.empty()) {
+		xCtrlMin = *std::min_element(cal.result.ctrlVals.begin(), cal.result.ctrlVals.end());
+		xCtrlMax = *std::max_element(cal.result.ctrlVals.begin(), cal.result.ctrlVals.end());
+	}
+	for (auto pnum : range (numfitpts)) {
+		double xCtrl = calibrationFunction(runningVal, cal.result, this, false);
+		if ((xCtrl >= xCtrlMin - 0.5) && (xCtrl <= xCtrlMax + 0.5)) {
+			plotData[1].push_back(dataPoint{ xCtrl,runningVal,0.0 });
+		}
+		//plotData[1][pnum].y = runningVal;
+		//plotData[1][pnum].x = calibrationFunction (plotData[1][pnum].y, cal.result, this, false);
+		//plotData[1][pnum].x = cal.result.bsfit.calculateY(plotData[1][pnum].y);
 		runningVal += (cal.result.calmax +1.0- cal.result.calmin) / (numfitpts - 1);
 	}
-
-	numfitpts = 30;
-	plotData[2].resize (numfitpts);
+	qDebug() << "After set the sec data vec at " << et.elapsed();
+	numfitpts = 350;
+	plotData[2].clear();
+	plotData[2].resize(numfitpts);
 	if (cal.historicalResult.calibrationName.empty() || cal.historicalResult.ctrlVals.size() == 0) {
 		// looks like there is no history calibration, then just copy the current result
 		plotData[2] = plotDataVec(plotData[1]);
@@ -657,49 +715,57 @@ void CalibrationManager::updateCalibrationView (calSettings& cal) {
 		runningVal = cal.historicalResult.calmin;
 		for (auto pnum : range(plotData[2].size())) {
 			plotData[2][pnum].y = runningVal;
-			//plotData[2][pnum].x = calibrationFunction(plotData[2][pnum].y, cal.historicalResult, this);
-			plotData[2][pnum].x = cal.result.bsfit.calculateY(plotData[2][pnum].y);
+			plotData[2][pnum].x = calibrationFunction(plotData[2][pnum].y, cal.historicalResult, this, false);
+			//plotData[2][pnum].x = cal.result.bsfit.calculateY(plotData[2][pnum].y);
 			runningVal += (cal.historicalResult.calmax - cal.historicalResult.calmin) / (numfitpts - 1);
 		}
 	}
-
+	qDebug() << "After set the third data vec at " << et.elapsed();
 	calibrationViewer.resetChart ();
 	calibrationViewer.setTitle ("Calibration View: " + cal.result.calibrationName);
 	calibrationViewer.setData (plotData);
+	qDebug() << "After set the data to plotter" << et.elapsed();
 }
 
-//double CalibrationManager::calibrationFunction (double val, calResult res, IChimeraSystem* parent) {
-//	if (val < res.calmin - 1e-6) {
-//		if (parent != nullptr) {
-//			emit parent->warning (qstr("Warning: Tried to set calibrated value below calibration range. Assuming that you want the "
-//								  "minimum value the calibration can provide."));
-//		}
-//		val = res.calmin;
-//	}
-//	if (val > res.calmax+1e-6) {
-//		thrower ("Tried to use calibration \""+ res.calibrationName + "\"above calibration range! Not Allowed! Value "
-//				 "was " + str(val) + ", Max is " + str(res.calmax));
-//	}
-//	double ctrl = 0;
-//	auto& cc = res.calibrationCoefficients;
-//	if (cc.size () != 1 + res.polynomialOrder + 2 * res.includesSqrt) {
-//		thrower ("calibration constants size doesn't match fit polynomial order!");
-//	}
-//	if (res.includesSqrt) {
-//		ctrl += cc[0] * std::pow (val + cc[1], 0.5);
-//		if (cc.size () > 2) {
-//			for (auto coefnum : range (cc.size () - 2)) {
-//				ctrl += cc[coefnum + 2] * std::pow (val, coefnum);
-//			}
-//		}
-//	}
-//	else {
-//		for (auto coefnum : range (cc.size ())) {
-//			ctrl += cc[coefnum] * std::pow (val, coefnum);
-//		}
-//	}
-//	return ctrl;
-//}
+double CalibrationManager::calibrationFunction (double val, calResult& res, IChimeraSystem* parent, bool boundaryCheck) {
+	if (boundaryCheck) {
+		if (val < res.calmin - 1e-6) {
+			if (parent != nullptr) {
+				emit parent->warning(qstr("Warning: Tried to set calibrated value" + str(val) + "below calibration range for \"" + res.calibrationName + ", min is " + str(res.calmin) + "\". Assuming that you want the "
+					"minimum value the calibration can provide."));
+			}
+			val = res.calmin;
+		}
+		if (val > res.calmax + 1e-6) {
+			thrower("Tried to use calibration \"" + res.calibrationName + "\"above calibration range! Not Allowed! Value "
+				"was " + str(val) + ", Max is " + str(res.calmax));
+		}
+	}
+
+	// note we are taking the control value as y and result value as x for the B spline fit, so that we can just get feed in result value and get the correpsonding control value
+	// then we don't need to invert the function.
+	return res.bsfit.calculateY(val);
+
+	//double ctrl = 0;
+	//auto& cc = res.calibrationCoefficients;
+	//if (cc.size () != 1 + res.polynomialOrder + 2 * res.includesSqrt) {
+	//	thrower ("calibration constants size doesn't match fit polynomial order!");
+	//}
+	//if (res.includesSqrt) {
+	//	ctrl += cc[0] * std::pow (val + cc[1], 0.5);
+	//	if (cc.size () > 2) {
+	//		for (auto coefnum : range (cc.size () - 2)) {
+	//			ctrl += cc[coefnum + 2] * std::pow (val, coefnum);
+	//		}
+	//	}
+	//}
+	//else {
+	//	for (auto coefnum : range (cc.size ())) {
+	//		ctrl += cc[coefnum] * std::pow (val, coefnum);
+	//	}
+	//}
+	//return ctrl;
+}
 
 std::vector<double> CalibrationManager::calPtTextToVals (QString qtxt) {
 	// format is " [ initVal finVal ) numVals" where "[" and ")" can be either brackets or parenthesis for inclusive

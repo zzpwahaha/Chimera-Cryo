@@ -39,7 +39,7 @@ void AiOutput::initialize(AiSystem* parent, int aiNumber)
 		catch (ChimeraError& e) { emit parent->error(e.qtrace()); }
 		updateDisplayColor();
 		});
-	setName(nameLabel->text().toStdString());
+	setName("adc_" + nameLabel->text().toStdString());
 }
 
 void AiOutput::setValueDisplay(double mean, double std)

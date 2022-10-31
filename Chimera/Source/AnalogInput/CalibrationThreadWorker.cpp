@@ -42,6 +42,7 @@ void CalibrationThreadWorker::runAll () {
 		count++;
 	}
 	input.ttls->setTtlStatus(doInitStatus);
+	Sleep(50);
 	input.ao->setDacStatus(aoInitStatus);
 	emit updateBoxColor("Gray", "AI-SYSTEM");
 }
@@ -56,7 +57,9 @@ void CalibrationThreadWorker::calibrate (calSettings& cal, unsigned which) {
 	cal.currentlyCalibrating = true;
 	//cal.result.includesSqrt = cal.includeSqrt;
 	input.ttls->zeroBoard ();
+	Sleep(50);
 	input.ao->zeroDacs ();
+	Sleep(50);
 	for (auto dac : cal.aoConfig) {
 		input.ao->setSingleDac (dac.first, dac.second);
 	}
@@ -137,10 +140,17 @@ void CalibrationThreadWorker::calibrate (calSettings& cal, unsigned which) {
 	//	result.polynomialOrder, result.includesSqrt,initP);
 	//fitWorker.solve_system();
 	//result.calibrationCoefficients = fitWorker.fittedPara();
-	result.bsfit.initialize(result.ctrlVals.size(), result.resVals, result.ctrlVals, 
-		result.orderBSpline, result.nBreak);
-	result.bsfit.solve_system();
-	result.fillCalibrationResult();
+
+	try {
+		result.bsfit.initialize(result.ctrlVals.size(), result.resVals, result.ctrlVals,
+			result.orderBSpline, result.nBreak);
+		result.bsfit.solve_system();
+		result.fillCalibrationResult();
+	}
+	catch (...) {
+		throwNested("B-Spline fitting failed, looks like the data is not valid, please calibrate it again.");
+	}
+
 	//result.includesSqrt = cal.includeSqrt;
 	//calibrationTable->repaint ();
 	cal.calibrated = true;

@@ -41,7 +41,7 @@ struct calResult : public calBase {
 			+ "\nCalibration Coefficients: " + dblVecToString(calibrationCoefficients)
 			+ "\nBSpline order: " + str(orderBSpline)
 			+ "\nBSpline number of break points: " + str(nBreak)
-			+ "\nMin/Max: " + str (calmin, 3) + "/" + str (calmax, 3);
+			+ "\nCalibration result Min/Max: " + str (calmin, 3) + "/" + str (calmax, 3);
 	}
 };
 

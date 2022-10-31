@@ -38,6 +38,7 @@ public:
 	// this name and note is not used for now, but still kept updating in case, check AiSystem::outputs::info
 	void setName(int aiNumber, std::string name);
 	void setNote(int aiNumber, std::string note);
+	int getAiIdentifier(std::string name);
 
 public:
 	const std::string configDelim{ "AI-SYSTEM" };
