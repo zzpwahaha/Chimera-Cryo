@@ -415,6 +415,9 @@ void CalibrationManager::handleOpenMasterConfigIndvResult (ConfigStream& configS
 	for (auto& val : result.resVals) {
 		configStream >> val;
 	}
+	if (!BSplineFit::isMonotonic(result.resVals)) {
+		thrower("The resVals is not monotonic. Is the result saved corrupted?");
+	}
 	determineCalMinMax (result);
 
 	if (result.ctrlVals.size() != result.resVals.size()) {

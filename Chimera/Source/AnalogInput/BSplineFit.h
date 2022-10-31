@@ -29,6 +29,8 @@ public:
 	static std::vector<double> calculateY(unsigned orderBSpline, unsigned nBreak, 
 		std::pair<double, double> xlim, std::vector<double> coef, std::vector<double> xpts);
 
+	static bool isMonotonic(const std::vector<double>& vec);
+
 private:
 
 

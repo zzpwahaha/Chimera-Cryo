@@ -4,6 +4,7 @@
 #include <gsl/gsl_linalg.h>
 #include <gsl/gsl_poly.h>
 #include <algorithm>
+#include <qdebug.h>
 
 
 BSplineFit::BSplineFit(const BSplineFit& bsfit)
@@ -34,6 +35,11 @@ BSplineFit::~BSplineFit()
 void BSplineFit::initialize(unsigned _dataSize, std::vector<double> _datax, std::vector<double> _datay,
     unsigned _orderBSpline, unsigned _nBreak)
 {
+    if (!isMonotonic(_datax)) {
+        thrower("The BSplineFit _datax is not monotonic. \r\n\t That is probably because the calibration result is used as x-value in the fitting "
+            "and this result can be corrupted (most cases are the result is all close to zero) .And for BSpline, the x-value need to be monotonic.");
+    }
+
     if (_dataSize != _datax.size() || _dataSize != _datay.size()) {
         thrower("Error in Spline fitting: the input data size is not equal to the expected one");
     }
@@ -238,4 +244,22 @@ std::vector<double> BSplineFit::calculateY(unsigned orderBSpline, unsigned nBrea
     gsl_bspline_free(bw);
 
     return std::vector<double>(tmp->data, tmp->data + tmp->size);
+}
+
+bool BSplineFit::isMonotonic(const std::vector<double>& vec)
+{
+    bool increasing = true;
+    bool decreasing = true;
+    if (vec.size() == 0) {
+        return true;
+    }
+    else {
+        for (int i = 0; i < vec.size() - 1; ++i) {
+            if (vec[i] > vec[i + 1])
+                increasing = false;
+            if (vec[i] < vec[i + 1])
+                decreasing = false;
+        }
+        return increasing || decreasing;
+    }
 }
