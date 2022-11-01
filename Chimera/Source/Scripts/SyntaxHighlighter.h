@@ -22,6 +22,7 @@ class SyntaxHighlighter : public QSyntaxHighlighter {
         void setDacNames (std::vector<std::string> dacNames);
         void setDdsNames(std::vector<std::string> ddsNames);
         void setOlNames(std::vector<std::string> olNames);
+        void setCalNames(std::vector<std::string> calNames);
     protected:
         void highlightBlock (const QString& text) override;
         
@@ -39,6 +40,7 @@ class SyntaxHighlighter : public QSyntaxHighlighter {
         QVector<HighlightingRule> doRules;
         QVector<HighlightingRule> ddsRules;
         QVector<HighlightingRule> olRules;
+        QVector<HighlightingRule> calRules;
         QVector<HighlightingRule> localParamRules;
         QVector<HighlightingRule> otherParamRules;
 

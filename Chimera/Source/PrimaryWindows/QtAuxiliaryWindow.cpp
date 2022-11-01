@@ -233,6 +233,16 @@ std::array<std::string, size_t(OLGrid::total)> QtAuxiliaryWindow::getOlNames()
 	return names;
 }
 
+std::vector<std::string> QtAuxiliaryWindow::getCalNames()
+{
+	auto calibrations = calManager.getCalibrationInfo();
+	std::vector<std::string> names;
+	for (auto& cal : calibrations) {
+		names.push_back(cal.calibrationName);
+	}
+	return names;
+}
+
 std::vector<parameterType> QtAuxiliaryWindow::getAllParams (){
 	std::vector<parameterType> vars = configParamCtrl.getAllParams ();
 	std::vector<parameterType> vars2 = globalParamCtrl.getAllParams ();

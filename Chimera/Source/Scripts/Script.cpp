@@ -82,6 +82,7 @@ void Script::initialize(IChimeraQtWindow* parent, std::string deviceTypeInput, s
 							"-      pulseon: [ttlName] [pulseLength]\n"
 							"-      pulseoff: [ttlName] [pulseLength]\n"
 							"-      dac: [dacName] [voltage]\n"
+							"-      dac: [dacName] {[calibratedValue] [calibrationName]}\n"
 							"-      dacramp: [dacName] [initValue] [finalValue] [rampTime]\n"
 							"-      dacarange: [dacName] [initValue] [finalValue] [rampTime] [rampInc]\n"
 							"-      daclinspace: [dacName] [initValue] [finalValue] [rampTime] [numberOfSteps]\n"

@@ -36,6 +36,7 @@ SyntaxHighlighter::SyntaxHighlighter (ScriptableDevice device, QTextDocument* pa
 		addRules ({ "call", "def" }, QColor (38, 139, 210), true, true);
 		addRules ({ "t" }, QColor (0, 0, 0), true, true);
 		addRules ({ ":" }, QColor (0, 0, 0), false, false);
+		addRules ({ "{", "}" }, QColor(181, 137, 0), true, true);
 		addRules ({ "sin","cos","tan","exp","ln","var" }, QColor (42, 161, 152), true, true);
 	}
 	else if (device == ScriptableDevice::ArbGen) {
@@ -108,6 +109,17 @@ void SyntaxHighlighter::setOlNames(std::vector<std::string> olNames)
 	addRules(olNamesRegex, QColor(47, 193, 225), false, true, olRules);
 }
 
+void SyntaxHighlighter::setCalNames(std::vector<std::string> calNames)
+{
+	QVector<QString> calNamesRegex;
+	for (auto olInc : range(calNames.size()))
+	{
+		calNamesRegex.push_back(cstr(calNames[olInc]));
+	}
+	calRules.clear();
+	addRules(calNamesRegex, QColor(0, 101, 253), false, true, calRules);
+}
+
 
 
 void SyntaxHighlighter::addRules (QVector<QString> regexStrings, QColor color, bool bold, bool addWordReq) {
@@ -174,6 +186,13 @@ void SyntaxHighlighter::highlightBlock (const QString& text){
 		}
 	}
 	for (const HighlightingRule& rule : qAsConst(olRules)) {
+		auto matchIterator = rule.pattern.globalMatch(text);
+		while (matchIterator.hasNext()) {
+			auto match = matchIterator.next();
+			setFormat(match.capturedStart(), match.capturedLength(), rule.format);
+		}
+	}
+	for (const HighlightingRule& rule : qAsConst(calRules)) {
 		auto matchIterator = rule.pattern.globalMatch(text);
 		while (matchIterator.hasNext()) {
 			auto match = matchIterator.next();

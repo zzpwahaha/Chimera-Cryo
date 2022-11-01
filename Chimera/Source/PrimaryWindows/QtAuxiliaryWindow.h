@@ -64,6 +64,7 @@ class QtAuxiliaryWindow : public IChimeraQtWindow{
 		std::array<std::string, size_t(AOGrid::total)> getDacNames();
 		std::array<std::string, size_t(DDSGrid::total)> getDdsNames();
 		std::array<std::string, size_t(OLGrid::total)> getOlNames();
+		std::vector<std::string> getCalNames();
 
 		DoSystem& getTtlSystem();
 		DoCore& getTtlCore();
