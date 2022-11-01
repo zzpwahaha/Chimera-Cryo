@@ -6,7 +6,8 @@
 #include <qcheckbox.h>
 #include <QComboBox.h>
 #include <qradiobutton.h>
-#include <PrimaryWindows/IChimeraQtWindow.h>
+
+class IChimeraQtWindow;
 
 class CQLineEdit : public QLineEdit 
 {

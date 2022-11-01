@@ -3,13 +3,14 @@
 #include "GeneralObjects/IChimeraSystem.h"
 #include "ConfigurationSystems/Version.h"
 #include "ConfigurationSystems/ConfigStream.h"
-#include "PrimaryWindows/IChimeraQtWindow.h"
 #include <QLabel.h>
 #include <qcheckbox.h>
 #include <array>
 #include "MakoCameraCore.h"
 #include "ImageCalculatingThread.h"
 #include <GeneralImaging/PictureViewer.h>
+
+class IChimeraQtWindow;
 
 class MakoCamera : public IChimeraSystem 
 {

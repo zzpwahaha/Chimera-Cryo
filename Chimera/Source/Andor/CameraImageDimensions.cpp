@@ -1,7 +1,7 @@
 // created by Mark O. Brown
 #include "stdafx.h"
 #include "CameraImageDimensions.h"
-#include "PrimaryWindows/QtAndorWindow.h"
+#include "PrimaryWindows/IChimeraQtWindow.h"
 #include "PrimaryWindows/QtMainWindow.h"
 #include "AndorCameraSettingsControl.h"
 #include <PrimaryWindows/QtAndorWindow.h>

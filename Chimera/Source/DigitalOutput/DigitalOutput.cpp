@@ -1,5 +1,7 @@
 ﻿#include "stdafx.h"
 #include "DigitalOutput.h"
+#include "PrimaryWindows/IChimeraQtWindow.h"
+
 
 
 void DigitalOutput::updateStatus ( ){ // function name should probably be changed, updating check display only here

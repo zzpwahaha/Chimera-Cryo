@@ -52,7 +52,7 @@ class QtAndorWindow : public IChimeraQtWindow{
 		dataPoint getMainAnalysisResult ();
 		void checkCameraIdle ();
 		//void handleEmGainChange ();
-		void fillMasterThreadInput (ExperimentThreadInput* input);
+		void fillMasterThreadInput (ExperimentThreadInput* input) override;
 		DataLogger& getLogger ();
 		std::string getSystemStatusString ();
 		void windowSaveConfig (ConfigStream& saveFile);

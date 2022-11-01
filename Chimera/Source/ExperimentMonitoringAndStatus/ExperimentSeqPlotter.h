@@ -1,6 +1,6 @@
 #pragma once
-#include <ExperimentThread/ExpThreadWorker.h>
-
+#include <Plotting/PlotInfo.h>
+#include <qobject.h>
 class IChimeraQtWindow;
 class QCustomPlotCtrl;
 

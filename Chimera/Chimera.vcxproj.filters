@@ -1033,6 +1033,9 @@
     <ClInclude Include="Source\ExperimentThread\ExpRuntimeData.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Plotting\PlotInfo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="Source\ExperimentMonitoringAndStatus\StatusControlOptionDlg.ui">

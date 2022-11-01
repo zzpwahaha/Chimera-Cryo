@@ -2,7 +2,9 @@
 
 #include "AoStructures.h"
 #include "AnalogOutput.h"
-#include "Plotting/PlotCtrl.h"
+#include <Plotting/PlotInfo.h>
+#include <AnalogInput/calInfo.h>
+#include <ParameterSystem/ParameterSystemStructures.h>
 //#include "ParameterSystem/ParameterSystem.h"
 //#include "ConfigurationSystems/Version.h"
 #include "ZynqTCP/ZynqTCP.h"
@@ -11,7 +13,7 @@
 #include <vector>
 #include <array>
 
-
+class ExpThreadWorker;
 
 class AoCore
 {

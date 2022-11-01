@@ -1,8 +1,5 @@
 #pragma once
 #include "Plotting/dataPoint.h"
-#include <QLineSeries>
-
-#include "PrimaryWindows/IChimeraQtWindow.h"
 #include <qchart.h>
 #include <qchartview.h>
 #include <qlineseries.h>
@@ -14,9 +11,11 @@
 #include <vector>
 #include <string>
 #include <memory>
-#include <plotting/PlotCtrl.h>
+#include <plotting/PlotInfo.h>
+#include <AnalogInput/calInfo.h>
 
-typedef std::vector<dataPoint> plotDataVec;
+//typedef std::vector<dataPoint> plotDataVec;
+class IChimeraQtWindow;
 
 /*
 * This is a custom object that I use for plotting. All of the drawing is done manually by standard win32 / MFC

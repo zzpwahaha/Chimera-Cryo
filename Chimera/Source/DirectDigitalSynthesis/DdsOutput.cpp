@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "DdsOutput.h"
-
+#include "PrimaryWindows/IChimeraQtWindow.h"
 #include "boost\lexical_cast.hpp"
 #include <QlineEdit>
 #include <QKeyEvent>

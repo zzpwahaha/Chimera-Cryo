@@ -2,6 +2,7 @@
 
 #include "stdafx.h"
 #include "MainOptionsControl.h"
+#include <PrimaryWindows/IChimeraQtWindow.h>
 #include "ConfigurationSystems/ConfigSystem.h"
 #include "PrimaryWindows/QtMainWindow.h"
 #include <boost/lexical_cast.hpp>

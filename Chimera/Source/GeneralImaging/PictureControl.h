@@ -2,7 +2,6 @@
 #pragma once
 #include "GeneralImaging/imageParameters.h"
 #include "RealTimeDataAnalysis/atomGrid.h"
-#include "Plotting/PlotCtrl.h"
 #include <Plotting/QCustomPlotCtrl.h>
 //#include "CustomQtControls/LongQSlider.h"
 #include <CustomQtControls/RangeSlider.h>
@@ -17,7 +16,7 @@
  * picture. Unlike many classes in my program, this is /not/ built to be a singleton. Instead, there should be one 
  * such control for every picture that needs to be displayed on the screen at a given time. 
  */
-; 
+class IChimeraQtWindow;
 namespace Ui {
 	class PictureControl;
 }

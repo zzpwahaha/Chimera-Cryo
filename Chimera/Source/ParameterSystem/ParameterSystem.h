@@ -10,11 +10,11 @@
 #include <vector>
 #include <string>
 #include <unordered_map>
-#include "PrimaryWindows/IChimeraQtWindow.h"
 #include <GeneralObjects/IChimeraSystem.h>
 #include <qtablewidget.h>
 #include <qlabel.h>
 
+class IChimeraQtWindow;
 class MainWindow;
 class AuxiliaryWindow;
 class Script;

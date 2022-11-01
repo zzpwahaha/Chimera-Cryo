@@ -4,12 +4,12 @@
 #include "ConfigurationSystems/ConfigStream.h"
 #include "GeneralObjects/commonTypes.h"
 #include "debugInfo.h"
-#include "PrimaryWindows/IChimeraQtWindow.h"
 #include <QCheckBox>
 #include <QLabel>
 #include <QLineEdit>
 
 class MainWindow;
+class IChimeraQtWindow;
 
 class DebugOptionsControl : public QWidget
 {

@@ -3,7 +3,7 @@
 #include "GeneralUtilityFunctions/miscCommonFunctions.h"
 #include "DigitalOutput/DoStructures.h"
 #include "ParameterSystem/Expression.h"
-#include "Plotting/PlotCtrl.h"
+#include "Plotting/PlotInfo.h"
 #include "GeneralFlumes/ftdiStructures.h"
 #include "ConfigurationSystems/Version.h"
 #include "ConfigurationSystems/ConfigStream.h"
@@ -16,12 +16,12 @@
 #include <array>
 #include <sstream>
 #include <unordered_map>
-#include "PrimaryWindows/IChimeraQtWindow.h"
 #include <qlabel.h>
 #include <qpushbutton.h>
 #include <GeneralObjects/IChimeraSystem.h>
 
 /**/
+class IChimeraQtWindow;
 class AuxiliaryWindow;
 
 class DoSystem : public IChimeraSystem

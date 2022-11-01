@@ -9,7 +9,6 @@
 #include "ParameterSystem/ParameterSystem.h"
 #include "ConfigurationSystems/Version.h"
 #include <CustomQtControls/AutoNotifyCtrls.h>
-#include <PrimaryWindows/IChimeraQtWindow.h>
 #include <ArbGen/ArbGenCore.h>
 #include <Python/NewPythonHandler.h>
 #include <type_traits>
@@ -17,6 +16,7 @@
 #include <QTableWidget>
 #include <QPushButton>
 
+class IChimeraQtWindow;
 
 class CalibrationManager : public IChimeraSystem {
 	public:
@@ -46,6 +46,7 @@ class CalibrationManager : public IChimeraSystem {
 		static std::vector<double> calPtTextToVals (QString qtxt);
 		// no boundary check is only used in setting the plot of the calibration, in the experiment, the boundary check should always be on
 		static double calibrationFunction (double val, calResult& calibration, IChimeraSystem* parent = nullptr, bool boundaryCheck = true);
+
 		
 	public:
 		const std::string systemDelim = "CALIBRATION_MANAGER";

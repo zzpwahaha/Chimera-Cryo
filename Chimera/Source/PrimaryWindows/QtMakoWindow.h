@@ -20,6 +20,7 @@ public:
     void windowOpenConfig(ConfigStream& configFile);
     void windowSaveConfig(ConfigStream& newFile);
     void fillExpDeviceList(DeviceList& list);
+    void fillMasterThreadInput(ExperimentThreadInput* input) override {};
     std::string getSystemStatusString();
     MakoCamera* getMakoCam(int idx) { return &cam[idx]; }
 public slots: //will this work without qslot? NO zzp 2021/06/01

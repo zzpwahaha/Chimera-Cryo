@@ -117,15 +117,15 @@ void QtAuxiliaryWindow::initializeWidgets (){
 	}
 }
 
-void QtAuxiliaryWindow::handleDoAoPlotData (const std::vector<std::vector<plotDataVec>>& doData,
-											const std::vector<std::vector<plotDataVec>>& aoData){
-	for (auto ttlPlotNum: range(ttlPlots.size())){
-		ttlPlots[ttlPlotNum]->setData (doData[ttlPlotNum]);
-	}
-	for (auto aoPlotNum : range (aoPlots.size ())) {
-		aoPlots[aoPlotNum]->setData (aoData[aoPlotNum]);
-	}
-}
+//void QtAuxiliaryWindow::handleDoAoPlotData (const std::vector<std::vector<plotDataVec>>& doData,
+//											const std::vector<std::vector<plotDataVec>>& aoData){
+//	for (auto ttlPlotNum: range(ttlPlots.size())){
+//		ttlPlots[ttlPlotNum]->setData (doData[ttlPlotNum]);
+//	}
+//	for (auto aoPlotNum : range (aoPlots.size ())) {
+//		aoPlots[aoPlotNum]->setData (aoData[aoPlotNum]);
+//	}
+//}
 
 std::vector<parameterType> QtAuxiliaryWindow::getUsableConstants (){
 	// This generates a usable set of constants (mostly for "Program Now" commands") based on the current GUI settings.

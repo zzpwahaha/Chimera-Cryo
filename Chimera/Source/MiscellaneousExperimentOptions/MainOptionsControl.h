@@ -7,7 +7,8 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QCheckBox>
-#include <PrimaryWindows/IChimeraQtWindow.h>
+
+class IChimeraQtWindow;
 
 struct mainOptions{
 	bool dontActuallyGenerate=false;

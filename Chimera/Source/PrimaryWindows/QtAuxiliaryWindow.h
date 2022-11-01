@@ -76,7 +76,7 @@ class QtAuxiliaryWindow : public IChimeraQtWindow{
 
 		std::string getVisaDeviceStatus ();
 
-		void fillMasterThreadInput (ExperimentThreadInput* input);
+		void fillMasterThreadInput(ExperimentThreadInput* input) override;
 		void SetDacs ();
 		void SetDds();
 		void SetOls();
@@ -129,14 +129,14 @@ class QtAuxiliaryWindow : public IChimeraQtWindow{
 		OlSettingsDialog* OLdialog;
 		AiSettingsDialog* AIdialog;
 
-		std::vector<PlotCtrl*> aoPlots;
-		std::vector<PlotCtrl*> ttlPlots;
+		//std::vector<PlotCtrl*> aoPlots;
+		//std::vector<PlotCtrl*> ttlPlots;
 		unsigned NUM_DAC_PLTS = 3;
 		unsigned NUM_TTL_PLTS = 4;
 
 	public Q_SLOTS:
-		void handleDoAoPlotData (const std::vector<std::vector<plotDataVec>>& doData,
-							     const std::vector<std::vector<plotDataVec>>& aoData);
+		//void handleDoAoPlotData (const std::vector<std::vector<plotDataVec>>& doData,
+		//					     const std::vector<std::vector<plotDataVec>>& aoData);
 		void updateExpActiveInfo (std::vector<parameterType> expParams);
 };
 

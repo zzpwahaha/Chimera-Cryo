@@ -4,6 +4,7 @@
 #include "ConfigurationSystems/ConfigStream.h"
 #include "ConfigurationSystems/Version.h"
 #include "ExperimentThread/DeviceList.h"
+#include <ExperimentThread/ExperimentThreadInput.h>
 #include <array>
 #include <QMainWindow>
 
@@ -32,6 +33,7 @@ class IChimeraQtWindow : public QMainWindow{
 		// so every window must have a function to add them.
 		virtual void fillExpDeviceList (DeviceList& list) = 0;
 		virtual void initializeWidgets () = 0;
+		virtual void fillMasterThreadInput(ExperimentThreadInput* input) = 0;
 		void initializeShortcuts ();
 		void initializeMenu ();
 		void loadFriends (QtMainWindow* mainWin_, QtScriptWindow* scriptWin_, QtAuxiliaryWindow* auxWin_,

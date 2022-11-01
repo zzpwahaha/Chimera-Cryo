@@ -1,6 +1,7 @@
 ﻿// created by Mark O. Brown
 #include "stdafx.h"
 #include "PlotCtrl.h"
+#include "PrimaryWindows/IChimeraQtWindow.h"
 #include <numeric>
 #include <qgraphicslayout.h>
 #include <qdebug.h>

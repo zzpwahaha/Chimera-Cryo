@@ -20,6 +20,7 @@ public:
 	void windowSaveConfig(ConfigStream& configFile) override;
 	void fillExpDeviceList(DeviceList& list) override;
 	void initializeWidgets() override;
+	void fillMasterThreadInput(ExperimentThreadInput* input) override {};
 	//MOTAnalysisControl
 
 public slots:

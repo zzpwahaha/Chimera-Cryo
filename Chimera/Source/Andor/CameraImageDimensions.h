@@ -5,7 +5,6 @@
 #include "ConfigurationSystems/Version.h"
 #include "ConfigurationSystems/ConfigStream.h"
 #include "GeneralImaging/imageParameters.h"
-#include "PrimaryWindows/IChimeraQtWindow.h"
 #include <qlabel.h>
 #include <qlineedit.h>
 #include <CustomQtControls/AutoNotifyCtrls.h>
@@ -14,6 +13,7 @@
 struct cameraPositions;
 class AndorWindow;
 class MainWindow;
+class IChimeraQtWindow;
 
 
 class ImageDimsControl : public QWidget

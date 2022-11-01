@@ -200,6 +200,7 @@
     <ClInclude Include="Source\GigaMOOG\MessagePrinter.h" />
     <ClInclude Include="Source\GigaMOOG\MessageSender.h" />
     <ClInclude Include="Source\GigaMOOG\Messagetypes.h" />
+    <ClInclude Include="Source\Plotting\PlotInfo.h" />
     <ClInclude Include="Source\RealTimeMOTAnalysis\MOTAnalysisSystem.h" />
     <ClInclude Include="Source\RealTimeMOTAnalysis\MOTAnalysisControl.h" />
     <QtMoc Include="Source\RealTimeMOTAnalysis\MOTAnalysisThreadWoker.h" />

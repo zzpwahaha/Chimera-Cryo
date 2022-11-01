@@ -1,10 +1,10 @@
 ﻿// created by Mark O. Brown
 #pragma once
 
-#include "Plotting/dataPoint.h"
+#include <Plotting/PlotInfo.h>
+#include <AnalogInput/calInfo.h>
 #include <QLineSeries>
 
-#include "PrimaryWindows/IChimeraQtWindow.h"
 #include <qchart.h>
 #include <qchartview.h>
 #include <qlineseries.h>
@@ -15,31 +15,7 @@
 #include <vector>
 #include <memory>
 
-enum class plotStyle {
-	PicturePlot,
-	DensityPlot,
-	DensityPlotWithHisto,
-	// ttl and dac plot use steps.
-	TtlPlot,
-	DacPlot,
-	// uses circs and error bars to represent data and errors
-	BinomialDataPlot,
-	GeneralErrorPlot,
-	CalibrationPlot,
-	// uses bars for histograms
-	HistPlot,
-	VertHist,
-	// 
-	OscilloscopePlot
-};
-
-
-typedef std::vector<dataPoint> plotDataVec; 
-Q_DECLARE_METATYPE (std::vector<std::vector<plotDataVec>>)
-
-struct plotMinMax { 
-	double min_x, min_y, max_x, max_y;
-};
+class IChimeraQtWindow;
 
 /*
 * This is a custom object that I use for plotting. 

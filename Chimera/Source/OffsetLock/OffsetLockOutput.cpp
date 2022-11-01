@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "OffsetLockOutput.h"
-
+#include "PrimaryWindows/IChimeraQtWindow.h"
 #include <QlineEdit>
 #include <QKeyEvent>
 

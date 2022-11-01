@@ -4,8 +4,9 @@
 #include "AoStructures.h"
 #include <CustomQtControls/AutoNotifyCtrls.h>
 #include <qlabel.h>
-#include "PrimaryWindows/IChimeraQtWindow.h"
 #include <qlayout.h>
+
+class IChimeraQtWindow;
 
 class AnalogOutput
 {

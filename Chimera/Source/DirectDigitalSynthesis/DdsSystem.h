@@ -16,15 +16,15 @@
 #include <array>
 #include <string>
 #include <unordered_map>
-#include "PrimaryWindows/IChimeraQtWindow.h"
 #include <qlabel.h>
 #include <qtablewidget.h>
 #include <qpushbutton.h>
 #include <CustomQtControls/AutoNotifyCtrls.h>
-#include <PrimaryWindows/IChimeraQtWindow.h>
 #include <GeneralObjects/IChimeraSystem.h>
 
 #include "ZynqTCP/ZynqTCP.h"
+
+class IChimeraQtWindow;
 
 class DdsSystem : public IChimeraSystem{	
 	Q_OBJECT

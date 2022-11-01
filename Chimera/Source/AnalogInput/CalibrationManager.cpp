@@ -7,6 +7,7 @@
 #include <QMenu>
 #include <qcombobox.h>
 #include "GeneralObjects/ChimeraStyleSheets.h"
+#include <PrimaryWindows/IChimeraQtWindow.h>
 #include <PrimaryWindows/QtMainWindow.h>
 #include <qapplication.h>
 #include <qlayout.h>

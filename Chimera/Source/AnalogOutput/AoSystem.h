@@ -11,7 +11,6 @@
 #include "AnalogOutput/AoCore.h"
 #include <GeneralObjects/IChimeraSystem.h>
 #include "ConfigurationSystems/Version.h"
-#include "PrimaryWindows/IChimeraQtWindow.h"
 #include "ZynqTCP/ZynqTCP.h"
 
 #include "qlabel.h"
@@ -20,6 +19,7 @@
 #include <qlineedit.h>
 
 class MainWindow;
+class IChimeraQtWindow;
 
 /**
  * AIO in the name stands for Analog In and Out, or measuring analog signals and producing analog signals.

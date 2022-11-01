@@ -3,6 +3,7 @@
 #include "ParameterSystem.h"
 #include "Scripts/Script.h"
 #include "DigitalOutput/DoSystem.h"
+#include "PrimaryWindows/IChimeraQtWindow.h"
 #include <PrimaryWindows/QtScriptWindow.h>
 #include "GeneralObjects/multiDimensionalKey.h"
 #include "GeneralUtilityFunctions/cleanString.h"

@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "ExperimentSeqPlotter.h"
+#include <ExperimentThread/ExpThreadWorker.h>
 #include <PrimaryWindows/IChimeraQtWindow.h>
 #include <PrimaryWindows/QtAuxiliaryWindow.h>
 #include <Plotting/QCustomPlotCtrl.h>

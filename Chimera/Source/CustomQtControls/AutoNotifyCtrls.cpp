@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "AutoNotifyCtrls.h"
+#include <PrimaryWindows/IChimeraQtWindow.h>
 #include <QButtonGroup.h>
 ///
 CQLineEdit::CQLineEdit (IChimeraQtWindow* parent) : QLineEdit (parent){

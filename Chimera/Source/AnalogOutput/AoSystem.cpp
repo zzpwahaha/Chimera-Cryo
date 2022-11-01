@@ -1,6 +1,7 @@
 // created by Mark O. Brown
 #include "stdafx.h"
 #include "AnalogOutput/AoSystem.h"
+#include "PrimaryWindows/IChimeraQtWindow.h"
 #include "PrimaryWindows/QtAuxiliaryWindow.h"
 #include "PrimaryWindows/QtMainWindow.h"
 #include "ConfigurationSystems/Version.h"

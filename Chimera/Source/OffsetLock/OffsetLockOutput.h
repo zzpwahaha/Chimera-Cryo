@@ -1,10 +1,11 @@
 #pragma once
 
 #include "OlStructure.h"
-#include "PrimaryWindows/IChimeraQtWindow.h"
 #include "CustomQtControls/AutoNotifyCtrls.h"
 #include <qlabel.h>
 #include <qlayout.h>
+
+class IChimeraQtWindow;
 
 class OffsetLockOutput
 {

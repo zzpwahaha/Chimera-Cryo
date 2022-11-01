@@ -13,7 +13,7 @@
 #include <PrimaryWindows/IChimeraQtWindow.h>
 #include <ArbGen/ArbGenCore.h>
 #include <Python/NewPythonHandler.h>
-#include <Plotting/PlotCtrl.h>
+#include <Plotting/PlotInfo.h>
 
 
 CalibrationThreadWorker::CalibrationThreadWorker (CalibrationThreadInput input_) {

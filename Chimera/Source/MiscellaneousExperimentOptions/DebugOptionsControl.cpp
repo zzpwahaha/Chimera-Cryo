@@ -1,6 +1,7 @@
 // created by Mark O. Brown
 #include "stdafx.h"
 #include "DebugOptionsControl.h"
+#include "PrimaryWindows/IChimeraQtWindow.h"
 #include "ConfigurationSystems/ConfigSystem.h"
 #include <boost/lexical_cast.hpp>
 #include <qlayout.h>

@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "MakoCamera.h"
+#include "PrimaryWindows/IChimeraQtWindow.h"
 #include <PrimaryWindows/QtAndorWindow.h>
 #include <PrimaryWindows/QtMakoWindow.h>
 #include <qdialog.h>

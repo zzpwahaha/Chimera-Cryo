@@ -1,14 +1,15 @@
 #pragma once
-#include "GeneralFlumes/ftdiFlume.h"
-#include "GeneralFlumes/ftdiStructures.h"
+//#include "GeneralFlumes/ftdiFlume.h"
+//#include "GeneralFlumes/ftdiStructures.h"
+#include <ParameterSystem/ParameterSystemStructures.h>
 #include "GeneralObjects/ExpWrap.h"
 #include <GeneralObjects/Matrix.h>
-#include "Plotting/PlotCtrl.h"
+#include <Plotting/PlotInfo.h>
 
 #include "DoStructures.h"
 #include "ZynqTCP/ZynqTCP.h"
 
-
+class ExpThreadWorker;
 
 /*
 	(Stands for DigitalOutput Core)

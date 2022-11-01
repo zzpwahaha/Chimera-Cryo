@@ -1,9 +1,10 @@
 ﻿#pragma once
-#include "Control.h"
+//#include "Control.h"
 #include <array>
 #include "DoStructures.h"
-#include "PrimaryWindows/IChimeraQtWindow.h"
 #include <CustomQtControls/AutoNotifyCtrls.h>
+
+class IChimeraQtWindow;
 
 class DigitalOutput
 {

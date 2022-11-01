@@ -4,9 +4,10 @@
 #include "DdsSystemStructures.h"
 #include <CustomQtControls/AutoNotifyCtrls.h>
 #include <qlabel.h>
-#include "PrimaryWindows/IChimeraQtWindow.h"
 #include <qlayout.h>
 #include <utility>
+
+class IChimeraQtWindow;
 
 class DdsOutput
 {

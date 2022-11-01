@@ -1,7 +1,6 @@
 // created by Mark O. Brown
 #pragma once
 #include "CameraImageDimensions.h"
-
 #include "AndorRunSettings.h"
 #include "AndorFlume.h"
 #include "GeneralObjects/Matrix.h"
@@ -9,6 +8,7 @@
 #include "AndorTemperatureStatus.h"
 #include <RealTimeDataAnalysis/analysisSettings.h>
 #include <Andor/cameraThreadInput.h>
+#include <GeneralObjects/commonTypes.h>
 #include "ATMCD32D.h"
 #include "atcore.h" 
 #include <string>

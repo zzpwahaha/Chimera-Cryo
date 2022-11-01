@@ -1,6 +1,7 @@
 ﻿// created by Mark O. Brown
 #include "stdafx.h"
 #include "AnalogOutput.h"
+#include "PrimaryWindows/IChimeraQtWindow.h"
 #include "boost\lexical_cast.hpp"
 #include <QlineEdit>
 #include <QKeyEvent>

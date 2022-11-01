@@ -1,6 +1,7 @@
 ﻿// created by Mark O. Brown
 #include "stdafx.h"
 #include "PictureControl.h"
+#include <PrimaryWindows/IChimeraQtWindow.h>
 #include <algorithm>
 #include <numeric>
 #include <boost/lexical_cast.hpp>

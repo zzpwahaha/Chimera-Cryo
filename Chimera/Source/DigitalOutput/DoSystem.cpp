@@ -5,6 +5,7 @@
 
 #include "ConfigurationSystems/Version.h"
 #include "LowLevel/constants.h"
+#include "PrimaryWindows/IChimeraQtWindow.h"
 #include "PrimaryWindows/QtAuxiliaryWindow.h"
 #include "GeneralUtilityFunctions/range.h"
 #include "ConfigurationSystems/Version.h"

@@ -1,12 +1,13 @@
 // created by Mark O. Brown
 #include "stdafx.h"
 #include "QCustomPlotCtrl.h"
+#include "PrimaryWindows/IChimeraQtWindow.h"
+#include <AnalogInput/CalibrationManager.h>
 #include <numeric>
 #include <qgraphicslayout.h>
 #include <qdebug.h>
 #include <qmenu.h>
 #include <qdialogbuttonbox.h>
-#include <AnalogInput/CalibrationManager.h>
 #include <qsizepolicy.h>
 
 QCustomPlotCtrl::QCustomPlotCtrl() :

@@ -48,7 +48,7 @@ class QtMainWindow : public IChimeraQtWindow{
 		DeviceList getDevices ();
 		// auxiliary functions used by the window.
 		void setNotes (std::string notes);
-		void fillMasterThreadInput (ExperimentThreadInput* input);
+		void fillMasterThreadInput (ExperimentThreadInput* input) override;
 		void fillMotInput (ExperimentThreadInput* input);
 
 		void startExperimentThread (ExperimentThreadInput* input);

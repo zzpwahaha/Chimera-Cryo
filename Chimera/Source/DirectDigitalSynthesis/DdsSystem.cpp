@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "ftd2xx.h"
 #include "DirectDigitalSynthesis/DdsSystem.h"
+#include <PrimaryWindows/IChimeraQtWindow.h>
 #include "PrimaryWindows/QtAuxiliaryWindow.h"
 #include "GeneralObjects/multiDimensionalKey.h"
 #include <ParameterSystem/Expression.h>
