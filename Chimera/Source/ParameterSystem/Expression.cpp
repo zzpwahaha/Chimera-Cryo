@@ -3,7 +3,7 @@
 #include "Expression.h"
 #include "ConfigurationSystems/ConfigStream.h"
 #include "GeneralUtilityFunctions/my_str.h"
-
+#include <AnalogInput/CalibrationManager.h>
 #include <boost/tokenizer.hpp>
 #include <boost/lexical_cast.hpp>
 #include <iomanip>
@@ -425,7 +425,7 @@ double Expression::handleCalibration (double val, std::vector<calResult> calibra
 	}
 	else {
 		calResult cal;
-		for (auto calTest : calibrations) {
+		for (auto& calTest : calibrations) {
 			if (calTest.calibrationName == calName) {
 				cal = calTest;
 				break;
@@ -435,7 +435,7 @@ double Expression::handleCalibration (double val, std::vector<calResult> calibra
 			thrower ("Expression needed calibration \"" + calName + "\" but didn't find it in the calibrations list given"
 				" to the evaluation function!");
 		}
-		return val;// CalibrationManager::calibrationFunction (val, cal);
+		return CalibrationManager::calibrationFunction (val, cal);
 	}
 }
 

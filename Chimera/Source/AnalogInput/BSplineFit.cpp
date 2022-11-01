@@ -20,6 +20,16 @@ BSplineFit::BSplineFit(const BSplineFit& bsfit)
     
 }
 
+BSplineFit& BSplineFit::operator=(const BSplineFit& bsfit)
+{
+    emptyStart = bsfit.emptyStart;
+    if (!emptyStart) {
+        initialize(bsfit.dataSize, bsfit.datax, bsfit.datay, bsfit.orderBSpline, bsfit.nBreak);
+        solve_system();
+    }
+    return *this;
+}
+
 BSplineFit::BSplineFit() : emptyStart(true)
 {
 }

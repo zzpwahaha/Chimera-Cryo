@@ -9,7 +9,8 @@
 class BSplineFit
 {
 public:
-	BSplineFit(const BSplineFit&);
+	BSplineFit(const BSplineFit& bsfit);
+	BSplineFit& operator=(const BSplineFit& bsfit);
 	BSplineFit();
 	~BSplineFit();
 	void initialize(unsigned dataSize, std::vector<double> datax, std::vector<double> datay,
