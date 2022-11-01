@@ -337,6 +337,7 @@ DoCore& QtAuxiliaryWindow::getTtlCore (){
 void QtAuxiliaryWindow::fillMasterThreadInput (ExperimentThreadInput* input){
 	try	{
 		input->globalParameters = globalParamCtrl.getAllParams ();
+		input->calibrations = calManager.getCalibrationInfo();
 	}
 	catch (ChimeraError&) {
 		throwNested ("Auxiliary window failed to fill master thread input.");
