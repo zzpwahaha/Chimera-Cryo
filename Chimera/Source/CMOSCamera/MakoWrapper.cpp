@@ -3,6 +3,21 @@
 #include <CMOSCamera/Helper.h>
 #include <qendian.h>
 
+void CameraObserver::CameraListChanged(AVT::VmbAPI::CameraPtr pCam, AVT::VmbAPI::UpdateTriggerType reason)
+{
+    VmbErrorType  error;
+    std::string sModel, sSN, sID, camName;
+    error = pCam->GetModel(sModel);
+    error = pCam->GetSerialNumber(sSN);
+    error = pCam->GetID(sID);
+    camName = sModel + "-" + sSN + "(" + sID + ")";
+
+    if (UpdateTriggerType::UpdateTriggerPluggedOut == reason) {
+        emit deviceListChanged("FATAL ERROR: Mako camera list changed!\r\n Camera name: " + qstr(camName) + ". \r\nCheck camera connection, either plugged in or disconnected one or several cameras!"
+            "\n This should not happen to the experiment camera.");
+    }
+}
+
 InterfacePtr MakoWrapper::getInterfaceByID(VimbaSystem& vsys, std::string sInterfaceID)
 {
     InterfacePtr interfacePtr;
@@ -428,3 +443,5 @@ VmbErrorType MakoWrapper::getIPAddress(const AVT::VmbAPI::CameraPtr& camera, std
 
     return error;
 }
+
+

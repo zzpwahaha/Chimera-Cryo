@@ -1,5 +1,6 @@
 #pragma once
 #include <qobject.h>
+#include <string>
 #include "VimbaCPP/Include/VimbaSystem.h"
 #include <VimbaCPP/Include/ICameraListObserver.h>
 
@@ -11,21 +12,16 @@ class CameraObserver : public QObject, public AVT::VmbAPI::ICameraListObserver
 {
 	Q_OBJECT
 public:
-	CameraObserver(void) {};
+	CameraObserver() {};
 	~CameraObserver(void) {};
-	virtual void CameraListChanged(AVT::VmbAPI::CameraPtr pCam, AVT::VmbAPI::UpdateTriggerType reason) 
-	{
-		if (UpdateTriggerType::UpdateTriggerPluggedOut == reason) {
-			thrower("FATAL ERROR: Mako camera list changed! Check camera connection, either plugged in or disconnected one or several cameras!"
-				"\n This should not happen.");
-		}
-	};
+	virtual void CameraListChanged(AVT::VmbAPI::CameraPtr pCam, AVT::VmbAPI::UpdateTriggerType reason);
+
 
 protected:
 private:
 
 signals:
-	void updateDeviceList(void);
+	void deviceListChanged(QString);
 };
 
 typedef AVT::VmbAPI::shared_ptr<CameraObserver> QtCameraObserverPtr;

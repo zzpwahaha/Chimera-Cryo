@@ -6,6 +6,8 @@
 #include "CMOSSetting.h"
 #include <utility>
 
+class IChimeraSystem;
+
 class MakoCameraCore : public IDeviceCore
 {
 	Q_OBJECT
@@ -14,7 +16,7 @@ public:
 	MakoCameraCore& operator=(const MakoCameraCore&) = delete;
 	MakoCameraCore(const MakoCameraCore&) = delete;
 
-	MakoCameraCore(CameraInfo camInfo);
+	MakoCameraCore(CameraInfo camInfo, IChimeraSystem* parent);
 	~MakoCameraCore();
 	
 	std::string getDelim() override { return camInfo.delim; }

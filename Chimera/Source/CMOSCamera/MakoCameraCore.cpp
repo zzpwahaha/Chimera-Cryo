@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "MakoCameraCore.h"
+#include <GeneralObjects/IChimeraSystem.h>
 #include "ConfigurationSystems/ConfigSystem.h"
 #include <ExperimentThread/ExpThreadWorker.h>
 #include "MiscellaneousExperimentOptions/Repetitions.h"
@@ -7,10 +8,11 @@
 #include <DataLogging/DataLogger.h>
 #include <qdebug.h>
 
-MakoCameraCore::MakoCameraCore(CameraInfo camInfo)
+MakoCameraCore::MakoCameraCore(CameraInfo camInfo, IChimeraSystem* parent)
     : m_VimbaSystem(AVT::VmbAPI::VimbaSystem::GetInstance())
     , makoCtrl()
     , camInfo(camInfo)
+    , pDeviceObs(new CameraObserver())
 {
     if (camInfo.safemode) {
         return;
@@ -27,6 +29,8 @@ MakoCameraCore::MakoCameraCore(CameraInfo camInfo)
     connect(&makoCtrl, &MakoSettingControl::resetFPS, [this]() {
         SP_ACCESS(frameObs)->resetFrameCounter(false); });
 
+    connect(pDeviceObs.get(), &CameraObserver::deviceListChanged, parent, [this, parent](QString err) {
+        emit parent->warning(err, 0); });
 
 }
 
@@ -252,6 +256,7 @@ void MakoCameraCore::validateCamera(const CameraPtrVector& Cameras)
         }
         allIPs += ipaddress.append(" ");
         if (ipaddress.find(camInfo.ip) != std::string::npos) {
+            /*register camera list observer*/
             cameraPtr = Cameras[i];
             QtCameraObserverPtr pDeviceObs(new CameraObserver());
             error = m_VimbaSystem.RegisterCameraListObserver(pDeviceObs);
