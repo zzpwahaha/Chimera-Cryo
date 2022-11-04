@@ -373,6 +373,13 @@ void DataLogger::logMasterInput( ExperimentThreadInput* input ){
 		}
 		H5::Group runParametersGroup( file.createGroup( "/Master-Input" ) );
 		writeDataSet (input->profile.configuration, "Configuration", runParametersGroup);
+		std::ifstream configF(input->profile.configFilePath());
+		if (!configF.is_open()) {
+			thrower("While trying to log the config file content from " + input->profile.configFilePath()
+				+ ", the config file failed to open!");
+		}
+		std::string configBuf(str(configF.rdbuf()));
+		writeDataSet(configBuf, "Configuration-Content", runParametersGroup);
 		writeDataSet( true, "Run-Master", runParametersGroup );
 		if ( true /*runmaster*/ ) {
 			std::ifstream masterScript( ConfigSystem::getMasterAddressFromConfig( input->profile ) );
