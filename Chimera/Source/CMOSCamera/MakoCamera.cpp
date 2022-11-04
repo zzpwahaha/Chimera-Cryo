@@ -13,7 +13,7 @@
 
 MakoCamera::MakoCamera(CameraInfo camInfo, IChimeraQtWindow* parent)
     : IChimeraSystem(parent)
-    , core(camInfo)
+    , core(camInfo, this)
     , viewer(core.CameraName(), this)
     , imgCThread(core.getFrameObs(), core, false,
         viewer)
@@ -545,6 +545,8 @@ void MakoCamera::setCurrentScreenROI()
     QCPRange yr = viewer.centerAxes()->axis(QCPAxis::atLeft)->range();
     if (xr.lower > 0 && xr.upper < maxw && yr.lower>0 && yr.upper < maxh)
     {
+        auto xwywoxoy = core.getROIIncrement();
+        int xwIncr = xwywoxoy[0]; int ywIncr = xwywoxoy[1]; int oxIncr = xwywoxoy[2]; int oyIncr = xwywoxoy[3];
         int xlower = 2 * std::floor(xr.lower / 2);
         int xupper = 2 * std::ceil(xr.upper / 2);
         int ylower = 2 * std::floor(yr.lower / 2);
@@ -553,7 +555,12 @@ void MakoCamera::setCurrentScreenROI()
         yupper += (yupper - ylower) % 4 == 0 ? 0 : 2;
         int xw = (xupper - xlower) > 2 ? xupper - xlower : 4;
         int yw = (yupper - ylower) > 2 ? yupper - ylower : 4;
-        
+
+        xlower += (xlower % oxIncr) == 0 ? 0 : oxIncr - (xlower % oxIncr);
+        ylower += (ylower % oyIncr) == 0 ? 0 : oyIncr - (ylower % oyIncr);
+        xw += (xw % xwIncr) == 0 ? 0 : xwIncr - (xw % xwIncr);
+        yw += (yw % ywIncr) == 0 ? 0 : ywIncr - (yw % ywIncr);
+
         resetFullROI(true);
         try {
             acquisitionStartStopFromCtrler("AcquisitionStop");

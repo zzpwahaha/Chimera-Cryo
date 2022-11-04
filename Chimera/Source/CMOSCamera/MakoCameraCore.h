@@ -44,6 +44,8 @@ public:
 
 	void stopCapture();
 
+	std::array<unsigned, 4> getROIIncrement(); // xwidth, ywidth, offsetx, offsety
+
 	void setROI(int width, int height, int offsetx, int offsety);
 
 	void resetFullROI();
@@ -79,6 +81,7 @@ private:
 
 	CameraPtr cameraPtr;
 	std::string cameraName; // name shown on top of viewer with camID, not same as name in CameraInfo
+	QtCameraObserverPtr pDeviceObs; // For monitoring device list change
 	// official copy.
 	MakoSettings runSettings;
 	MakoSettings expRunSettings;
