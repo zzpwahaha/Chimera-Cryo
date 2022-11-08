@@ -188,9 +188,9 @@ void AoSystem::initialize( IChimeraQtWindow* parent )
 	for ( auto& out : outputs )	
 	{
 		out.initialize ( parent, runningCount);
-		AOGridLayout->addLayout(out.getLayout(), 
-			runningCount % size_t(AOGrid::numPERunit), 
-			runningCount / size_t(AOGrid::numPERunit));
+		AOGridLayout->addLayout(out.getLayout(),
+			runningCount % (size_t(AOGrid::numPERunit) / 2),
+			runningCount / (size_t(AOGrid::numPERunit) / 2));
 		dacNames[runningCount] = out.info.name;
 		runningCount++;
 		

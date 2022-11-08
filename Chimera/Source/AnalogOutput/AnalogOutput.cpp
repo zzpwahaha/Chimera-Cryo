@@ -32,7 +32,7 @@ void AnalogOutput::initialize ( IChimeraQtWindow* parent, int whichDac)
 
 	layout->addWidget(label, 0, Qt::AlignRight);
 	layout->addWidget(edit, 1, Qt::AlignLeft);
-	layout->addStretch(1);
+	//layout->addStretch(1);
 	edit->setMaximumWidth(150);
 	updateEdit(false);
 }
