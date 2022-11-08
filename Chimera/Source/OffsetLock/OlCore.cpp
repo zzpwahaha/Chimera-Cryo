@@ -5,7 +5,7 @@
 #include <qelapsedtimer.h>
 
 OlCore::OlCore(bool safemode)
-	: qtFlume(safemode, "COM3")
+	: qtFlume(safemode, OL_COM_PORT)
 {
 	
 }

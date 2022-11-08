@@ -25,6 +25,7 @@ int main (int argc, char** argv) {
 	qRegisterMetaType<profileSettings> ();
 	qRegisterMetaType<analysisSettings> ();
 	qRegisterMetaType<calSettings> ();
+	qRegisterMetaType<std::vector<calSettings>>();
 	qRegisterMetaType<parameterType> ();
 	qRegisterMetaType<std::vector<parameterType>> ();
 	qRegisterMetaType<statusMsg>();

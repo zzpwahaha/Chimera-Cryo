@@ -68,6 +68,8 @@
 	const double DDS_MAX_AMP = 1.25; // in mW
 	const std::pair<unsigned, unsigned> DIO_REWIND = std::make_pair(8 - 1, 7); // used for the long time run rewind, see DoCore::checkLongTimeRun
 
+	//OffsetLock 
+	const std::string OL_COM_PORT = "COM3";
 	const double OL_TIME_RESOLUTION = 0.02; //in ms
 	const std::vector<std::pair<unsigned, unsigned>> OL_TRIGGER_LINE
 		= { std::make_pair(3 - 1,6),std::make_pair(3 - 1,7) }; /*the first is the label on the box minus 1, has minus'd 1 explicitly */
@@ -93,7 +95,7 @@
 
 	//Mako camera
 	const unsigned MAKO_NUMBER = 2;
-	const std::array<bool, MAKO_NUMBER> MAKO_SAFEMODE = { true,true};
+	const std::array<bool, MAKO_NUMBER> MAKO_SAFEMODE = { false,true};
 	const std::array<std::string, MAKO_NUMBER> MAKO_DELIMS = { "MAKO1_CAMERA_SETTING", "MAKO2_CAMERA_SETTING" };
 	const std::array<std::string, MAKO_NUMBER> MAKO_IPADDRS= { "10.10.0.6", "10.10.0.7" };
 	const std::vector<std::pair<unsigned, unsigned>> MAKO_TRIGGER_LINE
