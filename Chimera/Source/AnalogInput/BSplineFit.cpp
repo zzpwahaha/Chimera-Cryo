@@ -6,9 +6,10 @@
 #include <algorithm>
 #include <qdebug.h>
 
-
+int BSplineFit::count = 0;
 BSplineFit::BSplineFit(const BSplineFit& bsfit)
 {
+    qDebug() << "BSplineFit::BSplineFit(const BSplineFit& bsfit)";
     emptyStart = bsfit.emptyStart;
     if (emptyStart) {
         return;
@@ -17,11 +18,11 @@ BSplineFit::BSplineFit(const BSplineFit& bsfit)
         initialize(bsfit.dataSize, bsfit.datax, bsfit.datay, bsfit.orderBSpline, bsfit.nBreak);
         solve_system();
     }
-    
 }
 
 BSplineFit& BSplineFit::operator=(const BSplineFit& bsfit)
 {
+    qDebug() << "BSplineFit& BSplineFit::operator=(const BSplineFit& bsfit)";
     emptyStart = bsfit.emptyStart;
     if (!emptyStart) {
         initialize(bsfit.dataSize, bsfit.datax, bsfit.datay, bsfit.orderBSpline, bsfit.nBreak);
@@ -32,14 +33,51 @@ BSplineFit& BSplineFit::operator=(const BSplineFit& bsfit)
 
 BSplineFit::BSplineFit() : emptyStart(true)
 {
+    qDebug("BSplineFit::BSplineFit() : emptyStart(true) = 0x%08x, X = 0x%08x, count = %d", this, X, count);
+    count++;
 }
 
 BSplineFit::~BSplineFit()
 {
+    count--;
+    qDebug("BSplineFit::~BSplineFit() = 0x%16x, X = 0x%16x, count = %d", this, X, count);
     if (!emptyStart) {
         freeAll();
     }
     
+}
+
+BSplineFit::BSplineFit(BSplineFit&& bsfit)
+    : emptyStart(std::move(bsfit.emptyStart))
+    , datax(std::move(bsfit.datax))
+    , datay(std::move(bsfit.datay))
+    , RSS(std::move(bsfit.RSS))
+    , TSS(std::move(bsfit.TSS))
+    , Rsq(std::move(bsfit.Rsq))
+    , confi95(std::move(bsfit.confi95))
+    , leftPoly(std::move(bsfit.leftPoly))
+    , rightPoly(std::move(bsfit.rightPoly))
+    , orderBSpline(std::move(bsfit.orderBSpline))
+    , dataSize(std::move(bsfit.dataSize))
+    , nBreak(std::move(bsfit.nBreak))
+    , nBasis(std::move(bsfit.nBasis))
+    , X(std::exchange(bsfit.X, nullptr))
+    , y(std::exchange(bsfit.y, nullptr))
+    , coef(std::exchange(bsfit.coef, nullptr))
+    , cov(std::exchange(bsfit.cov, nullptr))
+    , B(std::exchange(bsfit.B, nullptr))
+    , bw(std::exchange(bsfit.bw, nullptr))
+    , mw(std::exchange(bsfit.mw, nullptr))
+{
+    qDebug("BSplineFit::BSplineFit(BSplineFit&& bsfit) = 0x%08x, X = 0x%08x, count = %d, \n old = 0x%08x, old X = 0x%08x", this, X, count, &bsfit, bsfit.X);
+    count++;
+    //X = bsfit.X;
+    //y = bsfit.y;
+    //coef = bsfit.coef;
+    //cov = bsfit.cov;
+    //B = bsfit.B;
+    //bw = bsfit.bw;
+    //mw = bsfit.mw;
 }
 
 void BSplineFit::initialize(unsigned _dataSize, std::vector<double> _datax, std::vector<double> _datay,
@@ -95,14 +133,14 @@ void BSplineFit::initialize(unsigned _dataSize, std::vector<double> _datax, std:
 
 void BSplineFit::freeAll()
 {
-    gsl_matrix_free(X);
-    gsl_vector_free(y);
-    gsl_vector_free(coef);
-    gsl_matrix_free(cov);
-    gsl_vector_free(B);
+    if (X != nullptr) gsl_matrix_free(X);
+    if (y != nullptr) gsl_vector_free(y);
+    if (coef != nullptr) gsl_vector_free(coef);
+    if (cov != nullptr) gsl_matrix_free(cov);
+    if (B != nullptr) gsl_vector_free(B);
 
-    gsl_bspline_free(bw);
-    gsl_multifit_linear_free(mw);
+    if (bw != nullptr) gsl_bspline_free(bw);
+    if (mw != nullptr) gsl_multifit_linear_free(mw);
 }
 
 

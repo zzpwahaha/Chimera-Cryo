@@ -13,6 +13,9 @@ public:
 	BSplineFit& operator=(const BSplineFit& bsfit);
 	BSplineFit();
 	~BSplineFit();
+	BSplineFit(BSplineFit&& bsfit); // so somehow the default move constructor did not assign nullptr to those gsl object, have to write myself... ZZP 2022/11/07
+	BSplineFit& operator=(BSplineFit&& bsfit) = default;
+
 	void initialize(unsigned dataSize, std::vector<double> datax, std::vector<double> datay,
 		unsigned orderBSpline, unsigned nBreak);
 	void freeAll();
@@ -36,23 +39,24 @@ private:
 
 
 private:
+	static int count;
 	bool emptyStart;
 	std::vector<double> datax, datay; // datax should be sorted in the ascending order
 
-	gsl_matrix* X; // design matrix in linear least square regression, dataSize x nBasis, each row is evaluated for the same x with different basis function
-	gsl_vector* y; // datay for fitting
-	gsl_vector* coef; // coefficient in front of basis function
-	gsl_matrix* cov; // variance-covariance matrix of linear regression, cov = RSS/(dataSize-nBasis) * (X^T*X)^(-1), RSS is called chisq in GSL
+	gsl_matrix* X = nullptr; // design matrix in linear least square regression, dataSize x nBasis, each row is evaluated for the same x with different basis function
+	gsl_vector* y = nullptr; // datay for fitting
+	gsl_vector* coef = nullptr; // coefficient in front of basis function
+	gsl_matrix* cov = nullptr; // variance-covariance matrix of linear regression, cov = RSS/(dataSize-nBasis) * (X^T*X)^(-1), RSS is called chisq in GSL
 					 // where RSS is the sum of square residual = sum(yi-\hat{yi})^2, RSS/(dataSize-nBasis) = s^2, the unbiased estimator of system variance
 	
-	gsl_vector* B; // Bspline vector for a particular point x, to facilitate eval inside functions
+	gsl_vector* B = nullptr; // Bspline vector for a particular point x, to facilitate eval inside functions
 	double RSS, TSS, Rsq;
 	std::vector<double> confi95;
 	std::vector<double> leftPoly, rightPoly;
 
 
-	gsl_bspline_workspace* bw;
-	gsl_multifit_linear_workspace* mw;
+	gsl_bspline_workspace* bw = nullptr;
+	gsl_multifit_linear_workspace* mw = nullptr;
 	unsigned orderBSpline; // order of B spline, gives a polynomial of order = orderBSpline-1. The common case of cibic B-splines is given by k = 4
 	unsigned dataSize; // number of data points to be fit
 	unsigned nBreak; // number of break points, including left and right end points
