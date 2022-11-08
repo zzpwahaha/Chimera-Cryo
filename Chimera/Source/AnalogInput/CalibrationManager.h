@@ -40,8 +40,9 @@ class CalibrationManager : public IChimeraSystem {
 		void handleOpenMasterConfigIndvResult (ConfigStream& configStream, calResult& result);
 		void handleOpenMasterConfig (ConfigStream& configStream);
 		void handleOpenConfig(ConfigStream& configStream);
-		std::vector<calResult> getCalibrationInfo ();
+		std::vector<calSettings> getCalibrationInfo ();
 		void standardStartThread (std::vector<std::reference_wrapper<calSettings>> calibrations);
+		void setCalibrations(std::vector<calSettings> cals);
 		void refreshListview ();
 		static std::vector<double> calPtTextToVals (QString qtxt);
 		// no boundary check is only used in setting the plot of the calibration, in the experiment, the boundary check should always be on

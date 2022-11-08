@@ -511,12 +511,15 @@ void DdsCore::handleDDSScriptCommand(DdsCommandForm command, std::string name, s
 
 /*TODO: add calibration usuage*/
 void DdsCore::calculateVariations(std::vector<parameterType>& variables, ExpThreadWorker* threadworker, 
-	std::vector<calResult> calibrations)
+	std::vector<calSettings>& calibrationSettings)
 {
+	std::vector<calResult> calibrations;
+	for (auto& calset : calibrationSettings) {
+		calibrations.push_back(calset.result);
+	}
 	UINT variations;
 	variations = variables.front().keyValues.size();
-	if (variations == 0)
-	{
+	if (variations == 0) {
 		variations = 1;
 	}
 	/// imporantly, this sizes the relevant structures.
@@ -732,6 +735,9 @@ void DdsCore::calculateVariations(std::vector<parameterType>& variables, ExpThre
 				thrower("ERROR: Unrecognized dds command name: " + ddsCommandFormList[eventInc].commandName);
 			}
 		}
+	}
+	for (size_t idx = 0; idx < calibrationSettings.size(); idx++) {
+		calibrationSettings[idx].result = calibrations[idx];
 	}
 }
 

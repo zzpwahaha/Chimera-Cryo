@@ -17,6 +17,8 @@ struct calBase {
 
 struct calResult : public calBase {
 	std::string calibrationName = "";
+	bool active = false; // true if used in experiment
+	bool currentActive = false; // true if used in the evaluate for the particular command, used only in expthread for locating which cal is used for eval.
 	//unsigned polynomialOrder = 0;
 	std::vector<double> ctrlVals;
 	std::vector<double> resVals;
@@ -47,6 +49,7 @@ struct calResult : public calBase {
 
 struct calSettings : public calBase {
 	bool active = false;
+	bool usedSameChannel = true; // if the cal is used in the experiment script with the same output channel as in the calibration
 	unsigned int aiInChan = 0; // this is the number on the AI box, 0-15 -> A0,B0,A1,B1,...A7,B7
 	unsigned int aoControlChannel = 0;
 	bool useAg = false;
@@ -67,3 +70,4 @@ struct calSettings : public calBase {
 };
 
 Q_DECLARE_METATYPE (calSettings)
+Q_DECLARE_METATYPE (std::vector<calSettings>)

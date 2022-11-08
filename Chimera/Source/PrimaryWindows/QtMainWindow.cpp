@@ -275,6 +275,7 @@ void QtMainWindow::startExperimentThread (ExperimentThreadInput* input){
 	connect (expWorker, &ExpThreadWorker::calibrationFinish, this, &QtMainWindow::onAutoCalFin);
 	connect (expWorker, &ExpThreadWorker::errorExperimentFinish, this, &QtMainWindow::onFatalError);
 	connect (expWorker, &ExpThreadWorker::expParamsSet, this->auxWin, &QtAuxiliaryWindow::updateExpActiveInfo);
+	connect(expWorker, &ExpThreadWorker::expCalibrationsSet, this->auxWin, &QtAuxiliaryWindow::updateCalActiveInfo);
 
 	connect (expThread, &QThread::started, expWorker, &ExpThreadWorker::process);
 	connect (expThread, &QThread::finished, expThread, &QObject::deleteLater);

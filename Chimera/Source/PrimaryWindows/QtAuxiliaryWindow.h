@@ -138,5 +138,6 @@ class QtAuxiliaryWindow : public IChimeraQtWindow{
 		//void handleDoAoPlotData (const std::vector<std::vector<plotDataVec>>& doData,
 		//					     const std::vector<std::vector<plotDataVec>>& aoData);
 		void updateExpActiveInfo (std::vector<parameterType> expParams);
+		void updateCalActiveInfo (std::vector<calSettings> expCalParams);
 };
 

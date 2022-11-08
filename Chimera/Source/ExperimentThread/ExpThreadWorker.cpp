@@ -66,7 +66,7 @@ void ExpThreadWorker::experimentThreadProcedure () {
 		emit prepareAnalysis();
 		emit notification("Enabling real time analysis \r\n", 1);
 
-		runConsistencyChecks (expRuntime.expParams);
+		runConsistencyChecks (expRuntime.expParams, input->calibrations);
 		if (input->expType != ExperimentType::LoadMot) {
 			for (auto& device : input->devices.list) {
 				if (device.get ().experimentActive) {
@@ -1199,7 +1199,7 @@ void ExpThreadWorker::calculateAdoVariations (ExpRuntimeData& runtime) {
 	}
 }
 
-void ExpThreadWorker::runConsistencyChecks (std::vector<parameterType> expParams) {
+void ExpThreadWorker::runConsistencyChecks (std::vector<parameterType> expParams, std::vector<calSettings> calibrations) {
 	Sleep (1000);
 	emit plot_Xvals_determined (ParameterSystem::getKeyValues (expParams));
 	emit expParamsSet (expParams);
@@ -1210,6 +1210,7 @@ void ExpThreadWorker::runConsistencyChecks (std::vector<parameterType> expParams
 		}
 	}
 	//checkTriggerNumbers (expParams);
+	emit expCalibrationsSet(calibrations);
 }
 
 void ExpThreadWorker::handlePause (std::atomic<bool>& isPaused, std::atomic<bool>& isAborting) {

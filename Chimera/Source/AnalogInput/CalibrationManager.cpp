@@ -321,12 +321,8 @@ void CalibrationManager::handleContextMenu (const QPoint& pos) {
 	menu.exec (calibrationTable->mapToGlobal (pos));
 }
 
-std::vector<calResult> CalibrationManager::getCalibrationInfo (){
-	std::vector<calResult> results;
-	for (auto& cal : calibrations) {
-		results.push_back (cal.result);
-	}
-	return results;
+std::vector<calSettings> CalibrationManager::getCalibrationInfo (){
+	return calibrations;
 }
 
 void CalibrationManager::handleSaveConfig(std::stringstream& configStream)
@@ -521,13 +517,16 @@ void CalibrationManager::refreshListview () {
 void CalibrationManager::addCalToListview (calSettings& cal) {
 	int row = calibrationTable->rowCount ();
 	int precision = 5;
-	QColor textColor;
+	QColor textColor, bkgColor;
 	textColor = cal.calibrated ? QColor (0, 101, 253) : QColor (255, 0, 0);
-	auto setItemExtra = [row, this, cal, textColor](int item) {
-		calibrationTable->item (row, item)->setFlags (!cal.active ? calibrationTable->item (row, item)->flags () & ~Qt::ItemIsEnabled
-			: calibrationTable->item (row, item)->flags () | Qt::ItemIsEnabled);
-		calibrationTable->item (row, item)->setForeground (textColor);
-		calibrationTable->item (row, item)->setToolTip (qstr(cal.result.stringRepr ()));
+	bkgColor = cal.result.active ? QColor("chartreuse") : QColor(255, 255, 255);
+	if (!cal.usedSameChannel && cal.result.active) bkgColor = QColor("burlywood");
+	auto setItemExtra = [row, this, cal, textColor, bkgColor](int item) {
+		calibrationTable->item(row, item)->setFlags(!cal.active ? calibrationTable->item(row, item)->flags() & ~Qt::ItemIsEnabled
+			: calibrationTable->item(row, item)->flags() | Qt::ItemIsEnabled);
+		calibrationTable->item(row, item)->setForeground(textColor);
+		calibrationTable->item(row, item)->setBackgroundColor(bkgColor);
+		calibrationTable->item(row, item)->setToolTip(qstr(cal.result.stringRepr()));
 	};
 	calibrationTable->insertRow (row);
 	calibrationTable->setItem (row, 0, new QTableWidgetItem (cal.result.calibrationName.c_str ()));
@@ -643,6 +642,12 @@ void CalibrationManager::standardStartThread (std::vector<std::reference_wrapper
 		&QtMainWindow::handleColorboxUpdate);
 
 	thread->start ();
+}
+
+void CalibrationManager::setCalibrations(std::vector<calSettings> cals)
+{
+	calibrations = cals;
+	refreshListview();
 }
 
 void CalibrationManager::calibrateThreaded (calSettings& cal, unsigned which) {

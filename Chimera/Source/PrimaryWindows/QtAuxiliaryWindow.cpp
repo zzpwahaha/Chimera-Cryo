@@ -238,7 +238,7 @@ std::vector<std::string> QtAuxiliaryWindow::getCalNames()
 	auto calibrations = calManager.getCalibrationInfo();
 	std::vector<std::string> names;
 	for (auto& cal : calibrations) {
-		names.push_back(cal.calibrationName);
+		names.push_back(cal.result.calibrationName);
 	}
 	return names;
 }
@@ -338,6 +338,10 @@ void QtAuxiliaryWindow::fillMasterThreadInput (ExperimentThreadInput* input){
 	try	{
 		input->globalParameters = globalParamCtrl.getAllParams ();
 		input->calibrations = calManager.getCalibrationInfo();
+		for (auto& cal : input->calibrations) {
+			cal.result.active = false;
+			cal.usedSameChannel = true;
+		}
 	}
 	catch (ChimeraError&) {
 		throwNested ("Auxiliary window failed to fill master thread input.");
@@ -515,6 +519,11 @@ void QtAuxiliaryWindow::updateExpActiveInfo (std::vector<parameterType> expParam
 	configParamCtrl.setUsages (expParams);
 }
 
+void QtAuxiliaryWindow::updateCalActiveInfo(std::vector<calSettings> expCalParams)
+{
+	calManager.setCalibrations(expCalParams);
+}
+
 void QtAuxiliaryWindow::SetDacs (){
 	reportStatus ("----------------------\r\nSetting Dacs... ");
 	try{
@@ -634,7 +643,7 @@ std::string QtAuxiliaryWindow::getOtherSystemStatusMsg (){
 
 	msg += "Offset Lock:\n";
 	if (!OFFSETLOCK_SAFEMODE) {
-		msg += str("\tOffset Lock System is Active at COMxx\n");
+		msg += str("\tOffset Lock System is Active at " + OL_COM_PORT + "\n");
 		msg += "\tAttached trigger line is \n\t\t";
 		for (const auto& oltrig : OL_TRIGGER_LINE)
 		{

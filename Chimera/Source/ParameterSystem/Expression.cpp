@@ -353,12 +353,24 @@ double Expression::getValue ( unsigned variation ){
 	return values[variation];
 }
 
+double Expression::evaluate(std::vector<parameterType>& variables)
+{
+	unsigned variation = -1;
+	return evaluate(variables, variation);
+}
+
+double Expression::evaluate(std::vector<parameterType>& variables, unsigned variation)
+{
+	std::vector<calResult> calibrations = std::vector<calResult>();
+	return evaluate(variables, variation, calibrations);
+}
+
 /*
 Evaluate takes in an expression, which can be a combination of variables, standard math operations, and standard
 math functions, and evaluates it to a double.
 */
 double Expression::evaluate( std::vector<parameterType>& variables, unsigned variation, 
-	std::vector<calResult> calibrations ){
+	std::vector<calResult>& calibrations ){
 	// make a constant copy of the original string to use during the evaluation.
 	const std::string originalExpression( expressionStr );
 	double resultOfReduction = 0;
@@ -419,16 +431,18 @@ double Expression::evaluate( std::vector<parameterType>& variables, unsigned var
 	return handleCalibration (reduce (fullTerms), calibrations);
 }
 
-double Expression::handleCalibration (double val, std::vector<calResult> calibrations) {
+double Expression::handleCalibration (double val, std::vector<calResult>& calibrations) {
 	if (calName == "") {
 		return val;
 	}
 	else {
 		calResult cal;
 		for (auto& calTest : calibrations) {
+			calTest.currentActive = false; // set all currentActive to false and set it to true if used below
 			if (calTest.calibrationName == calName) {
+				calTest.active = true;
+				calTest.currentActive = true;
 				cal = calTest;
-				break;
 			}
 		}
 		if (cal.calibrationName == "") {

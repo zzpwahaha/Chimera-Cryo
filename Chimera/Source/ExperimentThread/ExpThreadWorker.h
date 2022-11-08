@@ -62,7 +62,7 @@ class ExpThreadWorker : public QObject
 		double convertToTime (timeType time, std::vector<parameterType> variables, unsigned variation);
 		void calculateAdoVariations (ExpRuntimeData& runtime);
 		static std::vector<parameterType> getLocalParameters (ScriptStream& stream);
-		void runConsistencyChecks (std::vector<parameterType> expParams);
+		void runConsistencyChecks (std::vector<parameterType> expParams, std::vector<calSettings> calibrations);
 		void handlePause (std::atomic<bool>& isPaused, std::atomic<bool>& isAborting);
 		void initVariation (unsigned variationInc,
 			std::vector<parameterType> expParams);
@@ -114,6 +114,7 @@ class ExpThreadWorker : public QObject
 		void calibrationFinish (QString, profileSettings);
         void errorExperimentFinish (QString, profileSettings);
 		void expParamsSet (std::vector<parameterType> expParams);
+		void expCalibrationsSet (std::vector<calSettings> calibrations);
         void mainProcessFinish (); 
 
     private:

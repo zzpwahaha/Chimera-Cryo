@@ -52,7 +52,7 @@ struct ExperimentThreadInput{
 	ZynqTCP zynqExp;
 
 	DeviceList devices;
-	std::vector<calResult> calibrations;
+	std::vector<calSettings> calibrations;
 	std::vector<parameterType> globalParameters;
 	unsigned sleepTime = 0;
 	DataLogger& logger;
