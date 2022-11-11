@@ -143,6 +143,7 @@
     <ClCompile Include="Source\GigaMOOG\GigaMoogSystem.cpp" />
     <ClCompile Include="Source\GigaMOOG\MessagePrinter.cpp" />
     <ClCompile Include="Source\GigaMOOG\MessageSender.cpp" />
+    <ClCompile Include="Source\MiscellaneousExperimentOptions\InExpCalControl.cpp" />
     <ClCompile Include="Source\RealTimeMOTAnalysis\MOTAnalysisSystem.cpp" />
     <ClCompile Include="Source\PrimaryWindows\QtAnalysisWindow.cpp" />
     <ClCompile Include="Source\RealTimeMOTAnalysis\MOTAnalysisControl.cpp" />
@@ -200,6 +201,7 @@
     <ClInclude Include="Source\GigaMOOG\MessagePrinter.h" />
     <ClInclude Include="Source\GigaMOOG\MessageSender.h" />
     <ClInclude Include="Source\GigaMOOG\Messagetypes.h" />
+    <ClInclude Include="Source\MiscellaneousExperimentOptions\InExpCalControl.h" />
     <ClInclude Include="Source\Plotting\PlotInfo.h" />
     <ClInclude Include="Source\RealTimeMOTAnalysis\MOTAnalysisSystem.h" />
     <ClInclude Include="Source\RealTimeMOTAnalysis\MOTAnalysisControl.h" />

@@ -4,16 +4,20 @@
 #include "ConfigurationSystems/Version.h"
 #include "GeneralObjects/commonTypes.h"
 #include "ConfigurationSystems/ConfigStream.h"
+#include <MiscellaneousExperimentOptions/InExpCalControl.h>
 #include <QLabel>
 #include <QLineEdit>
 #include <QCheckBox>
+#include <qtimer.h>
+#include <atomic>
 
 class IChimeraQtWindow;
 
 struct mainOptions{
-	bool dontActuallyGenerate=false;
 	bool randomizeVariations=false;
 	bool repetitionFirst = false;
+	bool inExpCalibration = false;
+	double inExpCalInterval = 10.0;
 	bool delayAutoCal = false;
 	unsigned atomSkipThreshold=UINT_MAX;
 };
@@ -23,6 +27,9 @@ class MainOptionsControl : public QWidget
 {
 	Q_OBJECT
 	public:
+		MainOptionsControl& operator=(const MainOptionsControl&) = delete;
+		MainOptionsControl(const MainOptionsControl&) = delete;
+		MainOptionsControl() = default;
 		void handleSaveConfig(ConfigStream& saveFile);
 		static mainOptions getSettingsFromConfig(ConfigStream& openFile );
 		void setOptions ( mainOptions opts );
@@ -33,6 +40,7 @@ class MainOptionsControl : public QWidget
 		QLabel* header;
 		QCheckBox* randomizeVariationsButton;
 		QCheckBox* repetitionFirstButton;
+		InExpCalControl* inExpCalControl;
 		QCheckBox* delayAutoCal;
 		QLabel* atomThresholdForSkipText;
 		QLineEdit* atomThresholdForSkipEdit;
