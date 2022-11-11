@@ -21,6 +21,7 @@
 #include "DeviceList.h"
 
 #include <AnalogInput/calInfo.h>
+#include <AnalogInput/CalibrationManager.h>
 #include <CMOSCamera/CMOSSetting.h>
 #include "ZynqTcp/ZynqTcp.h"
 
@@ -38,6 +39,7 @@ class ExpThreadWorker;
 struct ExperimentThreadInput{
 	ExperimentThreadInput ( IChimeraQtWindow* win );
 	realTimePlotterInput* plotterInput;
+	CalibrationManager* calManager;
 	profileSettings profile;
 
 	DoSystem& ttlSys;

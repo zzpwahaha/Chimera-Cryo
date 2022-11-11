@@ -1,6 +1,7 @@
 ﻿// created by Mark O. Brown
 #include "stdafx.h"
 #include "AiSystem.h"
+#include "PrimaryWindows/IChimeraQtWindow.h"
 #include <qtimer.h>
 #include <qlayout.h>
 #include <QtConcurrent/qtconcurrentrun.h>

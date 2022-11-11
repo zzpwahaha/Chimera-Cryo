@@ -337,6 +337,7 @@ DoCore& QtAuxiliaryWindow::getTtlCore (){
 void QtAuxiliaryWindow::fillMasterThreadInput (ExperimentThreadInput* input){
 	try	{
 		input->globalParameters = globalParamCtrl.getAllParams ();
+		input->calManager = &calManager;
 		input->calibrations = calManager.getCalibrationInfo();
 		for (auto& cal : input->calibrations) {
 			cal.result.active = false;

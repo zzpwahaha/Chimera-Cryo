@@ -7,12 +7,12 @@
 #include "ConfigurationSystems/Version.h"
 #include "Scripts/ScriptStream.h"
 #include "ConfigurationSystems/ConfigStream.h"
-#include "PrimaryWindows/IChimeraQtWindow.h"
 #include <QLabel.h>
 #include <CustomQtControls/AutoNotifyCtrls.h>
 
 #include <array>
 
+class IChimeraQtWindow;
 
 /*
  * This is a interface for taking analog input data through an NI card that uses DAQmx. These cards are generally 
