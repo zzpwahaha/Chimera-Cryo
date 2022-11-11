@@ -436,7 +436,7 @@ void AoCore::calculateVariations(std::vector<parameterType>& params, ExpThreadWo
 				// check if the calibration usage is proper only for the first var
 				for (auto calIdx : range(calibrationSettings.size())) {
 					if (calibrations[calIdx].active && !calibrationSettings[calIdx].active) {
-						emit threadworker->warn("Used calibration " + qstr(calibrations[calIdx].calibrationName) + ", but it is not activated, please make sure the calibraition is up-to-date.\r\n", 1);
+						thrower("Used calibration " + calibrations[calIdx].calibrationName + ", but it is not activated, please activate it and make sure the calibraition is up-to-date!\r\n", 1);
 					}
 				}
 			}
