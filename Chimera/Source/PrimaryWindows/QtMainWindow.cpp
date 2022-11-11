@@ -278,8 +278,8 @@ void QtMainWindow::startExperimentThread (ExperimentThreadInput* input){
 	connect(expWorker, &ExpThreadWorker::expCalibrationsSet, this->auxWin, &QtAuxiliaryWindow::updateCalActiveInfo);
 
 	connect (expThread, &QThread::started, expWorker, &ExpThreadWorker::process);
-	connect (expThread, &QThread::finished, expThread, &QObject::deleteLater);
 	connect (expThread, &QThread::finished, expWorker, &QObject::deleteLater);
+	connect (expWorker, &QObject::destroyed, expThread, &QObject::deleteLater);
 	expThread->start (QThread::TimeCriticalPriority);
 }
 
