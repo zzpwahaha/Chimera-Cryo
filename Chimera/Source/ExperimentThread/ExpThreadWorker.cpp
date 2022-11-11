@@ -55,6 +55,16 @@ void ExpThreadWorker::experimentThreadProcedure () {
 			deviceLoadExpSettings (device, cStream);/*TODO: remove dds from device, and now device only has andor*/
 		}
 		input->numVariations = determineVariationNumber(expRuntime.expParams);
+
+		/// In-Experiment calibration
+		if (expRuntime.mainOpts.inExpCalibration) {
+			emit notification("Enabling In-Exp calibration\r\n", 0);
+			input->calManager->inExpRunAllThreaded(this, false);
+			std::unique_lock<std::mutex> lock(input->calManager->calLock());
+			input->calManager->calConditionVariable().wait(lock, [this] { 
+				return !input->calManager->isCalibrationRunning(); });
+		}
+
 		/// The Variation Calculation Step.
 		emit notification ("Calculating All Variation Data...\r\n");
 		for (auto& device : input->devices.list) {

@@ -12,11 +12,13 @@
 #include <ArbGen/ArbGenCore.h>
 #include <Python/NewPythonHandler.h>
 #include <type_traits>
+#include <condition_variable>
 #include <QLabel>
 #include <QTableWidget>
 #include <QPushButton>
 
 class IChimeraQtWindow;
+class ExpThreadWorker;
 
 class CalibrationManager : public IChimeraSystem {
 	public:
@@ -32,6 +34,7 @@ class CalibrationManager : public IChimeraSystem {
 		void initialize (IChimeraQtWindow* parent, AiSystem* ai, AoSystem* ao, DoSystem* ttls_in,
 			std::vector<std::reference_wrapper<ArbGenCore>> arbGensIn, NewPythonHandler* python_in);
 		void runAllThreaded ();
+		void inExpRunAllThreaded(ExpThreadWorker* expThread, bool calibrateOnlyActive);
 		void calibrateThreaded (calSettings& cal, unsigned which);
 		bool wantsExpAutoCal ();
 		void handleSaveConfig(std::stringstream& configStream);
@@ -41,19 +44,22 @@ class CalibrationManager : public IChimeraSystem {
 		void handleOpenMasterConfig (ConfigStream& configStream);
 		void handleOpenConfig(ConfigStream& configStream);
 		std::vector<calSettings> getCalibrationInfo ();
-		void standardStartThread (std::vector<std::reference_wrapper<calSettings>> calibrations);
+		void standardStartThread (std::vector<std::reference_wrapper<calSettings>> calibrations, ExpThreadWorker* expThread= nullptr);
 		void setCalibrations(std::vector<calSettings> cals);
 		void refreshListview ();
 		static std::vector<double> calPtTextToVals (QString qtxt);
 		// no boundary check is only used in setting the plot of the calibration, in the experiment, the boundary check should always be on
 		static double calibrationFunction (double val, calResult& calibration, IChimeraSystem* parent = nullptr, bool boundaryCheck = true);
 
-		
+		std::mutex& calLock() { return calibrationLock; }
+		std::condition_variable& calConditionVariable() { return calibrationConditionVariable; }
+		bool isCalibrationRunning() { return calibrationRunning; }
+
 	public:
 		const std::string systemDelim = "CALIBRATION_MANAGER";
 
 	private:
-		
+		bool calibrationRunning = false;
 		QLabel* calsHeader;
 		CQPushButton* calibrateAllButton;
 		CQCheckBox* expAutoCalButton;
@@ -73,6 +79,9 @@ class CalibrationManager : public IChimeraSystem {
 		DoSystem* ttls;
 		std::vector<std::reference_wrapper<ArbGenCore>> arbGens;
 		NewPythonHandler* pythonHandler;
+		// for expThread in-exp calibration
+		std::mutex calibrationLock;
+		std::condition_variable calibrationConditionVariable;
 };
 
 

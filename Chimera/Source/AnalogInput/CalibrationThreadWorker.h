@@ -47,6 +47,7 @@ Q_SIGNALS:
 		void newCalibrationDataPoint (QPointF point);
 		void finishedCalibration(calSettings cal);
 		void updateBoxColor(QString color, QString systemDelim);
+		void mainProcessFinish();
 	private:
 		CalibrationThreadInput input;
 };

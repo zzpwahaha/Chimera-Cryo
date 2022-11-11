@@ -9,6 +9,7 @@
 #include "GeneralObjects/ChimeraStyleSheets.h"
 #include <PrimaryWindows/IChimeraQtWindow.h>
 #include <PrimaryWindows/QtMainWindow.h>
+#include <ExperimentThread/ExpThreadWorker.h>
 #include <qapplication.h>
 #include <qlayout.h>
 
@@ -595,7 +596,33 @@ void CalibrationManager::runAllThreaded () {
 	standardStartThread (calInput);
 }
 
-void CalibrationManager::standardStartThread (std::vector<std::reference_wrapper<calSettings>> calsToRun) {
+void CalibrationManager::inExpRunAllThreaded(ExpThreadWorker* expThread, bool calibrateOnlyActive)
+{
+	calibrateOnlyActive ? 
+		emit notification(qstr("In-Exp Calibration: Running Only Experiment Active Calibrations.\n"), 0) :
+		emit notification(qstr("In-Exp Calibration: Running All Calibrations.\n"), 0);
+	
+	std::vector<std::reference_wrapper<calSettings>> calInput;
+	for (auto& cal : calibrations) {
+		if (calibrateOnlyActive) {
+			if (cal.result.active) {
+				calInput.push_back(cal);
+			}
+		}
+		else {
+			calInput.push_back(cal);
+		}
+	}
+
+	standardStartThread(calInput, expThread);
+}
+
+void CalibrationManager::standardStartThread (std::vector<std::reference_wrapper<calSettings>> calsToRun, ExpThreadWorker* expThread) 
+{
+	if (calibrationRunning) {
+		emit error("Calibration thread is still running, please wait until it finishes to arm another calibration!\r\n", 0);
+		return;
+	}
 	CalibrationThreadInput input;
 	input.calibrations = calsToRun;
 	input.arbGens = arbGens;
@@ -635,13 +662,30 @@ void CalibrationManager::standardStartThread (std::vector<std::reference_wrapper
 			refreshListview ();
 		});
 
+	// For calThread to exit and emit finished signal, see https://mayaposch.wordpress.com/2011/11/01/how-to-really-truly-use-qthreads-the-full-explanation/ 
+	// Also this need to be direct connection, i.e. the 'quit' slot should be excuted in the 'threadWorker' thread, not the main thread, which is where 'thread' lives in
+	//	This connection type is different from the expThread because during the in-exp cal, the main thread is frozen with a waitcondition
+	//  and the defaul connection type, which is autoconnection, will want to excute the slot in the main thread (where the 'thread' object lives in, even though the thread that it represents is a completely differet thread)
+	//  if two objects connected are not in the same thread. But due to the aforementioned reason, the main thread is frozen. So we need DirectConnection
+	connect(threadWorker, &CalibrationThreadWorker::mainProcessFinish, thread, &QThread::quit, Qt::DirectConnection); 
+
 	connect (thread, &QThread::started, threadWorker, &CalibrationThreadWorker::runAll);
-	connect (thread, &QThread::finished, thread, &QObject::deleteLater);
-	connect (thread, &QThread::finished, threadWorker, &QObject::deleteLater);
+	connect(threadWorker, &CalibrationThreadWorker::mainProcessFinish, threadWorker, &QObject::deleteLater);
+	connect(threadWorker, &QObject::destroyed, thread, &QObject::deleteLater);
+	if (expThread == nullptr) {
+		connect(thread, &QThread::finished, this, [this]() { calibrationRunning = false; });
+	}
 	connect(threadWorker, &CalibrationThreadWorker::updateBoxColor, this->parentWin->mainWin,
 		&QtMainWindow::handleColorboxUpdate);
+	if (expThread != nullptr) {
+		connect(thread, &QThread::finished, this, [this]() { 
+			std::unique_lock<std::mutex> lock(calibrationLock);
+			calibrationRunning = false;
+			calibrationConditionVariable.notify_all(); });
+	}
 
 	thread->start ();
+	calibrationRunning = true;
 }
 
 void CalibrationManager::setCalibrations(std::vector<calSettings> cals)
@@ -651,14 +695,9 @@ void CalibrationManager::setCalibrations(std::vector<calSettings> cals)
 }
 
 void CalibrationManager::calibrateThreaded (calSettings& cal, unsigned which) {
-	QElapsedTimer et;
-	et.start();
 	std::vector<std::reference_wrapper<calSettings>> calInput;
-	qDebug() << "before pushing back all input at " << et.elapsed();
 	calInput.push_back (cal);
-	qDebug() << "after pushing back all input at " << et.elapsed();
 	standardStartThread (calInput);
-	qDebug() << "after preparing thread" << et.elapsed();
 }
 
 void CalibrationManager::determineCalMinMax (calResult& res) {

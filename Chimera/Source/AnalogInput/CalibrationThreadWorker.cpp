@@ -45,16 +45,21 @@ void CalibrationThreadWorker::runAll () {
 	Sleep(50);
 	input.ao->setDacStatus(aoInitStatus);
 	emit updateBoxColor("Gray", "AI-SYSTEM");
+	emit mainProcessFinish();
 }
 
 void CalibrationThreadWorker::calibrate (calSettings& cal, unsigned which) {
 	if (!cal.active) {
+		cal.calibrated = false;
 		return;
 	}
-	auto& result = cal.result;
-	emit startingNewCalibration (cal);
-	emit notification(qstr("Running Calibration " + result.calibrationName + ".\n"));
+	emit startingNewCalibration(cal);
+	emit notification(qstr("Running Calibration " + cal.result.calibrationName + ".\n"));
+	cal.calibrated = false;
 	cal.currentlyCalibrating = true;
+	//auto& result = cal.result;
+	calResult result(cal.result); // copy cal.result in case the calibration failed, in which case it should/will fall back to the old calibration value
+
 	//cal.result.includesSqrt = cal.includeSqrt;
 	input.ttls->zeroBoard ();
 	Sleep(50);
@@ -74,22 +79,17 @@ void CalibrationThreadWorker::calibrate (calSettings& cal, unsigned which) {
 	unsigned aoNum = cal.aoControlChannel;
 	result.ctrlVals = CalibrationManager::calPtTextToVals (cal.ctrlPtString);
 	for (auto calPoint : result.ctrlVals) {
-		try {
-			if (cal.useAg) {
-				auto& ag = input.arbGens[int(cal.whichAg)].get();
-				dcInfo tempInfo;
-				tempInfo.dcLevel = str (calPoint);
-				std::vector<parameterType> var = std::vector<parameterType>();
-				tempInfo.dcLevel.internalEvaluate (var, 1);
-				ag.setDC (cal.agChannel, tempInfo, 0);
-				ag.outputOn(cal.agChannel);
-			}
-			else {
-				input.ao->setSingleDac (aoNum, calPoint);
-			}
+		if (cal.useAg) {
+			auto& ag = input.arbGens[int(cal.whichAg)].get();
+			dcInfo tempInfo;
+			tempInfo.dcLevel = str (calPoint);
+			std::vector<parameterType> var = std::vector<parameterType>();
+			tempInfo.dcLevel.internalEvaluate (var, 1);
+			ag.setDC (cal.agChannel, tempInfo, 0);
+			ag.outputOn(cal.agChannel);
 		}
-		catch (ChimeraError & err) {
-			emit error (err.qtrace ());
+		else {
+			input.ao->setSingleDac (aoNum, calPoint);
 		}
 		Sleep(100); // give some time for the analog output to change and settle..
 		// try maxTries to read before yell out error
@@ -121,6 +121,7 @@ void CalibrationThreadWorker::calibrate (calSettings& cal, unsigned which) {
 
 	CalibrationManager::determineCalMinMax (cal.result);
 	cal.currentlyCalibrating = false;
+
 	std::ofstream file (str(CODE_ROOT)+"\\Data-Analysis-Code\\CalibrationValuesFile.txt");
 	if (!file.is_open ()) {
 		thrower ("Failed to Write Calibration Results!");
@@ -152,7 +153,7 @@ void CalibrationThreadWorker::calibrate (calSettings& cal, unsigned which) {
 	}
 
 	//result.includesSqrt = cal.includeSqrt;
-	//calibrationTable->repaint ();
+	cal.result = result;
 	cal.calibrated = true;
 	if (cal.useAg) {
 		auto& ag = input.arbGens[int(cal.whichAg)].get();
