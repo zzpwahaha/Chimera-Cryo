@@ -150,9 +150,9 @@ void AoCore::resetDacEvents()
 void AoCore::calculateVariations(std::vector<parameterType>& params, ExpThreadWorker* threadworker,
 	std::vector<calSettings>& calibrationSettings)
 {
-	std::vector<calResult> calibrations(calibrationSettings.size());
-	for (size_t idx = 0; idx < calibrationSettings.size(); idx++) {
-		std::swap(calibrations[idx], calibrationSettings[idx].result);
+	std::vector<calResult> calibrations;
+	for (auto& calset : calibrationSettings) {
+		calibrations.push_back(calset.result);
 	}
 
 	CodeTimer sTimer;
@@ -175,7 +175,7 @@ void AoCore::calculateVariations(std::vector<parameterType>& params, ExpThreadWo
 	bool resolutionWarningPosted = false;
 	bool nonIntegerWarningPosted = false;
 	sTimer.tick("After-init");
-	try {
+
 		for (auto variationInc : range(variations)) {
 			if (variationInc == 0) {
 				sTimer.tick("Variation-" + str(variationInc) + "-Start");
@@ -385,7 +385,7 @@ void AoCore::calculateVariations(std::vector<parameterType>& params, ExpThreadWo
 					// pass the ramp points and time directly to a single or two dacCommandList element
 					long long int codeInit = long long int((initValue / 20 + 0.5) * 65535); // ((dacval+10)/20*65535), [-10,10]->[0,65535], 65536 pts and 65535 intervals
 					long long int codeFinl = long long int((finalValue / 20 + 0.5) * 65535);
-					long long int incr = ((codeFinl << 16) - (codeInit << 16)) / numStepsInt; // https://stackoverflow.com/questions/7221409/is-unsigned-integer-subtraction-defined-behavior The result of a subtraction generating a negative number in an unsigned type is well-defined: //[...] A computation involving unsigned operands can never overflow, because a result that cannot be represented by the resulting unsigned integer type is reduced modulo the number that is one greater than the largest value that can be represented by the resulting type. (ISO / IEC 9899:1999 (E)§6.2.5 / 9) //As you can see, (unsigned)0 - (unsigned)1 equals - 1 modulo UINT_MAX + 1, or in other words, UINT_MAX.
+					long long int incr = ((codeFinl << 16) - (codeInit << 16)) / numStepsInt; // https://stackoverflow.com/questions/7221409/is-unsigned-integer-subtraction-defined-behavior The result of a subtraction generating a negative number in an unsigned type is well-defined: //[...] A computation involving unsigned operands can never overflow, because a result that cannot be represented by the resulting unsigned integer type is reduced modulo the number that is one greater than the largest value that can be represented by the resulting type. (ISO / IEC 9899:1999 (E)ï¿½6.2.5 / 9) //As you can see, (unsigned)0 - (unsigned)1 equals - 1 modulo UINT_MAX + 1, or in other words, UINT_MAX.
 					long long int res = ((codeFinl << 16) - (codeInit << 16)) % numStepsInt; // https://stackoverflow.com/questions/7594508/modulo-operator-with-negative-values, (-7/3) => -2;-2 * 3 = > -6;so a % b = > -1; (7 / -3) = > -2;- 2 * -3 = > 6;so a % b = > 1
 					if (res == 0) { // no rounding error, just push back
 						tempEvent.value = initValue;
@@ -441,16 +441,9 @@ void AoCore::calculateVariations(std::vector<parameterType>& params, ExpThreadWo
 				}
 			}
 		}
-	}
-	catch (ChimeraError& e) {
-		// swap it back first in case of throw
+
 		for (size_t idx = 0; idx < calibrationSettings.size(); idx++) {
-			std::swap(calibrations[idx], calibrationSettings[idx].result);
-		}
-		throwNested(e.trace());
-	}
-	for (size_t idx = 0; idx < calibrationSettings.size(); idx++) {
-		std::swap(calibrations[idx], calibrationSettings[idx].result);
+		calibrationSettings[idx].result = calibrations[idx];
 	}
 }
 
