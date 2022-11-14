@@ -56,7 +56,6 @@ void CalibrationThreadWorker::calibrate (calSettings& cal, unsigned which) {
 	emit startingNewCalibration(cal);
 	emit notification(qstr("Running Calibration " + cal.result.calibrationName + ".\n"));
 	cal.calibrated = false;
-	cal.currentlyCalibrating = true;
 	//auto& result = cal.result;
 	calResult result(cal.result); // copy cal.result in case the calibration failed, in which case it should/will fall back to the old calibration value
 
@@ -120,7 +119,6 @@ void CalibrationThreadWorker::calibrate (calSettings& cal, unsigned which) {
 	}
 
 	CalibrationManager::determineCalMinMax (cal.result);
-	cal.currentlyCalibrating = false;
 
 	std::ofstream file (str(CODE_ROOT)+"\\Data-Analysis-Code\\CalibrationValuesFile.txt");
 	if (!file.is_open ()) {

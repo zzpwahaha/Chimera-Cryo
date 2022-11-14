@@ -60,7 +60,6 @@ struct calSettings : public calBase {
 	bool calibrated = false;
 	std::vector<std::pair<unsigned, unsigned> > ttlConfig;
 	std::vector<std::pair<unsigned, double>> aoConfig;
-	bool currentlyCalibrating = false;
 	unsigned int avgNum = 100;
 	// importantly, this value reflects the setting for the next calibration, whereas the version in the result 
 	// refers to whether that particular result includes the sqrt. 
