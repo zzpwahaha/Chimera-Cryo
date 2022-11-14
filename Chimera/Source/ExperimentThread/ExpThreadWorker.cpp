@@ -56,21 +56,17 @@ void ExpThreadWorker::experimentThreadProcedure () {
 		}
 		input->numVariations = determineVariationNumber(expRuntime.expParams);
 
-		/// In-Experiment calibration
-		if (expRuntime.mainOpts.inExpCalibration) {
-			emit notification("Enabling In-Exp calibration\r\n", 0);
-			input->calManager->inExpRunAllThreaded(this, false);
-			std::unique_lock<std::mutex> lock(input->calManager->calLock());
-			input->calManager->calConditionVariable().wait(lock, [this] { 
-				return !input->calManager->isCalibrationRunning(); });
-		}
-
 		/// The Variation Calculation Step.
 		emit notification ("Calculating All Variation Data...\r\n");
 		for (auto& device : input->devices.list) {
 			deviceCalculateVariations (device, expRuntime.expParams);
 		}
 		calculateAdoVariations (expRuntime);
+
+		/// In-Experiment calibration
+		calibrationOptionReport(expRuntime);
+		inExpCalibrationProcedure(expRuntime, false);
+		emit startInExpCalibrationTimer();
 
 		/// Anaylsis preparation
 		emit prepareAnalysis();
@@ -102,10 +98,11 @@ void ExpThreadWorker::experimentThreadProcedure () {
 				}
 				emit notification("Running Experiment.\n");
 				for (const auto& repInc : range(expRuntime.repetitions)) {
-					handlePause(isPaused, isAborting);
+					inExpCalibrationRun(expRuntime);
 					emit notification(qstr("Starting Repetition #" + qstr(repInc) + "\n"), 2);
+					handlePause(isPaused, isAborting);
 					startRep(repInc, variationInc, input->skipNext == nullptr ? false : input->skipNext->load());
-					Sleep(finaltimes[variationInc]+10);//wait 500ms between rep, added temporarily by zzp 20210225
+					Sleep(finaltimes[variationInc]+10);
 				}
 			}
 		}
@@ -117,6 +114,7 @@ void ExpThreadWorker::experimentThreadProcedure () {
 				emit notification(qstr("Starting Repetition #" + qstr(repInc) + "\n"), 0);
 				emit repUpdate(repInc);
 				for (const auto& variationInc : range(determineVariationNumber(expRuntime.expParams))) {
+					inExpCalibrationRun(expRuntime);
 					emit notification("Programming Devices for Variation...\n", 2);
 					qDebug() << "Programming Devices for Variation"<< variationInc;
 					for (auto& device : input->devices.list) {
@@ -125,7 +123,7 @@ void ExpThreadWorker::experimentThreadProcedure () {
 					initVariation(variationInc, expRuntime.expParams);
 					handlePause(isPaused, isAborting);
 					startRep(repInc, variationInc, input->skipNext == nullptr ? false : input->skipNext->load());
-					Sleep(finaltimes[variationInc]+10);//wait 500ms between rep, added temporarily by zzp 20210225
+					Sleep(finaltimes[variationInc]+10);
 				}
 			}
 		}
@@ -1182,7 +1180,7 @@ void ExpThreadWorker::calculateAdoVariations (ExpRuntimeData& runtime) {
 		emit notification("Calcualting OL system variations...\n", 1);
 		input->ol.calculateVariations(runtime.expParams, this);
 
-		emit notification ("Running final ado checks...\n");
+		emit notification ("Preparing DO, AO, DDS, OL for experiment and Running final ado checks...\n");
 		for (auto variationInc : range (variations)) {
 			if (isAborting) { thrower (abortString); }
 			double& currLoadSkipTime = loadSkipTimes[variationInc];
@@ -1194,7 +1192,7 @@ void ExpThreadWorker::calculateAdoVariations (ExpRuntimeData& runtime) {
 			
 			input->ao.checkTimingsWork(variationInc);
 		}
-		emit warn(cstr(warnings));
+		emit warn(qstr(warnings));
 		unsigned __int64 totalTime = 0;
 		std::vector<double> finaltimes = input->ttls.getFinalTimes();
 		double sum = std::accumulate(finaltimes.begin(), finaltimes.end(), 0.0);
@@ -1407,6 +1405,88 @@ void ExpThreadWorker::deviceNormalFinish (IDeviceCore& device) {
 	}
 	else {
 		emit updateBoxColor ("Dark gray", device.getDelim ().c_str ());
+	}
+}
+
+void ExpThreadWorker::calibrationOptionReport(const ExpRuntimeData& runtime)
+{	
+	// this should be placed after the first deviceCalculateVariations and calculateAdoVariations
+	bool calUsed = false;
+	for (auto& cal : input->calibrations) {
+		calUsed = calUsed || cal.result.active;
+	}
+	if (!runtime.mainOpts.inExpCalibration && calUsed) {
+		emit notification("Calibration is used in the experiment. In-Exp calibration is NOT enabled.\r\n", 0);
+	}
+	else if (runtime.mainOpts.inExpCalibration && !calUsed) {
+		emit warn("Calibration is NOT used in the experiment but In-Exp calibration is enabled. Please make sure this is what you really want.\r\n", 0);
+	}
+	else if (!runtime.mainOpts.inExpCalibration && !calUsed) {
+		emit notification("Calibration is NOT used in the experiment. In-Exp calibration is NOT enabled.\r\n", 0);
+	}
+	else if (runtime.mainOpts.inExpCalibration && calUsed) {
+		emit notification("Calibration is used in the experiment. In-Exp calibration is enabled.\r\n", 0);
+	}
+}
+
+void ExpThreadWorker::inExpCalibrationProcedure(ExpRuntimeData& runtime, bool calibrateOnlyExpActive)
+{
+	// this should be placed after the first deviceCalculateVariations and calculateAdoVariations
+	if (!runtime.mainOpts.inExpCalibration) {
+		return;
+	}
+	calibrateOnlyExpActive ?
+		emit notification(qstr("In-Exp Calibration: Running Only Experiment Active Calibrations.\n"), 0) :
+		emit notification(qstr("In-Exp Calibration: Running All Calibrations.\n"), 0);
+
+	emit expCalibrationsSet(input->calibrations); // blocking connection, wait for slot to return so that alway set expCal before run another inexp cal.
+	input->calManager->inExpRunAllThreaded(this, calibrateOnlyExpActive);
+	std::unique_lock<std::mutex> lock(input->calManager->calLock());
+	input->calManager->calConditionVariable().wait(lock, [this] {
+		return !input->calManager->isCalibrationRunning(); });
+	lock.unlock();
+	emit notification("In-Exp Calibration: Finished calibration and proceed to recalculate variations", 1);
+
+	input->calibrations = input->calManager->getCalibrationInfo();
+	for (auto& cal : input->calibrations) {
+		if (cal.active && !cal.calibrated && cal.result.active) {
+			emit warn("In-Exp calibration failed for " + qstr(cal.result.calibrationName) + ". Falling back to the previous calibration result.\r\n", 0);
+		}
+		else if (cal.active && !cal.calibrated && !cal.result.active) {
+			emit warn("In-Exp calibration failed for " + qstr(cal.result.calibrationName) + ". But this is not used in the experiment.\r\n", 1);
+		}
+	}
+
+	auto variations = determineVariationNumber(runtime.expParams);
+	emit notification("In-Exp Calibration: Re-Calcualting DO system variations...\n", 2);
+	input->ttls.calculateVariations(runtime.expParams, this);
+	emit notification("In-Exp Calibration: Re-Calcualting AO system variations...\n", 2);
+	input->ao.calculateVariations(runtime.expParams, this, input->calibrations);
+	emit notification("In-Exp Calibration: Re-Calcualting DDS system variations...\n", 2);
+	input->dds.calculateVariations(runtime.expParams, this, input->calibrations);
+	emit notification("In-Exp Calibration: Re-Calcualting OL system variations...\n", 2);
+	input->ol.calculateVariations(runtime.expParams, this);
+	
+	emit notification("In-Exp Calibration: Preparing DO, AO, DDS, OL for experiment and Running final ado checks...\n", 1);
+	std::string warnings;
+	for (auto variationInc : range(variations)) {
+		double& currLoadSkipTime = loadSkipTimes[variationInc];
+		currLoadSkipTime = convertToTime(loadSkipTime, runtime.expParams, variationInc);
+		input->aoSys.standardExperimentPrep(variationInc, runtime.expParams, currLoadSkipTime);
+		input->ddsSys.standardExperimentPrep(variationInc);
+		input->olSys.standardExperimentPrep(variationInc, input->ttls, warnings);
+		input->ttlSys.standardExperimentPrep(variationInc, currLoadSkipTime, runtime.expParams);//make sure this is the last one, since offsetlock can insert in ttl sequence 
+		input->ao.checkTimingsWork(variationInc);
+	}
+	emit warn(qstr(warnings), 2);
+	emit notification("In-Exp Calibration: Finished Re-Calcualting DAC/DDS system variations", 1);
+}
+
+void ExpThreadWorker::inExpCalibrationRun(ExpRuntimeData& runtime)
+{
+	if (input->calInterrupt->load()) {
+		input->calInterrupt->store(false);
+		inExpCalibrationProcedure(runtime, true);
 	}
 }
 

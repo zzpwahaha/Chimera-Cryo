@@ -58,6 +58,13 @@ void MainOptionsControl::initialize( IChimeraQtWindow* parent )
 }
 
 void MainOptionsControl::handleSaveConfig(ConfigStream& saveFile){
+	try {
+		// in case people forget to press enter on inExpCalibrationDurationEdit before they start exp or save
+		currentOptions.inExpCalInterval = boost::lexical_cast<double>(str(inExpCalControl->inExpCalibrationDurationEdit->text()));
+	}
+	catch (boost::bad_lexical_cast&) {
+		throwNested("Bad value for calibration interval value!");
+	}
 	saveFile << "MAIN_OPTIONS"
 			 << "\n/*Randomize Variations?*/ " << randomizeVariationsButton->isChecked()
 			 << "\n/*Repetition First Over Variation?*/ " << repetitionFirstButton->isChecked()
@@ -100,14 +107,22 @@ void MainOptionsControl::setOptions ( mainOptions opts ){
 	repetitionFirstButton->setChecked(currentOptions.repetitionFirst);
 	inExpCalControl->inExpCalibrationButton->setChecked(currentOptions.inExpCalibration);
 	inExpCalControl->inExpCalibrationDurationEdit->setText(qstr(currentOptions.inExpCalInterval, 2));
-	atomThresholdForSkipEdit->setText( cstr ( currentOptions.atomSkipThreshold ) );
+	if (inExpCalControl->inExpCalibrationButton->isChecked()) {
+		inExpCalControl->timer->start(int(currentOptions.inExpCalInterval * 60 * 1000));
+	}
+	atomThresholdForSkipEdit->setText( qstr ( currentOptions.atomSkipThreshold ) );
 }
 
 mainOptions MainOptionsControl::getOptions(){
 	currentOptions.randomizeVariations = randomizeVariationsButton->isChecked();
 	currentOptions.repetitionFirst= repetitionFirstButton->isChecked();
 	currentOptions.inExpCalibration = inExpCalControl->inExpCalibrationButton->isChecked();
-	currentOptions.inExpCalInterval = inExpCalControl->interval;
+	try {
+		currentOptions.inExpCalInterval = boost::lexical_cast<double>(str(inExpCalControl->inExpCalibrationDurationEdit->text()));
+	}
+	catch (boost::bad_lexical_cast&) {
+		throwNested("Bad value for calibration interval value!");
+	}
 	currentOptions.delayAutoCal = delayAutoCal->isChecked ();
 	try{
 		currentOptions.atomSkipThreshold = boost::lexical_cast<unsigned long>( str( atomThresholdForSkipEdit->text() ) );
@@ -116,4 +131,32 @@ mainOptions MainOptionsControl::getOptions(){
 		throwNested ( "failed to convert atom threshold for load-skip to an unsigned long!" );
 	}
 	return currentOptions;
+}
+
+void MainOptionsControl::startInExpCalibrationTimer()
+{
+	if (inExpCalControl->inExpCalibrationButton->isChecked()) {
+		double interval;
+		try {
+			interval = boost::lexical_cast<double>(str(inExpCalControl->inExpCalibrationDurationEdit->text()));
+		}
+		catch (boost::bad_lexical_cast&) { 
+			thrower("Invalid InExpCalibration Duration ??? This should not happen.");
+		}
+		if (inExpCalControl->inExpCalibrationButton->isChecked() != currentOptions.inExpCalibration ||
+			fabs(interval - currentOptions.inExpCalInterval) > 1e6 * DBL_EPSILON) {
+			thrower("Inconsistent InExpCalibration Option or Duration ??? This is a low level bug.");;
+		}
+		inExpCalControl->interrupt = false;
+		inExpCalControl->timer->start(int(interval * 60 * 1000));
+	}
+	else {
+		inExpCalControl->timer->stop();
+		inExpCalControl->interrupt = false;
+	}
+}
+
+std::atomic<bool>* MainOptionsControl::interruptPointer()
+{
+	return &inExpCalControl->interrupt;
 }

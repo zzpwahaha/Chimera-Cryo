@@ -40,6 +40,7 @@ struct ExperimentThreadInput{
 	ExperimentThreadInput ( IChimeraQtWindow* win );
 	realTimePlotterInput* plotterInput;
 	CalibrationManager* calManager;
+	std::atomic<bool>* calInterrupt = nullptr;
 	profileSettings profile;
 
 	DoSystem& ttlSys;

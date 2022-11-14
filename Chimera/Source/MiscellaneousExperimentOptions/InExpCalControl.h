@@ -16,7 +16,6 @@ public:
 	void initialize(IChimeraQtWindow* parent);
 private:
 	std::atomic<bool> interrupt = false;
-	double interval; // in the unit of minutes
 	QTimer* timer = nullptr;
 
 

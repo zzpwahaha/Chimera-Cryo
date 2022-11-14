@@ -8,8 +8,7 @@
 #include <boost/lexical_cast.hpp>
 
 InExpCalControl::InExpCalControl(IChimeraQtWindow* parent)
-	: interval(10.0)
-	, timer(new QTimer(parent))
+	: timer(new QTimer(parent))
 {
 	parent->connect(timer, &QTimer::timeout, parent, [this]() { interrupt = true; });
 }
@@ -28,6 +27,7 @@ void InExpCalControl::initialize(IChimeraQtWindow* parent)
 	parent->connect(inExpCalibrationButton, &QCheckBox::stateChanged, parent, [this, changeBkgColor]() {
 		changeBkgColor(inExpCalibrationButton);
 		if (inExpCalibrationButton->isChecked()) {
+			double interval;
 			try {
 				interval = boost::lexical_cast<double>(str(inExpCalibrationDurationEdit->text()));
 			}
@@ -44,6 +44,7 @@ void InExpCalControl::initialize(IChimeraQtWindow* parent)
 
 	inExpCalibrationDurationEdit = new QLineEdit("10.0", parent);
 	parent->connect(inExpCalibrationDurationEdit, &QLineEdit::returnPressed, parent, [this]() {
+		double interval;
 		try {
 			interval = boost::lexical_cast<double>(str(inExpCalibrationDurationEdit->text()));
 			if (inExpCalibrationButton->isChecked()) {

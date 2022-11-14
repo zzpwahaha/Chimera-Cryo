@@ -275,7 +275,8 @@ void QtMainWindow::startExperimentThread (ExperimentThreadInput* input){
 	connect (expWorker, &ExpThreadWorker::calibrationFinish, this, &QtMainWindow::onAutoCalFin);
 	connect (expWorker, &ExpThreadWorker::errorExperimentFinish, this, &QtMainWindow::onFatalError);
 	connect (expWorker, &ExpThreadWorker::expParamsSet, this->auxWin, &QtAuxiliaryWindow::updateExpActiveInfo);
-	connect(expWorker, &ExpThreadWorker::expCalibrationsSet, this->auxWin, &QtAuxiliaryWindow::updateCalActiveInfo);
+	connect(expWorker, &ExpThreadWorker::expCalibrationsSet, this->auxWin, &QtAuxiliaryWindow::updateCalActiveInfo, Qt::BlockingQueuedConnection); // want expthread wait untill cal is set
+	connect(expWorker, &ExpThreadWorker::startInExpCalibrationTimer, &(this->mainOptsCtrl), &MainOptionsControl::startInExpCalibrationTimer, Qt::BlockingQueuedConnection);
 
 	connect (expThread, &QThread::started, expWorker, &ExpThreadWorker::process);
 	connect (expThread, &QThread::finished, expWorker, &QObject::deleteLater);
@@ -306,6 +307,7 @@ bool QtMainWindow::experimentIsPaused () { return expWorker->getIsPaused (); }
 void QtMainWindow::fillMasterThreadInput (ExperimentThreadInput* input){
 	input->sleepTime = debugger.getOptions ().sleepTime;
 	input->profile = profile.getProfileSettings ();
+	input->calInterrupt = mainOptsCtrl.interruptPointer();
 }
 
 void QtMainWindow::logParams (DataLogger* logger, ExperimentThreadInput* input){

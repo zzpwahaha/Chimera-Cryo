@@ -80,6 +80,12 @@ class ExpThreadWorker : public QObject
 		void deviceProgramVariation (IDeviceCore& device, std::vector<parameterType>& expParams, unsigned variationInc);
 		void deviceCalculateVariations (IDeviceCore& device, std::vector<parameterType>& expParams);
 		void deviceNormalFinish (IDeviceCore& device);
+
+		/*In-Exp calibration stuff*/
+		void calibrationOptionReport(const ExpRuntimeData& runtime);
+		void inExpCalibrationProcedure(ExpRuntimeData& runtime, bool calibrateOnlyExpActive);
+		void inExpCalibrationRun(ExpRuntimeData& runtime);
+
 		
 		// I've forgotten why there are two of these. 
 		timeType loadSkipTime;
@@ -115,6 +121,7 @@ class ExpThreadWorker : public QObject
         void errorExperimentFinish (QString, profileSettings);
 		void expParamsSet (std::vector<parameterType> expParams);
 		void expCalibrationsSet (std::vector<calSettings> calibrations);
+		void startInExpCalibrationTimer();
         void mainProcessFinish (); 
 
     private:

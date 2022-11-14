@@ -35,6 +35,10 @@ class MainOptionsControl : public QWidget
 		void setOptions ( mainOptions opts );
 		void initialize( IChimeraQtWindow* parent );
 		mainOptions getOptions();
+		std::atomic<bool>* interruptPointer();
+	public slots:
+		void startInExpCalibrationTimer();
+
 
 	private:
 		QLabel* header;

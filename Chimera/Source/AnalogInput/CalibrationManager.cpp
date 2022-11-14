@@ -323,6 +323,7 @@ void CalibrationManager::handleContextMenu (const QPoint& pos) {
 }
 
 std::vector<calSettings> CalibrationManager::getCalibrationInfo (){
+	const std::lock_guard<std::mutex> lock(calibrationLock);
 	return calibrations;
 }
 
@@ -598,10 +599,6 @@ void CalibrationManager::runAllThreaded () {
 
 void CalibrationManager::inExpRunAllThreaded(ExpThreadWorker* expThread, bool calibrateOnlyActive)
 {
-	calibrateOnlyActive ? 
-		emit notification(qstr("In-Exp Calibration: Running Only Experiment Active Calibrations.\n"), 0) :
-		emit notification(qstr("In-Exp Calibration: Running All Calibrations.\n"), 0);
-	
 	std::vector<std::reference_wrapper<calSettings>> calInput;
 	for (auto& cal : calibrations) {
 		if (calibrateOnlyActive) {
