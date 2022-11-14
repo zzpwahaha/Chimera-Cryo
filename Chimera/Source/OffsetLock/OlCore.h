@@ -26,6 +26,8 @@ public:
 	void setNames(std::array<std::string, size_t(OLGrid::total)> namesIn);
 
 	void resetOLEvents();
+	void prepareForce();
+	void sizeDataStructures(unsigned variations);
 	void initializeDataObjects(unsigned variationNum);
 	std::vector<OlCommand> getOlCommand(unsigned variation);
 	void setOLCommandForm(OlCommandForm command);

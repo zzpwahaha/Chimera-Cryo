@@ -76,17 +76,26 @@ void OlCore::resetOLEvents()
 	olChannelSnapshots.clear();
 }
 
-void OlCore::initializeDataObjects(unsigned variationNum)
+void OlCore::prepareForce()
 {
-	olCommandFormList.clear();
+	sizeDataStructures(1);
+}
+
+void OlCore::sizeDataStructures(unsigned variations)
+{
 	olCommandList.clear();
 	olSnapshots.clear();
 	olChannelSnapshots.clear();
 
-	olCommandFormList.resize(variationNum);
-	olCommandList.resize(variationNum);
-	olSnapshots.resize(variationNum);
-	olChannelSnapshots.resize(variationNum);
+	olCommandList.resize(variations);
+	olSnapshots.resize(variations);
+	olChannelSnapshots.resize(variations);
+}
+
+void OlCore::initializeDataObjects(unsigned variationNum)
+{
+	olCommandFormList = std::vector<OlCommandForm>(variationNum);
+	sizeDataStructures(variationNum);
 }
 
 std::vector<OlCommand> OlCore::getOlCommand(unsigned variation)
@@ -135,9 +144,7 @@ void OlCore::calculateVariations(std::vector<parameterType>& variables, ExpThrea
 		variations = 1;
 	}
 	/// imporantly, this sizes the relevant structures.
-	olCommandList = std::vector<std::vector<OlCommand>>(variations);
-	olSnapshots = std::vector<std::vector<OlSnapshot>>(variations);
-	olChannelSnapshots = std::vector<std::vector<OlChannelSnapshot>>(variations);
+	sizeDataStructures(variations);
 
 	bool resolutionWarningPosted = false;
 	bool nonIntegerWarningPosted = false;

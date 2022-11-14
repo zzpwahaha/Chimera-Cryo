@@ -114,6 +114,8 @@ public:
 
 
 	void resetDDSEvents();
+	void prepareForce();
+	void sizeDataStructures(unsigned variations);
 	void initializeDataObjects(unsigned variationNum);
 	std::vector<DdsCommand> getDdsCommand(unsigned variation);
 	void setDDSCommandForm(DdsCommandForm command);

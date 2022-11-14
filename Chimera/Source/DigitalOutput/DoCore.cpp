@@ -141,7 +141,7 @@ void DoCore::sizeDataStructures (unsigned variations){
 }
 
 void DoCore::initializeDataObjects(unsigned variationNum) {
-	ttlCommandFormList = std::vector<DoCommandForm>();
+	ttlCommandFormList = std::vector<DoCommandForm>(variationNum);
 	sizeDataStructures(variationNum);
 }
 
@@ -609,8 +609,16 @@ std::vector<DoCommand> DoCore::getTtlCommand(unsigned variation)
 	return ttlCommandList[variation];
 }
 
-std::array<std::string, size_t(DOGrid::total)> DoCore::getAllNames () { return names; }
-void DoCore::resetTtlEvents () { initializeDataObjects (0); }
+std::array<std::string, size_t(DOGrid::total)> DoCore::getAllNames () 
+{ 
+	return names; 
+}
+
+void DoCore::resetTtlEvents () 
+{ 
+	initializeDataObjects (0); 
+}
+
 void DoCore::wait2 (double time) { Sleep (time + 10); }
 
 bool DoCore::isValidTTLName (std::string name){

@@ -457,17 +457,30 @@ void DdsCore::resetDDSEvents()
 	ddsCommandFormList.clear();
 	ddsCommandList.clear();
 	ddsSnapshots.clear();
+	ddsChannelSnapshots.clear();
+}
+
+void DdsCore::prepareForce()
+{
+	// purposefully preserve ddsCommandFormList, for inExpCal
+	sizeDataStructures(1);
+}
+
+void DdsCore::sizeDataStructures(unsigned variations)
+{
+	ddsCommandList.clear();
+	ddsSnapshots.clear();
+	ddsChannelSnapshots.clear();
+
+	ddsCommandList.resize(variations);
+	ddsSnapshots.resize(variations);
+	ddsChannelSnapshots.resize(variations);
 }
 
 void DdsCore::initializeDataObjects(unsigned variationNum)
 {
-	ddsCommandFormList.clear();
-	ddsCommandList.clear();
-	ddsSnapshots.clear();
-
-	ddsCommandFormList.resize(variationNum);
-	ddsCommandList.resize(variationNum);
-	ddsSnapshots.resize(variationNum);
+	ddsCommandFormList = std::vector<DdsCommandForm>(variationNum);
+	sizeDataStructures(variationNum);
 }
 
 std::vector<DdsCommand> DdsCore::getDdsCommand(unsigned variation)
@@ -523,9 +536,7 @@ void DdsCore::calculateVariations(std::vector<parameterType>& variables, ExpThre
 		variations = 1;
 	}
 	/// imporantly, this sizes the relevant structures.
-	ddsCommandList = std::vector<std::vector<DdsCommand>>(variations);
-	ddsSnapshots = std::vector<std::vector<DdsSnapshot>>(variations);
-	ddsChannelSnapshots = std::vector<std::vector<DdsChannelSnapshot>>(variations);
+	sizeDataStructures(variations);
 
 	bool resolutionWarningPosted = false;
 	bool nonIntegerWarningPosted = false;
@@ -842,10 +853,8 @@ void DdsCore::writeDDSs(UINT variation, bool loadSkip)
 
 void DdsCore::setGUIDdsChange(std::vector<std::vector<DdsChannelSnapshot>> channelSnapShot)
 {
-	ddsChannelSnapshots.clear();
-	ddsChannelSnapshots = channelSnapShot;
+	prepareForce();
 	writeDDSs(0, true);
-	resetDDSEvents();
 	int tcp_connect;
 	try {
 		tcp_connect = zynq_tcp.connectTCP(ZYNQ_ADDRESS);
