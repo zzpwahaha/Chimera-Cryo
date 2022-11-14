@@ -39,13 +39,15 @@ public:
 
 	void setDacCommandForm(AoCommandForm command);
 	void initializeDataObjects(unsigned cmdNum);
+	void sizeDataStructures(unsigned variations);
 	void resetDacEvents();
+	void prepareForce();
 
 	void calculateVariations(std::vector<parameterType>& params, 
 		ExpThreadWorker* threadworker, std::vector<calSettings>& calibrationSettings);
 	void organizeDacCommands(unsigned variation, AoSnapshot initSnap);
 	void findLoadSkipSnapshots(double time, std::vector<parameterType>& variables, unsigned variation);
-	void AoCore::formatDacForFPGA(UINT variation, AoSnapshot initSnap);
+	void formatDacForFPGA(UINT variation, AoSnapshot initSnap);
 
 	void writeDacs(unsigned variation, bool loadSkip);
 

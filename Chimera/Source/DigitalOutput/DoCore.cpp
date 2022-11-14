@@ -65,37 +65,6 @@ void DoCore::standardNonExperimentStartDoSequence (DoSnapshot initSnap){
 
 }
 
-void DoCore::initializeDataObjects (unsigned variationNum){
-	ttlCommandFormList = std::vector<DoCommandForm>();
-
-	doFPGA.clear();
-	doFPGA.resize(variationNum);
-
-	ttlCommandList.clear();
-	ttlCommandList.resize(variationNum);
-
-	ttlSnapshots.clear();
-	ttlSnapshots.resize(variationNum);
-
-	loadSkipTtlSnapshots.clear();
-	loadSkipTtlSnapshots.resize(variationNum);
-
-	formattedTtlSnapshots.clear();
-	formattedTtlSnapshots.resize(variationNum);
-
-	loadSkipFormattedTtlSnapshots.clear();
-	loadSkipFormattedTtlSnapshots.resize(variationNum);
-	
-	finalFormatTtlData.clear();
-	finalFormatTtlData.resize(variationNum);
-	
-	loadSkipFinalFormatTtlData.clear();
-	loadSkipFinalFormatTtlData.resize(variationNum);
-
-
-}
-
-
 void DoCore::ttlOn (unsigned row, unsigned column, timeType time){
 	ttlCommandFormList.push_back ({ {row, column}, time, {}, true });
 }
@@ -152,7 +121,11 @@ void DoCore::restructureCommands (){
 	}
 }
 
-
+void DoCore::prepareForce()
+{
+	// purposefully preserve ttlCommandFormList, for inExpCal
+	sizeDataStructures(1);
+}
 
 void DoCore::sizeDataStructures (unsigned variations){
 	/// imporantly, this sizes the relevant structures.
@@ -165,23 +138,12 @@ void DoCore::sizeDataStructures (unsigned variations){
 	ttlSnapshots.clear();
 	ttlSnapshots.resize(variations);
 
-	loadSkipTtlSnapshots.clear();
-	loadSkipTtlSnapshots.resize(variations);
-
-	formattedTtlSnapshots.clear();
-	formattedTtlSnapshots.resize(variations);
-
-	loadSkipFormattedTtlSnapshots.clear();
-	loadSkipFormattedTtlSnapshots.resize(variations);
-
-	finalFormatTtlData.clear();
-	finalFormatTtlData.resize(variations);
-
-	loadSkipFinalFormatTtlData.clear();
-	loadSkipFinalFormatTtlData.resize(variations);
-
 }
 
+void DoCore::initializeDataObjects(unsigned variationNum) {
+	ttlCommandFormList = std::vector<DoCommandForm>();
+	sizeDataStructures(variationNum);
+}
 
 /*
  * Read key values from variables and convert command form to the final commands.
@@ -347,9 +309,7 @@ void DoCore::checkLongTimeRun(unsigned variation)
 
 void DoCore::FPGAForceOutput(DOStatus status)
 {
-
-	resetTtlEvents();
-	sizeDataStructures(1);
+	prepareForce();
 	ttlSnapshots[0].push_back({ 0.1, status });
 	formatForFPGA(0);
 	writeTtlDataToFPGA(0, false);
@@ -380,8 +340,7 @@ void DoCore::FPGAForceOutput(DOStatus status)
 
 void DoCore::FPGAForcePulse(DOStatus status, std::vector<std::pair<unsigned, unsigned>> rowcol, double dur)
 {
-	resetTtlEvents();
-	sizeDataStructures(1);
+	prepareForce();
 	ttlSnapshots[0].push_back({ 0.1, status });
 	for (auto& rc : rowcol)
 	{
@@ -514,21 +473,21 @@ void DoCore::writeTtlDataToFPGA(UINT variation, bool loadSkip) //arguments unuse
 void DoCore::findLoadSkipSnapshots (double time, std::vector<parameterType>& variables, unsigned variation)
 {
 	// find the splitting time and set the loadSkip snapshots to have everything after that time.
-	auto& snaps = ttlSnapshots [variation];
-	auto& loadSkipSnaps = loadSkipTtlSnapshots [variation];
-	for (auto snapshotInc : range (ttlSnapshots [variation].size () - 1))
-	{
-		if (snaps[snapshotInc].time < time && snaps[snapshotInc + 1].time >= time)
-		{
-			loadSkipSnaps = std::vector<DoSnapshot> (snaps.begin () + snapshotInc + 1, snaps.end ());
-			break;
-		}
-	}
-	// need to zero the times.
-	for (auto& snapshot : loadSkipSnaps)
-	{
-		snapshot.time -= time;
-	}
+	//auto& snaps = ttlSnapshots [variation];
+	//auto& loadSkipSnaps = loadSkipTtlSnapshots [variation];
+	//for (auto snapshotInc : range (ttlSnapshots [variation].size () - 1))
+	//{
+	//	if (snaps[snapshotInc].time < time && snaps[snapshotInc + 1].time >= time)
+	//	{
+	//		loadSkipSnaps = std::vector<DoSnapshot> (snaps.begin () + snapshotInc + 1, snaps.end ());
+	//		break;
+	//	}
+	//}
+	//// need to zero the times.
+	//for (auto& snapshot : loadSkipSnaps)
+	//{
+	//	snapshot.time -= time;
+	//}
 }
 
 
@@ -653,8 +612,6 @@ std::vector<DoCommand> DoCore::getTtlCommand(unsigned variation)
 std::array<std::string, size_t(DOGrid::total)> DoCore::getAllNames () { return names; }
 void DoCore::resetTtlEvents () { initializeDataObjects (0); }
 void DoCore::wait2 (double time) { Sleep (time + 10); }
-void DoCore::prepareForce () { initializeDataObjects (1); }
-
 
 bool DoCore::isValidTTLName (std::string name){
 	unsigned row;

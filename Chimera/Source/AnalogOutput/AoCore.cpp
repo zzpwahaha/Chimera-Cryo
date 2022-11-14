@@ -121,29 +121,33 @@ void AoCore::setDacCommandForm(AoCommandForm command)
 void AoCore::initializeDataObjects(unsigned cmdNum) 
 {
 	dacCommandFormList = std::vector<AoCommandForm>(cmdNum);
+	sizeDataStructures(cmdNum);
+}
 
+void AoCore::sizeDataStructures(unsigned variations)
+{	
+	// imporantly, this sizes the relevant structures.
 	dacCommandList.clear();
 	dacSnapshots.clear();
 	loadSkipDacSnapshots.clear();
 	finalDacSnapshots.clear();
 
-	dacCommandList.resize(cmdNum);
-	dacSnapshots.resize(cmdNum);
-	loadSkipDacSnapshots.resize(cmdNum);
-	finalDacSnapshots.resize(cmdNum);
-
+	dacCommandList.resize(variations);
+	dacSnapshots.resize(variations);
+	loadSkipDacSnapshots.resize(variations);
+	finalDacSnapshots.resize(variations);
 }
 
 
 void AoCore::resetDacEvents()
 {
-	dacCommandFormList.clear();
-	dacCommandList.clear();
-	dacSnapshots.clear();
-	loadSkipDacSnapshots.clear();
-	finalDacSnapshots.clear();
-
 	initializeDataObjects(0);
+}
+
+void AoCore::prepareForce()
+{
+	// purposefully preserve dacCommandFormList, for inExpCal
+	sizeDataStructures(1);
 }
 
 
@@ -161,288 +165,279 @@ void AoCore::calculateVariations(std::vector<parameterType>& params, ExpThreadWo
 	if (variations == 0) {
 		variations = 1;
 	}
-	/// imporantly, this sizes the relevant structures.
-	dacCommandList.clear();
-	dacSnapshots.clear();
-	loadSkipDacSnapshots.clear();
-	finalDacSnapshots.clear();
-
-	dacCommandList.resize(variations);
-	dacSnapshots.resize(variations);
-	loadSkipDacSnapshots.resize(variations);
-	finalDacSnapshots.resize(variations);
+	sizeDataStructures(variations);
 
 	bool resolutionWarningPosted = false;
 	bool nonIntegerWarningPosted = false;
 	sTimer.tick("After-init");
 
-		for (auto variationInc : range(variations)) {
-			if (variationInc == 0) {
-				sTimer.tick("Variation-" + str(variationInc) + "-Start");
+	for (auto variationInc : range(variations)) {
+		if (variationInc == 0) {
+			sTimer.tick("Variation-" + str(variationInc) + "-Start");
+		}
+		auto& cmdList = dacCommandList[variationInc];
+		for (auto eventInc : range(dacCommandFormList.size())) {
+			AoCommand tempEvent;
+			auto& formList = dacCommandFormList[eventInc];
+			tempEvent.line = formList.line;
+			// Deal with time.
+			if (formList.time.first.size() == 0) {
+				// no variable portion of the time.
+				tempEvent.time = formList.time.second;
 			}
-			auto& cmdList = dacCommandList[variationInc];
-			for (auto eventInc : range(dacCommandFormList.size())) {
-				AoCommand tempEvent;
-				auto& formList = dacCommandFormList[eventInc];
-				tempEvent.line = formList.line;
-				// Deal with time.
-				if (formList.time.first.size() == 0) {
-					// no variable portion of the time.
-					tempEvent.time = formList.time.second;
+			else {
+				double varTime = 0;
+				for (auto variableTimeString : formList.time.first) {
+					varTime += variableTimeString.evaluate(params, variationInc, calibrations);
 				}
-				else {
-					double varTime = 0;
-					for (auto variableTimeString : formList.time.first) {
-						varTime += variableTimeString.evaluate(params, variationInc, calibrations);
-					}
-					tempEvent.time = varTime + formList.time.second;
-				}
-				if (variationInc == 0) {
-					sTimer.tick("Time-Handled");
-				}
-				/// deal with command
-				if (formList.commandName == "dac:") {
-					/// single point.
-					tempEvent.value = formList.finalVal.evaluate(params, variationInc, calibrations);
-					tempEvent.endValue = tempEvent.value;
-					tempEvent.rampTime = 0;
+				tempEvent.time = varTime + formList.time.second;
+			}
+			if (variationInc == 0) {
+				sTimer.tick("Time-Handled");
+			}
+			/// deal with command
+			if (formList.commandName == "dac:") {
+				/// single point.
+				tempEvent.value = formList.finalVal.evaluate(params, variationInc, calibrations);
+				tempEvent.endValue = tempEvent.value;
+				tempEvent.rampTime = 0;
 
-					if (variationInc == 0)/*for time tick, no effect for code*/
+				if (variationInc == 0)/*for time tick, no effect for code*/
+				{
+					sTimer.tick("val-evaluated");
+				}
+
+				cmdList.push_back(tempEvent);
+
+				if (variationInc == 0)/*for time tick, no effect for code*/
+				{
+					sTimer.tick("Dac:-Handled");
+				}
+			}
+			else if (formList.commandName == "dacarange:") {
+				// interpret ramp time command. I need to know whether it's ramping or not.
+				double rampTime = formList.rampTime.evaluate(params, variationInc, calibrations);
+				/// many points to be made.
+				// convert initValue and finalValue to doubles to be used 
+				double initValue, finalValue, rampInc;
+				initValue = formList.initVal.evaluate(params, variationInc, calibrations);
+				// deal with final value;
+				finalValue = formList.finalVal.evaluate(params, variationInc, calibrations);
+				// deal with ramp inc
+				rampInc = formList.rampInc.evaluate(params, variationInc, calibrations);
+				if (rampInc < 10.0 / pow(2, 16) && !resolutionWarningPosted) {
+					resolutionWarningPosted = true;
+					emit threadworker->warn(cstr("Warning: ramp increment of " + str(rampInc) + " in dac command number "
+						+ str(eventInc) + " is below the resolution of the aoSys (which is 10/2^16 = "
+						+ str(10.0 / pow(2, 16)) + "). These ramp points are unnecessary.\r\n"));
+				}
+				// This might be the first not i++ usage of a for loop I've ever done... XD
+				// calculate the time increment:
+				int steps = int(fabs(finalValue - initValue) / rampInc + 0.5);
+				double stepsFloat = fabs(finalValue - initValue) / rampInc;
+				double diff = fabs(steps - stepsFloat);
+				if (diff > 100 * DBL_EPSILON && !nonIntegerWarningPosted) {
+					nonIntegerWarningPosted = true;
+					emit threadworker->warn(cstr("Warning: Ideally your spacings for a dacArange would result in a non-integer number "
+						"of steps. The code will attempt to compensate by making a last step to the final value which"
+						" is not the same increment in voltage or time as the other steps to take the dac to the final"
+						" value at the right time.\r\n"));
+				}
+				double timeInc = rampTime / steps;
+				double initTime = tempEvent.time;
+				double currentTime = tempEvent.time;
+				if (timeInc < DAC_TIME_RESOLUTION) {
+					thrower("Warning: numPoints of " + str(steps) + " results in a ramp time steps of "
+						+ str(timeInc) + " is below the time resolution of the aoSys (which is 20us)."
+						" You probably want to use dacramp instead of dacarange\r\n");
+				}
+				// handle the two directions seperately.
+				if (initValue < finalValue) {
+					for (double dacValue = initValue;
+						(dacValue - finalValue) < -rampInc/2 + DBL_EPSILON; dacValue += rampInc)
 					{
-						sTimer.tick("val-evaluated");
-					}
-
-					cmdList.push_back(tempEvent);
-
-					if (variationInc == 0)/*for time tick, no effect for code*/
-					{
-						sTimer.tick("Dac:-Handled");
-					}
-				}
-				else if (formList.commandName == "dacarange:") {
-					// interpret ramp time command. I need to know whether it's ramping or not.
-					double rampTime = formList.rampTime.evaluate(params, variationInc, calibrations);
-					/// many points to be made.
-					// convert initValue and finalValue to doubles to be used 
-					double initValue, finalValue, rampInc;
-					initValue = formList.initVal.evaluate(params, variationInc, calibrations);
-					// deal with final value;
-					finalValue = formList.finalVal.evaluate(params, variationInc, calibrations);
-					// deal with ramp inc
-					rampInc = formList.rampInc.evaluate(params, variationInc, calibrations);
-					if (rampInc < 10.0 / pow(2, 16) && !resolutionWarningPosted) {
-						resolutionWarningPosted = true;
-						emit threadworker->warn(cstr("Warning: ramp increment of " + str(rampInc) + " in dac command number "
-							+ str(eventInc) + " is below the resolution of the aoSys (which is 10/2^16 = "
-							+ str(10.0 / pow(2, 16)) + "). These ramp points are unnecessary.\r\n"));
-					}
-					// This might be the first not i++ usage of a for loop I've ever done... XD
-					// calculate the time increment:
-					int steps = int(fabs(finalValue - initValue) / rampInc + 0.5);
-					double stepsFloat = fabs(finalValue - initValue) / rampInc;
-					double diff = fabs(steps - stepsFloat);
-					if (diff > 100 * DBL_EPSILON && !nonIntegerWarningPosted) {
-						nonIntegerWarningPosted = true;
-						emit threadworker->warn(cstr("Warning: Ideally your spacings for a dacArange would result in a non-integer number "
-							"of steps. The code will attempt to compensate by making a last step to the final value which"
-							" is not the same increment in voltage or time as the other steps to take the dac to the final"
-							" value at the right time.\r\n"));
-					}
-					double timeInc = rampTime / steps;
-					double initTime = tempEvent.time;
-					double currentTime = tempEvent.time;
-					if (timeInc < DAC_TIME_RESOLUTION) {
-						thrower("Warning: numPoints of " + str(steps) + " results in a ramp time steps of "
-							+ str(timeInc) + " is below the time resolution of the aoSys (which is 20us)."
-							" You probably want to use dacramp instead of dacarange\r\n");
-					}
-					// handle the two directions seperately.
-					if (initValue < finalValue) {
-						for (double dacValue = initValue;
-							(dacValue - finalValue) < -rampInc/2 + DBL_EPSILON; dacValue += rampInc)
-						{
-							tempEvent.value = dacValue;
-							tempEvent.endValue = dacValue;
-							tempEvent.rampTime = 0;
-							tempEvent.time = currentTime;
-							cmdList.push_back(tempEvent);
-							currentTime += timeInc;
-
-						}
-					}
-					else
-					{
-						for (double dacValue = initValue;
-							dacValue - finalValue > rampInc/2 - DBL_EPSILON; dacValue -= rampInc) {
-							tempEvent.value = dacValue;
-							tempEvent.endValue = dacValue;
-							tempEvent.rampTime = 0;
-							tempEvent.time = currentTime;
-							cmdList.push_back(tempEvent);
-							currentTime += timeInc;
-						}
-					}
-					// and get the final value.
-					tempEvent.value = finalValue;
-					tempEvent.endValue = finalValue;
-					tempEvent.rampTime = 0;
-					tempEvent.time = initTime + rampTime;
-					cmdList.push_back(tempEvent);
-					if (variationInc == 0) {
-						sTimer.tick("dacarange:-Handled");
-					}
-				}
-				else if (formList.commandName == "daclinspace:") {
-					// interpret ramp time command. I need to know whether it's ramping or not.
-					double rampTime = formList.rampTime.evaluate(params, variationInc, calibrations);
-					/// many points to be made.
-					double initValue, finalValue;
-					unsigned numSteps;
-					initValue = formList.initVal.evaluate(params, variationInc, calibrations);
-					finalValue = formList.finalVal.evaluate(params, variationInc, calibrations);
-					numSteps = formList.numSteps.evaluate(params, variationInc, calibrations);
-					double rampInc = (finalValue - initValue) / numSteps;
-					// this warning isn't actually very useful. very rare that actually run into issues with overtaxing ao 
-					// or do systems like this and these circumstances often happen when something is ramped.
-					if ( (fabs( rampInc ) < 10.0 / pow( 2, 16 )) && !resolutionWarningPosted ){
-						resolutionWarningPosted = true;
-						emit threadworker->warn (cstr ("Warning: numPoints of " + str (numSteps) + " results in a ramp increment of "
-							+ str (rampInc) + " is below the resolution of the aoSys (which is 10/2^16 = "
-							+ str (10.0 / pow (2, 16)) + ").These linspace points are unnecessary\r\n"));
-					}
-					// This might be the first not i++ usage of a for loop I've ever done... XD
-					// calculate the time increment:
-					double timeInc = rampTime / numSteps;
-					double initTime = tempEvent.time;
-					double currentTime = tempEvent.time;
-					double val = initValue;
-					if (timeInc < DAC_TIME_RESOLUTION) {
-						thrower("Warning: numPoints of " + str(numSteps) + " results in a ramp time steps of "
-							+ str(timeInc) + " is below the time resolution of the aoSys (which is 20us)."
-							" You probably want to use dacramp instead of daclinspace\r\n");
-					}
-
-					// handle the two directions seperately.
-					for (auto stepNum : range(numSteps))
-					{
-						tempEvent.value = val;
-						tempEvent.endValue = val;
+						tempEvent.value = dacValue;
+						tempEvent.endValue = dacValue;
 						tempEvent.rampTime = 0;
 						tempEvent.time = currentTime;
 						cmdList.push_back(tempEvent);
 						currentTime += timeInc;
-						val += rampInc;
-					}
-					// and get the final value. Just use the nums explicitly to avoid rounding error I guess.
-					tempEvent.value = finalValue;
-					tempEvent.endValue = finalValue;
-					tempEvent.rampTime = 0;
-					tempEvent.time = initTime + rampTime;
-					cmdList.push_back(tempEvent);
-					if (variationInc == 0) {
-						sTimer.tick("daclinspace:-Handled");
+
 					}
 				}
-				else if (formList.commandName == "dacramp:")
+				else
 				{
-					// interpret ramp time command. I need to know whether it's ramping or not.
-					double rampTime = formList.rampTime.evaluate(params, variationInc);
-					/// many points to be made.
-					// convert initValue and finalValue to doubles to be used 
-					double initValue, finalValue, numSteps;
-					initValue = formList.initVal.evaluate(params, variationInc);
-					// deal with final value;
-					finalValue = formList.finalVal.evaluate(params, variationInc);
-					// set votlage resolution to be maximum allowed by the ramp range and time
-					numSteps = rampTime / DAC_TIME_RESOLUTION;
-					double rampInc = (finalValue - initValue) / numSteps;
-					if ((fabs(rampInc) < dacResolution))
-					{
-						emit threadworker->warn(qstr("Warning: numPoints of " + str(numSteps) + " results in a ramp increment of "
-							+ str(rampInc) + " is below the resolution of the dacs (which is 20/2^16 = "
-							+ str(dacResolution) + "). \r\n"));
-					}
-					//if (numSteps > DAC_RAMP_MAX_PTS) {
-					//	thrower("Warning: numPoints of " + str(numSteps) + " is larger than the max time of the DAC ramps."
-					//		" Ramp will not run. \r\n");
-					//}
-					unsigned numStepsInt = unsigned(numSteps + 0.5);
-					if (fabs(numSteps - numStepsInt) > 100 * DBL_EPSILON) {
-						thrower("Warning: numPoints of " + str(numSteps) + "resulting from ramping time = " + str(rampTime) +
-							"ms, and dac timing resolution 20us, is not an interger. "
-							"Ramp will not run. \r\n");
-					}
-					if (rampTime < DAC_TIME_RESOLUTION) {
-						thrower("Warning: Ramp time of "
-							+ str(rampTime) + " is below the time resolution of the aoSys (which is 20us)."
-							" Ramp will not run. \r\n");
-					}
-				
-
-					double initTime = tempEvent.time;
-
-					// for dacRamp, need to check whether the end point can be reached without rounding error and then
-					// pass the ramp points and time directly to a single or two dacCommandList element
-					long long int codeInit = long long int((initValue / 20 + 0.5) * 65535); // ((dacval+10)/20*65535), [-10,10]->[0,65535], 65536 pts and 65535 intervals
-					long long int codeFinl = long long int((finalValue / 20 + 0.5) * 65535);
-					long long int incr = ((codeFinl << 16) - (codeInit << 16)) / numStepsInt; // https://stackoverflow.com/questions/7221409/is-unsigned-integer-subtraction-defined-behavior The result of a subtraction generating a negative number in an unsigned type is well-defined: //[...] A computation involving unsigned operands can never overflow, because a result that cannot be represented by the resulting unsigned integer type is reduced modulo the number that is one greater than the largest value that can be represented by the resulting type. (ISO / IEC 9899:1999 (E)ï¿½6.2.5 / 9) //As you can see, (unsigned)0 - (unsigned)1 equals - 1 modulo UINT_MAX + 1, or in other words, UINT_MAX.
-					long long int res = ((codeFinl << 16) - (codeInit << 16)) % numStepsInt; // https://stackoverflow.com/questions/7594508/modulo-operator-with-negative-values, (-7/3) => -2;-2 * 3 = > -6;so a % b = > -1; (7 / -3) = > -2;- 2 * -3 = > 6;so a % b = > 1
-					if (res == 0) { // no rounding error, just push back
-						tempEvent.value = initValue;
-						tempEvent.endValue = finalValue;
-						tempEvent.time = initTime;
-						tempEvent.rampTime = rampTime;
-						cmdList.push_back(tempEvent);
-					}
-					else { // handle the last ramp specifically
-						tempEvent.value = initValue;
-						tempEvent.endValue = ((codeFinl-(incr/0x10000)) / 65535.0) * 20.0 - 10.0;
-						tempEvent.time = initTime;
-						tempEvent.rampTime = rampTime - DAC_TIME_RESOLUTION;
-						cmdList.push_back(tempEvent);
-
-						tempEvent.value = tempEvent.endValue;
-						tempEvent.endValue = finalValue;
-						tempEvent.time += tempEvent.rampTime;
-						tempEvent.rampTime = DAC_TIME_RESOLUTION;
-						cmdList.push_back(tempEvent);
-
-						tempEvent.value = finalValue;
-						tempEvent.endValue = finalValue; // the purpose is to keep the value at endValue
-						tempEvent.time += tempEvent.rampTime;
+					for (double dacValue = initValue;
+						dacValue - finalValue > rampInc/2 - DBL_EPSILON; dacValue -= rampInc) {
+						tempEvent.value = dacValue;
+						tempEvent.endValue = dacValue;
 						tempEvent.rampTime = 0;
+						tempEvent.time = currentTime;
 						cmdList.push_back(tempEvent);
+						currentTime += timeInc;
 					}
-
 				}
-
-				else {
-					thrower("Unrecognized dac command name: " + formList.commandName);
-				}
-
+				// and get the final value.
+				tempEvent.value = finalValue;
+				tempEvent.endValue = finalValue;
+				tempEvent.rampTime = 0;
+				tempEvent.time = initTime + rampTime;
+				cmdList.push_back(tempEvent);
 				if (variationInc == 0) {
-					// check if the calibration usage is proper only for the first var
-					for (auto calIdx : range(calibrationSettings.size())) {
-						if (calibrations[calIdx].currentActive && calibrationSettings[calIdx].aoControlChannel != formList.line) {
-							calibrationSettings[calIdx].usedSameChannel = false;
-							emit threadworker->warn("Used calibration " + qstr(calibrations[calIdx].calibrationName) + " whose AoControlChannel is " + 
-								qstr(calibrationSettings[calIdx].aoControlChannel) + ", but the calibration is used with dac channel " +
-								qstr(formList.line) + ", please make sure the calibraition is used properly.\r\n", 0);
-						}
-					}
+					sTimer.tick("dacarange:-Handled");
 				}
 			}
+			else if (formList.commandName == "daclinspace:") {
+				// interpret ramp time command. I need to know whether it's ramping or not.
+				double rampTime = formList.rampTime.evaluate(params, variationInc, calibrations);
+				/// many points to be made.
+				double initValue, finalValue;
+				unsigned numSteps;
+				initValue = formList.initVal.evaluate(params, variationInc, calibrations);
+				finalValue = formList.finalVal.evaluate(params, variationInc, calibrations);
+				numSteps = formList.numSteps.evaluate(params, variationInc, calibrations);
+				double rampInc = (finalValue - initValue) / numSteps;
+				// this warning isn't actually very useful. very rare that actually run into issues with overtaxing ao 
+				// or do systems like this and these circumstances often happen when something is ramped.
+				if ( (fabs( rampInc ) < 10.0 / pow( 2, 16 )) && !resolutionWarningPosted ){
+					resolutionWarningPosted = true;
+					emit threadworker->warn (cstr ("Warning: numPoints of " + str (numSteps) + " results in a ramp increment of "
+						+ str (rampInc) + " is below the resolution of the aoSys (which is 10/2^16 = "
+						+ str (10.0 / pow (2, 16)) + ").These linspace points are unnecessary\r\n"));
+				}
+				// This might be the first not i++ usage of a for loop I've ever done... XD
+				// calculate the time increment:
+				double timeInc = rampTime / numSteps;
+				double initTime = tempEvent.time;
+				double currentTime = tempEvent.time;
+				double val = initValue;
+				if (timeInc < DAC_TIME_RESOLUTION) {
+					thrower("Warning: numPoints of " + str(numSteps) + " results in a ramp time steps of "
+						+ str(timeInc) + " is below the time resolution of the aoSys (which is 20us)."
+						" You probably want to use dacramp instead of daclinspace\r\n");
+				}
+
+				// handle the two directions seperately.
+				for (auto stepNum : range(numSteps))
+				{
+					tempEvent.value = val;
+					tempEvent.endValue = val;
+					tempEvent.rampTime = 0;
+					tempEvent.time = currentTime;
+					cmdList.push_back(tempEvent);
+					currentTime += timeInc;
+					val += rampInc;
+				}
+				// and get the final value. Just use the nums explicitly to avoid rounding error I guess.
+				tempEvent.value = finalValue;
+				tempEvent.endValue = finalValue;
+				tempEvent.rampTime = 0;
+				tempEvent.time = initTime + rampTime;
+				cmdList.push_back(tempEvent);
+				if (variationInc == 0) {
+					sTimer.tick("daclinspace:-Handled");
+				}
+			}
+			else if (formList.commandName == "dacramp:")
+			{
+				// interpret ramp time command. I need to know whether it's ramping or not.
+				double rampTime = formList.rampTime.evaluate(params, variationInc);
+				/// many points to be made.
+				// convert initValue and finalValue to doubles to be used 
+				double initValue, finalValue, numSteps;
+				initValue = formList.initVal.evaluate(params, variationInc);
+				// deal with final value;
+				finalValue = formList.finalVal.evaluate(params, variationInc);
+				// set votlage resolution to be maximum allowed by the ramp range and time
+				numSteps = rampTime / DAC_TIME_RESOLUTION;
+				double rampInc = (finalValue - initValue) / numSteps;
+				if ((fabs(rampInc) < dacResolution))
+				{
+					emit threadworker->warn(qstr("Warning: numPoints of " + str(numSteps) + " results in a ramp increment of "
+						+ str(rampInc) + " is below the resolution of the dacs (which is 20/2^16 = "
+						+ str(dacResolution) + "). \r\n"));
+				}
+				//if (numSteps > DAC_RAMP_MAX_PTS) {
+				//	thrower("Warning: numPoints of " + str(numSteps) + " is larger than the max time of the DAC ramps."
+				//		" Ramp will not run. \r\n");
+				//}
+				unsigned numStepsInt = unsigned(numSteps + 0.5);
+				if (fabs(numSteps - numStepsInt) > 100 * DBL_EPSILON) {
+					thrower("Warning: numPoints of " + str(numSteps) + "resulting from ramping time = " + str(rampTime) +
+						"ms, and dac timing resolution 20us, is not an interger. "
+						"Ramp will not run. \r\n");
+				}
+				if (rampTime < DAC_TIME_RESOLUTION) {
+					thrower("Warning: Ramp time of "
+						+ str(rampTime) + " is below the time resolution of the aoSys (which is 20us)."
+						" Ramp will not run. \r\n");
+				}
+				
+
+				double initTime = tempEvent.time;
+
+				// for dacRamp, need to check whether the end point can be reached without rounding error and then
+				// pass the ramp points and time directly to a single or two dacCommandList element
+				long long int codeInit = long long int((initValue / 20 + 0.5) * 65535); // ((dacval+10)/20*65535), [-10,10]->[0,65535], 65536 pts and 65535 intervals
+				long long int codeFinl = long long int((finalValue / 20 + 0.5) * 65535);
+				long long int incr = ((codeFinl << 16) - (codeInit << 16)) / numStepsInt; // https://stackoverflow.com/questions/7221409/is-unsigned-integer-subtraction-defined-behavior The result of a subtraction generating a negative number in an unsigned type is well-defined: //[...] A computation involving unsigned operands can never overflow, because a result that cannot be represented by the resulting unsigned integer type is reduced modulo the number that is one greater than the largest value that can be represented by the resulting type. (ISO / IEC 9899:1999 (E)§6.2.5 / 9) //As you can see, (unsigned)0 - (unsigned)1 equals - 1 modulo UINT_MAX + 1, or in other words, UINT_MAX.
+				long long int res = ((codeFinl << 16) - (codeInit << 16)) % numStepsInt; // https://stackoverflow.com/questions/7594508/modulo-operator-with-negative-values, (-7/3) => -2;-2 * 3 = > -6;so a % b = > -1; (7 / -3) = > -2;- 2 * -3 = > 6;so a % b = > 1
+				if (res == 0) { // no rounding error, just push back
+					tempEvent.value = initValue;
+					tempEvent.endValue = finalValue;
+					tempEvent.time = initTime;
+					tempEvent.rampTime = rampTime;
+					cmdList.push_back(tempEvent);
+				}
+				else { // handle the last ramp specifically
+					tempEvent.value = initValue;
+					tempEvent.endValue = ((codeFinl-(incr/0x10000)) / 65535.0) * 20.0 - 10.0;
+					tempEvent.time = initTime;
+					tempEvent.rampTime = rampTime - DAC_TIME_RESOLUTION;
+					cmdList.push_back(tempEvent);
+
+					tempEvent.value = tempEvent.endValue;
+					tempEvent.endValue = finalValue;
+					tempEvent.time += tempEvent.rampTime;
+					tempEvent.rampTime = DAC_TIME_RESOLUTION;
+					cmdList.push_back(tempEvent);
+
+					tempEvent.value = finalValue;
+					tempEvent.endValue = finalValue; // the purpose is to keep the value at endValue
+					tempEvent.time += tempEvent.rampTime;
+					tempEvent.rampTime = 0;
+					cmdList.push_back(tempEvent);
+				}
+
+			}
+
+			else {
+				thrower("Unrecognized dac command name: " + formList.commandName);
+			}
+
 			if (variationInc == 0) {
 				// check if the calibration usage is proper only for the first var
 				for (auto calIdx : range(calibrationSettings.size())) {
-					if (calibrations[calIdx].active && !calibrationSettings[calIdx].active) {
-						thrower("Used calibration " + calibrations[calIdx].calibrationName + ", but it is not activated, please activate it and make sure the calibraition is up-to-date!\r\n", 1);
+					if (calibrations[calIdx].currentActive && calibrationSettings[calIdx].aoControlChannel != formList.line) {
+						calibrationSettings[calIdx].usedSameChannel = false;
+						emit threadworker->warn("Used calibration " + qstr(calibrations[calIdx].calibrationName) + " whose AoControlChannel is " + 
+							qstr(calibrationSettings[calIdx].aoControlChannel) + ", but the calibration is used with dac channel " +
+							qstr(formList.line) + ", please make sure the calibraition is used properly.\r\n", 0);
 					}
 				}
 			}
 		}
+		if (variationInc == 0) {
+			// check if the calibration usage is proper only for the first var
+			for (auto calIdx : range(calibrationSettings.size())) {
+				if (calibrations[calIdx].active && !calibrationSettings[calIdx].active) {
+					thrower("Used calibration " + calibrations[calIdx].calibrationName + ", but it is not activated, please activate it and make sure the calibraition is up-to-date!\r\n", 1);
+				}
+			}
+		}
+	}
 
-		for (size_t idx = 0; idx < calibrationSettings.size(); idx++) {
+	for (size_t idx = 0; idx < calibrationSettings.size(); idx++) {
 		calibrationSettings[idx].result = calibrations[idx];
 	}
 }
@@ -614,7 +609,7 @@ void AoCore::writeDacs(unsigned variation, bool loadSkip)
 // channelSnapShot[0] contains changes that need to make for dac channels, do no call this during experiment interpretation.
 void AoCore::setGUIDacChange(std::vector<std::vector<AoChannelSnapshot>> channelSnapShot)
 {
-	resetDacEvents();
+	prepareForce();
 	dacSnapshots.resize(1); // just to make getNumberEvents happy, used in AoCore::writeDacs()
 	dacSnapshots[0].resize(channelSnapShot.size());
 	finalDacSnapshots = channelSnapShot;
@@ -624,7 +619,7 @@ void AoCore::setGUIDacChange(std::vector<std::vector<AoChannelSnapshot>> channel
 	catch (ChimeraError& e) {
 		thrower("GUI sending data to DAC failed: \r\n" + e.trace());
 	}
-	resetDacEvents();
+	
 	int tcp_connect;
 	try {
 		tcp_connect = zynq_tcp.connectTCP(ZYNQ_ADDRESS);
