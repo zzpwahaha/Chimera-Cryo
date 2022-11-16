@@ -2,25 +2,10 @@
 #include "BoostAsyncSerial.h"
 
 BoostAsyncSerial::BoostAsyncSerial(std::string portID, int baudrate)
-	: portID(portID)
-	, baudrate(baudrate)
-{
-	if (!GIGAMOOG_SAFEMODE) {
-		//io_service_ = std::make_unique<boost::asio::io_service>(boost::asio::io_service());
-		port_ = std::make_unique<boost::asio::serial_port>(io_service_);
-
-		port_->open(portID);
-		port_->set_option(boost::asio::serial_port_base::baud_rate(baudrate));
-		port_->set_option(boost::asio::serial_port_base::character_size(8));
-		port_->set_option(boost::asio::serial_port_base::stop_bits(boost::asio::serial_port_base::stop_bits::one));
-		port_->set_option(boost::asio::serial_port_base::parity(boost::asio::serial_port_base::parity::none));
-		port_->set_option(boost::asio::serial_port_base::flow_control(boost::asio::serial_port_base::flow_control::none));
-
-		io_thread = boost::thread(boost::bind(&BoostAsyncSerial::run, this));
-		read();
-	}
-
-}
+	: BoostAsyncSerial(portID, baudrate, 8,
+		boost::asio::serial_port_base::stop_bits::one,
+		boost::asio::serial_port_base::parity::none,
+		boost::asio::serial_port_base::flow_control::none) {}
 
 BoostAsyncSerial::BoostAsyncSerial(
 	std::string portID,
@@ -32,21 +17,25 @@ BoostAsyncSerial::BoostAsyncSerial(
 	: portID(portID)
 	, baudrate(baudrate)
 {
-	port_ = std::make_unique<boost::asio::serial_port>(io_service_);
+	if (!GIGAMOOG_SAFEMODE) {
+		port_ = std::make_unique<boost::asio::serial_port>(io_service_);
 
-	port_->open(portID);
-	port_->set_option(boost::asio::serial_port_base::baud_rate(baudrate));
-	port_->set_option(boost::asio::serial_port_base::character_size(character_size));
-	port_->set_option(boost::asio::serial_port_base::stop_bits(stop_bits));
-	port_->set_option(boost::asio::serial_port_base::parity(parity));
-	port_->set_option(boost::asio::serial_port_base::flow_control(flow_control));
+		port_->open(portID);
+		port_->set_option(boost::asio::serial_port_base::baud_rate(baudrate));
+		port_->set_option(boost::asio::serial_port_base::character_size(character_size));
+		port_->set_option(boost::asio::serial_port_base::stop_bits(stop_bits));
+		port_->set_option(boost::asio::serial_port_base::parity(parity));
+		port_->set_option(boost::asio::serial_port_base::flow_control(flow_control));
 
-	io_thread = boost::thread(boost::bind(&BoostAsyncSerial::run, this));
-	read();
+		io_thread = boost::thread(boost::bind(&BoostAsyncSerial::run, this));
+		read();
+	}
 }
 
 BoostAsyncSerial::~BoostAsyncSerial()
 {
+	// this io_service_.stop() will make the readhandler stop, but will also make the port not released after 'cancel()' and 'close()'
+	// so need to avoid using io_service_.stop() when disconnect
 	io_service_.stop();
 
 	if (port_) {

@@ -28,26 +28,19 @@ public:
 
 	void disconnect();
 	void reconnect();
+
+private:
+	void read();
+	void run();
+	void readhandler(const boost::system::error_code& error, std::size_t bytes_transferred);
 private:
 	const std::string portID;
 	const int baudrate;
 	boost::asio::io_service io_service_;
-	//std::unique_ptr<boost::asio::io_service> io_service_;
 	std::unique_ptr<boost::asio::serial_port> port_;
-	
-	void read();
-	void run();
-	
-	std::array<unsigned char, 1024> readbuffer;
-
-	void readhandler(
-		const boost::system::error_code& error,
-		std::size_t bytes_transferred
-	);
-
 	boost::thread io_thread;
+	std::array<unsigned char, 1024> readbuffer;
 	boost::mutex mutex_;
-
 	boost::function<void(uint8_t)> read_callback_;
 
 	//std::unique_ptr<boost::asio::io_service::work> work;
