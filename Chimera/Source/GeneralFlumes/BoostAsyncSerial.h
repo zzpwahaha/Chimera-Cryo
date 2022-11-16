@@ -36,6 +36,7 @@ private:
 private:
 	const std::string portID;
 	const int baudrate;
+	std::atomic<bool> continue_reading;
 	boost::asio::io_service io_service_;
 	std::unique_ptr<boost::asio::serial_port> port_;
 	boost::thread io_thread;

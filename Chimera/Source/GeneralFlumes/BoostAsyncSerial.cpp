@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "BoostAsyncSerial.h"
+#include <qdebug.h>
 
 BoostAsyncSerial::BoostAsyncSerial(std::string portID, int baudrate)
 	: BoostAsyncSerial(portID, baudrate, 8,
@@ -16,6 +17,7 @@ BoostAsyncSerial::BoostAsyncSerial(
 	boost::asio::serial_port_base::flow_control::type flow_control) 
 	: portID(portID)
 	, baudrate(baudrate)
+	, continue_reading(true)
 {
 	if (!GIGAMOOG_SAFEMODE) {
 		port_ = std::make_unique<boost::asio::serial_port>(io_service_);
@@ -28,6 +30,7 @@ BoostAsyncSerial::BoostAsyncSerial(
 		port_->set_option(boost::asio::serial_port_base::flow_control(flow_control));
 
 		io_thread = boost::thread(boost::bind(&BoostAsyncSerial::run, this));
+		Sleep(10); // give some time for the io_thread to run
 		read();
 	}
 }
@@ -56,14 +59,23 @@ void BoostAsyncSerial::readhandler(const boost::system::error_code & error, std:
 	boost::mutex::scoped_lock look(mutex_);
 
 	if (error) {
-		thrower("Error reading from serial");
+		if (!continue_reading) {
+			// probably due to the port closing, so just return
+			std::string s = error.message();
+			qDebug() << "BoostAsyncSerial::readhandler: continue_reading false: " << qstr(s);
+		}
+		else {
+			std::string s = error.message();
+			throw("Error reading from serial: " + s);
+		}
 	}
 	
-	port_->async_read_some(boost::asio::buffer(readbuffer), boost::bind(&BoostAsyncSerial::readhandler, this,
-		boost::asio::placeholders::error,
-		boost::asio::placeholders::bytes_transferred
-	));
-
+	if (continue_reading) {
+		port_->async_read_some(boost::asio::buffer(readbuffer), boost::bind(&BoostAsyncSerial::readhandler, this,
+			boost::asio::placeholders::error,
+			boost::asio::placeholders::bytes_transferred
+		));
+	}
 	int c;
 	for (int idx = 0; idx < bytes_transferred; idx++) {
 		c = static_cast<int>(readbuffer[idx]) & 0xFF;
@@ -109,12 +121,14 @@ void BoostAsyncSerial::disconnect()
 		thrower("port_ is already closed. Can not disconnect again");
 	}
 	try {
-		io_service_.stop();
+		//io_service_.stop(); // will make the readhandler stop, but will also make the port not released after 'cancel()' and 'close()'
 		if (port_) {
-			port_->cancel();
+			continue_reading = false;
 			boost::system::error_code ec;
+			port_->cancel(ec);
+			auto s1 = ec.message();
 			port_->close(ec);
-			auto s = ec.message();
+			auto s2 = ec.message();
 		}
 		if (port_->is_open()) {
 			thrower("After port->close(), the port is still open??");
@@ -123,18 +137,10 @@ void BoostAsyncSerial::disconnect()
 	catch (boost::system::system_error& ex) {
 		throwNested(ex.what());
 	}
-	//io_service_.post([this]() {
-	//	io_service_.stop();
-	//	port_->close();
-	//	work->reset(); });
-	//port_.reset();
-	//work.reset();
-	//io_service_.restart();
-	//io_thread.detach();
 	work->reset();
-	//io_thread.interrupt();
+	work.reset();
 	io_thread.join();
-	io_service_.restart();
+	port_.reset();
 }
 
 void BoostAsyncSerial::reconnect()
@@ -145,6 +151,7 @@ void BoostAsyncSerial::reconnect()
 	if (port_ && port_->is_open()/*io_service_.stopped()*/) {
 		thrower("port_ is already open. Can not connect again");
 	}
+	continue_reading = true;
 	io_service_.restart();
 
 	port_ = std::make_unique<boost::asio::serial_port>(io_service_);
