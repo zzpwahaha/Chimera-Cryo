@@ -1,4 +1,4 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 #include "ConfigurationSystems/ConfigSystem.h"
 #include "DdsCore.h"
 
@@ -854,6 +854,7 @@ void DdsCore::writeDDSs(UINT variation, bool loadSkip)
 void DdsCore::setGUIDdsChange(std::vector<std::vector<DdsChannelSnapshot>> channelSnapShot)
 {
 	prepareForce();
+	ddsChannelSnapshots = channelSnapShot;
 	writeDDSs(0, true);
 	int tcp_connect;
 	try {
