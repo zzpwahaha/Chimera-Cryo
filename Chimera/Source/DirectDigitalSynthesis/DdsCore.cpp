@@ -1,4 +1,4 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 #include "ConfigurationSystems/ConfigSystem.h"
 #include "DdsCore.h"
 
@@ -856,20 +856,20 @@ void DdsCore::setGUIDdsChange(std::vector<std::vector<DdsChannelSnapshot>> chann
 	prepareForce();
 	ddsChannelSnapshots = channelSnapShot;
 	writeDDSs(0, true);
-	int tcp_connect;
-	try {
-		tcp_connect = zynq_tcp.connectTCP(ZYNQ_ADDRESS);
-	}
-	catch (ChimeraError& err) {
-		tcp_connect = 1;
-		thrower(err.what());
-	}
-
-	if (tcp_connect == 0) {
-		zynq_tcp.writeCommand("trigger");
-		zynq_tcp.disconnect();
-	}
-	else {
-		thrower("connection to zynq failed. can't write DDS data\n");
-	}
+	//int tcp_connect;
+	//try {
+	//	tcp_connect = zynq_tcp.connectTCP(ZYNQ_ADDRESS);
+	//}
+	//catch (ChimeraError& err) {
+	//	tcp_connect = 1;
+	//	thrower(err.what());
+	//}
+	//Sleep(100);
+	//if (tcp_connect == 0) {
+	//	zynq_tcp.writeCommand("trigger");
+	//	zynq_tcp.disconnect();
+	//}
+	//else {
+	//	thrower("connection to zynq failed. can't write DDS data\n");
+	//}
 }

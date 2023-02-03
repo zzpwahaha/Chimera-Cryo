@@ -628,7 +628,7 @@ void AoCore::setGUIDacChange(std::vector<std::vector<AoChannelSnapshot>> channel
 		tcp_connect = 1;
 		thrower(err.what());
 	}
-
+	Sleep(100);
 	if (tcp_connect == 0) {
 		zynq_tcp.writeCommand("trigger");
 		zynq_tcp.disconnect();

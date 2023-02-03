@@ -554,6 +554,7 @@ void QtAuxiliaryWindow::SetDds()
 		////ttlBoard.resetTtlEvents();
 		//reportStatus("Setting Dacs...\r\n");
 		dds.handleSetDdsButtonPress(true);
+		ttlBoard.setTtlStatus(ttlBoard.getCurrentStatus());
 		//dds.setDDSs();
 		//aoSys.forceDacs (ttlBoard.getCore (), { 0, ttlBoard.getCurrentStatus () });
 		reportStatus("Finished Setting DDSs.\r\n");
