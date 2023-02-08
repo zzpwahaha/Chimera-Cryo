@@ -86,6 +86,7 @@ void DataAnalysisControl::handleContextMenu (const QPoint& pos) {
 	plotListview->connect (detailsAction, &QAction::triggered, [this, item]() {
 		QtPlotDesignerDlg* dialog = new QtPlotDesignerDlg(unofficialPicsPerRep);
 		dialog->setStyleSheet(chimeraStyleSheets::stdStyleSheet());
+		dialog->setAttribute(Qt::WA_DeleteOnClose);
 		dialog->exec();
 		//allTinyPlots.push_back (newPlot);
 		reloadListView(); });
@@ -93,6 +94,12 @@ void DataAnalysisControl::handleContextMenu (const QPoint& pos) {
 
 	auto* newPerson = new QAction ("New Plot", plotListview);
 	plotListview->connect (newPerson, &QAction::triggered, [this]() {
+		QtPlotDesignerDlg* dialog = new QtPlotDesignerDlg(unofficialPicsPerRep);
+		dialog->setStyleSheet(chimeraStyleSheets::stdStyleSheet());
+		dialog->setAttribute(Qt::WA_DeleteOnClose);
+		dialog->exec();
+		//allTinyPlots.push_back (newPlot);
+		reloadListView();
 		});
 	if (item) { menu.addAction (deleteAction); }
 	menu.addAction (newPerson);
@@ -110,6 +117,7 @@ void DataAnalysisControl::initialize( IChimeraQtWindow* parent ){
 	layout1->setContentsMargins(0, 0, 0, 0);
 	currentDataSetNumberText = new QLabel ("Data Set #:", parent);
 	currentDataSetNumberDisp = new QLabel ("?", parent);
+	currentDataSetNumberText->setStyleSheet("QLabel { font: 24pt; };");
 	currentDataSetNumberDisp->setStyleSheet("QLabel { font: bold 24pt; };");
 	layout1->addWidget(currentDataSetNumberText, 0);
 	layout1->addWidget(currentDataSetNumberDisp, 1);
@@ -144,6 +152,10 @@ void DataAnalysisControl::initialize( IChimeraQtWindow* parent ){
 	tlColLabel = new QLabel ("T.L. Col:", parent);
 	tlColEdit = new CQLineEdit ("0", parent);
 	displayGridBtn = new CQCheckBox("Display Grid?", parent);
+	parent->connect(displayGridBtn, &QCheckBox::released, [this, parent]() {
+
+		});
+
 
 	layout2->addWidget(gridSelector, 0);
 	layout2->addWidget(deleteGrid, 0);

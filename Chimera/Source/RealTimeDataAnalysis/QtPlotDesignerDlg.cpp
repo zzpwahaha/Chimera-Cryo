@@ -1,5 +1,6 @@
 #include <stdafx.h>
 #include <RealTimeDataAnalysis/QtPlotDesignerDlg.h>
+#include <qlayout.h>
 #include <boost/lexical_cast.hpp>
 
 QtPlotDesignerDlg::QtPlotDesignerDlg (unsigned pictureNumber) : picNumber (pictureNumber), currentPlotInfo (picNumber) {
@@ -12,180 +13,202 @@ QtPlotDesignerDlg::QtPlotDesignerDlg (std::string fileName) : picNumber (Plottin
 }
 
 void QtPlotDesignerDlg::initializeWidgets () {
+	QVBoxLayout* layoutWigetBase = new QVBoxLayout(this);
+	QHBoxLayout* layoutWiget = new QHBoxLayout();
+	QVBoxLayout* layout1 = new QVBoxLayout();
+	layoutWiget->setContentsMargins(0, 0, 0, 0);
+	layout1->setContentsMargins(0, 0, 0, 0);
 	
-	QPoint pos = { 0,0 };
-	auto& px = pos.rx (), & py = pos.ry ();
-
-	plotPropertiesText = new QLabel ("Plot Properties", this);
-	plotPropertiesText->setGeometry (px, py, 480, 25);
+	plotPropertiesText = new QLabel("Plot Properties", this);
+	layout1->addWidget(plotPropertiesText);
+	QGridLayout* layout2 = new QGridLayout();
+	layout2->setContentsMargins(0, 0, 0, 0);
 
 	plotTitleText = new QLabel ("Plot Title", this);
-	plotTitleText->setGeometry (px, py += 25, 240, 25);
 	plotTitleEdit = new QLineEdit (qstr (currentPlotInfo.getTitle ()), this);
-	plotTitleEdit->setGeometry (px+240, py, 240, 25);
-	
+	layout2->addWidget(plotTitleText, 0, 0);
+	layout2->addWidget(plotTitleEdit, 0, 1);
+
 	yLabelText = new QLabel ("Y-Axis Label", this);
-	yLabelText->setGeometry (px, py += 25, 240, 25);
 	yLabelEdit = new QLineEdit (qstr (currentPlotInfo.getYLabel ()), this);
-	yLabelEdit->setGeometry (px + 240, py, 240, 25);
+	layout2->addWidget(yLabelText, 1, 0);
+	layout2->addWidget(yLabelEdit, 1, 1);
 
 	plotFilenameText = new QLabel ("Plot Filename", this);
-	plotFilenameText->setGeometry (px, py += 25, 240, 25);
 	plotFilenameEdit = new QLineEdit (qstr (currentPlotInfo.getFileName ()), this);
-	plotFilenameEdit->setGeometry (px + 240, py, 240, 25);
+	layout2->addWidget(plotFilenameText, 2, 0);
+	layout2->addWidget(plotFilenameEdit, 2, 1);
 
 	generalPlotTypeText = new QLabel ("Plot Type", this);
-	generalPlotTypeText->setGeometry (px, py += 25, 480, 25);
 	generalPlotTypeCombo = new QComboBox (this);
-	generalPlotTypeCombo->setGeometry (px, py += 25, 480, 25);
 	generalPlotTypeCombo->addItems ({ "Pixel Count Histograms", "Pixel Counts", "Atoms" });
 	generalPlotTypeCombo->setCurrentIndex (0);
+	layout2->addWidget(generalPlotTypeText, 3, 0);
+	layout2->addWidget(generalPlotTypeCombo, 3, 1);
 
 	dataSetNumberText = new QLabel ("Data Set #", this);
-	dataSetNumberText->setGeometry (px, py+=25, 240, 25);
 	dataSetNumCombo = new QComboBox (this);
-	dataSetNumCombo->setGeometry (px + 240, py, 240, 25);
 	dataSetNumCombo->addItems ({ "Data Set #1", "Add New Data Set", "Remove Data Set" });
 	connect ( dataSetNumCombo, qOverload<int> (&QComboBox::currentIndexChanged), 
 			  [this]() {handleDataSetComboChange (); });
+	layout2->addWidget(dataSetNumberText, 4, 0);
+	layout2->addWidget(dataSetNumCombo, 4, 1);
 
 	plotThisDataBox = new QCheckBox ("Plot This Data", this);
-	plotThisDataBox->setGeometry (px, py+=25, 480, 25);
+	layout2->addWidget(plotThisDataBox, 5, 0, 1, 2);
+	layout1->addLayout(layout2);
+
 
 	// Positive Result Conditions
 	positiveResultConditionText = new QLabel ("Positive Result Condition", this);
-	positiveResultConditionText->setGeometry (px, py += 25, 480, 25);
+	layout1->addWidget(positiveResultConditionText);
+
+	QGridLayout* layout3 = new QGridLayout();
+	layout3->setContentsMargins(0, 0, 0, 0);
 
 	prcPictureNumberText = new QLabel ("Picture Number", this);
-	prcPictureNumberText->setGeometry (px, py += 25, 240, 25);
-
 	prcPicNumCombo = new QComboBox (this);
-	prcPicNumCombo->setGeometry (px + 240, py, 240, 25);
 	for (auto num : range (picNumber)){
 		prcPicNumCombo->addItem(qstr ("Picture #" + str (num + 1)));
 	}
 	connect (prcPicNumCombo, qOverload<int> (&QComboBox::currentIndexChanged), [this]() {handlePrcPictureNumberChange (); });
+	layout3->addWidget(prcPictureNumberText, 0, 0);
+	layout3->addWidget(prcPicNumCombo, 0, 1);
 
 	prcPixelNumberText = new QLabel ("Pixel Number");
-	prcPixelNumberText->setGeometry (px, py += 25, 240, 25);
 	prcPixelNumCombo = new QComboBox (this);
-	prcPixelNumCombo->setGeometry (px + 240, py, 240, 25);
-	prcPixelNumCombo->addItem ("Pixel 1");
+	prcPixelNumCombo->addItem ("Pixel #1");
 	connect (prcPixelNumCombo, qOverload<int> (&QComboBox::currentIndexChanged), [this]() {handlePrcPixelNumberChange (); });
+	layout3->addWidget(prcPixelNumberText, 1, 0);
+	layout3->addWidget(prcPixelNumCombo, 1, 1);
 
 	prcAtomBox = new QCheckBox ("Atom", this);
-	prcAtomBox->setGeometry (px, py += 25, 240, 25);
-
 	prcNoAtomBox = new QCheckBox ("No Atom", this);
-	prcNoAtomBox->setGeometry (px + 240, py, 240, 25);
-	prcShowAllButton = new QPushButton ("Show All", this);
-	prcShowAllButton->setGeometry (px, py += 25, 480, 25);
-	connect (prcShowAllButton, &QPushButton::pressed, [this]() { handlePrcShowAll (); });
+	layout3->addWidget(prcAtomBox, 2, 0);
+	layout3->addWidget(prcNoAtomBox, 2, 1);
 	
+	prcShowAllButton = new QPushButton ("Show All", this);
+	connect (prcShowAllButton, &QPushButton::pressed, [this]() { handlePrcShowAll (); });
+	layout3->addWidget(prcShowAllButton, 3, 0, 1, 2);
+	layout1->addLayout(layout3);
+
+
+
 	fitsText = new QLabel ("Fits", this);
-	fitsText->setGeometry (px, py += 25, 480, 25);
+	layout1->addWidget(fitsText);
 
+	QGridLayout* layout4 = new QGridLayout();
+	layout4->setContentsMargins(0, 0, 0, 0);
 	gaussianFit = new QCheckBox ("Gaussian", this);
-	gaussianFit->setGeometry (px, py, 240, 25);
-
 	lorentzianFit = new QCheckBox ("Lorentzian", this);
-	lorentzianFit->setGeometry (px, py += 25, 240, 25);
 	decayingSineFit = new QCheckBox ("Decaying Sine", this);
-	decayingSineFit->setGeometry (px, py += 25, 240, 25);
-	py -= 75;
 	noFit = new QCheckBox ("None", this);
-	noFit->setGeometry (px+240, py, 240, 25);
 	noFit->setChecked (true);
-	realTimeFit = new QCheckBox ("Real Time Fit", this);
-	realTimeFit->setGeometry (px + 240, py += 25, 240, 25);
-
-	atFinishFit = new QCheckBox ("At Finish", this);
-	atFinishFit->setGeometry (px + 240, py += 25, 240, 25);
+	realTimeFit = new QCheckBox("Real Time Fit", this);
+	atFinishFit = new QCheckBox("At Finish", this);
 	setFitRadios ();
-	px = 480;
-	py = 0;
+	layout4->addWidget(gaussianFit, 0, 0);
+	layout4->addWidget(lorentzianFit, 0, 1);
+	layout4->addWidget(decayingSineFit, 1, 0);
+	layout4->addWidget(noFit, 1, 1);
+	layout4->addWidget(realTimeFit, 2, 0);
+	layout4->addWidget(atFinishFit, 2, 1);
 
-	analysisLocationsText = new QLabel ("Analysis Locations", this);
-	analysisLocationsText->setGeometry (px, py, 480, 25);
+	layout1->addLayout(layout4);
 
+	QVBoxLayout* layout5 = new QVBoxLayout();
+	layout5->setContentsMargins(0, 0, 0, 0);
+
+	analysisLocationsText = new QLabel("Analysis Locations", this);
+	layout5->addWidget(analysisLocationsText);
+	QGridLayout* layout6 = new QGridLayout();
+	layout6->setContentsMargins(0, 0, 0, 0);
 	pixelsPerAnalysisGroupText = new QLabel ("Pixels Per Analysis Group", this);
-	pixelsPerAnalysisGroupText->setGeometry (px, py += 25, 240, 25);
 	pixelsPerAnalysisGroupEdit = new QLineEdit ("1", this);
-	pixelsPerAnalysisGroupEdit->setGeometry (px + 240, py, 240, 25);
 	connect (pixelsPerAnalysisGroupEdit, &QLineEdit::textChanged, [this]() {handlePixelEditChange (); });
+	layout6->addWidget(pixelsPerAnalysisGroupText, 0, 0);
+	layout6->addWidget(pixelsPerAnalysisGroupEdit, 0, 1);
+	layout5->addLayout(layout6);
+
 
 	xAxisText = new QLabel ("X-Axis", this);
-	xAxisText->setGeometry (px, py += 25, 480, 25);
-
+	layout5->addWidget(xAxisText);
+	QGridLayout* layout7 = new QGridLayout();
+	layout7->setContentsMargins(0, 0, 0, 0);
 	averageEachVariation = new QCheckBox ("Average Each Variation", this);
-	averageEachVariation->setGeometry (px, py += 25, 480, 25);
-	averageEachVariation->setChecked (1);
-
+	averageEachVariation->setChecked (true);
 	runningAverage = new QCheckBox ("Running Average (Continuous Mode Only)", this);
-	runningAverage->setGeometry (px, py += 25, 480, 25);
-
+	layout7->addWidget(averageEachVariation, 0, 0);
+	layout7->addWidget(runningAverage, 1, 0);
+	layout5->addLayout(layout7);
+	
+	
 	aestheticsText = new QLabel ("Aesthetics", this);
-	aestheticsText->setGeometry (px, py += 25, 480, 25);
-
+	layout5->addWidget(aestheticsText);
+	QGridLayout* layout8 = new QGridLayout();
+	layout8->setContentsMargins(0, 0, 0, 0);
 	legendText = new QLabel ("Legend Text", this);
-	legendText->setGeometry (px, py += 25, 240, 25);
-
 	legendEdit = new QLineEdit (this);
-	legendEdit->setGeometry (px + 240, py, 240, 25);
-
 	binWidthText = new QLabel ("Hist Bin Width:", this);
-	binWidthText->setGeometry (px, py += 25, 240, 25);
 	binWidthEdit = new QLineEdit ("10", this);
-	binWidthEdit->setGeometry (px + 240, py, 240, 25);
+	layout8->addWidget(legendText, 0, 0);
+	layout8->addWidget(legendEdit, 0, 1);
+	layout8->addWidget(binWidthText, 1, 0);
+	layout8->addWidget(binWidthEdit, 1, 1);
+	layout5->addLayout(layout8);
+
 
 	// Post selection conditions
 	postSelectionConditionText = new QLabel ("Post-Selection Conditions", this);
-	postSelectionConditionText->setGeometry (px, py += 25, 480, 25);
+	layout5->addWidget(postSelectionConditionText);
+	QGridLayout* layout9 = new QGridLayout();
+	layout9->setContentsMargins(0, 0, 0, 0);
 	pscConditionNumberText = new QLabel ("Condition Number", this);
-	pscConditionNumberText->setGeometry (px, py += 25, 240, 25);
 	pscConditionNumCombo = new QComboBox (this);
-	pscConditionNumCombo->setGeometry (px+240, py, 240, 25);
 	pscConditionNumCombo->addItems ({ "Condition #1", "Add New Condition", "Remove Condition" });
 	connect (pscConditionNumCombo, qOverload<int> (&QComboBox::currentIndexChanged), 
 			 [this]() {handlePscConditionNumberChange (); });
+	layout9->addWidget(pscConditionNumberText, 0, 0);
+	layout9->addWidget(pscConditionNumCombo, 0, 1);
 
 	pscPictureNumberText = new QLabel ("Picture Number", this);
-	pscPictureNumberText->setGeometry (px, py += 25, 240, 25);
 	pscPicNumCombo = new QComboBox (this);
-	pscPicNumCombo->setGeometry (px+240, py, 240, 25);
 	for (auto num : range (picNumber)){
 		pscPicNumCombo->addItem (qstr ("Picture #" + str (num + 1)));
 	}
 	connect (pscPicNumCombo, qOverload<int> (&QComboBox::currentIndexChanged),
 		[this]() {handlePscPictureNumberChange (); });
-	
+	layout9->addWidget(pscPictureNumberText, 1, 0);
+	layout9->addWidget(pscPicNumCombo, 1, 1);
 
 	pscPixelNumberText = new QLabel ("Pixel Number", this);
-	pscPixelNumberText->setGeometry (px, py += 25, 240, 25);
 	pscPixelNumCombo = new QComboBox (this);
-	pscPixelNumCombo->setGeometry (px+240, py, 240, 25);
 	pscPixelNumCombo->addItem ("Pixel #1");
 	connect (pscPixelNumCombo, qOverload<int> (&QComboBox::currentIndexChanged),
 		[this]() { handlePscPixelNumberChange (); });
-
+	layout9->addWidget(pscPixelNumberText, 2, 0);
+	layout9->addWidget(pscPixelNumCombo, 2, 1);
 	
-
 	pscAtomBox = new QCheckBox ("Atom", this);
-	pscAtomBox->setGeometry (px, py += 25, 240, 25);
 	pscNoAtomBox = new QCheckBox ("No Atom",this);
-	pscNoAtomBox->setGeometry (px+240, py, 240, 25);
+	layout9->addWidget(pscAtomBox, 3, 0);
+	layout9->addWidget(pscNoAtomBox, 3, 1);
+
 	pscShowAllButton = new QPushButton ("Show All", this);
-	pscShowAllButton->setGeometry (px, py += 25, 480, 25);
 	connect ( pscShowAllButton, &QPushButton::pressed, [this](){handlePscShowAll ();});
+	layout9->addWidget(pscShowAllButton, 4, 0, 1, 2);
+	layout5->addLayout(layout9);
 
-	saveButton = new QPushButton ("SAVE", this);
-	saveButton->setGeometry (px, py += 25, 240, 25);
-	connect (saveButton, &QPushButton::pressed, [this]() {handleSave (); });
+	layoutWiget->addLayout(layout1);
+	layoutWiget->addLayout(layout5);
 
-	cancelButton = new QPushButton ("CANCEL", this);
-	cancelButton->setGeometry (px+240, py, 240, 25);
-	connect (cancelButton, &QPushButton::pressed, [this]() {handleCancel (); });
+	buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
+	connect (buttonBox, &QDialogButtonBox::accepted, [this]() {handleSave (); });
+	connect (buttonBox, &QDialogButtonBox::rejected, [this]() {handleCancel (); });
 	enableAndDisable ();
+
+	layoutWigetBase->addLayout(layoutWiget);
+	layoutWigetBase->addWidget(buttonBox);
 }
 
 void QtPlotDesignerDlg::handlePixelEditChange (){
@@ -575,8 +598,7 @@ void QtPlotDesignerDlg::enableAndDisable (){
 	dataSetNumCombo->setEnabled (true);
 	pscShowAllButton->setEnabled (true);
 	prcShowAllButton->setEnabled (true);
-	saveButton->setEnabled (true);
-	cancelButton->setEnabled (true);
+	buttonBox->setEnabled (true);
 	// each of the bools here determines whether a combo has a selection or not. 
 	// There are simply a set of combos that must have a valid selection for a control it to be active.		
 	bool dataSetSel = (dataSetNumCombo->currentIndex() != -1);

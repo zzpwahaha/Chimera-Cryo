@@ -4,6 +4,7 @@
 #include <qlabel.h>
 #include <qlineedit.h>
 #include <qpushbutton.h>
+#include <qdialogbuttonbox.h>
 #include <qcheckbox.h>
 #include <qcombobox.h>
 #include <Plotting/PlottingInfo.h>
@@ -116,6 +117,5 @@ class QtPlotDesignerDlg : public QDialog {
 		QCheckBox* realTimeFit;
 		QCheckBox* atFinishFit;
 
-		QPushButton* saveButton;
-		QPushButton* cancelButton;
+		QDialogButtonBox* buttonBox;
 };
