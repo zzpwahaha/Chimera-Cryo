@@ -620,22 +620,22 @@ void AoCore::setGUIDacChange(std::vector<std::vector<AoChannelSnapshot>> channel
 		thrower("GUI sending data to DAC failed: \r\n" + e.trace());
 	}
 	
-	int tcp_connect;
-	try {
-		tcp_connect = zynq_tcp.connectTCP(ZYNQ_ADDRESS);
-	}
-	catch (ChimeraError& err) {
-		tcp_connect = 1;
-		thrower(err.what());
-	}
-	Sleep(100);
-	if (tcp_connect == 0) {
-		zynq_tcp.writeCommand("trigger");
-		zynq_tcp.disconnect();
-	}
-	else {
-		thrower("connection to zynq failed. can't write DAC data\n");
-	}
+	//int tcp_connect;
+	//try {
+	//	tcp_connect = zynq_tcp.connectTCP(ZYNQ_ADDRESS);
+	//}
+	//catch (ChimeraError& err) {
+	//	tcp_connect = 1;
+	//	thrower(err.what());
+	//}
+	//Sleep(100);
+	//if (tcp_connect == 0) {
+	//	zynq_tcp.writeCommand("trigger");
+	//	zynq_tcp.disconnect();
+	//}
+	//else {
+	//	thrower("connection to zynq failed. can't write DAC data\n");
+	//}
 }
 
 

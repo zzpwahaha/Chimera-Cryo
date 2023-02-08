@@ -533,6 +533,7 @@ void QtAuxiliaryWindow::SetDacs (){
 		//ttlBoard.resetTtlEvents();
 		reportStatus("Setting Dacs...\r\n");
 		aoSys.handleSetDacsButtonPress(true);
+		ttlBoard.setTtlStatus(ttlBoard.getCurrentStatus());
 		//aoSys.forceDacs (ttlBoard.getCore (), { 0, ttlBoard.getCurrentStatus () });
 		reportStatus ("Finished Setting Dacs.\r\n");
 	}
