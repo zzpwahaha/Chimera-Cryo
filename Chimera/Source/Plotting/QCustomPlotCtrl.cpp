@@ -666,6 +666,11 @@ void QCustomPlotCtrl::setControlLocation(QRect loc) {
 	plot->setGeometry(loc);
 }
 
+QCPAxisRect* QCustomPlotCtrl::getCenterAxisRect()
+{
+	return centerAxisRect;
+}
+
 std::vector<double> QCustomPlotCtrl::handleMousePosOnCMap(QMouseEvent* event)
 {
 	std::vector<double> vec{};

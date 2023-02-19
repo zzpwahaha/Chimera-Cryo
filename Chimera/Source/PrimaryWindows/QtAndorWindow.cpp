@@ -133,6 +133,20 @@ void QtAndorWindow::refreshPics()
 	pics.setSinglePicture(andorSettingsCtrl.getConfigSettings().andor.imageSettings);
 }
 
+void QtAndorWindow::displayAnalysisGrid(std::vector<atomGrid> grids)
+{
+	for (auto& pic : pics.pictures) {
+		pic.drawAnalysisMarkers(grids);
+	}
+}
+
+void QtAndorWindow::removeAnalysisGrid()
+{
+	for (auto& pic : pics.pictures) {
+		pic.removeAnalysisMarkers();
+	}
+}
+
 bool QtAndorWindow::wasJustCalibrated (){
 	return justCalibrated;
 }
@@ -766,7 +780,7 @@ void QtAndorWindow::completePlotterStart () {
 	/// start the plotting thread.
 	plotThreadActive = true;
 	plotThreadAborting = false;
-	auto* pltInput = new realTimePlotterInput (analysisHandler.getPlotTime ());
+	auto* pltInput = new realTimePlotterInput ();
 	pltInput->plotParentWindow = this;
 	pltInput->aborting = &plotThreadAborting;
 	pltInput->active = &plotThreadActive;
@@ -782,7 +796,6 @@ void QtAndorWindow::completePlotterStart () {
 	pltInput->alertThreshold = alerts.getAlertThreshold ();
 	pltInput->wantAtomAlerts = alerts.wantsAtomAlerts ();
 	pltInput->numberOfRunsToAverage = 5;
-	pltInput->plottingFrequency = analysisHandler.getPlotFreq ();
 	analysisHandler.fillPlotThreadInput (pltInput);
 	// remove old plots that aren't trying to sustain.
 	unsigned mainPlotInc = 0;
@@ -798,7 +811,7 @@ void QtAndorWindow::completePlotterStart () {
 
 	bool gridHasBeenSet = false;
 	for (auto gridInfo : pltInput->grids) {
-		if (!(gridInfo.topLeftCorner == coordinate (0, 0))) {
+		if (!(gridInfo.gridOrigin == coordinate (0, 0))) {
 			gridHasBeenSet = true;
 			break;
 		}

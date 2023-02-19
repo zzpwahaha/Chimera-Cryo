@@ -18,9 +18,6 @@
 
 DataAnalysisControl::DataAnalysisControl (IChimeraQtWindow* parent) 
 	: IChimeraSystem(parent)
-	, gridSpacing(nullptr)
-	, gridHeight(nullptr)
-	, gridWidth(nullptr)
 {
 	std::vector<std::string> names = ConfigSystem::searchForFiles (PLOT_FILES_SAVE_LOCATION, str ("*.") + PLOTTING_EXTENSION);
 	for (auto name : names) {
@@ -124,6 +121,7 @@ void DataAnalysisControl::initialize( IChimeraQtWindow* parent ){
 
 	QHBoxLayout* layout2 = new QHBoxLayout(this);
 	layout2->setContentsMargins(0, 0, 0, 0);
+	QLabel* gridSelectorLabel = new QLabel("Grid:", parent);
 	gridSelector = new CQComboBox (parent);
 	parent->connect (gridSelector, qOverload<int>(&QComboBox::currentIndexChanged), 
 		[this, parent]() {
@@ -147,55 +145,52 @@ void DataAnalysisControl::initialize( IChimeraQtWindow* parent ){
 				parent->reportErr (err.qtrace ());
 			}
 		});
-	tlRowLabel = new QLabel("T.L. Row:", parent);;
-	tlRowEdit = new CQLineEdit("0", parent);
-	tlColLabel = new QLabel ("T.L. Col:", parent);
-	tlColEdit = new CQLineEdit ("0", parent);
 	displayGridBtn = new CQCheckBox("Display Grid?", parent);
 	parent->connect(displayGridBtn, &QCheckBox::released, [this, parent]() {
-
+		updateSettings();
+		if (displayGridBtn->isChecked()) {
+			parent->andorWin->displayAnalysisGrid(currentSettings.grids);
+		}
+		else {
+			parent->andorWin->removeAnalysisGrid();
+		}
 		});
 
-
+	layout2->addWidget(gridSelectorLabel, 0);
 	layout2->addWidget(gridSelector, 0);
 	layout2->addWidget(deleteGrid, 0);
-	layout2->addWidget(tlRowLabel, 0);
-	layout2->addWidget(tlRowEdit, 1);
-	layout2->addWidget(tlColLabel, 0);
-	layout2->addWidget(tlColEdit, 1);
 	layout2->addWidget(displayGridBtn, 0);
 
-	QHBoxLayout* layout3 = new QHBoxLayout(this);
+	QGridLayout* layout3 = new QGridLayout(this);
 	layout3->setContentsMargins(0, 0, 0, 0);
-	gridSpacingText = new QLabel ("Spacing", parent);
-	gridSpacing = new CQLineEdit ("0", parent);
-	gridWidthText = new QLabel ("Width", parent);
-	gridWidth = new CQLineEdit ("0", parent);
-	gridHeightText = new QLabel ("Height", parent);
-	gridHeight = new CQLineEdit ("0", parent);
-	layout3->addWidget(gridSpacingText, 0);
-	layout3->addWidget(gridSpacing, 1);
-	layout3->addWidget(gridWidthText, 0);
-	layout3->addWidget(gridWidth, 1);
-	layout3->addWidget(gridHeightText, 0);
-	layout3->addWidget(gridHeight, 1);
+	layout3->addWidget(new QLabel("Origin Coord.", this), 0, 1);
+	layout3->addWidget(new QLabel("Spacing", this), 0, 2);
+	layout3->addWidget(new QLabel("#", this), 0, 3);
+	layout3->addWidget(new QLabel("Bin Incl.", this), 0, 4);
 
+	layout3->addWidget(new QLabel("X", this), 1, 0);
+	originEditX = new CQLineEdit("0", parent);
+	gridSpacingX = new CQLineEdit("0", parent);
+	gridNumberX = new CQLineEdit("0", parent);
+	includePixelX = new CQLineEdit("0", parent);
+	layout3->addWidget(originEditX, 1, 1);
+	layout3->addWidget(gridSpacingX, 1, 2);
+	layout3->addWidget(gridNumberX, 1, 3);
+	layout3->addWidget(includePixelX, 1, 4);
+
+	layout3->addWidget(new QLabel("Y", this), 2, 0);
+	originEditY = new CQLineEdit("0", parent);
+	gridSpacingY = new CQLineEdit("0", parent);
+	gridNumberY = new CQLineEdit("0", parent);
+	includePixelY = new CQLineEdit("0", parent);
+	layout3->addWidget(originEditY, 2, 1);
+	layout3->addWidget(gridSpacingY, 2, 2);
+	layout3->addWidget(gridNumberY, 2, 3);
+	layout3->addWidget(includePixelY, 2, 4);
 
 	/// PLOTTING FREQUENCY CONTROLS
-	QHBoxLayout* layout4 = new QHBoxLayout(this);
-	layout4->setContentsMargins(0, 0, 0, 0);
-	updateFrequencyLabel1 = new QLabel ("Update plots every", parent);
-	updateFrequencyEdit = new CQLineEdit ("5", parent);
-	updateFrequency = 5;
-	updateFrequencyLabel2 = new QLabel (" reps.", parent);
-	plotTimerTxt = new QLabel ("Plot Update Timer (ms):", parent);
-	plotTimerEdit = new CQLineEdit ("5000", parent);
-	layout4->addWidget(updateFrequencyLabel1, 0);
-	layout4->addWidget(updateFrequencyEdit, 0);
-	layout4->addWidget(updateFrequencyLabel2, 0);
-	layout4->addWidget(plotTimerTxt, 0);
-	layout4->addWidget(plotTimerEdit, 1);
-	parent->connect (plotTimerEdit, &QLineEdit::textChanged, [this]() { updatePlotTime (); });
+	//QHBoxLayout* layout4 = new QHBoxLayout(this);
+	//layout4->setContentsMargins(0, 0, 0, 0);
 
 	QHBoxLayout* layout5 = new QHBoxLayout(this);
 	layout5->setContentsMargins(0, 0, 0, 0);
@@ -268,22 +263,9 @@ void DataAnalysisControl::initialize( IChimeraQtWindow* parent ){
 	layout->addLayout(layout1);
 	layout->addLayout(layout2);
 	layout->addLayout(layout3);
-	layout->addLayout(layout4);
+	//layout->addLayout(layout4);
 	layout->addLayout(layout5);
 	layout->addWidget(plotListview);
-}
-
-void DataAnalysisControl::updatePlotTime ( ){
-	try	{
-		plotTime = boost::lexical_cast<unsigned long>(str(plotTimerEdit->text()));
-	}
-	catch ( boost::bad_lexical_cast& ){
-		//throwNested ( "ERROR: plot time failed to convert to an unsigned integer!" );
-	}
-}
-
-std::atomic<unsigned>& DataAnalysisControl::getPlotTime( ){
-	return plotTime;
 }
 
 void DataAnalysisControl::handleDeleteGrid( ){
@@ -300,17 +282,6 @@ void DataAnalysisControl::handleDeleteGrid( ){
 	gridSelector->addItem( "New" );
 	gridSelector->setCurrentIndex( 0 );
 	loadGridParams(currentSettings.grids[0] );
-}
-
-unsigned DataAnalysisControl::getPlotFreq( ){
-	try	{
-		updateFrequency = boost::lexical_cast<long>( str(updateFrequencyEdit->text()) );
-	}
-	catch ( boost::bad_lexical_cast& ){
-		throwNested ( "ERROR: Failed to convert plotting update frequency to an integer! text was: " 
-			+ str(updateFrequencyEdit->text ()) );
-	}
-	return updateFrequency;
 }
 
 void DataAnalysisControl::updateDisplays (analysisSettings settings) {
@@ -359,7 +330,8 @@ analysisSettings DataAnalysisControl::getAnalysisSettingsFromFile (ConfigStream&
 	}
 	settings.grids.resize (numGrids);
 	for (auto& grid : settings.grids) {
-		file >> grid.topLeftCorner.row >> grid.topLeftCorner.column >> grid.width >> grid.height >> grid.pixelSpacing;
+		file >> grid.gridOrigin.row >> grid.gridOrigin.column >> grid.width >> grid.height 
+			>> grid.pixelSpacingX >> grid.pixelSpacingY >> grid.includedPixelX >> grid.includedPixelY;
 	}
 	// load the grid parameters for that selection.
 	ConfigSystem::checkDelimiterLine (file, "BEGIN_ACTIVE_PLOTS");
@@ -404,12 +376,15 @@ void DataAnalysisControl::handleSaveConfig( ConfigStream& file ){
 	file << "\n/*Number of Analysis Grids: */\t" << currentSettings.grids.size ();
 	unsigned count = 0;
 	for ( auto grid : currentSettings.grids ){
-		file << "\n/*Grid #" + str (++count) << ":*/ "
-			<< "\n/*Top-Left Corner Row:*/\t\t" << grid.topLeftCorner.row
-			<< "\n/*Top-Left Corner Column:*/\t\t" << grid.topLeftCorner.column
+		file << "\n/*Grid #" + str(++count) << ":*/ "
+			<< "\n/*Grid Origin X(Bottom-Left Corner Column):*/\t\t" << grid.gridOrigin.column
+			<< "\n/*Grid Origin Y(Bottom-Left Corner Row):*/\t\t" << grid.gridOrigin.row
 			<< "\n/*Grid Width:*/\t\t\t\t\t" << grid.width
 			<< "\n/*Grid Height:*/\t\t\t\t" << grid.height
-			<< "\n/*Pixel Spacing:*/\t\t\t\t" << grid.pixelSpacing;
+			<< "\n/*Pixel Spacing X:*/\t\t\t\t" << grid.pixelSpacingX
+			<< "\n/*Pixel Spacing Y:*/\t\t\t\t" << grid.pixelSpacingY
+			<< "\n/*Include Pixels X:*/\t\t\t\t" << grid.includedPixelX
+			<< "\n/*Include Pixels Y:*/\t\t\t\t" << grid.includedPixelY;
 	}
 	file << "\nBEGIN_ACTIVE_PLOTS\n";
 	unsigned activeCount = 0;
@@ -449,7 +424,6 @@ void DataAnalysisControl::fillPlotThreadInput(realTimePlotterInput* input){
 		}
 	}
 	input->grids = currentlyRunningSettings.grids;
-	input->plottingFrequency = updateFrequency;
 	// as I fill the input, also check this, which is necessary info for plotting.
 	input->needsCounts = false;
 	for (auto plt : input->plotInfo){
@@ -489,31 +463,40 @@ void DataAnalysisControl::reloadGridCombo( unsigned num ){
 }
 
 void DataAnalysisControl::loadGridParams( atomGrid grid ){
-	if (!gridSpacing || !gridHeight || !gridWidth) {
+	if (!gridSpacingX || !gridSpacingY || !gridNumberX || !gridNumberY) {
 		return;
 	}
-	tlColEdit->setText (qstr (grid.topLeftCorner.column));
-	tlRowEdit->setText (qstr (grid.topLeftCorner.row));
-	std::string txt = str( grid.pixelSpacing );
-	gridSpacing->setText(cstr(txt));
+	originEditX->setText (qstr (grid.gridOrigin.column));
+	originEditY->setText (qstr (grid.gridOrigin.row));
+	std::string txt = str(grid.pixelSpacingX);
+	gridSpacingX->setText(qstr(txt));
+	txt = str(grid.pixelSpacingY);
+	gridSpacingY->setText(qstr(txt));
 	txt = str( grid.width );
-	gridWidth->setText(cstr(txt));
+	gridNumberX->setText(qstr(txt));
 	txt = str( grid.height );
-	gridHeight->setText ( cstr( txt ) );
+	gridNumberY->setText(qstr(txt));
+	txt = str(grid.includedPixelX);
+	includePixelX->setText(qstr(txt));
+	txt = str(grid.includedPixelX);
+	includePixelY->setText(qstr(txt));
 }
 
 void DataAnalysisControl::saveGridParams( ){
-	if (!gridSpacing || !gridHeight || !gridWidth) {
+	if (!gridSpacingX || !gridSpacingY || !gridNumberX || !gridNumberY) {
 		return;
 	}
 	unsigned row = 0, col = 0;
 	try{
-		row = boost::lexical_cast<unsigned> (str (tlRowEdit->text ()));
-		col = boost::lexical_cast<unsigned> (str (tlColEdit->text ()));
-		currentSettings.grids[0].topLeftCorner = { row, col };
-		currentSettings.grids[0].pixelSpacing = boost::lexical_cast<long>( str(gridSpacing->text()) );
-		currentSettings.grids[0].height = boost::lexical_cast<long>( str( gridHeight->text() ) );
-		currentSettings.grids[0].width = boost::lexical_cast<long>( str( gridWidth->text()) );
+		row = boost::lexical_cast<unsigned> (str (originEditY->text ()));
+		col = boost::lexical_cast<unsigned> (str (originEditX->text ()));
+		currentSettings.grids[0].gridOrigin = { row, col };
+		currentSettings.grids[0].pixelSpacingX = boost::lexical_cast<long>( str(gridSpacingX->text()) );
+		currentSettings.grids[0].pixelSpacingY = boost::lexical_cast<long>(str(gridSpacingY->text()));
+		currentSettings.grids[0].height = boost::lexical_cast<long>( str( gridNumberY->text() ) );
+		currentSettings.grids[0].width = boost::lexical_cast<long>( str(gridNumberX->text()) );
+		currentSettings.grids[0].includedPixelX = boost::lexical_cast<long>(str(includePixelX->text()));
+		currentSettings.grids[0].includedPixelY = boost::lexical_cast<long>(str(includePixelY->text()));
 	}
 	catch ( boost::bad_lexical_cast&){
 		throwNested ( "ERROR: failed to convert grid parameters to longs while saving grid data!" );

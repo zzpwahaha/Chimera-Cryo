@@ -19,8 +19,8 @@ void CruncherThreadWorker::init () {
 		auto& grid = input->grids[gridInc];
 		for (auto columnInc : range (grid.width)) {
 			for (auto rowInc : range (grid.height)) {
-				unsigned long pixelRowInverted = grid.topLeftCorner.row + rowInc * grid.pixelSpacing;
-				unsigned long pixelColumn = grid.topLeftCorner.column + columnInc * grid.pixelSpacing;
+				unsigned long pixelRowInverted = grid.gridOrigin.row + rowInc * grid.pixelSpacingY;
+				unsigned long pixelColumn = grid.gridOrigin.column + columnInc * grid.pixelSpacingX;
 				unsigned long pixelRow = input->imageDims.height () - pixelRowInverted - 1;
 
 				if (pixelRow >= input->imageDims.height () || pixelColumn >= input->imageDims.width ()) {

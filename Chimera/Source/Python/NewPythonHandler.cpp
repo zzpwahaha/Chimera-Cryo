@@ -23,8 +23,8 @@ double NewPythonHandler::runCarrierAnalysis (std::string date, long runNumber, a
 	params << "C:\\Users\\Regal-Lab\\Code\\Data-Analysis-Code\\CarrierAnalysis.py";
 	params << qstr(date);
 	params << qstr(runNumber);
-	params << "[" + qstr (gridInfo.topLeftCorner.row) + "," + qstr (gridInfo.topLeftCorner.column) + ","
-		+ qstr (gridInfo.pixelSpacing) + "," + qstr (gridInfo.width) + "," + qstr (gridInfo.height) + "]";
+	params << "[" + qstr (gridInfo.gridOrigin.row) + "," + qstr (gridInfo.gridOrigin.column) + ","
+		+ qstr (gridInfo.pixelSpacingX) + "," + qstr (gridInfo.width) + "," + qstr (gridInfo.height) + "]"; /// TODO: need to fix this for python analysis ZZP 2023/02/19
 
 	QProcess* process = new QProcess (parent);
 	process->start(command, params);

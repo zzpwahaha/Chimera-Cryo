@@ -263,10 +263,7 @@ std::vector<std::vector<dataPoint>> AnalysisThreadWorker::handlePlotAtoms (Plott
 			finData[dataSetI][groupI].second++;
 		}
 	}
-	// Core data structures have been updated. return if not time for a plot update yet.
-	if (plotNumberCount % input->plottingFrequency != 0) {
-		return {};
-	}
+	// Core data structures have been updated. 
 	if (dataContainers.size () == 0) {
 		return {};
 	}
@@ -368,10 +365,7 @@ std::vector<std::vector<dataPoint>> AnalysisThreadWorker::handlePlotHist (Plotti
 			}
 		}
 	}
-	// Core data structures have been updated. return if not time for a plot update yet.
-	if (pltNumberCount % input->plottingFrequency != 0) {
-		return {};
-	}
+	// Core data structures have been updated.
 	return dataContainers;
 }
 
