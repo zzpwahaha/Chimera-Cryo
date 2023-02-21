@@ -41,9 +41,9 @@ void CalibrationThreadWorker::runAll () {
 		Sleep (200);
 		count++;
 	}
-	input.ttls->setTtlStatus(doInitStatus);
-	Sleep(50);
 	input.ao->setDacStatus(aoInitStatus);
+	Sleep(50);
+	input.ttls->setTtlStatus(doInitStatus);
 	emit updateBoxColor("Gray", "AI-SYSTEM");
 	emit mainProcessFinish();
 }
@@ -60,12 +60,14 @@ void CalibrationThreadWorker::calibrate (calSettings& cal, unsigned which) {
 	calResult result(cal.result); // copy cal.result in case the calibration failed, in which case it should/will fall back to the old calibration value
 
 	//cal.result.includesSqrt = cal.includeSqrt;
-	input.ttls->zeroBoard ();
-	Sleep(50);
 	input.ao->zeroDacs ();
+	Sleep(50);
+	input.ttls->zeroBoard(); // ZZP 02/12/2023 - need ttls to trigger dac change in zynq, same as bellow
 	Sleep(50);
 	for (auto dac : cal.aoConfig) {
 		input.ao->setSingleDac (dac.first, dac.second);
+		input.ttls->getCore().FPGAForceOutput(input.ttls->getCurrentStatus()); // ZZP 02/12/2023 - update ttls since now dac/dds gui update will always need separate TTL update as zynq trigger
+		Sleep(50);
 	}
 	for (auto ttl : cal.ttlConfig) {
 		auto& outputs = input.ttls->getDigitalOutputs();
@@ -89,6 +91,8 @@ void CalibrationThreadWorker::calibrate (calSettings& cal, unsigned which) {
 		}
 		else {
 			input.ao->setSingleDac (aoNum, calPoint);
+			input.ttls->getCore().FPGAForceOutput(input.ttls->getCurrentStatus()); // ZZP 02/12/2023 - need ttls to trigger dac change in zynq, same as bellow
+			Sleep(50);
 		}
 		Sleep(100); // give some time for the analog output to change and settle..
 		// try maxTries to read before yell out error
