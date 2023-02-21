@@ -545,6 +545,13 @@ void DdsCore::calculateVariations(std::vector<parameterType>& variables, ExpThre
 	{
 		for (UINT eventInc = 0; eventInc < ddsCommandFormList.size(); eventInc++)
 		{
+			if (variationInc == 0) {
+				// clear calibration usage for each command in the first var, for later check the proper usage of calibration
+				for (auto calIdx : range(calibrationSettings.size())) {
+					calibrations[calIdx].currentActive = false;
+				}
+			}
+
 			DdsCommand tempEvent;
 			tempEvent.line = ddsCommandFormList[eventInc].line;
 			// Deal with time.

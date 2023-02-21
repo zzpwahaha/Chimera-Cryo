@@ -177,6 +177,13 @@ void AoCore::calculateVariations(std::vector<parameterType>& params, ExpThreadWo
 		}
 		auto& cmdList = dacCommandList[variationInc];
 		for (auto eventInc : range(dacCommandFormList.size())) {
+			if (variationInc == 0) {
+				// clear calibration usage for each command in the first var, for later check the proper usage of calibration
+				for (auto calIdx : range(calibrationSettings.size())) {
+					calibrations[calIdx].currentActive = false;
+				}
+			}
+			
 			AoCommand tempEvent;
 			auto& formList = dacCommandFormList[eventInc];
 			tempEvent.line = formList.line;
