@@ -45,15 +45,14 @@ class DataAnalysisControl : public IChimeraSystem {
 		
 		void reloadListView();
 		void handleAtomGridCombo( );
-		void reloadGridCombo( unsigned num );
+		void reloadGridCombo( );
 		void fillPlotThreadInput( realTimePlotterInput* input );
-		void loadGridParams( atomGrid grid );
+		void loadGridParams( atomGrid& grid );
 		void saveGridParams( );
-		void handleDeleteGrid( );
+		void handleDeleteGrid(int sel);
 
 		void handleContextMenu (const QPoint& pos);
 
-		unsigned getPlotFreq ();
 		std::vector<std::string> getActivePlotList ();
 
 		// used to determine what plots to show in the listview. should be updated from the official number when the 
@@ -63,6 +62,9 @@ class DataAnalysisControl : public IChimeraSystem {
 		analysisSettings getConfigSettings ();
 		void setRunningSettings (analysisSettings options);
 		analysisSettings getRunningSettings ();
+	private:
+		std::vector<std::string> getGridFileNames();
+
 	private:
 		analysisSettings currentSettings, currentlyRunningSettings;
 
@@ -94,8 +96,9 @@ class DataAnalysisControl : public IChimeraSystem {
 
 		CQCheckBox* autoThresholdAnalysisButton;
 		CQCheckBox* displayGridBtn;
-
+		CQPushButton* newGrid;
 		CQPushButton* deleteGrid;
+		CQPushButton* refreshGrid;
 
 };
 

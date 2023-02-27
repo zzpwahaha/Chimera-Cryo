@@ -571,37 +571,58 @@ void PictureControl::drawPicNum( unsigned picNum, QPainter& painter ){
 	painter.drawText (QPoint ( int(picScaleFactor)/5, picScaleFactor), cstr (picNum));
 }
 
-void PictureControl::drawAnalysisMarkers( std::vector<atomGrid> gridInfo){
+void PictureControl::drawAnalysisMarkers(atomGrid gridInfo){
 	analysisMarkers.clear();
 	if ( !active ){
 		return;
 	}
 	QPen pen(Qt::yellow);
 	unsigned gridCount = 0;
-	for (auto atomGrid : gridInfo) {
-		if (atomGrid.gridOrigin == coordinate(0, 0)) {
-			// atom grid is empty, not to be used.
-			unsigned count = 1;
-		}
-		else {
+
+	if (coordinate(gridInfo.gridOrigin) == coordinate(0, 0) && !gridInfo.useFile) {
+		// atom grid is empty, not to be used.
+		unsigned count = 1;
+	}
+	else {
+		if (!gridInfo.useFile) {
 			// use the atom grid.
 			unsigned count = 1;
-			for (auto columnInc : range(atomGrid.width)) {
-				for (auto rowInc : range(atomGrid.height)) {
+			for (auto columnInc : range(gridInfo.width)) {
+				for (auto rowInc : range(gridInfo.height)) {
 					analysisMarkers.push_back(new QCPItemRect(pic.plot));
 					auto* rect = analysisMarkers.back();
 					rect->setPen(pen);
 					rect->setClipAxisRect(pic.getCenterAxisRect());
-					unsigned pixelRow = (atomGrid.gridOrigin.row + rowInc * atomGrid.pixelSpacingY);
-					unsigned pixelColumn = (atomGrid.gridOrigin.column + columnInc * atomGrid.pixelSpacingX);
-					rect->topLeft->setCoords(pixelColumn - 0.5 - atomGrid.includedPixelX, pixelRow + 0.5 + atomGrid.includedPixelY);
-					rect->bottomRight->setCoords(pixelColumn + 0.5 + atomGrid.includedPixelX, pixelRow - 0.5 - atomGrid.includedPixelY);
+					unsigned pixelRow = (gridInfo.gridOrigin.row + rowInc * gridInfo.pixelSpacingY);
+					unsigned pixelColumn = (gridInfo.gridOrigin.column + columnInc * gridInfo.pixelSpacingX);
+					rect->topLeft->setCoords(pixelColumn - 0.5 - gridInfo.includedPixelX, pixelRow + 0.5 + gridInfo.includedPixelY);
+					rect->bottomRight->setCoords(pixelColumn + 0.5 + gridInfo.includedPixelX, pixelRow - 0.5 - gridInfo.includedPixelY);
 				}
 			}
-			pic.resetChart();
 		}
-		gridCount++;
+		else {
+			// use the atom grid from file.
+			unsigned count = 1;
+			if (gridInfo.atomLocs.empty()) {
+				thrower("Atoms locations for file: " + gridInfo.fileName + " is empty, seems like it is not loaded. This should not happen. A low level bug.");
+			}
+			for (auto coords : gridInfo.atomLocs) {
+				for (auto rc : coords) {
+					analysisMarkers.push_back(new QCPItemRect(pic.plot));
+					auto* rect = analysisMarkers.back();
+					rect->setBrush(QBrush("Yellow"));
+					rect->setPen(pen);
+					rect->setClipAxisRect(pic.getCenterAxisRect());
+					rect->topLeft->setCoords(rc.column - 0.5, rc.row + 0.5);
+					rect->bottomRight->setCoords(rc.column + 0.5, rc.row - 0.5);
+				}
+			}
+		}
+
+		pic.resetChart();
 	}
+	gridCount++;
+	
 }
 
 void PictureControl::removeAnalysisMarkers()
@@ -621,7 +642,7 @@ void PictureControl::drawDongles (QPainter& painter, std::vector<atomGrid> grids
 	bool includingAnalysisMarkers){
 	//drawPicNum (pictureNumber, painter);
 	if (includingAnalysisMarkers) {
-		drawAnalysisMarkers (  grids );
+		//drawAnalysisMarkers (  grids );
 	}
 	//painter.setPen (Qt::red);
 	//drawCircle (selectedLocation, painter);

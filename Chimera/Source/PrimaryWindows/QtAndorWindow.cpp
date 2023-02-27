@@ -133,11 +133,17 @@ void QtAndorWindow::refreshPics()
 	pics.setSinglePicture(andorSettingsCtrl.getConfigSettings().andor.imageSettings);
 }
 
-void QtAndorWindow::displayAnalysisGrid(std::vector<atomGrid> grids)
+void QtAndorWindow::displayAnalysisGrid(atomGrid grids)
 {
-	for (auto& pic : pics.pictures) {
-		pic.drawAnalysisMarkers(grids);
+	try {
+		for (auto& pic : pics.pictures) {
+			pic.drawAnalysisMarkers(grids);
+		}
 	}
+	catch (ChimeraError& err) {
+		reportErr(qstr(err.trace()));
+	}
+
 }
 
 void QtAndorWindow::removeAnalysisGrid()
@@ -478,10 +484,6 @@ void QtAndorWindow::onCameraProgress (int picNumReported){
 	if (picNum == curSettings.totalPicsInExperiment() - 1) {
 		andor.onFinish();
 	}
-}
-
-void QtAndorWindow::handleSetAnalysisPress (){
-	analysisHandler.saveGridParams ();
 }
 
 void QtAndorWindow::wakeRearranger (){

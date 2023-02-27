@@ -462,6 +462,9 @@
     <ClCompile Include="Source\MiscellaneousExperimentOptions\InExpCalControl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\RealTimeDataAnalysis\atomGrid.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="3rd_Party\qcustomplot\qcustomplot.h">

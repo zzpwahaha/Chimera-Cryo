@@ -3,6 +3,8 @@
 
 #include "RealTimeDataAnalysis/DataAnalysisControl.h"
 #include "Control.h"
+#include <filesystem>
+#include <algorithm>
 #include "PrimaryWindows/QtAndorWindow.h"
 #include "ConfigurationSystems/ConfigSystem.h"
 #include "RealTimeDataAnalysis/QtPlotDesignerDlg.h"
@@ -133,23 +135,60 @@ void DataAnalysisControl::initialize( IChimeraQtWindow* parent ){
 			}
 		});
 	gridSelector->addItem ("0");
-	gridSelector->addItem ("New");
 	gridSelector->setCurrentIndex( 0 );	
+
+	newGrid = new CQPushButton("New", parent);
+	parent->connect(newGrid, &QPushButton::released, [this, parent]() {
+		try {
+			currentSettings.grids.emplace_back();
+			reloadGridCombo();
+		}
+		catch (ChimeraError& err) {
+			parent->reportErr(err.qtrace());
+		}
+		});
 
 	deleteGrid = new CQPushButton ("Del", parent);
 	parent->connect (deleteGrid, &QPushButton::released, [this, parent]() {
 			try{
-				handleDeleteGrid ();
+				handleDeleteGrid (gridSelector->currentIndex());
 			}
 			catch (ChimeraError& err){
 				parent->reportErr (err.qtrace ());
 			}
 		});
-	displayGridBtn = new CQCheckBox("Display Grid?", parent);
+
+	refreshGrid = new CQPushButton("Refr.", parent);
+	parent->connect(refreshGrid, &QPushButton::released, [this, parent]() {
+		try {
+			int sel = gridSelector->currentIndex();
+			std::vector<std::string> gridNames = getGridFileNames();
+			auto& grids = currentSettings.grids;
+			for (auto& gridName : gridNames) {
+				if (std::find_if(grids.begin(), grids.end(), [this, gridName](auto& g) {
+					return g.useFile && (g.fileName == gridName);
+					}) == grids.end()) { // means this grid file is not in the current setting grids
+					grids.emplace_back();
+					grids.back().useFile = true;
+					grids.back().fileName = gridName;
+				}
+			}
+			reloadGridCombo();
+			gridSelector->setCurrentIndex(sel);
+
+		}
+		catch (ChimeraError& err) {
+			parent->reportErr(err.qtrace());
+		}
+		});
+
+
+	displayGridBtn = new CQCheckBox("Disp. Grid?", parent);
 	parent->connect(displayGridBtn, &QCheckBox::released, [this, parent]() {
 		updateSettings();
 		if (displayGridBtn->isChecked()) {
-			parent->andorWin->displayAnalysisGrid(currentSettings.grids);
+			int sel = gridSelector->currentIndex();
+			parent->andorWin->displayAnalysisGrid(currentSettings.grids[sel]);
 		}
 		else {
 			parent->andorWin->removeAnalysisGrid();
@@ -157,8 +196,10 @@ void DataAnalysisControl::initialize( IChimeraQtWindow* parent ){
 		});
 
 	layout2->addWidget(gridSelectorLabel, 0);
-	layout2->addWidget(gridSelector, 0);
+	layout2->addWidget(gridSelector, 1);
+	layout2->addWidget(newGrid, 0);
 	layout2->addWidget(deleteGrid, 0);
+	layout2->addWidget(refreshGrid, 0);
 	layout2->addWidget(displayGridBtn, 0);
 
 	QGridLayout* layout3 = new QGridLayout(this);
@@ -187,6 +228,11 @@ void DataAnalysisControl::initialize( IChimeraQtWindow* parent ){
 	layout3->addWidget(gridSpacingY, 2, 2);
 	layout3->addWidget(gridNumberY, 2, 3);
 	layout3->addWidget(includePixelY, 2, 4);
+
+	for (auto* b : { originEditX,originEditY,gridSpacingX,gridSpacingY,gridNumberX,gridNumberY,includePixelX,includePixelY }) {
+		parent->connect(b, &QLineEdit::returnPressed, this, [this]() {saveGridParams(); });
+		//b->setStyleSheet("QLineEdit[readOnly=\"true\"] {color: #808080; background-color: #F0F0F0;}");
+	}
 
 	/// PLOTTING FREQUENCY CONTROLS
 	//QHBoxLayout* layout4 = new QHBoxLayout(this);
@@ -268,18 +314,18 @@ void DataAnalysisControl::initialize( IChimeraQtWindow* parent ){
 	layout->addWidget(plotListview);
 }
 
-void DataAnalysisControl::handleDeleteGrid( ){
+void DataAnalysisControl::handleDeleteGrid(int sel){
 	if (currentSettings.grids.size() == 1 ){
 		thrower ( "ERROR: You are not allowed to delete the last grid for data analysis!" );
 	}
-	currentSettings.grids.erase(currentSettings.grids.begin( ) + 0 );
-	gridSelector->clear ();
-	unsigned count = 0;
-	for ( auto grid : currentSettings.grids ){
-		std::string txt( str( count++ ) );
-		gridSelector->addItem( cstr( txt ) );
+	if (sel == -1) {
+		return;
 	}
-	gridSelector->addItem( "New" );
+	if (sel >= currentSettings.grids.size()) {
+		thrower("Error: The selected grid number is larger than the internal grid data. A low level bug.");
+	}
+	currentSettings.grids.erase(currentSettings.grids.begin( ) + sel);
+	reloadGridCombo();
 	gridSelector->setCurrentIndex( 0 );
 	loadGridParams(currentSettings.grids[0] );
 }
@@ -305,7 +351,7 @@ void DataAnalysisControl::updateDisplays (analysisSettings settings) {
 	}
 	// load the grid parameters for that selection.
 	loadGridParams (currentSettings.grids[0]);
-	reloadGridCombo (currentSettings.grids.size ());
+	reloadGridCombo ();
 	gridSelector->setCurrentIndex (0);
 	reloadListView ();
 }
@@ -330,8 +376,8 @@ analysisSettings DataAnalysisControl::getAnalysisSettingsFromFile (ConfigStream&
 	}
 	settings.grids.resize (numGrids);
 	for (auto& grid : settings.grids) {
-		file >> grid.gridOrigin.row >> grid.gridOrigin.column >> grid.width >> grid.height 
-			>> grid.pixelSpacingX >> grid.pixelSpacingY >> grid.includedPixelX >> grid.includedPixelY;
+		file >> grid.gridOrigin.row >> grid.gridOrigin.column >> grid.width >> grid.height
+			>> grid.pixelSpacingX >> grid.pixelSpacingY >> grid.includedPixelX >> grid.includedPixelY >> grid.useFile >> grid.fileName;
 	}
 	// load the grid parameters for that selection.
 	ConfigSystem::checkDelimiterLine (file, "BEGIN_ACTIVE_PLOTS");
@@ -375,16 +421,18 @@ void DataAnalysisControl::handleSaveConfig( ConfigStream& file ){
 	file << "/*Auto-Threshold Analysis?*/\t" << currentSettings.autoThresholdAnalysisOption;
 	file << "\n/*Number of Analysis Grids: */\t" << currentSettings.grids.size ();
 	unsigned count = 0;
-	for ( auto grid : currentSettings.grids ){
+	for ( auto& grid : currentSettings.grids ){
 		file << "\n/*Grid #" + str(++count) << ":*/ "
 			<< "\n/*Grid Origin X(Bottom-Left Corner Column):*/\t\t" << grid.gridOrigin.column
 			<< "\n/*Grid Origin Y(Bottom-Left Corner Row):*/\t\t" << grid.gridOrigin.row
 			<< "\n/*Grid Width:*/\t\t\t\t\t" << grid.width
 			<< "\n/*Grid Height:*/\t\t\t\t" << grid.height
-			<< "\n/*Pixel Spacing X:*/\t\t\t\t" << grid.pixelSpacingX
-			<< "\n/*Pixel Spacing Y:*/\t\t\t\t" << grid.pixelSpacingY
-			<< "\n/*Include Pixels X:*/\t\t\t\t" << grid.includedPixelX
-			<< "\n/*Include Pixels Y:*/\t\t\t\t" << grid.includedPixelY;
+			<< "\n/*Pixel Spacing X:*/\t\t\t" << grid.pixelSpacingX
+			<< "\n/*Pixel Spacing Y:*/\t\t\t" << grid.pixelSpacingY
+			<< "\n/*Include Pixels X:*/\t\t\t" << grid.includedPixelX
+			<< "\n/*Include Pixels Y:*/\t\t\t" << grid.includedPixelY
+			<< "\n/*Use External File:*/\t\t\t" << grid.useFile
+			<< "\n/*Grid File Name:*/\t\t\t\t" << grid.fileName;
 	}
 	file << "\nBEGIN_ACTIVE_PLOTS\n";
 	unsigned activeCount = 0;
@@ -435,68 +483,86 @@ void DataAnalysisControl::fillPlotThreadInput(realTimePlotterInput* input){
 }
 
 void DataAnalysisControl::handleAtomGridCombo( ){
-	saveGridParams( );
 	int sel = gridSelector->currentIndex( );
 	if ( sel == -1 ){
 		return;
 	}
-	else if ( sel == currentSettings.grids.size() ){
-		reloadGridCombo( sel + 1 );
-	}
-	else if (sel > currentSettings.grids.size()){
+	else if (sel >= currentSettings.grids.size()){
 		thrower ( "ERROR: Bad value for atom grid combobox selection???  (A low level bug, this shouldn't happen)" );
 	}
-	gridSelector->setCurrentIndex( sel );
 	// load the grid parameters for that selection.
 	loadGridParams(currentSettings.grids[sel] );
 }
 
-void DataAnalysisControl::reloadGridCombo( unsigned num ){
-	currentSettings.grids.resize( num );
+void DataAnalysisControl::reloadGridCombo( ){
 	gridSelector->clear( );
 	unsigned count = 0;
-	for ( auto grid : currentSettings.grids ){
+	for ( const auto& grid : currentSettings.grids ){
 		std::string txt( str( count++ ) );
-		gridSelector->addItem( cstr( txt ) );
+		gridSelector->addItem(qstr(txt) + (grid.useFile ? ": " + qstr(grid.fileName) : ""));
 	}
-	gridSelector->addItem( "New" );
 }
 
-void DataAnalysisControl::loadGridParams( atomGrid grid ){
+void DataAnalysisControl::loadGridParams( atomGrid& grid ){
 	if (!gridSpacingX || !gridSpacingY || !gridNumberX || !gridNumberY) {
 		return;
 	}
-	originEditX->setText (qstr (grid.gridOrigin.column));
-	originEditY->setText (qstr (grid.gridOrigin.row));
+	originEditX->setText(qstr(grid.gridOrigin.column));
+	originEditY->setText(qstr(grid.gridOrigin.row));
 	std::string txt = str(grid.pixelSpacingX);
 	gridSpacingX->setText(qstr(txt));
 	txt = str(grid.pixelSpacingY);
 	gridSpacingY->setText(qstr(txt));
-	txt = str( grid.width );
+	txt = str(grid.width);
 	gridNumberX->setText(qstr(txt));
-	txt = str( grid.height );
+	txt = str(grid.height);
 	gridNumberY->setText(qstr(txt));
 	txt = str(grid.includedPixelX);
 	includePixelX->setText(qstr(txt));
 	txt = str(grid.includedPixelX);
 	includePixelY->setText(qstr(txt));
+	if (grid.useFile) {
+		gridSelector->setToolTip(qstr(grid.fileName));
+		for (auto* b : { originEditX,originEditY,gridSpacingX,gridSpacingY,gridNumberX,gridNumberY,includePixelX,includePixelY }) {
+			b->setEnabled(false);
+			b->setStyleSheet("QLineEdit { background: rgb(204, 204, 204); }");
+		}
+		atomGrid::loadGridFile(grid);
+	}
+	else {
+		for (auto* b : { originEditX,originEditY,gridSpacingX,gridSpacingY,gridNumberX,gridNumberY,includePixelX,includePixelY }) {
+			b->setEnabled(true);
+			b->setStyleSheet("QLineEdit { background: rgb(255, 255, 255); }");
+		}
+	}
+	if (displayGridBtn->isChecked()) {
+		parentWin->andorWin->removeAnalysisGrid();
+		parentWin->andorWin->displayAnalysisGrid(grid);
+	}
 }
 
 void DataAnalysisControl::saveGridParams( ){
 	if (!gridSpacingX || !gridSpacingY || !gridNumberX || !gridNumberY) {
 		return;
 	}
+	int sel = gridSelector->currentIndex();
+	if (sel == -1) {
+		return;
+	}
+	if (sel >= currentSettings.grids.size()) {
+		thrower("Error: The selected grid number is larger than the internal grid data. A low level bug.");
+	}
 	unsigned row = 0, col = 0;
 	try{
-		row = boost::lexical_cast<unsigned> (str (originEditY->text ()));
-		col = boost::lexical_cast<unsigned> (str (originEditX->text ()));
-		currentSettings.grids[0].gridOrigin = { row, col };
-		currentSettings.grids[0].pixelSpacingX = boost::lexical_cast<long>( str(gridSpacingX->text()) );
-		currentSettings.grids[0].pixelSpacingY = boost::lexical_cast<long>(str(gridSpacingY->text()));
-		currentSettings.grids[0].height = boost::lexical_cast<long>( str( gridNumberY->text() ) );
-		currentSettings.grids[0].width = boost::lexical_cast<long>( str(gridNumberX->text()) );
-		currentSettings.grids[0].includedPixelX = boost::lexical_cast<long>(str(includePixelX->text()));
-		currentSettings.grids[0].includedPixelY = boost::lexical_cast<long>(str(includePixelY->text()));
+		row = boost::lexical_cast<unsigned long> (str (originEditY->text ()));
+		col = boost::lexical_cast<unsigned long> (str (originEditX->text ()));
+		currentSettings.grids[sel].gridOrigin = { row, col };
+		currentSettings.grids[sel].pixelSpacingX = boost::lexical_cast<long>( str(gridSpacingX->text()) );
+		currentSettings.grids[sel].pixelSpacingY = boost::lexical_cast<long>(str(gridSpacingY->text()));
+		currentSettings.grids[sel].height = boost::lexical_cast<long>( str( gridNumberY->text() ) );
+		currentSettings.grids[sel].width = boost::lexical_cast<long>( str(gridNumberX->text()) );
+		currentSettings.grids[sel].includedPixelX = boost::lexical_cast<long>(str(includePixelX->text()));
+		currentSettings.grids[sel].includedPixelY = boost::lexical_cast<long>(str(includePixelY->text()));
 	}
 	catch ( boost::bad_lexical_cast&){
 		throwNested ( "ERROR: failed to convert grid parameters to longs while saving grid data!" );
@@ -550,6 +616,26 @@ analysisSettings DataAnalysisControl::getConfigSettings () {
 
 analysisSettings DataAnalysisControl::getRunningSettings() {
 	return currentlyRunningSettings;
+}
+
+std::vector<std::string> DataAnalysisControl::getGridFileNames()
+{
+	std::vector<std::string> gridDirs;
+	std::string path(PLOT_FILES_SAVE_LOCATION);
+	std::string ext(atomGrid::GRID_FILE_EXTENSION);
+	try {
+		for (auto& p : std::filesystem::recursive_directory_iterator(path))
+		{
+			if (p.path().extension() == ext) {
+				gridDirs.push_back(p.path().stem().string());
+			}
+		}
+	}
+	catch (std::filesystem::filesystem_error const& ex) {
+		throwNested(ex.what());
+	}
+
+	return gridDirs;
 }
 
 void DataAnalysisControl::setRunningSettings (analysisSettings options) {

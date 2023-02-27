@@ -40,7 +40,7 @@ class PictureControl : public QWidget{
 		void drawGrid(QPainter& painter);
 		void drawCircle(coordinate selectedLocation, QPainter& painter);
 		void setSoftwareAccumulationOption ( softwareAccumulationOption opt );
-		void drawAnalysisMarkers( std::vector<atomGrid> gridInfo);
+		void drawAnalysisMarkers(atomGrid gridInfo);
 		void removeAnalysisMarkers();
 		void handleEditChange( int id );
 		void updatePalette(QVector<QRgb> pallete );
