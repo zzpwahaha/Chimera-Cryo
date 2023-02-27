@@ -39,7 +39,8 @@ ConfigStream::ConfigStream (std::string txt, bool isAddr){
 		streamText = this->str ();
 	}
 	else{
-		ScriptStream::ScriptStream (txt);
+		std::stringstream s(txt);
+		ScriptStream::operator<<(s.rdbuf()); // somehow can not call std::stringstream::operator<<, not sure why, ZZP 20230223
 		streamText = this->str ();
 	}
 };
