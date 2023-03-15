@@ -89,6 +89,8 @@ class QtAuxiliaryWindow : public IChimeraQtWindow{
 		void relockPLL();
 	 
 		std::vector<parameterType> getAllParams ();
+		std::vector<parameterType> getConfigParams();
+		std::vector<parameterType> getGlobalParams();
 
 		void clearVariables ();
 

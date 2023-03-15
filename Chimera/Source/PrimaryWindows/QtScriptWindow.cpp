@@ -63,7 +63,8 @@ void QtScriptWindow::initializeWidgets (){
 
 void QtScriptWindow::updateVarNames() {
 	auto params = auxWin->getAllParams ();
-	masterScript.highlighter->setOtherParams (params);
+	masterScript.highlighter->setGlobalParams(auxWin->getGlobalParams());
+	masterScript.highlighter->setOtherParams (auxWin->getConfigParams());
 	masterScript.highlighter->setLocalParams (masterScript.getLocalParams ());
 	masterScript.highlighter->rehighlight();
 

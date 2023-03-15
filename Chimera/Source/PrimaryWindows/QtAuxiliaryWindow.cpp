@@ -250,6 +250,15 @@ std::vector<parameterType> QtAuxiliaryWindow::getAllParams (){
 	return vars;
 }
 
+std::vector<parameterType> QtAuxiliaryWindow::getConfigParams() {
+	std::vector<parameterType> vars = configParamCtrl.getAllParams();
+	return vars;
+}
+
+std::vector<parameterType> QtAuxiliaryWindow::getGlobalParams() {
+	std::vector<parameterType> vars2 = globalParamCtrl.getAllParams();
+	return vars2;
+}
 
 void QtAuxiliaryWindow::clearVariables (){
 	mainWin->updateConfigurationSavedStatus (false);
