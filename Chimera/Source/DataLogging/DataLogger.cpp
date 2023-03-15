@@ -529,7 +529,7 @@ void DataLogger::writeTemperature(std::pair<std::vector<long long>, std::vector<
 	}
 }
 
-void DataLogger::writePressure(std::pair<std::vector<long long>, std::vector<double>> timedata, std::string identifier)
+void DataLogger::writePressure(std::pair<std::vector<long long>, std::vector<double>> timedata, std::string identifier, InfluxDataUnitType::mode unit)
 {
 	if (fileIsOpen == false) {
 		thrower("Tried to write to h5 file (for pressure), but the file is closed!\r\n");
@@ -551,7 +551,18 @@ void DataLogger::writePressure(std::pair<std::vector<long long>, std::vector<dou
 			strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", localtime(&epoch));
 			return std::string(buffer); });
 		writeDataSet(timeStr, "Datetime", subtemp);
-		writeDataSet(timedata.second, "Pressure(mBar)", subtemp);
+		switch (unit)
+		{
+		case InfluxDataUnitType::mode::K:
+			thrower("Incorrect unit for Pressure in saveing influx monitor data!");
+			break;
+		case InfluxDataUnitType::mode::mBar:
+			writeDataSet(timedata.second, "Pressure(mBar)", subtemp);
+			break;
+		case InfluxDataUnitType::mode::Torr:
+			writeDataSet(timedata.second, "Pressure(Torr)", subtemp);
+			break;
+		}
 
 	}
 	catch (H5::Exception& err) {

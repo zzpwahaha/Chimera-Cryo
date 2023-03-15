@@ -11,15 +11,12 @@
 #include <PrimaryWindows/IChimeraQtWindow.h>
 #include <PrimaryWindows/QtAndorWindow.h>
 
-const std::array<InfluxDataType::mode, 2> allModes = {
-	InfluxDataType::mode::Temperature,
-	InfluxDataType::mode::Pressure };
 
 TemperatureMonitor::TemperatureMonitor(IChimeraQtWindow* parent_in, bool safemode)
 	: IChimeraSystem(parent_in)
 	, core(parent_in, safemode)
-	, name{ new QLabel(this) ,new QLabel(this), new QLabel(this) }
-	, reading{ new QLabel(this) ,new QLabel(this), new QLabel(this) }
+	, name{ new QLabel(this) ,new QLabel(this), new QLabel(this), new QLabel(this), new QLabel(this) }
+	, reading{ new QLabel(this) ,new QLabel(this), new QLabel(this), new QLabel(this), new QLabel(this) }
 {
 }
 
@@ -29,17 +26,29 @@ void TemperatureMonitor::initialize(IChimeraQtWindow* parent)
 		std::string identifier(core.dataBroker[id].identifier);
 		std::replace(identifier.begin(), identifier.end(), '_', ' ');
 		name[id]->setText(qstr(identifier)+": ");
-		name[id]->setStyleSheet("QLabel {font: bold 20pt;}");
-		reading[id]->setStyleSheet("QLabel {font: bold 20pt;}");
+		name[id]->setStyleSheet("QLabel {font: bold 16pt;}");
+		reading[id]->setStyleSheet("QLabel {font: bold 16pt;}");
 	}
 	QVBoxLayout* layout = new QVBoxLayout(this);
-	std::array<QHBoxLayout*, TEMPMON_NUMBER> lay;
-	for (auto id : range(TEMPMON_NUMBER)) {
+	std::array<QHBoxLayout*, 3> lay;
+	for (auto id : range(3/*TEMPMON_NUMBER*/)) {
 		lay[id] = new QHBoxLayout();
 		lay[id]->setContentsMargins(0, 0, 0, 0);
-		lay[id]->addWidget(name[id]);
-		lay[id]->addWidget(reading[id], 0);
-		layout->addLayout(lay[id]);
+		if (id == 0) {
+			lay[0]->addWidget(name[0]);
+			lay[0]->addWidget(reading[0], 0);
+			lay[0]->addWidget(name[1]);
+			lay[0]->addWidget(reading[1], 0);
+			lay[0]->addWidget(name[2]);
+			lay[0]->addWidget(reading[2], 0);
+			layout->addLayout(lay[0]);
+		}
+		else {
+			lay[id]->addWidget(name[id+2]);
+			lay[id]->addWidget(reading[id+2], 0);
+			layout->addLayout(lay[id]);
+		}
+
 	}
 	QTimer* timer = new QTimer(this);
 	QObject::connect(timer, &QTimer::timeout, [this]() {
@@ -60,7 +69,15 @@ void TemperatureMonitor::initialize(IChimeraQtWindow* parent)
 				reading[idx]->setText(qstr(timedata.second, 2) + " K");
 				break;
 			case InfluxDataType::mode::Pressure:
-				reading[idx]->setText(qstr(timedata.second, 2, false, false, false, true) + " mBar");
+				switch (core.dataBroker[idx].unitMode)
+				{
+				case InfluxDataUnitType::mode::mBar:
+					reading[idx]->setText(qstr(timedata.second, 2, false, false, false, true) + " mBar");
+					break;
+				case InfluxDataUnitType::mode::Torr:
+					reading[idx]->setText(qstr(timedata.second, 2, false, false, false, true) + " Torr");
+					break;
+				}
 				break;
 			default:
 				break;
@@ -73,16 +90,18 @@ void TemperatureMonitor::initialize(IChimeraQtWindow* parent)
 
 TemperatureMonitorCore::TemperatureMonitorCore(IChimeraQtWindow* parent, bool safemode)
 	: dataBroker{ 
-	InfluxBroker(TEMPMON_ID[0],TEMPMON_SYNTAX[0], InfluxDataType::mode::Temperature, safemode),
-	InfluxBroker(TEMPMON_ID[1],TEMPMON_SYNTAX[1], InfluxDataType::mode::Temperature, safemode),
-	InfluxBroker(TEMPMON_ID[2],TEMPMON_SYNTAX[2], InfluxDataType::mode::Pressure, safemode) }//array aggregation, no copy or move involved
+	InfluxBroker(TEMPMON_ID[0],TEMPMON_SYNTAX[0], InfluxDataType::mode::Temperature, InfluxDataUnitType::mode::K, safemode),
+	InfluxBroker(TEMPMON_ID[1],TEMPMON_SYNTAX[1], InfluxDataType::mode::Temperature, InfluxDataUnitType::mode::K, safemode),
+	InfluxBroker(TEMPMON_ID[2],TEMPMON_SYNTAX[2], InfluxDataType::mode::Temperature, InfluxDataUnitType::mode::K, safemode),
+	InfluxBroker(TEMPMON_ID[3],TEMPMON_SYNTAX[3], InfluxDataType::mode::Pressure, InfluxDataUnitType::mode::mBar, safemode),
+	InfluxBroker(TEMPMON_ID[4],TEMPMON_SYNTAX[4], InfluxDataType::mode::Pressure, InfluxDataUnitType::mode::Torr, safemode) }//array aggregation, no copy or move involved
 {
 	this->setParent(parent);
 	//dataBroker.reserve(TEMPMON_NUMBER);
 	//for (unsigned idx = 0; idx < TEMPMON_NUMBER; idx++) {
 	//	dataBroker.emplace_back(TEMPMON_ID[idx],TEMPMON_SYNTAX[idx]);
 	//}
-	auto shit = InfluxBroker(TEMPMON_ID[1], TEMPMON_SYNTAX[1], InfluxDataType::mode::Temperature, safemode);// this is in-place construction, no copy nor move in c++17
+	auto shit = InfluxBroker(TEMPMON_ID[1], TEMPMON_SYNTAX[1], InfluxDataType::mode::Temperature, InfluxDataUnitType::mode::K, safemode);// this is in-place construction, no copy nor move in c++17
 
 	QTime midnight = QTime(23, 59, 59, 999);
 	//QTime midnightCreateFolder = QTime(23, 50, 0, 0); // give ten minute ahead to create folder 
@@ -143,7 +162,7 @@ void TemperatureMonitorCore::normalFinish()
 			break;
 		case InfluxDataType::mode::Pressure:
 			try {
-				logger.writePressure(timedata, broker.identifier);
+				logger.writePressure(timedata, broker.identifier, broker.unitMode);
 			}
 			catch (ChimeraError& e) {
 				win->reportErr(qstr("Pressure data abandoned. Due to ") + e.qtrace());
@@ -184,10 +203,34 @@ void TemperatureMonitorCore::dumpDataToFile()
 		char buff[128];
 		auto timedata = std::move(dataBroker[idx].getData());
 		std::ofstream ofs(DATA_SAVE_LOCATION + fullPath + "//" + TEMPMON_ID[idx] + ".csv", std::ofstream::out);
-		ofs << "epochTime(ms)" << ',' << "Temperature(K)" << '\n';
-		for (auto idd : range(timedata.first.size())) {
-			sprintf_s(buff, "%Id64,%f\n", timedata.first[idd], timedata.second[idd]);
-			ofs << buff;
+		switch (dataBroker[idx].dataMode)
+		{
+		case InfluxDataType::mode::Temperature:
+			ofs << "epochTime(ms)" << ',' << "Temperature(K)" << '\n';
+			for (auto idd : range(timedata.first.size())) {
+				sprintf_s(buff, "%Id64,%f\n", timedata.first[idd], timedata.second[idd]);
+				ofs << buff;
+			}
+			break;
+		case InfluxDataType::mode::Pressure:
+			switch (dataBroker[idx].unitMode)
+			{
+				case InfluxDataUnitType::mode::mBar:
+					ofs << "epochTime(ms)" << ',' << "Pressure (mBar)" << '\n';
+					for (auto idd : range(timedata.first.size())) {
+						sprintf_s(buff, "%Id64,%e\n", timedata.first[idd], timedata.second[idd]);
+						ofs << buff;
+					}
+				break;
+				case InfluxDataUnitType::mode::Torr:
+					ofs << "epochTime(ms)" << ',' << "Pressure (Torr)" << '\n';
+					for (auto idd : range(timedata.first.size())) {
+						sprintf_s(buff, "%Id64,%e\n", timedata.first[idd], timedata.second[idd]);
+						ofs << buff;
+					}
+				break;
+			}
+			break;
 		}
 		ofs.close();
 		dataBroker[idx].clearNonExpData();
@@ -195,11 +238,12 @@ void TemperatureMonitorCore::dumpDataToFile()
 
 }
 
-InfluxBroker::InfluxBroker(std::string identifier, std::string syntax, InfluxDataType::mode mode, bool safemode) :
+InfluxBroker::InfluxBroker(std::string identifier, std::string syntax, InfluxDataType::mode mode, InfluxDataUnitType::mode unit, bool safemode) :
 	safemode(safemode),
 	dataMode(mode),
 	identifier(identifier),
 	syntax(syntax), 
+	unitMode(unit),
 	experimentOngoing(false)
 {
 	influxPtr = influxdb::InfluxDBFactory::Get(dbAddr);

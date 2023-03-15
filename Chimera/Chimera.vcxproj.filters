@@ -462,6 +462,9 @@
     <ClCompile Include="Source\MiscellaneousExperimentOptions\InExpCalControl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\ExperimentMonitoringAndStatus\InfluxTypes.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="3rd_Party\qcustomplot\qcustomplot.h">
@@ -1040,6 +1043,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\MiscellaneousExperimentOptions\InExpCalControl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ExperimentMonitoringAndStatus\InfluxTypes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

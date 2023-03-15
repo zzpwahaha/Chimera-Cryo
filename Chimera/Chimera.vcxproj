@@ -130,6 +130,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Source\ExperimentMonitoringAndStatus\InfluxTypes.cpp" />
     <ClCompile Include="Source\AnalogInput\AiOutput.cpp" />
     <ClCompile Include="Source\ExcessDialogs\AiSettingsDialog.cpp" />
     <ClCompile Include="Source\Andor\AndorBinningMode.cpp" />
@@ -189,6 +190,7 @@
     <QtMoc Include="Source\ExperimentMonitoringAndStatus\TemperatureMonitor.h" />
     <QtMoc Include="Source\CMOSCamera\FrameAverager.h" />
     <QtMoc Include="Source\ExcessDialogs\AiSettingsDialog.h" />
+    <ClInclude Include="Source\ExperimentMonitoringAndStatus\InfluxTypes.h" />
     <ClInclude Include="Source\AnalogInput\AiOutput.h" />
     <ClInclude Include="Source\Andor\AndorBinningMode.h" />
     <ClInclude Include="Source\Andor\AndorGainMode.h" />

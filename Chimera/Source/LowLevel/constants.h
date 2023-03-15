@@ -95,7 +95,7 @@
 
 	//Mako camera
 	const unsigned MAKO_NUMBER = 2;
-	const std::array<bool, MAKO_NUMBER> MAKO_SAFEMODE = { false,true};
+	const std::array<bool, MAKO_NUMBER> MAKO_SAFEMODE = { false,false};
 	const std::array<std::string, MAKO_NUMBER> MAKO_DELIMS = { "MAKO1_CAMERA_SETTING", "MAKO2_CAMERA_SETTING" };
 	const std::array<std::string, MAKO_NUMBER> MAKO_IPADDRS= { "10.10.0.6", "10.10.0.7" };
 	const std::vector<std::pair<unsigned, unsigned>> MAKO_TRIGGER_LINE
@@ -113,12 +113,15 @@
 
 	//Temperature Monitor
 	const bool TEMPMON_SAFEMODE = false;
-	const unsigned TEMPMON_NUMBER = 3;
-	const std::array<std::string, TEMPMON_NUMBER> TEMPMON_ID{ "Cold_Shield", "Cold_Finger", "Main_Chamber_Pressure"};
+	const unsigned TEMPMON_NUMBER = 5;
+	const std::array<std::string, TEMPMON_NUMBER> TEMPMON_ID{ 
+		"Cold_Shield", "Cold_Finger", "Cold_Box", "Main_Chamber_Pressure", "Cryostat_side_Pressure"};
 	const std::array<std::string, TEMPMON_NUMBER> TEMPMON_SYNTAX{ 
 		"SELECT \"Cold Shield\" from ColdEdge order by time desc limit 1", 
 		"SELECT \"Cold finger\" from ColdEdge order by time desc limit 1",
-		"SELECT \"pressure\" from B240_main_chamber order by time desc limit 1" };
+		"SELECT \"temperature_B\" from \"Lakeshore331 T\" order by time desc limit 1",
+		"SELECT \"pressure\" from B240_main_chamber order by time desc limit 1",
+		"SELECT \"Pressure\" from \"Terranova\" order by time desc limit 1" };
 #endif
 /// Random other Constants
 constexpr double PI = 3.14159265358979323846264338327950288;
