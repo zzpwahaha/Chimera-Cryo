@@ -276,11 +276,13 @@ void AgilentCore::setSquare (int channel, squareInfo info, unsigned var){
 		visaFlume.write ("SOURCE" + str (channel) + ":APPLY:SQUARE " + str (info.frequency.getValue (var)) + " KHZ, "
 			+ str (convertPowerToSetPoint (info.amplitude.getValue (var), info.useCal, calibrations[channel - 1])) + " VPP, "
 			+ str (convertPowerToSetPoint (info.offset.getValue (var), info.useCal, calibrations[channel - 1])) + " V");
+		visaFlume.write("SOURCE" + str(channel) + ":FUNCTION:SQUARE:DCYCLE " + str(info.dutyCycle.getValue(var)));
+		visaFlume.write("SOURCE" + str(channel) + ":PHASE " + str(info.phase.getValue(var)) + " DEG");
 		if (info.burstMode) {
-			visaFlume.write("BURST:MODE GATED");
-			visaFlume.write("BURST:GATE:POLARITY NORMAL");
-			visaFlume.write("BURST:PHASE 0");
-			visaFlume.write("BURST:STATE ON");
+			visaFlume.write("SOURCE" + str(channel) + ":BURST:MODE GATED");
+			visaFlume.write("SOURCE" + str(channel) + ":BURST:GATE:POLARITY NORMAL");
+			visaFlume.write("SOURCE" + str(channel) + ":BURST:PHASE 0");
+			visaFlume.write("SOURCE" + str(channel) + ":BURST:STATE ON");
 		}
 
 	

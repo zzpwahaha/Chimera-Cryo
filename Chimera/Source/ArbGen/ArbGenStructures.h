@@ -35,7 +35,6 @@ struct squareInfo : public generalArbGenOutputInfo {
 	Expression frequency;
 	Expression amplitude;
 	Expression offset;
-	// not used yet // ?!?!
 	Expression dutyCycle;
 	Expression phase;
 	bool burstMode = false;

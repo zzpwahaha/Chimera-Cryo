@@ -255,6 +255,8 @@ void ArbGenCore::convertInputToFinalSettings(unsigned chan, deviceOutputInfo& in
 			channel.square.frequency.internalEvaluate(params, totalVariations);
 			channel.square.amplitude.internalEvaluate(params, totalVariations);
 			channel.square.offset.internalEvaluate(params, totalVariations);
+			channel.square.dutyCycle.internalEvaluate(params, totalVariations);
+			channel.square.phase.internalEvaluate(params, totalVariations);
 			break;
 		case ArbGenChannelMode::which::Preloaded:
 			break;
@@ -349,6 +351,8 @@ deviceOutputInfo ArbGenCore::getSettingsFromConfig(ConfigStream& file) {
 		readFunc(file, channel.square.amplitude.expressionStr);
 		readFunc(file, channel.square.frequency.expressionStr);
 		readFunc(file, channel.square.offset.expressionStr);
+		readFunc(file, channel.square.dutyCycle.expressionStr);
+		readFunc(file, channel.square.phase.expressionStr);
 		file >> channel.square.burstMode;
 		//if (file.ver > Version ("2.3")){
 		file >> channel.square.useCal;
@@ -399,6 +403,8 @@ void ArbGenCore::logSettings(DataLogger& log, ExpThreadWorker* threadworker) {
 			log.writeDataSet(channel.square.amplitude.expressionStr, "Amplitude", squareGroup);
 			log.writeDataSet(channel.square.frequency.expressionStr, "Frequency", squareGroup);
 			log.writeDataSet(channel.square.offset.expressionStr, "Offset", squareGroup);
+			log.writeDataSet(channel.square.dutyCycle.expressionStr, "DutyCycle", squareGroup);
+			log.writeDataSet(channel.square.phase.expressionStr, "Phase", squareGroup);
 			H5::Group preloadedArbGroup(channelGroup.createGroup("Preloaded-Arb-Settings"));
 			log.writeDataSet(channel.preloadedArb.address.expressionStr, "Address", preloadedArbGroup);
 			H5::Group scriptedArbSettings(channelGroup.createGroup("Scripted-Arb-Settings"));
