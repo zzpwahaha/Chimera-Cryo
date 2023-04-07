@@ -377,6 +377,16 @@ void QtScriptWindow::newMasterFunction (){
 	}
 }
 
+void QtScriptWindow::reloadMasterFunction()
+{
+	try {
+		masterScript.loadFunctions();
+	}
+	catch (ChimeraError& exception) {
+		reportErr("New Master function Failed: " + exception.qtrace() + "\r\n");
+	}
+}
+
 void QtScriptWindow::saveMasterFunction (){
 	try{
 		masterScript.saveAsFunction ();
