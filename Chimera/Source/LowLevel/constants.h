@@ -80,12 +80,12 @@
 
 	//ArbGens
 	const bool UWAVE_SAFEMODE = true;
-	const bool UWAVE_SAFEMODE_SIG = true;
+	const bool UWAVE_SAFEMODE_SIG = false;
 	const bool UWAVE_SAFEMODE_AGI = false;
 	const int numArbGen = 2;
 	//const std::string UWAVE_AGILENT_ADDRESS = "TCPIP0::10.10.0.5::inst0::INSTR";
 	const std::string UWAVE_AGILENT_ADDRESS = "USB0::0x0957::0x2807::MY57400998::INSTR";
-	const std::string UWAVE_SIGLENT_ADDRESS = "TCPIP0::10.10.0.4::inst0::INSTR";
+	const std::string UWAVE_SIGLENT_ADDRESS = "USB0::0xF4EC::0x1102::SDG2XCAC6R0238::INSTR";
 	const std::string RAMP_LOCATION = str(CODE_ROOT) + "\\Ramp_Files\\";
 
 	//Analog in 
