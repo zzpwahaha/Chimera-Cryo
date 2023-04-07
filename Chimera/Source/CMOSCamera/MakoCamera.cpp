@@ -176,7 +176,12 @@ void MakoCamera::initialize()
 
     /*image calc thread*/
     connect(&imgCThread, &ImageCalculatingThread::imageReadyForPlot, this, [this]() {
-        viewer.renderImgFromCalcThread(m_aManualCscale->isChecked());
+        try {
+            viewer.renderImgFromCalcThread(m_aManualCscale->isChecked());
+        }
+        catch (...) {
+            emit error("Mako 'renderImgFromCalcThread' failed, probably due to replot, can just ignore it.\r\n");
+        }
         auto MaxMin = imgCThread.dataMaxMin();
         m_DataMaxMinLabel->setText("Max/Min: (" + qstr(MaxMin.first) + "/" + qstr(MaxMin.second) + ")");
         imgCThread.mutex().lock();
