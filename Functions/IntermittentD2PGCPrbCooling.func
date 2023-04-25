@@ -1,0 +1,34 @@
+% This is should be called right after imaging tweezer
+% This function set the time back to before entering the function
+%
+
+def IntermittentD2PGCPrbCooling():
+    %%%%%%%%%%%%%%%%% After Image TWIZZER %%%%%%%%%%%%%%%%%
+    t += 10
+
+    dac: BiasCoilX pgc_twz_bias_x
+    dac: BiasCoilY pgc_twz_bias_y
+    dac: BiasCoilZ pgc_twz_bias_z
+
+    on: PrbShutter
+    off: xyzMOTShutter
+    ol: ol_cooling d2_cooling_resonance+20-pgc_lifetime_twz_olcool
+    ol: ol_repump d2_repump_resonance-20+pgc_lifetime_twz_olrepump
+    dac: PrbAmp pgcprb_lifetime_cool_amp
+    dac: PrbrepAmp pgcprb_lifetime_repump_amp
+    t += 4
+
+    %%%%%%%%%%%%%%%%% Intermittent cooling with Probe %%%%%%%%%%%%%%%%%
+    off: SciMOTTrg
+    off: PrbTrg
+    on: MOTFlashTrg
+    t += -4
+    t += -10
+    t += t_lifetime-10 % reserve 10ms before the lifetime ends, for general purpose, e.g on/off shutter, change bias field for imaging, etc
+    off: MOTFlashTrg
+    off: PrbTrg
+
+    off: xyzMOTShutter
+    off: PrbShutter
+
+    t += -(t_lifetime-10)  % go back to initial time

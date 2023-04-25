@@ -1,0 +1,26 @@
+% This requires 4ms before this function is called
+% This function shine light onto tweezer array with certain frequency using the probe light
+% This functino also contains a ramp down ramp up after the kick out, total 25ms
+% Things need to be considered is the kick out time and kick out intensity. Those are not made to be local variable, since there are too many
+% This function will advance the time by 2.5+t_kick+2.5+25 ms = 30+t_kick ms
+
+def kickOutTweezer(twz_intensity_start, twz_intensity_ramped_down):
+    t += -4
+    off: xyzMOTShutter 
+    on: PrbShutter
+    t += 4
+    ol: ol_cooling d2_cooling_prb_resonance-kick_olcool
+    ol: ol_repump d2_repump_prb_resonance+kick_olrepump
+    dac: PrbRepAmp kick_repump_amp
+    dac: PrbAmp kick_cool_amp
+    t += 2.5
+    pulseon: PrbTrg t_kick
+    pulseon: DO1_0 1
+    t += 2.5
+
+    dacramp: TweezerIntensity twz_intensity_start twz_intensity_ramped_down 10 
+    t += 10
+    t += 5
+    dacramp: TweezerIntensity twz_intensity_ramped_down twz_intensity_start 10 
+    t += 10
+

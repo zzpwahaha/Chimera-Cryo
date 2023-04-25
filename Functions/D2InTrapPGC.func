@@ -1,0 +1,23 @@
+% This requires 4ms before this function is called
+% also note that this function set the time back to before entering the function
+
+def D2InTrapPGC(pgc_time):
+    t += -4
+    on: xyzMOTShutter
+    on: xyMOTShutter
+    ol: ol_cooling d2_cooling_resonance-pgc_twz_olcool
+    ol: ol_repump d2_repump_resonance+pgc_twz_olrepump
+    dac: BiasCoilX pgc_twz_bias_x
+    dac: BiasCoilY pgc_twz_bias_y 
+    dac: BiasCoilZ pgc_twz_bias_z
+    dac: SciMOTAmp pgc_twz_cool_amp
+    dac: TARepAmp pgc_twz_rep_amp
+    t += 4
+
+    on: SciMOTTrg
+    t += pgc_time
+    pulseon: DO1_0 1
+    off: SciMOTTrg
+    off: xyzMOTShutter 
+    off: xyMOTShutter
+    t += -pgc_time

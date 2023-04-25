@@ -13,8 +13,8 @@ pulseon: DO1_0 1
 % change the field/laser freq parameter here because the previous section is TOF and no light is on
 t += -4
 on: xyzMOTShutter
-ol: ol_cooling pgc_twz_olcool
-ol: ol_repump pgc_twz_olrepump
+ol: ol_cooling d2_cooling_resonance-pgc_twz_olcool
+ol: ol_repump d2_repump_resonance+pgc_twz_olrepump
 dac: BiasCoilX pgc_twz_bias_x
 dac: BiasCoilY pgc_twz_bias_y 
 dac: BiasCoilZ pgc_twz_bias_z
@@ -36,8 +36,8 @@ t += 100
 % change the field/laser freq parameter here because the previous section is dark, i.e. 100-t_pgc_twz is larger than 4
 t += -4
 on: PrbShutter
-ol: ol_cooling probe_olcool
-ol: ol_repump probe_olrepump
+ol: ol_cooling d2_cooling_resonance+20-probe_olcool
+ol: ol_repump d2_repump_resonance-20+probe_olrepump
 dac: BiasCoilX pgc_img_bias_x
 dac: BiasCoilY pgc_img_bias_y
 dac: BiasCoilZ pgc_img_bias_z
@@ -75,13 +75,13 @@ t += t_twz_imaging+10
 %pulseon: PrbTrg t_kick
 %t += 2
 
-pulseon: TweezerHold 50
-t += 55
+pulseon: TweezerHold 100
+t += 105
 
-dacramp: TweezerIntensity twz_intensity twz_int_low 10 
-t += 10+15
-dacramp: TweezerIntensity twz_int_low twz_intensity 10 
-t += 10
+%dacramp: TweezerIntensity twz_intensity twz_int_low 10 
+%t += 10+15
+%dacramp: TweezerIntensity twz_int_low twz_intensity 10 
+%t += 10
 
 % note the t_lifetime should be larger than all the minus term in front him
 t += t_lifetime
@@ -93,8 +93,8 @@ t += -4
 on: PrbShutter
 off: xyzMOTShutter
 off: SciMOTTrg
-ol: ol_cooling probe_olcool
-ol: ol_repump probe_olrepump
+ol: ol_cooling d2_cooling_resonance+20-probe_olcool
+ol: ol_repump d2_repump_resonance-20+probe_olrepump
 dac: BiasCoilX pgc_img_bias_x
 dac: BiasCoilY pgc_img_bias_y
 dac: BiasCoilZ pgc_img_bias_z

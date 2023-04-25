@@ -1,0 +1,25 @@
+% This requires 4ms before this function is called
+% the actual imaging time is t_twz_imaging-7, the 7ms is the time for the shutter to turn on
+% the camera is exposed for t_twz_imaging time in total
+% also note that this function advance the time by t_twz_imaging+7ms, and the camera shutter will be completely closed
+
+def PGCTweezerImaging():
+    t += -4
+    on: PrbShutter
+    off: xyzMOTShutter
+    off: SciMOTTrg
+    ol: ol_cooling d2_cooling_resonance+20-probe_olcool
+    ol: ol_repump d2_repump_resonance-20+probe_olrepump
+    dac: BiasCoilX pgc_img_bias_x
+    dac: BiasCoilY pgc_img_bias_y
+    dac: BiasCoilZ pgc_img_bias_z
+    dac: PrbAmp {probe_cool_amp_cal prb_pwr}
+    dac: PrbrepAmp probe_repump_amp
+    t += 4
+
+    pulseon: pixis_trg t_twz_imaging
+    t += 7
+    pulseon: PrbTrg t_twz_imaging-7
+    pulseon: DO1_0 1
+    t += t_twz_imaging
+    off: PrbShutter 

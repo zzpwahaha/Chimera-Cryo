@@ -3,38 +3,43 @@ t = 1
 call CryoMOTLoadingPGC()
 
 %%%%%%%%%%%%%%%  TOF  %%%%%%%%%%%%%%%%%%
-call TOF(t_tof)
+off: SciMOTTrg
+off: xyzMOTShutter
+off: PrbShutter 
+t += t_tof
+pulseon: DO1_0 1
 
 %%%%%%%%%%%%%%  PGC in Tweezer %%%%%%%%%%%%%%%%%%
 % change the field/laser freq parameter here because the previous section is TOF and no light is on
 call D2InTrapPGC(t_pgc_twz)
 % note the t_pgc_twz should be smaller than 100
 t += 100
+
 
 %%%%%%%%%%%%%%  Image TWIZZER  %%%%%%%%%%%%%%%%%%
 % change the field/laser freq parameter here because the previous section is dark, i.e. 100-t_pgc_twz is larger than 4
 call PGCTweezerImaging()
 %on: MOTFlashTrg
 
-t += 10
-%%%%%%%%%%%%%%  Kickout TWIZZER  %%%%%%%%%%%%%%%%%%
-call kickOutTweezer(twz_intensity, twz_intensity*0.1)
-t += 10
+%%%%%%%%%%%%% lifetime %%%%%%%
+dacramp: TweezerIntensity twz_intensity twz_int_lifetime 5
 
-%%%%%%%%%%%%%%  PGC in Tweezer %%%%%%%%%%%%%%%%%%
-% change the field/laser freq parameter here because the previous section is TOF and no light is on
+t += t_lifetime
+%t += 1000
+dacramp: TweezerIntensity twz_int_lifetime twz_intensity 5
+t += 10
 call D2InTrapPGC(t_pgc_twz)
 % note the t_pgc_twz should be smaller than 100
 t += 100
 %%%%%%%%%%%%%%% Second Twizzer Image
-% note the previous section should have at least 4 ms dark interval. change the field/laser freq parameter here because the previous section is dark, i.e. 100-t_pgc_twz is larger than 4
+% note the previous section should have at least 4 ms dark interval
 call PGCTweezerImaging()
-%on: MOTFlashTrg
 
 
 %%%%%%%%%%%%%%  END Sequence  %%%%%%%%%%%%%%%%%%
 t += 100
 pulseon: DO1_0 0.5
+
 
 
 

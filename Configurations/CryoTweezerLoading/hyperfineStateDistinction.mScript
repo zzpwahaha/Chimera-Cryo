@@ -1,0 +1,132 @@
+%%%%%%%%%%%%%%%%% Start With 1ms %%%%%%%%%%%%%%%%% 
+t = 1
+call CryoMOTLoadingPGC()
+
+%%%%%%%%%%%%%%%  TOF  %%%%%%%%%%%%%%%%%%
+off: SciMOTTrg
+off: xyzMOTShutter
+off: PrbShutter 
+t += t_tof
+pulseon: DO1_0 1
+
+%%%%%%%%%%%%%%  PGC in Tweezer %%%%%%%%%%%%%%%%%%
+% change the field/laser freq parameter here because the previous section is TOF and no light is on
+call D2InTrapPGC(t_pgc_twz)
+% note the t_pgc_twz should be smaller than 100
+t += 100
+
+
+%%%%%%%%%%%%%%  Image TWIZZER  %%%%%%%%%%%%%%%%%%
+% change the field/laser freq parameter here because the previous section is dark, i.e. 100-t_pgc_twz is larger than 4
+call PGCTweezerImaging()
+%on: MOTFlashTrg
+t += 10
+
+on: xyMOTShutter
+off: PrbCoolShutter
+off: TARepShutter
+dac: TARepAmp 0
+%%%%%%%%%%%%%% cooling with lifetime parameter  %%%%%%%%%%%
+t += 5
+t += -4
+ol: ol_cooling d2_cooling_resonance-pgc_twz_olcool_scan
+ol: ol_repump d2_repump_prb_resonance+pgc_twz_olrepump_scan
+dac: BiasCoilX pgc_twz_bias_x
+dac: BiasCoilY pgc_twz_bias_y
+dac: BiasCoilZ pgc_twz_bias_z
+dac: SciMOTAmp pgc_twz_cool_amp_scan
+dac: PrbAmp 1.5
+dac: PrbRepAmp pgc_twz_rep_amp_scan
+on: xyzMOTShutter
+on: PrbShutter
+t += 4
+
+on: SciMOTTrg
+on: PrbTrg
+
+t += t_pulsed_cool
+pulseon: DO1_0 1
+off: SciMOTTrg
+off: PrbTrg
+off: xyzMOTShutter 
+off: PrbShutter 
+t += 10
+
+
+%%%%%%%%%%%%%%  Polarize the atom into F=2 with probe repump %%%%%%%%%%%%%
+t += -4
+%ol: ol_cooling d2_cooling_resonance-pgc_twz_olcool_scan
+ol: ol_repump d2_repump_prb_resonance+28.8
+dac: BiasCoilX pgc_twz_bias_x
+dac: BiasCoilY pgc_twz_bias_y
+dac: BiasCoilZ pgc_twz_bias_z
+dac: PrbAmp 1.5
+dac: PrbRepAmp pgc_twz_rep_amp_scan
+off: SciMOTTrg
+off: xyzMOTShutter 
+on: PrbShutter
+t += 4
+
+off: PrbTrg
+t += t_polarizingF2
+
+off: PrbTrg
+off: SciMOTTrg
+off: xyzMOTShutter 
+off: PrbShutter
+t += 10
+
+%%%%%%%%%%%%% Release recapture to measure temperature %%%%%%%
+%call ReleaseRecapture(t_twz_release)
+    %%%%%%%%%%%%% release and recature, 
+    off: SciMOTTrg
+    off: PrbTrg
+    on: xyzMOTShutter
+    off: PrbShutter
+    off: MOTFlashTrg
+    dac: BiasCoilX pgc_twz_bias_x
+    dac: BiasCoilY pgc_twz_bias_y
+    dac: BiasCoilZ pgc_twz_bias_z
+    dac: SciMOTAmp blowoff_amp_F2
+    dac: TARepAmp 10
+    ol: ol_cooling d2_cooling_resonance
+    ol: ol_repump d2_repump_resonance
+    on: TARepShutter
+
+    on: TweezerHold
+    t += 4 % needed to allow actuation of shutters
+    off: TweezerTrg % switch off the intensity
+    on: SciMOTTrg
+    pulseon: DO1_0 1
+    t += t_twz_release 
+    on: TweezerTrg % turn on the trigger again
+    off: SciMOTTrg
+    off: xyzMOTShutter
+    off: TweezerHold
+
+
+%%%%%%%%%%%%% turn probe cool shutter back on %%%%%%%%%%
+on: prbcoolshutter
+on: TARepShutter
+on: xyMOTShutter
+
+t += 10
+call D2InTrapPGC(t_pgc_twz)
+% note the t_pgc_twz should be smaller than 100
+t += 100
+%%%%%%%%%%%%%%% Second Twizzer Image
+% note the previous section should have at least 4 ms dark interval
+call PGCTweezerImaging()
+
+
+%%%%%%%%%%%%%%  END Sequence  %%%%%%%%%%%%%%%%%%
+t += 100
+pulseon: DO1_0 0.5
+
+
+
+
+
+
+
+

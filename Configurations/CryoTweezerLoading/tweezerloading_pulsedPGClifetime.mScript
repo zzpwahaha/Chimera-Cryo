@@ -1,0 +1,93 @@
+%%%%%%%%%%%%%%%%% Start With 1ms %%%%%%%%%%%%%%%%% 
+t = 1
+call CryoMOTLoadingPGC()
+
+%%%%%%%%%%%%%%%  TOF  %%%%%%%%%%%%%%%%%%
+off: SciMOTTrg
+off: xyzMOTShutter
+off: PrbShutter 
+t += t_tof
+pulseon: DO1_0 1
+
+%%%%%%%%%%%%%%  PGC in Tweezer %%%%%%%%%%%%%%%%%%
+% change the field/laser freq parameter here because the previous section is TOF and no light is on
+call D2InTrapPGC(t_pgc_twz)
+% note the t_pgc_twz should be smaller than 100
+t += 100
+
+
+%%%%%%%%%%%%%%  Image TWIZZER  %%%%%%%%%%%%%%%%%%
+% change the field/laser freq parameter here because the previous section is dark, i.e. 100-t_pgc_twz is larger than 4
+call PGCTweezerImaging()
+%on: MOTFlashTrg
+
+%%%%%%%%%%%%%% Prepare for pulsed PGC %%%%%%%%%%%%%%%
+dacramp: TweezerIntensity twz_intensity twz_int_lifetime 5
+
+off: PrbShutter
+on: TARepShutter
+on: xyMOTShutter
+
+%set ol frequencies since there is a memory limit for the ol
+ol: ol_cooling d2_cooling_resonance-pgc_twz_olcool_scan
+ol: ol_repump d2_repump_resonance+pgc_twz_olrepump_scan
+
+% Set bias fields during pulsed cooling
+dac: BiasCoilX pgc_twz_bias_x_scan
+dac: BiasCoilY pgc_twz_bias_y_scan
+dac: BiasCoilZ pgc_twz_bias_z_scan
+
+% wait 100ms before cooling pulse 
+t += 100
+
+%t += t_wait_before_rr
+%%%%%%%%%%%%%%% Pulsed PGC 5 times %%%%%%%%%%%%%%%
+repeat: 20
+    dacramp: TweezerIntensity twz_int_lifetime twz_intensity 5
+    t += 6
+%    t += 500 % 50 ms between pulses
+    t += -4
+    on: xyzMOTShutter
+    dac: SciMOTAmp pgc_twz_cool_amp_scan
+    dac: TARepAmp pgc_twz_rep_amp_scan
+    t += 4
+
+    on: SciMOTTrg
+
+    t += t_pulsed_cool
+    pulseon: DO1_0 1
+    off: SciMOTTrg
+    off: xyzMOTShutter 
+
+    dacramp: TweezerIntensity twz_intensity twz_int_lifetime 5
+    t += 5
+    t += 500-(t_pulsed_cool+5)-6
+end
+
+%%%%%%%%%%%%% turn probe cool shutter back on %%%%%%%%%%
+on: prbcoolshutter
+on: TARepShutter
+on: xyMOTShutter
+t += 5
+
+%call ReleaseRecapture(t_twz_release)
+%wait a bit before next step
+t += 10
+
+% wait 500ms before imaging intrap PGC
+%t += 500
+%
+dacramp: TweezerIntensity twz_int_lifetime twz_intensity 5
+t += 6
+
+call D2InTrapPGC(t_pgc_twz)
+% note the t_pgc_twz should be smaller than 100
+t += 100
+%%%%%%%%%%%%%%% Second Twizzer Image
+% note the previous section should have at least 4 ms dark interval
+call PGCTweezerImaging()
+
+
+%%%%%%%%%%%%%%  END Sequence  %%%%%%%%%%%%%%%%%%
+t += 100
+pulseon: DO1_0 0.5
