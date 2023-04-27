@@ -83,6 +83,9 @@ int WinSockFlume::open()
 
 void WinSockFlume::close()
 {
+	if (safemode) {
+		return;
+	}
 	closesocket(Winsocket);
 	WSACleanup();
 }
@@ -110,6 +113,9 @@ int WinSockFlume::sendWithCatch(const SOCKET& socket, const char* byte_buf, int 
 
 void WinSockFlume::write(const char* msg, unsigned len, QByteArray terminator)
 {
+	if (safemode) {
+		return;
+	}
 	try {
 		QByteArray buff = QByteArray(msg, len);
 		buff.append(terminator);
@@ -192,6 +198,9 @@ QByteArray WinSockFlume::readTillFull(unsigned size)
 
 QByteArray WinSockFlume::read(unsigned size)
 {
+	if (safemode) {
+		return "Error! SafeMode!!";
+	}
 	QByteArray tmp(size, Qt::Initialization::Uninitialized);
 	int timeout_ms = 500;
 	setsockopt(Winsocket, SOL_SOCKET, SO_RCVTIMEO, (const char*)&timeout_ms, sizeof(timeout_ms));
