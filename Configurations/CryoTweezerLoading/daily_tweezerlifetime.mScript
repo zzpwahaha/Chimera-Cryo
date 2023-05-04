@@ -21,62 +21,50 @@ t += 100
 call PGCTweezerImaging()
 %on: MOTFlashTrg
 t += 10
-%%%%%%%%%%%%%% Intermittent cooling with Probe %%%%%%%
+%%%%%%%%%%%%%% Prepare for pulsed PGC with Probe %%%%%%%%%%%%%%%
 dacramp: TweezerIntensity twz_intensity twz_int_lifetime 5
-
-
-% turn off repump in TA path and turn off cooling in probe path
-dac: TARepAmp 0 
-off: PrbCoolShutter
+%% turn off TA path and turn on Prb path for single beam cooling
+on: PrbCoolShutter
 off: TARepShutter
-on: xyMOTShutter
+off: xyMOTShutter
+
+off: PrbShutter
+off: xyzMOTShutter
 
 
-% wait 1s before cooling pulse 
-t += 500
+% wait 100 ms before cooling pulse 
+t += 100
 %t += 5
 %set ol frequencies since there is a memory limit for the ol
-ol: ol_cooling d2_cooling_resonance-pgc_twz_olcool_scan
-ol: ol_repump d2_repump_prb_resonance+pgc_twz_olrepump_scan
+ol: ol_cooling d2_cooling_prb_resonance-pgc_twz_olcool_scan
+ol: ol_repump d2_repump_prb_resonance+pgc_twz_olrepump
+
+% Set bias fields during pulsed cooling
+dac: BiasCoilX pgc_twz_bias_x_scan
+dac: BiasCoilY pgc_twz_bias_y_scan
+dac: BiasCoilZ pgc_twz_bias_z_scan
+
+%%%%%%%%%%%%%%% Pulsed PGC 5 times %%%%%%%%%%%%%%%
 repeat: 10
-     dacramp: TweezerIntensity twz_int_lifetime twz_intensity 5
+    dacramp: TweezerIntensity twz_int_lifetime twz_intensity 5
     t += 6
-%	call D2InTrapPGC(15)
-%	t += 20
-
     t += -4
-    on: xyzMOTShutter
     on: PrbShutter
-%
-%    ol: ol_repump d2_repump_resonance+pgc_twz_olrepump_scan
-%%%%%%%%%%%%% set repump offset in probe beam %%%%%%%%%%
-
-    dac: BiasCoilX pgc_twz_bias_x_scan
-    dac: BiasCoilY pgc_twz_bias_y_scan
-    dac: BiasCoilZ pgc_twz_bias_z_scan
-    dac: SciMOTAmp pgc_twz_cool_amp_scan
-%%%%%%%%%%%%% set prb repump amplitude %%%%%%%%%%%
-    dac: TARepAmp 0
-    dac: PrbAmp 1.5
-    dac: PrbRepAmp pgc_twz_rep_amp_scan
-
+    dac: PrbAmp pgcprb_twz_cool_amp
+    dac: PrbRepAmp pgcprb_twz_rep_amp
+    on: PrbRepTrg
     t += 4
 
-    on: SciMOTTrg
     on: PrbTrg
 
     t += t_pulsed_cool
     pulseon: DO1_0 1
-    off: SciMOTTrg
     off: PrbTrg
-    off: xyzMOTShutter 
-    off: PrbShutter 
-	t += -t_pulsed_cool
-%
-	t += t_pulsed_cool+5
-	dacramp: TweezerIntensity twz_intensity twz_int_lifetime 5
-%	t += 5
-	t += 500-(t_pulsed_cool+5)-6
+    off: PrbShutter
+
+    dacramp: TweezerIntensity twz_intensity twz_int_lifetime 5
+    t += 5
+    t += 1000-(t_pulsed_cool+5)-6
 end
 % 
 %t += t_wait_before_rr

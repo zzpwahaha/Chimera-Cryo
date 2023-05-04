@@ -29,8 +29,8 @@ Chimera/*.dll
 !**/x86/*.hpp
 
 
-OffsetLock/*
-!OffsetLock/**/*.ino
+OffsetLock/*/*
+!OffsetLock/*/*.ino
 
 *.obj
 *.log

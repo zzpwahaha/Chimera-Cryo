@@ -42,7 +42,7 @@ t += 500
 
 
 %%%%%%%%%%%%%% Pulsed PGC 5 times %%%%%%%%%%%%%%%
-repeat: 5
+repeat: 10
     dacramp: TweezerIntensity twz_int_lifetime twz_intensity 5
     t += 6
 
