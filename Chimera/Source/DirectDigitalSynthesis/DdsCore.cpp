@@ -770,6 +770,7 @@ void DdsCore::constructRepeats(repeatManager& repeatMgr)
 	}
 
 	unsigned variations = ddsCommandList.size();
+	repeatMgr.saveCalculationResults(); // repeatAddedTime is changed during construction, need to save and reset it before and after the construction body
 	auto* repearRoot = repeatMgr.getRepeatRoot();
 	auto allDescendant = repearRoot->getAllDescendant();
 	if (allDescendant.empty()) {
@@ -850,9 +851,7 @@ void DdsCore::constructRepeats(repeatManager& repeatMgr)
 			}
 		}
 	}
-
-
-
+	repeatMgr.loadCalculationResults();
 }
 
 void DdsCore::organizeDDSCommands(UINT variation)

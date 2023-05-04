@@ -39,6 +39,16 @@ void repeatInfo::calculateVariations(std::vector<parameterType>& params)
     }
 }
 
+void repeatInfo::saveCalculationResults()
+{
+    repeatAddedTimesSave = repeatAddedTimes;
+}
+
+void repeatInfo::loadCalculationResults()
+{
+    repeatAddedTimes = repeatAddedTimesSave;
+}
+
 
 repeatManager::repeatManager()
     : repeatInfoIncrement(0)
@@ -110,5 +120,22 @@ void repeatManager::calculateVariations(std::vector<parameterType>& params)
     auto allDes = repeatRoot->getAllDescendant();
     for (auto* item : allDes) {
         item->data().calculateVariations(params);
+        item->data().saveCalculationResults();
+    }
+}
+
+void repeatManager::saveCalculationResults()
+{
+    auto allDes = repeatRoot->getAllDescendant();
+    for (auto* item : allDes) {
+        item->data().saveCalculationResults();
+    }
+}
+
+void repeatManager::loadCalculationResults()
+{
+    auto allDes = repeatRoot->getAllDescendant();
+    for (auto* item : allDes) {
+        item->data().loadCalculationResults();
     }
 }

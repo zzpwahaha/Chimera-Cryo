@@ -278,6 +278,7 @@ void OlCore::constructRepeats(repeatManager& repeatMgr)
 	}
 
 	unsigned variations = olCommandList.size();
+	repeatMgr.saveCalculationResults(); // repeatAddedTime is changed during construction, need to save and reset it before and after the construction body
 	auto* repearRoot = repeatMgr.getRepeatRoot();
 	auto allDescendant = repearRoot->getAllDescendant();
 	if (allDescendant.empty()) {
@@ -358,6 +359,7 @@ void OlCore::constructRepeats(repeatManager& repeatMgr)
 			}
 		}
 	}
+	repeatMgr.loadCalculationResults();
 }
 
 

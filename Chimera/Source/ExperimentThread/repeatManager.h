@@ -21,8 +21,12 @@ struct repeatInfo
 	std::vector<unsigned> repeatNums;
 	std::vector<unsigned> repeatAddedTimes;
 
+	std::vector<unsigned> repeatAddedTimesSave;
+
 	repeatInfo(unsigned identifier);
 	void calculateVariations(std::vector<parameterType>& params);
+	void saveCalculationResults();
+	void loadCalculationResults();
 };
 
 class repeatManager
@@ -39,6 +43,8 @@ public:
 	void fininshCurrentRepeat();
 	TreeItem<repeatInfo>* getCurrentActiveItem();
 	void calculateVariations(std::vector<parameterType>& params);
+	void saveCalculationResults();
+	void loadCalculationResults();
 private:
 	// used to label each tree item with this unique identifier, used in getCurrentActiveID().
 	unsigned repeatInfoIncrement; 

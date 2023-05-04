@@ -460,6 +460,7 @@ void AoCore::constructRepeats(repeatManager& repeatMgr)
 	}
 
 	unsigned variations = dacCommandList.size();
+	repeatMgr.saveCalculationResults(); // repeatAddedTime is changed during construction, need to save and reset it before and after the construction body
 	auto* repearRoot = repeatMgr.getRepeatRoot();
 	auto allDescendant = repearRoot->getAllDescendant();
 	if (allDescendant.empty()) {
@@ -540,7 +541,7 @@ void AoCore::constructRepeats(repeatManager& repeatMgr)
 			}
 		}
 	}
-
+	repeatMgr.loadCalculationResults();
 }
 
 
