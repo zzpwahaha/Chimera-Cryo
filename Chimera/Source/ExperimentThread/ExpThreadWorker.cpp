@@ -176,9 +176,9 @@ void ExpThreadWorker::analyzeMasterScript (DoCore& ttls, AoCore& ao, DdsCore& dd
 			}
 			else if (handleVariableDeclaration (word, currentMasterScript, vars, scope, warnings)) {}
 			else if (handleDoCommands (word, currentMasterScript, vars, ttls, scope, operationTime, repeatMgr)) {}
-			else if (handleAoCommands (word, currentMasterScript, vars, ao, ttls, scope, operationTime)) {}
-			else if (handleDdsCommands(word, currentMasterScript, vars, dds, scope, operationTime)) {}
-			else if (handleOlCommands(word, currentMasterScript, vars, ol, scope, operationTime)) {}
+			else if (handleAoCommands (word, currentMasterScript, vars, ao, ttls, scope, operationTime, repeatMgr)) {}
+			else if (handleDdsCommands(word, currentMasterScript, vars, dds, scope, operationTime, repeatMgr)) {}
+			else if (handleOlCommands(word, currentMasterScript, vars, ol, scope, operationTime, repeatMgr)) {}
 			else if (handleRepeats(word, currentMasterScript, vars, scope, repeatMgr)) {}
 			else if (word == "callcppcode") {
 				// and that's it... 
@@ -274,9 +274,9 @@ void ExpThreadWorker::analyzeFunction (std::string function, std::vector<std::st
 			if (handleTimeCommands (word, functionStream, params, scope, operationTime, repeatMgr)) { /* got handled*/ }
 			else if (handleVariableDeclaration (word, functionStream, params, scope, warnings)) {}
 			else if (handleDoCommands (word, functionStream, params, ttls, scope, operationTime, repeatMgr)) {}
-			else if (handleAoCommands (word, functionStream, params, ao, ttls, scope, operationTime)) {}
-			else if (handleDdsCommands(word, functionStream, params, dds, scope, operationTime)) {}
-			else if (handleOlCommands(word, functionStream, params, ol, scope, operationTime)) {}
+			else if (handleAoCommands (word, functionStream, params, ao, ttls, scope, operationTime, repeatMgr)) {}
+			else if (handleDdsCommands(word, functionStream, params, dds, scope, operationTime, repeatMgr)) {}
+			else if (handleOlCommands(word, functionStream, params, ol, scope, operationTime, repeatMgr)) {}
 			else if (handleRepeats(word, functionStream, params, scope, repeatMgr)) {}
 			else if (word == "callcppcode") {
 				// and that's it... 
@@ -694,7 +694,8 @@ bool ExpThreadWorker::handleDoCommands (std::string word, ScriptStream& stream, 
 
 /* returns true if handles word, false otherwise. */
 bool ExpThreadWorker::handleAoCommands (std::string word, ScriptStream& stream,	std::vector<parameterType>& params, AoCore& ao, DoCore& ttls,
-	std::string scope, timeType& operationTime) {
+	std::string scope, timeType& operationTime, repeatManager& repeatMgr) {
+	repeatInfoId repeatId = repeatMgr.getCurrentActiveID();
 	if (word == "cao:") {
 		// zzp 10/28/2022 - I think this is not used in any of B232's code and we can deprecate this keyword
 		// for calibrated dac output, the syntax should be 
@@ -711,6 +712,7 @@ bool ExpThreadWorker::handleAoCommands (std::string word, ScriptStream& stream,	
 		command.commandName = "dac:";
 		command.numSteps.expressionStr = command.initVal.expressionStr = "__NONE__";
 		command.rampTime.expressionStr = command.rampInc.expressionStr = "__NONE__";
+		command.repeatId = repeatId;
 		try {
 			ao.handleDacScriptCommand (command, dacName, params);
 		}
@@ -727,6 +729,7 @@ bool ExpThreadWorker::handleAoCommands (std::string word, ScriptStream& stream,	
 		command.commandName = "dac:";
 		command.numSteps.expressionStr = command.initVal.expressionStr = "__NONE__";
 		command.rampTime.expressionStr = command.rampInc.expressionStr = "__NONE__";
+		command.repeatId = repeatId;
 		try {
 			ao.handleDacScriptCommand (command, name, params);
 		}
@@ -745,6 +748,7 @@ bool ExpThreadWorker::handleAoCommands (std::string word, ScriptStream& stream,	
 		command.numSteps.assertValid (params, scope);
 		command.time = operationTime;
 		command.commandName = "daclinspace:";
+		command.repeatId = repeatId;
 		// not used here.
 		command.rampInc.expressionStr = "__NONE__";
 		//
@@ -768,6 +772,7 @@ bool ExpThreadWorker::handleAoCommands (std::string word, ScriptStream& stream,	
 		command.commandName = "dacarange:";
 		// not used here.
 		command.numSteps.expressionStr = "__NONE__";
+		command.repeatId = repeatId;
 		try {
 			ao.handleDacScriptCommand (command, name, params);
 		}
@@ -788,6 +793,7 @@ bool ExpThreadWorker::handleAoCommands (std::string word, ScriptStream& stream,	
 		// not used here. 
 		command.numSteps.expressionStr = "__NONE__";
 		command.rampInc.expressionStr = "__NONE__";
+		command.repeatId = repeatId;
 		try
 		{
 			ao.handleDacScriptCommand(command, name, params);
@@ -806,8 +812,9 @@ bool ExpThreadWorker::handleAoCommands (std::string word, ScriptStream& stream,	
 
 /* returns true if handles word, false otherwise. */
 bool ExpThreadWorker::handleDdsCommands(std::string word, ScriptStream& stream, std::vector<parameterType>& vars,
-	DdsCore& ddss, std::string scope, timeType& operationTime)
+	DdsCore& ddss, std::string scope, timeType& operationTime, repeatManager& repeatMgr)
 {
+	repeatInfoId repeatId = repeatMgr.getCurrentActiveID();
 	if (word == "ddsamp:") //ddsamp: name amp
 	{
 		DdsCommandForm command;
@@ -819,6 +826,7 @@ bool ExpThreadWorker::handleDdsCommands(std::string word, ScriptStream& stream, 
 		command.finalVal.expressionStr = "__NONE__";
 		command.rampTime.expressionStr = "__NONE__";
 		command.numSteps.expressionStr = "__NONE__";
+		command.repeatId = repeatId;
 		try
 		{
 			ddss.handleDDSScriptCommand(command, name, vars);
@@ -839,6 +847,7 @@ bool ExpThreadWorker::handleDdsCommands(std::string word, ScriptStream& stream, 
 		command.finalVal.expressionStr = "__NONE__";
 		command.rampTime.expressionStr = "__NONE__";
 		command.numSteps.expressionStr = "__NONE__";
+		command.repeatId = repeatId;
 		try
 		{
 			ddss.handleDDSScriptCommand(command, name, vars);
@@ -859,6 +868,7 @@ bool ExpThreadWorker::handleDdsCommands(std::string word, ScriptStream& stream, 
 		command.numSteps.assertValid(vars, scope);
 		command.time = operationTime;
 		command.commandName = "ddslinspaceamp:";
+		command.repeatId = repeatId;
 		try
 		{
 			ddss.handleDDSScriptCommand(command, name, vars);
@@ -879,6 +889,7 @@ bool ExpThreadWorker::handleDdsCommands(std::string word, ScriptStream& stream, 
 		command.numSteps.assertValid(vars, scope);
 		command.time = operationTime;
 		command.commandName = "ddslinspacefreq:";
+		command.repeatId = repeatId;
 		try
 		{
 			ddss.handleDDSScriptCommand(command, name, vars);
@@ -899,6 +910,7 @@ bool ExpThreadWorker::handleDdsCommands(std::string word, ScriptStream& stream, 
 		command.time = operationTime;
 		command.commandName = "ddsrampamp:";
 		command.numSteps.expressionStr = "__NONE__";
+		command.repeatId = repeatId;
 		try
 		{
 			ddss.handleDDSScriptCommand(command, name, vars);
@@ -919,6 +931,7 @@ bool ExpThreadWorker::handleDdsCommands(std::string word, ScriptStream& stream, 
 		command.time = operationTime;
 		command.commandName = "ddsrampfreq:";
 		command.numSteps.expressionStr = "__NONE__";
+		command.repeatId = repeatId;
 		try
 		{
 			ddss.handleDDSScriptCommand(command, name, vars);
@@ -937,8 +950,9 @@ bool ExpThreadWorker::handleDdsCommands(std::string word, ScriptStream& stream, 
 
 /* returns true if handles word, false otherwise. */
 bool ExpThreadWorker::handleOlCommands(std::string word, ScriptStream& stream, std::vector<parameterType>& vars,
-	OlCore& ols, std::string scope, timeType& operationTime)
+	OlCore& ols, std::string scope, timeType& operationTime, repeatManager& repeatMgr)
 {
+	repeatInfoId repeatId = repeatMgr.getCurrentActiveID();
 	if (word == "ol:") //ddsamp: name amp
 	{
 		OlCommandForm command;
@@ -950,6 +964,7 @@ bool ExpThreadWorker::handleOlCommands(std::string word, ScriptStream& stream, s
 		command.finalVal.expressionStr = "__NONE__";
 		command.rampTime.expressionStr = "__NONE__";
 		command.numSteps.expressionStr = "__NONE__";
+		command.repeatId = repeatId;
 		try
 		{
 			ols.handleOLScriptCommand(command, name, vars);
@@ -970,6 +985,7 @@ bool ExpThreadWorker::handleOlCommands(std::string word, ScriptStream& stream, s
 		//command.numSteps.assertValid(vars, scope);
 		command.time = operationTime;
 		command.commandName = "olramp:";
+		command.repeatId = repeatId;
 		try
 		{
 			ols.handleOLScriptCommand(command, name, vars);
@@ -989,6 +1005,7 @@ bool ExpThreadWorker::handleOlCommands(std::string word, ScriptStream& stream, s
 		command.numSteps.assertValid(vars, scope);
 		command.time = operationTime;
 		command.commandName = "ollinspace:";
+		command.repeatId = repeatId;
 		// not used here.
 		command.rampInc.expressionStr = "__NONE__";
 		//
@@ -1164,7 +1181,16 @@ void ExpThreadWorker::calculateAdoVariations (ExpRuntimeData& runtime) {
 		input->dds.calculateVariations(runtime.expParams, this, input->calibrations);
 		emit notification("Calcualting OL system variations...\n", 1);
 		input->ol.calculateVariations(runtime.expParams, this);
+
+		emit notification("Constructing repeatitions for DO system...\n", 1);
 		input->ttls.constructRepeats(repeatMgr);
+		emit notification("Constructing repeatitions for AO system...\n", 1);
+		input->ao.constructRepeats(repeatMgr);
+		emit notification("Constructing repeatitions for DDS system...\n", 1);
+		input->dds.constructRepeats(repeatMgr);
+		emit notification("Constructing repeatitions for OL system...\n", 1);
+		input->ol.constructRepeats(repeatMgr);
+		
 		emit notification ("Preparing DO, AO, DDS, OL for experiment and Running final ado checks...\n");
 		for (auto variationInc : range (variations)) {
 			if (isAborting) { thrower (abortString); }

@@ -3,6 +3,7 @@
 
 #include "ParameterSystem/Expression.h"
 #include "GeneralObjects/commonTypes.h"
+#include <ExperimentThread/repeatManager.h>
 #include <array>
 
 enum class AOGrid : size_t
@@ -41,7 +42,7 @@ struct AoCommandForm
 	Expression numSteps;
 
 	// stores whether this command is subject to repeats and which repeat it correpsonds to in the tree if so
-	//repeatInfoId repeatId = { 0, {0,0} };
+	repeatInfoId repeatId = { 0, {0,0} };
 };
 
 
@@ -52,6 +53,9 @@ struct AoCommand
 	double value;
 	double endValue;
 	double rampTime;
+
+	// same as AoCommandForm, this will be used for repeat generation, i.e. copy and extend the std::vector<AoCommand>
+	repeatInfoId repeatId = { 0, {0,0} };
 };
 
 

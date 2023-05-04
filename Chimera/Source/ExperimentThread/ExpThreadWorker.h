@@ -45,11 +45,11 @@ class ExpThreadWorker : public QObject
 			DoCore& ttls, std::string scope, timeType& operationTime, repeatManager& repeatMgr);
 		bool handleAoCommands (std::string word, ScriptStream& stream, std::vector<parameterType>& params,
 			AoCore& ao, DoCore& ttls, std::string scope,
-			timeType& operationTime);
+			timeType& operationTime, repeatManager& repeatMgr);
 		bool handleDdsCommands(std::string word, ScriptStream& stream, std::vector<parameterType>& params,
-			DdsCore& dds, std::string scope, timeType& operationTime);
+			DdsCore& dds, std::string scope, timeType& operationTime, repeatManager& repeatMgr);
 		bool handleOlCommands(std::string word, ScriptStream& stream, std::vector<parameterType>& params,
-			OlCore& ol, std::string scope, timeType& operationTime);
+			OlCore& ol, std::string scope, timeType& operationTime, repeatManager& repeatMgr);
 		bool handleRepeats(std::string word, ScriptStream& stream, std::vector<parameterType>& params,
 			std::string scope, repeatManager& repeatMgr);
 		bool handleFunctionCall (std::string word, ScriptStream& stream, std::vector<parameterType>& params,

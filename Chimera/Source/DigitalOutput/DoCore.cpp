@@ -184,8 +184,9 @@ void DoCore::constructRepeats(repeatManager& repeatMgr)
 		thrower("No TTL Commands???");
 	}
 
-	unsigned variations = ttlCommandFormList[0].timeVals.size();
-	auto allDescendant = repeatMgr.getRepeatRoot()->getAllDescendant();
+	unsigned variations = ttlCommandList.size();
+	auto* repearRoot = repeatMgr.getRepeatRoot();
+	auto allDescendant = repearRoot->getAllDescendant();
 	if (allDescendant.empty()) {
 		return; // no repeats need to handle.
 	}
@@ -257,7 +258,7 @@ void DoCore::constructRepeats(repeatManager& repeatMgr)
 			std::for_each(cmdToRepeatEnd, cmds.end(), [&](Command& doc) {
 				doc.time += repeatAddedTime * (repeatNum - 1); });
 			/*advance the time of the parent repeat, if the parent is not root*/
-			if (repeatIParent != repeatMgr.getRepeatRoot()) {
+			if (repeatIParent != repearRoot) {
 				repeatIParent->data().repeatAddedTimes[varInc] += repeatAddedTime * repeatNum;
 			}
 		}

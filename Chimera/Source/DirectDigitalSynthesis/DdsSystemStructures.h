@@ -3,7 +3,7 @@
 #include <array>
 #include "ParameterSystem/Expression.h"
 #include "GeneralObjects/CommonTypes.h"
-
+#include <ExperimentThread/repeatManager.h>
 
 enum class DDSGrid : size_t
 {
@@ -46,7 +46,7 @@ struct DdsCommandForm
 	Expression numSteps;
 
 	// stores whether this command is subject to repeats and which repeat it correpsonds to in the tree if so
-	//repeatInfoId repeatId = { 0, {0,0} };
+	repeatInfoId repeatId = { 0, {0,0} };
 };
 
 struct DdsCommand
@@ -58,6 +58,9 @@ struct DdsCommand
 	double endAmp;
 	double endFreq;
 	double rampTime;
+
+	// same as DdsCommandForm, this will be used for repeat generation, i.e. copy and extend the std::vector<DdsCommand>
+	repeatInfoId repeatId = { 0, {0,0} };
 };
 
 
