@@ -1,0 +1,27 @@
+t = 1/2
+repeat: x
+t += x
+on: DO1_0
+dac: dac0_0 5
+ddsfreq: dds0_0 80
+ol: ol0_0 5000
+repeat: y
+t += y
+on: DO1_1
+dacramp: dac1_0 0 5 y
+ddsfreq: dds0_1 y
+ol: ol0_1 y
+t += 5
+end
+end
+t += 10
+repeat: z
+t += z
+on: DO1_0
+dac: dac0_0 z
+ddsfreq: dds0_0 z
+ol: ol0_0 z
+end
+
+t += 100
+on: DO1_0

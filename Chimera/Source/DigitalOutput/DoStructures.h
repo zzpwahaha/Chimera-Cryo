@@ -2,6 +2,7 @@
 #pragma once
 #include <array>
 #include "GeneralObjects/commonTypes.h"
+#include <ExperimentThread/repeatManager.h>
 //#include "DigitalOutput/DoRows.h"
 
 enum class DOGrid : size_t
@@ -24,6 +25,8 @@ struct DoCommandForm
 	std::vector<double> timeVals; /*not used for zynq, then DoCommandForm and DoCommand are the same*/
 	// the value to set it to. 
 	bool value;
+	// stores whether this command is subject to repeats and which repeat it correpsonds to in the tree if so
+	repeatInfoId repeatId = { 0, {0,0} };
 };
 
 // no variables in this version. It's calculated each variation based on corresponding ComandForm structs.
@@ -35,6 +38,8 @@ struct DoCommand
 	double time;
 	// the value to set it to. 
 	bool value;
+	// same as DoCommandForm, this will be used for repeat generation, i.e. copy and extend the std::vector<DoCommand>
+	repeatInfoId repeatId = { 0, {0,0} };
 };
 
 

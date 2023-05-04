@@ -4,6 +4,7 @@
 #include <string>
 #include "ParameterSystem/Expression.h"
 #include "GeneralObjects/CommonTypes.h"
+#include <ExperimentThread/repeatManager.h>
 
 enum class OLGrid : size_t
 {
@@ -38,6 +39,9 @@ struct OlCommandForm
 	Expression rampTime;
 	Expression rampInc;
 	Expression numSteps;
+
+	// stores whether this command is subject to repeats and which repeat it correpsonds to in the tree if so
+	repeatInfoId repeatId = { 0, {0,0} };
 };
 
 
@@ -49,6 +53,9 @@ struct OlCommand
 	double endValue;
 	unsigned numSteps;
 	double rampTime;
+
+	// same as OlCommandForm, this will be used for repeat generation, i.e. copy and extend the std::vector<OlCommand>
+	repeatInfoId repeatId = { 0, {0,0} };
 };
 
 

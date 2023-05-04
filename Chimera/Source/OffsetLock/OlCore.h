@@ -16,6 +16,7 @@ public:
 	~OlCore();
 
 	void calculateVariations(std::vector<parameterType>& params, ExpThreadWorker* threadworker);
+	void constructRepeats(repeatManager& repeatMgr);
 	const std::string configDelim = "OFFSETLOCK_SYSTEM";
 	std::string getDelim() { return configDelim; }
 

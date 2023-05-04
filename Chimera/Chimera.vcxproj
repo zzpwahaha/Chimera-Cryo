@@ -138,6 +138,7 @@
     <ClCompile Include="Source\CMOSCamera\FrameAverager.cpp" />
     <ClCompile Include="Source\ExperimentMonitoringAndStatus\StatusOptionsWindow.cpp" />
     <ClCompile Include="Source\ExperimentMonitoringAndStatus\TemperatureMonitor.cpp" />
+    <ClCompile Include="Source\ExperimentThread\repeatManager.cpp" />
     <ClCompile Include="Source\GigaMOOG\GigaMoogCore.cpp" />
     <ClCompile Include="Source\ExperimentMonitoringAndStatus\ExperimentSeqPlotter.cpp" />
     <ClCompile Include="Source\GeneralFlumes\BoostAsyncSerial.cpp" />
@@ -197,6 +198,8 @@
     <ClInclude Include="Source\ExperimentMonitoringAndStatus\StatusControlOptions.h" />
     <QtMoc Include="Source\ExperimentMonitoringAndStatus\StatusOptionsWindow.h" />
     <ClInclude Include="Source\ExperimentThread\ExpRuntimeData.h" />
+    <ClInclude Include="Source\ExperimentThread\repeatManager.h" />
+    <ClInclude Include="Source\GeneralObjects\TreeItem.h" />
     <ClInclude Include="Source\GigaMOOG\GigaMoogCore.h" />
     <ClInclude Include="Source\GeneralFlumes\BoostAsyncSerial.h" />
     <ClInclude Include="Source\GigaMOOG\GigaMoogSystem.h" />
