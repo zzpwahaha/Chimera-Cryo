@@ -39,6 +39,9 @@ struct AoCommandForm
 	Expression rampTime;
 	Expression rampInc;
 	Expression numSteps;
+
+	// stores whether this command is subject to repeats and which repeat it correpsonds to in the tree if so
+	//repeatInfoId repeatId = { 0, {0,0} };
 };
 
 

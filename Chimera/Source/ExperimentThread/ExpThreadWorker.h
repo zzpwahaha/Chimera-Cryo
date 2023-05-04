@@ -2,6 +2,7 @@
 
 #include <ExperimentThread/ExperimentThreadInput.h>
 #include <ExperimentThread/ExpRuntimeData.h>
+#include <ExperimentThread/repeatManager.h>
 #include <MiscellaneousExperimentOptions/debugInfo.h>
 #include <qobject.h>
 #include <string>
@@ -30,7 +31,7 @@ class ExpThreadWorker : public QObject
 			std::vector<parameterType>& vars,
 			ScriptStream& currentMasterScript, bool expectsLoadSkip,
 			std::string& warnings, timeType& operationTime,
-			timeType& loadSkipTime);
+			timeType& loadSkipTime, repeatManager& repeatManager);
 		void waitForAndorFinish ();
 		// this function needs the mastewindow in order to gather the relevant parameters for the experiment.
 		void startExperimentThread (ExperimentThreadInput* input, IChimeraQtWindow* parent);
@@ -39,9 +40,9 @@ class ExpThreadWorker : public QObject
 		bool getAbortStatus ();
 		const std::string abortString = "\r\nABORTED!\r\n";
 		bool handleTimeCommands (std::string word, ScriptStream& stream, std::vector<parameterType>& params,
-			std::string scope, timeType& operationTime);
+			std::string scope, timeType& operationTime, repeatManager& repeatMgr);
 		bool handleDoCommands (std::string word, ScriptStream& stream, std::vector<parameterType>& params,
-			DoCore& ttls, std::string scope, timeType& operationTime);
+			DoCore& ttls, std::string scope, timeType& operationTime, repeatManager& repeatMgr);
 		bool handleAoCommands (std::string word, ScriptStream& stream, std::vector<parameterType>& params,
 			AoCore& ao, DoCore& ttls, std::string scope,
 			timeType& operationTime);
@@ -49,8 +50,10 @@ class ExpThreadWorker : public QObject
 			DdsCore& dds, std::string scope, timeType& operationTime);
 		bool handleOlCommands(std::string word, ScriptStream& stream, std::vector<parameterType>& params,
 			OlCore& ol, std::string scope, timeType& operationTime);
+		bool handleRepeats(std::string word, ScriptStream& stream, std::vector<parameterType>& params,
+			std::string scope, repeatManager& repeatMgr);
 		bool handleFunctionCall (std::string word, ScriptStream& stream, std::vector<parameterType>& params,
-			DoCore& ttls, AoCore& ao, DdsCore& dds, OlCore& ol, std::string& warnings, std::string callingFunction, timeType& operationTime);
+			DoCore& ttls, AoCore& ao, DdsCore& dds, OlCore& ol, std::string& warnings, std::string callingFunction, timeType& operationTime, repeatManager& repeatMgr);
 		static bool handleVariableDeclaration (std::string word, ScriptStream& stream, std::vector<parameterType>& params,
 			std::string scope, std::string& warnings);
 		static bool handleVectorizedValsDeclaration (std::string word, ScriptStream& stream,
@@ -95,7 +98,7 @@ class ExpThreadWorker : public QObject
 		const std::string functionsFolderLocation = FUNCTIONS_FOLDER_LOCATION;
 		// called by analyzeMasterScript functions only.
 		void analyzeFunction (std::string function, std::vector<std::string> args, DoCore& ttls, AoCore& ao, DdsCore& dds, OlCore& ol,
-			std::vector<parameterType>& vars, std::string& warnings, timeType& operationTime, std::string callingScope);
+			std::vector<parameterType>& vars, std::string& warnings, timeType& operationTime, std::string callingScope, repeatManager& repeatMgr);
 		timeType operationTime;
 		HANDLE runningThread;
 	private:

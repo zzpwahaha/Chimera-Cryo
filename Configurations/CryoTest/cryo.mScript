@@ -1,0 +1,18 @@
+t = 1/2
+repeat: x
+t += x
+on: DO1_0
+repeat: y
+t += y
+on: DO1_1
+t += 5
+end
+end
+t += 10
+repeat: z
+t += z
+on: DO1_0
+end
+
+t += 100
+on: DO1_0
