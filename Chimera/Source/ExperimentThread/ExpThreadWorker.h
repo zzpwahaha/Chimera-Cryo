@@ -66,6 +66,7 @@ class ExpThreadWorker : public QObject
 		void calculateAdoVariations (ExpRuntimeData& runtime);
 		static std::vector<parameterType> getLocalParameters (ScriptStream& stream);
 		void runConsistencyChecks (std::vector<parameterType> expParams, std::vector<calSettings> calibrations);
+		void waitForSequenceFinish(double seqTime);
 		void handlePause (std::atomic<bool>& isPaused, std::atomic<bool>& isAborting);
 		void initVariation (unsigned variationInc,
 			std::vector<parameterType> expParams);

@@ -534,6 +534,10 @@ void OlCore::makeFinalDataFormat(unsigned variation, DoCore& doCore)
 			doCore.ttlPulseDirect(OL_TRIGGER_LINE[channel].first, OL_TRIGGER_LINE[channel].second, 
 				channelSnapshot.time, OL_TRIGGER_TIME, variation);
 		}
+		if (olChannelSnapshots[variation].size() > maxCommandNum) {
+			thrower("Ol command number " + str(olChannelSnapshots[variation].size()) + " is greater than the maximum Ol command that the"
+				"microcontroller can accept, which is " + str(maxCommandNum));
+		}
 	}
 
 }

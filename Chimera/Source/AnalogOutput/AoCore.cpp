@@ -679,6 +679,10 @@ void AoCore::formatDacForFPGA(UINT variation, AoSnapshot initSnap)
 			finalDacSnapshots[variation].push_back(channelSnapshot);
 		}
 	}
+	if (finalDacSnapshots[variation].size() > maxCommandNum) {
+		thrower("AO command number " + str(finalDacSnapshots[variation].size()) + " is greater than the maximum AO command that the"
+			"microcontroller can accept, which is " + str(maxCommandNum));
+	}
 }
 
 void AoCore::writeDacs(unsigned variation, bool loadSkip) 

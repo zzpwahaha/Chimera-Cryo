@@ -102,7 +102,7 @@ void ExpThreadWorker::experimentThreadProcedure () {
 					emit notification(qstr("Starting Repetition #" + qstr(repInc) + "\n"), 2);
 					handlePause(isPaused, isAborting);
 					startRep(repInc, variationInc, input->skipNext == nullptr ? false : input->skipNext->load());
-					Sleep(finaltimes[variationInc]+10);
+					waitForSequenceFinish(finaltimes[variationInc]);
 				}
 			}
 		}
@@ -123,7 +123,7 @@ void ExpThreadWorker::experimentThreadProcedure () {
 					initVariation(variationInc, expRuntime.expParams);
 					handlePause(isPaused, isAborting);
 					startRep(repInc, variationInc, input->skipNext == nullptr ? false : input->skipNext->load());
-					Sleep(finaltimes[variationInc]+10);
+					waitForSequenceFinish(finaltimes[variationInc]);
 				}
 			}
 		}
@@ -1230,6 +1230,21 @@ void ExpThreadWorker::runConsistencyChecks (std::vector<parameterType> expParams
 	}
 	//checkTriggerNumbers (expParams);
 	emit expCalibrationsSet(calibrations);
+}
+
+void ExpThreadWorker::waitForSequenceFinish(double seqTime)
+{
+	const double minimumSleep = 10.0;
+	const double maximumSleep = 300.0;
+	const double targetSleep = seqTime * 0.1;
+	double sleepTime = seqTime + minimumSleep;
+	if (targetSleep > minimumSleep) {
+		sleepTime = seqTime + targetSleep;
+	}
+	if (targetSleep > maximumSleep) {
+		sleepTime = seqTime + maximumSleep;
+	}
+	Sleep(sleepTime);
 }
 
 void ExpThreadWorker::handlePause (std::atomic<bool>& isPaused, std::atomic<bool>& isAborting) {
