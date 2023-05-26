@@ -22,7 +22,7 @@ call PGCTweezerImaging()
 %on: MOTFlashTrg
 
 t += 100
-%call releaseRecapture(t_twz_release)
+call releaseRecapture(t_twz_release)
 t += 100
 
 %%%%%%%%%%%%%%  PGC in Tweezer %%%%%%%%%%%%%%%%%%

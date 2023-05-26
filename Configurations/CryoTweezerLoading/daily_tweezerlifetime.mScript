@@ -45,7 +45,7 @@ dac: BiasCoilY pgc_twz_bias_y_scan
 dac: BiasCoilZ pgc_twz_bias_z_scan
 
 %%%%%%%%%%%%%%% Pulsed PGC 5 times %%%%%%%%%%%%%%%
-repeat: 10
+repeat: repeat_num
     dacramp: TweezerIntensity twz_int_lifetime twz_intensity 5
     t += 6
     t += -4
@@ -64,7 +64,7 @@ repeat: 10
 
     dacramp: TweezerIntensity twz_intensity twz_int_lifetime 5
     t += 5
-    t += 1000-(t_pulsed_cool+5)-6
+    t += 500-(t_pulsed_cool+5)-6
 end
 % 
 %t += t_wait_before_rr

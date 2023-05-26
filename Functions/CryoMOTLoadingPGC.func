@@ -24,8 +24,8 @@ def cryoMOTLoadingPGC():
     ddsfreq: PrbRep 80
     ddsamp: PrbRep 100
     t += 1
-    ddsfreq: PrbRep_tmp 80
-    ddsamp: PrbRep_tmp 100
+    ddsfreq: D1LGM 80
+    ddsamp: D1LGM 100
     t += 1
     ddsfreq: dds2_3 80
     ddsamp: dds2_3 100

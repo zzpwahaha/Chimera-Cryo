@@ -99,7 +99,7 @@
 %set DAC1 7  30.75 103.60  0
 %%set DAC1 8  30.13 107.60  0
 
-%%balanced trap depth
+%%balanced trap depth - 05/12/2023
 set DAC0 0  25.59  86.80 171.90
 set DAC0 1  25.63  88.00 181.50
 set DAC0 2  24.55  89.60 323.00
