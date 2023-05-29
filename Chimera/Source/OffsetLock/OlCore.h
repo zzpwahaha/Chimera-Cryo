@@ -55,7 +55,7 @@ private:
 	//std::vector<std::pair<double, std::vector<OlCommand>>> timeOrganizer;
 	std::array<std::vector<std::pair<double, OlCommand>>, size_t(OLGrid::total)> timeOrganizer;
 
-	QtSerialFlume qtFlume;
+	std::array<QtSerialFlume, size_t(OLGrid::numOFunit)> qtFlumes;
 
 public:
 	const unsigned maxCommandNum = 512;

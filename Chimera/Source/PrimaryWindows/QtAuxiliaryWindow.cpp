@@ -655,7 +655,10 @@ std::string QtAuxiliaryWindow::getOtherSystemStatusMsg (){
 
 	msg += "Offset Lock:\n";
 	if (!OFFSETLOCK_SAFEMODE) {
-		msg += str("\tOffset Lock System is Active at " + OL_COM_PORT + "\n");
+		for (auto ol_com_port : OL_COM_PORT) {
+			msg += str("\tOffset Lock System is Active at " + ol_com_port + ", ");
+		}
+		msg += "\n";
 		msg += "\tAttached trigger line is \n\t\t";
 		for (const auto& oltrig : OL_TRIGGER_LINE)
 		{

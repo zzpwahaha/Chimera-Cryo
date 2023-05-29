@@ -9,7 +9,7 @@
 enum class OLGrid : size_t
 {
 	numPERunit = 2,
-	numOFunit = 1,
+	numOFunit = 2,
 	total = numPERunit * numOFunit
 };
 
