@@ -65,6 +65,11 @@ uint32_t rampflg1;  //ramp start/stop flag
 uint32_t rampCounter0;  //number of uploaded ramp in ch0
 uint32_t rampCounter1;  //number of uploaded ramp in ch1
 
+const char startMarker = '(';  //start marker for each set of data
+const char endMarker = ')';  //end marker for each set of data
+const char endendMarker = 'e';  //end marker for the whole frame of data
+const char trigMarker = 't'; //software trigger marker type "te" to software trigger
+
 void updatePFD(uint32_t FTW, int LE);
 uint32_t calcFTW(uint32_t freq, uint32_t fPFD);
 void processData();
@@ -91,6 +96,8 @@ void setup() {
   pinMode(Trig1,INPUT);
   attachInterrupt(digitalPinToInterrupt(Trig0),setRamp0,RISING);
   attachInterrupt(digitalPinToInterrupt(Trig1),setRamp1,RISING);
+  EEPROM.updateLong(address,624000);
+  EEPROM.updateLong(address+5,6835000/2);
   //Initialize ADF4159 to default frequency from EEPROM
   delay(1000);
   pfdInit();
@@ -247,10 +254,7 @@ void processData(){
   uint32_t paraint1[MAX_RAMP_NUM][5];
   uint32_t rampCount0 = 0;
   uint32_t rampCount1 = 0;
-  char startMarker = '(';  //start marker for each set of data
-  char endMarker = ')';  //end marker for each set of data
-  char endendMarker = 'e';  //end marker for the whole frame of data
-  char trigMarker = 't'; //software trigger marker type "te" to software trigger
+
   char rc = 0;
   bool error = true;   //error flag for input parameter
   bool triggered = false; //software triggered?
@@ -371,7 +375,7 @@ bool dataCheck(uint32_t par[5]){
 bool dataCheck1(uint32_t par[5]){
   bool errorflg = true;
   if (par[0] == 0 || par[0] == 1 ){
-    if (par[1] >= 6650*250 && par[1] <= 7500*250 && par[2] >= 6650*250 && par[2] <= 7500*250){
+    if (par[1] >= 6650*1000/2 && par[1] <= 7500*1000/2 && par[2] >= 6650*1000/2 && par[2] <= 7500*1000/2){
       if (par[3] > 0 && par[4]/par[3] >= 20){
         errorflg = false;
       }
