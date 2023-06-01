@@ -2,7 +2,7 @@
  *  *Note: MAY 31 2023, increase ramp array length to accomidate more ramp segments
  *      Also add ramp number check to make sure it doesn't exceed internal array size
  *      Max number of ramp segments is 512 for each channel
- * This is the firmware for the teensy 3.1/3.2 that takes command from serial interface 
+ * This is the firmware for the teensy 4.0 that takes command from serial interface 
  * and program the ADF4159 IC. 
  * The teensy micrcontroller also generates the necessary data for ramping the frequency.
  *  
