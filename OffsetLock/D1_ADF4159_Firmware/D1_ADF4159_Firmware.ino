@@ -64,6 +64,16 @@ uint32_t rampflg1;  //ramp start/stop flag
 uint32_t rampCounter0;  //number of uploaded ramp in ch0
 uint32_t rampCounter1;  //number of uploaded ramp in ch1
 
+void updatePFD(uint32_t FTW, int LE);
+uint32_t calcFTW(uint32_t freq);
+void processData();
+void pfdInit();
+void setRamp0();
+void setRamp1();
+bool dataCheck(uint32_t par[5]);
+bool dataCheck1(uint32_t par[5]);
+
+
 //initialization of hardware
 void setup() {
   // Initializing USB serial to 12Mbit/sec. Teensy ignores the 9600 baud rate.
