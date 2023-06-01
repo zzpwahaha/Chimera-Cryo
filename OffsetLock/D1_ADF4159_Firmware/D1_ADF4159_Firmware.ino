@@ -35,19 +35,20 @@
 #include <EEPROMex.h>
 
 //Variable declaration
-#define MAX_RAMP_NUM 512
-int cs0 = 14;  //slave select pin for ch0
-int cs1 = 15;  //slave select pin for ch1
+const int MAX_RAMP_NUM = 512;
+const int cs0 = 14;  //slave select pin for ch0
+const int cs1 = 15;  //slave select pin for ch1
 
-int Trig0 = 7;  //ch0 ramp trigger pin
-int Trig1 = 8;  //ch1 ramp trigger pin
+const int Trig0 = 7;  //ch0 ramp trigger pin
+const int Trig1 = 8;  //ch1 ramp trigger pin
 
-uint32_t fPFD = 50000;  //PFD frequency in kHz
+const uint32_t fPFD0 = 20000;  //PFD frequency in kHz, for Rcounter=5
+const uint32_t fPFD1 = 100000;  //PFD frequency in kHz, for Rcounter=1
 
 int32_t ramp0[MAX_RAMP_NUM][6];  //ramp parameters for ch0 (Fs,Fe,R#,Rleng,dF,dt)
 int32_t ramp1[MAX_RAMP_NUM][6];  //ramp parameters for ch1 (Fs,Fe,R#,Rleng,dF,dt)
 
-uint32_t address = 0;  //eeprom address for ch0,1 default frequencies
+const uint32_t address = 0;  //eeprom address for ch0,1 default frequencies
 
 elapsedMicros rampDelay0;  //ramp delay timer0
 elapsedMicros rampDelay1;  //ramp delay timer1
@@ -199,7 +200,7 @@ uint32_t calcFTW(uint32_t freq){
   float Frac;
   uint32_t FTW;
   N = freq/fPFD;
-  Frac = (float)(freq%fPFD)/fPFD*33554432;
+  Frac = (float)(freq%fPFD)/fPFD*0x2000000; //2**25//33554432;
   FTW = (N << 25)+ (uint32_t)Frac;
   return FTW;
 }
@@ -311,8 +312,8 @@ void processData(){
     rampCounter1 = rampCount1;
     rampflg0 = 0;
     rampflg1 = 0;
-    EEPROM.updateLong(address,ramp0[0][0]);
-    EEPROM.updateLong(address+5,ramp1[0][0]);
+    // EEPROM.updateLong(address,ramp0[0][0]);
+    // EEPROM.updateLong(address+5,ramp1[0][0]);
     //write ch0 R1,R0
     updatePFD(calcFTW(EEPROM.readLong(address)),cs0);
     //write ch1 R1,R0
