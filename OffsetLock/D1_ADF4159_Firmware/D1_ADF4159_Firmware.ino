@@ -140,7 +140,7 @@ void loop() {
 
 //Initialize ADF4159 board and load default frequencies from EEPROM
 //The ADF4159 is initialized to the following 
-//ch0: R=2,cp=0.3125mA
+//ch0: R=5,cp=2.5mA, Prescaler = 4/5: NMIN = 23, at 500MHz, INT=25
 //ch1: R=1, cp=2.1875mA, bleed=101-243uA
 void pfdInit(){
   char INI[28] = {0,0,0,7,
@@ -150,7 +150,7 @@ void pfdInit(){
                   0,0x80,0,5,
                   0,0x18,0x01,4,
                   0,0x18,1,0x44};
-  char ch0R32[8] = {0x01,0x83,0x00,0x83,0x07,0x01,0x00,0x0A};
+  char ch0R32[8] = {0x01,0x83,0x00,0x83,0x07,0x02,0x80,0x0A};
   char ch1R32[8] = {0x01,0x63,0x00,0x83,0x06,0x00,0x80,0x0A};
   //ch0 R4,R5,R6,R7 Initialization
   for(int i=0;i<7;i++){
