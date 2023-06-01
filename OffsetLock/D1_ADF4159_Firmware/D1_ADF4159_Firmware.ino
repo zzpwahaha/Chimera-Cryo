@@ -1,4 +1,7 @@
 /****************************************************************************************
+ *  *Note: MAY 31 2023, increase ramp array length to accomidate more ramp segments
+ *      Also add ramp number check to make sure it doesn't exceed internal array size
+ *      Max number of ramp segments is 512 for each channel
  * This is the firmware for the teensy 3.1/3.2 that takes command from serial interface 
  * and program the ADF4159 IC. 
  * The teensy micrcontroller also generates the necessary data for ramping the frequency.
@@ -8,8 +11,8 @@
  * 
  * range for input data:
  * Ch:0
- * Start freq: 1000-8000(MHz)  If start freq = stop freq then the ramp is ignored.
- * Stop freq:1000-8000(MHz)    If start freq = stop freq then the ramp is ignored.
+ * Start freq: 500-8000(MHz)  If start freq = stop freq then the ramp is ignored.
+ * Stop freq:500-8000(MHz)    If start freq = stop freq then the ramp is ignored.
  * Ramp step number: <2^32     Must be a positive integer
  * Ramp length: in ms.         Minimum step time is limited to 20us.
  *                             i.e. step length/step munber >20us
@@ -32,6 +35,7 @@
 #include <EEPROMex.h>
 
 //Variable declaration
+#define MAX_RAMP_NUM 512
 int cs0 = 14;  //slave select pin for ch0
 int cs1 = 15;  //slave select pin for ch1
 
@@ -40,8 +44,8 @@ int Trig1 = 8;  //ch1 ramp trigger pin
 
 uint32_t fPFD = 50000;  //PFD frequency in kHz
 
-int32_t ramp0[40][6];  //ramp parameters for ch0 (Fs,Fe,R#,Rleng,dF,dt)
-int32_t ramp1[40][6];  //ramp parameters for ch1 (Fs,Fe,R#,Rleng,dF,dt)
+int32_t ramp0[MAX_RAMP_NUM][6];  //ramp parameters for ch0 (Fs,Fe,R#,Rleng,dF,dt)
+int32_t ramp1[MAX_RAMP_NUM][6];  //ramp parameters for ch1 (Fs,Fe,R#,Rleng,dF,dt)
 
 uint32_t address = 0;  //eeprom address for ch0,1 default frequencies
 
@@ -228,8 +232,8 @@ void updatePFD(uint32_t FTW, int LE){
 //test3 (0,1340,1340,1,1)(0,1340,1300,1000,2000)(0,1300,1340,1000,2000)e
 void processData(){
   float para[5];
-  uint32_t paraint0[40][5];
-  uint32_t paraint1[40][5];
+  uint32_t paraint0[MAX_RAMP_NUM][5];
+  uint32_t paraint1[MAX_RAMP_NUM][5];
   uint32_t rampCount0 = 0;
   uint32_t rampCount1 = 0;
   char startMarker = '(';  //start marker for each set of data
@@ -277,7 +281,7 @@ void processData(){
     }
   }
   //check if there are errors in the data or the serial communication timeout is reached
-  if (error == false && serialTimeout < 10000 && triggered == false){
+  if (error == false && serialTimeout < 10000 && triggered == false && rampCount0 < MAX_RAMP_NUM && rampCount1 < MAX_RAMP_NUM ){
     //transfer local buffered parameter to global parameter in the main program
     for (int i=0; i<rampCount0; i++){
       for(int j=0; j<4; j++){
@@ -334,7 +338,7 @@ void processData(){
 bool dataCheck(uint32_t par[5]){
   bool errorflg = true;
   if (par[0] == 0 || par[0] == 1 ){
-    if (par[1] >= 500000 && par[1] <= 8000000 && par[2] >= 500000 && par[2] <= 8000000){
+    if (par[1] >= 500000 && par[1] <= 8000000 && par[2] >= 500000 && par[2] <= 8000000){ /*check if the freq is within range of 500MHz to 8GHz*/
       if (par[3] > 0 && par[4]/par[3] >= 20){
         errorflg = false;
       }
