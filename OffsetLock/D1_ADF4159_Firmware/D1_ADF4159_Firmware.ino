@@ -66,7 +66,7 @@ uint32_t rampCounter0;  //number of uploaded ramp in ch0
 uint32_t rampCounter1;  //number of uploaded ramp in ch1
 
 void updatePFD(uint32_t FTW, int LE);
-uint32_t calcFTW(uint32_t freq);
+uint32_t calcFTW(uint32_t freq, uint32_t fPFD);
 void processData();
 void pfdInit();
 void setRamp0();
@@ -106,13 +106,13 @@ void loop() {
   if (rampflg0%2 && rampflg0/2 < rampCounter0){
     if (stepCount0 == 0){
       dt0 = ramp0[rampflg0/2][5];
-      updatePFD(calcFTW(ramp0[rampflg0/2][0]),cs0);
+      updatePFD(calcFTW(ramp0[rampflg0/2][0], fPFD0),cs0);
       stepCount0++;
     }
     if (rampDelay0 >= dt0 && stepCount0 <= ramp0[rampflg0/2][2]){
       rampDelay0 = rampDelay0 - dt0;
       //update ch0 pfd function goes here
-      updatePFD(calcFTW(ramp0[rampflg0/2][0]+(ramp0[rampflg0/2][4]*stepCount0)),cs0);
+      updatePFD(calcFTW(ramp0[rampflg0/2][0]+(ramp0[rampflg0/2][4]*stepCount0), fPFD0),cs0);
       stepCount0++;
     }
     else if (stepCount0 > ramp0[rampflg0/2][2]){
@@ -123,13 +123,13 @@ void loop() {
   if (rampflg1%2 && rampflg1/2 < rampCounter1){
     if (stepCount1 == 0){
       dt1 = ramp1[rampflg1/2][5];
-      updatePFD(calcFTW(ramp1[rampflg1/2][0]),cs1);
+      updatePFD(calcFTW(ramp1[rampflg1/2][0], fPFD1),cs1);
       stepCount1++;
     }
     if (rampDelay1 >= dt1 && stepCount1 <= ramp1[rampflg1/2][2]){
       rampDelay1 = rampDelay1 - dt1;
       //update ch1 pfd function goes here
-      updatePFD(calcFTW(ramp1[rampflg1/2][0]+(ramp1[rampflg1/2][4]*stepCount1)),cs1);
+      updatePFD(calcFTW(ramp1[rampflg1/2][0]+(ramp1[rampflg1/2][4]*stepCount1), fPFD1),cs1);
       stepCount1++;
     }
     else if (stepCount1 > ramp1[rampflg1/2][2]){
@@ -170,7 +170,7 @@ void pfdInit(){
     digitalWrite(cs0,LOW);
   }
   //write ch0 R1,R0
-  updatePFD(calcFTW(EEPROM.readLong(address)),cs0);
+  updatePFD(calcFTW(EEPROM.readLong(address), fPFD0),cs0);
   //ch1 R7,R6,R5,R4 Initialization
   for(int i=0;i<7;i++){
     for(int j=0;j<4;j++){
@@ -189,13 +189,13 @@ void pfdInit(){
   }
   //write ch1 R1,R0
   //Initialize CH1 to 6.835 GHz due to PFD frequency being 100 MHz and feedign back to Fout/2
-  //The programmed frequency needs to be fout/4
+  //The programmed frequency needs to be fout/2
   //updatePFD(calcFTW(EEPROM.readLong(address+5)),cs1);
-  updatePFD(calcFTW(3417500/2),cs1);
+  updatePFD(calcFTW(6835000/2, fPFD1),cs1);
 }
 
 //Calculate the FTW according to the input frequency in kHz
-uint32_t calcFTW(uint32_t freq){
+uint32_t calcFTW(uint32_t freq, uint32_t fPFD){
   uint32_t N;
   float Frac;
   uint32_t FTW;
@@ -279,8 +279,8 @@ void processData(){
       }
       else if ((int)para[0] == 1){
         paraint1[rampCount1][0] = para[0];    //ch
-        paraint1[rampCount1][1] = para[1]*250;    //freq start in kHz
-        paraint1[rampCount1][2] = para[2]*250;    //freq stop in kHz
+        paraint1[rampCount1][1] = para[1]*1000/2;    //freq start in kHz, /2 because the VCO is divided by 2 feeded to PLL
+        paraint1[rampCount1][2] = para[2]*1000/2;    //freq stop in kHz
         paraint1[rampCount1][3] = para[3];    //step number
         paraint1[rampCount1][4] = para[4]*1000;    //step length time in us
         error = dataCheck1(paraint1[rampCount1]);
@@ -315,9 +315,9 @@ void processData(){
     // EEPROM.updateLong(address,ramp0[0][0]);
     // EEPROM.updateLong(address+5,ramp1[0][0]);
     //write ch0 R1,R0
-    updatePFD(calcFTW(EEPROM.readLong(address)),cs0);
+    updatePFD(calcFTW(EEPROM.readLong(address), fPFD0),cs0);
     //write ch1 R1,R0
-    updatePFD(calcFTW(EEPROM.readLong(address+5)),cs1);
+    updatePFD(calcFTW(EEPROM.readLong(address+5), fPFD1),cs1);
     Serial.print("Parameter programmed in :");
     Serial.print(serialTimeout);
     Serial.println(" ms");
