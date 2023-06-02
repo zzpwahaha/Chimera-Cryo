@@ -256,7 +256,7 @@ void processData(){
   uint32_t rampCount1 = 0;
 
   char rc = 0;
-  bool error = true;   //error flag for input parameter
+  bool error = false;   //error flag for input parameter
   bool triggered = false; //software triggered?
   elapsedMillis serialTimeout;  //timeout for serial receive in case of faliur
   
@@ -278,7 +278,7 @@ void processData(){
         paraint0[rampCount0][2] = para[2]*1000;    //freq stop in kHz
         paraint0[rampCount0][3] = para[3];    //step number
         paraint0[rampCount0][4] = para[4]*1000;    //step length time in us
-        error = dataCheck(paraint0[rampCount0]);
+        error |= dataCheck(paraint0[rampCount0]);
         rampCount0++;
       }
       else if ((int)para[0] == 1){
@@ -287,7 +287,7 @@ void processData(){
         paraint1[rampCount1][2] = para[2]*1000/2;    //freq stop in kHz
         paraint1[rampCount1][3] = para[3];    //step number
         paraint1[rampCount1][4] = para[4]*1000;    //step length time in us
-        error = dataCheck1(paraint1[rampCount1]);
+        error |= dataCheck1(paraint1[rampCount1]);
         rampCount1++;
       }
     }
@@ -325,7 +325,7 @@ void processData(){
     Serial.print("Parameter programmed in :");
     Serial.print(serialTimeout);
     Serial.println(" ms");
-    Serial.print("f");
+    // Serial.print("f");
   }
   else if (triggered == true){
     //trigger ch0 ramp
@@ -337,12 +337,12 @@ void processData(){
     rampflg1++;
     stepCount1 = 0;
     Serial.println("Software triggered!!");
-    Serial.print("f");
+    // Serial.print("f");
     triggered = false;
   }
   else{
     Serial.println("Error in paramter!! Nothing changed.");
-    Serial.print("f");
+    // Serial.print("f");
   }
   while (Serial.available()){
     Serial.read();    
