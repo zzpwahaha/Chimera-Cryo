@@ -232,7 +232,7 @@ void processData(){
   uint32_t rampCount1 = 0;
 
   char rc = 0;
-  bool error = true;   //error flag for input parameter
+  bool error = false;   //error flag for input parameter
   elapsedMillis serialTimeout;  //timeout for serial receive in case of faliur
   
   //process all serial data until the end marker is received
@@ -253,7 +253,7 @@ void processData(){
         paraint0[rampCount0][2] = para[2]*1000;    //freq stop in kHz
         paraint0[rampCount0][3] = para[3];    //step number
         paraint0[rampCount0][4] = para[4]*1000;    //step length time in us
-        error = dataCheck(paraint0[rampCount0]);
+        error |= dataCheck(paraint0[rampCount0]);
         rampCount0++;
       }
       else if ((int)para[0] == 1){
@@ -262,7 +262,7 @@ void processData(){
         paraint1[rampCount1][2] = para[2]*1000;    //freq stop in kHz
         paraint1[rampCount1][3] = para[3];    //step number
         paraint1[rampCount1][4] = para[4]*1000;    //step length time in us
-        error = dataCheck(paraint1[rampCount1]);
+        error |= dataCheck(paraint1[rampCount1]);
         rampCount1++;
       }
     }
