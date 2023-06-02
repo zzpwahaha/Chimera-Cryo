@@ -574,6 +574,7 @@ std::vector<std::vector<plotDataVec>> OlCore::getPlotData(unsigned var)
 
 void OlCore::writeOLs(unsigned variation)
 {
+	unsigned short flumesIdx = 0;
 	for (auto& qtFlume : qtFlumes) {
 		qtFlume.getPort().clear();
 		//unsigned channel, steps;
@@ -581,9 +582,12 @@ void OlCore::writeOLs(unsigned variation)
 		std::string buffCmd;
 		for (auto& channelSnap : olChannelSnapshots[variation])
 		{
-			buffCmd += "(" + str(channelSnap.channel) + "," + str(channelSnap.val, numFreqDigits) + ","
-				+ str(channelSnap.endVal, numFreqDigits) + "," + str(channelSnap.numSteps) + ","
-				+ str(channelSnap.rampTime, numTimeDigits) + ")";
+			if (channelSnap.channel / static_cast<unsigned short>(OLGrid::numPERunit) == flumesIdx) {
+				buffCmd += "(" + str(channelSnap.channel % static_cast<unsigned short>(OLGrid::numPERunit)) + "," 
+					+ str(channelSnap.val, numFreqDigits) + ","
+					+ str(channelSnap.endVal, numFreqDigits) + "," + str(channelSnap.numSteps) + ","
+					+ str(channelSnap.rampTime, numTimeDigits) + ")";
+			}
 		}
 		buffCmd += "e";
 		QElapsedTimer timer;
@@ -609,6 +613,7 @@ void OlCore::writeOLs(unsigned variation)
 			}
 		}
 		tmp++;
+		flumesIdx++;
 	}
 }
 
