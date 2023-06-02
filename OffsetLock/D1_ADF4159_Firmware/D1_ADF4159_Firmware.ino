@@ -30,6 +30,8 @@
  * During power on, the controller programs the ADF4159 to the last defult frequency.
  ***************************************************************************************/
 
+// #define DEBUG_
+
 //Including necessary libraries 
 #include <SPI.h>
 #include <EEPROMex.h>
@@ -115,12 +117,22 @@ void loop() {
       dt0 = ramp0[rampflg0/2][5];
       updatePFD(calcFTW(ramp0[rampflg0/2][0], fPFD0),cs0);
       stepCount0++;
+      #ifdef DEBUG_
+      char buff[128];
+      sprintf(buff, "ramping ch0: ramp step (%d/%d) in ramp# (%d/%d)", stepCount0, ramp0[rampflg0/2][2]+1, rampflg0/2+1, rampCounter0);
+      Serial.println(buff);
+      #endif
     }
     if (rampDelay0 >= dt0 && stepCount0 <= ramp0[rampflg0/2][2]){
       rampDelay0 = rampDelay0 - dt0;
       //update ch0 pfd function goes here
       updatePFD(calcFTW(ramp0[rampflg0/2][0]+(ramp0[rampflg0/2][4]*stepCount0), fPFD0),cs0);
       stepCount0++;
+      #ifdef DEBUG_
+      char buff[128];
+      sprintf(buff, "ramping ch0: ramp step (%d/%d) in ramp# (%d/%d)", stepCount0, ramp0[rampflg0/2][2]+1, rampflg0/2+1, rampCounter0);
+      Serial.println(buff);
+      #endif
     }
     else if (stepCount0 > ramp0[rampflg0/2][2]){
       stepCount0 = 0;
@@ -132,12 +144,22 @@ void loop() {
       dt1 = ramp1[rampflg1/2][5];
       updatePFD(calcFTW(ramp1[rampflg1/2][0], fPFD1),cs1);
       stepCount1++;
+      #ifdef DEBUG_
+      char buff[128];
+      sprintf(buff, "ramping ch1: ramp step (%d/%d) in ramp# (%d/%d)", stepCount1, ramp1[rampflg1/2][2]+1, rampflg1/2+1, rampCounter1);
+      Serial.println(buff);
+      #endif
     }
     if (rampDelay1 >= dt1 && stepCount1 <= ramp1[rampflg1/2][2]){
       rampDelay1 = rampDelay1 - dt1;
       //update ch1 pfd function goes here
       updatePFD(calcFTW(ramp1[rampflg1/2][0]+(ramp1[rampflg1/2][4]*stepCount1), fPFD1),cs1);
       stepCount1++;
+      #ifdef DEBUG_
+      char buff[128];
+      sprintf(buff, "ramping ch1: ramp step (%d/%d) in ramp# (%d/%d)", stepCount1, ramp1[rampflg1/2][2]+1, rampflg1/2+1, rampCounter1);
+      Serial.println(buff);
+      #endif
     }
     else if (stepCount1 > ramp1[rampflg1/2][2]){
       stepCount1 = 0;
@@ -398,6 +420,9 @@ void setRamp0(){
   rampDelay0 = 0;
   rampflg0++;
   stepCount0 = 0;
+  #ifdef DEBUG_
+  Serial.println("Trigger for ch0 triggered");
+  #endif
 }
 
 //ISR for ch1 ramp when the trigger is detected
@@ -405,4 +430,7 @@ void setRamp1(){
   rampDelay1 = 0;
   rampflg1++;
   stepCount1 = 0;
+  #ifdef DEBUG_
+  Serial.println("Trigger for ch1 triggered");
+  #endif
 }
