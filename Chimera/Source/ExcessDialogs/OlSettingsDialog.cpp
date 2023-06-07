@@ -8,10 +8,11 @@ OlSettingsDialog::OlSettingsDialog(OlSystem* inputPtr)
 	this->setModal(false);
 	QVBoxLayout* layoutWiget = new QVBoxLayout(this);
 	QHBoxLayout* layout = new QHBoxLayout();
-	auto ollayout = std::array<QGridLayout*, 1>({ new QGridLayout() });
+	auto ollayout = std::array<QGridLayout*, size_t(OLGrid::numOFunit)>(/*{ new QGridLayout() }*/);
 	short cnts = 0;
 	for (auto* lay : ollayout)
 	{
+		lay = new QGridLayout();
 		lay->setContentsMargins(0, 0, 0, 0);
 		lay->addWidget(new QLabel(QString("OffsetLock %1").arg(cnts)), 0, 0, 1, 7, Qt::AlignHCenter);
 		{

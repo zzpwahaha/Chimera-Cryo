@@ -9,7 +9,7 @@
 enum class OLGrid : size_t
 {
 	numPERunit = 2,
-	numOFunit = 1,
+	numOFunit = 2,
 	total = numPERunit * numOFunit
 };
 
@@ -18,8 +18,8 @@ struct OlInfo
 	std::string name = "";
 
 	double currFreq = 0;
-	double minFreq = 1000.0; //in MHz
-	double maxFreq = 6000.0;
+	double minFreq = 500.0; //in MHz
+	double maxFreq = 7501.0;
 	double defaultFreq = 1500.0;
 
 	std::string note = "None";

@@ -69,10 +69,11 @@
 	const std::pair<unsigned, unsigned> DIO_REWIND = std::make_pair(8 - 1, 7); // used for the long time run rewind, see DoCore::checkLongTimeRun
 
 	//OffsetLock 
-	const std::string OL_COM_PORT = "COM3";
+	const std::vector<std::string> OL_COM_PORT = { "COM3", "COM7" };
 	const double OL_TIME_RESOLUTION = 0.02; //in ms
 	const std::vector<std::pair<unsigned, unsigned>> OL_TRIGGER_LINE
-		= { std::make_pair(3 - 1,6),std::make_pair(3 - 1,7) }; /*the first is the label on the box minus 1, has minus'd 1 explicitly */
+		= { std::make_pair(3 - 1,6),std::make_pair(3 - 1,7),
+			std::make_pair(4 - 1,6),std::make_pair(4 - 1,7) }; /*the first is the label on the box minus 1, has minus'd 1 explicitly */
 	const double OL_TRIGGER_TIME = 0.01; //in ms i.e. 50us
 
 	//#define DDS_FPGA_ADDRESS "FT1I6IBSB"; //Device Serial: FT1I6IBS, Use FT1I6IBSB in C++ to select Channel B

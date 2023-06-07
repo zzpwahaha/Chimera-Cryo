@@ -5,14 +5,18 @@
 #include <qelapsedtimer.h>
 
 OlCore::OlCore(bool safemode)
-	: qtFlume(safemode, OL_COM_PORT)
+	: qtFlumes{ 
+	QtSerialFlume(safemode, OL_COM_PORT[0]),
+	QtSerialFlume(safemode, OL_COM_PORT[1]) }
 {
 	
 }
 
 OlCore::~OlCore()
 {
-	qtFlume.close();
+	for (auto& qtFlume : qtFlumes) {
+		qtFlume.close();
+	}
 }
 
 
@@ -570,40 +574,47 @@ std::vector<std::vector<plotDataVec>> OlCore::getPlotData(unsigned var)
 
 void OlCore::writeOLs(unsigned variation)
 {
-	qtFlume.getPort().clear();
-	//unsigned channel, steps;
-	//double time, start, stop, ramptime;
-	std::string buffCmd;
-	for (auto& channelSnap : olChannelSnapshots[variation])
-	{
-		buffCmd += "(" + str(channelSnap.channel) + "," + str(channelSnap.val, numFreqDigits) + ","
-			+ str(channelSnap.endVal, numFreqDigits) + "," + str(channelSnap.numSteps) + ","
-			+ str(channelSnap.rampTime, numTimeDigits) + ")";
-	}
-	buffCmd += "e";
-	QElapsedTimer timer;
-	timer.start();
-	std::string recv;
-	if (buffCmd != "e") {
-		recv = qtFlume.query(buffCmd);
-	}
-	else {
-		recv = "Nothing programmed in OffsetLock in variation" + str(variation);
-	}
-
-	qDebug() << tmp << qstr(buffCmd) << "Total time:" << timer.elapsed()/**/ <<"ms";
-	if (recv.empty()) {
-		thrower("Nothing feeded back from Teensy after writing, something might be wrong with it." + recv);
-		qDebug() << tmp << qstr("Empty return");
-	}
-	else {
-		qDebug() << tmp << qstr(recv);
-		std::transform(recv.begin(), recv.end(), recv.begin(), ::tolower); /*:: without namespace select from global namespce, see https://stackoverflow.com/questions/5539249/why-cant-transforms-begin-s-end-s-begin-tolower-be-complied-successfu*/
-		if (recv.find("Error") != std::string::npos) {
-			thrower("Error in offset lock programming, from Teensy: " + recv + "\r\nNote each number can only be of 13 chars long");
+	unsigned short flumesIdx = 0;
+	for (auto& qtFlume : qtFlumes) {
+		qtFlume.getPort().clear();
+		//unsigned channel, steps;
+		//double time, start, stop, ramptime;
+		std::string buffCmd;
+		for (auto& channelSnap : olChannelSnapshots[variation])
+		{
+			if (channelSnap.channel / static_cast<unsigned short>(OLGrid::numPERunit) == flumesIdx) {
+				buffCmd += "(" + str(channelSnap.channel % static_cast<unsigned short>(OLGrid::numPERunit)) + "," 
+					+ str(channelSnap.val, numFreqDigits) + ","
+					+ str(channelSnap.endVal, numFreqDigits) + "," + str(channelSnap.numSteps) + ","
+					+ str(channelSnap.rampTime, numTimeDigits) + ")";
+			}
 		}
+		buffCmd += "e";
+		QElapsedTimer timer;
+		timer.start();
+		std::string recv;
+		if (buffCmd != "e") {
+			recv = qtFlume.query(buffCmd);
+		}
+		else {
+			recv = "Nothing programmed in OffsetLock in variation" + str(variation);
+		}
+
+		qDebug() << tmp << qstr(buffCmd) << "Total time:" << timer.elapsed()/**/ << "ms";
+		if (recv.empty()) {
+			thrower("Nothing feeded back from Teensy after writing, something might be wrong with it." + recv);
+			qDebug() << tmp << qstr("Empty return");
+		}
+		else {
+			qDebug() << tmp << qstr(recv);
+			std::transform(recv.begin(), recv.end(), recv.begin(), ::tolower); /*:: without namespace select from global namespce, see https://stackoverflow.com/questions/5539249/why-cant-transforms-begin-s-end-s-begin-tolower-be-complied-successfu*/
+			if (recv.find("Error") != std::string::npos) {
+				thrower("Error in offset lock programming, from Teensy: " + recv + "\r\nNote each number can only be of 13 chars long");
+			}
+		}
+		tmp++;
+		flumesIdx++;
 	}
-	tmp++;
 }
 
 void OlCore::OLForceOutput(std::array<double,size_t(OLGrid::total)> status, DoCore& doCore, DOStatus dostatus)
@@ -621,5 +632,7 @@ void OlCore::OLForceOutput(std::array<double,size_t(OLGrid::total)> status, DoCo
 
 void OlCore::resetConnection()
 {
-	qtFlume.resetConnection();
+	for (auto& qtFlume : qtFlumes) {
+		qtFlume.resetConnection();
+	}
 }
