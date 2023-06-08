@@ -437,6 +437,7 @@ calSettings CalibrationManager::handleOpenMasterConfigIndvCal (ConfigStream& con
 	try {
 		std::string configValue;
 		configStream >> tmpInfo.result.calibrationName;
+		tmpInfo.historicalResult.calibrationName = tmpInfo.result.calibrationName;
 		configStream >> configValue;
 		tmpInfo.aiInChan = ai->getCore().getAiIdentifier(configValue);
 		if (tmpInfo.aiInChan == -1) {

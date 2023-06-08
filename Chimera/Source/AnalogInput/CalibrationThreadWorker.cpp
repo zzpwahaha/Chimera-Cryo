@@ -14,6 +14,7 @@
 #include <ArbGen/ArbGenCore.h>
 #include <Python/NewPythonHandler.h>
 #include <Plotting/PlotInfo.h>
+#include <qelapsedtimer.h>
 
 
 CalibrationThreadWorker::CalibrationThreadWorker (CalibrationThreadInput input_) {
@@ -53,22 +54,26 @@ void CalibrationThreadWorker::calibrate (calSettings& cal, unsigned which) {
 		cal.calibrated = false;
 		return;
 	}
+	QElapsedTimer eTimer;
+	eTimer.start();
 	emit startingNewCalibration(cal);
 	emit notification(qstr("Running Calibration " + cal.result.calibrationName + ".\n"));
 	cal.calibrated = false;
 	//auto& result = cal.result;
 	calResult result(cal.result); // copy cal.result in case the calibration failed, in which case it should/will fall back to the old calibration value
-
+	qDebug() << "start to zero dac "<< eTimer.elapsed();
 	//cal.result.includesSqrt = cal.includeSqrt;
 	input.ao->zeroDacs ();
-	Sleep(50);
+	qDebug() << "start to zero ttl " << eTimer.elapsed();
 	input.ttls->zeroBoard(); // ZZP 02/12/2023 - need ttls to trigger dac change in zynq, same as bellow
 	Sleep(50);
+	qDebug() << "start to set aoConfig " << eTimer.elapsed();
 	for (auto dac : cal.aoConfig) {
 		input.ao->setSingleDac (dac.first, dac.second);
 		input.ttls->getCore().FPGAForceOutput(input.ttls->getCurrentStatus()); // ZZP 02/12/2023 - update ttls since now dac/dds gui update will always need separate TTL update as zynq trigger
 		Sleep(50);
 	}
+	qDebug() << "start to set ttlConfig " << eTimer.elapsed();
 	for (auto ttl : cal.ttlConfig) {
 		auto& outputs = input.ttls->getDigitalOutputs();
 		outputs(ttl.first, ttl.second).set(true, false); //TODO: check compatibility for row and col
