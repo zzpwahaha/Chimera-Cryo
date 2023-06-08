@@ -1084,25 +1084,55 @@ void ExpThreadWorker::checkTriggerNumbers (std::vector<parameterType>& expParams
 	/// check all trigger numbers between the DO system and the individual subsystems. These should almost always match,
 	/// a mismatch is usually user error in writing the script.
 	/// 
-	
-	//bool rsgMismatch = false;
-	//for (auto variationInc : range (determineVariationNumber (expParams))) {
-	//	if (true /*runMaster*/) {
-	//		unsigned actualTrigs = input->ttls.countTriggers ({ DoRows::which::D,15 }, variationInc);
-	//		unsigned dacExpectedTrigs = input->aoSys.getNumberSnapshots (variationInc);
-	//		std::string infoString = "Actual/Expected DAC Triggers: " + str (actualTrigs) + "/"
-	//			+ str (dacExpectedTrigs) + ".";
-	//		if (actualTrigs != dacExpectedTrigs) {
-	//			// this is a serious low level error. throw, don't warn.
-	//			thrower ("the number of dac triggers that the ttl system sends to the dac line does not "
-	//				"match the number of dac snapshots! " + infoString + ", seen in variation #"
-	//				+ str (variationInc) + "\r\n");
-	//		}
-	//		if (variationInc == 0) {
-	//			emit notification (qstr (infoString), 2);
-	//		}
-	//	}
-	//}
+	emit notification("Running consistency checks for various experiment-active devices", 1);
+	bool rsgMismatch = false;
+	for (auto variationInc : range (determineVariationNumber (expParams))) {
+		if (true /*runMaster*/) {
+			auto& andorCamera = input->devices.getSingleDevice<AndorCameraCore>();
+			if (andorCamera.getAndorRunSettings().controlCamera) {
+				// check if there is just enough trigger for andor if it is used in the experiment
+				emit notification("Running consistency checks for Andor Camera", 2);
+				unsigned actualTrigs = input->ttls.countTriggers(ANDOR_TRIGGER_LINE, variationInc);
+				unsigned expectedTrigs = andorCamera.getAndorRunSettings().picsPerRepetition;
+				if (actualTrigs != expectedTrigs) {
+					// this is a serious low-level/user error. throw, don't warn.
+					std::string infoString = "Actual/Expected Andor Triggers: " + str(actualTrigs) + "/"
+						+ str(expectedTrigs) + ".";
+					thrower("The number of Andor triggers that the ttl system sends to the Andor camera does not "
+						"match the number of images in the Andor control! " + infoString + ", seen in variation #"
+						+ str(variationInc) + "\r\n");
+				}
+			}
+			else {
+				// check if there are triggers for andor but the andor is not set active. If so, warn.
+				unsigned actualTrigs = input->ttls.countTriggers(ANDOR_TRIGGER_LINE, variationInc); 
+				if (actualTrigs != 0) {
+					emit warn("There are " + qstr(actualTrigs) + " triggers sent to Andor trigger in ttl line ("
+						+ qstr(ANDOR_TRIGGER_LINE.first) + "," + qstr(ANDOR_TRIGGER_LINE.second) + "), but the Andor system is not active." +
+						"Make sure that this is what you actually want.\r\n", 0);
+				}
+			}
+
+			auto makoCameras = input->devices.getDevicesByClass<MakoCameraCore>();
+			for (auto makoCam : makoCameras) {
+				if (makoCam.get().getRunningSettings().expActive) {
+					emit notification("Running consistency checks for Mako Camera: "+qstr(makoCam.get().CameraName()), 2);
+					auto triggerLine = makoCam.get().getTriggerLine();
+					unsigned actualTrigs = input->ttls.countTriggers(triggerLine, variationInc);
+					unsigned expectedTrigs = makoCam.get().getRunningSettings().picsPerRep;
+					if (actualTrigs != expectedTrigs) {
+						// this is a serious low-level/user error. throw, don't warn.
+						std::string infoString = "Actual/Expected Mako Triggers: " + str(actualTrigs) + "/"
+							+ str(expectedTrigs) + ".";
+						thrower("The number of Mako triggers that the ttl system sends to the Mako camera does not "
+							"match the number of images in the Mako control! " + infoString + ", seen in variation #"
+							+ str(variationInc) + "\r\n");
+					}
+				}
+			}
+
+		}
+	}
 }
 
 bool ExpThreadWorker::handleFunctionCall (std::string word, ScriptStream& stream, std::vector<parameterType>& vars,
@@ -1228,8 +1258,9 @@ void ExpThreadWorker::runConsistencyChecks (std::vector<parameterType> expParams
 			emit warn (cstr ("WARNING: Variable " + var.name + " is varied, but not being used?!?\r\n"));
 		}
 	}
-	//checkTriggerNumbers (expParams);
 	emit expCalibrationsSet(calibrations);
+
+	checkTriggerNumbers(expParams);
 }
 
 void ExpThreadWorker::waitForSequenceFinish(double seqTime)

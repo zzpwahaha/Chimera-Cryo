@@ -64,6 +64,7 @@ public:
 	SP_DECL(FrameObserver) getFrameObs() { return frameObs; }
 	CameraPtr& getCameraPtr() { return cameraPtr; }
 	MakoSettings getRunningSettings() { return runSettings; }
+	std::pair<unsigned, unsigned> getTriggerLine() { return camInfo.triggerLine; }
 
 signals:
 	void makoFinished();
