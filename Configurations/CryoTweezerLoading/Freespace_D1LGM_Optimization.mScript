@@ -88,7 +88,7 @@ t = 1
 
 
 
-    %%%%%%%%%%%%%%  PGC  %%%%%%%%%%%%%%%%%%
+%    %%%%%%%%%%%%%%  PGC  %%%%%%%%%%%%%%%%%%
     on: SciMOTTrg
     ol: ol_cooling d2_cooling_resonance-pgc_olcool
     ol: ol_repump d2_repump_resonance+pgc_olrepump
@@ -100,94 +100,65 @@ t = 1
     t += t_pgc_cool_time
     pulseon: DO1_0 1
 
-%%%%%%%%%%%%%%%%  TOF  %%%%%%%%%%%%%%%%%%
-%off: SciMOTTrg
+
+    %%%%%%%%%%%%%%  LGM  %%%%%%%%%%%%%%%%%%
+    t += -4
+    on: D1LGMShutter
+    on: D1LGMEOMTrg
+    dac: D1LGMEOMAmp d1lgm_rep_amp
+    dac: D1LGMAmp d1lgm_cool_amp
+    ol: ol_D1LGM D1_LGMCooling_resonance-d1lgm_olcool
+    ol: ol_D1_repump Rb87_HFSplitting+d1lgm_olrepump
+    t += 4
+    off: SciMOTTrg
+%    off: xyzMOTShutter
+    dac: BiasCoilX pgc_bias_x
+    dac: BiasCoilY pgc_bias_y 
+    dac: BiasCoilZ pgc_bias_z
+
+    on: D1LGMTrg
+    t += t_LGM_cool_time
+    off: D1LGMTrg
+    off: D1LGMEOMTrg
+    pulseon: DO1_0 1
+
+
+%%%%%%%%%%%%%%%  TOF  %%%%%%%%%%%%%%%%%%
+off: SciMOTTrg
+off: PrbTrg
+off: D1LGMTrg
+%off: xyzMOTShutter
+off: PrbShutter 
+off: D1LGMShutter
+
+t += 5 %t_tof
+pulseon: DO1_0 1
+
+%t += 5
+
+%%%%%%%%%%% prepare imaging %%%%%%%%%%%%%%
+%t += -4
 %on: xyzMOTShutter
-%off: PrbShutter 
-%ol: ol_cooling d2_cooling_resonance
-%ol: ol_repump d2_repump_resonance
-%dac: SciMOTAmp 10
-%dac: TARepAmp 10
-%
-%t += t_tof
-%pulseon: DO1_0 1
-
-t += 5
-
-%%% image with D1 2-2' and D2 repump to scan frequency
-%t += -4
-%off: PrbCoolShutter
 %on: PrbShutter
-%off: xyzMOTShutter
-%on: D1LGMShutter
-%
-%off: D1LGMEOMTrg
-%dac: D1LGMEOMAmp 0.0
-%
-%on: PrbRepTrg
-%
-%ol: ol_cooling d2_cooling_prb_resonance
-%ol: ol_repump d2_repump_prb_resonance
-%ol: ol_D1LGM d1_lgmcooling_resonance-resonance_scan
-%ol: ol_D1_repump rb87_hfsplitting
-%dac: PrbAmp 5
-%dac: PrbRepAmp 10
-%dac: D1LGMAmp 4
+ol: ol_cooling D2_cooling_resonance
+ol: ol_repump D2_repump_resonance
+dac: SciMOTAmp 10
+dac: TARepAmp 10
 %t += 4
-
-%%%% image with D1 2-2' and D1 repump to scan frequency
-%%% this does not work somehow
-t += -4
-off: PrbCoolShutter
-off: PrbShutter
-off: xyzMOTShutter
-on: D1LGMShutter
-
-on: D1LGMEOMTrg
-dac: D1LGMEOMAmp 6.0
-
-ol: ol_cooling d2_cooling_prb_resonance
-ol: ol_repump d2_repump_prb_resonance
-ol: ol_D1LGM d1_lgmcooling_resonance-resonance_scan %-(-2) %-resonance_scan 
-ol: ol_D1_repump rb87_hfsplitting-resonance_scan
-dac: PrbAmp 5
-dac: PrbRepAmp 2 %test_mot_pwr
-dac: D1LGMAmp 4
-t += 4
-
-%%%% image with D2 2-3' and D1 repump to scan frequency
-%t += -4
-%on: PrbCoolShutter
-%on: PrbShutter
-%off: xyzMOTShutter
-%on: D1LGMShutter
-%
-%on: D1LGMEOMTrg
-%dac: D1LGMEOMAmp 6.0
-%
-%off: PrbRepTrg
-%
-%ol: ol_cooling d2_cooling_prb_resonance
-%ol: ol_repump d2_repump_prb_resonance
-%ol: ol_D1LGM d1_lgmcooling_resonance-(-50)
-%ol: ol_D1_repump rb87_hfsplitting+resonance_scan % scan the freq around +50MHz
-%dac: PrbAmp 5
+%ol: ol_cooling D2_cooling_prb_resonance
+%ol: ol_repump D2_repump_prb_resonance
+%dac: PrbAmp 10 %probe_cool_amp
 %dac: PrbRepAmp 10
-%dac: D1LGMAmp 4
-%t += 4
-
 
 
 %%%%%%%%%%%%%%%  MAKO Image  %%%%%%%%%%%%%%%%%%
 pulseon: Mako2 1
 t += 0.1
-%pulseon: SciMOTTrg 0.8
-pulseon: PrbTrg 0.8
-pulseon: D1LGMTrg 0.8
+pulseon: SciMOTTrg 0.8
+%pulseon: PrbTrg 0.8
+%pulseon: D1LGMTrg 0.8
 
 t += 10
-off: D1LGMEOMTrg
 %%%%%%%%%%%%%%  END Sequence  %%%%%%%%%%%%%%%%%%
-off: D1LGMShutter
 t += 100
 pulseon: DO1_0 0.5
