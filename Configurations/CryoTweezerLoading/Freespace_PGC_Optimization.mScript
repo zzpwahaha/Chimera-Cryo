@@ -1,0 +1,26 @@
+%%%%%%%%%%%%%%%%% Start With 1ms %%%%%%%%%%%%%%%%% 
+t = 1
+call CryoMOTLoadingPGC()
+
+%%%%%%%%%%%%%%%  TOF  %%%%%%%%%%%%%%%%%%
+off: SciMOTTrg
+on: xyzMOTShutter
+off: PrbShutter 
+ol: ol_cooling d2_cooling_resonance
+ol: ol_repump d2_repump_resonance
+dac: SciMOTAmp 10
+dac: TARepAmp 10
+
+t += t_tof
+pulseon: DO1_0 1
+
+
+%%%%%%%%%%%%%%%  MAKO Image  %%%%%%%%%%%%%%%%%%
+pulseon: Mako2 1
+t += 0.1
+pulseon: SciMOTTrg 0.3
+
+
+%%%%%%%%%%%%%%  END Sequence  %%%%%%%%%%%%%%%%%%
+t += 100
+pulseon: DO1_0 0.5

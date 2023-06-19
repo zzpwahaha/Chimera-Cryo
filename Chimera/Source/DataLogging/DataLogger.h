@@ -8,6 +8,7 @@
 #include <GeneralObjects/Matrix.h>
 #include <DigitalOutput/DoCore.h>
 #include <CMOSCamera/CMOSSetting.h>
+#include <ExperimentMonitoringAndStatus/InfluxTypes.h>
 // there's potentially a typedef conflict with a python file which also typedefs ssize_t.
 #define ssize_t h5_ssize_t
 #include "H5Cpp.h"
@@ -33,7 +34,7 @@ class DataLogger : public IChimeraSystem {
 		void writeAndorPic( Matrix<long> image, imageParameters dims );
 		void writeMakoPic(std::vector<double> image, int width, int height, CameraInfo::name name);
 		void writeTemperature(std::pair<std::vector<long long>, std::vector<double>> timedata, std::string identifier );
-		void writePressure(std::pair<std::vector<long long>, std::vector<double>> timedata, std::string identifier);
+		void writePressure(std::pair<std::vector<long long>, std::vector<double>> timedata, std::string identifier, InfluxDataUnitType::mode unit);
 		void writeVolts ( unsigned currentVoltNumber, std::vector<float64> data );
 		void assertCalibrationFilesExist ();
 		void logMasterInput( ExperimentThreadInput* input );

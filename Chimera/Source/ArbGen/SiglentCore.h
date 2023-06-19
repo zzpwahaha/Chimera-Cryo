@@ -50,6 +50,7 @@ public:
 	void prepArbGenSettings(unsigned channel) override;
 	void setScriptOutput(unsigned varNum, scriptedArbInfo scriptInfo, unsigned channel) override;
 	void programBurstMode(int channel, bool burstOption) override;
+	void programNonArbBurstMode(int channel, bool burstOption);
 	void setDefault(int channel) override;
 	void handleScriptVariation(unsigned variation, scriptedArbInfo& scriptInfo, unsigned channel,
 		std::vector<parameterType>& params) override;

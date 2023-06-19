@@ -102,7 +102,7 @@ void ExpThreadWorker::experimentThreadProcedure () {
 					emit notification(qstr("Starting Repetition #" + qstr(repInc) + "\n"), 2);
 					handlePause(isPaused, isAborting);
 					startRep(repInc, variationInc, input->skipNext == nullptr ? false : input->skipNext->load());
-					Sleep(finaltimes[variationInc]+10);
+					waitForSequenceFinish(finaltimes[variationInc]);
 				}
 			}
 		}
@@ -123,7 +123,7 @@ void ExpThreadWorker::experimentThreadProcedure () {
 					initVariation(variationInc, expRuntime.expParams);
 					handlePause(isPaused, isAborting);
 					startRep(repInc, variationInc, input->skipNext == nullptr ? false : input->skipNext->load());
-					Sleep(finaltimes[variationInc]+10);
+					waitForSequenceFinish(finaltimes[variationInc]);
 				}
 			}
 		}
@@ -153,7 +153,7 @@ void ExpThreadWorker::analyzeMasterScript (DoCore& ttls, AoCore& ao, DdsCore& dd
 	std::vector<parameterType>& vars,
 	ScriptStream& currentMasterScript, bool expectsLoadSkip,
 	std::string& warnings, timeType& operationTime,
-	timeType& loadSkipTime) 
+	timeType& loadSkipTime, repeatManager& repeatMgr)
 {
 	std::string currentMasterScriptText = currentMasterScript.str ();
 	loadSkipTime.first.clear ();
@@ -166,21 +166,20 @@ void ExpThreadWorker::analyzeMasterScript (DoCore& ttls, AoCore& ao, DdsCore& dd
 	}
 	std::string word;
 	currentMasterScript >> word;
-	std::vector<unsigned> totalRepeatNum, currentRepeatNum;
-	std::vector<std::streamoff> repeatPos;
 	// the analysis loop.
 	bool loadSkipFound = false;
 	std::string scope = PARENT_PARAMETER_SCOPE;
 	try {
 		while (!(currentMasterScript.peek () == EOF) || word != "__end__") {
-			if (handleTimeCommands (word, currentMasterScript, vars, scope, operationTime)) {
+			if (handleTimeCommands (word, currentMasterScript, vars, scope, operationTime, repeatMgr)) {
 				// got handled, so break out of the if-else by entering this scope.
 			}
 			else if (handleVariableDeclaration (word, currentMasterScript, vars, scope, warnings)) {}
-			else if (handleDoCommands (word, currentMasterScript, vars, ttls, scope, operationTime)) {}
-			else if (handleAoCommands (word, currentMasterScript, vars, ao, ttls, scope, operationTime)) {}
-			else if (handleDdsCommands(word, currentMasterScript, vars, dds, scope, operationTime)) {}
-			else if (handleOlCommands(word, currentMasterScript, vars, ol, scope, operationTime)) {}
+			else if (handleDoCommands (word, currentMasterScript, vars, ttls, scope, operationTime, repeatMgr)) {}
+			else if (handleAoCommands (word, currentMasterScript, vars, ao, ttls, scope, operationTime, repeatMgr)) {}
+			else if (handleDdsCommands(word, currentMasterScript, vars, dds, scope, operationTime, repeatMgr)) {}
+			else if (handleOlCommands(word, currentMasterScript, vars, ol, scope, operationTime, repeatMgr)) {}
+			else if (handleRepeats(word, currentMasterScript, vars, scope, repeatMgr)) {}
 			else if (word == "callcppcode") {
 				// and that's it... 
 				callCppCodeFunction ();
@@ -194,35 +193,7 @@ void ExpThreadWorker::analyzeMasterScript (DoCore& ttls, AoCore& ao, DdsCore& dd
 				thrower ("\"rsg:\" command is deprecated! Please use the microwave system listview instead.");
 			}
 			else if (handleFunctionCall (word, currentMasterScript, vars, ttls, ao, dds, ol, warnings,
-				PARENT_PARAMETER_SCOPE, operationTime)) {
-			}
-			else if (word == "repeat:") {
-				Expression repeatStr;
-				currentMasterScript >> repeatStr;
-				try {
-					totalRepeatNum.push_back (repeatStr.evaluate ());
-				}
-				catch (ChimeraError&) {
-					throwNested ("the repeat number failed to convert to an integer! Note that the repeat number can not"
-						" currently be a variable.");
-				}
-				repeatPos.push_back (currentMasterScript.tellg ());
-				currentRepeatNum.push_back (1);
-			}
-			else if (word == "end") {
-				// handle end of repeat
-				if (currentRepeatNum.size () == 0) {
-					thrower ("ERROR! Tried to end repeat structure in master script, but you weren't repeating!");
-				}
-				if (currentRepeatNum.back () < totalRepeatNum.back ()) {
-					currentMasterScript.seekg (repeatPos.back ());
-					currentRepeatNum.back ()++;
-				}
-				else {
-					currentRepeatNum.pop_back ();
-					repeatPos.pop_back ();
-					totalRepeatNum.pop_back ();
-				}
+				PARENT_PARAMETER_SCOPE, operationTime, repeatMgr)) {
 			}
 			else {
 				word = (word == "") ? "[EMPTY-STRING]" : word;
@@ -244,7 +215,7 @@ void ExpThreadWorker::analyzeMasterScript (DoCore& ttls, AoCore& ao, DdsCore& dd
 
 void ExpThreadWorker::analyzeFunction (std::string function, std::vector<std::string> args, DoCore& ttls, 
 	AoCore& ao, DdsCore& dds, OlCore& ol, std::vector<parameterType>& params, std::string& warnings, timeType& operationTime,
-	std::string callingScope) {
+	std::string callingScope, repeatManager& repeatMgr) {
 	/// load the file
 	std::fstream functionFile;
 	// check if file address is good.
@@ -275,9 +246,6 @@ void ExpThreadWorker::analyzeFunction (std::string function, std::vector<std::st
 		thrower ("Function File for " + function + " function was empty! (A low level bug, this shouldn't happen");
 	}
 	std::string word;
-	// the following are used for repeat: functionality
-	std::vector<unsigned long> totalRepeatNum, currentRepeatNum;
-	std::vector<std::streamoff> repeatPos;
 	std::string scope = function;
 	/// get the function arguments.
 	std::string defLine, name;
@@ -303,12 +271,13 @@ void ExpThreadWorker::analyzeFunction (std::string function, std::vector<std::st
 	functionStream >> word;
 	try {
 		while (!(functionStream.peek () == EOF) || word != "__end__") {
-			if (handleTimeCommands (word, functionStream, params, scope, operationTime)) { /* got handled*/ }
+			if (handleTimeCommands (word, functionStream, params, scope, operationTime, repeatMgr)) { /* got handled*/ }
 			else if (handleVariableDeclaration (word, functionStream, params, scope, warnings)) {}
-			else if (handleDoCommands (word, functionStream, params, ttls, scope, operationTime)) {}
-			else if (handleAoCommands (word, functionStream, params, ao, ttls, scope, operationTime)) {}
-			else if (handleDdsCommands(word, functionStream, params, dds, scope, operationTime)) {}
-			else if (handleOlCommands(word, functionStream, params, ol, scope, operationTime)) {}
+			else if (handleDoCommands (word, functionStream, params, ttls, scope, operationTime, repeatMgr)) {}
+			else if (handleAoCommands (word, functionStream, params, ao, ttls, scope, operationTime, repeatMgr)) {}
+			else if (handleDdsCommands(word, functionStream, params, dds, scope, operationTime, repeatMgr)) {}
+			else if (handleOlCommands(word, functionStream, params, ol, scope, operationTime, repeatMgr)) {}
+			else if (handleRepeats(word, functionStream, params, scope, repeatMgr)) {}
 			else if (word == "callcppcode") {
 				// and that's it... 
 				callCppCodeFunction ();
@@ -318,37 +287,7 @@ void ExpThreadWorker::analyzeFunction (std::string function, std::vector<std::st
 				thrower ("\"rsg:\" command is deprecated! Please use the microwave system listview instead.");
 			}
 			/// deal with function calls.
-			else if (handleFunctionCall (word, functionStream, params, ttls, ao, dds, ol, warnings, function, operationTime)) {}
-			else if (word == "repeat:") {
-				std::string repeatStr;
-				functionStream >> repeatStr;
-				try {
-					totalRepeatNum.push_back (boost::lexical_cast<int> (repeatStr));
-				}
-				catch (boost::bad_lexical_cast&) {
-					throwNested ("the repeat number for a repeat structure inside the master script failed to convert "
-						"to an integer! Note that the repeat number can not currently be a variable.");
-				}
-				repeatPos.push_back (functionStream.tellg ());
-				currentRepeatNum.push_back (1);
-			}
-			else if (word == "end") {
-				if (currentRepeatNum.size () == 0) {
-					thrower ("mismatched \"end\" command for repeat structure in master script! there were more "
-						"\"end\" commands than \"repeat\" commands.");
-				}
-				if (currentRepeatNum.back () < totalRepeatNum.back ()) {
-					functionStream.seekg (repeatPos.back ());
-					currentRepeatNum.back ()++;
-				}
-				else {
-					// remove the entries corresponding to this repeat loop.
-					currentRepeatNum.pop_back ();
-					repeatPos.pop_back ();
-					totalRepeatNum.pop_back ();
-					// and continue (no seekg)
-				}
-			}
+			else if (handleFunctionCall (word, functionStream, params, ttls, ao, dds, ol, warnings, function, operationTime, repeatMgr)) {}
 			else {
 				thrower ("unrecognized master script command inside function analysis: " + word);
 			}
@@ -665,7 +604,8 @@ bool ExpThreadWorker::handleVariableDeclaration (std::string word, ScriptStream&
 
 // if it handled it, returns true, else returns false.
 bool ExpThreadWorker::handleTimeCommands (std::string word, ScriptStream& stream, std::vector<parameterType>& vars,
-	std::string scope, timeType& operationTime) {
+	std::string scope, timeType& operationTime, repeatManager& repeatMgr) {
+	bool repeating = repeatMgr.isRepeating();
 	try {
 		if (word == "t") {
 			std::string command;
@@ -675,19 +615,37 @@ bool ExpThreadWorker::handleTimeCommands (std::string word, ScriptStream& stream
 		//
 		if (word == "t++") {
 			operationTime.second++;
+			if (repeating) {
+				repeatMgr.getCurrentActiveItem()->data().repeatAddedTime.second++;
+			}
 		}
 		else if (word == "t+=") {
 			Expression time;
 			stream >> time;
 			try {
 				operationTime.second += time.evaluate ();
+				if (repeating) {
+					repeatMgr.getCurrentActiveItem()->data().repeatAddedTime.second += time.evaluate();
+				}
 			}
 			catch (ChimeraError&) {
 				time.assertValid (vars, scope);
 				operationTime.first.push_back (time);
+				if (repeating) {
+					repeatMgr.getCurrentActiveItem()->data().repeatAddedTime.first.push_back(time);
+				}
 			}
 		}
 		else if (word == "t=") {
+			if (repeating) {
+				throwNested("Can not use \"t=\" syntax inside a repeat. Use incremental syntax instead. This would cause the sequence time to be reset during repeat,"
+					"which may be what you want but I am pretty sure there are other way to achieve the same result without using \"t=\" inside repeat.");
+			}
+			if (repeatMgr.repeatHappend()) {
+				throwNested("Can not use \"t=\" syntax after a repeat. Use incremental syntax instead. This would cause the sequence time to be reset after repeat,"
+					"and will definitively get affected by the repeat. A possible fix is to break the time command according to \"t=\", so that "
+					"each block of time can be analyzed separately. But this would require to change all Do,Ao,Dds,Ol's CommandFormList to vec of vec for different time commnad segment. ");
+			}
 			Expression time;
 			stream >> time;
 			try {
@@ -714,18 +672,19 @@ bool ExpThreadWorker::handleTimeCommands (std::string word, ScriptStream& stream
 
 /* returns true if handles word, false otherwise. */
 bool ExpThreadWorker::handleDoCommands (std::string word, ScriptStream& stream, std::vector<parameterType>& vars,
-	DoCore& ttls, std::string scope, timeType& operationTime) {
+	DoCore& ttls, std::string scope, timeType& operationTime, repeatManager& repeatMgr) {
+	repeatInfoId repeatId = repeatMgr.getCurrentActiveID();
 	if (word == "on:" || word == "off:") {
 		std::string name;
 		stream >> name;
-		ttls.handleTtlScriptCommand (word, operationTime, name, vars, scope);
+		ttls.handleTtlScriptCommand (word, operationTime, name, vars, scope, repeatId);
 	}
 	else if (word == "pulseon:" || word == "pulseoff:") {
 		// this requires handling time as it is handled above.
 		std::string name;
 		Expression pulseLength;
 		stream >> name >> pulseLength;
-		ttls.handleTtlScriptCommand (word, operationTime, name, pulseLength, vars, scope);
+		ttls.handleTtlScriptCommand (word, operationTime, name, pulseLength, vars, scope, repeatId);
 	}
 	else {
 		return false;
@@ -735,7 +694,8 @@ bool ExpThreadWorker::handleDoCommands (std::string word, ScriptStream& stream, 
 
 /* returns true if handles word, false otherwise. */
 bool ExpThreadWorker::handleAoCommands (std::string word, ScriptStream& stream,	std::vector<parameterType>& params, AoCore& ao, DoCore& ttls,
-	std::string scope, timeType& operationTime) {
+	std::string scope, timeType& operationTime, repeatManager& repeatMgr) {
+	repeatInfoId repeatId = repeatMgr.getCurrentActiveID();
 	if (word == "cao:") {
 		// zzp 10/28/2022 - I think this is not used in any of B232's code and we can deprecate this keyword
 		// for calibrated dac output, the syntax should be 
@@ -752,6 +712,7 @@ bool ExpThreadWorker::handleAoCommands (std::string word, ScriptStream& stream,	
 		command.commandName = "dac:";
 		command.numSteps.expressionStr = command.initVal.expressionStr = "__NONE__";
 		command.rampTime.expressionStr = command.rampInc.expressionStr = "__NONE__";
+		command.repeatId = repeatId;
 		try {
 			ao.handleDacScriptCommand (command, dacName, params);
 		}
@@ -768,6 +729,7 @@ bool ExpThreadWorker::handleAoCommands (std::string word, ScriptStream& stream,	
 		command.commandName = "dac:";
 		command.numSteps.expressionStr = command.initVal.expressionStr = "__NONE__";
 		command.rampTime.expressionStr = command.rampInc.expressionStr = "__NONE__";
+		command.repeatId = repeatId;
 		try {
 			ao.handleDacScriptCommand (command, name, params);
 		}
@@ -786,6 +748,7 @@ bool ExpThreadWorker::handleAoCommands (std::string word, ScriptStream& stream,	
 		command.numSteps.assertValid (params, scope);
 		command.time = operationTime;
 		command.commandName = "daclinspace:";
+		command.repeatId = repeatId;
 		// not used here.
 		command.rampInc.expressionStr = "__NONE__";
 		//
@@ -809,6 +772,7 @@ bool ExpThreadWorker::handleAoCommands (std::string word, ScriptStream& stream,	
 		command.commandName = "dacarange:";
 		// not used here.
 		command.numSteps.expressionStr = "__NONE__";
+		command.repeatId = repeatId;
 		try {
 			ao.handleDacScriptCommand (command, name, params);
 		}
@@ -829,6 +793,7 @@ bool ExpThreadWorker::handleAoCommands (std::string word, ScriptStream& stream,	
 		// not used here. 
 		command.numSteps.expressionStr = "__NONE__";
 		command.rampInc.expressionStr = "__NONE__";
+		command.repeatId = repeatId;
 		try
 		{
 			ao.handleDacScriptCommand(command, name, params);
@@ -847,8 +812,9 @@ bool ExpThreadWorker::handleAoCommands (std::string word, ScriptStream& stream,	
 
 /* returns true if handles word, false otherwise. */
 bool ExpThreadWorker::handleDdsCommands(std::string word, ScriptStream& stream, std::vector<parameterType>& vars,
-	DdsCore& ddss, std::string scope, timeType& operationTime)
+	DdsCore& ddss, std::string scope, timeType& operationTime, repeatManager& repeatMgr)
 {
+	repeatInfoId repeatId = repeatMgr.getCurrentActiveID();
 	if (word == "ddsamp:") //ddsamp: name amp
 	{
 		DdsCommandForm command;
@@ -860,6 +826,7 @@ bool ExpThreadWorker::handleDdsCommands(std::string word, ScriptStream& stream, 
 		command.finalVal.expressionStr = "__NONE__";
 		command.rampTime.expressionStr = "__NONE__";
 		command.numSteps.expressionStr = "__NONE__";
+		command.repeatId = repeatId;
 		try
 		{
 			ddss.handleDDSScriptCommand(command, name, vars);
@@ -880,6 +847,7 @@ bool ExpThreadWorker::handleDdsCommands(std::string word, ScriptStream& stream, 
 		command.finalVal.expressionStr = "__NONE__";
 		command.rampTime.expressionStr = "__NONE__";
 		command.numSteps.expressionStr = "__NONE__";
+		command.repeatId = repeatId;
 		try
 		{
 			ddss.handleDDSScriptCommand(command, name, vars);
@@ -900,6 +868,7 @@ bool ExpThreadWorker::handleDdsCommands(std::string word, ScriptStream& stream, 
 		command.numSteps.assertValid(vars, scope);
 		command.time = operationTime;
 		command.commandName = "ddslinspaceamp:";
+		command.repeatId = repeatId;
 		try
 		{
 			ddss.handleDDSScriptCommand(command, name, vars);
@@ -920,6 +889,7 @@ bool ExpThreadWorker::handleDdsCommands(std::string word, ScriptStream& stream, 
 		command.numSteps.assertValid(vars, scope);
 		command.time = operationTime;
 		command.commandName = "ddslinspacefreq:";
+		command.repeatId = repeatId;
 		try
 		{
 			ddss.handleDDSScriptCommand(command, name, vars);
@@ -940,6 +910,7 @@ bool ExpThreadWorker::handleDdsCommands(std::string word, ScriptStream& stream, 
 		command.time = operationTime;
 		command.commandName = "ddsrampamp:";
 		command.numSteps.expressionStr = "__NONE__";
+		command.repeatId = repeatId;
 		try
 		{
 			ddss.handleDDSScriptCommand(command, name, vars);
@@ -960,6 +931,7 @@ bool ExpThreadWorker::handleDdsCommands(std::string word, ScriptStream& stream, 
 		command.time = operationTime;
 		command.commandName = "ddsrampfreq:";
 		command.numSteps.expressionStr = "__NONE__";
+		command.repeatId = repeatId;
 		try
 		{
 			ddss.handleDDSScriptCommand(command, name, vars);
@@ -978,8 +950,9 @@ bool ExpThreadWorker::handleDdsCommands(std::string word, ScriptStream& stream, 
 
 /* returns true if handles word, false otherwise. */
 bool ExpThreadWorker::handleOlCommands(std::string word, ScriptStream& stream, std::vector<parameterType>& vars,
-	OlCore& ols, std::string scope, timeType& operationTime)
+	OlCore& ols, std::string scope, timeType& operationTime, repeatManager& repeatMgr)
 {
+	repeatInfoId repeatId = repeatMgr.getCurrentActiveID();
 	if (word == "ol:") //ddsamp: name amp
 	{
 		OlCommandForm command;
@@ -991,6 +964,7 @@ bool ExpThreadWorker::handleOlCommands(std::string word, ScriptStream& stream, s
 		command.finalVal.expressionStr = "__NONE__";
 		command.rampTime.expressionStr = "__NONE__";
 		command.numSteps.expressionStr = "__NONE__";
+		command.repeatId = repeatId;
 		try
 		{
 			ols.handleOLScriptCommand(command, name, vars);
@@ -1011,6 +985,7 @@ bool ExpThreadWorker::handleOlCommands(std::string word, ScriptStream& stream, s
 		//command.numSteps.assertValid(vars, scope);
 		command.time = operationTime;
 		command.commandName = "olramp:";
+		command.repeatId = repeatId;
 		try
 		{
 			ols.handleOLScriptCommand(command, name, vars);
@@ -1030,6 +1005,7 @@ bool ExpThreadWorker::handleOlCommands(std::string word, ScriptStream& stream, s
 		command.numSteps.assertValid(vars, scope);
 		command.time = operationTime;
 		command.commandName = "ollinspace:";
+		command.repeatId = repeatId;
 		// not used here.
 		command.rampInc.expressionStr = "__NONE__";
 		//
@@ -1042,6 +1018,29 @@ bool ExpThreadWorker::handleOlCommands(std::string word, ScriptStream& stream, s
 	}
 	else
 	{
+		return false;
+	}
+	return true;
+}
+
+bool ExpThreadWorker::handleRepeats(std::string word, ScriptStream& stream, std::vector<parameterType>& params, 
+	std::string scope, repeatManager& repeatMgr)
+{
+	if (word == "repeat:") {
+		// handle start of repeat
+		auto* child = repeatMgr.addNewRepeat();
+
+		Expression repeatNum;
+		stream >> repeatNum;
+		repeatNum.assertValid(params, scope);
+		child->data().repeatNum = repeatNum;
+		child->data().repeatAddedTime = timeType(std::vector<Expression>(), 0.0);
+	}
+	else if (word == "end") {
+		// handle end of repeat
+		repeatMgr.fininshCurrentRepeat();
+	}
+	else {
 		return false;
 	}
 	return true;
@@ -1085,30 +1084,60 @@ void ExpThreadWorker::checkTriggerNumbers (std::vector<parameterType>& expParams
 	/// check all trigger numbers between the DO system and the individual subsystems. These should almost always match,
 	/// a mismatch is usually user error in writing the script.
 	/// 
-	
-	//bool rsgMismatch = false;
-	//for (auto variationInc : range (determineVariationNumber (expParams))) {
-	//	if (true /*runMaster*/) {
-	//		unsigned actualTrigs = input->ttls.countTriggers ({ DoRows::which::D,15 }, variationInc);
-	//		unsigned dacExpectedTrigs = input->aoSys.getNumberSnapshots (variationInc);
-	//		std::string infoString = "Actual/Expected DAC Triggers: " + str (actualTrigs) + "/"
-	//			+ str (dacExpectedTrigs) + ".";
-	//		if (actualTrigs != dacExpectedTrigs) {
-	//			// this is a serious low level error. throw, don't warn.
-	//			thrower ("the number of dac triggers that the ttl system sends to the dac line does not "
-	//				"match the number of dac snapshots! " + infoString + ", seen in variation #"
-	//				+ str (variationInc) + "\r\n");
-	//		}
-	//		if (variationInc == 0) {
-	//			emit notification (qstr (infoString), 2);
-	//		}
-	//	}
-	//}
+	emit notification("Running consistency checks for various experiment-active devices", 1);
+	bool rsgMismatch = false;
+	for (auto variationInc : range (determineVariationNumber (expParams))) {
+		if (true /*runMaster*/) {
+			auto& andorCamera = input->devices.getSingleDevice<AndorCameraCore>();
+			if (andorCamera.getAndorRunSettings().controlCamera) {
+				// check if there is just enough trigger for andor if it is used in the experiment
+				emit notification("Running consistency checks for Andor Camera", 2);
+				unsigned actualTrigs = input->ttls.countTriggers(ANDOR_TRIGGER_LINE, variationInc);
+				unsigned expectedTrigs = andorCamera.getAndorRunSettings().picsPerRepetition;
+				if (actualTrigs != expectedTrigs) {
+					// this is a serious low-level/user error. throw, don't warn.
+					std::string infoString = "Actual/Expected Andor Triggers: " + str(actualTrigs) + "/"
+						+ str(expectedTrigs) + ".";
+					thrower("The number of Andor triggers that the ttl system sends to the Andor camera does not "
+						"match the number of images in the Andor control! " + infoString + ", seen in variation #"
+						+ str(variationInc) + "\r\n");
+				}
+			}
+			else {
+				// check if there are triggers for andor but the andor is not set active. If so, warn.
+				unsigned actualTrigs = input->ttls.countTriggers(ANDOR_TRIGGER_LINE, variationInc); 
+				if (actualTrigs != 0) {
+					emit warn("There are " + qstr(actualTrigs) + " triggers sent to Andor trigger in ttl line ("
+						+ qstr(ANDOR_TRIGGER_LINE.first) + "," + qstr(ANDOR_TRIGGER_LINE.second) + "), but the Andor system is not active." +
+						"Make sure that this is what you actually want.\r\n", 0);
+				}
+			}
+
+			auto makoCameras = input->devices.getDevicesByClass<MakoCameraCore>();
+			for (auto makoCam : makoCameras) {
+				if (makoCam.get().getRunningSettings().expActive) {
+					emit notification("Running consistency checks for Mako Camera: "+qstr(makoCam.get().CameraName()), 2);
+					auto triggerLine = makoCam.get().getTriggerLine();
+					unsigned actualTrigs = input->ttls.countTriggers(triggerLine, variationInc);
+					unsigned expectedTrigs = makoCam.get().getRunningSettings().picsPerRep;
+					if (actualTrigs != expectedTrigs) {
+						// this is a serious low-level/user error. throw, don't warn.
+						std::string infoString = "Actual/Expected Mako Triggers: " + str(actualTrigs) + "/"
+							+ str(expectedTrigs) + ".";
+						thrower("The number of Mako triggers that the ttl system sends to the Mako camera does not "
+							"match the number of images in the Mako control! " + infoString + ", seen in variation #"
+							+ str(variationInc) + "\r\n");
+					}
+				}
+			}
+
+		}
+	}
 }
 
 bool ExpThreadWorker::handleFunctionCall (std::string word, ScriptStream& stream, std::vector<parameterType>& vars,
 	DoCore& ttls, AoCore& ao, DdsCore& dds, OlCore& ol, std::string& warnings,
-	std::string callingFunction, timeType& operationTime) {
+	std::string callingFunction, timeType& operationTime, repeatManager& repeatMgr) {
 	if (word != "call") {
 		return false;
 	}
@@ -1142,7 +1171,7 @@ bool ExpThreadWorker::handleFunctionCall (std::string word, ScriptStream& stream
 			" infinite recursion\r\n");
 	}
 	try {
-		analyzeFunction (functionName, args, ttls, ao, dds, ol, vars, warnings, operationTime, callingFunction);
+		analyzeFunction (functionName, args, ttls, ao, dds, ol, vars, warnings, operationTime, callingFunction, repeatMgr);
 	}
 	catch (ChimeraError&) {
 		throwNested ("Error handling Function call to function " + functionName + ".");
@@ -1168,9 +1197,12 @@ void ExpThreadWorker::calculateAdoVariations (ExpRuntimeData& runtime) {
 		loadSkipTimes = std::vector<double> (variations);
 		emit notification ("Analyzing Master Script...\n");
 		std::string warnings;
+		repeatManager repeatMgr;
 		analyzeMasterScript (input->ttls, input->ao,input->dds, input->ol, runtime.expParams, runtime.masterScript,
-			runtime.mainOpts.atomSkipThreshold != UINT_MAX, warnings, operationTime, loadSkipTime);
+			runtime.mainOpts.atomSkipThreshold != UINT_MAX, warnings, operationTime, loadSkipTime, repeatMgr);
 		
+		emit notification("Calcualting Repeat Manager variations...\n", 1);
+		repeatMgr.calculateVariations(runtime.expParams);
 		emit notification ("Calcualting DO system variations...\n", 1);
 		input->ttls.calculateVariations (runtime.expParams, this);
 		emit notification ("Calcualting AO system variations...\n", 1);
@@ -1180,6 +1212,15 @@ void ExpThreadWorker::calculateAdoVariations (ExpRuntimeData& runtime) {
 		emit notification("Calcualting OL system variations...\n", 1);
 		input->ol.calculateVariations(runtime.expParams, this);
 
+		emit notification("Constructing repeatitions for DO system...\n", 1);
+		input->ttls.constructRepeats(repeatMgr);
+		emit notification("Constructing repeatitions for AO system...\n", 1);
+		input->ao.constructRepeats(repeatMgr);
+		emit notification("Constructing repeatitions for DDS system...\n", 1);
+		input->dds.constructRepeats(repeatMgr);
+		emit notification("Constructing repeatitions for OL system...\n", 1);
+		input->ol.constructRepeats(repeatMgr);
+		
 		emit notification ("Preparing DO, AO, DDS, OL for experiment and Running final ado checks...\n");
 		for (auto variationInc : range (variations)) {
 			if (isAborting) { thrower (abortString); }
@@ -1217,8 +1258,24 @@ void ExpThreadWorker::runConsistencyChecks (std::vector<parameterType> expParams
 			emit warn (cstr ("WARNING: Variable " + var.name + " is varied, but not being used?!?\r\n"));
 		}
 	}
-	//checkTriggerNumbers (expParams);
 	emit expCalibrationsSet(calibrations);
+
+	checkTriggerNumbers(expParams);
+}
+
+void ExpThreadWorker::waitForSequenceFinish(double seqTime)
+{
+	const double minimumSleep = 10.0;
+	const double maximumSleep = 300.0;
+	const double targetSleep = seqTime * 0.1;
+	double sleepTime = seqTime + minimumSleep;
+	if (targetSleep > minimumSleep) {
+		sleepTime = seqTime + targetSleep;
+	}
+	if (targetSleep > maximumSleep) {
+		sleepTime = seqTime + maximumSleep;
+	}
+	Sleep(sleepTime);
 }
 
 void ExpThreadWorker::handlePause (std::atomic<bool>& isPaused, std::atomic<bool>& isAborting) {

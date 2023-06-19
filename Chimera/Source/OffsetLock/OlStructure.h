@@ -4,11 +4,12 @@
 #include <string>
 #include "ParameterSystem/Expression.h"
 #include "GeneralObjects/CommonTypes.h"
+#include <ExperimentThread/repeatManager.h>
 
 enum class OLGrid : size_t
 {
 	numPERunit = 2,
-	numOFunit = 1,
+	numOFunit = 2,
 	total = numPERunit * numOFunit
 };
 
@@ -17,8 +18,8 @@ struct OlInfo
 	std::string name = "";
 
 	double currFreq = 0;
-	double minFreq = 1000.0; //in MHz
-	double maxFreq = 6000.0;
+	double minFreq = 500.0; //in MHz
+	double maxFreq = 7501.0;
 	double defaultFreq = 1500.0;
 
 	std::string note = "None";
@@ -38,6 +39,9 @@ struct OlCommandForm
 	Expression rampTime;
 	Expression rampInc;
 	Expression numSteps;
+
+	// stores whether this command is subject to repeats and which repeat it correpsonds to in the tree if so
+	repeatInfoId repeatId = { 0, {0,0} };
 };
 
 
@@ -49,6 +53,9 @@ struct OlCommand
 	double endValue;
 	unsigned numSteps;
 	double rampTime;
+
+	// same as OlCommandForm, this will be used for repeat generation, i.e. copy and extend the std::vector<OlCommand>
+	repeatInfoId repeatId = { 0, {0,0} };
 };
 
 

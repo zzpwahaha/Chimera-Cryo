@@ -153,12 +153,20 @@ void SyntaxHighlighter::setLocalParams (std::vector<parameterType> localParams) 
 	addRules (names, QColor (0, 255, 0), true, true, localParamRules);
 }
 
+void SyntaxHighlighter::setGlobalParams(std::vector<parameterType> globalParams) {
+	QVector<QString> names;
+	for (auto param : globalParams) {
+		names.push_back(param.name.c_str());
+	}
+	addRules(names, QColor(58, 46, 230), true, true, otherParamRules);
+}
+
 void SyntaxHighlighter::setOtherParams (std::vector<parameterType> otherParams) {
 	QVector<QString> names;
 	for (auto param : otherParams) {
 		names.push_back (param.name.c_str ());
 	}
-	addRules (names, QColor (0, 255, 0), true, true, otherParamRules);
+	addRules (names, QColor (97, 224, 47), true, true, otherParamRules);
 }
 
 void SyntaxHighlighter::highlightBlock (const QString& text){
@@ -204,6 +212,13 @@ void SyntaxHighlighter::highlightBlock (const QString& text){
 		while (matchIterator.hasNext ()) {
 			auto match = matchIterator.next ();
 			setFormat (match.capturedStart (), match.capturedLength (), rule.format);
+		}
+	}
+	for (const HighlightingRule& rule : qAsConst(globalParamRules)) {
+		QRegularExpressionMatchIterator matchIterator = rule.pattern.globalMatch(text);
+		while (matchIterator.hasNext()) {
+			auto match = matchIterator.next();
+			setFormat(match.capturedStart(), match.capturedLength(), rule.format);
 		}
 	}
 	for (const HighlightingRule& rule : qAsConst (otherParamRules)) {

@@ -1,0 +1,11 @@
+% This function ramps the trap depth down to 'twz_intensity_ramped_down' in 'ramp_time' and wait for 'wait_time' 
+% and then ramp back up to original value 'twz_intensity_start' in 'ramp_time'
+% This functino will advance time forward by 2*ramp_time + wait_time
+%
+
+def TrapLowerAndRise(twz_intensity_start, twz_intensity_ramped_down, ramp_time, wait_time):
+    dacramp: TweezerIntensity twz_intensity_start twz_intensity_ramped_down ramp_time 
+    t += ramp_time
+    t += wait_time
+    dacramp: TweezerIntensity twz_intensity_ramped_down twz_intensity_start ramp_time 
+    t += ramp_time

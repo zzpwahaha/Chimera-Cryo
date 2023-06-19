@@ -45,26 +45,27 @@ off: PrbShutter
 
 dac: TARepAmp 10
 dac: SrcMOTAmp 10
-dac: SciMOTAmp 6.8 
+dac: SciMOTAmp mot_load_cool_amp %{mot_load_cool_amp_cal mot_pwr} 
 dac: DipolePushAmp 4.4
 dac: TweezerIntensity twz_intensity %Converison is 38.7mW per 1V Aug/1/2022 
 dac: PrbRepAmp 10
 dac: PrbAmp 2.5 
 
-ol: ol_cooling 1214
-ol: ol_repump 5282
+ol: ol_cooling d2_cooling_resonance+10 %1216
+ol: ol_repump d2_repump_resonance %5282
 
 dac: MOTCoil mot_gradient
 dac: BiasCoilX bias_x %0.04
 dac: BiasCoilY bias_y %0.4
 dac: BiasCoilZ bias_z %0.0
 
-t = t_loading %1000
+t = t_loading
 off: SrcMOTTrg
 off: DipolePushTrg
 off: DipolePushShutter
 dac: MOTCoil 0
 pulseon: DO1_0 1
+
 
 % attempt to move the MOT, maybe needed for the future
 %t += -20
@@ -73,7 +74,6 @@ pulseon: DO1_0 1
 %dac: BiasCoilZ shift_bias_z
 %ol: ol_cooling shift_olcool
 %t += 20
-
 
 
 %%%%%%%%%%%%%%  PGC  %%%%%%%%%%%%%%%%%%
@@ -88,27 +88,49 @@ dac: TARepAmp pgc_rep_amp
 t += t_pgc_cool_time
 pulseon: DO1_0 1
 
+%%%%%%%%%%%%% Probe frequency calibration %%%%%%%%%%%%
+%on: PrbTrg
+%ol: ol_cooling pgc_olcool
+%ol: ol_repump pgc_olrepump
+%dac: BiasCoilX pgc_bias_x
+%dac: BiasCoilY pgc_bias_y 
+%dac: BiasCoilZ pgc_bias_z
+%dac: PrbRepAmp kick_repump_amp
+%dac: PrbAmp kick_cool_amp
+%t += t_pgc_cool_time
+%pulseon: DO1_0 1
 %%%%%%%%%%%%%%%  TOF  %%%%%%%%%%%%%%%%%%
 off: SciMOTTrg
 %off: xyzMOTShutter
-off: PrbShutter 
+%off: PrbShutter 
 t += t_tof
 pulseon: DO1_0 1
 
 %%%%%%%%%%%%%%  Image MOT  %%%%%%%%%%%%%%%%%%
 %t += -4
-%on: xyzMOTShutter
-ol: ol_cooling D2_cooling_resonance
-ol: ol_repump D2_repump_resonance
+on: xyzMOTShutter
 dac: BiasCoilX pgc_bias_x
 dac: BiasCoilY pgc_bias_y 
 dac: BiasCoilZ pgc_bias_z
+
+ol: ol_cooling D2_cooling_resonance
+ol: ol_repump D2_repump_resonance
 dac: SciMOTAmp 10
 dac: TARepAmp 10
+
+%ol: ol_cooling 1226
+%ol: ol_repump 5262
+%dac: PrbAmp 10 %probe_cool_amp
+%dac: PrbRepAmp 10
+%t += -6
+%on: PrbShutter
+%t += 6
+
 %t += 4
 pulseon: mako2 0.1
 t += 0.07
 pulseon: SciMOTTrg 0.7
+%pulseon: PrbTrg t_twz_imaging
 
 
 %%%%%%%%%%%%%%  PGC in Tweezer %%%%%%%%%%%%%%%%%%

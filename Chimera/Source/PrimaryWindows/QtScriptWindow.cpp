@@ -63,7 +63,8 @@ void QtScriptWindow::initializeWidgets (){
 
 void QtScriptWindow::updateVarNames() {
 	auto params = auxWin->getAllParams ();
-	masterScript.highlighter->setOtherParams (params);
+	masterScript.highlighter->setGlobalParams(auxWin->getGlobalParams());
+	masterScript.highlighter->setOtherParams (auxWin->getConfigParams());
 	masterScript.highlighter->setLocalParams (masterScript.getLocalParams ());
 	masterScript.highlighter->rehighlight();
 
@@ -373,6 +374,16 @@ void QtScriptWindow::newMasterFunction (){
 	}
 	catch (ChimeraError& exception){
 		reportErr ("New Master function Failed: " + exception.qtrace () + "\r\n");
+	}
+}
+
+void QtScriptWindow::reloadMasterFunction()
+{
+	try {
+		masterScript.loadFunctions();
+	}
+	catch (ChimeraError& exception) {
+		reportErr("New Master function Failed: " + exception.qtrace() + "\r\n");
 	}
 }
 

@@ -1,0 +1,17 @@
+% this function will turn off MOT and Probe light and shutter. 
+%This advances the time by 4 + t_release
+% t_release = tweezer off time (release time)
+
+def releaseRecapture(t_release):
+    %%%%%%%%%%%%% release and recature, 
+    off: SciMOTTrg
+    off: PrbTrg
+    off: xyzMOTShutter
+    off: PrbShutter
+    on: TweezerHold
+    off: MOTFlashTrg
+    t += 4 % needed to allow actuation of shutters
+    off: TweezerTrg % switch off the intensity
+    t += t_release 
+    on: TweezerTrg % turn on the trigger again
+    off: TweezerHold

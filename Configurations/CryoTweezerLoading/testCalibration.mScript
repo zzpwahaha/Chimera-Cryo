@@ -3,5 +3,5 @@ t = 1
 pulseon: do1_0 1
 dac: SciMOTAmp {test_mot_pwr mot_pwr}
 
-t += 1000
+t += 10000
 pulseon: do1_0 10

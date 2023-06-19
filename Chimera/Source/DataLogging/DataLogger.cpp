@@ -449,7 +449,7 @@ void DataLogger::writeAndorPic( Matrix<long> image, imageParameters dims){
 	// MUST initialize status
 	// starting coordinates of writebtn area in the h5 file of the array of picture data points.
 	hsize_t offset[] = { currentAndorPicNumber++, 0, 0 };
-	hsize_t slabdim[3] = { 1, dims.widthBinned(), dims.heightBinned() };
+	hsize_t slabdim[3] = { 1, dims.heightBinned(), dims.widthBinned() };
 	try{
 		if (AndorPicureSetDataSpace.getId () == -1) {
 			hsize_t dims[3];
@@ -484,7 +484,7 @@ void DataLogger::writeMakoPic(std::vector<double> image, int width, int height, 
 	}
 	// starting coordinates of writebtn area in the h5 file of the array of picture data points.
 	hsize_t offset[] = { currentMakoPicNumber[name]++, 0, 0 };
-	hsize_t slabdim[3] = { 1, width, height };// dims.width (), dims.height ()};
+	hsize_t slabdim[3] = { 1, height, width };// dims.height (), dims.width ()}; // dim0(row/height) first and then dim1(col/width)
 	try {
 		MakoPicureSetDataSpace[name].selectHyperslab(H5S_SELECT_SET, slabdim, offset);
 		MakoPictureDataset[name].write(image.data(), H5::PredType::NATIVE_DOUBLE, MakoPicDataSpace[name],
@@ -529,7 +529,7 @@ void DataLogger::writeTemperature(std::pair<std::vector<long long>, std::vector<
 	}
 }
 
-void DataLogger::writePressure(std::pair<std::vector<long long>, std::vector<double>> timedata, std::string identifier)
+void DataLogger::writePressure(std::pair<std::vector<long long>, std::vector<double>> timedata, std::string identifier, InfluxDataUnitType::mode unit)
 {
 	if (fileIsOpen == false) {
 		thrower("Tried to write to h5 file (for pressure), but the file is closed!\r\n");
@@ -551,7 +551,18 @@ void DataLogger::writePressure(std::pair<std::vector<long long>, std::vector<dou
 			strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", localtime(&epoch));
 			return std::string(buffer); });
 		writeDataSet(timeStr, "Datetime", subtemp);
-		writeDataSet(timedata.second, "Pressure(mBar)", subtemp);
+		switch (unit)
+		{
+		case InfluxDataUnitType::mode::K:
+			thrower("Incorrect unit for Pressure in saveing influx monitor data!");
+			break;
+		case InfluxDataUnitType::mode::mBar:
+			writeDataSet(timedata.second, "Pressure(mBar)", subtemp);
+			break;
+		case InfluxDataUnitType::mode::Torr:
+			writeDataSet(timedata.second, "Pressure(Torr)", subtemp);
+			break;
+		}
 
 	}
 	catch (H5::Exception& err) {

@@ -158,7 +158,9 @@ void IChimeraQtWindow::initializeMenu (){
 	connect(saveMasterFn, &QAction::triggered, [this, cmnMsg]() {cmnMsg(ID_MASTERSCRIPT_SAVEFUNCTION, this); });
 	//auto* saveMasterAsFn = masterFn->addAction("Save Master Function &As", this);
 	//connect(saveMasterAsFn, &QAction::triggered, [this, cmnMsg]() {cmnMsg(ID_MASTERSCRIPT_SAVEAS, this); });
-	
+	auto* reloadMasterFn = masterFn->addAction("Reload Master Function");
+	connect(reloadMasterFn, &QAction::triggered, [this, cmnMsg]() {scriptWin->reloadMasterFunction(); });
+
 	///
 	scriptsM->addSeparator();
 	if (scriptWin != nullptr) {

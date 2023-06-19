@@ -1,4 +1,5 @@
 #pragma once
+#include "InfluxTypes.h"
 #include "GeneralObjects/commonTypes.h"
 #include <GeneralObjects/IDeviceCore.h>
 #include <GeneralObjects/IChimeraSystem.h>
@@ -12,19 +13,11 @@ class IChimeraQtWindow;
 class InfluxBroker;
 class TemperatureMonitorCore;
 
-struct InfluxDataType
-{
-	enum class mode {
-		Temperature,
-		Pressure
-	};
-	static const std::array<mode, 2> allModes;
-};
 
 class InfluxBroker
 {
 public:
-	InfluxBroker(std::string identifier, std::string syntax, InfluxDataType::mode mode, bool safemode);
+	InfluxBroker(std::string identifier, std::string syntax, InfluxDataType::mode mode, InfluxDataUnitType::mode unit, bool safemode);
 	InfluxBroker(const InfluxBroker&) = delete;
 	InfluxBroker& operator=(const InfluxBroker&) = delete;
 	//InfluxBroker(InfluxBroker&&) noexcept = default;
@@ -44,6 +37,7 @@ public:
 	const std::string syntax;
 	const std::string identifier;
 	const InfluxDataType::mode dataMode;
+	const InfluxDataUnitType::mode unitMode;
 
 private:
 	const bool safemode;

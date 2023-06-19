@@ -45,6 +45,7 @@ public:
 
 	void calculateVariations(std::vector<parameterType>& params, 
 		ExpThreadWorker* threadworker, std::vector<calSettings>& calibrationSettings);
+	void constructRepeats(repeatManager& repeatMgr);
 	void organizeDacCommands(unsigned variation, AoSnapshot initSnap);
 	void findLoadSkipSnapshots(double time, std::vector<parameterType>& variables, unsigned variation);
 	void formatDacForFPGA(UINT variation, AoSnapshot initSnap);
@@ -76,7 +77,7 @@ private:
 	//Zynq tcp connection
 	ZynqTCP zynq_tcp;
 	double dacTriggerTime; // used in checkTimingsWork() to see if time of two points in dac is shorter than 1/ramp freq
-
+	const unsigned maxCommandNum = 512;
 	static constexpr double dacResolution = 20.0 / 0xffff; /*16bit dac*/
 	const int numDigits = static_cast<int>(abs(round(log10(dacResolution) - 0.49)));
 

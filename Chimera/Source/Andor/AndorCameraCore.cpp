@@ -821,9 +821,9 @@ void AndorCameraCore::logSettings (DataLogger& log, ExpThreadWorker* threadworke
 		hsize_t rank1[] = { 1 };
 		// pictures. These are permanent members of the class for speed during the writing process.	
 		if (expRunSettings.acquisitionMode == AndorRunModes::mode::Single) {
-			hsize_t setDims[] = { unsigned __int64 (expRunSettings.totalPicsInExperiment ()), expRunSettings.imageSettings.widthBinned (),
-				expRunSettings.imageSettings.heightBinned () };
-			hsize_t picDims[] = { 1, expRunSettings.imageSettings.widthBinned (), expRunSettings.imageSettings.heightBinned () };
+			hsize_t setDims[] = { unsigned __int64 (expRunSettings.totalPicsInExperiment ()), expRunSettings.imageSettings.heightBinned(),
+				expRunSettings.imageSettings.widthBinned() };
+			hsize_t picDims[] = { 1, expRunSettings.imageSettings.heightBinned(), expRunSettings.imageSettings.widthBinned() };
 			log.AndorPicureSetDataSpace = H5::DataSpace (3, setDims);
 			log.AndorPicDataSpace = H5::DataSpace (3, picDims);
 			log.AndorPictureDataset = andorGroup.createDataSet ( "Pictures", H5::PredType::NATIVE_LONG, 

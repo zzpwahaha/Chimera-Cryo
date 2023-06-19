@@ -253,6 +253,8 @@ void ArbGenSystem::readGuiSettings(int chan ){
 			stream >> currentGuiInfo.channel[chani].square.frequency;
 			stream >> currentGuiInfo.channel[chani].square.amplitude;
 			stream >> currentGuiInfo.channel[chani].square.offset;
+			stream >> currentGuiInfo.channel[chani].square.dutyCycle;
+			stream >> currentGuiInfo.channel[chani].square.phase;
 			currentGuiInfo.channel[chani].square.burstMode = burstButton->isChecked();
 			currentGuiInfo.channel[chani].square.useCal = calibratedButton->isChecked ( );
 			break;
@@ -351,7 +353,9 @@ void ArbGenSystem::updateSettingsDisplay(int chan, std::string configPath, RunIn
 			arbGenScript.reset ( );
 			arbGenScript.setScriptText( currentGuiInfo.channel[chan].square.frequency.expressionStr + " "
 										 + currentGuiInfo.channel[chan].square.amplitude.expressionStr + " " 
-										 + currentGuiInfo.channel[chan].square.offset.expressionStr );
+										 + currentGuiInfo.channel[chan].square.offset.expressionStr + " "
+										 + currentGuiInfo.channel[chan].square.dutyCycle.expressionStr + " "
+										 + currentGuiInfo.channel[chan].square.phase.expressionStr + " ");
 			calibratedButton->setChecked( currentGuiInfo.channel[chan].square.useCal );
 			burstButton->setChecked(currentGuiInfo.channel[chan].square.burstMode);
 			burstButton->setEnabled(true);
@@ -427,7 +431,7 @@ void ArbGenSystem::handleModeCombo(){
 			arbGenScript.setEnabled ( true, false );
 			break;
 		case 4:
-			optionsFormat->setText ( "[Frequency(kHz)] [Amplitude(Vpp)] [Offset(V)]" );
+			optionsFormat->setText ( "[Freq(kHz)] [Amp(Vpp)] [Offset(V)] [DutyCycle(%)] [Phase(Deg)]" );
 			currentGuiInfo.channel[selectedChannel].option = ArbGenChannelMode::which::Square;
 			arbGenScript.setEnabled ( true, false );
 			break;
@@ -472,6 +476,8 @@ void ArbGenSystem::handleSavingConfig(ConfigStream& saveFile, std::string config
 		saveFile << "\n/*Square Amplitude:*/\t\t\t" << channel.square.amplitude;
 		saveFile << "\n/*Square Freq:*/\t\t\t\t" << channel.square.frequency;
 		saveFile << "\n/*Square Offset:*/\t\t\t\t" << channel.square.offset;
+		saveFile << "\n/*Square DutyCycle:*/\t\t\t" << channel.square.dutyCycle;
+		saveFile << "\n/*Square Phase:*/\t\t\t\t" << channel.square.phase;
 		saveFile << "\n/*Square Burst:*/\t\t\t\t" << channel.square.burstMode;
 		saveFile << "\n/*Square Calibrated:*/\t\t\t" << channel.square.useCal;
 		saveFile << "\n/*Preloaded Arb Address:*/\t\t" << channel.preloadedArb.address;

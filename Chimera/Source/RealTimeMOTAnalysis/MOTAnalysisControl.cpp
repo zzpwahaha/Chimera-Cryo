@@ -242,6 +242,12 @@ void MOTAnalysisControl::prepareMOTAnalysis(MakoCamera*& cam)
 		cam = nullptr;
 		return;
 	}
+	else {
+		if (!makoCam->getMakoCore().getRunningSettings().expActive) {
+			cam = nullptr;
+			return;
+		}
+	}
 	emit notification("MOT analysis is turned on for " + qstr(CameraInfo::toStr(cam->getCameraInfo().camName)) + "\r\n", 1);
 	if (calcActive->isChecked() && makoCam != nullptr) {
 		cam = makoCam;

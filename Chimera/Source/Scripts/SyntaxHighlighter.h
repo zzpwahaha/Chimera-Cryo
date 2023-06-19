@@ -17,6 +17,7 @@ class SyntaxHighlighter : public QSyntaxHighlighter {
     public:
         SyntaxHighlighter (ScriptableDevice device, QTextDocument* parent = 0);
         void setLocalParams (std::vector<parameterType> localParams);
+        void setGlobalParams(std::vector<parameterType> globalParams);
         void setOtherParams (std::vector<parameterType> otherParams);
         void setTtlNames (std::vector<std::string> ttlNames);
         void setDacNames (std::vector<std::string> dacNames);
@@ -42,6 +43,7 @@ class SyntaxHighlighter : public QSyntaxHighlighter {
         QVector<HighlightingRule> olRules;
         QVector<HighlightingRule> calRules;
         QVector<HighlightingRule> localParamRules;
+        QVector<HighlightingRule> globalParamRules;
         QVector<HighlightingRule> otherParamRules;
 
         QRegularExpression commentStartExpression;

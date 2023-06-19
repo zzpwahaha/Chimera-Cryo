@@ -6,6 +6,8 @@
 #include <ExperimentThread/ExpThreadWorker.h>
 
 #include <bitset>
+#include <iterator>
+#include <algorithm>
 
 DoCore::DoCore()
 	//: names(size_t(DOGrid::numPERunit), size_t(DOGrid::numOFunit), "")
@@ -65,13 +67,13 @@ void DoCore::standardNonExperimentStartDoSequence (DoSnapshot initSnap){
 
 }
 
-void DoCore::ttlOn (unsigned row, unsigned column, timeType time){
-	ttlCommandFormList.push_back ({ {row, column}, time, {}, true });
+void DoCore::ttlOn (unsigned row, unsigned column, timeType time, repeatInfoId repeatId){
+	ttlCommandFormList.push_back ({ {row, column}, time, {}, true, repeatId });
 }
 
 
-void DoCore::ttlOff (unsigned row, unsigned column, timeType time){
-	ttlCommandFormList.push_back ({ {row, column}, time, {}, false });
+void DoCore::ttlOff (unsigned row, unsigned column, timeType time, repeatInfoId repeatId){
+	ttlCommandFormList.push_back ({ {row, column}, time, {}, false, repeatId });
 }
 
 
@@ -109,13 +111,14 @@ void DoCore::restructureCommands (){
 		thrower ("No TTL Commands???");
 	}
 	ttlCommandList.clear();
-	ttlCommandList.resize (ttlCommandFormList[0].timeVals.size ());
+	ttlCommandList.resize (ttlCommandFormList[0].timeVals.size ()); // resize to variation number
 	for (auto varInc : range (ttlCommandList.size ())){
 		for (auto& cmd : ttlCommandFormList){
 			DoCommand nCmd;
 			nCmd.line = cmd.line;
 			nCmd.time = cmd.timeVals[varInc];
 			nCmd.value = cmd.value;
+			nCmd.repeatId = cmd.repeatId;
 			ttlCommandList [varInc].push_back (nCmd);
 		}
 	}
@@ -171,6 +174,97 @@ void DoCore::calculateVariations (std::vector<parameterType>& params, ExpThreadW
 		}
 	}
 	restructureCommands ();
+}
+
+void DoCore::constructRepeats(repeatManager& repeatMgr)
+{
+	typedef DoCommand Command;
+	/* this is to be done after ttlCommandList is filled with all variations. */
+	if (ttlCommandFormList.size() == 0 || ttlCommandList.size() == 0) {
+		thrower("No TTL Commands???");
+	}
+
+	unsigned variations = ttlCommandList.size();
+	repeatMgr.saveCalculationResults(); // repeatAddedTime is changed during construction, need to save and reset it before and after the construction body
+	auto* repearRoot = repeatMgr.getRepeatRoot();
+	auto allDescendant = repearRoot->getAllDescendant();
+	if (allDescendant.empty()) {
+		return; // no repeats need to handle.
+	}
+
+
+	// iterate through all variations
+	for (auto varInc : range(variations)) {
+		auto& cmds = ttlCommandList[varInc];
+
+		// Recursively add these repeat for always starting with maxDepth repeat. And also update the already constructed one to its parent layer
+		// The loop will end when all commands is not associated with repeat, i.e. the maxDepth command's repeatId.repeatTreeMap is root
+		while (true) {
+			/*find the max depth repeated command*/
+			auto maxDepthIter = std::max_element(cmds.begin(), cmds.end(), [&](const Command& a, const Command& b) {
+				return (a.repeatId.repeatTreeMap.first < b.repeatId.repeatTreeMap.first); });
+			Command maxDepth = *maxDepthIter;
+
+			/*check if all command is with zero repeat. If so, exit the loop*/
+			if (maxDepth.repeatId.repeatTreeMap == repeatInfoId::root) {
+				break;
+			}
+
+			/*find the repeat num and the repeat added time with the unique identifier*/
+			auto repeatIIter = std::find_if(allDescendant.begin(), allDescendant.end(), [&](TreeItem<repeatInfo>* a) {
+				return (maxDepth.repeatId.repeatIdentifier == a->data().identifier); });
+			if (repeatIIter == allDescendant.end()) {
+				thrower("Can not find the ID for the repeat in the DoCommand with max depth of the tree. This is a low level bug.");
+			}
+			TreeItem<repeatInfo>* repeatI = *repeatIIter;
+			unsigned repeatNum = repeatI->data().repeatNums[varInc];
+			double repeatAddedTime = repeatI->data().repeatAddedTimes[varInc];
+			/*find the parent of this repeat and record its repeatInfoId for updating the repeated ones*/
+			TreeItem<repeatInfo>* repeatIParent = repeatI->parentItem();
+			repeatInfoId repeatIdParent{ repeatIParent->data().identifier, repeatIParent->itemID() };
+			/*collect command that need to be repeated*/
+			std::vector<Command> cmdToRepeat;
+			std::copy_if(cmds.begin(), cmds.end(), std::back_inserter(cmdToRepeat), [&](Command doc) {
+				return (doc.repeatId.repeatIdentifier == maxDepth.repeatId.repeatIdentifier); });
+			/*check if the repeated command is continuous in the cmds vector, it should be as the cmds is representing the script's order at this stage*/
+			auto cmdToRepeatStart = std::search(cmds.begin(), cmds.end(), cmdToRepeat.begin(), cmdToRepeat.end(),
+				[&](const Command& a, const Command& b) {
+					return (a.repeatId.repeatIdentifier == b.repeatId.repeatIdentifier);
+				});
+			if (cmdToRepeatStart == cmds.end()) {
+				thrower("The repeated command is not contiguous inside the CommandList, which is not suppose to happen.");
+			}
+			int cmdToRepeatStartPos = std::distance(cmds.begin(), cmdToRepeatStart);
+			auto cmdToRepeatEnd = cmdToRepeatStart + cmdToRepeat.size(); // this will point to first cmd that is after those repeated one in CommandList
+			/*transform the repeating commandlist to its parent repeatInfoId so that it can be repeated in its parents level*/
+			// could also use this: std::transform(cmds.cbegin(), cmds.cend(), cmds.begin(), [&](Command doc) { with a return
+			std::for_each(cmds.begin(), cmds.end(), [&](Command& doc) {
+				if (doc.repeatId.repeatIdentifier == maxDepth.repeatId.repeatIdentifier) {
+					doc.repeatId = repeatIdParent;
+				} });
+			/*start to insert the repeated 'cmdToRpeat' to end of the repeat block, after insertion, 'cmdToRepeatEnd' can not be used*/
+			std::vector<Command> cmdToInsert;
+			cmdToInsert.clear();
+			for (unsigned repeatInc : range(repeatNum - 1)) {
+				// if only repeat for once, below will be ignored, since the first repeat is already in the list
+				/*transform the repeating commandlist to its parent repeatInfoId and also increment its time so that it can be repeated in its parents level*/
+				std::for_each(cmdToRepeat.begin(), cmdToRepeat.end(), [&](Command& doc) {
+					doc.repeatId = repeatIdParent;
+					doc.time += repeatAddedTime; });
+				cmdToInsert.insert(cmdToInsert.end(), cmdToRepeat.begin(), cmdToRepeat.end());
+			}
+			cmds.insert(cmdToRepeatEnd, cmdToInsert.begin(), cmdToInsert.end());
+			/*advance the time of thoses command that is later in CommandList than the repeat block*/
+			cmdToRepeatEnd = cmds.begin() + cmdToRepeatStartPos + cmdToRepeat.size() + cmdToInsert.size();
+			std::for_each(cmdToRepeatEnd, cmds.end(), [&](Command& doc) {
+				doc.time += repeatAddedTime * (repeatNum - 1); });
+			/*advance the time of the parent repeat, if the parent is not root*/
+			if (repeatIParent != repearRoot) {
+				repeatIParent->data().repeatAddedTimes[varInc] += repeatAddedTime * repeatNum;
+			}
+		}
+	}
+	repeatMgr.loadCalculationResults();
 }
 
 std::vector<double> DoCore::getFinalTimes ()
@@ -651,8 +745,8 @@ int DoCore::getNameIdentifier (std::string name, unsigned& row, unsigned& number
 
 }
 
-void DoCore::handleTtlScriptCommand (std::string command, timeType time, std::string name, Expression pulseLength,
-									 std::vector<parameterType>& vars, std::string scope){
+void DoCore::handleTtlScriptCommand(std::string command, timeType time, std::string name, Expression pulseLength,
+	std::vector<parameterType>& vars, std::string scope, repeatInfoId repeatId) {
 	if (!isValidTTLName (name)){
 		thrower ("the name " + name + " is not the name of a ttl!");
 	}
@@ -661,10 +755,10 @@ void DoCore::handleTtlScriptCommand (std::string command, timeType time, std::st
 	unsigned row;
 	getNameIdentifier (name, row, collumn);
 	if (command == "on:"){
-		ttlOn (int (row), collumn, time);
+		ttlOn (int (row), collumn, time, repeatId);
 	}
 	else if (command == "off:"){
-		ttlOff (int (row), collumn, time);
+		ttlOff (int (row), collumn, time, repeatId);
 	}
 	else if (command == "pulseon:" || command == "pulseoff:"){
 		try	{
@@ -675,20 +769,20 @@ void DoCore::handleTtlScriptCommand (std::string command, timeType time, std::st
 			pulseEndTime.first.push_back (pulseLength);
 		}
 		if (command == "pulseon:"){
-			ttlOn (int (row), collumn, time);
-			ttlOff (int (row), collumn, pulseEndTime);
+			ttlOn (int (row), collumn, time, repeatId);
+			ttlOff (int (row), collumn, pulseEndTime, repeatId);
 		}
 		if (command == "pulseoff:"){
-			ttlOff (int (row), collumn, time);
-			ttlOn (int (row), collumn, pulseEndTime);
+			ttlOff (int (row), collumn, time, repeatId);
+			ttlOn (int (row), collumn, pulseEndTime, repeatId);
 		}
 	}
-}
+};
 
 void DoCore::handleTtlScriptCommand (std::string command, timeType time, std::string name, 
-	std::vector<parameterType>& vars, std::string scope){
+	std::vector<parameterType>& vars, std::string scope, repeatInfoId repeatId){
 	// use an empty expression.
-	handleTtlScriptCommand (command, time, name, Expression (), vars, scope);
+	handleTtlScriptCommand (command, time, name, Expression (), vars, scope, repeatId);
 }
 
 //void DoCore::standardExperimentPrep (unsigned variationInc, double currLoadSkipTime, std::vector<parameterType>& expParams){

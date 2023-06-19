@@ -35,14 +35,15 @@ class DoCore
 		void restructureCommands ();
 		void initializeDataObjects (unsigned variationNum);
 
-		void ttlOn (unsigned row, unsigned column, timeType time);
-		void ttlOff (unsigned row, unsigned column, timeType time);
+		void ttlOn (unsigned row, unsigned column, timeType time, repeatInfoId repeatId);
+		void ttlOff (unsigned row, unsigned column, timeType time, repeatInfoId repeatId);
 		void ttlOnDirect (unsigned row, unsigned column, double timev, unsigned variation);
 		void ttlOffDirect (unsigned row, unsigned column, double timev, unsigned variation);
 		void ttlPulseDirect(unsigned row, unsigned column, double timev, double dur, unsigned variation);
 		
 		void sizeDataStructures (unsigned variations);
 		void calculateVariations (std::vector<parameterType>& params, ExpThreadWorker* threadworker);
+		void constructRepeats(repeatManager& repeatMgr);
 		std::vector<std::vector<plotDataVec>> getPlotData (unsigned variation );
 		std::string getTtlSequenceMessage (unsigned variation);
 		std::vector<double> getFinalTimes ();
@@ -66,9 +67,9 @@ class DoCore
 		std::vector<std::vector<DoSnapshot>> getTtlSnapshots ();
 
 		void handleTtlScriptCommand (std::string command, timeType time, std::string name, Expression pulseLength,
-			std::vector<parameterType>& vars, std::string scope);
+			std::vector<parameterType>& vars, std::string scope, repeatInfoId repeatId);
 		void handleTtlScriptCommand (std::string command, timeType time, std::string name,
-			std::vector<parameterType>& vars, std::string scope);
+			std::vector<parameterType>& vars, std::string scope, repeatInfoId repeatID);
 		void setNames (std::array<std::string, size_t(DOGrid::total)> namesIn);
 		std::array<std::string, size_t(DOGrid::total)> getAllNames ();
 		//void standardExperimentPrep (unsigned variationInc, double currLoadSkipTime, std::vector<parameterType>& expParams);

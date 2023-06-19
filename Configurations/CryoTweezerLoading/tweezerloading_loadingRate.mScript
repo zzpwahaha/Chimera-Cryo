@@ -1,168 +1,40 @@
 %%%%%%%%%%%%%%%%% Start With 1ms %%%%%%%%%%%%%%%%% 
 t = 1
-pulseon: DO1_0 1
-t += 1
-ddsfreq: dds0_0 80
-ddsamp: dds0_0 100
-t += 1
-ddsfreq: SciSrcMOT 80
-ddsamp: SciSrcMOT 100
-t += 1
-% dipole push is in external rf source for now
-%for dipole push rep, this rep is 80MHz detuned
-ddsfreq: Prb 100
-ddsamp: Prb 100
-t += 1
-ddsfreq: dds0_3 80
-ddsamp: dds0_3 100
-
-t += 1
-ddsfreq: TARep 80 %also used for tweezer AOM
-ddsamp: TARep 100
-t += 1
-ddsfreq: PrbRep 80
-ddsamp: PrbRep 100
-t += 1
-ddsfreq: PrbRep_tmp 80
-ddsamp: PrbRep_tmp 100
-t += 1
-ddsfreq: dds2_3 80
-ddsamp: dds2_3 100
-
-
-on: TARepTrg
-on: SrcMOTTrg
-on: SciMOTTrg 
-on: DipolePushTrg
-on: xyMOTShutter
-on: PrbRepTrg
-off: PrbTrg
-
-dac: TARepAmp 10
-dac: SrcMOTAmp 10
-dac: SciMOTAmp 6.5 
-dac: DipolePushAmp 4.4
-dac: TweezerIntensity 1.4 %Converison is 38.7mW per 1V Aug/1/2022 
-dac: PrbRepAmp 10
-dac: PrbAmp 2.5 
-
-ol: ol_cooling 1216
-t += 0.05
-ol: ol_repump 5282
-
-dac: MOTCoil mot_gradient
-dac: BiasCoilX bias_x %0.04
-dac: BiasCoilY bias_y %0.4
-dac: BiasCoilZ bias_z %0.0
-
-t = t_loading %1000
-off: SrcMOTTrg
-off: DipolePushTrg
-dac: MOTCoil 0
-pulseon: DO1_0 1
-
-% attempt to move the MOT, maybe needed for the future
-%t += -20
-%dac: BiasCoilX shift_bias_x
-%dac: BiasCoilY shift_bias_y
-%dac: BiasCoilZ shift_bias_z
-%ol: ol_cooling shift_olcool
-%t += 20
-
-
-
-
-%%%%%%%%%%%%%%  PGC  %%%%%%%%%%%%%%%%%%
-on: SciMOTTrg
-ol: ol_cooling pgc_olcool
-t += 0.05
-ol: ol_repump pgc_olrepump
-dac: BiasCoilX pgc_bias_x
-dac: BiasCoilY pgc_bias_y 
-dac: BiasCoilZ pgc_bias_z
-dac: SciMOTAmp pgc_cool_amp
-dac: TARepAmp pgc_rep_amp
-t += pgc_cool_time
-pulseon: DO1_0 1
+call CryoMOTLoadingPGC()
 
 %%%%%%%%%%%%%%%  TOF  %%%%%%%%%%%%%%%%%%
-off: SciMOTTrg
-%off: xyMOTShutter
-t += t_tof
-pulseon: DO1_0 1
+call TOF(t_tof)
+% the t_tof should be at least 4ms so that in the next PGC, the shutter can be open
 
-%%%%%%%%%%%%%%%%%  Fluorescence  %%%%%%%%%%%%%%%%%%
-%ol: ol_cooling 1206
-%t += 0.03
-%ol: ol_repump 5282
-%pulseon: mako2 0.01
-%dac: SciMOTAmp 10
-%t += 0.07
-%pulseon: SciMOTTrg 0.3
-%%t += -7
-%%pulseon: pixis_trg 1
-%%t += 7
-%pulseon: DO1_0 1
+%%%%%%%%%%%%%%  PGC in Tweezer %%%%%%%%%%%%%%%%%%
+% change the field/laser freq parameter here because the previous section is TOF and no light is on
+call D2InTrapPGC(t_pgc_twz)
+% note the t_pgc_twz should be smaller than 100
+t += 100
 
-%%%%%%%%%%%%%%%%  Fluorescence with Probe  %%%%%%%%%%%%%%%%%%
-%t += -2
-%ol: ol_cooling probe_olcool
-%t += 0.03
-%ol: ol_repump probe_olrepump
-%dac: PrbAmp probe_cool_amp
-%%dac: PrbRepAmp 10
-%%on: PrbRepTrg
-%t += 2
-%pulseon: mako2 0.01
-%t += 0.07
-%pulseon: PrbTrg 0.3
-%pulseon: DO1_0 1
+%dacramp: TweezerIntensity twz_intensity twz_int_lifetime 10
+%t += 15
+%%%%%%%%%%%%%%  Image TWIZZER  %%%%%%%%%%%%%%%%%%
+% change the field/laser freq parameter here because the previous section is dark, i.e. 100-t_pgc_twz is larger than 4
+call PGCTweezerImaging()
 
+
+%on: MOTFlashTrg
+
+t += 100
+call releaseRecapture(t_twz_release)
+t += 100
+
+%%%%%%%%%%%%%%  PGC in Tweezer %%%%%%%%%%%%%%%%%%
+% change the field/laser freq parameter here because the previous section is TOF and no light is on
+call D2InTrapPGC(t_pgc_twz)
+% note the t_pgc_twz should be smaller than 100
+t += 100
 
 %%%%%%%%%%%%%%  Image TWIZZER  %%%%%%%%%%%%%%%%%%
-ol: ol_cooling probe_olcool
-t += 0.03
-ol: ol_repump probe_olrepump
-%dac: SciMOTAmp 6.2
-%dac: TARepAmp 10
-dac: PrbAmp probe_cool_amp
-pulseon: pixis_trg 1
+% change the field/laser freq parameter here because the previous section is dark, i.e. 100-t_pgc_twz is larger than 4
+call PGCTweezerImaging()
 
-t += 7
-%t += -1
-%pulseon: mako2 0.01
-%%dac: SciMOTAmp 10
-%t += 1
-%dac: TweezerIntensity 0.3
-t += 0.05
-pulseon: PrbTrg 10
-%pulseon: SciMOTTrg 0.5
-pulseon: DO1_0 1
-
-
-%%%%%%% intermediate PGC
-%t += 100
-%on: SciMOTTrg
-%ol: ol_cooling pgc_olcool
-%t += 0.05
-%ol: ol_repump pgc_olrepump
-%dac: BiasCoilX pgc_bias_x
-%dac: BiasCoilY pgc_bias_y 
-%dac: BiasCoilZ pgc_bias_z
-%dac: SciMOTAmp pgc_cool_amp
-%dac: TARepAmp pgc_rep_amp
-%t += pgc_cool_time
-%pulseon: DO1_0 1
-%t += 10000
-
-%%%%%%% Second Twizzer Image
-%t += -500
-%pulseon: pixis_trg 1
-%t += 500
-%pulseon: pixis_trg 1
-%t += 7
-%pulseon: PrbTrg 10
-%pulseon: DO1_0 1
 
 
 

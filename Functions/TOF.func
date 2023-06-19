@@ -1,0 +1,9 @@
+% This function turns off MOT, probe light and shutter
+% and advance the time by time_of_flight
+def TOF(time_of_flight):
+    off: SciMOTTrg
+    off: PrbTrg
+    off: xyzMOTShutter
+    off: PrbShutter 
+    t += time_of_flight
+    pulseon: DO1_0 1

@@ -437,6 +437,7 @@ calSettings CalibrationManager::handleOpenMasterConfigIndvCal (ConfigStream& con
 	try {
 		std::string configValue;
 		configStream >> tmpInfo.result.calibrationName;
+		tmpInfo.historicalResult.calibrationName = tmpInfo.result.calibrationName;
 		configStream >> configValue;
 		tmpInfo.aiInChan = ai->getCore().getAiIdentifier(configValue);
 		if (tmpInfo.aiInChan == -1) {
@@ -730,20 +731,22 @@ void CalibrationManager::updateCalibrationView (calSettings& cal) {
 	plotData[1].reserve (numfitpts);
 	double xCtrlMin = 0.0;
 	double xCtrlMax = 0.0;
-	double runningVal= cal.result.calmin-0.5;
 	if (!cal.result.ctrlVals.empty()) {
 		xCtrlMin = *std::min_element(cal.result.ctrlVals.begin(), cal.result.ctrlVals.end());
 		xCtrlMax = *std::max_element(cal.result.ctrlVals.begin(), cal.result.ctrlVals.end());
 	}
+	double calRange = cal.result.calmax - cal.result.calmin;
+	double ctrlRange = xCtrlMax - xCtrlMin;
+	double runningVal = cal.result.calmin - calRange * 0.1;
 	for (auto pnum : range (numfitpts)) {
 		double xCtrl = calibrationFunction(runningVal, cal.result, this, false);
-		if ((xCtrl >= xCtrlMin - 0.5) && (xCtrl <= xCtrlMax + 0.5)) {
+		if ((xCtrl >= xCtrlMin - 0.1 * ctrlRange) && (xCtrl <= xCtrlMax + 0.1 * ctrlRange)) {
 			plotData[1].push_back(dataPoint{ xCtrl,runningVal,0.0 });
 		}
 		//plotData[1][pnum].y = runningVal;
 		//plotData[1][pnum].x = calibrationFunction (plotData[1][pnum].y, cal.result, this, false);
 		//plotData[1][pnum].x = cal.result.bsfit.calculateY(plotData[1][pnum].y);
-		runningVal += (cal.result.calmax +1.0- cal.result.calmin) / (numfitpts - 1);
+		runningVal += (calRange * 1.2) / (numfitpts - 1);
 	}
 	std::sort(plotData[1].begin(), plotData[1].end(), [](dataPoint p1, dataPoint p2) {return p1.y < p2.y; }); // ascending order for y
 

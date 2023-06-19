@@ -12,7 +12,7 @@ struct CameraInfo
 	std::string ip;
 	std::string delim;
 	bool safemode = true;
-
+	std::pair<unsigned, unsigned> triggerLine;
 	static std::string toStr(name m_);
 	static CameraInfo::name fromStr(std::string txt);
 

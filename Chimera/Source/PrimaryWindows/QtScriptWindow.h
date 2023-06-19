@@ -63,6 +63,7 @@ class QtScriptWindow : public IChimeraQtWindow{
 		void saveMasterScript ();
 		void saveMasterScriptAs (IChimeraQtWindow* parent);
 		void newMasterFunction ();
+		void reloadMasterFunction();
 		void saveMasterFunction ();
 		void deleteMasterFunction ();
 

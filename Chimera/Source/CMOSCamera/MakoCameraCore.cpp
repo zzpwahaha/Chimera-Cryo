@@ -60,9 +60,9 @@ void MakoCameraCore::logSettings(DataLogger& log, ExpThreadWorker* threadworker)
         H5::Group makoSubGroup(makoGroup.createGroup(CameraInfo::toStr(camInfo.camName)));
         hsize_t rank1[] = { 1 };
         // pictures. These are permanent members of the class for speed during the writing process.	
-        hsize_t setDims[] = { unsigned __int64(expRunSettings.totalPictures()), expRunSettings.dims.width(),
-                               expRunSettings.dims.height() };
-        hsize_t picDims[] = { 1, expRunSettings.dims.width(), expRunSettings.dims.height() };
+        hsize_t setDims[] = { unsigned __int64(expRunSettings.totalPictures()), expRunSettings.dims.height(),
+                               expRunSettings.dims.width() };
+        hsize_t picDims[] = { 1, expRunSettings.dims.height(), expRunSettings.dims.width() };
         log.MakoPicureSetDataSpace[camInfo.camName] = H5::DataSpace(3, setDims);
         log.MakoPicDataSpace[camInfo.camName] = H5::DataSpace(3, picDims);
         log.MakoPictureDataset[camInfo.camName] = makoSubGroup.createDataSet("Pictures", H5::PredType::NATIVE_LONG,

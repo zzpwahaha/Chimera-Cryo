@@ -19,7 +19,7 @@
 	//constexpr bool DOFTDI_SAFEMODE = true;
 	constexpr bool DDS_SAFEMODE = true;
 	constexpr bool ANDOR_SAFEMODE = false;
-	const std::pair<unsigned, unsigned> ANDOR_TRIGGER_LINE = std::make_pair(1 - 1, 5); // used for QtAndorWindow::abortCameraRun to give the last trigger
+	const std::pair<unsigned, unsigned> ANDOR_TRIGGER_LINE = std::make_pair(1 - 1, 5); // used for QtAndorWindow::abortCameraRun to give the last trigger and also for consistensy check
 	constexpr bool OFFSETLOCK_SAFEMODE = /*true*/false;
 	//constexpr bool ANALOG_IN_SAFEMODE = true;
 	#ifdef _DEBUG
@@ -69,23 +69,23 @@
 	const std::pair<unsigned, unsigned> DIO_REWIND = std::make_pair(8 - 1, 7); // used for the long time run rewind, see DoCore::checkLongTimeRun
 
 	//OffsetLock 
-	const std::string OL_COM_PORT = "COM3";
+	const std::vector<std::string> OL_COM_PORT = { "COM3", "COM7" };
 	const double OL_TIME_RESOLUTION = 0.02; //in ms
 	const std::vector<std::pair<unsigned, unsigned>> OL_TRIGGER_LINE
-		= { std::make_pair(3 - 1,6),std::make_pair(3 - 1,7) }; /*the first is the label on the box minus 1, has minus'd 1 explicitly */
+		= { std::make_pair(3 - 1,6),std::make_pair(3 - 1,7),
+			std::make_pair(4 - 1,6),std::make_pair(4 - 1,7) }; /*the first is the label on the box minus 1, has minus'd 1 explicitly */
 	const double OL_TRIGGER_TIME = 0.01; //in ms i.e. 50us
 
 	//#define DDS_FPGA_ADDRESS "FT1I6IBSB"; //Device Serial: FT1I6IBS, Use FT1I6IBSB in C++ to select Channel B
 
-
 	//ArbGens
 	const bool UWAVE_SAFEMODE = true;
-	const bool UWAVE_SAFEMODE_SIG = true;
+	const bool UWAVE_SAFEMODE_SIG = false;
 	const bool UWAVE_SAFEMODE_AGI = false;
 	const int numArbGen = 2;
 	//const std::string UWAVE_AGILENT_ADDRESS = "TCPIP0::10.10.0.5::inst0::INSTR";
 	const std::string UWAVE_AGILENT_ADDRESS = "USB0::0x0957::0x2807::MY57400998::INSTR";
-	const std::string UWAVE_SIGLENT_ADDRESS = "TCPIP0::10.10.0.4::inst0::INSTR";
+	const std::string UWAVE_SIGLENT_ADDRESS = "USB0::0xF4EC::0x1102::SDG2XCAC6R0238::INSTR";
 	const std::string RAMP_LOCATION = str(CODE_ROOT) + "\\Ramp_Files\\";
 
 	//Analog in 
@@ -95,7 +95,7 @@
 
 	//Mako camera
 	const unsigned MAKO_NUMBER = 2;
-	const std::array<bool, MAKO_NUMBER> MAKO_SAFEMODE = { false,true};
+	const std::array<bool, MAKO_NUMBER> MAKO_SAFEMODE = { false,false};
 	const std::array<std::string, MAKO_NUMBER> MAKO_DELIMS = { "MAKO1_CAMERA_SETTING", "MAKO2_CAMERA_SETTING" };
 	const std::array<std::string, MAKO_NUMBER> MAKO_IPADDRS= { "10.10.0.6", "10.10.0.7" };
 	const std::vector<std::pair<unsigned, unsigned>> MAKO_TRIGGER_LINE
@@ -113,12 +113,15 @@
 
 	//Temperature Monitor
 	const bool TEMPMON_SAFEMODE = false;
-	const unsigned TEMPMON_NUMBER = 3;
-	const std::array<std::string, TEMPMON_NUMBER> TEMPMON_ID{ "Cold_Shield", "Cold_Finger", "Main_Chamber_Pressure"};
+	const unsigned TEMPMON_NUMBER = 5;
+	const std::array<std::string, TEMPMON_NUMBER> TEMPMON_ID{ 
+		"Cold_Shield", "Cold_Finger", "Cold_Box", "Main_Chamber_Pressure", "Cryostat_side_Pressure"};
 	const std::array<std::string, TEMPMON_NUMBER> TEMPMON_SYNTAX{ 
 		"SELECT \"Cold Shield\" from ColdEdge order by time desc limit 1", 
 		"SELECT \"Cold finger\" from ColdEdge order by time desc limit 1",
-		"SELECT \"pressure\" from B240_main_chamber order by time desc limit 1" };
+		"SELECT \"temperature_B\" from \"Lakeshore331 T\" order by time desc limit 1",
+		"SELECT \"pressure\" from B240_main_chamber order by time desc limit 1",
+		"SELECT \"Pressure\" from \"Terranova\" order by time desc limit 1" };
 #endif
 /// Random other Constants
 constexpr double PI = 3.14159265358979323846264338327950288;

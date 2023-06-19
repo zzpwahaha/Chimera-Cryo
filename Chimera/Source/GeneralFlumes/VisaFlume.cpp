@@ -39,7 +39,8 @@ void VisaFlume::open(){
 	if (!deviceSafemode){
 		errCheck( viOpenDefaultRM( &defaultResourceManager ) );
 		errCheck( viOpen( defaultResourceManager, (char *)cstr( usbAddress ), VI_NULL, VI_NULL, &instrument ) );
-		errCheck ( viClear (instrument) );
+		//errCheck ( viClear (instrument) ); // somehow this does not work with siglent SDG2042X, so comment this out and add the identityQuery
+		identityQuery();
 	}
 }
 

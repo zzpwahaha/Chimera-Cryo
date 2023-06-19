@@ -122,6 +122,7 @@ public:
 	void handleDDSScriptCommand(DdsCommandForm command, std::string name, std::vector<parameterType>& vars);
 	void calculateVariations(std::vector<parameterType>& variables, ExpThreadWorker* threadworker, 
 		std::vector<calSettings>& calibrationSettings);
+	void constructRepeats(repeatManager& repeatMgr);
 	void organizeDDSCommands(UINT variation);
 	void makeFinalDataFormat(UINT variation);
 	void standardExperimentPrep(UINT variation);

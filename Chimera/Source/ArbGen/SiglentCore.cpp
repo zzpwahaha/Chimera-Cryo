@@ -137,9 +137,44 @@ void SiglentCore::programBurstMode(int channel, bool burstOption)
 		visaFlume.write(sStr + ":BTWV EDGE,RISE");
 		visaFlume.write(sStr + ":BTWV TIME,1"); /*Value of Ncycle number*/
 		visaFlume.write(sStr + ":BTWV STPS,0");
+		visaFlume.write(sStr + ":BTWV DLAY,0");
 
 		if (TARB) {
 			visaFlume.write(sStr + ":SRATE MODE,TARB");
+			//thrower("Agilent can not set Burst in TrueArb mode. Have changed the mode to DDS.");
+		}
+
+	}
+	else {
+		visaFlume.write(sStr + ":BTWV STATE,OFF");
+	}
+}
+
+void SiglentCore::programNonArbBurstMode(int channel, bool burstOption)
+{
+	std::string sStr = "C" + str(channel);
+	if (burstOption)
+	{
+		std::string arbMode;
+		visaFlume.query(sStr + ":SRATE?", arbMode, "%t");
+		bool TARB = false;
+		if (arbMode.find("TARB") != std::string::npos) {
+			TARB = true;
+			/*must change to DDS mode to be able to change burst state*/
+			visaFlume.write(sStr + ":SRATE MODE,DDS");
+		}
+
+		visaFlume.write(sStr + ":BTWV STATE,ON");
+		visaFlume.write(sStr + ":BTWV GATE_NCYC,GATE");
+		visaFlume.write(sStr + ":BTWV TRSR,EXT");
+		visaFlume.write(sStr + ":BTWV EDGE,RISE");
+		visaFlume.write(sStr + ":BTWV PLRT,POS");
+		visaFlume.write(sStr + ":BTWV STPS,0");
+		visaFlume.write(sStr + ":BTWV DLAY,0");
+
+		if (TARB) {
+			//visaFlume.write(sStr + ":SRATE MODE,TARB");
+			thrower("Agilent can not set Burst in TrueArb mode. Have changed the mode to DDS.");
 		}
 
 	}
@@ -156,9 +191,17 @@ void SiglentCore::setSquare(int channel, squareInfo info, unsigned var) {
 	}
 	try {
 		visaFlume.write("C" + str(channel) + ":BSWV WVTP,SQUARE"
-			",FRQ," + str(info.frequency.getValue(var)) + "HZ"
+			",FRQ," + str(info.frequency.getValue(var) * 1000) +"HZ"
 			",AMP," + str(convertPowerToSetPoint(info.amplitude.getValue(var), info.useCal, calibrations[channel - 1])) + "VPP"
-			",OFST," + str(convertPowerToSetPoint(info.offset.getValue(var), info.useCal, calibrations[channel - 1])) + "V");
+			",OFST," + str(convertPowerToSetPoint(info.offset.getValue(var), info.useCal, calibrations[channel - 1])) + "V"
+			",DUTY," + str(info.dutyCycle.getValue(var)) + 
+			",PHSE," + str(info.phase.getValue(var)));
+		programNonArbBurstMode(channel, info.burstMode);
+		if (info.burstMode) {
+			visaFlume.write("C" + str(channel) + +":BTWV CARR,PHSE," + str(info.phase.getValue(var)));
+			visaFlume.write("C" + str(channel) + +":BTWV STPS," + str(info.phase.getValue(var))); // both works the same way
+		}
+		outputOn(channel);
 	}
 	catch (ChimeraError&) {
 		throwNested("Seen while programming Square Wave for channel " + str(channel) + " (1-indexed).");
@@ -172,11 +215,19 @@ void SiglentCore::setSine(int channel, sineInfo info, unsigned var) {
 	}
 	try {
 		visaFlume.write("C" + str(channel) + ":BSWV WVTP,SINE"
-			",FRQ," + str(info.frequency.getValue(var)) + "HZ"
-			",AMP," + str(convertPowerToSetPoint(info.amplitude.getValue(var), info.useCal, calibrations[channel - 1])) + "VPP");
+			",FRQ," + str(info.frequency.getValue(var) * 1000) + "HZ"
+			",AMP," + str(convertPowerToSetPoint(info.amplitude.getValue(var), info.useCal, calibrations[channel - 1])) + "VPP"
+			",OFST,0V,PHSE,0");
+		programNonArbBurstMode(channel, info.burstMode);
+		outputOn(channel);
+		//visaFlume.write("C" + str(channel) + ":BTWV CARR,WVTP,SINE"
+		//	",FRQ," + str(info.frequency.getValue(var) * 1000) + "HZ"
+		//	",AMP," + str(convertPowerToSetPoint(info.amplitude.getValue(var), info.useCal, calibrations[channel - 1])) + "VPP"
+		//	",OFST,0V,PHSE,0"); // this also works
+
 	}
-	catch (ChimeraError&) {
-		throwNested("Seen while programming Sine Wave for channel " + str(channel) + " (1-indexed).");
+	catch (ChimeraError& e) {
+		throwNested("Seen while programming Sine Wave for channel " + str(channel) + " (1-indexed). \r\n" + e.trace());
 	}
 
 }
