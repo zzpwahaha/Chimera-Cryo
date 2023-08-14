@@ -82,8 +82,18 @@ void DataAnalysisControl::handleContextMenu (const QPoint& pos) {
 		}});
 	menu.addAction (detailsAction);
 	auto* editAction = new QAction ("Edit Plot", plotListview);
-	plotListview->connect (detailsAction, &QAction::triggered, [this, item]() {
-		QtPlotDesignerDlg* dialog = new QtPlotDesignerDlg(unofficialPicsPerRep);
+	plotListview->connect (editAction, &QAction::triggered, [this, item]() {
+		auto name = plotListview->item(item->row(), 0)->text();
+		tinyPlotInfo selectedInfo;
+		unsigned selectedIndex = 0;
+		for (auto& pltInfo : allTinyPlots) {
+			if (pltInfo.name == str(name)) {
+				selectedInfo = pltInfo;
+				break;
+			}
+			selectedIndex++;
+		}
+		QtPlotDesignerDlg* dialog = new QtPlotDesignerDlg(PLOT_FILES_SAVE_LOCATION + "\\" + selectedInfo.name + "." + PLOTTING_EXTENSION/*, unofficialPicsPerRep*/);
 		dialog->setStyleSheet(chimeraStyleSheets::stdStyleSheet());
 		dialog->setAttribute(Qt::WA_DeleteOnClose);
 		dialog->exec();

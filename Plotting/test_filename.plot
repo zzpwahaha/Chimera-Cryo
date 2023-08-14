@@ -1,13 +1,13 @@
 Version: 2.1
-test
-Atoms
-test_ylabel
-Variation Average
-test_filename
-1
-1
-1
-1
+/*Plot title*/			test
+/*Plot type*/			Atoms
+/*Y label*/				test_ylabel
+/*X label*/				Variation_Average
+/*Plot File name*/		test_filename
+/*Data set number*/		1
+/*Condition number*/	1
+/*Picture number*/		1
+/*Pixel number*/ 		1
 POSITIVE_RESULT_BEGIN
 DATA_SET_BEGIN
 PICTURE_BEGIN
