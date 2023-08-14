@@ -13,7 +13,12 @@ struct atomGrid{
 	unsigned long width = 0;
 	unsigned long height = 0;
 	unsigned long numAtoms ( ){
-		return width * height;
+		if (!useFile) {
+			return width * height;
+		}
+		else {
+			return atomLocs.size();
+		}
 	}
 	bool useFile = false;
 	std::string fileName = std::string("");

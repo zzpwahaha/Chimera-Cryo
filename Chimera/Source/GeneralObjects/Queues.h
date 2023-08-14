@@ -18,7 +18,7 @@ struct NormalImage{
 
 struct PixList{
 	unsigned picNum;
-	std::vector<long> image;
+	std::vector<double> image;
 };
 
 // imQueue[gridNum][queuePositions][pixelNum(flattened)]
