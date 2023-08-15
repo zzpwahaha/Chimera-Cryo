@@ -364,7 +364,7 @@ std::vector<Matrix<long>> AndorCameraCore::acquireImageData (){
 		// each image processed from the call from a separate windows message
 		// If there is no data the acquisition must have been aborted
 		int experimentPictureNumber = runSettings.showPicsInRealTime ? 0
-			: (((currentPictureNumber) % runSettings.totalPicsInVariation ()) % runSettings.picsPerRepetition);
+			: ((currentPictureNumber) % runSettings.picsPerRepetition);
 		if (experimentPictureNumber == 0){
 			repImages.clear ();
 			//repImages.resize (runSettings.showPicsInRealTime ? 1 : runSettings.picsPerRepetition);
