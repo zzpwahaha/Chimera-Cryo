@@ -17,10 +17,10 @@ void CruncherThreadWorker::init () {
 	// preparing for the crunching
 	for (auto gridInc : range (gridSize)) {
 		auto& grid = input->grids[gridInc];
-		std::vector<long> pixelIndices;
 		if (grid.useFile) {
 			atomGrid::loadGridFile(grid);
 			for (auto& locBlocks : grid.atomLocs) {
+				std::vector<long> pixelIndices;
 				for (auto& loc : locBlocks) {
 					if (loc.row >= input->imageDims.heightBinned() || loc.column >= input->imageDims.widthBinned()) {
 						emit error("atom grid appears to include pixels outside the image frame! Not allowed, seen by atom "
@@ -36,6 +36,7 @@ void CruncherThreadWorker::init () {
 					}
 					pixelIndices.push_back(index);
 				}
+				monitoredPixelIndecies[gridInc].push_back(pixelIndices);
 			}
 		}
 		else {
@@ -44,6 +45,7 @@ void CruncherThreadWorker::init () {
 					unsigned pixelRow = (grid.gridOrigin.row + rowInc * grid.pixelSpacingY);
 					unsigned pixelColumn = (grid.gridOrigin.column + columnInc * grid.pixelSpacingX);
 					unsigned pixelRowTmp, pixelColumnTmp;
+					std::vector<long> pixelIndices;
 					for (auto colIncl : range(2 * grid.includedPixelX + 1)) {
 						for (auto rowIncl : range(2 * grid.includedPixelY + 1)) {
 							pixelColumnTmp = pixelColumn + colIncl - grid.includedPixelX;
@@ -64,10 +66,10 @@ void CruncherThreadWorker::init () {
 							pixelIndices.push_back(index);
 						}
 					}
+					monitoredPixelIndecies[gridInc].push_back(pixelIndices);
 				}
 			}
 		}
-		monitoredPixelIndecies[gridInc].push_back(pixelIndices);
 	}
 	for (auto picThresholds : input->thresholds) {
 		if (picThresholds.size () != 1 && picThresholds.size () != input->grids[0].numAtoms ()) {
@@ -96,8 +98,8 @@ void CruncherThreadWorker::handleImage (NormalImage image){
 		tempImagePixels[gridInc].image = std::vector<double>(monitoredPixelIndecies[gridInc].size(), 0.0);
 	}
 	for (auto gridInc : range (input->grids.size ())) {
-		tempImagePixels[gridInc].picNum = image.picNum;
-		tempAtomArray[gridInc].picNum = image.picNum;
+		tempImagePixels[gridInc].picStat = image.picStat;
+		tempAtomArray[gridInc].picStat = image.picStat;
 		for (auto atomInc : range(monitoredPixelIndecies[gridInc].size())) {
 			///*** Deal with 1st element entirely first, as this is important for the rearranger thread and the 
 			/// load-skip both of which are very time-sensitive.
