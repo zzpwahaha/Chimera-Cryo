@@ -68,7 +68,8 @@ class ParameterSystem : public IChimeraSystem
 		unsigned int getCurrentNumberOfVariables();
 		unsigned getTotalVariationNumber ( );
 		double getVariableValue ( std::string paramName );
-		static std::vector<double> getKeyValues ( std::vector<parameterType> variables );
+		static std::vector<double> getRawKeyValues ( std::vector<parameterType> variables ); // This is randomized (if selected to be randomized variation), also this is what used in the experiment.
+		static std::vector<double> getOrderedKeyValues(std::vector<parameterType> variables); // This is the de-randomized version of previous
 		ScanRangeInfo getRangeInfo ( );
 		// setters
 		void setParameterControlActive(bool active);
