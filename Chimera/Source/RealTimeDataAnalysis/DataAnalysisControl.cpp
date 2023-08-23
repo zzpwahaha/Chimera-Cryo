@@ -21,15 +21,7 @@
 DataAnalysisControl::DataAnalysisControl (IChimeraQtWindow* parent) 
 	: IChimeraSystem(parent)
 {
-	std::vector<std::string> names = ConfigSystem::searchForFiles (PLOT_FILES_SAVE_LOCATION, str ("*.") + PLOTTING_EXTENSION);
-	for (auto name : names) {
-		PlottingInfo totalInfo (PLOT_FILES_SAVE_LOCATION + "\\" + name + "." + PLOTTING_EXTENSION); 
-		tinyPlotInfo info;
-		info.name = name;
-		info.isHist = (totalInfo.getPlotType () == "Pixel Count Histograms");
-		info.numPics = totalInfo.getPicNumber ();
-		allTinyPlots.push_back (info);
-	}
+	reloadTinyPlotInfo();
 	currentSettings.grids.resize( 1 );
 }
 
@@ -93,10 +85,16 @@ void DataAnalysisControl::handleContextMenu (const QPoint& pos) {
 			}
 			selectedIndex++;
 		}
-		QtPlotDesignerDlg* dialog = new QtPlotDesignerDlg(PLOT_FILES_SAVE_LOCATION + "\\" + selectedInfo.name + "." + PLOTTING_EXTENSION/*, unofficialPicsPerRep*/);
-		dialog->setStyleSheet(chimeraStyleSheets::stdStyleSheet());
-		dialog->setAttribute(Qt::WA_DeleteOnClose);
-		dialog->exec();
+		try {
+			QtPlotDesignerDlg* dialog = new QtPlotDesignerDlg(PLOT_FILES_SAVE_LOCATION + "\\" + selectedInfo.name + "." + PLOTTING_EXTENSION/*, unofficialPicsPerRep*/);
+			dialog->setStyleSheet(chimeraStyleSheets::stdStyleSheet());
+			dialog->setAttribute(Qt::WA_DeleteOnClose);
+			dialog->exec();
+		}
+		catch (ChimeraError& err) {
+			errBox(err.trace());
+		}
+
 		//allTinyPlots.push_back (newPlot);
 		reloadListView(); });
 	menu.addAction (editAction);
@@ -108,10 +106,20 @@ void DataAnalysisControl::handleContextMenu (const QPoint& pos) {
 		dialog->setAttribute(Qt::WA_DeleteOnClose);
 		dialog->exec();
 		//allTinyPlots.push_back (newPlot);
+		reloadTinyPlotInfo();
 		reloadListView();
 		});
 	if (item) { menu.addAction (deleteAction); }
 	menu.addAction (newPerson);
+
+	auto* refresh = new QAction("Refresh Plot List", plotListview);
+	plotListview->connect(refresh, &QAction::triggered, [this]() {
+		reloadTinyPlotInfo();
+		reloadListView();
+		});
+	if (item) { menu.addAction(deleteAction); }
+	menu.addAction(refresh);
+
 	menu.exec (plotListview->mapToGlobal (pos));
 }
 
@@ -181,6 +189,7 @@ void DataAnalysisControl::initialize( IChimeraQtWindow* parent ){
 					grids.emplace_back();
 					grids.back().useFile = true;
 					grids.back().fileName = gridName;
+					grids.back().loadGridFile(grids.back());
 				}
 			}
 			reloadGridCombo();
@@ -322,6 +331,8 @@ void DataAnalysisControl::initialize( IChimeraQtWindow* parent ){
 	//layout->addLayout(layout4);
 	layout->addLayout(layout5);
 	layout->addWidget(plotListview);
+
+	emit refreshGrid->released();
 }
 
 void DataAnalysisControl::handleDeleteGrid(int sel){
@@ -482,6 +493,9 @@ void DataAnalysisControl::fillPlotThreadInput(realTimePlotterInput* input){
 		}
 	}
 	input->grids = currentlyRunningSettings.grids;
+	for (auto& grid : input->grids) {
+		grid.loadGridFile(grid); // make sure all grids in the real time analysis is loaded
+	}
 	// as I fill the input, also check this, which is necessary info for plotting.
 	input->needsCounts = false;
 	for (auto plt : input->plotInfo){
@@ -611,6 +625,20 @@ void DataAnalysisControl::reloadListView(){
 		auto item3 = new QTableWidgetItem (item.isActive ? "YES" : "NO");
 		item3->setFlags (item3->flags () & ~Qt::ItemIsEditable);
 		plotListview->setItem (row, 2, item3);
+	}
+}
+
+void DataAnalysisControl::reloadTinyPlotInfo()
+{
+	allTinyPlots.clear();
+	std::vector<std::string> names = ConfigSystem::searchForFiles(PLOT_FILES_SAVE_LOCATION, str("*.") + PLOTTING_EXTENSION);
+	for (auto name : names) {
+		PlottingInfo totalInfo(PLOT_FILES_SAVE_LOCATION + "\\" + name + "." + PLOTTING_EXTENSION);
+		tinyPlotInfo info;
+		info.name = name;
+		info.isHist = (totalInfo.getPlotType() == "Pixel_Count_Histograms");
+		info.numPics = totalInfo.getPicNumber();
+		allTinyPlots.push_back(info);
 	}
 }
 

@@ -44,6 +44,7 @@ class DataAnalysisControl : public IChimeraSystem {
 		void updateDataSetNumberEdit( int number );
 		
 		void reloadListView();
+		void reloadTinyPlotInfo();
 		void handleAtomGridCombo( );
 		void reloadGridCombo( );
 		void fillPlotThreadInput( realTimePlotterInput* input );
