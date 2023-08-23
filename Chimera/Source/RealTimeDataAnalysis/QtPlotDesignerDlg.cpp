@@ -112,6 +112,7 @@ void QtPlotDesignerDlg::initializeWidgets () {
 
 	prcAtomBox = new QCheckBox ("Atom", this);
 	prcNoAtomBox = new QCheckBox ("No Atom", this);
+	loadPositiveResultSettings();
 	layout3->addWidget(prcAtomBox, 2, 0);
 	layout3->addWidget(prcNoAtomBox, 2, 1);
 	
@@ -231,6 +232,7 @@ void QtPlotDesignerDlg::initializeWidgets () {
 	
 	pscAtomBox = new QCheckBox ("Atom", this);
 	pscNoAtomBox = new QCheckBox ("No Atom",this);
+	loadPostSelectionConditions();
 	layout9->addWidget(pscAtomBox, 3, 0);
 	layout9->addWidget(pscNoAtomBox, 3, 1);
 
@@ -670,5 +672,5 @@ void QtPlotDesignerDlg::enableAndDisable (){
 	bool prcPixelNumSel = (prcPixelNumCombo->currentIndex () != -1);
 	prcAtomBox->setEnabled (dataSetSel && prcPictureNumSel && prcPixelNumSel); // && currentPlotInfo.getPlotType( ) == "Atoms" );
 	prcNoAtomBox->setEnabled (dataSetSel && prcPictureNumSel && prcPixelNumSel); // && currentPlotInfo.getPlotType( ) == "Atoms" );
-	binWidthEdit->setEnabled (currentPlotInfo.getPlotType () == "Pixel Count Histograms");
+	binWidthEdit->setEnabled (currentPlotInfo.getPlotType () == "Pixel_Count_Histograms");
 }
