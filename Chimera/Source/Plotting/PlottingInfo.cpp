@@ -5,6 +5,8 @@
 #include <sstream>
 #include <boost/lexical_cast.hpp>
 
+const std::array<std::string, 3> PlottingInfo::allPlotTypes = { "Pixel_Count_Histograms", "Pixel_Counts", "Atoms" };
+
 PlottingInfo::PlottingInfo(unsigned picNumber)
 {
 	// initialize things.
@@ -449,8 +451,8 @@ void PlottingInfo::savePlotInfo()
 
 	message += "/*Data set number*/\t\t" + str(dataSets.size()) + "\n";
 	message += "/*Condition number*/\t" + str(currentConditionNumber) + "\n";
-	message += "/*Picture number*/\t\t" + str(currentPixelNumber) + "\n";
-	message += "/*Pixel number*/ \t\t" + str(numberOfPictures) + "\n";
+	message += "/*Picture number*/\t\t" + str(numberOfPictures) + "\n";
+	message += "/*Pixel number*/ \t\t" + str(currentPixelNumber) + "\n";
 
 	message += "POSITIVE_RESULT_BEGIN\n";
 	for (auto& dset : dataSets)
@@ -570,6 +572,16 @@ void PlottingInfo::loadPlottingInfoFromFile(std::string fileLocation)
 	plotStream >> yLabel;
 	plotStream >> xAxis;
 	plotStream >> fileName;
+
+	auto it = std::find_if(PlottingInfo::allPlotTypes.begin(), PlottingInfo::allPlotTypes.end(), [this](std::string s) {
+		return s == generalPlotType; });
+	if (it == PlottingInfo::allPlotTypes.end()) {
+		std::string allowedType;
+		for (auto s : PlottingInfo::allPlotTypes) {
+			allowedType += (s + ", ");
+		}
+		thrower("Invalid plot types: " + generalPlotType + " reading from Plot File " + fileName + ". Allowed types are: " + allowedType);
+	}
 
 	// Data Set Number
 	std::string testString;
@@ -795,7 +807,7 @@ void PlottingInfo::loadPlottingInfoFromFile(std::string fileLocation)
 		dataSetCount++;
 	}
 
-	if (generalPlotType == "Pixel Count Histograms" || generalPlotType == "Pixel Counts")
+	if (generalPlotType.find("Pixel_Count") != std::string::npos)
 	{
 		if (dataSetCount != dataSets.size())
 		{
