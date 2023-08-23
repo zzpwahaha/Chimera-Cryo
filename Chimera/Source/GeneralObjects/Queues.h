@@ -5,19 +5,26 @@
 #include <GeneralObjects/Matrix.h>
 #include <qobject.h>
 
+// info for the picture in the experiment run in which the pic is taken
+struct picureStatus {
+	unsigned picNum;
+	unsigned repNum;
+	unsigned varNum;
+};
+
 // basically just a little nicer than a std::pair
 struct AtomImage{
-	unsigned picNum;
+	picureStatus picStat;
 	std::vector<bool> image;
 };
 
 struct NormalImage{
-	unsigned picNum;
+	picureStatus picStat;
 	Matrix<long> image;
 };
 
 struct PixList{
-	unsigned picNum;
+	picureStatus picStat;
 	std::vector<double> image;
 };
 

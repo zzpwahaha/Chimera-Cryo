@@ -39,6 +39,7 @@ struct AndorRunSettings{
 	unsigned __int64 repetitionsPerVariation=10;
 	unsigned __int64 totalVariations = 3;
 	unsigned __int64 totalPicsInVariation();
+	std::vector<size_t> variationShuffleIndex; // used for randomize variation case, to look up the true variation
 	bool repFirst = false;
 	// this is an int to reflect that the final number that's programmed to the camera is an int
 	int totalPicsInExperiment();

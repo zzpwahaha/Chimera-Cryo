@@ -119,8 +119,7 @@ void AndorCameraThreadWorker::process (){
 				(*input->imageTimes).push_back (std::chrono::high_resolution_clock::now ());
 			}
 			if (input->Andor->cameraIsRunning && safeModeCount < input->Andor->runSettings.totalPicsInExperiment ()) {
-				if (input->Andor->runSettings.acquisitionMode == AndorRunModes::mode::Kinetic) {
-					safeModeCount++;
+				if (true/*input->Andor->runSettings.acquisitionMode == AndorRunModes::mode::Kinetic*/) {
 					if (input->Andor->isCalibrating ()) {
 						//input->comm->sendCameraCalProgress (safeModeCount);
 					}
@@ -128,6 +127,7 @@ void AndorCameraThreadWorker::process (){
 						emit pictureTaken (safeModeCount);
 						//input->comm->sendCameraProgress (safeModeCount);
 					}
+					safeModeCount++;
 				}
 				else {
 					if (input->Andor->isCalibrating ()) {

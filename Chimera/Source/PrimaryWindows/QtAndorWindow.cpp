@@ -399,7 +399,8 @@ void QtAndorWindow::onCameraProgress (int picNumReported){
 	if (picNum % 2 == 1){
 		imageGrabTimes.push_back (std::chrono::high_resolution_clock::now ());
 	}
-	emit newImage ({ picNum, calPicData[(picNum/* - 1*/) % curSettings.picsPerRepetition] }); 
+	auto repVar = andor.getCurrentRepVarNumber(picNum);
+	emit newImage({ {picNum, repVar.first, repVar.second}, calPicData[(picNum/* - 1*/) % curSettings.picsPerRepetition] });
 	qDebug() << "send Image data for drawing for image " << picNum << " at time " << timerE.elapsed() << " ms";
 	auto picsToDraw = andorSettingsCtrl.getImagesToDraw (calPicData);
 	try
@@ -813,7 +814,7 @@ void QtAndorWindow::completePlotterStart () {
 
 	bool gridHasBeenSet = false;
 	for (auto gridInfo : pltInput->grids) {
-		if (!(gridInfo.gridOrigin == coordinate (0, 0))) {
+		if (!(gridInfo.gridOrigin == coordinate(0, 0)) || gridInfo.useFile) {
 			gridHasBeenSet = true;
 			break;
 		}
