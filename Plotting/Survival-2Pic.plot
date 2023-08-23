@@ -3,7 +3,7 @@ Version: 2.1
 /*Plot type*/			Atoms
 /*Y label*/				probability
 /*X label*/				Variation_Average
-/*Plot File name*/		test_2pic
+/*Plot File name*/		Survival-2Pic
 /*Data set number*/		1
 /*Condition number*/	1
 /*Picture number*/		2
@@ -11,10 +11,10 @@ Version: 2.1
 POSITIVE_RESULT_BEGIN
 DATA_SET_BEGIN
 PICTURE_BEGIN
-0
+1
 PICTURE_END
 PICTURE_BEGIN
-0
+1
 PICTURE_END
 DATA_SET_END
 POSITIVE_RESULT_END
@@ -25,7 +25,7 @@ PICTURE_BEGIN
 1
 PICTURE_END
 PICTURE_BEGIN
-1
+0
 PICTURE_END
 DATA_SET_END
 CONDITION_END
