@@ -1027,7 +1027,3 @@ void QtAndorWindow::manualProgramCameraSetting()
 {
 }
 
-void QtAndorWindow::handleTransformationModeChange () {
-	auto mode = andorSettingsCtrl.getTransformationMode ();
-	pics.setTransformationMode (mode);
-}

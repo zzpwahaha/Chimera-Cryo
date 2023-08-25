@@ -102,7 +102,6 @@ class QtAndorWindow : public IChimeraQtWindow{
 		void fillExpDeviceList (DeviceList& list);
 		CruncherThreadWorker* atomCruncherWorker;
 		AnalysisThreadWorker* analysisThreadWorker;
-		void handleTransformationModeChange ();
 		void manualArmCamera ();
 		NewPythonHandler* getPython ();
 
