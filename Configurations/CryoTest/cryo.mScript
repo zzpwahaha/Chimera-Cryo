@@ -1,4 +1,5 @@
 t = 1/2
+pulseon: do1_5 1
 repeat: x
 t += x
 on: DO1_0
@@ -22,6 +23,6 @@ dac: dac0_0 z
 ddsfreq: dds0_0 z
 ol: ol0_0 z
 end
-
-t += 100
+pulseon: do1_5 1
+t += 500
 on: DO1_0

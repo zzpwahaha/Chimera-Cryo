@@ -827,6 +827,3 @@ std::vector<Matrix<long>> AndorCameraSettingsControl::getImagesToDraw ( const st
 	return imagesToDraw;
 }
 
-Qt::TransformationMode AndorCameraSettingsControl::getTransformationMode (){
-	return picSettingsObj.getTransformationMode();
-}

@@ -34,21 +34,21 @@ void PictureSettingsControl::initialize( IChimeraQtWindow* parent ){
 	//auto handleChangeNoGui = [this, handleChange]() { handleChange(false); };
 	//auto handleChangeGui = [this, handleChange]() { handleChange(true); };
 
-	QHBoxLayout* layout1 = new QHBoxLayout(this);
-	layout1->setContentsMargins(0, 0, 0, 0);
-	picScaleFactorLabel = new QLabel("Pic. Scale Factor:", parent);
-	picScaleFactorEdit = new QLineEdit("50", parent);
-	parent->connect(picScaleFactorEdit, &QLineEdit::textChanged, handleChange);
+	//QHBoxLayout* layout1 = new QHBoxLayout(this);
+	//layout1->setContentsMargins(0, 0, 0, 0);
+	//picScaleFactorLabel = new QLabel("Pic. Scale Factor:", parent);
+	//picScaleFactorEdit = new QLineEdit("50", parent);
+	//parent->connect(picScaleFactorEdit, &QLineEdit::textChanged, handleChange);
 
-	transfModeLabel = new QLabel ("Qt Image Transformation Mode:", parent);
-	transformationModeCombo = new CQComboBox (parent);
-	transformationModeCombo->addItems ({ "Fast", "Smooth" });
-	parent->connect (transformationModeCombo, qOverload<int> (&QComboBox::currentIndexChanged), 
-		parent->andorWin, &QtAndorWindow::handleTransformationModeChange);
-	layout1->addWidget(picScaleFactorLabel, 0);
-	layout1->addWidget(picScaleFactorEdit, 0);
-	layout1->addWidget(transfModeLabel, 0);
-	layout1->addWidget(transformationModeCombo, 1);
+	//transfModeLabel = new QLabel ("Qt Image Transformation Mode:", parent);
+	//transformationModeCombo = new CQComboBox (parent);
+	//transformationModeCombo->addItems ({ "Fast", "Smooth" });
+	//parent->connect (transformationModeCombo, qOverload<int> (&QComboBox::currentIndexChanged), 
+	//	parent->andorWin, &QtAndorWindow::handleTransformationModeChange);
+	//layout1->addWidget(picScaleFactorLabel, 0);
+	//layout1->addWidget(picScaleFactorEdit, 0);
+	//layout1->addWidget(transfModeLabel, 0);
+	//layout1->addWidget(transformationModeCombo, 1);
 
 	QGridLayout* layout2 = new QGridLayout(this);
 	layout2->setContentsMargins(0, 0, 0, 0);
@@ -128,7 +128,7 @@ void PictureSettingsControl::initialize( IChimeraQtWindow* parent ){
 	setPictureControlEnabled (1, false);
 	setPictureControlEnabled (2, false);
 	setPictureControlEnabled (3, false);
-	layout->addLayout(layout1);
+	//layout->addLayout(layout1);
 	layout->addLayout(layout2);
 }
 
@@ -161,7 +161,7 @@ std::array<std::string, 4> PictureSettingsControl::getThresholdStrings(){
 
 void PictureSettingsControl::handleSaveConfig(ConfigStream& saveFile){
 	saveFile << "PICTURE_SETTINGS\n";
-	saveFile << "/*Transformation Mode:*/ " << str (transformationModeCombo->currentText ());
+	//saveFile << "/*Transformation Mode:*/ " << str (transformationModeCombo->currentText ());
 	saveFile << "\n/*Color Options:*/ ";
 	for (auto color : currentPicSettings.colors){
 		saveFile << color << " ";
@@ -174,14 +174,12 @@ void PictureSettingsControl::handleSaveConfig(ConfigStream& saveFile){
 	for ( auto saOpt : getSoftwareAccumulationOptions ( ) ){
 		saveFile << saOpt.accumAll << " " << saOpt.accumNum << " ";
 	}
-	saveFile << "\n/*Pic Scale Factor:*/\t" << str(picScaleFactorEdit->text());
+	//saveFile << "\n/*Pic Scale Factor:*/\t" << str(picScaleFactorEdit->text());
 	saveFile << "\nEND_PICTURE_SETTINGS\n";
 }
 
 andorPicSettingsGroup PictureSettingsControl::getPictureSettingsFromConfig (ConfigStream& configFile ){
 	andorPicSettingsGroup fileSettings;
-	std::string transformationMode;
-	configFile >> fileSettings.tMode;
 	for ( auto& color : fileSettings.colors ){
 		configFile >> color;
 	}
@@ -191,7 +189,6 @@ andorPicSettingsGroup PictureSettingsControl::getPictureSettingsFromConfig (Conf
 	for ( auto& opt : fileSettings.saOpts ){
 		configFile >> opt.accumAll >> opt.accumNum;
 	}
-	configFile >> fileSettings.picScaleFactor;
 	return fileSettings;
 }
 
@@ -331,13 +328,6 @@ void PictureSettingsControl::updateAllSettings ( andorPicSettingsGroup inputSett
 	updateColormaps ( inputSettings.colors );
 	setThresholds ( inputSettings.thresholdStrs );
 	setSoftwareAccumulationOptions ( inputSettings.saOpts );
-	if (inputSettings.tMode == "Fast") {
-		transformationModeCombo->setCurrentIndex (0);
-	}
-	else {
-		transformationModeCombo->setCurrentIndex (1);
-	}
-	picScaleFactorEdit->setText(qstr(inputSettings.picScaleFactor));
 }
 
 std::array<std::vector<int>, 4> PictureSettingsControl::getThresholds ( ){
@@ -382,15 +372,6 @@ void PictureSettingsControl::updateSettings( ){
 	}
 }
 
-Qt::TransformationMode PictureSettingsControl::getTransformationMode (){
-	if (transformationModeCombo->currentText () == "Fast") {
-		return Qt::TransformationMode::FastTransformation;
-	}
-	else {
-		return Qt::TransformationMode::SmoothTransformation;
-	}
-}
-
 void PictureSettingsControl::setEnabledStatus (bool viewRunningSettings) {
 	if (viewRunningSettings) {
 		for (auto num : range (4)) {
@@ -410,16 +391,6 @@ void PictureSettingsControl::setEnabledStatus (bool viewRunningSettings) {
 		setUnofficialPicsPerRep (unofficialPicsPerRep);
 	}
 }
-
-int PictureSettingsControl::getPicScaleFactor() {
-	try {
-		return boost::lexical_cast<int>(str(picScaleFactorEdit->text()));
-	}
-	catch (boost::bad_lexical_cast& err) {
-		thrower("Failed to convert picture scale factor to integer!");
-	}
-}
-
 
 void PictureSettingsControl::toggleExposureTimeEditGui(bool enable)
 {

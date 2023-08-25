@@ -45,6 +45,7 @@ public:
 	void handleContextMenu(const QPoint& pos);
 	QCustomPlot* plot = nullptr;
 	void setControlLocation(QRect loc);
+	QCPAxisRect* getCenterAxisRect(); // used in PictureControl for drawing rect for realtimeAnalysis
 
 	//used only in densityWithHisto plot, for showing the value of the mouse point, return x,y,value
 	std::vector<double> handleMousePosOnCMap(QMouseEvent* event);

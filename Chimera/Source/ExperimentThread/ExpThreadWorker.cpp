@@ -1250,7 +1250,7 @@ void ExpThreadWorker::calculateAdoVariations (ExpRuntimeData& runtime) {
 
 void ExpThreadWorker::runConsistencyChecks (std::vector<parameterType> expParams, std::vector<calSettings> calibrations) {
 	Sleep (1000);
-	emit plot_Xvals_determined (ParameterSystem::getKeyValues (expParams));
+	emit plot_Xvals_determined (ParameterSystem::getOrderedKeyValues (expParams));
 	emit expParamsSet (expParams);
 	//input->globalControl.setUsages (expParams);
 	for (auto& var : expParams) {

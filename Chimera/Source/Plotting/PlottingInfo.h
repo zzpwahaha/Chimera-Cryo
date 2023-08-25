@@ -105,6 +105,8 @@ class PlottingInfo
 		analysisGroupLocation& groupInfo( unsigned pixelNumber, unsigned pixelSet );
 		analysisGroupLocation  groupInfo( unsigned pixelNumber, unsigned pixelSet ) const;
 
+		static const std::array<std::string, 3> allPlotTypes;
+
 	private:
 		// Versions of the plot save file system. 
 		// Version 1.x refers to files that were outputted with no version number

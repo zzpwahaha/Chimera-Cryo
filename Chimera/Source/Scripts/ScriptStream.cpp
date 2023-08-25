@@ -190,7 +190,7 @@ void ScriptStream::eatComments(){
 		if (currentChar == '%'){
 			std::getline( *this, comment, '\n' );
 		}
-		if (currentChar == '/' && get() == '*'){
+		if (currentChar == '/' && get() == '*'){ // ZZP 2023/02/19, this looks strange, what if it get!='*', and the next get will miss this char
 			// handle open-ended comments.
 	 		while (!eof())	{
 				if (currentChar == '*'){

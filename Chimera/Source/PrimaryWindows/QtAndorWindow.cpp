@@ -133,6 +133,26 @@ void QtAndorWindow::refreshPics()
 	pics.setSinglePicture(andorSettingsCtrl.getConfigSettings().andor.imageSettings);
 }
 
+void QtAndorWindow::displayAnalysisGrid(atomGrid grids)
+{
+	try {
+		for (auto& pic : pics.pictures) {
+			pic.drawAnalysisMarkers(grids);
+		}
+	}
+	catch (ChimeraError& err) {
+		reportErr(qstr(err.trace()));
+	}
+
+}
+
+void QtAndorWindow::removeAnalysisGrid()
+{
+	for (auto& pic : pics.pictures) {
+		pic.removeAnalysisMarkers();
+	}
+}
+
 bool QtAndorWindow::wasJustCalibrated (){
 	return justCalibrated;
 }
@@ -379,7 +399,8 @@ void QtAndorWindow::onCameraProgress (int picNumReported){
 	if (picNum % 2 == 1){
 		imageGrabTimes.push_back (std::chrono::high_resolution_clock::now ());
 	}
-	emit newImage ({ picNum, calPicData[(picNum/* - 1*/) % curSettings.picsPerRepetition] }); 
+	auto repVar = andor.getCurrentRepVarNumber(picNum);
+	emit newImage({ {picNum, repVar.first, repVar.second}, calPicData[(picNum/* - 1*/) % curSettings.picsPerRepetition] });
 	qDebug() << "send Image data for drawing for image " << picNum << " at time " << timerE.elapsed() << " ms";
 	auto picsToDraw = andorSettingsCtrl.getImagesToDraw (calPicData);
 	try
@@ -464,10 +485,6 @@ void QtAndorWindow::onCameraProgress (int picNumReported){
 	if (picNum == curSettings.totalPicsInExperiment() - 1) {
 		andor.onFinish();
 	}
-}
-
-void QtAndorWindow::handleSetAnalysisPress (){
-	analysisHandler.saveGridParams ();
 }
 
 void QtAndorWindow::wakeRearranger (){
@@ -766,7 +783,7 @@ void QtAndorWindow::completePlotterStart () {
 	/// start the plotting thread.
 	plotThreadActive = true;
 	plotThreadAborting = false;
-	auto* pltInput = new realTimePlotterInput (analysisHandler.getPlotTime ());
+	auto* pltInput = new realTimePlotterInput ();
 	pltInput->plotParentWindow = this;
 	pltInput->aborting = &plotThreadAborting;
 	pltInput->active = &plotThreadActive;
@@ -782,7 +799,6 @@ void QtAndorWindow::completePlotterStart () {
 	pltInput->alertThreshold = alerts.getAlertThreshold ();
 	pltInput->wantAtomAlerts = alerts.wantsAtomAlerts ();
 	pltInput->numberOfRunsToAverage = 5;
-	pltInput->plottingFrequency = analysisHandler.getPlotFreq ();
 	analysisHandler.fillPlotThreadInput (pltInput);
 	// remove old plots that aren't trying to sustain.
 	unsigned mainPlotInc = 0;
@@ -798,7 +814,7 @@ void QtAndorWindow::completePlotterStart () {
 
 	bool gridHasBeenSet = false;
 	for (auto gridInfo : pltInput->grids) {
-		if (!(gridInfo.topLeftCorner == coordinate (0, 0))) {
+		if (!(gridInfo.gridOrigin == coordinate(0, 0)) || gridInfo.useFile) {
 			gridHasBeenSet = true;
 			break;
 		}
@@ -1011,7 +1027,3 @@ void QtAndorWindow::manualProgramCameraSetting()
 {
 }
 
-void QtAndorWindow::handleTransformationModeChange () {
-	auto mode = andorSettingsCtrl.getTransformationMode ();
-	pics.setTransformationMode (mode);
-}

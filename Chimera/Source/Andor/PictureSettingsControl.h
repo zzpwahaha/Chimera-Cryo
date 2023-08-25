@@ -47,12 +47,10 @@ class PictureSettingsControl : public QWidget
 		void updateSettings( );
 		void updateColormaps ( std::array<int, 4> colorsIndexes );
 		void setUnofficialPicsPerRep( unsigned picNum);
-		int getPicScaleFactor();
 		std::array<std::string, 4> getThresholdStrings();
 		std::array<softwareAccumulationOption, 4> getSoftwareAccumulationOptions ( );
 		void setSoftwareAccumulationOptions ( std::array<softwareAccumulationOption, 4> opts );
 		static andorPicSettingsGroup getPictureSettingsFromConfig (ConfigStream& configFile );
-		Qt::TransformationMode getTransformationMode ();
 		void setEnabledStatus (bool viewRunningSettings);
 
 		void toggleExposureTimeEditGui(bool enable);
@@ -70,10 +68,10 @@ class PictureSettingsControl : public QWidget
 		QLabel* colormapLabel;
 		QLabel* displayTypeLabel;
 		QLabel* softwareAccumulationLabel;
-		QLabel* picScaleFactorLabel;
-		QLineEdit* picScaleFactorEdit;
-		QLabel* transfModeLabel;
-		CQComboBox* transformationModeCombo;
+		//QLabel* picScaleFactorLabel;
+		//QLineEdit* picScaleFactorEdit;
+		//QLabel* transfModeLabel;
+		//CQComboBox* transformationModeCombo;
 		// 
 		std::array<CQRadioButton*, 4> totalNumberChoice = std::array<CQRadioButton*, 4>();
 		std::array<QLabel*, 4> pictureNumbers = std::array<QLabel*, 4>();

@@ -5,6 +5,8 @@
 #include <sstream>
 #include <boost/lexical_cast.hpp>
 
+const std::array<std::string, 3> PlottingInfo::allPlotTypes = { "Pixel_Count_Histograms", "Pixel_Counts", "Atoms" };
+
 PlottingInfo::PlottingInfo(unsigned picNumber)
 {
 	// initialize things.
@@ -441,16 +443,16 @@ void PlottingInfo::savePlotInfo()
 	}
 	std::string message;
 	message += "Version: " + str( versionMajor ) + "." + str( versionMinor ) + "\n";
-	message += title + "\n";
-	message += generalPlotType + "\n";
-	message += yLabel + "\n";
-	message += xAxis + "\n";
-	message += fileName + "\n";
+	message += "/*Plot title*/\t\t\t" + title + "\n";
+	message += "/*Plot type*/\t\t\t" + generalPlotType + "\n";
+	message += "/*Y label*/\t\t\t\t" + yLabel + "\n";
+	message += "/*X label*/\t\t\t\t" + xAxis + "\n";
+	message += "/*Plot File name*/\t\t" + fileName + "\n";
 
-	message += str(dataSets.size()) + "\n";
-	message += str(currentConditionNumber) + "\n";
-	message += str(currentPixelNumber) + "\n";
-	message += str(numberOfPictures) + "\n";
+	message += "/*Data set number*/\t\t" + str(dataSets.size()) + "\n";
+	message += "/*Condition number*/\t" + str(currentConditionNumber) + "\n";
+	message += "/*Picture number*/\t\t" + str(numberOfPictures) + "\n";
+	message += "/*Pixel number*/ \t\t" + str(currentPixelNumber) + "\n";
 
 	message += "POSITIVE_RESULT_BEGIN\n";
 	for (auto& dset : dataSets)
@@ -558,59 +560,76 @@ void PlottingInfo::loadPlottingInfoFromFile(std::string fileLocation)
 		tempDouble /= 10;
 	}
 	versionMinor = int(std::round( tempDouble ));
-	plotStream.get( );
-	getline(plotStream, title);
-	getline(plotStream, generalPlotType);
-	getline(plotStream, yLabel);
-	getline(plotStream, xAxis);
-	getline(plotStream, fileName);
+	//plotStream.get( );
+	//getline(plotStream, title);
+	//getline(plotStream, generalPlotType);
+	//getline(plotStream, yLabel);
+	//getline(plotStream, xAxis);
+	//getline(plotStream, fileName);
+
+	plotStream >> title;
+	plotStream >> generalPlotType;
+	plotStream >> yLabel;
+	plotStream >> xAxis;
+	plotStream >> fileName;
+
+	auto it = std::find_if(PlottingInfo::allPlotTypes.begin(), PlottingInfo::allPlotTypes.end(), [this](std::string s) {
+		return s == generalPlotType; });
+	if (it == PlottingInfo::allPlotTypes.end()) {
+		std::string allowedType;
+		for (auto s : PlottingInfo::allPlotTypes) {
+			allowedType += (s + ", ");
+		}
+		thrower("Invalid plot types: " + generalPlotType + " reading from Plot File " + fileName + ". Allowed types are: " + allowedType);
+	}
 
 	// Data Set Number
 	std::string testString;
-	getline(plotStream, testString);
+	//plotStream.get( );
+	//getline(plotStream, testString);
 	try
 	{
-		int tempDataSetNumber = boost::lexical_cast<int>(testString);
+		int tempDataSetNumber; /*boost::lexical_cast<int>(testString);*/
+		plotStream >> tempDataSetNumber;
 		resetDataSetNumber(tempDataSetNumber);
 	}
-	catch ( boost::bad_lexical_cast&)
+	catch (ChimeraError& /*boost::bad_lexical_cast&*/)
 	{
-		throwNested ("ERROR: Couldn't read data set number from file. The data set string was " + testString);
+		throwNested ("ERROR: Couldn't read data set number from file.");
 	}
 	// Condition Number
-	getline(plotStream, testString);
 	try
 	{
-		currentConditionNumber = boost::lexical_cast<int>(testString);
+		plotStream >> currentConditionNumber; 
 		resetConditionNumber(currentConditionNumber);
 	}
-	catch ( boost::bad_lexical_cast&)
+	catch (ChimeraError&)
 	{
-		throwNested ("ERROR: Couldn't read post-selection number from file. The post-selection string was " + testString);
+		throwNested ("ERROR: Couldn't read post-selection number from file.");
 	}
-	// Pixel Number
-	getline(plotStream, testString);
 	// Picture Number
 	std::string testString2;
-	getline(plotStream, testString2);
 	try
 	{
-		numberOfPictures = boost::lexical_cast<int>(testString2);
+		plotStream >> numberOfPictures;
 		resetPictureNumber(numberOfPictures);
 	}
-	catch ( boost::bad_lexical_cast&)
+	catch (ChimeraError&)
 	{
-		throwNested ("ERROR: Couldn't read Picture number from file. The picture string was " + testString);
+		throwNested ("ERROR: Couldn't read Picture number from file.");
 	}
+	// Pixel Number
 	try
 	{
-		currentPixelNumber = boost::lexical_cast<int>(testString);
+		plotStream >> currentPixelNumber;
 		resetPixelNumber(currentPixelNumber);
 	}
-	catch ( boost::bad_lexical_cast&)
+	catch (ChimeraError&)
 	{
-		throwNested ("ERROR: Couldn't read pixel number from file. The pixel string was " + testString);
+		throwNested ("ERROR: Couldn't read pixel number from file.");
 	}
+
+
 	/// Analys pixels
 	ConfigSystem::checkDelimiterLine(plotStream, "POSITIVE_RESULT_BEGIN" );
 	unsigned dataSetCount = 0;
@@ -788,7 +807,7 @@ void PlottingInfo::loadPlottingInfoFromFile(std::string fileLocation)
 		dataSetCount++;
 	}
 
-	if (generalPlotType == "Pixel Count Histograms" || generalPlotType == "Pixel Counts")
+	if (generalPlotType.find("Pixel_Count") != std::string::npos)
 	{
 		if (dataSetCount != dataSets.size())
 		{

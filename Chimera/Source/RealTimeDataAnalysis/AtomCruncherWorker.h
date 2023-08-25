@@ -23,6 +23,6 @@ class CruncherThreadWorker : public QObject {
     private:
         atomCruncherInput* input;
         unsigned imageCount;
-        std::vector<std::vector<long>> monitoredPixelIndecies;
+        std::vector<std::vector<std::vector<long>>> monitoredPixelIndecies; // grid -> atom -> monitored pixels
 };
 

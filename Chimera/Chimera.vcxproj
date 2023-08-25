@@ -146,6 +146,7 @@
     <ClCompile Include="Source\GigaMOOG\MessagePrinter.cpp" />
     <ClCompile Include="Source\GigaMOOG\MessageSender.cpp" />
     <ClCompile Include="Source\MiscellaneousExperimentOptions\InExpCalControl.cpp" />
+    <ClCompile Include="Source\RealTimeDataAnalysis\atomGrid.cpp" />
     <ClCompile Include="Source\RealTimeMOTAnalysis\MOTAnalysisSystem.cpp" />
     <ClCompile Include="Source\PrimaryWindows\QtAnalysisWindow.cpp" />
     <ClCompile Include="Source\RealTimeMOTAnalysis\MOTAnalysisControl.cpp" />

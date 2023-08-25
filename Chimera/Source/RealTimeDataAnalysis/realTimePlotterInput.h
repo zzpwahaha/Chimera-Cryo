@@ -14,9 +14,8 @@ class IChimeraQtWindow;
 class AnalysisThreadWorker;
 
 struct realTimePlotterInput{
-	realTimePlotterInput ( std::atomic<unsigned>& pltTime ) : plotTime ( pltTime ) { }
+	realTimePlotterInput ( ) { }
 	//AnalysisThreadWorker* worker;
-	std::atomic<unsigned>& plotTime;
 	//AndorCameraSettings cameraSettings;
 	IChimeraQtWindow* plotParentWindow;
 
@@ -36,7 +35,6 @@ struct realTimePlotterInput{
 	unsigned alertThreshold;
 	bool wantAtomAlerts;
 
-	unsigned plottingFrequency;
 	unsigned numberOfRunsToAverage;
 	bool needsCounts;
 };

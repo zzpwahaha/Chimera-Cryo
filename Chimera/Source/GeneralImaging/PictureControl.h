@@ -40,7 +40,8 @@ class PictureControl : public QWidget{
 		void drawGrid(QPainter& painter);
 		void drawCircle(coordinate selectedLocation, QPainter& painter);
 		void setSoftwareAccumulationOption ( softwareAccumulationOption opt );
-		void drawAnalysisMarkers( std::vector<atomGrid> gridInfo, QPainter& painter);
+		void drawAnalysisMarkers(atomGrid gridInfo);
+		void removeAnalysisMarkers();
 		void handleEditChange( int id );
 		void updatePalette(QVector<QRgb> pallete );
 		void redrawImage();
@@ -81,6 +82,8 @@ class PictureControl : public QWidget{
 		// in the most recent run.
 		unsigned maxWidth, maxHeight;
 		bool active;
+		std::vector<QCPItemRect*> analysisMarkers;
+
 		
 		// unofficial; these are just parameters this uses to keep track of grid size on redraws.
 		imageParameters unofficialImageParameters;

@@ -97,6 +97,43 @@ AndorCameraCore::AndorCameraCore( bool safemode_opt ) : safemode( safemode_opt )
 	flume.setEnumString(L"AuxOutSourceTwo", L"ExternalShutterControl");
 	flume.setEnumString(L"FanSpeed", L"Off");
 
+
+
+	H5::H5File fp(PLOT_FILES_SAVE_LOCATION + "\\test_data" + "\\test_20230213.hdf5", H5F_ACC_RDONLY);
+	H5::DataSet dset = fp.openDataSet("/default");
+	H5::DataSpace dspace = dset.getSpace();
+	hsize_t dims[3];
+	hsize_t rank = dspace.getSimpleExtentDims(dims, NULL);
+	// Define the memory dataspace
+	hsize_t dimsm[2] = { dims[1] , dims[2] };
+	H5::DataSpace memspace(2, dimsm);
+	// Initialize hyperslabs
+	hsize_t dataCount[3] = { 1, dims[1], dims[2] };
+	hsize_t dataOffset[3] = { 0, 0, 0 };
+	const hsize_t memCount[2] = { dims[1], dims[2] };
+	const hsize_t memOffset[2] = { 0, 0 };
+	memspace.selectHyperslab(H5S_SELECT_SET, memCount, memOffset);
+	dspace.selectHyperslab(H5S_SELECT_SET, dataCount, dataOffset);
+	std::vector<long> tmp(dims[1]*dims[2]);
+	try {
+		dset.read(tmp.data(), H5::PredType::NATIVE_LONG, memspace, dspace);
+
+	}
+	catch (H5::Exception& err) {
+		FILE* pFile;
+		// note the "w", so this file is constantly overwritten.
+		fopen_s(&pFile, "TempH5Log.txt", "w");
+		if (pFile != 0) {
+			err.printErrorStack(pFile);
+			fclose(pFile);
+		}
+		std::ifstream readFile("TempH5Log.txt");
+		if (!readFile) {
+			thrower("Failed to get full HDF5 Error! Read file failed to open?!?");
+		}
+		std::stringstream buffer;
+		buffer << readFile.rdbuf();
+	}
 }
 
 void AndorCameraCore::initializeClass(IChimeraQtWindow* parent, chronoTimes* imageTimes){
@@ -215,7 +252,7 @@ void AndorCameraCore::queueBuffers()
  */
 void AndorCameraCore::armCamera( double& minKineticCycleTime ){
 	if (safemode) {
-		return;
+		//return;
 	}
 	if (cameraIsRunning) {
 		qDebug() << "Camera is running in sequence with picture number" << currentPictureNumber << ". Pass AndorCameraCore::armCamera from deviceProgramVariaton";
@@ -272,7 +309,7 @@ void AndorCameraCore::armCamera( double& minKineticCycleTime ){
 	cameraIsRunning = true;
 	//cameraIsArmed = true;
 
-	AT_64 ImageSizeBytes;
+	AT_64 ImageSizeBytes = 0;
 	flume.getInt(L"Image Size Bytes", &ImageSizeBytes);
 	bufferSize = static_cast<int>(ImageSizeBytes);
 	//Allocate a number of memory buffers to store frames
@@ -412,30 +449,46 @@ std::vector<Matrix<long>> AndorCameraCore::acquireImageData (){
 			}
 		}
 		else{
-			for (auto imageVecInc : range (repImages[experimentPictureNumber].size ()))	{
-				std::random_device rd;
-				std::mt19937 e2 (rd ());
-				std::normal_distribution<> dist (180, 20);
-				std::normal_distribution<> dist2 (350, 100);
-				tempImage.data[imageVecInc] = dist (e2) + 10;
-				if (((imageVecInc / imSettings.widthBinned ()) % 2 == 1) && ((imageVecInc % imSettings.widthBinned()) % 2 == 1)){
-					// can have an atom here.
-					if (unsigned (rand ()) % 300 > imageVecInc + 50){
-						// use the exposure time and em gain level 
-						tempImage.data[imageVecInc] += runSettings.exposureTimes[experimentPictureNumber] * 1e3 * dist2 (e2);
-						//if (runSettings.emGainModeIsOn)
-						//{
-						//	tempImage.data[imageVecInc] *= runSettings.emGainLevel;
-						//}
-					}
-				}
-			}
-			auto& ims = runSettings.imageSettings;
-			for (auto rowI : range (repImages[experimentPictureNumber].getRows ()))	{
-				for (auto colI : range (repImages[experimentPictureNumber].getCols ()))	{
-					repImages[experimentPictureNumber] (rowI, colI) = tempImage (tempImage.getRows()-colI-1, rowI);
-				}
-			}
+			//for (auto imageVecInc : range (repImages[experimentPictureNumber].size ()))	{
+			//	std::random_device rd;
+			//	std::mt19937 e2 (rd ());
+			//	std::normal_distribution<> dist (180, 20);
+			//	std::normal_distribution<> dist2 (350, 100);
+			//	tempImage.data[imageVecInc] = dist (e2) + 10;
+			//	if (((imageVecInc / imSettings.widthBinned ()) % 2 == 1) && ((imageVecInc % imSettings.widthBinned()) % 2 == 1)){
+			//		// can have an atom here.
+			//		if (unsigned (rand ()) % 300 > imageVecInc + 50){
+			//			// use the exposure time and em gain level 
+			//			tempImage.data[imageVecInc] += runSettings.exposureTimes[experimentPictureNumber] * 1e3 * dist2 (e2);
+			//			//if (runSettings.emGainModeIsOn)
+			//			//{
+			//			//	tempImage.data[imageVecInc] *= runSettings.emGainLevel;
+			//			//}
+			//		}
+			//	}
+			//}
+			//auto& ims = runSettings.imageSettings;
+			//for (auto rowI : range (repImages[experimentPictureNumber].getRows ()))	{
+			//	for (auto colI : range (repImages[experimentPictureNumber].getCols ()))	{
+			//		repImages[experimentPictureNumber] (rowI, colI) = tempImage (tempImage.getRows()-colI-1, rowI);
+			//	}
+			//}
+			H5::H5File fp(PLOT_FILES_SAVE_LOCATION + "\\test_data" + "\\test_20230213.hdf5", H5F_ACC_RDONLY);
+			H5::DataSet dset = fp.openDataSet("/default");
+			H5::DataSpace dspace = dset.getSpace();
+			hsize_t dims[3];
+			hsize_t rank = dspace.getSimpleExtentDims(dims, NULL);
+			// Define the memory dataspace
+			hsize_t dimsm[2] = { dims[1] , dims[2] };
+			H5::DataSpace memspace(2, dimsm);
+			// Initialize hyperslabs
+			hsize_t dataCount[3] = { 1, dims[1], dims[2] };
+			hsize_t dataOffset[3] = { currentPictureNumber % dims[0], 0, 0 };
+			const hsize_t memCount[2] = { dims[1], dims[2] };
+			const hsize_t memOffset[2] = { 0, 0 };
+			memspace.selectHyperslab(H5S_SELECT_SET, memCount, memOffset);
+			dspace.selectHyperslab(H5S_SELECT_SET, dataCount, dataOffset);
+			dset.read(repImages[experimentPictureNumber].data.data(), H5::PredType::NATIVE_LONG, memspace, dspace);
 		}
 		return repImages;
 	}
@@ -896,6 +949,7 @@ void AndorCameraCore::loadExpSettings (ConfigStream& stream){
 
 void AndorCameraCore::calculateVariations (std::vector<parameterType>& params, ExpThreadWorker* threadworker){
 	expRunSettings.totalVariations = (params.size () == 0 ? 1 : params.front ().keyValues.size ());;
+	expRunSettings.variationShuffleIndex = params.front().shuffleIndex;
 	if (experimentActive){
 		setSettings (expRunSettings);
 		emit threadworker->prepareAndor (&expRunSettings, expAnalysisSettings);
@@ -907,6 +961,23 @@ void AndorCameraCore::programVariation (unsigned variationInc, std::vector<param
 		double kinTime;
 		armCamera (kinTime);
 	}
+}
+
+std::pair<unsigned, unsigned> AndorCameraCore::getCurrentRepVarNumber(unsigned int currentPicNumber)
+{
+	unsigned currentRepNumber, currentVarNumber;
+	if (expRunSettings.repFirst) {
+		currentVarNumber = (currentPicNumber / expRunSettings.picsPerRepetition) / expRunSettings.repetitionsPerVariation;
+		currentRepNumber = (currentPicNumber / expRunSettings.picsPerRepetition) % expRunSettings.repetitionsPerVariation;
+	}
+	else {
+		currentRepNumber = (currentPicNumber / expRunSettings.picsPerRepetition) / expRunSettings.totalVariations;
+		currentVarNumber = (currentPicNumber / expRunSettings.picsPerRepetition) % expRunSettings.totalVariations;
+	}
+	if (expRunSettings.variationShuffleIndex.size() < currentVarNumber) {
+		thrower("AndorCamera variationShuffleIndex size" + str(expRunSettings.variationShuffleIndex.size()) + " is smaller than currentVarNumber" + str(currentVarNumber) + "A low level bug!");
+	}
+	return std::pair<unsigned, unsigned>(currentRepNumber, expRunSettings.variationShuffleIndex[currentVarNumber]);
 }
 
 void AndorCameraCore::normalFinish (){

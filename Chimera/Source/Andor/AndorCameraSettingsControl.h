@@ -63,7 +63,6 @@ class AndorCameraSettingsControl : public QWidget
 		std::vector<Matrix<long>> getImagesToDraw( const std::vector<Matrix<long>>& rawData  );
 		const imageParameters fullResolution = { 1,2048,1,2048,1,1 };
 		std::array<softwareAccumulationOption, 4> getSoftwareAccumulationOptions ( );
-		Qt::TransformationMode getTransformationMode ();
 		void setConfigSettings (AndorRunSettings inputSettings);
 		AndorRunSettings getRunningSettings ();
 		unsigned getHsSpeed ();

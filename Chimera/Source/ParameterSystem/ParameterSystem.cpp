@@ -516,7 +516,7 @@ ScanRangeInfo ParameterSystem::getRangeInfo ( ){
 }
 
 
-std::vector<double> ParameterSystem::getKeyValues( std::vector<parameterType> params ){
+std::vector<double> ParameterSystem::getRawKeyValues( std::vector<parameterType> params ){
 	for ( auto variable : params){
 		if ( variable.valuesVary ){
 			return variable.keyValues;
@@ -524,6 +524,21 @@ std::vector<double> ParameterSystem::getKeyValues( std::vector<parameterType> pa
 	}
 	// no varying parameters found.
 	return std::vector<double>( 1, 0 );
+}
+
+std::vector<double> ParameterSystem::getOrderedKeyValues(std::vector<parameterType> params)
+{
+	for (auto variable : params) {
+		if (variable.valuesVary) {
+			std::vector<double> keyVals(variable.keyValues.size());
+			for (auto idx : range(keyVals.size())) {
+				keyVals[idx] = variable.keyValues[variable.shuffleIndexReverse[idx]];
+			}
+			return keyVals;
+		}
+	}
+	// no varying parameters found.
+	return std::vector<double>(1, 0);
 }
 
 

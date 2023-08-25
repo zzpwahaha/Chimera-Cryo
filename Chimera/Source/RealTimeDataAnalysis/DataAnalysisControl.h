@@ -44,19 +44,16 @@ class DataAnalysisControl : public IChimeraSystem {
 		void updateDataSetNumberEdit( int number );
 		
 		void reloadListView();
+		void reloadTinyPlotInfo();
 		void handleAtomGridCombo( );
-		void reloadGridCombo( unsigned num );
+		void reloadGridCombo( );
 		void fillPlotThreadInput( realTimePlotterInput* input );
-		void loadGridParams( atomGrid grid );
-		static unsigned __stdcall plotterProcedure( void* voidInput );
+		void loadGridParams( atomGrid& grid );
 		void saveGridParams( );
-		void handleDeleteGrid( );
-		void updatePlotTime ( );
-		std::atomic<unsigned>& getPlotTime( );
+		void handleDeleteGrid(int sel);
 
 		void handleContextMenu (const QPoint& pos);
 
-		unsigned getPlotFreq ();
 		std::vector<std::string> getActivePlotList ();
 
 		// used to determine what plots to show in the listview. should be updated from the official number when the 
@@ -67,14 +64,13 @@ class DataAnalysisControl : public IChimeraSystem {
 		void setRunningSettings (analysisSettings options);
 		analysisSettings getRunningSettings ();
 	private:
+		std::vector<std::string> getGridFileNames();
+
+	private:
 		analysisSettings currentSettings, currentlyRunningSettings;
 
 		unsigned unofficialPicsPerRep = 1;
 		// real time plotting
-		unsigned long updateFrequency;
-		QLabel* updateFrequencyLabel1;
-		QLabel* updateFrequencyLabel2;
-		CQLineEdit* updateFrequencyEdit;
 
 		QLabel* header;
 		QTableWidget* plotListview;
@@ -85,17 +81,15 @@ class DataAnalysisControl : public IChimeraSystem {
 		QLabel* currentDataSetNumberDisp;
 
 		CQComboBox* gridSelector;
+		CQLineEdit* originEditX = nullptr;
+		CQLineEdit* originEditY = nullptr;
+		CQLineEdit* gridSpacingX = nullptr;
+		CQLineEdit* gridSpacingY = nullptr;
+		CQLineEdit* gridNumberX = nullptr;
+		CQLineEdit* gridNumberY = nullptr;
+		CQLineEdit* includePixelX = nullptr;
+		CQLineEdit* includePixelY = nullptr;
 
-		QLabel* tlRowLabel;
-		CQLineEdit* tlRowEdit;
-		QLabel* tlColLabel;
-		CQLineEdit* tlColEdit;
-		QLabel* gridSpacingText;
-		CQLineEdit* gridSpacing;
-		QLabel* gridWidthText;
-		CQLineEdit* gridWidth;
-		QLabel* gridHeightText;
-		CQLineEdit* gridHeight;
 
 		CQPushButton* doBumpAnalysis;
 		CQCheckBox* autoBumpAnalysis;
@@ -103,12 +97,9 @@ class DataAnalysisControl : public IChimeraSystem {
 
 		CQCheckBox* autoThresholdAnalysisButton;
 		CQCheckBox* displayGridBtn;
-
-		QLabel* plotTimerTxt;
-		CQLineEdit* plotTimerEdit;
-		std::atomic<unsigned> plotTime=5000;
-
+		CQPushButton* newGrid;
 		CQPushButton* deleteGrid;
+		CQPushButton* refreshGrid;
 
 };
 

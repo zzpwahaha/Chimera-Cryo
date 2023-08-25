@@ -18,9 +18,9 @@
 #ifdef MASTER_COMPUTER
 	//constexpr bool DOFTDI_SAFEMODE = true;
 	constexpr bool DDS_SAFEMODE = true;
-	constexpr bool ANDOR_SAFEMODE = false;
+	constexpr bool ANDOR_SAFEMODE = true;
 	const std::pair<unsigned, unsigned> ANDOR_TRIGGER_LINE = std::make_pair(1 - 1, 5); // used for QtAndorWindow::abortCameraRun to give the last trigger and also for consistensy check
-	constexpr bool OFFSETLOCK_SAFEMODE = /*true*/false;
+	constexpr bool OFFSETLOCK_SAFEMODE = true;
 	//constexpr bool ANALOG_IN_SAFEMODE = true;
 	#ifdef _DEBUG
 		constexpr bool PYTHON_SAFEMODE = true;

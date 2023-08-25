@@ -17,24 +17,57 @@ void CruncherThreadWorker::init () {
 	// preparing for the crunching
 	for (auto gridInc : range (gridSize)) {
 		auto& grid = input->grids[gridInc];
-		for (auto columnInc : range (grid.width)) {
-			for (auto rowInc : range (grid.height)) {
-				unsigned long pixelRowInverted = grid.topLeftCorner.row + rowInc * grid.pixelSpacing;
-				unsigned long pixelColumn = grid.topLeftCorner.column + columnInc * grid.pixelSpacing;
-				unsigned long pixelRow = input->imageDims.height () - pixelRowInverted - 1;
+		if (grid.useFile) {
+			atomGrid::loadGridFile(grid);
+			for (auto& locBlocks : grid.atomLocs) {
+				std::vector<long> pixelIndices;
+				for (auto& loc : locBlocks) {
+					if (loc.row >= input->imageDims.heightBinned() || loc.column >= input->imageDims.widthBinned()) {
+						emit error("atom grid appears to include pixels outside the image frame! Not allowed, seen by atom "
+							"cruncher thread");
+						return;
+					}
 
-				if (pixelRow >= input->imageDims.height () || pixelColumn >= input->imageDims.width ()) {
-					emit error ("atom grid appears to include pixels outside the image frame! Not allowed, seen by atom "
-						"cruncher thread");
-					return;
+					int index = ((loc.row)*input->imageDims.widthBinned() + loc.column);
+					if (index >= input->imageDims.widthBinned() * input->imageDims.heightBinned()) {
+						emit error("Math error! Somehow, the pixel indexes appear within bounds, but the calculated index"
+							" is larger than the image is!  (A low level bug, this shouldn't happen)");
+						return;
+					}
+					pixelIndices.push_back(index);
 				}
-				int index = ((input->imageDims.height () - 1 - pixelRow) * input->imageDims.width () + pixelColumn);
-				if (index >= input->imageDims.width () * input->imageDims.height ()) {
-					emit error ("Math error! Somehow, the pixel indexes appear within bounds, but the calculated index"
-								" is larger than the image is!  (A low level bug, this shouldn't happen)");
-					return;
+				monitoredPixelIndecies[gridInc].push_back(pixelIndices);
+			}
+		}
+		else {
+			for (auto columnInc : range(grid.width)) {
+				for (auto rowInc : range(grid.height)) {
+					unsigned pixelRow = (grid.gridOrigin.row + rowInc * grid.pixelSpacingY);
+					unsigned pixelColumn = (grid.gridOrigin.column + columnInc * grid.pixelSpacingX);
+					unsigned pixelRowTmp, pixelColumnTmp;
+					std::vector<long> pixelIndices;
+					for (auto colIncl : range(2 * grid.includedPixelX + 1)) {
+						for (auto rowIncl : range(2 * grid.includedPixelY + 1)) {
+							pixelColumnTmp = pixelColumn + colIncl - grid.includedPixelX;
+							pixelRowTmp = pixelRow + rowIncl - grid.includedPixelY;
+							if (pixelRowTmp >= input->imageDims.heightBinned() || pixelColumnTmp >= input->imageDims.widthBinned() || 
+								pixelRowTmp < 0 || pixelColumnTmp < 0) {
+								emit error("atom grid appears to include pixels outside the image frame! Not allowed, seen by atom "
+									"cruncher thread");
+								return;
+							}
+
+							int index = ((pixelRowTmp) * input->imageDims.widthBinned() + pixelColumnTmp);
+							if (index >= input->imageDims.widthBinned() * input->imageDims.heightBinned()) {
+								emit error("Math error! Somehow, the pixel indexes appear within bounds, but the calculated index"
+									" is larger than the image is!  (A low level bug, this shouldn't happen)");
+								return;
+							}
+							pixelIndices.push_back(index);
+						}
+					}
+					monitoredPixelIndecies[gridInc].push_back(pixelIndices);
 				}
-				monitoredPixelIndecies[gridInc].push_back (index);
 			}
 		}
 	}
@@ -62,27 +95,28 @@ void CruncherThreadWorker::handleImage (NormalImage image){
 	atomQueue tempAtomArray (input->grids.size ());
 	for (auto gridInc : range (input->grids.size ())) {
 		tempAtomArray[gridInc].image = std::vector<bool> (monitoredPixelIndecies[gridInc].size ());
-		tempImagePixels[gridInc].image = std::vector<long> (monitoredPixelIndecies[gridInc].size ());
+		tempImagePixels[gridInc].image = std::vector<double>(monitoredPixelIndecies[gridInc].size(), 0.0);
 	}
 	for (auto gridInc : range (input->grids.size ())) {
-		unsigned count = 0;
-		{
-			tempImagePixels[gridInc].picNum = image.picNum;
-			tempAtomArray[gridInc].picNum = image.picNum;
+		tempImagePixels[gridInc].picStat = image.picStat;
+		tempAtomArray[gridInc].picStat = image.picStat;
+		for (auto atomInc : range(monitoredPixelIndecies[gridInc].size())) {
 			///*** Deal with 1st element entirely first, as this is important for the rearranger thread and the 
 			/// load-skip both of which are very time-sensitive.
-			for (auto pixelIndex : monitoredPixelIndecies[gridInc]) {
-				if (pixelIndex > image.image.size ()) {
-					emit error (cstr ("Monitored pixel indecies included pixel out of image?!?! pixel: " + str (pixelIndex)
-						+ ", size: " + str (image.image.size ())));
+			for (auto pixelIndex : monitoredPixelIndecies[gridInc][atomInc]) {
+				if (pixelIndex > image.image.size()) {
+					emit error("Monitored pixel indecies included pixel out of image?!?! pixel: " + qstr(pixelIndex)
+						+ ", size: " + qstr(image.image.size()));
 					// should I return here?
 				}
 				else {
-					tempImagePixels[gridInc].image[count++] = image.image.data[pixelIndex];
+					tempImagePixels[gridInc].image[atomInc] += image.image.data[pixelIndex];
 				}
 			}
+			tempImagePixels[gridInc].image[atomInc] /= monitoredPixelIndecies[gridInc][atomInc].size();
 		}
-		count = 0;
+
+		unsigned count = 0;
 		for (auto& pix : tempImagePixels[gridInc].image) {
 			auto& picThresholds = input->thresholds[imageCount % input->picsPerRep];
 			if (pix >= picThresholds[count % picThresholds.size ()]) {

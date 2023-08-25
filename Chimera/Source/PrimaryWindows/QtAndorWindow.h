@@ -96,12 +96,12 @@ class QtAndorWindow : public IChimeraQtWindow{
 		void handlePlotPop (unsigned id);
 		// purely for getting rid of the bugs of resizing the plotter, only need it once after andor window is activated in QtMainWindow
 		void refreshPics();
+		void displayAnalysisGrid(atomGrid grids);
+		void removeAnalysisGrid();
 
 		void fillExpDeviceList (DeviceList& list);
-		void handleSetAnalysisPress ();
 		CruncherThreadWorker* atomCruncherWorker;
 		AnalysisThreadWorker* analysisThreadWorker;
-		void handleTransformationModeChange ();
 		void manualArmCamera ();
 		NewPythonHandler* getPython ();
 

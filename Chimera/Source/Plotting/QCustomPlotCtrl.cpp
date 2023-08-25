@@ -415,7 +415,7 @@ void QCustomPlotCtrl::setData(std::vector<plotDataVec> newData, std::vector<std:
 			else {
 				plot->graph()->setName("DSet " + qstr(traceNum + 1));
 				auto gcolor = GIST_RAINBOW_RGB[traceNum * GIST_RAINBOW_RGB.size() / newData.size()];
-				auto qtColor = QColor(gcolor[0], gcolor[1], gcolor[2], 100);
+				auto qtColor = QColor(gcolor[0], gcolor[1], gcolor[2], 25);
 				plot->graph()->setPen(qtColor);
 				errorBars->setPen(qtColor);
 				plot->graph()->setScatterStyle(QCPScatterStyle::ssCircle);
@@ -430,7 +430,8 @@ void QCustomPlotCtrl::setData(std::vector<plotDataVec> newData, std::vector<std:
 			return;
 		}
 		unsigned lineCount = 0;
-		for (auto traceNum : range(newData.size())) {
+		// ignore the last data point, which is supposedly the avg, which is not used in histo
+		for (auto traceNum : range(newData.size() - 1)) {
 			auto& newLine = newData[traceNum];
 			if (newLine.size() > 1000) {
 				continue; // something very wrong...
@@ -664,6 +665,11 @@ void QCustomPlotCtrl::resetChart() {
 
 void QCustomPlotCtrl::setControlLocation(QRect loc) {
 	plot->setGeometry(loc);
+}
+
+QCPAxisRect* QCustomPlotCtrl::getCenterAxisRect()
+{
+	return centerAxisRect;
 }
 
 std::vector<double> QCustomPlotCtrl::handleMousePosOnCMap(QMouseEvent* event)

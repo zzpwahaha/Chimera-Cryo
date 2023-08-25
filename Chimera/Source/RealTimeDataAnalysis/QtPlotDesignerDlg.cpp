@@ -3,12 +3,17 @@
 #include <qlayout.h>
 #include <boost/lexical_cast.hpp>
 
-QtPlotDesignerDlg::QtPlotDesignerDlg (unsigned pictureNumber) : picNumber (pictureNumber), currentPlotInfo (picNumber) {
+QtPlotDesignerDlg::QtPlotDesignerDlg(unsigned pictureNumber) :
+	picNumber(pictureNumber),
+	currentPlotInfo(picNumber)
+{
 	initializeWidgets ();
 }
 
-QtPlotDesignerDlg::QtPlotDesignerDlg (std::string fileName) : picNumber (PlottingInfo::getPicNumberFromFile (fileName)),
-	currentPlotInfo (fileName) {
+QtPlotDesignerDlg::QtPlotDesignerDlg (std::string fileName) : 
+	picNumber (PlottingInfo::getPicNumberFromFile (fileName)),
+	currentPlotInfo (fileName)
+{
 	initializeWidgets ();
 }
 
@@ -41,14 +46,29 @@ void QtPlotDesignerDlg::initializeWidgets () {
 
 	generalPlotTypeText = new QLabel ("Plot Type", this);
 	generalPlotTypeCombo = new QComboBox (this);
-	generalPlotTypeCombo->addItems ({ "Pixel Count Histograms", "Pixel Counts", "Atoms" });
-	generalPlotTypeCombo->setCurrentIndex (0);
+	QStringList typeList;
+	for (auto type : PlottingInfo::allPlotTypes) {
+		typeList.push_back(type.c_str());
+	}
+	generalPlotTypeCombo->addItems(typeList);
+	auto it = std::find_if(PlottingInfo::allPlotTypes.begin(), PlottingInfo::allPlotTypes.end(), [this](std::string s) {
+		return s == currentPlotInfo.getPlotType(); });
+	if (it == PlottingInfo::allPlotTypes.end()) {
+		thrower("Plot type is not found in all valid plot types. A low level bug.");
+	}
+	generalPlotTypeCombo->setCurrentIndex(std::distance(PlottingInfo::allPlotTypes.begin(), it));
 	layout2->addWidget(generalPlotTypeText, 3, 0);
 	layout2->addWidget(generalPlotTypeCombo, 3, 1);
 
 	dataSetNumberText = new QLabel ("Data Set #", this);
 	dataSetNumCombo = new QComboBox (this);
-	dataSetNumCombo->addItems ({ "Data Set #1", "Add New Data Set", "Remove Data Set" });
+	auto dataSetNumber = currentPlotInfo.getDataSetNumber();
+	for (auto num : range(dataSetNumber)) {
+		dataSetNumCombo->addItem(qstr("Data Set #" + str(num + 1)));
+	}
+	dataSetNumCombo->addItems({ "Add New Data Set", "Remove Data Set" });
+	dataSetNumCombo->setCurrentIndex(0);
+	currentDataSet = 0;
 	connect ( dataSetNumCombo, qOverload<int> (&QComboBox::currentIndexChanged), 
 			  [this]() {handleDataSetComboChange (); });
 	layout2->addWidget(dataSetNumberText, 4, 0);
@@ -68,22 +88,31 @@ void QtPlotDesignerDlg::initializeWidgets () {
 
 	prcPictureNumberText = new QLabel ("Picture Number", this);
 	prcPicNumCombo = new QComboBox (this);
-	for (auto num : range (picNumber)){
+	auto pictureNumber = currentPlotInfo.getPicNumber();
+	for (auto num : range (pictureNumber)){
 		prcPicNumCombo->addItem(qstr ("Picture #" + str (num + 1)));
 	}
+	prcPicNumCombo->setCurrentIndex(0);
+	currentPrcPicture = 0;
 	connect (prcPicNumCombo, qOverload<int> (&QComboBox::currentIndexChanged), [this]() {handlePrcPictureNumberChange (); });
 	layout3->addWidget(prcPictureNumberText, 0, 0);
 	layout3->addWidget(prcPicNumCombo, 0, 1);
 
 	prcPixelNumberText = new QLabel ("Pixel Number");
 	prcPixelNumCombo = new QComboBox (this);
-	prcPixelNumCombo->addItem ("Pixel #1");
+	auto pixelNumber = currentPlotInfo.getPixelNumber();
+	for (auto num : range(pixelNumber)) {
+		prcPixelNumCombo->addItem(qstr("Pixel #" + str(num + 1)));
+	}
+	prcPixelNumCombo->setCurrentIndex(0);
+	currentPrcPixel = 0;
 	connect (prcPixelNumCombo, qOverload<int> (&QComboBox::currentIndexChanged), [this]() {handlePrcPixelNumberChange (); });
 	layout3->addWidget(prcPixelNumberText, 1, 0);
 	layout3->addWidget(prcPixelNumCombo, 1, 1);
 
 	prcAtomBox = new QCheckBox ("Atom", this);
 	prcNoAtomBox = new QCheckBox ("No Atom", this);
+	loadPositiveResultSettings();
 	layout3->addWidget(prcAtomBox, 2, 0);
 	layout3->addWidget(prcNoAtomBox, 2, 1);
 	
@@ -165,7 +194,13 @@ void QtPlotDesignerDlg::initializeWidgets () {
 	layout9->setContentsMargins(0, 0, 0, 0);
 	pscConditionNumberText = new QLabel ("Condition Number", this);
 	pscConditionNumCombo = new QComboBox (this);
-	pscConditionNumCombo->addItems ({ "Condition #1", "Add New Condition", "Remove Condition" });
+	auto pscConditionNum = currentPlotInfo.getConditionNumber();
+	for (auto num : range(pscConditionNum)) {
+		pscConditionNumCombo->addItem(qstr("Condition #" + str(num + 1)));
+	}
+	pscConditionNumCombo->addItems ({ "Add New Condition", "Remove Condition" });
+	pscConditionNumCombo->setCurrentIndex(0);
+	currentPscCondition = 0;
 	connect (pscConditionNumCombo, qOverload<int> (&QComboBox::currentIndexChanged), 
 			 [this]() {handlePscConditionNumberChange (); });
 	layout9->addWidget(pscConditionNumberText, 0, 0);
@@ -173,9 +208,11 @@ void QtPlotDesignerDlg::initializeWidgets () {
 
 	pscPictureNumberText = new QLabel ("Picture Number", this);
 	pscPicNumCombo = new QComboBox (this);
-	for (auto num : range (picNumber)){
+	for (auto num : range (pictureNumber)){
 		pscPicNumCombo->addItem (qstr ("Picture #" + str (num + 1)));
 	}
+	pscPicNumCombo->setCurrentIndex(0);
+	currentPscPicture = 0;
 	connect (pscPicNumCombo, qOverload<int> (&QComboBox::currentIndexChanged),
 		[this]() {handlePscPictureNumberChange (); });
 	layout9->addWidget(pscPictureNumberText, 1, 0);
@@ -183,7 +220,11 @@ void QtPlotDesignerDlg::initializeWidgets () {
 
 	pscPixelNumberText = new QLabel ("Pixel Number", this);
 	pscPixelNumCombo = new QComboBox (this);
-	pscPixelNumCombo->addItem ("Pixel #1");
+	for (auto num : range(pixelNumber)) {
+		pscPixelNumCombo->addItem(qstr("Pixel #" + str(num + 1)));
+	}
+	pscPixelNumCombo->setCurrentIndex(0);
+	currentPscPixel = 0;
 	connect (pscPixelNumCombo, qOverload<int> (&QComboBox::currentIndexChanged),
 		[this]() { handlePscPixelNumberChange (); });
 	layout9->addWidget(pscPixelNumberText, 2, 0);
@@ -191,6 +232,7 @@ void QtPlotDesignerDlg::initializeWidgets () {
 	
 	pscAtomBox = new QCheckBox ("Atom", this);
 	pscNoAtomBox = new QCheckBox ("No Atom",this);
+	loadPostSelectionConditions();
 	layout9->addWidget(pscAtomBox, 3, 0);
 	layout9->addWidget(pscNoAtomBox, 3, 1);
 
@@ -240,6 +282,12 @@ void QtPlotDesignerDlg::handleSave () {
 	currentPlotInfo.changeYLabel (str (text));
 	text = plotFilenameEdit->text ();
 	currentPlotInfo.changeFileName (str (text));
+	int itemIndex = generalPlotTypeCombo->currentIndex();
+	if (itemIndex == -1) {
+		errBox("Plot type selection out of range? Low level bug.");
+	}
+	text = generalPlotTypeCombo->itemText(itemIndex);
+	currentPlotInfo.changeGeneralPlotType(str(text));
 	int runningAverageCheck = runningAverage->isChecked ();
 	int variationAverageCheck = averageEachVariation->isChecked ();
 	if (variationAverageCheck == 0x0001/*BST_CHECKED*/) {
@@ -247,14 +295,14 @@ void QtPlotDesignerDlg::handleSave () {
 			errBox ("Please select only one x-axis option.");
 			return;
 		}
-		currentPlotInfo.changeXAxis ("Variation Average");
+		currentPlotInfo.changeXAxis ("Variation_Average");
 	}
 	else if (runningAverageCheck == 0x0001/*BST_CHECKED*/) {
 		if (variationAverageCheck == 0x0001/*BST_CHECKED*/) {
 			errBox ("Please select only one x-axis option.");
 			return;
 		}
-		currentPlotInfo.changeXAxis ("Running Average");
+		currentPlotInfo.changeXAxis ("Running_Average");
 	}
 	else {
 		errBox ("Please select an x-axis option.");
@@ -624,5 +672,5 @@ void QtPlotDesignerDlg::enableAndDisable (){
 	bool prcPixelNumSel = (prcPixelNumCombo->currentIndex () != -1);
 	prcAtomBox->setEnabled (dataSetSel && prcPictureNumSel && prcPixelNumSel); // && currentPlotInfo.getPlotType( ) == "Atoms" );
 	prcNoAtomBox->setEnabled (dataSetSel && prcPictureNumSel && prcPixelNumSel); // && currentPlotInfo.getPlotType( ) == "Atoms" );
-	binWidthEdit->setEnabled (currentPlotInfo.getPlotType () == "Pixel Count Histograms");
+	binWidthEdit->setEnabled (currentPlotInfo.getPlotType () == "Pixel_Count_Histograms");
 }
