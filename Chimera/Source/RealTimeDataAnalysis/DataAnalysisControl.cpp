@@ -297,9 +297,18 @@ void DataAnalysisControl::initialize( IChimeraQtWindow* parent ){
 	plotListview->verticalHeader ()->setFixedWidth (40);
 	parent->connect (plotListview, &QTableWidget::cellChanged, [this, parent](int row, int col) {
 			if (col == 1) {
-				auto* item = plotListview->item (row, col);
+				auto* item = plotListview->item (row, 0);
+				auto itemName = str(item->text());
+				unsigned counter = 0;
+				for (auto& pltInfo : allTinyPlots) {
+					if (pltInfo.name == itemName) {
+						break;
+					}
+					counter++;
+				}
+				item = plotListview->item(row, col);
 				try {
-					allTinyPlots[row].whichGrid = boost::lexical_cast<unsigned>( cstr (item->text ()));
+					allTinyPlots[counter].whichGrid = boost::lexical_cast<unsigned>( cstr (item->text ()));
 				}
 				catch (ChimeraError&) {}
 			}
