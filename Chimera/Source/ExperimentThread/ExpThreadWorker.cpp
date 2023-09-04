@@ -1089,7 +1089,7 @@ void ExpThreadWorker::checkTriggerNumbers (std::vector<parameterType>& expParams
 	for (auto variationInc : range (determineVariationNumber (expParams))) {
 		if (true /*runMaster*/) {
 			auto& andorCamera = input->devices.getSingleDevice<AndorCameraCore>();
-			if (andorCamera.getAndorRunSettings().controlCamera) {
+			if (andorCamera.experimentActive) {
 				// check if there is just enough trigger for andor if it is used in the experiment
 				emit notification("Running consistency checks for Andor Camera", 2);
 				unsigned actualTrigs = input->ttls.countTriggers(ANDOR_TRIGGER_LINE, variationInc);
