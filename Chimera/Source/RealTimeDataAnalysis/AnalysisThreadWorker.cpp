@@ -207,8 +207,10 @@ void AnalysisThreadWorker::init (){
 void AnalysisThreadWorker::setXpts (std::vector<double> newXpts) {
 	for (auto plotInc : range(dataContainers.size())) {
 		auto& plotInfo = allPlots[plotInc];
+		unsigned whichGrid = input->plotInfo[plotInc].whichGrid;
+		unsigned groupNum = input->grids[whichGrid].numAtoms();
 		// +1 for avg
-		dataContainers[plotInc].resize (input->grids[0].numAtoms()+1);
+		dataContainers[plotInc].resize(groupNum + 1);
 		for (auto& dset : dataContainers[plotInc]) {
 			dset.resize (newXpts.size ());
 			for (auto dpNum : range(dset.size())) {
