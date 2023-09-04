@@ -652,8 +652,8 @@ void ParameterSystem::generateKey( std::vector<parameterType>& parameters, bool 
 			return dis; });
 	if (shuffleIndex.size() == 0) {
 		// means there is nothing changing in the experiment, all params are constant
-		shuffleIndex = std::vector<size_t>({ 1 });
-		shuffleIndexReverse = std::vector<size_t>({ 1 });
+		shuffleIndex = std::vector<size_t>({ 0 });
+		shuffleIndexReverse = std::vector<size_t>({ 0 });
 	}
 
 	// initialize this to one so that constants always get at least one value.
@@ -727,8 +727,8 @@ void ParameterSystem::generateKey( std::vector<parameterType>& parameters, bool 
 		totalSize = tempKeyRandomized.values.size ();
 	}
 	if (totalSize == 1) { // for no variation
-		shuffleIndex = std::vector<size_t>(1, 1);
-		shuffleIndexReverse = std::vector<size_t>(1, 1);
+		shuffleIndex = std::vector<size_t>(1, 0);
+		shuffleIndexReverse = std::vector<size_t>(1, 0);
 	}
 	// now add all constant objects.
 	for ( parameterType& param : parameters){
