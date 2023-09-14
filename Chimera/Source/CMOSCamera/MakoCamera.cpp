@@ -43,6 +43,7 @@ void MakoCamera::initialize()
     namelabel->setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
     QLabel* repLabel = new QLabel("PicsPerRep: ");
     m_picsPerRep = new QSpinBox(this);
+    m_picsPerRep->setRange(0, 999);
     QLabel* activeLabel = new QLabel("Exp. Active?", this);
     m_expActive = new QCheckBox(this);
     nameLayout->addWidget(namelabel, 1);

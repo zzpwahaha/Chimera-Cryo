@@ -273,7 +273,7 @@ std::vector<std::vector<dataPoint>> AnalysisThreadWorker::handlePlotAtoms (Plott
 			unsigned dataId = (dataSetI + 1) * groupI;
 			// calculate new data points
 			double mean = finData[dataSetI][groupI][variationNum].first / finData[dataSetI][groupI][variationNum].second;
-			double error = mean * (1 - mean) / std::sqrt (finData[dataSetI][groupI][variationNum].second);
+			double error = std::sqrt(mean * (1 - mean) / finData[dataSetI][groupI][variationNum].second);
 			dataContainers[dataId][variationNum].y = mean;
 			dataContainers[dataId][variationNum].err = error;
 		}
@@ -289,7 +289,7 @@ std::vector<std::vector<dataPoint>> AnalysisThreadWorker::handlePlotAtoms (Plott
 		}
 		else {
 			double mean = allDataTempNew.first / allDataTempNew.second;
-			double error = mean * (1 - mean) / std::sqrt (allDataTempNew.second);
+			double error = std::sqrt(mean * (1 - mean) / allDataTempNew.second);
 			dataContainers[avgId][variationNum].y = mean;
 			dataContainers[avgId][variationNum].err = error;
 		}
