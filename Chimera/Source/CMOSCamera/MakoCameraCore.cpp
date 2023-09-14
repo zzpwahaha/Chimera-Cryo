@@ -23,7 +23,7 @@ MakoCameraCore::MakoCameraCore(CameraInfo camInfo, IChimeraSystem* parent)
         makoCtrl.initialize(qstr(cameraName), cameraPtr); // cameraName is initialized in initializeVimba->validateCamera
     }
     catch (ChimeraError& e) {
-        throwNested(e.trace());
+        throwNested("Error in initializing MAKO Vimba control");
     }
 
     connect(&makoCtrl, &MakoSettingControl::resetFPS, [this]() {
@@ -195,7 +195,7 @@ void MakoCameraCore::initializeVimba()
     }
     catch (ChimeraError& e)
     {
-        throwNested(str("Mako <constructor> Exception: ") + e.trace());
+        throwNested(str("Mako <constructor> Exception: "));
     }
 }
 

@@ -130,14 +130,14 @@ static returnType ConfigSystem::stdConfigGetter (ConfigStream& configStream, std
 		ConfigSystem::initializeAtDelim (configStream, delim, minVer);
 	}
 	catch (ChimeraError & e){
-		throwNested ("Failed to initialize config file for " + delim + "!\n\n" + e.trace ());
+		throwNested ("Failed to initialize config file for " + delim + "!\n\n");
 		return res;
 	}
 	try{
 		res = (*getterFunc) (configStream);
 	}
 	catch (ChimeraError & e){
-		throwNested ("Failed to gather information from config file for " + delim + "!\n\n" + e.trace ());
+		throwNested ("Failed to gather information from config file for " + delim + "!\n\n");
 		return res;
 	}
 	try{
@@ -145,7 +145,7 @@ static returnType ConfigSystem::stdConfigGetter (ConfigStream& configStream, std
 	}
 	catch (ChimeraError & e){
 		throwNested ( "End delimiter for the " + delim + " control was not found. This might indicate that the "
-					  "control did not initialize properly.\n\n" + e.trace ());
+					  "control did not initialize properly.\n\n");
 	}
 	return res;
 }
@@ -158,20 +158,20 @@ static void ConfigSystem::stdGetFromConfig ( ConfigStream& configStream, coreTyp
 		ConfigSystem::initializeAtDelim (configStream, core.getDelim (), minVer);
 	}
 	catch (ChimeraError & e){
-		throwNested ("Failed to initialize config file for " + core.getDelim () + "!\n\n" + e.trace ());
+		throwNested ("Failed to initialize config file for " + core.getDelim () + "!\n\n");
 	}
 	try{
 		settings = core.getSettingsFromConfig (configStream);
 	}
 	catch (ChimeraError & e){
-		throwNested ("Failed to gather information from config file for " + core.getDelim() + "!\n\n" + e.trace ());
+		throwNested ("Failed to gather information from config file for " + core.getDelim() + "!\n\n");
 	}
 	try{
 		ConfigSystem::checkDelimiterLine (configStream, "END_" + core.getDelim ());
 	}
 	catch (ChimeraError & e){
 		throwNested ("End delimiter for the " + core.getDelim () + " control was not found. This might indicate that the "
-					 "control did not initialize properly.\n\n" + e.trace ());
+					 "control did not initialize properly.\n\n");
 	}
 }
 

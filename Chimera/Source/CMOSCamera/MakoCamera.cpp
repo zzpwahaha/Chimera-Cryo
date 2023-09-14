@@ -771,7 +771,6 @@ void MakoCamera::handleExpImage(QVector<double> img, int width, int height)
     catch (ChimeraError& err) {
         emit error(err.qtrace());
         m_OperatingStatusLabel->setText("Exp ERROR!");
-        //throwNested(err.what());
     }
 }
 

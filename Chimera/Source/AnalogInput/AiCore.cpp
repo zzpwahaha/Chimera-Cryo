@@ -55,7 +55,7 @@ void AiCore::updateChannelRange()
 		}
 	}
 	catch (ChimeraError& e) {
-		throwNested(e.what());
+		throwNested("Error seen in updateChannelRange function in AnalogIn:");
 	}
 }
 
@@ -106,7 +106,7 @@ void AiCore::getSingleSnap(unsigned n_to_avg)
 		socket.close();
 	}
 	catch (ChimeraError& e) {
-		throwNested(e.what());
+		throwNested("Error seen in getting single snap data in AnalogIn:");
 	}
 	// see if the return start with error
 	if (std::string(rc.left(10)).find("Error") != std::string::npos) {

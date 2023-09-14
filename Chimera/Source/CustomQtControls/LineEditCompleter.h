@@ -1,7 +1,7 @@
 #pragma once
 #include <qlineedit.h>
 #include <QKeyEvent>
-
+#include <qabstractitemview.h>
 #include <QCompleter>
 #include <QStringList>
 #include <QModelIndex>

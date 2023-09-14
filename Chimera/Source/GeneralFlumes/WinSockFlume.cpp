@@ -123,7 +123,7 @@ void WinSockFlume::write(const char* msg, unsigned len, QByteArray terminator)
 		qDebug() << "Send WinSockFlume message: " << buff;
 	}
 	catch (ChimeraError& e) {
-		throwNested(str("Error in winSockFlume write:\n") + e.trace());
+		throwNested(str("Error in winSockFlume write:\n"));
 	}
 }
 

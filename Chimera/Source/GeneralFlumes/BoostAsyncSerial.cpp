@@ -135,7 +135,7 @@ void BoostAsyncSerial::disconnect()
 		}
 	}
 	catch (boost::system::system_error& ex) {
-		throwNested(ex.what());
+		throwNested("Error in disconnecting BoostAsyncSerial.");
 	}
 	work->reset();
 	work.reset();
@@ -159,7 +159,7 @@ void BoostAsyncSerial::reconnect()
 		port_->open(portID);
 	}
 	catch (boost::system::system_error& ex) {
-		throwNested(ex.what());
+		throwNested("Error in reconnecting BoostAsyncSerial.");
 	}
 	port_->set_option(boost::asio::serial_port_base::baud_rate(baudrate));
 	port_->set_option(boost::asio::serial_port_base::character_size(8));

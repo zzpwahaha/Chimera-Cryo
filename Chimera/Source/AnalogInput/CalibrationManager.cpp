@@ -480,7 +480,7 @@ calSettings CalibrationManager::handleOpenMasterConfigIndvCal (ConfigStream& con
 		
 	}
 	catch (ChimeraError& e) {
-		throwNested (e.trace() + "\nFailed to load Calibration named " + tmpInfo.result.calibrationName + "!");
+		throwNested ("Failed to load Calibration named " + tmpInfo.result.calibrationName + "!");
 	}
 	return tmpInfo;
 }
