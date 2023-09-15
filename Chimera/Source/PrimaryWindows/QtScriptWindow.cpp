@@ -14,7 +14,7 @@ QtScriptWindow::QtScriptWindow(QWidget* parent) : IChimeraQtWindow(parent)
 	, masterScript(this)
 	, arbGens{ {ArbGenSystem(UWAVE_SIGLENT_SETTINGS, ArbGenType::Siglent, this),
 		ArbGenSystem(UWAVE_AGILENT_SETTINGS, ArbGenType::Agilent, this) } }
-	, gigaMoog(GIGAMOOG_PORT, GIGAMOOG_BAUDRATE, this)
+	, gigaMoog(this)
 {
 	setWindowTitle ("Script Window");
 }

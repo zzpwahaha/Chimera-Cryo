@@ -6,8 +6,11 @@
 #include "MessagePrinter.h" 
 #include "MessageSender.h" 
 
-GigaMoogCore::GigaMoogCore(std::string portID, int baudrate)
-	: fpga(portID, baudrate)
+GigaMoogCore::GigaMoogCore(bool safemode, std::string portID, int baudrate)
+	: fpga(safemode, portID, baudrate, 8, 
+		boost::asio::serial_port_base::stop_bits::one,
+		boost::asio::serial_port_base::parity::none,
+		boost::asio::serial_port_base::flow_control::none)
 {
 
 }

@@ -2,6 +2,7 @@
 #include "GeneralObjects/IDeviceCore.h"
 #include "OffsetLockOutput.h"
 #include "GeneralFlumes/QtSerialFlume.h"
+#include <GeneralFlumes/BoostAsyncSerial.h>
 #include "DigitalOutput/DoCore.h"
 #include "Plotting/QCustomPlotCtrl.h"
 
@@ -38,10 +39,9 @@ public:
 	std::vector<std::vector<plotDataVec>> getPlotData(unsigned var);
 	//void standardExperimentPrep(unsigned variation, DoCore& doCore, std::string& warning);
 	void writeOLs(unsigned variation);
-
 	void OLForceOutput(std::array<double, size_t(OLGrid::total)> status, DoCore& doCore, DOStatus dostatus);
-
 	void resetConnection();
+	void callback(int byte);
 private:
 	unsigned long long tmp = 0;
 	std::array<std::string, size_t(OLGrid::total)> names;
@@ -55,7 +55,10 @@ private:
 	//std::vector<std::pair<double, std::vector<OlCommand>>> timeOrganizer;
 	std::array<std::vector<std::pair<double, OlCommand>>, size_t(OLGrid::total)> timeOrganizer;
 
-	std::array<QtSerialFlume, size_t(OLGrid::numOFunit)> qtFlumes;
+	//std::array<QtSerialFlume, size_t(OLGrid::numOFunit)> qtFlumes;
+	std::array<BoostAsyncSerial, size_t(OLGrid::numOFunit)> btFlumes;
+	std::atomic<bool> readComplete;	
+	std::vector<unsigned char> readRegister;
 
 public:
 	const unsigned maxCommandNum = 512;

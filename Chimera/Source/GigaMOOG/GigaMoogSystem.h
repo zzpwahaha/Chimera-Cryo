@@ -20,7 +20,7 @@ public:
 	GigaMoogSystem& operator=(const GigaMoogSystem&) = delete;
 	GigaMoogSystem(const GigaMoogSystem&) = delete;
 
-	GigaMoogSystem(std::string portID, int baudrate, IChimeraQtWindow* parent);
+	GigaMoogSystem(IChimeraQtWindow* parent);
 	virtual ~GigaMoogSystem(void);
 
 	void initialize(IChimeraQtWindow* win);

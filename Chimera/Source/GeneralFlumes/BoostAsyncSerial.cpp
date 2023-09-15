@@ -2,24 +2,26 @@
 #include "BoostAsyncSerial.h"
 #include <qdebug.h>
 
-BoostAsyncSerial::BoostAsyncSerial(std::string portID, int baudrate)
-	: BoostAsyncSerial(portID, baudrate, 8,
+BoostAsyncSerial::BoostAsyncSerial(bool safemode, std::string portID, int baudrate)
+	: BoostAsyncSerial(safemode, portID, baudrate, 8,
 		boost::asio::serial_port_base::stop_bits::one,
 		boost::asio::serial_port_base::parity::none,
 		boost::asio::serial_port_base::flow_control::none) {}
 
 BoostAsyncSerial::BoostAsyncSerial(
+	bool safemode,
 	std::string portID,
 	int baudrate,
 	int character_size,
 	boost::asio::serial_port_base::stop_bits::type stop_bits,
 	boost::asio::serial_port_base::parity::type parity,
 	boost::asio::serial_port_base::flow_control::type flow_control) 
-	: portID(portID)
+	: safemode(safemode)
+	, portID(portID)
 	, baudrate(baudrate)
 	, continue_reading(true)
 {
-	if (!GIGAMOOG_SAFEMODE) {
+	if (!safemode) {
 		port_ = std::make_unique<boost::asio::serial_port>(io_service_);
 
 		port_->open(portID);
@@ -88,6 +90,9 @@ void BoostAsyncSerial::readhandler(const boost::system::error_code & error, std:
 
 void BoostAsyncSerial::write(std::vector<unsigned char> data)
 {
+	if (safemode) {
+		return;
+	}
 	if (!port_->is_open()) {
 		thrower("Serial port has not been opened");
 	}
@@ -96,6 +101,9 @@ void BoostAsyncSerial::write(std::vector<unsigned char> data)
 
 void BoostAsyncSerial::write(std::vector<int> data)
 {
+	if (safemode) {
+		return;
+	}
 	std::vector<unsigned char> converted(data.size());
 	for (int idx = 0; idx < data.size(); idx++) {
 		if(data[idx] < 0 || data[idx] >255){
@@ -114,7 +122,7 @@ void BoostAsyncSerial::write(std::vector<int> data)
 
 void BoostAsyncSerial::disconnect()
 {
-	if (GIGAMOOG_SAFEMODE) {
+	if (safemode) {
 		return;
 	}
 	if (!port_) {
@@ -145,7 +153,7 @@ void BoostAsyncSerial::disconnect()
 
 void BoostAsyncSerial::reconnect()
 {
-	if (GIGAMOOG_SAFEMODE) {
+	if (safemode) {
 		return;
 	}
 	if (port_ && port_->is_open()/*io_service_.stopped()*/) {
@@ -173,6 +181,9 @@ void BoostAsyncSerial::reconnect()
 
 void BoostAsyncSerial::read()
 {
+	if (safemode) {
+		return;
+	}
 	if (!port_->is_open()) {
 		thrower("Serial port has not been opened");
 	}

@@ -9,9 +9,10 @@ class BoostAsyncSerial
 {
 public:
 	//this is just a simple constructor with default options
-	BoostAsyncSerial(std::string portID, int baudrate);
+	BoostAsyncSerial(bool safemode, std::string portID, int baudrate);
 	//constructor with all options available
 	BoostAsyncSerial(
+		bool safemode,
 		std::string portID,
 		int baudrate,
 		int character_size,
@@ -34,6 +35,7 @@ private:
 	void run();
 	void readhandler(const boost::system::error_code& error, std::size_t bytes_transferred);
 private:
+	const bool safemode;
 	const std::string portID;
 	const int baudrate;
 	std::atomic<bool> continue_reading;

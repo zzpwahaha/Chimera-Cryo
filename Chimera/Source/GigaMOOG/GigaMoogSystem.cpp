@@ -14,10 +14,10 @@
 //const UINT gigaMoog::loadoffset = 2048; 
 //const UINT gigaMoog::moveoffset = 2560; 
 
-GigaMoogSystem::GigaMoogSystem(std::string portID, int baudrate, IChimeraQtWindow* parent)
+GigaMoogSystem::GigaMoogSystem(IChimeraQtWindow* parent)
 	: IChimeraSystem(parent)
 	, gmoogScript(parent)
-	, core(portID, baudrate)
+	, core(GIGAMOOG_SAFEMODE, GIGAMOOG_PORT, GIGAMOOG_BAUDRATE)
 {
 	if (!GIGAMOOG_SAFEMODE) {
 		//writeOff(); 

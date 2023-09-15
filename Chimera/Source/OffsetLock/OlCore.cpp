@@ -5,18 +5,30 @@
 #include <qelapsedtimer.h>
 
 OlCore::OlCore(bool safemode)
-	: qtFlumes{ 
-	QtSerialFlume(safemode, OL_COM_PORT[0]),
-	QtSerialFlume(safemode, OL_COM_PORT[1]) }
+	//: qtFlumes{
+	//QtSerialFlume(safemode, OL_COM_PORT[0]),
+	//QtSerialFlume(safemode, OL_COM_PORT[1]) }
+	: btFlumes{
+	BoostAsyncSerial(safemode, OL_COM_PORT[0], 9600, 8,
+		boost::asio::serial_port_base::stop_bits::one,
+		boost::asio::serial_port_base::parity::none,
+		boost::asio::serial_port_base::flow_control::none),
+	BoostAsyncSerial(safemode, OL_COM_PORT[1], 9600, 8,
+		boost::asio::serial_port_base::stop_bits::one,
+		boost::asio::serial_port_base::parity::none,
+		boost::asio::serial_port_base::flow_control::none) }
+	, readComplete(true)
 {
-	
+	for (auto& btFlume : btFlumes) {
+		btFlume.setReadCallback(boost::bind(&OlCore::callback, this, _1));
+	}
 }
 
 OlCore::~OlCore()
 {
-	for (auto& qtFlume : qtFlumes) {
-		qtFlume.close();
-	}
+	//for (auto& qtFlume : qtFlumes) {
+	//	qtFlume.close();
+	//}
 }
 
 
@@ -98,6 +110,7 @@ void OlCore::sizeDataStructures(unsigned variations)
 
 void OlCore::initializeDataObjects(unsigned variationNum)
 {
+	tmp = 0;
 	olCommandFormList = std::vector<OlCommandForm>(variationNum);
 	sizeDataStructures(variationNum);
 }
@@ -575,10 +588,8 @@ std::vector<std::vector<plotDataVec>> OlCore::getPlotData(unsigned var)
 void OlCore::writeOLs(unsigned variation)
 {
 	unsigned short flumesIdx = 0;
-	for (auto& qtFlume : qtFlumes) {
-		qtFlume.getPort().clear();
-		//unsigned channel, steps;
-		//double time, start, stop, ramptime;
+	for (auto& btFlume : btFlumes/*auto& qtFlume : qtFlumes*/) {
+		//qtFlume.getPort().clear();
 		std::string buffCmd;
 		for (auto& channelSnap : olChannelSnapshots[variation])
 		{
@@ -593,14 +604,29 @@ void OlCore::writeOLs(unsigned variation)
 		QElapsedTimer timer;
 		timer.start();
 		std::string recv;
+		readRegister.clear();
+		readComplete = false;
 		if (buffCmd != "e") {
-			recv = qtFlume.query(buffCmd);
+			//recv = qtFlume.query(buffCmd);
+			std::vector<int> byteBuffCmd(buffCmd.cbegin(), buffCmd.cend());
+			//std::transform(buffCmd.cbegin(), buffCmd.cend(), std::back_inserter(byteBuffCmd), [](unsigned char c) {
+			//	return c; }); // Should also work
+			btFlume.write(byteBuffCmd);
 		}
 		else {
 			recv = "Nothing programmed in OffsetLock in variation" + str(variation);
 		}
+		qDebug() << tmp << qstr(buffCmd) << "Total time:" << timer.elapsed() << "ms";
 
-		qDebug() << tmp << qstr(buffCmd) << "Total time:" << timer.elapsed()/**/ << "ms";
+		for (auto idx : range(200)) {
+			if (readComplete) {
+				recv = std::string(readRegister.cbegin(), readRegister.cend());
+				break;
+			}
+			Sleep(5);
+		}
+		qDebug() << ">> After read:" << timer.elapsed() << "ms";
+		
 		if (recv.empty()) {
 			thrower("Nothing feeded back from Teensy after writing, something might be wrong with it." + recv);
 			qDebug() << tmp << qstr("Empty return");
@@ -608,7 +634,7 @@ void OlCore::writeOLs(unsigned variation)
 		else {
 			qDebug() << tmp << qstr(recv);
 			std::transform(recv.begin(), recv.end(), recv.begin(), ::tolower); /*:: without namespace select from global namespce, see https://stackoverflow.com/questions/5539249/why-cant-transforms-begin-s-end-s-begin-tolower-be-complied-successfu*/
-			if (recv.find("Error") != std::string::npos) {
+			if (recv.find("error") != std::string::npos) {
 				thrower("Error in offset lock programming, from Teensy: " + recv + "\r\nNote each number can only be of 13 chars long");
 			}
 		}
@@ -632,7 +658,23 @@ void OlCore::OLForceOutput(std::array<double,size_t(OLGrid::total)> status, DoCo
 
 void OlCore::resetConnection()
 {
-	for (auto& qtFlume : qtFlumes) {
-		qtFlume.resetConnection();
+	//for (auto& qtFlume : qtFlumes) {
+	//	qtFlume.resetConnection();
+	//}
+	for (auto& btFlume : btFlumes) {
+		btFlume.disconnect();
+		Sleep(10);
+		btFlume.reconnect();
+	}
+}
+
+void OlCore::callback(int byte)
+{
+	if (byte < 0 || byte >255) {
+		thrower("Byte value readed needs to be in range 0-255.");
+	}
+	readRegister.push_back(byte);
+	if (byte == '\n') {
+		readComplete = true;
 	}
 }

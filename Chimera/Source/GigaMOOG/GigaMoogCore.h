@@ -12,7 +12,7 @@ public:
 	GigaMoogCore& operator=(const GigaMoogCore&) = delete;
 	GigaMoogCore(const GigaMoogCore&) = delete;
 
-	GigaMoogCore(std::string portID, int baudrate);
+	GigaMoogCore(bool safemode, std::string portID, int baudrate);
 
 	std::string getSettingsFromConfig(ConfigStream& configStream); //used in GigaMoogSystem::handleOpenConfig and ConfigSystem::stdGetFromConfig
 	void loadExpSettings(ConfigStream& stream) override; // update fileAddress
