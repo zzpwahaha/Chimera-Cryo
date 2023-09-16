@@ -20,7 +20,8 @@ OlCore::OlCore(bool safemode)
 	, readComplete(true)
 {
 	for (auto& btFlume : btFlumes) {
-		btFlume.setReadCallback(boost::bind(&OlCore::callback, this, _1));
+		btFlume.setReadCallback(boost::bind(&OlCore::readCallback, this, _1));
+		btFlume.setErrorCallback(boost::bind(&OlCore::errorCallback, this, _1));
 	}
 }
 
@@ -601,20 +602,32 @@ void OlCore::writeOLs(unsigned variation)
 			}
 		}
 		buffCmd += "e";
+
+		int current_fails = 0;
+label:
 		QElapsedTimer timer;
 		timer.start();
 		std::string recv;
 		readRegister.clear();
+		errorMsg.clear();
 		readComplete = false;
+		std::vector<unsigned char> byteBuffCmd(buffCmd.cbegin(), buffCmd.cend());
 		if (buffCmd != "e") {
 			//recv = qtFlume.query(buffCmd);
-			std::vector<int> byteBuffCmd(buffCmd.cbegin(), buffCmd.cend());
-			//std::transform(buffCmd.cbegin(), buffCmd.cend(), std::back_inserter(byteBuffCmd), [](unsigned char c) {
-			//	return c; }); // Should also work
 			btFlume.write(byteBuffCmd);
+			// want to try rethrow the possible exception with Chimera, but it is still not handled in expThread. ???????
+			if (auto e = btFlume.lastException()) {
+				try {
+					boost::rethrow_exception(e);
+				}
+				catch (boost::system::system_error& e) {
+					throwNested("Error seen in writing to serial port " + str(btFlume.portID) + ". Error: " + e.what());
+				}
+			}
 		}
 		else {
 			recv = "Nothing programmed in OffsetLock in variation" + str(variation);
+			continue;
 		}
 		qDebug() << tmp << qstr(buffCmd) << "Total time:" << timer.elapsed() << "ms";
 
@@ -627,8 +640,14 @@ void OlCore::writeOLs(unsigned variation)
 		}
 		qDebug() << ">> After read:" << timer.elapsed() << "ms";
 		
-		if (recv.empty()) {
-			thrower("Nothing feeded back from Teensy after writing, something might be wrong with it." + recv);
+		if (recv.empty() || (!errorMsg.empty())) {
+			// this could just be the case where we missed the return or the write is flaky, try to re-write
+			if (current_fails < 3) {
+				current_fails++;
+				qDebug() << current_fails << "OFFSETLOCK Read nothing but tried to re-write to OFFSETLOCK!";
+				goto label;
+			}
+			thrower("Nothing feeded back from Teensy after writing, something might be wrong with it." + recv + "\r\nError message: " + errorMsg);
 			qDebug() << tmp << qstr("Empty return");
 		}
 		else {
@@ -668,7 +687,7 @@ void OlCore::resetConnection()
 	}
 }
 
-void OlCore::callback(int byte)
+void OlCore::readCallback(int byte)
 {
 	if (byte < 0 || byte >255) {
 		thrower("Byte value readed needs to be in range 0-255.");
@@ -677,4 +696,9 @@ void OlCore::callback(int byte)
 	if (byte == '\n') {
 		readComplete = true;
 	}
+}
+
+void OlCore::errorCallback(std::string error)
+{
+	errorMsg = error;
 }

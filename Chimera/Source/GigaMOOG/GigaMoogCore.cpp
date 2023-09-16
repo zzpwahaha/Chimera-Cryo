@@ -222,4 +222,13 @@ void GigaMoogCore::send(MessageSender& ms)
 	//MessagePrinter rec; 
 	//fpga.setReadCallback(boost::bind(&MessagePrinter::callback, rec, _1)); 
 	fpga.write(ms.getMessageBytes());
+	if (auto e = fpga.lastException()) {
+		try {
+			boost::rethrow_exception(e);
+		}
+		catch (boost::system::system_error& e) {
+			throwNested("Error seen in writing to serial port " + str(fpga.portID) + ". Error: " + e.what());
+		}
+	}
+
 }

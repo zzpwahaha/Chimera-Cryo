@@ -3,6 +3,7 @@
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
 #include <boost/thread.hpp>
+#include <queue>
 #include <iostream>
 
 class BoostAsyncSerial
@@ -23,6 +24,7 @@ public:
 	~BoostAsyncSerial();
 
 	void setReadCallback(const boost::function<void(int)> &read_callback);
+	void setErrorCallback(const boost::function<void(std::string)>& error_callback);
 
 	void write(std::vector<unsigned char>);
 	void write(std::vector<int>);
@@ -30,14 +32,17 @@ public:
 	void disconnect();
 	void reconnect();
 
+	boost::exception_ptr lastException();
+
 private:
 	void read();
 	void run();
 	void readhandler(const boost::system::error_code& error, std::size_t bytes_transferred);
-private:
+public:
 	const bool safemode;
 	const std::string portID;
 	const int baudrate;
+private:
 	std::atomic<bool> continue_reading;
 	boost::asio::io_service io_service_;
 	std::unique_ptr<boost::asio::serial_port> port_;
@@ -45,6 +50,8 @@ private:
 	std::array<unsigned char, 1024> readbuffer;
 	boost::mutex mutex_;
 	boost::function<void(uint8_t)> read_callback_;
+	boost::function<void(std::string)> error_callback_;
+	std::queue<boost::exception_ptr> exceptionQueue;
 
 	//std::unique_ptr<boost::asio::io_service::work> work;
 	typedef boost::asio::executor_work_guard<boost::asio::io_context::executor_type> work_guard;

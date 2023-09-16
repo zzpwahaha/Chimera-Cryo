@@ -41,7 +41,8 @@ public:
 	void writeOLs(unsigned variation);
 	void OLForceOutput(std::array<double, size_t(OLGrid::total)> status, DoCore& doCore, DOStatus dostatus);
 	void resetConnection();
-	void callback(int byte);
+	void readCallback(int byte);
+	void errorCallback(std::string error);
 private:
 	unsigned long long tmp = 0;
 	std::array<std::string, size_t(OLGrid::total)> names;
@@ -59,6 +60,7 @@ private:
 	std::array<BoostAsyncSerial, size_t(OLGrid::numOFunit)> btFlumes;
 	std::atomic<bool> readComplete;	
 	std::vector<unsigned char> readRegister;
+	std::string errorMsg;
 
 public:
 	const unsigned maxCommandNum = 512;

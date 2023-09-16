@@ -56,9 +56,14 @@ void BoostAsyncSerial::setReadCallback(const boost::function<void(int)>& read_ca
 	read_callback_ = read_callback;
 }
 
+void BoostAsyncSerial::setErrorCallback(const boost::function<void(std::string)>& error_callback)
+{
+	error_callback_ = error_callback;
+}
+
 void BoostAsyncSerial::readhandler(const boost::system::error_code & error, std::size_t bytes_transferred)
 {
-	boost::mutex::scoped_lock look(mutex_);
+	boost::mutex::scoped_lock lock(mutex_);
 
 	if (error) {
 		if (!continue_reading) {
@@ -68,7 +73,11 @@ void BoostAsyncSerial::readhandler(const boost::system::error_code & error, std:
 		}
 		else {
 			std::string s = error.message();
-			throw("Error reading from serial: " + s);
+			if (!error_callback_.empty()) {
+				error_callback_(s);
+			}
+			qDebug() << "BoostAsyncSerial::readhandler sees an error from reading serial: " << qstr(s);
+			//throw("Error reading from serial: " + s);
 		}
 	}
 	
@@ -96,7 +105,15 @@ void BoostAsyncSerial::write(std::vector<unsigned char> data)
 	if (!port_->is_open()) {
 		thrower("Serial port has not been opened");
 	}
-	boost::asio::write(*port_, boost::asio::buffer(data));
+	boost::mutex::scoped_lock lock(mutex_);
+	try {
+		boost::asio::write(*port_, boost::asio::buffer(data));
+	}
+	catch (boost::system::system_error& e) {
+		exceptionQueue.push(boost::current_exception());
+		//thrower("Error seen in writing to serial port " + str(portID) + ". Error: " + e.what());
+	}
+
 }
 
 void BoostAsyncSerial::write(std::vector<int> data)
@@ -111,13 +128,11 @@ void BoostAsyncSerial::write(std::vector<int> data)
 		}
 		converted[idx] = data[idx];
 	}
-
-	std::cout << "Serial is writing: ";
-	for (auto& byte : data)
-		std::cout << (int)byte << " ";
-	std::cout << "\n";
-
-	boost::asio::write(*port_, boost::asio::buffer(converted));
+	write(converted);
+	//std::cout << "Serial is writing: ";
+	//for (auto& byte : data)
+	//	std::cout << (int)byte << " ";
+	//std::cout << "\n";
 }
 
 void BoostAsyncSerial::disconnect()
@@ -177,6 +192,17 @@ void BoostAsyncSerial::reconnect()
 
 	io_thread = boost::thread(boost::bind(&BoostAsyncSerial::run, this));
 	read();
+}
+
+boost::exception_ptr BoostAsyncSerial::lastException()
+{
+	boost::mutex::scoped_lock lock(mutex_);
+	boost::exception_ptr e;
+	if (!exceptionQueue.empty()) {
+		e = exceptionQueue.front();
+		exceptionQueue.pop();
+	}
+	return e;
 }
 
 void BoostAsyncSerial::read()
