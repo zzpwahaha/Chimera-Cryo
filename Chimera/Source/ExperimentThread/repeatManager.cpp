@@ -21,6 +21,10 @@ void repeatInfo::calculateVariations(std::vector<parameterType>& params)
     for (auto variationNum : range(variations)) {
         double repeatNumDouble = repeatNum.evaluate(params, variationNum);
         unsigned repeatNumRound = std::round(repeatNumDouble);
+        if (repeatNumRound <= 0) {
+            thrower("Repeat number: " + repeatNum.expressionStr + " evaluates to: " + str(repeatNumDouble, 5)
+                + " in variation " + str(variationNum) + ", is negative.");
+        }
         if (std::abs(repeatNumDouble - repeatNumRound) > 1e-5) {
             thrower("Repeat number: " + repeatNum.expressionStr + " evaluates to: " + str(repeatNumDouble, 5)
                 + " in variation " + str(variationNum) + ", is more than 1e-5 away from its closest integer " + str(repeatNumRound, 1)

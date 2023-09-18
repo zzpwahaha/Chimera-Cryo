@@ -37,7 +37,7 @@ SyntaxHighlighter::SyntaxHighlighter (ScriptableDevice device, QTextDocument* pa
 		addRules ({ "t" }, QColor (0, 0, 0), true, true);
 		addRules ({ ":" }, QColor (0, 0, 0), false, false);
 		addRules ({ "{", "}" }, QColor(181, 137, 0), true, true);
-		addRules ({ "sin","cos","tan","exp","ln","var" }, QColor (42, 161, 152), true, true);
+		addRules ({ "sin","cos","tan","exp","ln","log10","int","var"}, QColor(42, 161, 152), true, true);
 	}
 	else if (device == ScriptableDevice::ArbGen) {
 		addRules ({"ramp", "hold", "pulse", "modpulse"}, QColor(108, 113, 196), true, true);

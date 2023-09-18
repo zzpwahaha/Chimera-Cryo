@@ -630,7 +630,10 @@ label:
 			continue;
 		}
 		qDebug() << tmp << qstr(buffCmd) << "Total time:" << timer.elapsed() << "ms";
-
+		if (btFlume.safemode) {
+			qDebug() << "I am in safemode: " << qstr(btFlume.portID);
+			continue;
+		}
 		for (auto idx : range(200)) {
 			if (readComplete) {
 				recv = std::string(readRegister.cbegin(), readRegister.cend());
