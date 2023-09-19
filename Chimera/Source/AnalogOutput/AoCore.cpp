@@ -639,6 +639,13 @@ void AoCore::findLoadSkipSnapshots(double time, std::vector<parameterType>& vari
 
 void AoCore::formatDacForFPGA(UINT variation, AoSnapshot initSnap)
 {
+	typedef unsigned long long l64;
+	const l64 timeConv = 100000; // DIO time given in multiples of 10 ns, this is different from the ramp time, which uses timeConvDAC
+	const l64 rewindTime = l64(1) << 32; // 0xFFFFFFFF + 1, correspond to 32 bit time 
+	int durCounter = l64(std::llround(dacSnapshots[variation][0].time * timeConv)) / rewindTime;
+	if (durCounter > 0) {// the first time stamp is larger than a rewind, shouldn't happen after organizeDAC, otherwise it is impossible to know the dac state before exp
+		thrower("The DAC start time is beyond 42.9s and is started instead at " + str(dacSnapshots[variation][0].time) + ". Make sure you input a DAC command in the experiment.");
+	}
 	//std::array<double, size_t(AOGrid::total)> dacValuestmp = initSnap.dacValues;
 	for (int i = 0; i < dacSnapshots[variation].size(); ++i)
 	{
@@ -646,16 +653,11 @@ void AoCore::formatDacForFPGA(UINT variation, AoSnapshot initSnap)
 		AoSnapshot snapshot;
 		AoChannelSnapshot channelSnapshot;
 		std::vector<int> channels;
-
 		snapshot = dacSnapshots[variation][i];
 
 		if (i == 0) {
 			for (int j = 0; j < size_t(AOGrid::total); ++j)
 			{
-				//if (snapshot.dacValues[j] != dacValuestmp[j] ||
-				//	(snapshot.dacValues[j] == dacValuestmp[j] && snapshot.dacRampTimes[j] != 0)) {
-				//	channels.push_back(j);
-				//}
 				channels.push_back(j);
 			}
 		}
@@ -683,6 +685,13 @@ void AoCore::formatDacForFPGA(UINT variation, AoSnapshot initSnap)
 			channelSnapshot.dacEndValue = snapshot.dacEndValues[channel];
 			channelSnapshot.dacRampTime = snapshot.dacRampTimes[channel];
 			finalDacSnapshots[variation].push_back(channelSnapshot);
+
+			if (l64(std::llround(snapshot.time * timeConv)) / rewindTime > durCounter) {
+				durCounter++;
+				unsigned int windTime = (l64(durCounter) * rewindTime - 10) & l64(0xffffffff); // 10*10ns away from rewind to avoid error in double
+				finalDacSnapshots[variation].push_back({ DAC_REWIND[0], static_cast<double>(windTime) / timeConv, static_cast<double>(durCounter % 5),static_cast<double>(durCounter % 5),0.0 });
+				finalDacSnapshots[variation].push_back({ DAC_REWIND[1], static_cast<double>(windTime) / timeConv, static_cast<double>(durCounter % 5),static_cast<double>(durCounter % 5),0.0 });
+			}
 		}
 	}
 	if (finalDacSnapshots[variation].size() > maxCommandNum) {

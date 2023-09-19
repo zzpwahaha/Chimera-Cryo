@@ -66,7 +66,8 @@
 	//const int DAC_RAMP_MAX_PTS = 0xffff; // 65535 ???
 	const double DDS_TIME_RESOLUTION = 1.6; // in ms
 	const double DDS_MAX_AMP = 1.25; // in mW
-	const std::pair<unsigned, unsigned> DIO_REWIND = std::make_pair(8 - 1, 7); // used for the long time run rewind, see DoCore::checkLongTimeRun
+	const std::pair<unsigned, unsigned> DIO_REWIND = std::make_pair(8 - 1, 7); // used for the long time run rewind, see DoCore::checkLongTimeRun. THIS IS NOT USED FOR NOW
+	const std::array<unsigned short, 2> DAC_REWIND = { 15, 31 }; // used for the long time run rewind, see AoCore::formatDacForFPGA
 
 	//OffsetLock 
 	const std::vector<std::string> OL_COM_PORT = { "COM3", "COM7" };
