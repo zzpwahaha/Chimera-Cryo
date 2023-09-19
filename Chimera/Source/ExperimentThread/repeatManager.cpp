@@ -21,7 +21,7 @@ void repeatInfo::calculateVariations(std::vector<parameterType>& params)
     for (auto variationNum : range(variations)) {
         double repeatNumDouble = repeatNum.evaluate(params, variationNum);
         unsigned repeatNumRound = std::round(repeatNumDouble);
-        if (repeatNumRound <= 0) {
+        if (repeatNumRound < 0) {
             thrower("Repeat number: " + repeatNum.expressionStr + " evaluates to: " + str(repeatNumDouble, 5)
                 + " in variation " + str(variationNum) + ", is negative.");
         }

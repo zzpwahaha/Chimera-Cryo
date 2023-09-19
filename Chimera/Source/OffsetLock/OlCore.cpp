@@ -335,6 +335,12 @@ void OlCore::constructRepeats(repeatManager& repeatMgr)
 			/*find the parent of this repeat and record its repeatInfoId for updating the repeated ones*/
 			TreeItem<repeatInfo>* repeatIParent = repeatI->parentItem();
 			repeatInfoId repeatIdParent{ repeatIParent->data().identifier, repeatIParent->itemID() };
+			/*if repeatNum is zero, delete the repeated command and that is all*/
+			if (repeatNum == 0) {
+				cmds.erase(std::remove_if(cmds.begin(), cmds.end(), [&](Command doc) {
+					return (doc.repeatId.repeatIdentifier == maxDepth.repeatId.repeatIdentifier); }));
+				continue;
+			}
 			/*collect command that need to be repeated*/
 			std::vector<Command> cmdToRepeat;
 			std::copy_if(cmds.begin(), cmds.end(), std::back_inserter(cmdToRepeat), [&](Command doc) {
