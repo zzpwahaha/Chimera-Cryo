@@ -679,19 +679,19 @@ void AoCore::formatDacForFPGA(UINT variation, AoSnapshot initSnap)
 
 		//for each channel with a changed voltage add a dacSnapshot to the final list
 		for (int channel : channels) {
+			if (l64(std::llround(snapshot.time * timeConv)) / rewindTime > durCounter) {
+				durCounter++;
+				unsigned int windTime = (l64(durCounter) * rewindTime - 3000) & l64(0xffffffff); // 3000*10ns=30us away from rewind to avoid the ramp time round up in sequencer.py
+				finalDacSnapshots[variation].push_back({ DAC_REWIND[0], static_cast<double>(windTime) / timeConv, static_cast<double>(durCounter % 5),static_cast<double>(durCounter % 5),0.0 });
+				finalDacSnapshots[variation].push_back({ DAC_REWIND[1], static_cast<double>(windTime) / timeConv, static_cast<double>(durCounter % 5),static_cast<double>(durCounter % 5),0.0 });
+			}
+
 			channelSnapshot.time = snapshot.time;
 			channelSnapshot.channel = channel;
 			channelSnapshot.dacValue = snapshot.dacValues[channel];
 			channelSnapshot.dacEndValue = snapshot.dacEndValues[channel];
 			channelSnapshot.dacRampTime = snapshot.dacRampTimes[channel];
 			finalDacSnapshots[variation].push_back(channelSnapshot);
-
-			if (l64(std::llround(snapshot.time * timeConv)) / rewindTime > durCounter) {
-				durCounter++;
-				unsigned int windTime = (l64(durCounter) * rewindTime - 10) & l64(0xffffffff); // 10*10ns away from rewind to avoid error in double
-				finalDacSnapshots[variation].push_back({ DAC_REWIND[0], static_cast<double>(windTime) / timeConv, static_cast<double>(durCounter % 5),static_cast<double>(durCounter % 5),0.0 });
-				finalDacSnapshots[variation].push_back({ DAC_REWIND[1], static_cast<double>(windTime) / timeConv, static_cast<double>(durCounter % 5),static_cast<double>(durCounter % 5),0.0 });
-			}
 		}
 	}
 	if (finalDacSnapshots[variation].size() > maxCommandNum) {
