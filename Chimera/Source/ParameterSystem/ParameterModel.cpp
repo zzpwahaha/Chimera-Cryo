@@ -95,7 +95,10 @@ QVariant ParameterModel::data (const QModelIndex& index, int role) const{
                     if (param.constant) {
                         return QString ("---");
                     }
-                    auto rangeNum = int (col - 5) / 3;
+                    auto rangeNum = int (col - 5) / 3; // make sure rangeNum is >0, since numRanges return size_t, therefore  int(-1)>size_t(0)
+                    if (rangeNum > rangeInfo.numRanges(param.scanDimension) - 1) {
+                        return QString("---");
+                    }
                     std::string lEnd = rangeInfo (param.scanDimension, rangeNum).leftInclusive ? "[" : "(";
                     std::string rEnd = rangeInfo (param.scanDimension, rangeNum).rightInclusive ? "]" : ")";
                     switch ((col - 5) % 3) {
@@ -141,10 +144,19 @@ QVariant ParameterModel::headerData (int section, Qt::Orientation orientation, i
 }
 
 Qt::ItemFlags ParameterModel::flags (const QModelIndex& index) const {
-    if (index.column () == 1 && !isGlobal || // the "const. / var. option is togglable, not editable.
-		(index.column() >= preRangeColumns && parameters[index.row()].constant) || // variation values for constants
-		index.column() == 3 && !isGlobal && !parameters[index.row()].constant) { // const value for variables
-        return QAbstractTableModel::flags(index) | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled;;
+    if (index.column() == 1 && !isGlobal || // the "const. / var. option is togglable, not editable.
+        (index.column() >= preRangeColumns && parameters[index.row()].constant) || // variation values for constants
+        index.column() == 3 && !isGlobal && !parameters[index.row()].constant // const value for variables
+        //(index.column() - preRangeColumns) / 3 > rangeInfo.numRanges(parameters[index.row()].scanDimension) - 1 // parameter with its dimension does not have this range
+        ) {
+        return QAbstractTableModel::flags(index) | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled;
+    }
+    if (index.column() >= preRangeColumns) {
+        int rangeNum = (index.column() - preRangeColumns) / 3;
+        int numRange = rangeInfo.numRanges(parameters[index.row()].scanDimension);
+        if (rangeNum > numRange - 1) {
+            return QAbstractTableModel::flags(index) | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled;
+        }
     }
     return Qt::ItemIsEditable | QAbstractTableModel::flags(index) | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled;
 };
@@ -174,6 +186,9 @@ bool ParameterModel::setData (const QModelIndex& index, const QVariant& value, i
                         param.scanDimension = boost::lexical_cast<int> (cstr(value.toString ())); 
                         if (param.scanDimension+1 > rangeInfo.numScanDimensions ()){
                             rangeInfo.setNumScanDimensions (param.scanDimension+1);
+                        }
+                        while (param.ranges.size() < rangeInfo.numRanges(param.scanDimension)) {
+                            param.ranges.push_back({ 0.0, 0.0 });
                         }
                         break;
                     case 3: 
@@ -242,12 +257,13 @@ void ParameterModel::checkScanDimensionConsistency () {
 
 void ParameterModel::checkVariationRangeConsistency () {
 	bool flag = true;
-    for (auto var : parameters) {
+    for (auto& var : parameters) {
         if (var.ranges.size () != rangeInfo.numRanges (var.scanDimension)) {
-            if (flag) {
+            if (flag && (!var.constant)) {
+                // only alert user for variable parameter, do constant under the hood
                 errBox ("The number of variation ranges of a parameter, " + var.name + ", (and perhaps others) did "
                     "not match the official number. The code will force the parameter to match the official number.");
-				flag = false; // only dislpay the error message once.
+				//flag = false; // only dislpay the error message once.
             }
             var.ranges.resize (rangeInfo.numRanges (var.scanDimension));
         }
@@ -255,9 +271,9 @@ void ParameterModel::checkVariationRangeConsistency () {
 }
 
 
-void ParameterModel::setVariationRangeNumber (int num, unsigned short dimNumber){
+void ParameterModel::setVariationRangeNumber (int newRangeNum, int currVarRangeNum, unsigned short dimNumber){
     // -2 for the two +- columns
-    int currentVariableRangeNumber = (columnCount () - preRangeColumns) / 3;
+    int currentVariableRangeNumber = currVarRangeNum;
     checkScanDimensionConsistency ();
     checkVariationRangeConsistency ();
     if (rangeInfo.numRanges (dimNumber) != currentVariableRangeNumber) {
@@ -280,25 +296,31 @@ void ParameterModel::setVariationRangeNumber (int num, unsigned short dimNumber)
             }
         }
     }
-    if (currentVariableRangeNumber < num) {
-        while (currentVariableRangeNumber < num) {
+    if (currentVariableRangeNumber < newRangeNum) {
+        while (currentVariableRangeNumber < newRangeNum) {
             /// add a range.
             rangeInfo.dimensionInfo (dimNumber).push_back (defaultRangeInfo);
             for (unsigned varInc = 0; varInc < parameters.size (); varInc++) {
-                indvParamRangeInfo tempInfo{ 0,0 };
-                parameters[varInc].ranges.push_back (tempInfo);
+                if (parameters[varInc].scanDimension == dimNumber) {
+                    // only add range for the same dimension parameter, no matter whether it is const or var
+                    indvParamRangeInfo tempInfo{ 0,0 };
+                    parameters[varInc].ranges.push_back(tempInfo);
+                }
             }
             currentVariableRangeNumber++;
         }
     }
-    else if (currentVariableRangeNumber > num) {
-        while (currentVariableRangeNumber > num) {
+    else if (currentVariableRangeNumber > newRangeNum) {
+        while (currentVariableRangeNumber > newRangeNum) {
             // delete a range.
             if (rangeInfo.dimensionInfo (dimNumber).size () == 1) {
                 return;	// can't delete last range
             }
             for (auto& param : parameters) {
-                param.ranges.pop_back ();
+                if (param.scanDimension == dimNumber) {
+                    // only remove range for the same dimension parameter, no matter whether it is const or var
+                    param.ranges.pop_back();
+                }
             }
             rangeInfo.dimensionInfo (dimNumber).pop_back ();
             currentVariableRangeNumber--;

@@ -62,13 +62,15 @@ void ParameterSystem::handleContextMenu (const QPoint& pos){
 	parametersView->connect (addRange, &QAction::triggered, [this, index]() {
 		auto rangeInfo = paramModel.getRangeInfo ();
 		auto scanDim = paramModel.getParams ()[index.row ()].scanDimension;
-		paramModel.setVariationRangeNumber (rangeInfo.numRanges (scanDim) + 1, scanDim);
+		auto currVarRangeNum = paramModel.getParams()[index.row()].ranges.size();
+		paramModel.setVariationRangeNumber (rangeInfo.numRanges (scanDim) + 1, currVarRangeNum, scanDim);
 		});
 	auto* rmRange = new QAction ("Remove Range", &menu);
 	parametersView->connect (rmRange, &QAction::triggered, [this, index]() {
 		auto rangeInfo = paramModel.getRangeInfo ();
 		auto scanDim = paramModel.getParams ()[index.row ()].scanDimension;
-		paramModel.setVariationRangeNumber (rangeInfo.numRanges (scanDim) - 1, scanDim);
+		auto currVarRangeNum = paramModel.getParams()[index.row()].ranges.size();
+		paramModel.setVariationRangeNumber (rangeInfo.numRanges (scanDim) - 1, currVarRangeNum, scanDim);
 		});
 	// change the selection type from item to rows, so that the drag and drop can work properly, 
 	// having it checked shouldn't affect anything other than that the whole row will be selceted when click on one item
@@ -598,7 +600,7 @@ void ParameterSystem::generateKey( std::vector<parameterType>& parameters, bool 
 	// for randomizing...
 	std::vector<int> variableIndexes;
 	for ( auto dimInc : range( maxDim+1 ) )	{
-		variationNums[dimInc].resize( parameters.front( ).ranges.size( ) );
+		variationNums[dimInc].clear();
 		for ( auto paramInc : range( parameters.size() ) ){
 			auto& parameter = parameters[paramInc];
 			// find a varying parameter in this scan dimension
@@ -607,8 +609,8 @@ void ParameterSystem::generateKey( std::vector<parameterType>& parameters, bool 
 			}
 			variableIndexes.push_back( paramInc );
 			if ( variationNums[dimInc].size( ) != parameter.ranges.size( ) ){
-				// if its zero its just the initial size on the initial variable. Else something has gone wrong.
-				if ( variationNums.size( ) != 0 ){
+				// if its zero its just the first round of the loop. Else something has gone wrong.
+				if ( variationNums[dimInc].size( ) != 0 ){
 					thrower ( "Not all variables seem to have the same number of ranges for their parameters!" );
 				}
 				variationNums[dimInc].resize( parameter.ranges.size( ) );
@@ -674,7 +676,7 @@ void ParameterSystem::generateKey( std::vector<parameterType>& parameters, bool 
 		{0,1,2} -> {1,1,2} -> {2,1,2}.
 		at which point the while loop will notice that all values turn over at the same time and leave the loop.
 		*/
-		std::vector<unsigned> keyValueIndexes (maxDim + 1);
+		std::vector<unsigned> keyValueIndexes (maxDim + 1, 0);
 		while (true){
 			unsigned rangeIndex = 0, varDim = variable.scanDimension, tempShrinkingIndex = keyValueIndexes[varDim],
 				rangeCount = 0, rangeOffset = 0;

@@ -84,10 +84,10 @@ class ScanRangeInfo{
 			}
 			return data[ scanDimIndex ][ rangeIndex ];
 		}
-		size_t numScanDimensions ( ){
+		size_t numScanDimensions ( ) const {
 			return data.size ( );
-		}
-		size_t numRanges ( unsigned scanDimIndex ){
+		};
+		size_t numRanges ( unsigned scanDimIndex ) const {
 			if ( scanDimIndex >= data.size ( ) ){
 				thrower ( "IndvRangeInfo: Tried to access scan dimension that does not exist." );
 			}

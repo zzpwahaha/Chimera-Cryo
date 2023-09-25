@@ -23,7 +23,7 @@ class ParameterModel : public QAbstractTableModel
         const unsigned short preRangeColumns = 5;
         void checkScanDimensionConsistency ();
         void checkVariationRangeConsistency ();
-        void setVariationRangeNumber (int num, unsigned short dimNumber);
+        void setVariationRangeNumber (int newRangeNum, int currVarRangeNum, unsigned short dimNumber );
         const bool isGlobal;
 
 
