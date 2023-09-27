@@ -3,247 +3,47 @@ t = 1
 call CryoMOTLoadingPGC()
 
 %%%%%%%%%%%%%%%  TOF  %%%%%%%%%%%%%%%%%%
-off: SciMOTTrg
-off: xyzMOTShutter
-off: PrbShutter 
-t += t_tof
-pulseon: DO1_0 1
+call TOF(t_tof)
+t += 2
+%%%%%%%%%%%%%%  PGC in Tweezer %%%%%%%%%%%%%%%%%%
+% change the field/laser freq parameter here because the previous section is TOF and no light is on
+call D2InTrapPGC(t_pgc_twz)
+% note the t_pgc_twz should be smaller than 100
+t += 100-t_pgc_twz
 
 %%%%%%%%%%%%%%  PGC in Tweezer %%%%%%%%%%%%%%%%%%
 % change the field/laser freq parameter here because the previous section is TOF and no light is on
-t += -4
-on: xyzMOTShutter
-ol: ol_cooling d2_cooling_resonance-pgc_twz_olcool
-ol: ol_repump d2_repump_resonance+pgc_twz_olrepump
-dac: BiasCoilX pgc_twz_bias_x
-dac: BiasCoilY pgc_twz_bias_y 
-dac: BiasCoilZ pgc_twz_bias_z
-dac: SciMOTAmp pgc_twz_cool_amp %{pgc_twz_cool_amp_cal mot_pwr}
-dac: TARepAmp pgc_twz_rep_amp
-t += 4
-
-on: SciMOTTrg
-t += t_pgc_twz
-pulseon: DO1_0 1
-off: SciMOTTrg
-off: xyzMOTShutter 
+call D2InTrapPGCPrb(t_pgc_twz)
 % note the t_pgc_twz should be smaller than 100
-t += -t_pgc_twz
-t += 100
-
+t += 100-t_pgc_twz
 
 %%%%%%%%%%%%%%  Image TWIZZER  %%%%%%%%%%%%%%%%%%
 % change the field/laser freq parameter here because the previous section is dark, i.e. 100-t_pgc_twz is larger than 4
-t += -4
-on: PrbShutter
-ol: ol_cooling d2_cooling_resonance+20-probe_olcool
-ol: ol_repump d2_repump_resonance-20+probe_olrepump
-dac: BiasCoilX pgc_img_bias_x
-dac: BiasCoilY pgc_img_bias_y
-dac: BiasCoilZ pgc_img_bias_z
-dac: PrbAmp {probe_cool_amp_cal prb_pwr}
-dac: PrbrepAmp probe_repump_amp
-t += 4
-
-pulseon: pixis_trg t_twz_imaging
-t += 7
-pulseon: PrbTrg t_twz_imaging-7
-pulseon: DO1_0 1
-
-
-%%%%%%%%%%%%% RELEASE AND RECAPTURE TWEEZER
-t += t_twz_imaging+10
-%on: TweezerHold
-%t += 2
-%off: TweezerTrg
-%t += t_twz_release
-%on: TweezerTrg
-%t += 2
-%off: TweezerHold
-
-%dacramp: TweezerIntensity twz_intensity twz_int_low 10 
-%t += 10+15
-%dacramp: TweezerIntensity twz_int_low twz_intensity 10 
-%t += 10
-%dac: TweezerIntensity 0.13
-%t += 3
-%dac: TweezerIntensity twz_intensity
-
-%dacramp: TweezerIntensity twz_intensity 0.03 10 
-%t += 10+15
-%dacramp: TweezerIntensity 0.03 twz_intensity 10 
-%t += 10
-%%%%%%%%%%%%%%%%% After Image TWIZZER %%%%%%%%%
-%dacramp: TweezerIntensity twz_intensity twz_int_lifetime 10 
-dac: BiasCoilX pgc_twz_bias_x
-dac: BiasCoilY pgc_twz_bias_y
-dac: BiasCoilZ pgc_twz_bias_z
-
-%off: PrbShutter
-%on: xyzMOTShutter
-%ol: ol_cooling pgc_lifetime_twz_olcool
-%ol: ol_repump pgc_lifetime_twz_olrepump
-%dac: SciMOTAmp pgc_lifetime_cool_amp
-%dac: SciMOTAmp {pgc_lifetime_cool_amp_cal mot_pwr} % continous cooling
-%dac: SciMOTAmp {pgc_flash_amp_cal mot_pwr} % intermittent cooling
-%dac: TARepAmp pgc_lifetime_repump_amp
-
-on: PrbShutter
-off: xyzMOTShutter
-ol: ol_cooling d2_cooling_resonance+20-pgc_lifetime_twz_olcool
-ol: ol_repump d2_repump_resonance-20+pgc_lifetime_twz_olrepump
-dac: PrbAmp pgcprb_lifetime_cool_amp
-dac: PrbrepAmp pgcprb_lifetime_repump_amp
-t += 4
-
-%%%%%%%% Continous cooling
-%%on: SciMOTTrg
-%on: PrbTrg
-%t += -4
-%%t += -t_twz_release-2-2
-%%t += -(10+10+15) % for lowering and raising tweezer intensity
-%%t += -3
-%t += -(t_twz_imaging+10)
-%t += t_lifetime-10 %t_pgc_twz
-%off: SciMOTTrg
-%off: PrbTrg
-
-%%%%%%%% Intermittent cooling with MOT
-%off: SciMOTTrg
+call PGCTweezerImaging()
 %on: MOTFlashTrg
-%t += -4
-%%t += -t_twz_release-2-2
-%%t += -(10+10+15) % for lowering and raising tweezer intensity
-%%t += -3
-%t += -(t_twz_imaging+10)
-%t += t_lifetime-10 %t_pgc_twz
-%off: SciMOTTrg
-%off: PrbTrg
 
-%%%%%%%% Intermittent cooling with Probe
-off: SciMOTTrg
-off: PrbTrg
-on: MOTFlashTrg
-t += -4
-%t += -t_twz_release-2-2
-%t += -(10+10+15) % for lowering and raising tweezer intensity
-%t += -3
-t += -(t_twz_imaging+10)
-t += t_lifetime-10 %t_pgc_twz
-off: MOTFlashTrg
-off: PrbTrg
+t += 15
+%%%%%%%%%%%%%%  Kickout TWIZZER  %%%%%%%%%%%%%%%%%%
+%call kickOutTweezer()
+%call TrapLowerAndRise(twz_intensity, twz_intensity*0.1, 10, 15)
+call ReleaseRecapture(t_twz_release)
+t += 15
 
-
-off: xyzMOTShutter
-off: PrbShutter
-
-
-%dacramp: TweezerIntensity twz_int_lifetime twz_intensity 10 
-t += -(t_lifetime-10)  %-t_pgc_twz
-
-%%%%%%%%%%%%% INSTANT RELEASE AND RECAPTURE TWEEZER
-%t += 50
-%off: SciMOTTrg
-%off: PrbTrg
-%off: xyzMOTShutter
-%off: PrbShutter
-%on: TweezerHold
-%off: MOTFlashTrg
-%t += 20
-%off: TweezerTrg
-%t += t_twz_release %start release at 70ms aft first image
-%on: TweezerTrg
-%
-%t += -(50+20+t_twz_release) %go back to first image
-
-%%%%%%%%%%%%% RR with varying time when RR starts
-t += t_rr
-off: SciMOTTrg
-off: PrbTrg
-off: xyzMOTShutter
-off: PrbShutter
-on: TweezerHold
-off: MOTFlashTrg
-t += 20
-off: TweezerTrg
-t += t_twz_release 
-on: TweezerTrg
-
-%%%%%%%%%%%% in trap pgc before imaging
-%t += t_lifetime-100 %100 ms before lifetime
-t += -(t_twz_release)
-t += 10 %10 ms after start of RR
-t += -4
-on: xyzMOTShutter
-ol: ol_cooling d2_cooling_resonance-pgc_twz_olcool
-ol: ol_repump d2_repump_resonance+pgc_twz_olrepump
-dac: BiasCoilX pgc_twz_bias_x
-dac: BiasCoilY pgc_twz_bias_y 
-dac: BiasCoilZ pgc_twz_bias_z
-dac: SciMOTAmp pgc_twz_cool_amp %{pgc_twz_cool_amp_cal mot_pwr}
-dac: TARepAmp pgc_twz_rep_amp
-t += 4
-
-on: SciMOTTrg
-t += t_pgc_twz
-pulseon: DO1_0 1
-off: SciMOTTrg
-off: xyzMOTShutter 
-
-%t += -(t_lifetime-100+t_pgc_twz) % go back to first image
-
-
-%%%%%%%%%%%%% RELEASE AND RECAPTURE TWEEZER
-%t += t_lifetime/2
-%off: SciMOTTrg
-%off: PrbTrg
-%off: xyzMOTShutter
-%off: PrbShutter
-%on: TweezerHold
-%off: MOTFlashTrg
-%t += 20
-%off: TweezerTrg
-%t += t_twz_release
-%on: TweezerTrg
-%off: xyzMOTShutter
-%on: PrbShutter
-%t += 20
-%off: TweezerHold
-%off: SciMOTTrg
-%off: PrbTrg
-%on: MOTFlashTrg
-%t += -(t_lifetime/2+20+20)
-
-
-%t += t_lifetime
-
+%%%%%%%%%%%%%%  PGC in Tweezer %%%%%%%%%%%%%%%%%%
+% change the field/laser freq parameter here because the previous section is TOF and no light is on
+call D2InTrapPGCPrb(t_pgc_twz)
+% note the t_pgc_twz should be smaller than 100
+t += 100-t_pgc_twz
 %%%%%%%%%%%%%%% Second Twizzer Image
-% note the previous section should have at least 4 ms dark interval
-t += 10 %10ms after end of PGC
-t += -4
-on: PrbShutter
-off: xyzMOTShutter
-off: SciMOTTrg
-ol: ol_cooling d2_cooling_resonance+20-probe_olcool
-ol: ol_repump d2_repump_resonance-20+probe_olrepump
-dac: BiasCoilX pgc_img_bias_x
-dac: BiasCoilY pgc_img_bias_y
-dac: BiasCoilZ pgc_img_bias_z
-dac: PrbAmp {probe_cool_amp_cal prb_pwr}
-dac: PrbrepAmp probe_repump_amp
-t += 4
-
-
-pulseon: pixis_trg t_twz_imaging
-t += 7
-pulseon: PrbTrg t_twz_imaging-7
-pulseon: DO1_0 1
-
+% note the previous section should have at least 4 ms dark interval. change the field/laser freq parameter here because the previous section is dark, i.e. 100-t_pgc_twz is larger than 4
+call PGCTweezerImaging()
+%on: MOTFlashTrg
 
 
 %%%%%%%%%%%%%%  END Sequence  %%%%%%%%%%%%%%%%%%
 t += 100
 pulseon: DO1_0 0.5
+
 
 
 

@@ -2,7 +2,7 @@
 % also note that this function set the time back to before entering the function
 
 def D2InTrapPGC(pgc_time):
-    t += -4
+    t += -t_shutter
     on: xyzMOTShutter
     on: xyMOTShutter
     ol: ol_cooling d2_cooling_resonance-pgc_twz_olcool
@@ -12,7 +12,7 @@ def D2InTrapPGC(pgc_time):
     dac: BiasCoilZ pgc_twz_bias_z
     dac: SciMOTAmp pgc_twz_cool_amp
     dac: TARepAmp pgc_twz_rep_amp
-    t += 4
+    t += t_shutter
 
     on: SciMOTTrg
     t += pgc_time
@@ -20,4 +20,4 @@ def D2InTrapPGC(pgc_time):
     off: SciMOTTrg
     off: xyzMOTShutter 
     off: xyMOTShutter
-    t += -pgc_time
+%    t += -pgc_time

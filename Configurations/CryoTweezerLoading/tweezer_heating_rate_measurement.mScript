@@ -13,17 +13,25 @@ pulseon: DO1_0 1
 % change the field/laser freq parameter here because the previous section is TOF and no light is on
 call D2InTrapPGC(t_pgc_twz)
 % note the t_pgc_twz should be smaller than 100
-t += 100
+t += 100-t_pgc_twz
 
+call D2InTrapPGCPrb(t_pgc_twz)
+% note the t_pgc_twz should be smaller than 100
+t += 100-t_pgc_twz
 
 %%%%%%%%%%%%%%  Image TWIZZER  %%%%%%%%%%%%%%%%%%
 % change the field/laser freq parameter here because the previous section is dark, i.e. 100-t_pgc_twz is larger than 4
 call PGCTweezerImaging()
 %on: MOTFlashTrg
 
-%%%%%%%%%%%%%% Prepare for pulsed PGC %%%%%%%%%%%%%%%
-dacramp: TweezerIntensity twz_intensity twz_int_lifetime 5
+t += 15
+call D2InTrapPGCPrb(t_pgc_twz)
+% note the t_pgc_twz should be smaller than 100
+t += 100-t_pgc_twz
 
+%%%%%%%%%%%%%% Prepare for pulsed PGC %%%%%%%%%%%%%%%
+%dacramp: TweezerIntensity twz_intensity twz_int_lifetime 5
+t += 6
 t += t_wait_before_rr
 
 %%%%%%%%%%%%% release recapture %%%%%%%%%%
@@ -32,12 +40,12 @@ call ReleaseRecapture(t_twz_release)
 %wait a bit before next step
 t += 10
 
-dacramp: TweezerIntensity twz_int_lifetime twz_intensity 5
+%dacramp: TweezerIntensity twz_int_lifetime twz_intensity 5
 t += 6
 
-call D2InTrapPGC(t_pgc_twz)
+call D2InTrapPGCPrb(t_pgc_twz)
 % note the t_pgc_twz should be smaller than 100
-t += 100
+t += 100-t_pgc_twz
 %%%%%%%%%%%%%%% Second Twizzer Image
 % note the previous section should have at least 4 ms dark interval
 call PGCTweezerImaging()

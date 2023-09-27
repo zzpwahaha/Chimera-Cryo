@@ -1,0 +1,198 @@
+%%%%%%%%%%%%%%%%% Start With 1ms %%%%%%%%%%%%%%%%% 
+t = 1
+pulseon: DO1_0 10
+pulseon: GMLoadTrg 0.003
+t += 1
+ddsfreq: dds0_0 80
+ddsamp: dds0_0 100
+t += 1
+ddsfreq: SciSrcMOT 80
+ddsamp: SciSrcMOT 100
+t += 1
+% dipole push is in external rf source for now
+%for dipole push rep, this rep is 80MHz detuned
+ddsfreq: Prb 100
+ddsamp: Prb 100
+t += 1
+ddsfreq: dds0_3 80
+ddsamp: dds0_3 100
+
+t += 1
+ddsfreq: TARep 80 %also used for tweezer AOM
+ddsamp: TARep 100
+t += 1
+ddsfreq: PrbRep 80
+ddsamp: PrbRep 100
+t += 1
+ddsfreq: D1LGM 80
+ddsamp: D1LGM 100
+t += 1
+ddsfreq: dds2_3 80
+ddsamp: dds2_3 100
+
+
+on: TARepTrg
+on: SrcMOTTrg 
+on: SciMOTTrg 
+on: DipolePushTrg 
+on: PrbRepTrg
+off: PrbTrg
+off: TweezerHold
+on: TARepShutter
+off: D1LGMTrg
+off: D1LGMEOMTrg
+on: xyzMOTShutter
+on: xyMOTShutter
+on: DipolePushShutter 
+off: PrbShutter 
+on: PrbCoolShutter
+off: D1LGMShutter
+off: MOTFlashTrg
+on: TweezerTrg
+off: CameraShutter
+
+
+dac: TARepAmp 10
+dac: SrcMOTAmp 10
+dac: SciMOTAmp mot_load_cool_amp %{mot_load_cool_amp_cal mot_pwr} 
+dac: DipolePushAmp 6
+dac: TweezerIntensity twz_intensity %Converison is 38.7mW per 1V Aug/1/2022 
+dac: PrbRepAmp 10
+dac: PrbAmp 2.5 
+
+ol: ol_cooling d2_cooling_resonance+10 %1216
+ol: ol_repump d2_repump_resonance %5282
+
+dac: MOTCoil mot_gradient
+dac: BiasCoilX bias_x %0.04
+dac: BiasCoilY bias_y %0.4
+dac: BiasCoilZ bias_z %0.0
+
+t += 100 %t_loading
+off: SrcMOTTrg
+off: DipolePushTrg
+off: DipolePushShutter
+%dac: MOTCoil 0
+pulseon: DO1_0 100
+
+
+% attempt to move the MOT, maybe needed for the future
+%t += -20
+%dac: BiasCoilX shift_bias_x
+%dac: BiasCoilY shift_bias_y
+%dac: BiasCoilZ shift_bias_z
+%ol: ol_cooling shift_olcool
+%t += 20
+
+% to image PGC cloud for 5ms to make sure everything looks fine
+
+%%%%%%%%%%%%%%%  PGC  %%%%%%%%%%%%%%%%%%
+%on: SciMOTTrg
+%ol: ol_cooling d2_cooling_resonance-pgc_olcool
+%ol: ol_repump d2_repump_resonance+pgc_olrepump
+%dac: BiasCoilX pgc_bias_x
+%dac: BiasCoilY pgc_bias_y 
+%dac: BiasCoilZ pgc_bias_z
+%dac: SciMOTAmp pgc_cool_amp
+%dac: TARepAmp pgc_rep_amp
+%t += t_pgc_cool_time
+%pulseon: DO1_0 1
+
+%t += -5
+%pulseon: Mako2 0.1
+%t += 5
+
+
+%%%%%%%%%%%%%%%  TOF  %%%%%%%%%%%%%%%%%%
+off: SciMOTTrg
+%%%off: PrbTrg
+%%%off: xyzMOTShutter
+%%%off: PrbShutter 
+%%%off: D1LGMShutter
+t += 35 %t_tof
+pulseon: DO1_0 1
+on: SciMOTTrg
+t += 100
+%
+%on: SciMOTTrg
+%dacramp: SciMOTAmp mot_load_cool_amp 1.4 10000
+%t += 10000+10
+
+%%%%%%%%%%%%%%%%  Recapture MOT  %%%%%%%%%%%%%%%%%%
+%dac: MOTCoil mot_gradient
+%dac: BiasCoilX bias_x %0.04
+%dac: BiasCoilY bias_y %0.4
+%dac: BiasCoilZ bias_z %0.0
+%dac: TARepAmp 10
+%dac: SciMOTAmp mot_load_cool_amp
+%ol: ol_cooling d2_cooling_resonance+10 
+%ol: ol_repump d2_repump_resonance 
+%t += 3
+%on: SciMOTTrg
+%
+%t += 10
+%%t += t_lifetime
+
+
+%%%%%%%%%%%%%%  Image MOT  %%%%%%%%%%%%%%%%%%
+%t += -4
+%on: xyzMOTShutter
+%dac: BiasCoilX pgc_bias_x
+%dac: BiasCoilY pgc_bias_y 
+%dac: BiasCoilZ pgc_bias_z
+%
+%ol: ol_cooling D2_cooling_resonance
+%ol: ol_repump D2_repump_resonance
+%dac: SciMOTAmp 10
+%dac: TARepAmp 10
+
+
+
+%t += -6
+%dac: PrbAmp 5 %probe_cool_amp
+%dac: PrbRepAmp 10
+%on: PrbShutter
+%on: PrbCoolShutter
+%t += 6
+%off: SciMOTTrg
+%t += 1
+%ol: ol_cooling D2_cooling_prb_resonance+10
+%ol: ol_repump D2_repump_prb_resonance
+%off: xyzMOTShutter
+%on: PrbTrg
+
+
+%t += 4
+%pulseon: mako2 0.1
+%t += 0.07
+%pulseon: SciMOTTrg 4.7
+%pulseon: PrbTrg t_twz_imaging
+%t += 20000
+%t += -7
+%on: CameraShutter
+%t += 7
+%pulseon: pixis_trg 25 %t_twz_imaging
+%%pulseon: SciMOTTrg 35
+%pulseon: mako1 0.1
+%pulseon: mako2 0.1
+%t += 25
+%%pulseon: PrbTrg resonance_scan %t_twz_imaging-7
+%%pulseon: SciMOTTrg 10 %t_twz_imaging-7
+%off: CameraShutter
+
+repeat: 400
+%pulseon: mako1 0.1
+pulseon: mako2 0.1
+t += 6000
+%pulseon: DO1_0 1
+end
+
+%%%%%%%%%%%%%%  END Sequence  %%%%%%%%%%%%%%%%%%
+t += 100
+pulseon: DO1_0 0.5
+
+
+
+
+
+

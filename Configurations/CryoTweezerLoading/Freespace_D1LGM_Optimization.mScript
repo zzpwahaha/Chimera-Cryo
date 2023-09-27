@@ -122,7 +122,6 @@ t = 1
     off: D1LGMEOMTrg
     pulseon: DO1_0 1
 
-
 %%%%%%%%%%%%%%%  TOF  %%%%%%%%%%%%%%%%%%
 off: SciMOTTrg
 off: PrbTrg
@@ -130,8 +129,7 @@ off: D1LGMTrg
 %off: xyzMOTShutter
 off: PrbShutter 
 off: D1LGMShutter
-
-t += 5 %t_tof
+t += t_tof
 pulseon: DO1_0 1
 
 %t += 5

@@ -13,37 +13,44 @@ pulseon: DO1_0 1
 % change the field/laser freq parameter here because the previous section is TOF and no light is on
 call D2InTrapPGC(t_pgc_twz)
 % note the t_pgc_twz should be smaller than 100
-t += 100
+t += 100-t_pgc_twz
 
+call D2InTrapPGCPrb(t_pgc_twz)
+% note the t_pgc_twz should be smaller than 100
+t += 100-t_pgc_twz
 
 %%%%%%%%%%%%%%  Image TWIZZER  %%%%%%%%%%%%%%%%%%
 % change the field/laser freq parameter here because the previous section is dark, i.e. 100-t_pgc_twz is larger than 4
 call PGCTweezerImaging()
 %on: MOTFlashTrg
-t += 10
+t += 15
+
 %% pulsed cooling for 1 pulse
-    t += -4
+    t += -10
     on: PrbShutter
     ol: ol_cooling d2_cooling_prb_resonance-pgc_twz_olcool
     ol: ol_repump d2_repump_prb_resonance+pgc_twz_olrepump
     dac: PrbAmp pgcprb_twz_cool_amp
     dac: PrbRepAmp pgcprb_twz_rep_amp
+    dac: BiasCoilX pgc_twz_bias_x_scan
+    dac: BiasCoilY pgc_twz_bias_y_scan 
+    dac: BiasCoilZ pgc_twz_bias_z_scan
     on: PrbRepTrg
-    t += 4
+    t += 10
 
     on: PrbTrg
 
-    t += t_pulsed_cool
+    t += t_pgc_twz
     pulseon: DO1_0 1
     off: PrbTrg
     off: PrbShutter
 
 t += 5
 call ReleaseRecapture(t_twz_release)
-t += 10
-call D2InTrapPGC(t_pgc_twz)
+t += 15
+call D2InTrapPGCPrb(t_pgc_twz)
 % note the t_pgc_twz should be smaller than 100
-t += 100
+t += 100-t_pgc_twz
 %%%%%%%%%%%%%%% Second Twizzer Image
 % note the previous section should have at least 4 ms dark interval
 call PGCTweezerImaging()

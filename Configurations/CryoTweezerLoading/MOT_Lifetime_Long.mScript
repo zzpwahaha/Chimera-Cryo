@@ -86,8 +86,8 @@ t = 1
     ddsfreq: PrbRep 80
     ddsamp: PrbRep 100
     t += 1
-    ddsfreq: PrbRep_tmp 80
-    ddsamp: PrbRep_tmp 100
+    ddsfreq: D1LGM 80
+    ddsamp: D1LGM 100
     t += 1
     ddsfreq: dds2_3 80
     ddsamp: dds2_3 100
@@ -137,7 +137,7 @@ off: DipolePushShutter
 pulseon: DO1_0 1
 
 %%%%%%%%%%%%%%  Mako Trigger  %%%%%%%%%%%%%%%%%%
-repeat: 10
+repeat: 99
 	pulseon: Mako2 1
 	pulseon: DO1_0 1
 	t += 1000

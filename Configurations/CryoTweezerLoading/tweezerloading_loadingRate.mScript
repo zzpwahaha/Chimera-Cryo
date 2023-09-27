@@ -2,18 +2,151 @@
 t = 1
 call CryoMOTLoadingPGC()
 
+%    pulseon: DO1_0 10
+%    pulseon: GMLoadTrg 0.003
+%    t += 1
+%    ddsfreq: dds0_0 80
+%    ddsamp: dds0_0 100
+%    t += 1
+%    ddsfreq: SciSrcMOT 80
+%    ddsamp: SciSrcMOT 100
+%    t += 1
+%    % dipole push is in external rf source for now
+%    %for dipole push rep, this rep is 80MHz detuned
+%    ddsfreq: Prb 100
+%    ddsamp: Prb 100
+%    t += 1
+%    ddsfreq: dds0_3 80
+%    ddsamp: dds0_3 100
+%
+%    t += 1
+%    ddsfreq: TARep 80 %also used for tweezer AOM
+%    ddsamp: TARep 100
+%    t += 1
+%    ddsfreq: PrbRep 80
+%    ddsamp: PrbRep 100
+%    t += 1
+%    ddsfreq: D1LGM 80
+%    ddsamp: D1LGM 100
+%    t += 1
+%    ddsfreq: dds2_3 80
+%    ddsamp: dds2_3 100
+%
+%
+%    on: TARepTrg
+%    on: SrcMOTTrg
+%    on: SciMOTTrg 
+%    on: DipolePushTrg
+%    on: PrbRepTrg
+%    off: PrbTrg
+%    off: TweezerHold
+%    on: TARepShutter
+%    off: D1LGMTrg
+%    off: D1LGMEOMTrg
+%    on: xyzMOTShutter
+%    on: xyMOTShutter
+%    on: DipolePushShutter
+%    off: PrbShutter 
+%    on: PrbCoolShutter
+%    off: D1LGMShutter
+%    off: MOTFlashTrg
+%    on: TweezerTrg
+%
+%
+%    dac: TARepAmp 10
+%    dac: SrcMOTAmp 10
+%    dac: SciMOTAmp mot_load_cool_amp %{mot_load_cool_amp_cal mot_pwr} %6.8 
+%    dac: DipolePushAmp 6
+%    dac: TweezerIntensity twz_intensity %Converison is 38.7mW per 1V Aug/1/2022 
+%%    dac: TweezerIntensity twz_dac_intensity-twz_intensityservo_bias % set loading tweezer depth, which is 1mK, 1.7V on PD. Subtract the ofst on servo.
+%    dac: PrbRepAmp 10
+%    dac: PrbAmp 2.5 
+%
+%
+%    ol: ol_cooling d2_cooling_resonance+10
+%    ol: ol_repump d2_repump_resonance
+%
+%    dac: MOTCoil mot_gradient
+%    dac: BiasCoilX bias_x %0.04
+%    dac: BiasCoilY bias_y %0.4
+%    dac: BiasCoilZ bias_z %0.0
+%
+%    t = t_loading %1000
+%    off: SrcMOTTrg
+%    off: DipolePushTrg
+%    off: DipolePushShutter
+%    dac: MOTCoil 0
+%    pulseon: DO1_0 1
+%
+%    % attempt to move the MOT, maybe needed for the future
+%    %t += -20
+%    %dac: BiasCoilX shift_bias_x
+%    %dac: BiasCoilY shift_bias_y
+%    %dac: BiasCoilZ shift_bias_z
+%    %ol: ol_cooling shift_olcool
+%    %t += 20
+%
+%
+%
+%    %%%%%%%%%%%%%%  PGC  %%%%%%%%%%%%%%%%%%
+%    on: SciMOTTrg
+%    ol: ol_cooling d2_cooling_resonance-pgc_olcool
+%    ol: ol_repump d2_repump_resonance+pgc_olrepump
+%    dac: BiasCoilX pgc_bias_x
+%    dac: BiasCoilY pgc_bias_y 
+%    dac: BiasCoilZ pgc_bias_z
+%    dac: SciMOTAmp pgc_cool_amp
+%    dac: TARepAmp pgc_rep_amp
+%    t += t_pgc_cool_time
+%    pulseon: DO1_0 1
+%
+%
+%
+%
+%%%%%%%%%%%%%%%%  PGC in Tweezer %%%%%%%%%%%%%%%%%%
+%%call D2InTrapPGC(t_pgc_twz_loading)
+%%% note the t_pgc_twz should be smaller than 100
+%%t += 100
+%
+%    %%%%%%%%%%%%%%  LGM  %%%%%%%%%%%%%%%%%%
+%    t += -4
+%    on: D1LGMShutter
+%    on: D1LGMEOMTrg
+%%off: xyMOTShutter
+%    dac: D1LGMEOMAmp d1lgm_rep_amp
+%    dac: D1LGMAmp d1lgm_cool_amp
+%    ol: ol_D1LGM D1_LGMCooling_resonance-d1lgm_olcool
+%    ol: ol_D1_repump Rb87_HFSplitting+d1lgm_olrepump
+%    t += 4
+%    off: SciMOTTrg
+%%    off: xyzMOTShutter
+%    dac: BiasCoilX pgc_bias_x
+%    dac: BiasCoilY pgc_bias_y 
+%    dac: BiasCoilZ pgc_bias_z
+%
+%    on: D1LGMTrg
+%    t += t_LGM_cool_time
+%    off: D1LGMTrg
+%    off: D1LGMEOMTrg
+%    pulseon: DO1_0 1
+%
+
 %%%%%%%%%%%%%%%  TOF  %%%%%%%%%%%%%%%%%%
 call TOF(t_tof)
 % the t_tof should be at least 4ms so that in the next PGC, the shutter can be open
 
 %%%%%%%%%%%%%%  PGC in Tweezer %%%%%%%%%%%%%%%%%%
-% change the field/laser freq parameter here because the previous section is TOF and no light is on
 call D2InTrapPGC(t_pgc_twz)
 % note the t_pgc_twz should be smaller than 100
-t += 100
+t += 100-t_pgc_twz
 
 %dacramp: TweezerIntensity twz_intensity twz_int_lifetime 10
 %t += 15
+
+%%%%%%%%%%%%%%  PGC in Tweezer %%%%%%%%%%%%%%%%%%
+call D2InTrapPGCPrb(t_pgc_twz)
+% note the t_pgc_twz should be smaller than 100
+t += 100-t_pgc_twz
 %%%%%%%%%%%%%%  Image TWIZZER  %%%%%%%%%%%%%%%%%%
 % change the field/laser freq parameter here because the previous section is dark, i.e. 100-t_pgc_twz is larger than 4
 call PGCTweezerImaging()
@@ -22,14 +155,14 @@ call PGCTweezerImaging()
 %on: MOTFlashTrg
 
 t += 100
-call releaseRecapture(t_twz_release)
+%call releaseRecapture(t_twz_release)
 t += 100
 
 %%%%%%%%%%%%%%  PGC in Tweezer %%%%%%%%%%%%%%%%%%
 % change the field/laser freq parameter here because the previous section is TOF and no light is on
-call D2InTrapPGC(t_pgc_twz)
+call D2InTrapPGCPrb(t_pgc_twz)
 % note the t_pgc_twz should be smaller than 100
-t += 100
+t += 100-t_pgc_twz
 
 %%%%%%%%%%%%%%  Image TWIZZER  %%%%%%%%%%%%%%%%%%
 % change the field/laser freq parameter here because the previous section is dark, i.e. 100-t_pgc_twz is larger than 4

@@ -27,7 +27,7 @@ class DAC_seq_point:
     assert (address >= 0),"invalid address!"
     assert (address <= 1023),"invalid address!"
     assert (time >= 0),"invalid time!"
-    assert (time <= 65536*65536-1),"invalid time!"
+    assert (time <= 65536*65536-1),"invalid time!" + f"address: {address}, time: {time}, start: {start}, incr: {incr}, chan: {chan}"
     assert (clr_incr >= 0),"invalid clr_incr!"
     assert (clr_incr <= 1),"invalid clr_incr!"
     assert (chan >= 0),"invalid channel!"

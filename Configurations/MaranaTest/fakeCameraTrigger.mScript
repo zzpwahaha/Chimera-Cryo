@@ -1,0 +1,10 @@
+%%%%%%%%%%%%%%%%% Start With 1ms %%%%%%%%%%%%%%%%% 
+t = 1
+
+pulseon: DO1_0 1
+dac: dac0_0 0.0
+ddsfreq: dds0_0 80
+ol: ol_cooling 1216
+pulseon: Pixis_Trg 1
+t += 900
+pulseon: DO1_0 1

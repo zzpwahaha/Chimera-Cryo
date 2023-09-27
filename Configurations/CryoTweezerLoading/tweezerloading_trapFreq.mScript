@@ -13,8 +13,11 @@ pulseon: DO1_0 1
 % change the field/laser freq parameter here because the previous section is TOF and no light is on
 call D2InTrapPGC(t_pgc_twz)
 % note the t_pgc_twz should be smaller than 100
-t += 100
+t += 100-t_pgc_twz
 
+call D2InTrapPGCPrb(t_pgc_twz)
+% note the t_pgc_twz should be smaller than 100
+t += 100-t_pgc_twz
 %%%%%%%%%%%%%%  Image TWIZZER  %%%%%%%%%%%%%%%%%%
 % change the field/laser freq parameter here because the previous section is dark, i.e. 100-t_pgc_twz is larger than 4
 call PGCTweezerImaging()
@@ -53,13 +56,13 @@ t += 105
 %t += 10
 
 % note the t_lifetime should be larger than all the minus term in front him
-t += t_lifetime
+t += 10 %t_lifetime
 
 %%%%%%%%%%%%%%  PGC in Tweezer %%%%%%%%%%%%%%%%%%
 % change the field/laser freq parameter here because the previous section is TOF and no light is on
-call D2InTrapPGC(t_pgc_twz)
+call D2InTrapPGCPrb(t_pgc_twz)
 % note the t_pgc_twz should be smaller than 100
-t += 100
+t += 100-t_pgc_twz
 %%%%%%%%%%%%%%% Second Twizzer Image
 % note the previous section should have at least 4 ms dark interval
 call PGCTweezerImaging()
@@ -69,31 +72,6 @@ call PGCTweezerImaging()
 t += 100
 pulseon: DO1_0 0.5
 
-
-
-%%%%%%%%%%%%%%%%% After Image TWIZZER %%%%%%%%%
-%dacramp: TweezerIntensity twz_intensity twz_int_lifetime 10 
-%off: PrbShutter
-%on: xyzMOTShutter
-%ol: ol_cooling pgc_twz_olcool
-%ol: ol_repump pgc_twz_olrepump
-%dac: BiasCoilX pgc_twz_bias_x
-%dac: BiasCoilY pgc_twz_bias_y
-%dac: BiasCoilZ pgc_twz_bias_z
-%dac: SciMOTAmp pgc_twz_cool_amp
-%dac: TARepAmp pgc_twz_rep_amp
-%t += 4
-%
-%on: SciMOTTrg
-%t += t_lifetime-15 %t_pgc_twz
-%off: SciMOTTrg
-%off: xyzMOTShutter
-%dacramp: TweezerIntensity twz_int_lifetime twz_intensity 10 
-%t += -(t_lifetime-15)  %-t_pgc_twz
-%t += -4
-%%t += -(10+10+15)
-%%t += -3
-%t += -(t_twz_imaging+10)
 
 
 

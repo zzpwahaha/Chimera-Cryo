@@ -3,18 +3,18 @@ t = 1
 call CryoMOTLoadingPGC()
 
 %%%%%%%%%%%%%%%  TOF  %%%%%%%%%%%%%%%%%%
-off: SciMOTTrg
-off: xyzMOTShutter
-off: PrbShutter 
-t += t_tof
-pulseon: DO1_0 1
+call TOF(t_tof)
 
 %%%%%%%%%%%%%%  PGC in Tweezer %%%%%%%%%%%%%%%%%%
 % change the field/laser freq parameter here because the previous section is TOF and no light is on
 call D2InTrapPGC(t_pgc_twz)
 % note the t_pgc_twz should be smaller than 100
-t += 100
+t += 100-t_pgc_twz
 
+
+call D2InTrapPGCPrb(t_pgc_twz)
+% note the t_pgc_twz should be smaller than 100
+t += 100-t_pgc_twz
 
 %%%%%%%%%%%%%%  Image TWIZZER  %%%%%%%%%%%%%%%%%%
 % change the field/laser freq parameter here because the previous section is dark, i.e. 100-t_pgc_twz is larger than 4
@@ -36,20 +36,21 @@ off: xyzMOTShutter
 t += 100
 %t += 5
 %set ol frequencies since there is a memory limit for the ol
-ol: ol_cooling d2_cooling_prb_resonance-pgc_twz_olcool_scan
-ol: ol_repump d2_repump_prb_resonance+pgc_twz_olrepump
+ol: ol_cooling d2_cooling_prb_resonance-probe_olcool
+ol: ol_repump d2_repump_prb_resonance+probe_olrepump
 
-% Set bias fields during pulsed cooling
-dac: BiasCoilX pgc_twz_bias_x_scan
-dac: BiasCoilY pgc_twz_bias_y_scan
-dac: BiasCoilZ pgc_twz_bias_z_scan
+dac: BiasCoilX pgc_img_bias_x
+dac: BiasCoilY pgc_img_bias_y
+dac: BiasCoilZ pgc_img_bias_z
+dac: PrbAmp {probe_cool_amp_cal prb_pwr}
+dac: PrbrepAmp probe_repump_amp
 
 %%%%%%%%%%%%%%% Pulsed PGC 5 times %%%%%%%%%%%%%%%
 %var t_cooling_cycle 2000/repeat_num
 var _wait_time_ 2000
 repeat: repeat_num
 %    t += (t_cooling_cycle-5-5-t_pulsed_cool)/2
-    t += (_wait_time_/repeat_num-5-5-t_twz_imaging+7)/2
+    t += (_wait_time_/repeat_num-5-5-t_twz_imaging)/2
     dacramp: TweezerIntensity twz_int_lifetime twz_intensity 5
     t += 5
 
@@ -58,28 +59,18 @@ repeat: repeat_num
     on: PrbShutter
     off: xyzMOTShutter
     off: SciMOTTrg
-    ol: ol_cooling d2_cooling_resonance+20-probe_olcool
-    ol: ol_repump d2_repump_resonance-20+probe_olrepump
-    dac: BiasCoilX pgc_img_bias_x
-    dac: BiasCoilY pgc_img_bias_y
-    dac: BiasCoilZ pgc_img_bias_z
-    dac: PrbAmp {imaging_amplitude prb_pwr}
-    dac: PrbrepAmp probe_repump_amp
     t += 4
 
 %    pulseon: pixis_trg t_twz_imaging
-%    t += 7
-    pulseon: PrbTrg t_twz_imaging-7
+    pulseon: PrbTrg t_twz_imaging
 %    pulseon: DO1_0 1
-    t += t_twz_imaging-7
+    t += t_twz_imaging
     off: PrbShutter 
-
-
 
     dacramp: TweezerIntensity twz_intensity twz_int_lifetime 5
     t += 5
 %    t += (t_cooling_cycle-5-5-t_pulsed_cool)/2
-    t += (_wait_time_/repeat_num-5-5-t_twz_imaging+7)/2
+    t += (_wait_time_/repeat_num-5-5-t_twz_imaging)/2
 end
 % 
 %t += t_wait_before_rr
@@ -92,9 +83,9 @@ t += 5
 
 %call ReleaseRecapture(t_twz_release)
 t += 10
-call D2InTrapPGC(t_pgc_twz)
+call D2InTrapPGCPrb(t_pgc_twz)
 % note the t_pgc_twz should be smaller than 100
-t += 100
+t += 100-t_pgc_twz
 %%%%%%%%%%%%%%% Second Twizzer Image
 % note the previous section should have at least 4 ms dark interval
 call PGCTweezerImaging()

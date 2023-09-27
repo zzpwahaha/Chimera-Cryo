@@ -18,7 +18,7 @@ pulseon: DO1_0 1
 %%%%%%%%%%%%%%%  MAKO Image  %%%%%%%%%%%%%%%%%%
 pulseon: Mako2 1
 t += 0.1
-pulseon: SciMOTTrg 0.3
+pulseon: SciMOTTrg 0.7
 
 
 %%%%%%%%%%%%%%  END Sequence  %%%%%%%%%%%%%%%%%%
