@@ -222,12 +222,6 @@ void DoCore::constructRepeats(repeatManager& repeatMgr)
 			/*find the parent of this repeat and record its repeatInfoId for updating the repeated ones*/
 			TreeItem<repeatInfo>* repeatIParent = repeatI->parentItem();
 			repeatInfoId repeatIdParent{ repeatIParent->data().identifier, repeatIParent->itemID() };
-			/*if repeatNum is zero, delete the repeated command and that is all*/
-			if (repeatNum == 0) {
-				cmds.erase(std::remove_if(cmds.begin(), cmds.end(), [&](Command doc) {
-					return (doc.repeatId.repeatIdentifier == maxDepth.repeatId.repeatIdentifier); }));
-				continue;
-			}
 			/*collect command that need to be repeated*/
 			std::vector<Command> cmdToRepeat;
 			std::copy_if(cmds.begin(), cmds.end(), std::back_inserter(cmdToRepeat), [&](Command doc) {
@@ -242,6 +236,16 @@ void DoCore::constructRepeats(repeatManager& repeatMgr)
 			}
 			int cmdToRepeatStartPos = std::distance(cmds.begin(), cmdToRepeatStart);
 			auto cmdToRepeatEnd = cmdToRepeatStart + cmdToRepeat.size(); // this will point to first cmd that is after those repeated one in CommandList
+			/*if repeatNum is zero, delete the repeated command and reduce the time for those comand comes after the repeated commands and that is all*/
+			if (repeatNum == 0) {
+				cmds.erase(std::remove_if(cmds.begin(), cmds.end(), [&](Command doc) {
+					return (doc.repeatId.repeatIdentifier == maxDepth.repeatId.repeatIdentifier); }), cmds.end());
+				/*de-advance the time of thoses command that is later in CommandList than the repeat block*/
+				cmdToRepeatEnd = cmds.begin() + cmdToRepeatStartPos; // this will point to first cmd that is after those repeated one in CommandList, since the repeated is removed, should equal to cmdToRepeatStart
+				std::for_each(cmdToRepeatEnd, cmds.end(), [&](Command& doc) {
+					doc.time -= repeatAddedTime; });
+				continue;
+			}
 			/*transform the repeating commandlist to its parent repeatInfoId so that it can be repeated in its parents level*/
 			// could also use this: std::transform(cmds.cbegin(), cmds.cend(), cmds.begin(), [&](Command doc) { with a return
 			std::for_each(cmds.begin(), cmds.end(), [&](Command& doc) {
