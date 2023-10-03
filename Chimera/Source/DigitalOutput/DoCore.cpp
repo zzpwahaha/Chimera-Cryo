@@ -507,7 +507,7 @@ void DoCore::formatForFPGA(UINT variation)
 	}
 	for (auto snapshot : ttlSnapshots[variation])
 	{
-		if (l64(std::llround(snapshot.time * timeConv)) / rewindTime > durCounter) {
+		while (l64(std::llround(snapshot.time * timeConv)) / rewindTime > durCounter) {
 			durCounter++;
 			unsigned int windTime = (l64(durCounter) * rewindTime - 1) & l64(0xffffffff);
 			sprintf_s(byte_buf[0], DIO_LEN_BYTE_BUF, "t%08X_b%08X%08X", windTime, outputB, outputA); // use the output from previous loop
