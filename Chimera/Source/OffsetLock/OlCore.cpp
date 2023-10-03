@@ -555,9 +555,22 @@ void OlCore::makeFinalDataFormat(unsigned variation, DoCore& doCore)
 
 			channelSnapshot.time = to.first;
 			channelSnapshot.channel = to.second.line;
+			if (commandInc != 0) {
+				// only respond to command that make a difference in freq, other command could be there simply for 'repeat' placeholder or re-instating
+				const auto& channelSnapPre = olChannelSnapshots[variation].back();
+				if (channelSnapPre.channel != channelSnapshot.channel) {
+					thrower("Channel number in Offsetlock commands are conflicting: should be Channel " + str(channelSnapPre.channel) + ", but sees Channel"
+						+ str(channelSnapshot.channel) + " instead in variation " + str(variation) + ". This is a low level bug.");
+				}
+				if ((fabs(channelSnapshot.val - channelSnapshot.endVal) < olFreqResolution) &&
+					(fabs(channelSnapPre.val - channelSnapPre.endVal) < olFreqResolution)) { // this one and previous one is not ramping, value=endValue
+					if (fabs(channelSnapshot.val - channelSnapPre.endVal) < olFreqResolution) { // this one's value is the same as previous end value, should ignore
+						continue;
+					}
 
+				}
+			}
 			olChannelSnapshots[variation].push_back(channelSnapshot);
-
 			/*within timeOrganizer[i], the time are the same*/
 			doCore.ttlPulseDirect(OL_TRIGGER_LINE[channel].first, OL_TRIGGER_LINE[channel].second, 
 				channelSnapshot.time, OL_TRIGGER_TIME, variation);
