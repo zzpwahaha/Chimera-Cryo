@@ -1324,21 +1324,27 @@ void ExpThreadWorker::waitForAndorFinish () {
 void ExpThreadWorker::errorFinish (std::atomic<bool>& isAborting, ChimeraError& exception,
 	std::chrono::time_point<chronoClock> startTime) {
 	//setExperimentGUIcolor();
-	input->zynqExp.sendCommand("resetSeq");
-	Sleep(50);
-	input->zynqExp.sendCommand("resetSeq");
-	Sleep(50);
-	input->ttls.FPGAForceOutput(input->ttlSys.getCurrentStatus());
-	Sleep(50);
-	input->aoSys.setDACs();
-	Sleep(50);
-	input->ddsSys.setDDSs();
-	Sleep(50);
-	input->olSys.setOLs(input->ttls, input->ttlSys.getCurrentStatus());
-	Sleep(50);
-	input->ddsSys.relockPLL();
-	Sleep(100);
-	input->ttls.FPGAForceOutput(input->ttlSys.getCurrentStatus());
+	try {
+		input->zynqExp.sendCommand("resetSeq");
+		Sleep(50);
+		input->zynqExp.sendCommand("resetSeq");
+		Sleep(50);
+		input->ttls.FPGAForceOutput(input->ttlSys.getCurrentStatus());
+		Sleep(50);
+		input->aoSys.setDACs();
+		Sleep(50);
+		input->ddsSys.setDDSs();
+		Sleep(50);
+		input->olSys.setOLs(input->ttls, input->ttlSys.getCurrentStatus());
+		Sleep(50);
+		input->ddsSys.relockPLL();
+		Sleep(100);
+		input->ttls.FPGAForceOutput(input->ttlSys.getCurrentStatus());
+	}
+	catch (ChimeraError& e) {
+		emit warn("Failed to set default output for ZYNQ and/or Offsetlock after experiment ERROR-FINISH.\r\n" + e.qtrace(), 0);
+	}
+
 
 	std::string finMsg;
 	if (isAborting) {
@@ -1359,21 +1365,25 @@ void ExpThreadWorker::errorFinish (std::atomic<bool>& isAborting, ChimeraError& 
 void ExpThreadWorker::normalFinish (ExperimentType& expType, bool runMaster,
 	std::chrono::time_point<chronoClock> startTime) {
 	auto exp_t = std::chrono::duration_cast<std::chrono::seconds>((chronoClock::now () - startTime)).count ();
-	setExperimentGUIcolor();
-	input->zynqExp.sendCommand("resetSeq"); 
-	Sleep(50);
-	input->ttls.FPGAForceOutput(input->ttlSys.getCurrentStatus());
-	Sleep(50);
-	input->aoSys.setDACs();
-	Sleep(50);
-	input->ddsSys.setDDSs();
-	Sleep(50);
-	input->olSys.setOLs(input->ttls, input->ttlSys.getCurrentStatus());
-	Sleep(50);
-	input->ddsSys.relockPLL();
-	Sleep(100);
-	input->ttls.FPGAForceOutput(input->ttlSys.getCurrentStatus());
-
+	try {
+		setExperimentGUIcolor();
+		input->zynqExp.sendCommand("resetSeq"); 
+		Sleep(50);
+		input->ttls.FPGAForceOutput(input->ttlSys.getCurrentStatus());
+		Sleep(50);
+		input->aoSys.setDACs();
+		Sleep(50);
+		input->ddsSys.setDDSs();
+		Sleep(50);
+		input->olSys.setOLs(input->ttls, input->ttlSys.getCurrentStatus());
+		Sleep(50);
+		input->ddsSys.relockPLL();
+		Sleep(100);
+		input->ttls.FPGAForceOutput(input->ttlSys.getCurrentStatus());
+	}
+	catch (ChimeraError& e) {
+		emit warn("Failed to set default output for ZYNQ and/or Offsetlock after experiment NORMAL-FINISH.\r\nTHIS SHOULDN\'T HAPPEN\r\n" + e.qtrace(), 0);
+	}
 	switch (expType) {
 	case ExperimentType::AutoCal:
 		emit calibrationFinish (("\r\nCalibration Finished Normally.\r\nExperiment took "

@@ -18,7 +18,13 @@ void CruncherThreadWorker::init () {
 	for (auto gridInc : range (gridSize)) {
 		auto& grid = input->grids[gridInc];
 		if (grid.useFile) {
-			atomGrid::loadGridFile(grid);
+			try {
+				atomGrid::loadGridFile(grid);
+			}
+			catch (ChimeraError& e) {
+				emit error("Can not open grid file: " + qstr(grid.fileName) + ". Experiment would probably fail due to failure of realtime analysis.");
+				return;
+			}
 			for (auto& locBlocks : grid.atomLocs) {
 				std::vector<long> pixelIndices;
 				for (auto& loc : locBlocks) {
