@@ -497,29 +497,32 @@ void DoCore::formatForFPGA(UINT variation)
 	unsigned int time;
 	unsigned int outputA;
 	unsigned int outputB;
-	//int outputAtest;
-	//int outputBtest;
 
 	const l64 rewindTime = l64(1) << 32; // 0xFFFFFFFF + 1, correspond to 32 bit time 
 	int durCounter = l64(std::llround(ttlSnapshots[variation][0].time * timeConv)) / rewindTime;
 	if (durCounter > 0) {// the first time stamp is larger than a rewind, shouldn't happen after organizeTTL, otherwise it is impossible to know the ttl state before exp
 		thrower("The TTL didn't start at ZYNQ_DEADTIME, which is " + str(ZYNQ_DEADTIME) + ". Something low level wrong.");
 	}
-	for (auto snapshot : ttlSnapshots[variation])
+	for (const auto& snapshot : ttlSnapshots[variation])
 	{
 		while (l64(std::llround(snapshot.time * timeConv)) / rewindTime > durCounter) {
 			durCounter++;
 			unsigned int windTime = (l64(durCounter) * rewindTime - 1) & l64(0xffffffff);
 			sprintf_s(byte_buf[0], DIO_LEN_BYTE_BUF, "t%08X_b%08X%08X", windTime, outputB, outputA); // use the output from previous loop
 			doFPGA[variation].push_back(byte_buf);
-			snapIndex++;
+		}
+		if (snapIndex != 0) {
+			const auto& snapShotPre = ttlSnapshots[variation][snapIndex - 1];
+			if (snapshot.ttlStatus == snapShotPre.ttlStatus) { // ignoring command that does not change the output state
+				snapIndex++;
+				continue;
+			}
 		}
 		time = l64(std::llround(snapshot.time * timeConv)) & l64(0xffffffff);
 		//for each DIO bank convert the boolean array to a byte
 		outputA = 0;
 		outputB = 0;
-		//outputAtest = 0;
-		//outputBtest = 0;
+
 		for (unsigned i = 0; i < 4; i++)
 		{
 			bankA = snapshot.ttlStatus[i]; //bank here is set of 8 booleans
@@ -542,7 +545,6 @@ void DoCore::formatForFPGA(UINT variation)
 		doFPGA[variation].push_back(byte_buf);
 		snapIndex++;
 	}
-
 }
 
 void DoCore::writeTtlDataToFPGA(UINT variation, bool loadSkip) //arguments unused, just paralleling original DIO structure
