@@ -510,10 +510,17 @@ if __name__ == "__main__":
 					b't001636E0_b0000610000000000\x00'
 					# b't11E4B040_b0000610000000010\x00'\
 					# b't11E636E0_b0000610000000000\x00'
-	byte_buf_dac =  b't00030D40_c0006_s10.0000_e00.0398_d00079950\x00'\
+	byte_buf_dac =  b't00020D40_c0006_s05.0000_e05.0000_d00000000\x00'\
+					b't00030D40_c0006_s10.0000_e00.0398_d00079950\x00'\
 					b't000AA690_c0006_s00.0398_e00.0000_d000007D0\x00'\
 					b't000AAE60_c0006_s00.0000_e00.0000_d00000000\x00'\
-					b't000AAF60_c0010_s-7.0000_e-7.0000_d00000000\x00'
+					b't000BAE60_c0006_s01.0000_e01.0000_d00000000\x00'\
+					b't000CAE60_c0006_s01.0000_e01.0000_d00000000\x00'\
+					b't000DAE60_c0006_s02.0000_e02.0000_d00000000\x00'\
+					b't000EAE60_c0006_s03.0000_e03.0000_d00000000\x00'\
+					b't000EAF60_c0010_s-7.0000_e-7.0000_d00000000\x00'
+	# so it seems like you can have the duplicated dac command at different time		
+	#b't000BAE60_c0006_s01.0000_e01.0000_d00000000\x00'\
 	byte_buf_dds =  b't000186A0_c000A_f_s080.000_e080.000_d00000000\x00'\
 					b't000186A0_c000A_a_s100.000_e000.000_d00002710\x00'\
 					b't0010C8E2_c000A_a_s000.000_e000.000_d00000000\x00'
@@ -538,7 +545,7 @@ if __name__ == "__main__":
 		# seq.set_DAC(0, -1)
 		# seq.set_DAC(16, 1)
 		# seq.set_DAC(19, 1)
-		seq.dac_seq_write_points(44, byte_buf_dac, 4)
+		seq.dac_seq_write_points(44, byte_buf_dac, 9)
 		seq.mod_enable()
 		seq.dio_seq_write_points(28, byte_buf_dio, 7)
 		seq.mod_enable()
