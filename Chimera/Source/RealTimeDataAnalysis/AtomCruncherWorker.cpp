@@ -2,8 +2,9 @@
 #include <RealTimeDataAnalysis/AtomCruncherWorker.h>
 #include <RealTimeDataAnalysis/atomCruncherInput.h>
 
-CruncherThreadWorker::CruncherThreadWorker (atomCruncherInput* input_) : input(input_) {
-}
+CruncherThreadWorker::CruncherThreadWorker (std::unique_ptr<atomCruncherInput> input_) 
+	: input(std::move(input_)) 
+{}
 
 CruncherThreadWorker::~CruncherThreadWorker () {
 }

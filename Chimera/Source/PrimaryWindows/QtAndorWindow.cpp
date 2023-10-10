@@ -749,7 +749,7 @@ void QtAndorWindow::completeCruncherStart () {
 		// then this is called from ProgramNow in AndorWindow
 		return;
 	}
-	auto* cruncherInput = new atomCruncherInput;
+	auto cruncherInput = std::make_unique<atomCruncherInput>();
 	cruncherInput->plotterActive = plotThreadActive;
 	cruncherInput->imageDims = andorSettingsCtrl.getRunningSettings ().imageSettings;
 	atomCrunchThreadActive = true;
@@ -767,6 +767,7 @@ void QtAndorWindow::completeCruncherStart () {
 	cruncherInput->rearrangerConditionWatcher = &rearrangerConditionVariable;
 
 	atomCruncherWorker = new CruncherThreadWorker (cruncherInput);
+	atomCruncherWorker = new CruncherThreadWorker(std::move(cruncherInput));
 	QThread* thread = new QThread;
 	atomCruncherWorker->moveToThread (thread);
 
@@ -783,7 +784,7 @@ void QtAndorWindow::completePlotterStart () {
 	/// start the plotting thread.
 	plotThreadActive = true;
 	plotThreadAborting = false;
-	auto* pltInput = new realTimePlotterInput ();
+	auto pltInput = std::make_unique<realTimePlotterInput>();
 	pltInput->plotParentWindow = this;
 	pltInput->aborting = &plotThreadAborting;
 	pltInput->active = &plotThreadActive;
@@ -799,7 +800,7 @@ void QtAndorWindow::completePlotterStart () {
 	pltInput->alertThreshold = alerts.getAlertThreshold ();
 	pltInput->wantAtomAlerts = alerts.wantsAtomAlerts ();
 	pltInput->numberOfRunsToAverage = 5;
-	analysisHandler.fillPlotThreadInput (pltInput);
+	analysisHandler.fillPlotThreadInput (pltInput.get());
 	// remove old plots that aren't trying to sustain.
 	unsigned mainPlotInc = 0;
 	for (auto plotParams : pltInput->plotInfo) {
@@ -825,7 +826,7 @@ void QtAndorWindow::completePlotterStart () {
 	else {
 		// start the plotting thread
 		plotThreadActive = true;
-		analysisThreadWorker = new AnalysisThreadWorker (pltInput);
+		analysisThreadWorker = new AnalysisThreadWorker (std::move(pltInput));
 		QThread* thread = new QThread;
 		analysisThreadWorker->moveToThread (thread);
 		connect (thread, &QThread::started, analysisThreadWorker, &AnalysisThreadWorker::init);

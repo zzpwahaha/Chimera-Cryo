@@ -3,9 +3,9 @@
 #include "DataAnalysisControl.h"
 #include <vector>
 
-AnalysisThreadWorker::AnalysisThreadWorker (realTimePlotterInput* input_){
-	input = input_;
-}
+AnalysisThreadWorker::AnalysisThreadWorker (std::unique_ptr<realTimePlotterInput> input_)
+	:input(std::move(input_))
+{}
 
 AnalysisThreadWorker::~AnalysisThreadWorker () {
 }

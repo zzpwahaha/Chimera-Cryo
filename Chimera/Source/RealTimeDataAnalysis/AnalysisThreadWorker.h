@@ -11,7 +11,9 @@ class AnalysisThreadWorker : public QObject {
     Q_OBJECT
 		 
     public:
-        AnalysisThreadWorker (realTimePlotterInput* input_);
+        // meant to claim ownership of this unique_ptr, take it by value instead of r-value reference because the latter may or may not claim ownership (depending on internal code paths)
+        // see https://stackoverflow.com/questions/8114276/how-do-i-pass-a-unique-ptr-argument-to-a-constructor-or-a-function
+        AnalysisThreadWorker (std::unique_ptr<realTimePlotterInput> input_);
         ~AnalysisThreadWorker ();
 
     public Q_SLOTS:
@@ -39,7 +41,7 @@ class AnalysisThreadWorker : public QObject {
 			std::vector<std::vector<bool>>& pscSatisfied);
 
         std::vector<double> xvals;
-        realTimePlotterInput* input;
+        std::unique_ptr<realTimePlotterInput> input;
         std::vector<std::vector<std::vector<dataPoint>>> dataContainers; // [plot][atom+avg][var] -> dataPoint
         std::vector<std::vector<std::vector<double>>> countData; // [grid][atom][pic]
         std::vector<std::vector<std::vector<int>>> atomPresentData; // [grid][atom][pic]
