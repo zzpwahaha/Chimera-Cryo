@@ -769,15 +769,14 @@ void QtAndorWindow::completeCruncherStart () {
 	atomCruncherWorker = new CruncherThreadWorker (cruncherInput);
 	atomCruncherWorker = new CruncherThreadWorker(std::move(cruncherInput));
 	QThread* thread = new QThread;
-	atomCruncherWorker->moveToThread (thread);
+	atomCruncherWorker->moveToThread(thread);
+	connect(thread, &QThread::started, atomCruncherWorker, &CruncherThreadWorker::init);
+	connect(mainWin->getExpThread(), &QThread::finished, thread, &QThread::quit);
+	connect(thread, &QThread::finished, atomCruncherWorker, &CruncherThreadWorker::deleteLater);
+	connect(atomCruncherWorker, &QThread::destroyed, thread, &CruncherThreadWorker::deleteLater);
 
-
-	connect (mainWin->getExpThread(), &QThread::finished, atomCruncherWorker, &QObject::deleteLater);
-
-	connect (thread, &QThread::started, atomCruncherWorker, &CruncherThreadWorker::init);
-	connect (thread, &QThread::finished, thread, &CruncherThreadWorker::deleteLater);
-	connect (this, &QtAndorWindow::newImage, atomCruncherWorker, &CruncherThreadWorker::handleImage);
-	thread->start ();
+	connect(this, &QtAndorWindow::newImage, atomCruncherWorker, &CruncherThreadWorker::handleImage);
+	thread->start();
 }
 
 void QtAndorWindow::completePlotterStart () {
@@ -830,13 +829,12 @@ void QtAndorWindow::completePlotterStart () {
 		QThread* thread = new QThread;
 		analysisThreadWorker->moveToThread (thread);
 		connect (thread, &QThread::started, analysisThreadWorker, &AnalysisThreadWorker::init);
-		connect (thread, &QThread::finished, thread, &QThread::deleteLater);
-		connect (thread, &QThread::finished, analysisThreadWorker, &AnalysisThreadWorker::deleteLater);
-		
+		connect(mainWin->getExpThread(), &QThread::finished, thread, &QThread::quit);
+		connect(thread, &QThread::finished, analysisThreadWorker, &AnalysisThreadWorker::deleteLater);
+		connect(analysisThreadWorker, &AnalysisThreadWorker::destroyed, thread, &QThread::deleteLater);
+
 		connect (mainWin->getExpThreadWorker(), &ExpThreadWorker::plot_Xvals_determined,
 				 analysisThreadWorker, &AnalysisThreadWorker::setXpts);
-		connect (mainWin->getExpThread(), &QThread::finished, analysisThreadWorker, &QObject::deleteLater);
-
 		connect (analysisThreadWorker, &AnalysisThreadWorker::newPlotData, this,
 			[this](std::vector<std::vector<dataPoint>> data, int plotNum) {mainAnalysisPlots[plotNum]->setData (data); });
 		if (atomCruncherWorker) {
