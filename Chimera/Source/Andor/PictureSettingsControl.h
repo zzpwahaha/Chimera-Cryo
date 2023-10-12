@@ -43,9 +43,12 @@ class PictureSettingsControl : public QWidget
 		std::array<std::vector<int>, 4> getThresholds();
 		std::array<displayTypeOption, 4> getDisplayTypeOptions( );
 		void setThresholds( std::array<std::string, 4> thresholds);
+		bool getContinuousMode();
 		unsigned getPicsPerRepetition();
+		unsigned getPicsPerRepetitionNonContinuous();
 		void updateSettings( );
 		void updateColormaps ( std::array<int, 4> colorsIndexes );
+		void setContinuousMode(bool contMode, unsigned picNum);
 		void setUnofficialPicsPerRep( unsigned picNum);
 		std::array<std::string, 4> getThresholdStrings();
 		std::array<softwareAccumulationOption, 4> getSoftwareAccumulationOptions ( );
@@ -61,6 +64,8 @@ class PictureSettingsControl : public QWidget
 		andorPicSettingsGroup currentPicSettings;
 		unsigned unofficialPicsPerRep=1;
 		/// Grid of PictureOptions
+		CQCheckBox* continuousModeChk;
+		QSpinBox* picsPerRepEdit;
 		QLabel* totalPicNumberLabel;
 		QLabel* pictureLabel;
 		QLabel* exposureLabel;

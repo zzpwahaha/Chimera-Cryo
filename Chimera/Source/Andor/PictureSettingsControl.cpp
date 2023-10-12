@@ -50,6 +50,21 @@ void PictureSettingsControl::initialize( IChimeraQtWindow* parent ){
 	//layout1->addWidget(transfModeLabel, 0);
 	//layout1->addWidget(transformationModeCombo, 1);
 
+	QHBoxLayout* layout1 = new QHBoxLayout(this);
+	layout1->setContentsMargins(0, 0, 0, 0);
+	/// Continuous mode
+	continuousModeChk = new CQCheckBox("Continuous Mode", parent);
+	auto picsPerRepLabel = new QLabel("PicsPerRep: ",parent);
+	picsPerRepEdit = new QSpinBox(this);
+	picsPerRepEdit->setValue(1);
+	picsPerRepEdit->setEnabled(false);
+	picsPerRepEdit->setRange(0, 99999);
+	parent->connect(continuousModeChk, &QCheckBox::stateChanged, handleChange);
+	parent->connect(picsPerRepEdit, qOverload<int>(&QSpinBox::valueChanged), handleChange);
+	layout1->addWidget(continuousModeChk, 0);
+	layout1->addWidget(picsPerRepLabel, 0);
+	layout1->addWidget(picsPerRepEdit, 0);
+
 	QGridLayout* layout2 = new QGridLayout(this);
 	layout2->setContentsMargins(0, 0, 0, 0);
 	/// Picture Numbers
@@ -128,7 +143,7 @@ void PictureSettingsControl::initialize( IChimeraQtWindow* parent ){
 	setPictureControlEnabled (1, false);
 	setPictureControlEnabled (2, false);
 	setPictureControlEnabled (3, false);
-	//layout->addLayout(layout1);
+	layout->addLayout(layout1);
 	layout->addLayout(layout2);
 }
 
@@ -236,39 +251,84 @@ void PictureSettingsControl::setPictureControlEnabled (int pic, bool enabled){
 	softwareAccumulateNum[pic]->setEnabled (enabled);
 }
 
+bool PictureSettingsControl::getContinuousMode()
+{
+	return continuousModeChk->isChecked();
+}
 
 unsigned PictureSettingsControl::getPicsPerRepetition(){
-	unsigned which = 0, count=0;
-	for ( auto& ctrl : totalNumberChoice ){
-		count++;		
-		which = ctrl->isChecked ( ) ? count : which;
+	if (!continuousModeChk->isChecked()) {
+		return getPicsPerRepetitionNonContinuous();
 	}
-	if ( which == 0 ){
-		thrower ( "ERROR: failed to get pics per repetition?!?" );
+	else {
+		int picNum = picsPerRepEdit->value();
+		if (picNum <= 0) {
+			thrower("ERROR: Invald picture number, need at least 1, but get instead: " + str(picNum));
+		}
+		return picNum;
+	}
+}
+
+unsigned PictureSettingsControl::getPicsPerRepetitionNonContinuous()
+{
+	unsigned which = 0, count = 0;
+	for (auto& ctrl : totalNumberChoice) {
+		count++;
+		which = ctrl->isChecked() ? count : which;
+	}
+	if (which == 0) {
+		thrower("ERROR: failed to get pics per repetition?!?");
 	}
 	return which;
 }
 
+void PictureSettingsControl::setContinuousMode(bool contMode, unsigned picNum) {
+	continuousModeChk->setChecked(contMode);
+	picsPerRepEdit->setEnabled(contMode);
+	if (contMode) {
+		picsPerRepEdit->setValue(picNum);
+	}
+}
+
 
 void PictureSettingsControl::setUnofficialPicsPerRep( unsigned picNum ){
-	if ( picNum < 1 || picNum > 4 ){
-		thrower ( "Tried to set bad number of pics per rep: " + str ( picNum ) );
+	if (!continuousModeChk->isChecked()) {
+		if (picNum < 1 || picNum > 4) {
+			thrower("Tried to set bad number of pics per rep: " + str(picNum));
+		}
+		unofficialPicsPerRep = picNum;
+		unsigned count = 0;
+		for (auto& totalNumRadio : totalNumberChoice) {
+			count++;
+			totalNumRadio->setChecked(count == unofficialPicsPerRep);
+			setPictureControlEnabled(count - 1, count <= unofficialPicsPerRep);
+		}
 	}
-	unofficialPicsPerRep = picNum;
-	unsigned count = 0;
-	for (auto& totalNumRadio : totalNumberChoice){
-		count++;
-		totalNumRadio->setChecked (count == unofficialPicsPerRep);
-		setPictureControlEnabled (count-1, count <= unofficialPicsPerRep);
+	else {
+		unofficialPicsPerRep = picNum;
+		unsigned count = 0;
+		for (auto& totalNumRadio : totalNumberChoice) {
+			count++;
+			totalNumRadio->setChecked(false);
+			setPictureControlEnabled(count - 1, false);
+		}
 	}
 }
 
 
 void PictureSettingsControl::handleOptionChange( ){
-	for (auto radioInc : range(totalNumberChoice.size())){
-		if (totalNumberChoice[radioInc]->isChecked()){
-			setUnofficialPicsPerRep( radioInc + 1 );
+	if (!continuousModeChk->isChecked()) {
+		picsPerRepEdit->setEnabled(false);
+		for (auto radioInc : range(totalNumberChoice.size())) {
+			if (totalNumberChoice[radioInc]->isChecked()) {
+				setUnofficialPicsPerRep(radioInc + 1);
+			}
 		}
+	}
+	else {
+		picsPerRepEdit->setEnabled(true);
+		int picNum = picsPerRepEdit->value();
+		setUnofficialPicsPerRep(picNum);
 	}
 }
 
@@ -295,7 +355,7 @@ std::vector<float> PictureSettingsControl::getUsedExposureTimes() {
 	updateSettings( );
 	auto allTimes = getExposureTimes();
 	std::vector<float> usedTimes(std::begin(allTimes), std::end(allTimes));
-	usedTimes.resize ( getPicsPerRepetition ( ));
+	usedTimes.resize ( getPicsPerRepetitionNonContinuous ( )); // continuousMode can only work with external exposure so it does not care what expsure time edit is
 	return usedTimes;
 }
 

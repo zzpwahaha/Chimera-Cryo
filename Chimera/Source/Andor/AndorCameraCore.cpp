@@ -69,6 +69,7 @@ AndorRunSettings AndorCameraCore::getSettingsFromConfig (ConfigStream& configFil
 	for (auto& exp : tempSettings.exposureTimes)	{
 		configFile >> exp;
 	}
+	configFile >> tempSettings.continuousMode;
 	configFile >> tempSettings.picsPerRepetition;
 	//configFile >> tempSettings.horShiftSpeedSetting;
 	//configFile >> tempSettings.vertShiftSpeedSetting;
@@ -402,6 +403,9 @@ std::vector<Matrix<long>> AndorCameraCore::acquireImageData (){
 		// If there is no data the acquisition must have been aborted
 		int experimentPictureNumber = runSettings.showPicsInRealTime ? 0
 			: ((currentPictureNumber) % runSettings.picsPerRepetition);
+		if (runSettings.continuousMode) {
+			experimentPictureNumber = 0;
+		}
 		if (experimentPictureNumber == 0){
 			repImages.clear ();
 			//repImages.resize (runSettings.showPicsInRealTime ? 1 : runSettings.picsPerRepetition);

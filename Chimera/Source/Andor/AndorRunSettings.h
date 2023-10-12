@@ -35,6 +35,7 @@ struct AndorRunSettings{
 	//int accumulationNumber = 1;
 	std::vector<float> exposureTimes = { 0.026f };
 	//
+	bool continuousMode = false;
 	unsigned picsPerRepetition=1;
 	unsigned __int64 repetitionsPerVariation=10;
 	unsigned __int64 totalVariations = 3;

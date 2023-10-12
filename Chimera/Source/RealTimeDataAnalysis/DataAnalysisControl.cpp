@@ -651,9 +651,15 @@ void DataAnalysisControl::reloadTinyPlotInfo()
 	}
 }
 
-void DataAnalysisControl::updateUnofficialPicsPerRep (unsigned ppr) {
+void DataAnalysisControl::updateUnofficialPicsPerRep (unsigned ppr, bool continuousMode) {
 	unofficialPicsPerRep = ppr;
-	reloadListView ();
+	if (!continuousMode) {
+		plotListview->setEnabled(true);
+		reloadListView();
+	}
+	else {
+		plotListview->setDisabled(true);
+	}
 }
 
 analysisSettings DataAnalysisControl::getConfigSettings () {

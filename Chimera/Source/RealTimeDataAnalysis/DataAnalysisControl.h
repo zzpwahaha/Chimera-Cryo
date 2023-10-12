@@ -58,7 +58,7 @@ class DataAnalysisControl : public IChimeraSystem {
 
 		// used to determine what plots to show in the listview. should be updated from the official number when the 
 		// official changes. 
-		void updateUnofficialPicsPerRep (unsigned ppr);
+		void updateUnofficialPicsPerRep (unsigned ppr, bool continuousMode);
 		void updateDisplays (analysisSettings settings);
 		analysisSettings getConfigSettings ();
 		void setRunningSettings (analysisSettings options);

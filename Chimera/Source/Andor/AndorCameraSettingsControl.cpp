@@ -336,7 +336,7 @@ void AndorCameraSettingsControl::updateDisplays () {
 	//horizontalShiftSpeedCombo->setCurrentIndex(optionsIn.horShiftSpeedSetting);
 	//frameTransferModeCombo->setCurrentIndex(optionsIn.frameTransferMode);
 
-
+	picSettingsObj.setContinuousMode(optionsIn.continuousMode, optionsIn.picsPerRepetition);
 	picSettingsObj.setUnofficialExposures (optionsIn.exposureTimes);
 	picSettingsObj.setUnofficialPicsPerRep (optionsIn.picsPerRepetition);
 
@@ -396,6 +396,7 @@ void AndorCameraSettingsControl::updateSettings(){
 	configSettings.andor.exposureTimes =		picSettingsObj.getUsedExposureTimes( );
 	configSettings.thresholds =				picSettingsObj.getThresholds( );
 	configSettings.palleteNumbers =			picSettingsObj.getPictureColors( );
+	configSettings.andor.continuousMode = picSettingsObj.getContinuousMode();
 	configSettings.andor.picsPerRepetition =	picSettingsObj.getPicsPerRepetition( );
 	
 	configSettings.andor.imageSettings = readImageParameters( );
@@ -633,6 +634,7 @@ void AndorCameraSettingsControl::handleSaveConfig(ConfigStream& saveFile){
 	for ( auto exposure : configSettings.andor.exposureTimes ){
 		saveFile << exposure << " ";
 	}
+	saveFile << "\n/*Andor Continuous Mode:*/\t" << configSettings.andor.continuousMode;
 	saveFile << "\n/*Andor Pics Per Rep:*/\t\t" << configSettings.andor.picsPerRepetition;
 	//saveFile << "\n/*Horizontal Shift Speed*/\t" << configSettings.andor.horShiftSpeedSetting;
 	//saveFile << "\n/*Vertical Shift Speed*/\t" << configSettings.andor.vertShiftSpeedSetting;

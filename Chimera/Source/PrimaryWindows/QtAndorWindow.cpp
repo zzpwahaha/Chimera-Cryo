@@ -262,7 +262,8 @@ void QtAndorWindow::windowOpenConfig (ConfigStream& configFile){
 	catch (ChimeraError& e){
 		reportErr (qstr ("Andor Camera Window failed to read parameters from the configuration file.\n\n" + e.trace ()));
 	}
-	analysisHandler.updateUnofficialPicsPerRep (andorSettingsCtrl.getConfigSettings ().andor.picsPerRepetition);
+	analysisHandler.updateUnofficialPicsPerRep(andorSettingsCtrl.getConfigSettings().andor.picsPerRepetition,
+		andorSettingsCtrl.getConfigSettings().andor.continuousMode);
 }
 
 void QtAndorWindow::passAlwaysShowGrid (){
@@ -400,7 +401,9 @@ void QtAndorWindow::onCameraProgress (int picNumReported){
 		imageGrabTimes.push_back (std::chrono::high_resolution_clock::now ());
 	}
 	auto repVar = andor.getCurrentRepVarNumber(picNum);
-	emit newImage({ {picNum, repVar.first, repVar.second}, calPicData[(picNum/* - 1*/) % curSettings.picsPerRepetition] });
+	size_t currentActivePicNum = curSettings.continuousMode ? 0 : (picNum/* - 1*/) % curSettings.picsPerRepetition;
+
+	emit newImage({ {picNum, repVar.first, repVar.second}, calPicData[currentActivePicNum] });
 	qDebug() << "send Image data for drawing for image " << picNum << " at time " << timerE.elapsed() << " ms";
 	auto picsToDraw = andorSettingsCtrl.getImagesToDraw (calPicData);
 	try
@@ -408,11 +411,11 @@ void QtAndorWindow::onCameraProgress (int picNumReported){
 		if (realTimePic){
 			std::pair<int, int> minMax;
 			// draw the most recent pic.
-			minMax = stats.update (picsToDraw.back (), picNum % curSettings.picsPerRepetition, selectedPixel,
+			minMax = stats.update (picsToDraw.back (), currentActivePicNum, selectedPixel,
 				picNum / curSettings.picsPerRepetition,
 				curSettings.totalPicsInExperiment () / curSettings.picsPerRepetition);
 			QPainter painter (this);
-			pics.drawBitmap (picsToDraw.back (), minMax, picNum % curSettings.picsPerRepetition,
+			pics.drawBitmap (picsToDraw.back (), minMax, currentActivePicNum,
 				analysisHandler.getRunningSettings ().grids, picNum, 
 				analysisHandler.getRunningSettings ().displayGridOption, painter);
 			
@@ -465,7 +468,7 @@ void QtAndorWindow::onCameraProgress (int picNumReported){
 		try	{
 			// important! write the original raw data, not the pic-to-draw, which can be a difference pic, or the calibrated
 			// pictures, which can have the background subtracted.
-			dataHandler.writeAndorPic ( rawPicData[(picNum/* - 1*/) % curSettings.picsPerRepetition],
+			dataHandler.writeAndorPic ( rawPicData[currentActivePicNum],
 									    curSettings.imageSettings );
 		}
 		catch (ChimeraError& err){
@@ -579,12 +582,17 @@ atomGrid QtAndorWindow::getMainAtomGrid (){
 
 
 void QtAndorWindow::armCameraWindow (AndorRunSettings* settings){
-	pics.setNumberPicturesActive (settings->picsPerRepetition);
-	if (settings->picsPerRepetition == 1){
-		pics.setSinglePicture (settings->imageSettings);
+	if (!settings->continuousMode) {
+		pics.setNumberPicturesActive(settings->picsPerRepetition);
+		if (settings->picsPerRepetition == 1) {
+			pics.setSinglePicture(settings->imageSettings);
+		}
+		else {
+			pics.setMultiplePictures(settings->imageSettings, settings->picsPerRepetition);
+		}
 	}
-	else{
-		pics.setMultiplePictures (settings->imageSettings, settings->picsPerRepetition);
+	else {
+		pics.setSinglePicture(settings->imageSettings);
 	}
 	pics.resetPictureStorage ();
 	pics.setParameters (settings->imageSettings);
@@ -636,20 +644,33 @@ void QtAndorWindow::assertDataFileClosed () {
 
 void QtAndorWindow::handlePictureSettings (){
 	selectedPixel = { 0,0 };
-	unsigned picsperrep = andorSettingsCtrl.getConfigSettings().andor.picsPerRepetition;
+	const unsigned picsPerRep = andorSettingsCtrl.getConfigSettings().andor.picsPerRepetition;
+	const imageParameters imageSettings = andorSettingsCtrl.getConfigSettings().andor.imageSettings;
+	const bool continuousMode = andorSettingsCtrl.getConfigSettings().andor.continuousMode;
+	const AndorTriggerMode::mode triggerMode = andorSettingsCtrl.getConfigSettings().andor.triggerMode;
+	if (continuousMode && (triggerMode!= AndorTriggerMode::mode::ExternalExposure)) {
+		errBox("The continuous mode is checked and can only support External Exposure as trigger mode, that is, the exposure time number will be ignored"
+			" and only the exposure time is determined by the on-time of the TTL trigger.");
+		return;
+	}
+
 	andorSettingsCtrl.handlePictureSettings ();
-	if (andorSettingsCtrl.getConfigSettings().andor.picsPerRepetition == 1) {
-		pics.setSinglePicture(andorSettingsCtrl.getConfigSettings().andor.imageSettings);
+	if (!continuousMode) {
+		if (picsPerRep == 1) {
+			pics.setSinglePicture(imageSettings);
+		}
+		else {
+			pics.setMultiplePictures(imageSettings, picsPerRep);
+		}
 	}
 	else {
-		pics.setMultiplePictures(andorSettingsCtrl.getConfigSettings().andor.imageSettings,
-			andorSettingsCtrl.getConfigSettings().andor.picsPerRepetition);
+		pics.setSinglePicture(imageSettings);
 	}
 	
 	pics.resetPictureStorage ();
 	std::array<int, 4> nums = andorSettingsCtrl.getConfigSettings ().palleteNumbers;
 	pics.setPalletes (nums);
-	analysisHandler.updateUnofficialPicsPerRep (andorSettingsCtrl.getConfigSettings ().andor.picsPerRepetition);
+	analysisHandler.updateUnofficialPicsPerRep (picsPerRep, continuousMode);
 }
 
 /*
@@ -766,17 +787,18 @@ void QtAndorWindow::completeCruncherStart () {
 	cruncherInput->atomThresholdForSkip = mainWin->getMainOptions ().atomSkipThreshold;
 	cruncherInput->rearrangerConditionWatcher = &rearrangerConditionVariable;
 
-	atomCruncherWorker = new CruncherThreadWorker (cruncherInput);
-	atomCruncherWorker = new CruncherThreadWorker(std::move(cruncherInput));
-	QThread* thread = new QThread;
-	atomCruncherWorker->moveToThread(thread);
-	connect(thread, &QThread::started, atomCruncherWorker, &CruncherThreadWorker::init);
-	connect(mainWin->getExpThread(), &QThread::finished, thread, &QThread::quit);
-	connect(thread, &QThread::finished, atomCruncherWorker, &CruncherThreadWorker::deleteLater);
-	connect(atomCruncherWorker, &QThread::destroyed, thread, &CruncherThreadWorker::deleteLater);
+	if (!andorSettingsCtrl.getConfigSettings().andor.continuousMode) {
+		atomCruncherWorker = new CruncherThreadWorker(std::move(cruncherInput));
+		QThread* thread = new QThread;
+		atomCruncherWorker->moveToThread(thread);
+		connect(thread, &QThread::started, atomCruncherWorker, &CruncherThreadWorker::init);
+		connect(mainWin->getExpThread(), &QThread::finished, thread, &QThread::quit);
+		connect(thread, &QThread::finished, atomCruncherWorker, &CruncherThreadWorker::deleteLater);
+		connect(atomCruncherWorker, &QThread::destroyed, thread, &CruncherThreadWorker::deleteLater);
 
-	connect(this, &QtAndorWindow::newImage, atomCruncherWorker, &CruncherThreadWorker::handleImage);
-	thread->start();
+		connect(this, &QtAndorWindow::newImage, atomCruncherWorker, &CruncherThreadWorker::handleImage);
+		thread->start();
+	}
 }
 
 void QtAndorWindow::completePlotterStart () {
@@ -820,6 +842,9 @@ void QtAndorWindow::completePlotterStart () {
 		}
 	}
 	if ((!gridHasBeenSet) || pltInput->plotInfo.size () == 0) {
+		plotThreadActive = false;
+	}
+	else if (andorSettingsCtrl.getConfigSettings().andor.continuousMode) {
 		plotThreadActive = false;
 	}
 	else {
@@ -868,7 +893,7 @@ std::string QtAndorWindow::getStartMessage (){
 	bool errCheck = false;
 	for (unsigned plotInc = 0; plotInc < plots.size (); plotInc++){
 		PlottingInfo tempInfoCheck (PLOT_FILES_SAVE_LOCATION + "\\" + plots[plotInc] + ".plot");
-		if (tempInfoCheck.getPicNumber () != andrSttngs.picsPerRepetition){
+		if ((!andrSttngs.continuousMode) && (tempInfoCheck.getPicNumber() != andrSttngs.picsPerRepetition)) {
 			thrower (": one of the plots selected, " + plots[plotInc] + ", is not built for the currently "
 					 "selected number of pictures per experiment. (" + str(andrSttngs.picsPerRepetition) 
 					 + ") Please revise either the current setting or the plot file.");
