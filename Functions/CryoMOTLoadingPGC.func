@@ -50,7 +50,7 @@ def cryoMOTLoadingPGC():
     off: MOTFlashTrg
     on: TweezerTrg
     off: CameraShutter
-
+    on: SrcMOTValve
 
     dac: TARepAmp 10
     dac: SrcMOTAmp 10
@@ -77,6 +77,10 @@ def cryoMOTLoadingPGC():
     dac: MOTCoil 0
     pulseon: DO1_0 1
 
+    t += -4000
+    off: SrcMOTValve
+    pulseon: DO1_0 1
+    t += 4000
     % attempt to move the MOT, maybe needed for the future
     %t += -20
     %dac: BiasCoilX shift_bias_x

@@ -434,6 +434,9 @@ std::vector<Matrix<long>> AndorCameraCore::acquireImageData (){
 					//Cast the raw image buffer to a 16-bit array. 
 					//...Assumes the PixelEncoding is 16-bit. 
 					unsigned short* ImagePixels = reinterpret_cast<unsigned short*>(tempImageBuffers[currentPictureNumber % numberOfImageBuffers]);
+					if (ImagePixels == nullptr) {
+						thrower("Andor image pointer is null. This should not happen during experiment but could happen when abort.");
+					}
 					//Process each pixel in a row as normal 
 					for (AT_64 Pixel = 0; Pixel < Width; Pixel++) {
 						tempImage (Row, Pixel) = ImagePixels[Pixel];
@@ -441,9 +444,9 @@ std::vector<Matrix<long>> AndorCameraCore::acquireImageData (){
 					tempImageBuffers[currentPictureNumber % numberOfImageBuffers] += Stride;
 				}
 			}
-			catch (ChimeraError &)	{
+			catch (ChimeraError &e)	{
 				// let the blank image roll through to keep the image numbers going sensibly. // ??? WTF zzp 20220913
-				throwNested ("Error while calling getOldestImage.");
+				throwNested ("Error while calling getOldestImage.\n"+e.trace());
 			}
 			// immediately rotate
 			for (auto imageVecInc : range(repImages[experimentPictureNumber].size ())){

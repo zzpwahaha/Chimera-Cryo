@@ -3,11 +3,7 @@ t = 1
 call CryoMOTLoadingPGC()
 
 %%%%%%%%%%%%%%%  TOF  %%%%%%%%%%%%%%%%%%
-off: SciMOTTrg
-off: xyzMOTShutter
-off: PrbShutter 
-t += t_tof
-pulseon: DO1_0 1
+call TOF(t_tof)
 
 %%%%%%%%%%%%%%  PGC in Tweezer %%%%%%%%%%%%%%%%%%
 % change the field/laser freq parameter here because the previous section is TOF and no light is on
@@ -35,31 +31,58 @@ off: PrbShutter
 off: xyzMOTShutter
 
 t += 5
-%set ol frequencies since there is a memory limit for the ol
-ol: ol_cooling d2_cooling_prb_resonance-pgc_twz_olcool
-ol: ol_repump d2_repump_prb_resonance+pgc_twz_olrepump
+ol: ol_cooling d2_cooling_prb_resonance-pgc_twz_olcool %probe_olcool %pgc_twz_olcool
+ol: ol_repump d2_repump_prb_resonance+pgc_twz_olrepump %probe_olrepump %pgc_twz_olrepump
 
 % Set bias fields during pulsed cooling
 dac: BiasCoilX pgc_twz_bias_x
 dac: BiasCoilY pgc_twz_bias_y
 dac: BiasCoilZ pgc_twz_bias_z
-dac: dac1_15 1
-t += 10
+
+t += 15
+%%%%%%%%%%%%%%% contiunous 1 sec times %%%%%%%%%%%%%%%
+%t += -10
+%    on: PrbShutter
+%    dac: PrbAmp {pgcprb_twz_cool_amp_cal prb_pwr}
+%    dac: PrbRepAmp pgcprb_twz_rep_amp
+%    on: PrbRepTrg
+%    on: PrbCoolShutter
+%%%%%% hybrid cooling with MOT cooling and probe repump
+%%ol: ol_cooling d2_cooling_resonance-pgc_twz_olcool_scan
+%%ol: ol_repump d2_repump_prb_resonance+pgc_twz_olrepump
+%%on: xyzMOTShutter
+%%on: xyMOTShutter
+%%off: TARepShutter
+%%dac: SciMOTAmp pgc_twz_cool_amp_scan
+%
+%t += 10
+%    on: PrbTrg
+%%    on: SciMOTTrg
+%    t += t_pulsed_cool*repeat_num
+%    pulseon: DO1_0 1
+%    off: PrbTrg
+%%    off: SciMOTTrg
+%    off: PrbShutter
+%    on: PrbCoolShutter
+
+
 %%%%%%%%%%%%%%% Pulsed PGC 5 times %%%%%%%%%%%%%%%
 %var t_cooling_cycle 2000/repeat_num
-var _wait_time_ 2000
+var _wait_time_ 6000
 repeat: repeat_num
 %    t += (t_cooling_cycle-5-5-t_pulsed_cool)/2
-    t += (_wait_time_/repeat_num-5-5-t_pulsed_cool)/2
+    t += (_wait_time_/repeat_num-5-5-t_pulsed_cool)
     dacramp: TweezerIntensity twz_int_lifetime twz_intensity 5
-    dac: dac1_15 0
     t += 5
-    t += -4
+    t += -t_shutter
     on: PrbShutter
+    on: prbcoolshutter
     dac: PrbAmp pgcprb_twz_cool_amp
     dac: PrbRepAmp pgc_twz_rep_amp
+    ol: ol_cooling d2_cooling_prb_resonance-pgc_twz_olcool %pgc_twz_olcool %probe_olcool %pgc_twz_olcool
+    ol: ol_repump d2_repump_prb_resonance+pgc_twz_olrepump %pgc_twz_olrepump %pgc_twz_olrepump %probe_olrepump 
     on: PrbRepTrg
-    t += 4
+    t += t_shutter
 
     on: PrbTrg
 
@@ -70,9 +93,9 @@ repeat: repeat_num
 
 
     dacramp: TweezerIntensity twz_intensity twz_int_lifetime 5
-    dac: dac1_15 1
+    t += 5
 %    t += (t_cooling_cycle-5-5-t_pulsed_cool)/2
-    t += (_wait_time_/repeat_num-5-5-t_pulsed_cool)/2
+%    t += (_wait_time_/repeat_num-5-5-t_pulsed_cool)/2
 end
 t += 10
 %t += t_wait_before_rr

@@ -5,7 +5,9 @@
 def D2InTrapPGCPrb(pgc_time):
     t += -t_shutter
     on: PrbShutter
+    on: PrbCoolShutter
     off: xyzMOTShutter
+    on: PrbRepTrg
     ol: ol_cooling d2_cooling_resonance+20-pgc_twz_olcool
     ol: ol_repump d2_repump_resonance-20+pgc_twz_olrepump
 
@@ -13,7 +15,7 @@ def D2InTrapPGCPrb(pgc_time):
     dac: BiasCoilY pgc_twz_bias_y 
     dac: BiasCoilZ pgc_twz_bias_z
 
-    dac: PrbAmp pgcprb_twz_cool_amp
+    dac: PrbAmp {pgcprb_twz_cool_amp_cal prb_pwr}
     dac: PrbrepAmp pgcprb_twz_rep_amp
     t += t_shutter
 

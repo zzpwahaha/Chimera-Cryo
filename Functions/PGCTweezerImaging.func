@@ -6,6 +6,8 @@
 def PGCTweezerImaging():
     t += -t_shutter
     on: PrbShutter
+    on: PrbCoolShutter
+    on: PrbRepTrg
     off: xyzMOTShutter
     off: SciMOTTrg
     ol: ol_cooling d2_cooling_resonance+20-probe_olcool
