@@ -65,7 +65,7 @@ void ExpThreadWorker::experimentThreadProcedure () {
 
 		/// In-Experiment calibration
 		calibrationOptionReport(expRuntime);
-		inExpCalibrationProcedure(expRuntime, false);
+		inExpCalibrationProcedure(expRuntime, true/*false*/);
 		emit startInExpCalibrationTimer();
 
 		/// Anaylsis preparation
@@ -1197,7 +1197,8 @@ void ExpThreadWorker::calculateAdoVariations (ExpRuntimeData& runtime) {
 		loadSkipTimes = std::vector<double> (variations);
 		emit notification ("Analyzing Master Script...\n");
 		std::string warnings;
-		repeatManager repeatMgr;
+		repeatMgrPtr = std::make_unique<repeatManager>(); //repeatManager repeatMgr;
+		repeatManager& repeatMgr = *(repeatMgrPtr.get());
 		analyzeMasterScript (input->ttls, input->ao,input->dds, input->ol, runtime.expParams, runtime.masterScript,
 			runtime.mainOpts.atomSkipThreshold != UINT_MAX, warnings, operationTime, loadSkipTime, repeatMgr);
 		
@@ -1525,6 +1526,9 @@ void ExpThreadWorker::inExpCalibrationProcedure(ExpRuntimeData& runtime, bool ca
 	}
 
 	auto variations = determineVariationNumber(runtime.expParams);
+	repeatManager& repeatMgr = *(repeatMgrPtr.get());
+	emit notification("Calcualting Repeat Manager variations...\n", 2);
+	repeatMgr.calculateVariations(runtime.expParams);
 	emit notification("In-Exp Calibration: Re-Calcualting DO system variations...\n", 2);
 	input->ttls.calculateVariations(runtime.expParams, this);
 	emit notification("In-Exp Calibration: Re-Calcualting AO system variations...\n", 2);
@@ -1534,6 +1538,15 @@ void ExpThreadWorker::inExpCalibrationProcedure(ExpRuntimeData& runtime, bool ca
 	emit notification("In-Exp Calibration: Re-Calcualting OL system variations...\n", 2);
 	input->ol.calculateVariations(runtime.expParams, this);
 	
+	emit notification("Constructing repeatitions for DO system...\n", 2);
+	input->ttls.constructRepeats(repeatMgr);
+	emit notification("Constructing repeatitions for AO system...\n", 2);
+	input->ao.constructRepeats(repeatMgr);
+	emit notification("Constructing repeatitions for DDS system...\n", 2);
+	input->dds.constructRepeats(repeatMgr);
+	emit notification("Constructing repeatitions for OL system...\n", 2);
+	input->ol.constructRepeats(repeatMgr);
+
 	emit notification("In-Exp Calibration: Preparing DO, AO, DDS, OL for experiment and Running final ado checks...\n", 1);
 	std::string warnings;
 	for (auto variationInc : range(variations)) {
