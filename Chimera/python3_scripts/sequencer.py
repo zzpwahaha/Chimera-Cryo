@@ -103,7 +103,7 @@ class sequencer:
 
 		
 		self.mod_disable()
-		reset()
+		self.reset()
 		dds_lock_pll.dds_lock_pll() 
 		self.mod_enable()
 		self.mod_report()
@@ -112,7 +112,7 @@ class sequencer:
 		print('******************************************************************************************************************************************************************')
 		print('initializing experiment')
 		self.mod_disable()
-		reset()
+		self.reset()
 		dds_lock_pll.dds_lock_pll() 
 		self.mod_enable()
 		self.mod_report()
@@ -531,7 +531,7 @@ if __name__ == "__main__":
 
 	seq = sequencer()
 	seq.mod_disable()
-	reset()
+	seq.reset()
 	dds_lock_pll.dds_lock_pll()
 	for i in range(1):
 		# reset()
