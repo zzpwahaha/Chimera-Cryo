@@ -225,6 +225,7 @@ class sequencer:
 		self.gpio2.clear_bit(0, channel=1)
 	
 	def reset(self):
+		print(" --- reset from sequencer function --- ")
 		self.gpio2.write_axi_gpio(0xffff0000,channel=2)
 		self.gpio2.write_axi_gpio(0x0000ffff,channel=2)
 
@@ -236,8 +237,8 @@ class sequencer:
 	def reset_enable_mod(self):
 		print('resetting sequencers and enabling mod')
 		self.mod_disable()
-		dds_lock_pll.dds_lock_pll() 
 		self.reset()
+		dds_lock_pll.dds_lock_pll() 
 		self.mod_enable()
 
 	def lock_PLL(self):
