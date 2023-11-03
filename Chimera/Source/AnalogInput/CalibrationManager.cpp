@@ -621,17 +621,17 @@ void CalibrationManager::standardStartThread (std::vector<std::reference_wrapper
 		emit error("Calibration thread is still running, please wait until it finishes to arm another calibration!\r\n", 0);
 		return;
 	}
-	CalibrationThreadInput input;
-	input.calibrations = calsToRun;
-	input.arbGens = arbGens;
-	input.ttls = ttls;
-	input.ai = ai;
-	input.ao = ao;
-	input.calibrationViewer = &calibrationViewer;
-	input.parentWin = parentWin;
-	input.pythonHandler = pythonHandler;
+	auto calibrationInput = std::make_unique<CalibrationThreadInput>();
+	calibrationInput->calibrations = calsToRun;
+	calibrationInput->arbGens = arbGens;
+	calibrationInput->ttls = ttls;
+	calibrationInput->ai = ai;
+	calibrationInput->ao = ao;
+	calibrationInput->calibrationViewer = &calibrationViewer;
+	calibrationInput->parentWin = parentWin;
+	calibrationInput->pythonHandler = pythonHandler;
 
-	threadWorker = new CalibrationThreadWorker (input);
+	threadWorker = new CalibrationThreadWorker(std::move(calibrationInput));
 	thread = new QThread;
 
 	threadWorker->moveToThread (thread);

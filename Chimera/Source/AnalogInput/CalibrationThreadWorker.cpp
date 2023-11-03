@@ -17,10 +17,9 @@
 #include <qelapsedtimer.h>
 
 
-CalibrationThreadWorker::CalibrationThreadWorker (CalibrationThreadInput input_) {
-	
-	input = input_;
-}
+CalibrationThreadWorker::CalibrationThreadWorker (std::unique_ptr<CalibrationThreadInput> input_) 
+	: input(std::move(input_))
+{}
 
 CalibrationThreadWorker::~CalibrationThreadWorker () {
 }
@@ -29,9 +28,9 @@ void CalibrationThreadWorker::runAll () {
 	unsigned count = 0;
 	// made this asynchronous to facilitate updating gui while 
 	emit updateBoxColor("Green", "AI-SYSTEM");
-	DOStatus doInitStatus = input.ttls->getCurrentStatus();
-	auto aoInitStatus = input.ao->getDacValues();
-	for (auto& cal : input.calibrations) {
+	DOStatus doInitStatus = input->ttls->getCurrentStatus();
+	auto aoInitStatus = input->ao->getDacValues();
+	for (auto& cal : input->calibrations) {
 		try {
 			calibrate (cal, count);
 		}
@@ -42,9 +41,9 @@ void CalibrationThreadWorker::runAll () {
 		Sleep (200);
 		count++;
 	}
-	input.ao->setDacStatus(aoInitStatus);
+	input->ao->setDacStatus(aoInitStatus);
 	Sleep(50);
-	input.ttls->setTtlStatus(doInitStatus);
+	input->ttls->setTtlStatus(doInitStatus);
 	emit updateBoxColor("Gray", "AI-SYSTEM");
 	emit mainProcessFinish();
 }
@@ -61,24 +60,26 @@ void CalibrationThreadWorker::calibrate (calSettings& cal, unsigned which) {
 	cal.calibrated = false;
 	//auto& result = cal.result;
 	calResult result(cal.result); // copy cal.result in case the calibration failed, in which case it should/will fall back to the old calibration value
+	qDebug() << "start to reset sequencer " << eTimer.elapsed();
+	input->zynqCal.sendCommand("resetSeq");
 	qDebug() << "start to zero dac "<< eTimer.elapsed();
 	//cal.result.includesSqrt = cal.includeSqrt;
-	input.ao->zeroDacs ();
+	input->ao->zeroDacs ();
 	qDebug() << "start to zero ttl " << eTimer.elapsed();
-	input.ttls->zeroBoard(); // ZZP 02/12/2023 - need ttls to trigger dac change in zynq, same as bellow
-	Sleep(50);
+	input->ttls->zeroBoard(); // ZZP 02/12/2023 - need ttls to trigger dac change in zynq, same as bellow
+	Sleep(200);
 	qDebug() << "start to set aoConfig " << eTimer.elapsed();
 	for (auto dac : cal.aoConfig) {
-		input.ao->setSingleDac (dac.first, dac.second);
-		input.ttls->getCore().FPGAForceOutput(input.ttls->getCurrentStatus()); // ZZP 02/12/2023 - update ttls since now dac/dds gui update will always need separate TTL update as zynq trigger
+		input->ao->setSingleDac (dac.first, dac.second);
+		input->ttls->getCore().FPGAForceOutput(input->ttls->getCurrentStatus()); // ZZP 02/12/2023 - update ttls since now dac/dds gui update will always need separate TTL update as zynq trigger
 		Sleep(50);
 	}
 	qDebug() << "start to set ttlConfig " << eTimer.elapsed();
 	for (auto ttl : cal.ttlConfig) {
-		auto& outputs = input.ttls->getDigitalOutputs();
+		auto& outputs = input->ttls->getDigitalOutputs();
 		outputs(ttl.first, ttl.second).set(true, false); //TODO: check compatibility for row and col
 	}
-	input.ttls->getCore().FPGAForceOutput(input.ttls->getCurrentStatus());
+	input->ttls->getCore().FPGAForceOutput(input->ttls->getCurrentStatus());
 	Sleep (100); // give some time for the lasers to settle..
 	result.resVals.clear ();
 	unsigned aiNum = cal.aiInChan;
@@ -86,7 +87,7 @@ void CalibrationThreadWorker::calibrate (calSettings& cal, unsigned which) {
 	result.ctrlVals = CalibrationManager::calPtTextToVals (cal.ctrlPtString);
 	for (auto calPoint : result.ctrlVals) {
 		if (cal.useAg) {
-			auto& ag = input.arbGens[int(cal.whichAg)].get();
+			auto& ag = input->arbGens[int(cal.whichAg)].get();
 			dcInfo tempInfo;
 			tempInfo.dcLevel = str (calPoint);
 			std::vector<parameterType> var = std::vector<parameterType>();
@@ -95,8 +96,8 @@ void CalibrationThreadWorker::calibrate (calSettings& cal, unsigned which) {
 			ag.outputOn(cal.agChannel);
 		}
 		else {
-			input.ao->setSingleDac (aoNum, calPoint);
-			input.ttls->getCore().FPGAForceOutput(input.ttls->getCurrentStatus()); // ZZP 02/12/2023 - need ttls to trigger dac change in zynq, same as bellow
+			input->ao->setSingleDac (aoNum, calPoint);
+			input->ttls->getCore().FPGAForceOutput(input->ttls->getCurrentStatus()); // ZZP 02/12/2023 - need ttls to trigger dac change in zynq, same as bellow
 			Sleep(50);
 		}
 		Sleep(100); // give some time for the analog output to change and settle..
@@ -105,7 +106,7 @@ void CalibrationThreadWorker::calibrate (calSettings& cal, unsigned which) {
 		int maxTries = 3;
 		while (true) {
 			try {
-				result.resVals.push_back(input.ai->getSingleChannelValue(aiNum, cal.avgNum));
+				result.resVals.push_back(input->ai->getSingleChannelValue(aiNum, cal.avgNum));
 				break;
 			}
 			catch (ChimeraError& e) {
@@ -119,7 +120,7 @@ void CalibrationThreadWorker::calibrate (calSettings& cal, unsigned which) {
 
 	try {
 		if (cal.useAg) {
-			auto& ag = input.arbGens[int(cal.whichAg)].get();
+			auto& ag = input->arbGens[int(cal.whichAg)].get();
 			ag.outputOn(cal.agChannel);
 		}
 	}
@@ -137,7 +138,7 @@ void CalibrationThreadWorker::calibrate (calSettings& cal, unsigned which) {
 		file << result.ctrlVals[num] << " " << result.resVals[num] << "\n";
 	}
 	file.close ();
-	//result.calibrationCoefficients = input.pythonHandler->runCalibrationFits (cal, input.parentWin);
+	//result.calibrationCoefficients = input->pythonHandler->runCalibrationFits (cal, input->parentWin);
 	//PolynomialFit<cal.includeSqrt, 5> fitworker;
 	//std::vector<double> initP(1 + result.polynomialOrder + 2 * result.includesSqrt, 0.0);
 	//initP[0] = result.calmin;
@@ -163,7 +164,7 @@ void CalibrationThreadWorker::calibrate (calSettings& cal, unsigned which) {
 	cal.result = result;
 	cal.calibrated = true;
 	if (cal.useAg) {
-		auto& ag = input.arbGens[int(cal.whichAg)].get();
+		auto& ag = input->arbGens[int(cal.whichAg)].get();
 		ag.setAgCalibration (result, cal.agChannel);
 	}
 	emit calibrationChanged ();

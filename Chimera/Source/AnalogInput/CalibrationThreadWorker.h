@@ -6,6 +6,7 @@
 #include <qstring.h>
 #include <AnalogInput/calInfo.h>
 #include <Plotting/QCustomPlotCtrl.h>
+#include <ZynqTCP/ZynqTCP.h>
 
 class CalibrationManager; 
 class AiSystem;
@@ -21,6 +22,7 @@ struct CalibrationThreadInput {
 	AoSystem* ao;
 	DoSystem* ttls;
 	std::vector<std::reference_wrapper<ArbGenCore>> arbGens;
+	ZynqTCP zynqCal;
 	NewPythonHandler* pythonHandler;
 	QCustomPlotCtrl* calibrationViewer;
 	QWidget* parentWin;
@@ -30,7 +32,7 @@ struct CalibrationThreadInput {
 class CalibrationThreadWorker : public QObject {
 	Q_OBJECT
 	public:
-		CalibrationThreadWorker (CalibrationThreadInput input_);
+		CalibrationThreadWorker (std::unique_ptr<CalibrationThreadInput> input_);
 		~CalibrationThreadWorker ();
 	public Q_SLOTS:
 		void runAll ();
@@ -49,6 +51,6 @@ Q_SIGNALS:
 		void updateBoxColor(QString color, QString systemDelim);
 		void mainProcessFinish();
 	private:
-		CalibrationThreadInput input;
+		std::unique_ptr<CalibrationThreadInput> input;
 };
 
