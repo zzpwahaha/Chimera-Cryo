@@ -271,7 +271,7 @@ allDigitalOutputs& DoSystem::getDigitalOutputs ( ){
 
 void DoSystem::zeroBoard( ){
 	for ( auto& out : outputs ){
-		out.set (0); 
+		out.set(0, false);
 	}
 	core.FPGAForceOutput(getCurrentStatus());
 }
