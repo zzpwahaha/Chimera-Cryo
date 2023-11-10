@@ -1,0 +1,23 @@
+def D1InTrapLGMPrb(lgm_time):
+    t += -t_shutter
+    off: xyzMOTShutter
+    on: D1LGMPrbShutter
+    off: D1LGMShutter
+    on: D1LGMEOMTrg
+    dac: D1LGMEOMAmp d1lgmprb_twz_rep_amp
+    dac: D1LGMAmp d1lgmprb_twz_cool_amp
+    ol: ol_D1LGM D1_LGMCooling_resonance-d1lgm_twz_olcool
+    ol: ol_D1_repump Rb87_HFSplitting+d1lgm_twz_olrepump
+
+    dac: BiasCoilX pgc_twz_bias_x
+    dac: BiasCoilY -5 %pgc_twz_bias_y=-4.5
+    dac: BiasCoilZ pgc_twz_bias_z
+    t += t_shutter
+
+    on: D1LGMTrg
+    t += t_lgm_cool_time 
+    pulseon: DO1_0 1
+    off: D1LGMTrg
+    off: D1LGMEOMTrg
+    off: D1LGMShutter
+    off: D1LGMPrbShutter

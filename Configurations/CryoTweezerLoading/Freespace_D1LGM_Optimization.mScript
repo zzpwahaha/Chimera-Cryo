@@ -1,5 +1,6 @@
 %%%%%%%%%%%%%%%%% Start With 1ms %%%%%%%%%%%%%%%%% 
 t = 1
+off: SrcMOTValveEnable
 %%%%%%%%%%%%%%%%% Start With 1ms %%%%%%%%%%%%%%%%% 
 
     pulseon: DO1_0 10
@@ -49,6 +50,7 @@ t = 1
     off: PrbShutter 
     on: PrbCoolShutter
     off: D1LGMShutter
+    off: D1LGMPrbShutter
     off: MOTFlashTrg
     on: TweezerTrg
 
@@ -89,34 +91,44 @@ t = 1
 
 
 %    %%%%%%%%%%%%%%  PGC  %%%%%%%%%%%%%%%%%%
-    on: SciMOTTrg
-    ol: ol_cooling d2_cooling_resonance-pgc_olcool
-    ol: ol_repump d2_repump_resonance+pgc_olrepump
-    dac: BiasCoilX pgc_bias_x
-    dac: BiasCoilY pgc_bias_y 
-    dac: BiasCoilZ pgc_bias_z
-    dac: SciMOTAmp pgc_cool_amp
-    dac: TARepAmp pgc_rep_amp
-    t += t_pgc_cool_time
-    pulseon: DO1_0 1
+%    on: SciMOTTrg
+%    ol: ol_cooling d2_cooling_resonance-pgc_olcool
+%    ol: ol_repump d2_repump_resonance+pgc_olrepump
+%    dac: BiasCoilX pgc_bias_x
+%    dac: BiasCoilY pgc_bias_y 
+%    dac: BiasCoilZ pgc_bias_z
+%    dac: SciMOTAmp pgc_cool_amp
+%    dac: TARepAmp pgc_rep_amp
+%    t += 5
+%    dacramp: SciMOTAmp pgc_cool_amp 3 t_pgc_cool_time-5-2.5
+%    t += t_pgc_cool_time
+%    pulseon: DO1_0 1
 
 
-    %%%%%%%%%%%%%%  LGM  %%%%%%%%%%%%%%%%%%
-    t += -4
+%    %%%%%%%%%%%%%%  LGM  %%%%%%%%%%%%%%%%%%
+    t += -10
     on: D1LGMShutter
     on: D1LGMEOMTrg
+    on: D1LGMPrbShutter
+    dac: D1LGMEOMAmp 0 %d1lgm_rep_amp
+    dac: D1LGMAmp 0 %d1lgm_cool_amp
+    ol: ol_D1LGM D1_LGMCooling_resonance-40 %d1lgm_olcool
+    ol: ol_D1_repump Rb87_HFSplitting+d1lgm_olrepump %(-1) %d1lgm_olrepump
+    t += 10
+    off: SciMOTTrg
+    dac: SciMOTAmp 0
+    dac: TARepAmp 0
     dac: D1LGMEOMAmp d1lgm_rep_amp
     dac: D1LGMAmp d1lgm_cool_amp
-    ol: ol_D1LGM D1_LGMCooling_resonance-d1lgm_olcool
-    ol: ol_D1_repump Rb87_HFSplitting+d1lgm_olrepump
-    t += 4
-    off: SciMOTTrg
 %    off: xyzMOTShutter
     dac: BiasCoilX pgc_bias_x
     dac: BiasCoilY pgc_bias_y 
     dac: BiasCoilZ pgc_bias_z
 
     on: D1LGMTrg
+%    t += 10
+%    dacramp: D1LGMAmp d1lgm_cool_amp 3 5
+%    t += 5+5 %t_LGM_cool_time
     t += t_LGM_cool_time
     off: D1LGMTrg
     off: D1LGMEOMTrg
@@ -124,6 +136,8 @@ t = 1
 
 %%%%%%%%%%%%%%%  TOF  %%%%%%%%%%%%%%%%%%
 off: SciMOTTrg
+dac: SciMOTAmp 0
+dac: TARepAmp 0
 off: PrbTrg
 off: D1LGMTrg
 %off: xyzMOTShutter

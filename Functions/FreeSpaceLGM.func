@@ -1,0 +1,34 @@
+% need the 'LGM_cool_time' to be at least >20ms long
+% mostly this is used right after MOT loading stage
+% also the shutter is not off after this function, turn it off outside function need to 
+
+def FreeSpaceLGM(LGM_cool_time):
+    t += -t_shutter
+    % zero the light amplitude to avoid leakage and turn on shutter
+    on: D1LGMShutter
+    on: D1LGMPrbShutter
+    on: D1LGMEOMTrg
+    dac: D1LGMEOMAmp 0 
+    dac: D1LGMAmp 0 
+    ol: ol_D1LGM D1_LGMCooling_resonance-d1lgm_olcool
+    ol: ol_D1_repump Rb87_HFSplitting+d1lgm_olrepump
+    t += t_shutter
+    off: SciMOTTrg
+    dac: SciMOTAmp 0 % this is necessary to reduce the leakage, since don't want to turn off shutter
+    dac: TARepAmp 0
+    dac: D1LGMEOMAmp d1lgm_rep_amp
+    dac: D1LGMAmp d1lgm_cool_amp
+%    off: xyzMOTShutter 
+    dac: BiasCoilX pgc_bias_x
+    dac: BiasCoilY pgc_bias_y 
+    dac: BiasCoilZ pgc_bias_z
+
+    on: D1LGMTrg
+    t += 10 % cool at high intensity for 10ms
+    dacramp: D1LGMAmp d1lgm_cool_amp 3 5 % ramp down amplitude in 5ms to get lower temperature but more atom
+    t += 5+5 % hold at low intensity for 5ms
+    t += LGM_cool_time-(10+5+5)
+    off: D1LGMTrg
+    off: D1LGMEOMTrg
+
+    pulseon: DO1_0 1

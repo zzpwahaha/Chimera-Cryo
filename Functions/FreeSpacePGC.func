@@ -1,0 +1,19 @@
+% this function assumes the xyzMOTShutter is already open
+% mostly this is used right after MOT loading stage
+% also the shutter is not off after this function, turn it off outside function need to 
+def FreeSpacePGC(pgc_cool_time):
+    on: SciMOTTrg
+    ol: ol_cooling d2_cooling_resonance-pgc_olcool
+    ol: ol_repump d2_repump_resonance+pgc_olrepump
+    dac: BiasCoilX pgc_bias_x
+    dac: BiasCoilY pgc_bias_y 
+    dac: BiasCoilZ pgc_bias_z
+    dac: SciMOTAmp pgc_cool_amp
+    dac: TARepAmp pgc_rep_amp
+    t += pgc_cool_time
+    pulseon: DO1_0 1
+
+    % to image PGC cloud for 5ms to make sure everything looks fine
+    t += -5
+    pulseon: Mako1 0.1
+    t += 5

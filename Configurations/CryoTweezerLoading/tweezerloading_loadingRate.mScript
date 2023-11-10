@@ -156,7 +156,7 @@ call PGCTweezerImaging()
 
 t += 100
 %call releaseRecapture(t_twz_release)
-t += 100
+%t += 100
 
 %%%%%%%%%%%%%%  PGC in Tweezer %%%%%%%%%%%%%%%%%%
 % change the field/laser freq parameter here because the previous section is TOF and no light is on

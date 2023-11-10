@@ -1,6 +1,6 @@
 %%%%%%%%%%%%%%%%% Start With 1ms %%%%%%%%%%%%%%%%% 
 t = 1
-on: SrcMOTValveEnable
+off: SrcMOTValveEnable
 t += 1
 call CryoMOTLoadingPGC()
 
@@ -28,7 +28,7 @@ call PGCTweezerImaging()
 %on: MOTFlashTrg
 
 %%%%%%%%%%%%%% Prepare for pulsed PGC with Probe %%%%%%%%%%%%%%%
-%dacramp: TweezerIntensity twz_intensity twz_int_lifetime 5
+dacramp: TweezerIntensity twz_intensity twz_int_lifetime 5
 %% turn off TA path and turn on Prb path for single beam cooling
 on: PrbCoolShutter
 off: TARepShutter
@@ -48,22 +48,23 @@ dac: BiasCoilZ pgc_twz_bias_z
 
 dac: PrbAmp {pgcprb_twz_cool_amp_cal prb_pwr}
 dac: PrbRepAmp pgcprb_twz_rep_amp
-%dac: dac1_15 0
+
 % wait 10ms before cooling pulse 
 t += 10
 var repeat_interval 10000
 %%%%%%%%%%%%%%% Pulsed PGC 5 times %%%%%%%%%%%%%%%
 repeat: int(t_lifetime/repeat_interval) %repeat_num
     t += (repeat_interval-(t_pulsed_cool+5)-6)
-%    dacramp: TweezerIntensity twz_int_lifetime twz_intensity 5
-%    dac: dac1_15 1
+    dacramp: TweezerIntensity twz_int_lifetime twz_intensity 5
     t += 6
     t += -10
-    ol: ol_cooling d2_cooling_prb_resonance-pgc_twz_olcool %probe_olcool %pgc_twz_olcool %
-    ol: ol_repump d2_repump_prb_resonance+pgc_twz_olrepump %probe_olrepump %pgc_twz_olrepump %probe_olrepump 
+    ol: ol_cooling d2_cooling_prb_resonance-pgc_twz_olcool %(-50) %(-40) %pgc_twz_olcool %probe_olcool 
+    ol: ol_repump d2_repump_prb_resonance+pgc_twz_olrepump %pgc_twz_olrepump %probe_olrepump %pgc_twz_olrepump %probe_olrepump 
     on: PrbShutter
     on: PrbRepTrg
     on: CameraShutter
+    dac: PrbAmp {pgcprb_twz_cool_amp_cal prb_pwr} %2.75 %
+    dac: PrbRepAmp pgcprb_twz_rep_amp %0.3 %
     t += 10
 
     on: PrbTrg
@@ -75,8 +76,7 @@ repeat: int(t_lifetime/repeat_interval) %repeat_num
     off: Pixis_Trg
     off: CameraShutter
 
-%    dacramp: TweezerIntensity twz_intensity twz_int_lifetime 5
-%    dac: dac1_15 0
+    dacramp: TweezerIntensity twz_intensity twz_int_lifetime 5
     t += 5
 %    t += (repeat_interval-(t_pulsed_cool+5)-6)/2
 end
@@ -97,7 +97,7 @@ t += 10
 % wait 500ms before imaging intrap PGC
 %t += 500
 %
-%dacramp: TweezerIntensity twz_int_lifetime twz_intensity 5
+dacramp: TweezerIntensity twz_int_lifetime twz_intensity 5
 t += 6
 
 call D2InTrapPGCPrb(t_pgc_twz)

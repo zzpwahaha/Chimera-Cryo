@@ -248,13 +248,13 @@ void MOTAnalysisControl::prepareMOTAnalysis(MakoCamera*& cam)
 			return;
 		}
 	}
-	emit notification("MOT analysis is turned on for " + qstr(CameraInfo::toStr(cam->getCameraInfo().camName)) + "\r\n", 1);
 	if (calcActive->isChecked() && makoCam != nullptr) {
 		cam = makoCam;
 	}
 	else {
 		cam = nullptr;
 	}
+	emit notification("MOT analysis is turned on for " + qstr(CameraInfo::toStr(makoCam->getCameraInfo().camName)) + "\r\n", 1);
 	if (xKeysList.empty()) {
 		thrower("Error in MOTAnalysis: the keylist is empty, make sure to change parameter from const to var and then enable the analysis");
 	}

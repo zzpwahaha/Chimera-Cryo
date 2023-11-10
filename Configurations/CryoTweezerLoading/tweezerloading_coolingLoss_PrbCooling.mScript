@@ -19,9 +19,12 @@ t += 100-t_pgc_twz
 % change the field/laser freq parameter here because the previous section is dark, i.e. 100-t_pgc_twz is larger than 4
 call PGCTweezerImaging()
 %on: MOTFlashTrg
-t += 10
+t += 15
+
+%call kickOutTweezer()
+%t += 10
 %%%%%%%%%%%%%% Prepare for pulsed PGC with Probe %%%%%%%%%%%%%%%
-dacramp: TweezerIntensity twz_intensity twz_int_lifetime 5
+%dacramp: TweezerIntensity twz_intensity twz_int_lifetime 5
 %% turn off TA path and turn on Prb path for single beam cooling
 on: PrbCoolShutter
 off: TARepShutter
@@ -41,64 +44,64 @@ dac: BiasCoilZ pgc_twz_bias_z
 
 t += 15
 %%%%%%%%%%%%%%% contiunous 1 sec times %%%%%%%%%%%%%%%
-%t += -10
-%    on: PrbShutter
-%    dac: PrbAmp {pgcprb_twz_cool_amp_cal prb_pwr}
-%    dac: PrbRepAmp pgcprb_twz_rep_amp
-%    on: PrbRepTrg
-%    on: PrbCoolShutter
-%%%%%% hybrid cooling with MOT cooling and probe repump
-%%ol: ol_cooling d2_cooling_resonance-pgc_twz_olcool_scan
-%%ol: ol_repump d2_repump_prb_resonance+pgc_twz_olrepump
-%%on: xyzMOTShutter
-%%on: xyMOTShutter
-%%off: TARepShutter
-%%dac: SciMOTAmp pgc_twz_cool_amp_scan
-%
-%t += 10
-%    on: PrbTrg
-%%    on: SciMOTTrg
-%    t += t_pulsed_cool*repeat_num
-%    pulseon: DO1_0 1
-%    off: PrbTrg
-%%    off: SciMOTTrg
-%    off: PrbShutter
-%    on: PrbCoolShutter
+t += -10
+    on: PrbShutter
+    dac: PrbAmp 2.75 %pgcprb_twz_cool_amp_scan %{pgcprb_twz_cool_amp_cal prb_pwr}
+    dac: PrbRepAmp 0.3 %pgcprb_twz_rep_amp_scan 
+    on: PrbRepTrg
+    on: PrbCoolShutter
+%%%%% hybrid cooling with MOT cooling and probe repump
+%ol: ol_cooling d2_cooling_resonance-pgc_twz_olcool_scan
+%ol: ol_repump d2_repump_prb_resonance+pgc_twz_olrepump
+%on: xyzMOTShutter
+%on: xyMOTShutter
+%off: TARepShutter
+%dac: SciMOTAmp pgc_twz_cool_amp_scan
+
+t += 10
+    on: PrbTrg
+%    on: SciMOTTrg
+    t += t_pulsed_cool*repeat_num
+    pulseon: DO1_0 1
+    off: PrbTrg
+%    off: SciMOTTrg
+    off: PrbShutter
+    on: PrbCoolShutter
 
 
 %%%%%%%%%%%%%%% Pulsed PGC 5 times %%%%%%%%%%%%%%%
-%var t_cooling_cycle 2000/repeat_num
-var _wait_time_ 6000
-repeat: repeat_num
-%    t += (t_cooling_cycle-5-5-t_pulsed_cool)/2
-    t += (_wait_time_/repeat_num-5-5-t_pulsed_cool)
-    dacramp: TweezerIntensity twz_int_lifetime twz_intensity 5
-    t += 5
-    t += -t_shutter
-    on: PrbShutter
-    on: prbcoolshutter
-    dac: PrbAmp pgcprb_twz_cool_amp
-    dac: PrbRepAmp pgc_twz_rep_amp
-    ol: ol_cooling d2_cooling_prb_resonance-pgc_twz_olcool %pgc_twz_olcool %probe_olcool %pgc_twz_olcool
-    ol: ol_repump d2_repump_prb_resonance+pgc_twz_olrepump %pgc_twz_olrepump %pgc_twz_olrepump %probe_olrepump 
-    on: PrbRepTrg
-    t += t_shutter
-
-    on: PrbTrg
-
-    t += t_pulsed_cool
-    pulseon: DO1_0 1
-    off: PrbTrg
-    off: PrbShutter
-
-
-    dacramp: TweezerIntensity twz_intensity twz_int_lifetime 5
-    t += 5
-%    t += (t_cooling_cycle-5-5-t_pulsed_cool)/2
-%    t += (_wait_time_/repeat_num-5-5-t_pulsed_cool)/2
-end
-t += 10
-%t += t_wait_before_rr
+%%var t_cooling_cycle 2000/repeat_num
+%var _wait_time_ 6000
+%repeat: repeat_num
+%%    t += (t_cooling_cycle-5-5-t_pulsed_cool)/2
+%    t += (_wait_time_/repeat_num-5-5-t_pulsed_cool)
+%    dacramp: TweezerIntensity twz_int_lifetime twz_intensity 5
+%    t += 5
+%    t += -t_shutter
+%    on: PrbShutter
+%    on: prbcoolshutter
+%    dac: PrbAmp pgcprb_twz_cool_amp
+%    dac: PrbRepAmp pgc_twz_rep_amp
+%    ol: ol_cooling d2_cooling_prb_resonance-pgc_twz_olcool %pgc_twz_olcool %probe_olcool %pgc_twz_olcool
+%    ol: ol_repump d2_repump_prb_resonance+pgc_twz_olrepump %pgc_twz_olrepump %pgc_twz_olrepump %probe_olrepump 
+%    on: PrbRepTrg
+%    t += t_shutter
+%
+%    on: PrbTrg
+%
+%    t += t_pulsed_cool
+%    pulseon: DO1_0 1
+%    off: PrbTrg
+%    off: PrbShutter
+%
+%
+%    dacramp: TweezerIntensity twz_intensity twz_int_lifetime 5
+%    t += 5
+%%    t += (t_cooling_cycle-5-5-t_pulsed_cool)/2
+%%    t += (_wait_time_/repeat_num-5-5-t_pulsed_cool)/2
+%end
+%t += 10
+%%t += t_wait_before_rr
 %%%%%%%%%%%%% turn probe cool shutter back on %%%%%%%%%%
 on: prbcoolshutter
 on: TARepShutter
@@ -106,7 +109,7 @@ on: xyMOTShutter
 %
 %t += 500
 %%%t += 1000
-dacramp: TweezerIntensity twz_int_lifetime twz_intensity 5
+%dacramp: TweezerIntensity twz_int_lifetime twz_intensity 5
 t += 5
 
 %call ReleaseRecapture(t_twz_release)
