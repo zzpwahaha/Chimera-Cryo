@@ -19,9 +19,9 @@ struct repeatInfo
 	timeType repeatAddedTime;
 	// evaluated for all variations
 	std::vector<unsigned> repeatNums;
-	std::vector<unsigned> repeatAddedTimes;
+	std::vector<double> repeatAddedTimes;
 
-	std::vector<unsigned> repeatAddedTimesSave;
+	std::vector<double> repeatAddedTimesSave;
 
 	repeatInfo(unsigned identifier);
 	void calculateVariations(std::vector<parameterType>& params);
