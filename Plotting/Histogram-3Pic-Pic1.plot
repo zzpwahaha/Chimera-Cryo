@@ -1,9 +1,9 @@
 Version: 2.1
-/*Plot title*/			3-pic-test
-/*Plot type*/			Atoms
-/*Y label*/				3-test
+/*Plot title*/			Histogram-3Pic-Pic1
+/*Plot type*/			Pixel_Count_Histograms
+/*Y label*/				counts
 /*X label*/				Variation_Average
-/*Plot File name*/		3-pic-test
+/*Plot File name*/		Histogram-3Pic-Pic1
 /*Data set number*/		1
 /*Condition number*/	1
 /*Picture number*/		3
@@ -14,7 +14,7 @@ PICTURE_BEGIN
 0
 PICTURE_END
 PICTURE_BEGIN
-0
+1
 PICTURE_END
 PICTURE_BEGIN
 0
@@ -40,11 +40,12 @@ LEGENDS_BEGIN
 
 LEGENDS_END
 PLOT_COUNTS_LOCATIONS_BEGIN
+0 0
 PLOT_COUNTS_LOCATIONS_END
 FITTING_OPTIONS_BEGIN
--842150451 -842150451
+0 0
 FITTING_OPTIONS_END
 HIST_OPTIONS_BEGIN
 1
-10
+1
 HIST_OPTIONS_END
