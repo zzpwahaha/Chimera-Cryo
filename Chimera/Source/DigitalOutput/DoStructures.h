@@ -26,7 +26,7 @@ struct DoCommandForm
 	// the value to set it to. 
 	bool value;
 	// stores whether this command is subject to repeats and which repeat it correpsonds to in the tree if so
-	repeatInfoId repeatId = { 0, {0,0} };
+	repeatInfoId repeatId = { 0, {0,0}, false };
 };
 
 // no variables in this version. It's calculated each variation based on corresponding ComandForm structs.
@@ -39,7 +39,7 @@ struct DoCommand
 	// the value to set it to. 
 	bool value;
 	// same as DoCommandForm, this will be used for repeat generation, i.e. copy and extend the std::vector<DoCommand>
-	repeatInfoId repeatId = { 0, {0,0} };
+	repeatInfoId repeatId = { 0, {0,0}, false };
 };
 
 

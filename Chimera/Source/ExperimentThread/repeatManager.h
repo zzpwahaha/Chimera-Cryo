@@ -10,6 +10,7 @@ struct repeatInfoId
 	static const std::pair<int, int> root;
 	unsigned repeatIdentifier = 0; // identifier in the repeatInfo, which uniquely labels this repeat.
 	std::pair<int, int> repeatTreeMap = { 0,0 }; // record the index of the repeatInfo in the tree. (level, index), see TreeItem.
+	bool placeholder = false; // if true, meaning the command that contains this repeatInfoId is only for advancing time for that device class. And this command is inserted by Chimera automatically
 };
 
 struct repeatInfo

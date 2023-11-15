@@ -46,7 +46,7 @@ struct DdsCommandForm
 	Expression numSteps;
 
 	// stores whether this command is subject to repeats and which repeat it correpsonds to in the tree if so
-	repeatInfoId repeatId = { 0, {0,0} };
+	repeatInfoId repeatId = { 0, {0,0}, false };
 };
 
 struct DdsCommand
@@ -60,7 +60,7 @@ struct DdsCommand
 	double rampTime;
 
 	// same as DdsCommandForm, this will be used for repeat generation, i.e. copy and extend the std::vector<DdsCommand>
-	repeatInfoId repeatId = { 0, {0,0} };
+	repeatInfoId repeatId = { 0, {0,0}, false };
 };
 
 

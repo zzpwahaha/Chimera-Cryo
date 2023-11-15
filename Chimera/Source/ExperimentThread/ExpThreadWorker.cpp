@@ -179,7 +179,7 @@ void ExpThreadWorker::analyzeMasterScript (DoCore& ttls, AoCore& ao, DdsCore& dd
 			else if (handleAoCommands (word, currentMasterScript, vars, ao, ttls, scope, operationTime, repeatMgr)) {}
 			else if (handleDdsCommands(word, currentMasterScript, vars, dds, scope, operationTime, repeatMgr)) {}
 			else if (handleOlCommands(word, currentMasterScript, vars, ol, scope, operationTime, repeatMgr)) {}
-			else if (handleRepeats(word, currentMasterScript, vars, scope, repeatMgr)) {}
+			else if (handleRepeats(word, currentMasterScript, vars, ttls, ao, dds, ol, scope, repeatMgr)) {}
 			else if (word == "callcppcode") {
 				// and that's it... 
 				callCppCodeFunction ();
@@ -271,13 +271,13 @@ void ExpThreadWorker::analyzeFunction (std::string function, std::vector<std::st
 	functionStream >> word;
 	try {
 		while (!(functionStream.peek () == EOF) || word != "__end__") {
-			if (handleTimeCommands (word, functionStream, params, scope, operationTime, repeatMgr)) { /* got handled*/ }
-			else if (handleVariableDeclaration (word, functionStream, params, scope, warnings)) {}
-			else if (handleDoCommands (word, functionStream, params, ttls, scope, operationTime, repeatMgr)) {}
-			else if (handleAoCommands (word, functionStream, params, ao, ttls, scope, operationTime, repeatMgr)) {}
+			if (handleTimeCommands(word, functionStream, params, scope, operationTime, repeatMgr)) { /* got handled*/ }
+			else if (handleVariableDeclaration(word, functionStream, params, scope, warnings)) {}
+			else if (handleDoCommands(word, functionStream, params, ttls, scope, operationTime, repeatMgr)) {}
+			else if (handleAoCommands(word, functionStream, params, ao, ttls, scope, operationTime, repeatMgr)) {}
 			else if (handleDdsCommands(word, functionStream, params, dds, scope, operationTime, repeatMgr)) {}
 			else if (handleOlCommands(word, functionStream, params, ol, scope, operationTime, repeatMgr)) {}
-			else if (handleRepeats(word, functionStream, params, scope, repeatMgr)) {}
+			else if (handleRepeats(word, functionStream, params, ttls, ao, dds, ol, scope, repeatMgr)) {}
 			else if (word == "callcppcode") {
 				// and that's it... 
 				callCppCodeFunction ();
@@ -1024,6 +1024,7 @@ bool ExpThreadWorker::handleOlCommands(std::string word, ScriptStream& stream, s
 }
 
 bool ExpThreadWorker::handleRepeats(std::string word, ScriptStream& stream, std::vector<parameterType>& params, 
+	DoCore& ttls, AoCore& ao, DdsCore& dds, OlCore& ol,
 	std::string scope, repeatManager& repeatMgr)
 {
 	if (word == "repeat:") {
@@ -1037,6 +1038,19 @@ bool ExpThreadWorker::handleRepeats(std::string word, ScriptStream& stream, std:
 		child->data().repeatAddedTime = timeType(std::vector<Expression>(), 0.0);
 	}
 	else if (word == "end") {
+		repeatInfoId repeatId = repeatMgr.getCurrentActiveID();
+		if (!ttls.repeatsExistInCommandForm(repeatId)) {
+			ttls.addPlaceholderRepeatCommand(repeatId);
+		}
+		if (!ao.repeatsExistInCommandForm(repeatId)) {
+			ao.addPlaceholderRepeatCommand(repeatId);
+		}
+		if (!dds.repeatsExistInCommandForm(repeatId)) {
+			dds.addPlaceholderRepeatCommand(repeatId);
+		}
+		if (!ol.repeatsExistInCommandForm(repeatId)) {
+			ol.addPlaceholderRepeatCommand(repeatId);
+		}
 		// handle end of repeat
 		repeatMgr.fininshCurrentRepeat();
 	}

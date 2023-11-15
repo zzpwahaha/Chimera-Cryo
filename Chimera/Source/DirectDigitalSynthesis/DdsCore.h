@@ -123,6 +123,8 @@ public:
 	void calculateVariations(std::vector<parameterType>& variables, ExpThreadWorker* threadworker, 
 		std::vector<calSettings>& calibrationSettings);
 	void constructRepeats(repeatManager& repeatMgr);
+	bool repeatsExistInCommandForm(repeatInfoId repeatId);
+	void addPlaceholderRepeatCommand(repeatInfoId repeatId);
 	void organizeDDSCommands(UINT variation);
 	void makeFinalDataFormat(UINT variation);
 	void standardExperimentPrep(UINT variation);

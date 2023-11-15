@@ -18,6 +18,8 @@ public:
 
 	void calculateVariations(std::vector<parameterType>& params, ExpThreadWorker* threadworker);
 	void constructRepeats(repeatManager& repeatMgr);
+	bool repeatsExistInCommandForm(repeatInfoId repeatId);
+	void addPlaceholderRepeatCommand(repeatInfoId repeatId);
 	const std::string configDelim = "OFFSETLOCK_SYSTEM";
 	std::string getDelim() { return configDelim; }
 

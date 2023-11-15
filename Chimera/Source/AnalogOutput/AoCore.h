@@ -46,6 +46,8 @@ public:
 	void calculateVariations(std::vector<parameterType>& params, 
 		ExpThreadWorker* threadworker, std::vector<calSettings>& calibrationSettings);
 	void constructRepeats(repeatManager& repeatMgr);
+	bool repeatsExistInCommandForm(repeatInfoId repeatId);
+	void addPlaceholderRepeatCommand(repeatInfoId repeatId);
 	void organizeDacCommands(unsigned variation, AoSnapshot initSnap);
 	void findLoadSkipSnapshots(double time, std::vector<parameterType>& variables, unsigned variation);
 	void formatDacForFPGA(UINT variation, AoSnapshot initSnap);

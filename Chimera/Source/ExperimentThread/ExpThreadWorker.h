@@ -51,6 +51,7 @@ class ExpThreadWorker : public QObject
 		bool handleOlCommands(std::string word, ScriptStream& stream, std::vector<parameterType>& params,
 			OlCore& ol, std::string scope, timeType& operationTime, repeatManager& repeatMgr);
 		bool handleRepeats(std::string word, ScriptStream& stream, std::vector<parameterType>& params,
+			DoCore& ttls, AoCore& ao, DdsCore& dds, OlCore& ol,
 			std::string scope, repeatManager& repeatMgr);
 		bool handleFunctionCall (std::string word, ScriptStream& stream, std::vector<parameterType>& params,
 			DoCore& ttls, AoCore& ao, DdsCore& dds, OlCore& ol, std::string& warnings, std::string callingFunction, timeType& operationTime, repeatManager& repeatMgr);

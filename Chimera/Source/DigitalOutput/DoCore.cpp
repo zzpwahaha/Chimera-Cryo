@@ -250,22 +250,59 @@ void DoCore::constructRepeats(repeatManager& repeatMgr)
 			// could also use this: std::transform(cmds.cbegin(), cmds.cend(), cmds.begin(), [&](Command doc) { with a return
 			std::for_each(cmds.begin(), cmds.end(), [&](Command& doc) {
 				if (doc.repeatId.repeatIdentifier == maxDepth.repeatId.repeatIdentifier) {
-					doc.repeatId = repeatIdParent;
+					if (doc.repeatId.placeholder) {
+						doc.repeatId = repeatIdParent;
+						doc.repeatId.placeholder = true; // doesn't really matter, since this will be deleted anyway.
+					}
+					else { doc.repeatId = repeatIdParent; }
 				} });
-			/*start to insert the repeated 'cmdToRpeat' to end of the repeat block, after insertion, 'cmdToRepeatEnd' can not be used*/
-			std::vector<Command> cmdToInsert;
-			cmdToInsert.clear();
-			for (unsigned repeatInc : range(repeatNum - 1)) {
-				// if only repeat for once, below will be ignored, since the first repeat is already in the list
-				/*transform the repeating commandlist to its parent repeatInfoId and also increment its time so that it can be repeated in its parents level*/
-				std::for_each(cmdToRepeat.begin(), cmdToRepeat.end(), [&](Command& doc) {
-					doc.repeatId = repeatIdParent;
-					doc.time += repeatAddedTime; });
-				cmdToInsert.insert(cmdToInsert.end(), cmdToRepeat.begin(), cmdToRepeat.end());
+			/*determine whether this cmdToRepeat is just a placeholder*/
+			bool noPlaceholder = std::none_of(cmdToRepeat.begin(), cmdToRepeat.end(), [&](Command doc) {
+				return doc.repeatId.placeholder; });
+			int insertedCmdSize = 0;
+			if (noPlaceholder) {
+				/*start to insert the repeated 'cmdToRpeat' to end of the repeat block, after insertion, 'cmdToRepeatEnd' can not be used*/
+				std::vector<Command> cmdToInsert;
+				cmdToInsert.clear();
+				for (unsigned repeatInc : range(repeatNum - 1)) {
+					// if only repeat for once, below will be ignored, since the first repeat is already in the list
+					/*transform the repeating commandlist to its parent repeatInfoId and also increment its time so that it can be repeated in its parents level*/
+					std::for_each(cmdToRepeat.begin(), cmdToRepeat.end(), [&](Command& doc) {
+						doc.repeatId = repeatIdParent;
+						doc.time += repeatAddedTime; });
+					cmdToInsert.insert(cmdToInsert.end(), cmdToRepeat.begin(), cmdToRepeat.end());
+				}
+				cmds.insert(cmdToRepeatEnd, cmdToInsert.begin(), cmdToInsert.end());
+				insertedCmdSize = cmdToInsert.size();
+
 			}
-			cmds.insert(cmdToRepeatEnd, cmdToInsert.begin(), cmdToInsert.end());
+			else {
+				/*with placeholder, check if this is the only placeholder, as it should be in most cases*/
+				if (cmdToRepeat.size() > 1) {
+					bool allPlaceholder = std::all_of(cmdToRepeat.begin(), cmdToRepeat.end(), [&](Command doc) {
+						return doc.repeatId.placeholder; });
+					if (allPlaceholder) {
+						thrower("The command-to-repeat contains more than one placeholder. This shouldn't happen "
+							"as Chimera will only insert one placeholder if there is no command in this repeat. "
+							"This shouldn't come from nested repeat either, since Chimera will add placeholder for each level of repeats "
+							"if the there is no command. And the inferior level repeat placeholder should already be deleted after previous loop"
+							"A low level bug.");
+					}
+					else {
+						thrower("The command-to-repeat contains placeholder but also other commands that is not meant for placeholding. "
+							"This shouldn't happen as Chimera will only insert placeholder if there is no command in this repeat. "
+							"This shouldn't come from nested repeat either, inferior level repeat placeholder should already be deleted after previous loop. "
+							"A low level bug.");
+					}
+				}
+				else {
+					/*remove the placeholder for this level of repeat. Other level would have their own placeholder inserted already if needed.*/
+					cmds.erase(cmds.begin() + cmdToRepeatStartPos);
+					insertedCmdSize = -1; // same as '-cmdToRepeat.size()'
+				}
+			}
 			/*advance the time of thoses command that is later in CommandList than the repeat block*/
-			cmdToRepeatEnd = cmds.begin() + cmdToRepeatStartPos + cmdToRepeat.size() + cmdToInsert.size();
+			cmdToRepeatEnd = cmds.begin() + cmdToRepeatStartPos + cmdToRepeat.size() + insertedCmdSize;
 			std::for_each(cmdToRepeatEnd, cmds.end(), [&](Command& doc) {
 				doc.time += repeatAddedTime * (repeatNum - 1); });
 			/*advance the time of the parent repeat, if the parent is not root*/
@@ -275,6 +312,25 @@ void DoCore::constructRepeats(repeatManager& repeatMgr)
 		}
 	}
 	repeatMgr.loadCalculationResults();
+}
+
+bool DoCore::repeatsExistInCommandForm(repeatInfoId repeatId)
+{
+	typedef DoCommandForm CommandForm;
+	auto& cmdFormList = ttlCommandFormList;
+	auto cmdFormRepeated = std::find_if(cmdFormList.begin(), cmdFormList.end(), 
+		[&](const CommandForm& a) {
+			return (a.repeatId.repeatIdentifier == repeatId.repeatIdentifier);
+		});
+	return (cmdFormRepeated != cmdFormList.end());
+}
+
+void DoCore::addPlaceholderRepeatCommand(repeatInfoId repeatId)
+{
+	typedef DoCommandForm CommandForm;
+	auto& cmdFormList = ttlCommandFormList;
+	repeatId.placeholder = true;
+	cmdFormList.push_back({ {0, 0}, timeType({},-1.0), {}, true, repeatId }); // should be an alert for all other commands, and it will be cleansed after advancing the time
 }
 
 std::vector<double> DoCore::getFinalTimes ()

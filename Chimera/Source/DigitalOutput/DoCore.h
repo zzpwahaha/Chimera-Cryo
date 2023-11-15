@@ -44,6 +44,8 @@ class DoCore
 		void sizeDataStructures (unsigned variations);
 		void calculateVariations (std::vector<parameterType>& params, ExpThreadWorker* threadworker);
 		void constructRepeats(repeatManager& repeatMgr);
+		bool repeatsExistInCommandForm(repeatInfoId repeatId);
+		void addPlaceholderRepeatCommand(repeatInfoId repeatId);
 		std::vector<std::vector<plotDataVec>> getPlotData (unsigned variation );
 		std::string getTtlSequenceMessage (unsigned variation);
 		std::vector<double> getFinalTimes ();
