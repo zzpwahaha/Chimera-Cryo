@@ -234,7 +234,7 @@ ScanRangeInfo ParameterSystem::getRangeInfoFromFile (ConfigStream& configFile ){
 std::vector<parameterType> ParameterSystem::getParametersFromFile( ConfigStream& configFile, ScanRangeInfo rangeInfo ){
 	unsigned variableNumber;
 	configFile >> variableNumber;
-	if ( variableNumber > 100 ){
+	if ( variableNumber > 10000 ){
 		auto answer = QMessageBox::question (nullptr, "Suspicious Value...",
 			"variable number retrieved from file appears suspicious. The number is "
 			+ qstr (variableNumber) + ". Is this accurate?");
