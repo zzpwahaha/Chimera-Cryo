@@ -20,22 +20,28 @@ void MOTAnalysisSystem::initialize()
 void MOTAnalysisSystem::prepareMOTAnalysis()
 {
 	camExp.clear(); // find the exp active MOT camera that requires analysis
-	std::array<MakoCamera*, MOTCALCTRL_NUM> camPts;
-	for (unsigned idx = 0; idx < MOTCALCTRL_NUM; idx++) {
-		MOTCalcCtrl[idx].prepareMOTAnalysis(camPts[idx]);
-	}
-	for (auto pt : camPts) {
-		if (pt != nullptr && std::find(camExp.begin(), camExp.end(), pt) == camExp.end()) {
-			camExp.push_back(pt);
-			emit notification("get MAKO as" + qstr(pt->getMakoCore().CameraName()) + "\r\n");
+	try {
+		std::array<MakoCamera*, MOTCALCTRL_NUM> camPts;
+		for (unsigned idx = 0; idx < MOTCALCTRL_NUM; idx++) {
+			MOTCalcCtrl[idx].prepareMOTAnalysis(camPts[idx]);
+		}
+		for (auto pt : camPts) {
+			if (pt != nullptr && std::find(camExp.begin(), camExp.end(), pt) == camExp.end()) {
+				camExp.push_back(pt);
+				emit notification("get MAKO as" + qstr(pt->getMakoCore().CameraName()) + "\r\n");
+			}
+		}
+		if (camExp.size() > MAKO_NUMBER) {
+			thrower("MOT analysis Woker size greater than MAKO number, a low level bug");
+		}
+		for (size_t idx = 0; idx < camExp.size(); idx++) {
+			prepareMOTAnalysis(idx);
 		}
 	}
-	if (camExp.size() > MAKO_NUMBER) {
-		thrower("MOT analysis Woker size greater than MAKO number, a low level bug");
+	catch (ChimeraError& e) {
+		emit error("Error seen in preparing MOT analysis:\r\n" + e.qtrace());
 	}
-	for (size_t idx = 0; idx < camExp.size(); idx++) {
-		prepareMOTAnalysis(idx);
-	}
+
 
 }
 
