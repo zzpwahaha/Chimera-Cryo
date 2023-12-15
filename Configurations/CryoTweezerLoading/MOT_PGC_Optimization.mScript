@@ -31,19 +31,28 @@ ddsfreq: dds2_3 80
 ddsamp: dds2_3 100
 
 
-on: TARepTrg
-on: SrcMOTTrg
-on: SciMOTTrg 
-on: DipolePushTrg
-on: PrbRepTrg
-off: PrbTrg
-off: TweezerHold
-on: xyzMOTShutter
-on: xyMOTShutter
-on: DipolePushShutter
-off: PrbShutter 
-off: PrbCoolShutter 
-
+    on: TARepTrg
+    on: SrcMOTTrg 
+    on: SciMOTTrg 
+    on: DipolePushTrg 
+    on: PrbRepTrg
+    off: PrbTrg
+    off: TweezerHold
+    on: TARepShutter
+    off: D1LGMTrg
+    off: D1LGMEOMTrg
+    off: OPTrg
+    on: xyzMOTShutter
+    on: xyMOTShutter
+    on: DipolePushShutter 
+    off: PrbShutter 
+    on: PrbCoolShutter
+    off: D1LGMShutter
+    off: OPShutter
+%    off: TWZFlashTrg
+    on: TweezerTrg
+    off: CameraShutter
+    on: SrcMOTValve
 
 dac: TARepAmp 10
 dac: SrcMOTAmp 10
@@ -61,12 +70,16 @@ dac: BiasCoilX bias_x %0.04
 dac: BiasCoilY bias_y %0.4
 dac: BiasCoilZ bias_z %0.0
 
-t = 500 %t_loading
+t = 1000 %t_loading
 off: SrcMOTTrg
 off: DipolePushTrg
 off: DipolePushShutter
 dac: MOTCoil 0
 pulseon: DO1_0 1
+
+t += -3
+pulseon: MAKO1 0.1
+t += 3
 
 
 % attempt to move the MOT, maybe needed for the future
@@ -82,9 +95,9 @@ pulseon: DO1_0 1
 on: SciMOTTrg
 ol: ol_cooling d2_cooling_resonance-pgc_olcool
 ol: ol_repump d2_repump_resonance+pgc_olrepump
-dac: BiasCoilX pgc_bias_x
-dac: BiasCoilY pgc_bias_y 
-dac: BiasCoilZ pgc_bias_z
+dac: BiasCoilX pgc_bias_x %2.2 %1.75 %pgc_bias_x
+dac: BiasCoilY pgc_bias_y %-1.5 %-1.5 %pgc_bias_y 
+dac: BiasCoilZ pgc_bias_z %-0.35 %pgc_bias_z
 dac: SciMOTAmp pgc_cool_amp
 dac: TARepAmp pgc_rep_amp
 t += t_pgc_cool_time
@@ -103,9 +116,10 @@ pulseon: DO1_0 1
 %pulseon: DO1_0 1
 %%%%%%%%%%%%%%%  TOF  %%%%%%%%%%%%%%%%%%
 off: SciMOTTrg
+dac: SciMOTAmp 0
 %off: xyzMOTShutter
 %off: PrbShutter 
-t += 10 %t_tof
+t += t_tof %0.1 %10 %t_tof
 pulseon: DO1_0 1
 
 %%%%%%%%%%%%%%  Image MOT  %%%%%%%%%%%%%%%%%%
@@ -130,22 +144,22 @@ dac: TARepAmp 10
 %t += 6
 
 %t += 4
-%pulseon: mako2 0.1
-%t += 0.07
-%pulseon: SciMOTTrg 4.7
+pulseon: mako2 0.1
+t += 0.07
+pulseon: SciMOTTrg 0.8
 %pulseon: PrbTrg t_twz_imaging
 
-t += -7
-on: CameraShutter
-t += 7
-pulseon: pixis_trg 35 %t_twz_imaging
-pulseon: SciMOTTrg 35
-pulseon: mako1 0.1
-pulseon: mako2 0.1
-t += 25
-%pulseon: PrbTrg resonance_scan %t_twz_imaging-7
-%pulseon: SciMOTTrg 10 %t_twz_imaging-7
-off: CameraShutter
+%t += -7
+%on: CameraShutter
+%t += 7
+%pulseon: pixis_trg 35 %t_twz_imaging
+%pulseon: SciMOTTrg 35
+%pulseon: mako1 0.1
+%pulseon: mako2 0.1
+%t += 25
+%%pulseon: PrbTrg resonance_scan %t_twz_imaging-7
+%%pulseon: SciMOTTrg 10 %t_twz_imaging-7
+%off: CameraShutter
 
 
 

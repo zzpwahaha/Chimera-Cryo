@@ -1,0 +1,156 @@
+%%%%%%%%%%%%%%%%% Start With 1ms %%%%%%%%%%%%%%%%% 
+t = 1
+%call CryoMOTLoadingPGC()
+    call MOTLoading(t_loading)
+%    call FreeSpaceLGM(t_lgm_mot_cool_time)
+    call FreeSpacePGC(t_pgc_cool_time)
+
+%%%%%%%%%%%%%%%  TOF  %%%%%%%%%%%%%%%%%%
+call TOF(t_tof)
+
+%%%%%%%%%%%%%%  PGC in Tweezer %%%%%%%%%%%%%%%%%%
+% change the field/laser freq parameter here because the previous section is TOF and no light is on
+call D2InTrapPGC(t_pgc_twz)
+% note the t_pgc_twz should be smaller than 100
+t += 100-t_pgc_twz
+
+%%%%%%%%%%%%%%  PGC in Tweezer with Probe %%%%%%%%%%%%%%%%%%
+% change the field/laser freq parameter here because the previous section is TOF and no light is on
+call D2InTrapPGCPrb(t_pgc_twz)
+% note the t_pgc_twz should be smaller than 100
+t += 100-t_pgc_twz
+
+%%%%%%%%%%%%%%  Image TWIZZER  %%%%%%%%%%%%%%%%%%% change the field/laser freq parameter here because the previous section is dark, i.e. 100-t_pgc_twz is larger than 4
+call PGCTweezerImaging()
+t += 15
+
+t += 10
+off: PrbShutter
+off: PrbCoolShutter
+off: xyzMOTShutter
+off: D1LGMShutter
+off: D1LGMPrbShutter
+off: OPShutter
+off: TARepShutter
+t += 10
+dac: BiasCoilX -3.5 %-3.2  %-3.5 %quantization_bias_x %3.5
+dac: BiasCoilY 2 %4 %quantization_bias_y %-4.6 %quantization_bias_y %0.0 %4.0 %quantization_bias_y %-2.5 %quantization_bias_y %-2.5
+dac: BiasCoilZ 0.1 %quantization_bias_z %4.0 %quantization_bias_z %0.1 %quantization_bias_z %0.1 %quantization_bias_z %0.1
+t += time_scan %time_scan %time_scan %200 %time_scan %80
+
+%%set the field back to PGC params
+%dac: BiasCoilX -3.5
+%dac: BiasCoilY pgc_twz_bias_y 
+%dac: BiasCoilZ 0.1
+%t += time_scan
+%%%%%%%%%%%%%% optical pumping into |2,2> state with 2-2'' OP, 1-2'' probe %%%%%%%%%%%
+%on: PrbShutter
+%off: PrbCoolShutter
+%off: xyzMOTShutter
+%off: D1LGMShutter
+%off: D1LGMPrbShutter
+%on: OPShutter
+%off: TARepShutter
+%ol: ol_cooling d2_cooling_resonance-(30-266.65) 
+%ol: ol_repump d2_repump_prb_resonance+(25) %resonance_scan
+%dac: PrbRepAmp 8
+%dac: PrbAmp 8
+%dac: OPAmp {0.1 op_pwr} %time_scan
+%t += t_shutter
+%on: OPTrg
+%on: PrbTrg
+%t += 0.01
+%off: OPTrg
+%t += 0.005
+%off: PrbTrg
+%off: OPShutter
+%off: PrbShutter
+%
+%t += 15
+%%%%%%% pump out of F=2, other than |2,2> if with circular polarization, using cooling 2-2'', using OP beam %%%%%%%%%%%
+%off: PrbShutter
+%on: OPShutter
+%off: TARepShutter
+%off: xyzMOTShutter
+%off: D1LGMShutter
+%off: D1LGMPrbShutter
+%ol: ol_cooling d2_cooling_resonance-(30-266.65) %resonance_scan
+%ol: ol_repump d2_repump_resonance+(28.8+266.65+30) %
+%dac: OPAmp {0.1 op_pwr} %time_scan
+%t += t_shutter
+%on: OPTrg
+%t += 0.08 %0.04 %0.005 %time_scan %0.001
+%off: OPTrg
+%off: OPShutter
+%
+%
+%
+%%t += 15
+%%%%%%%%%%%%%% pump out of F=1 using probe repump 1-2'' %%%%%%%%%%%
+%%on: PrbShutter
+%%%off: PrbShutter
+%%off: PrbCoolShutter
+%%off: xyzMOTShutter
+%%off: D1LGMShutter
+%%off: D1LGMPrbShutter
+%%off: OPShutter
+%%off: PrbRepTrg
+%%ol: ol_cooling d2_cooling_prb_resonance-(28.8+266.65) 
+%%ol: ol_repump d2_repump_prb_resonance+(25) %resonance_scan
+%%dac: PrbRepAmp 1 %3.0
+%%dac: PrbAmp 5 %5.0
+%%t += t_shutter
+%%%dac: PrbRepAmp 4 %3.0
+%%%dac: PrbAmp 5 %5.0
+%%
+%%on: PrbTrg
+%%on: PrbRepTrg
+%%t += 0.05 %time_scan %0.005 %time_scan %10 %time_scan %100 %time_scan
+%%off: PrbRepTrg
+%%off: PrbTrg
+%%off: PrbShutter
+%
+%
+%%t += 15
+%    dac: BiasCoilX pgc_img_bias_x
+%    dac: BiasCoilY pgc_img_bias_y
+%    dac: BiasCoilZ pgc_img_bias_z
+%t += 200
+%dacramp: TweezerIntensity twz_intensity twz_intensity*0.2 10
+%t += 10
+%%%%%% push out F=2 using 2-3'', using OP beam
+%off: TARepShutter
+%off: PrbShutter
+%off: xyzMOTShutter
+%off: D1LGMShutter
+%off: D1LGMPrbShutter
+%on: OPShutter
+%ol: ol_cooling d2_cooling_resonance-(-3) %3(-3) %20 %resonance_scan %(28.8)
+%ol: ol_repump d2_repump_resonance+20 %resonance_scan %(28.8) %(28.8+266/2) %resonance_scan % % intensional
+%%dac: TARepAmp 3
+%dac: OPAmp {0.1 op_pwr} %time_scan
+%t += t_shutter
+%on: OPTrg
+%t += 3 %0.01 %time_scan %0.02 %time_scan %3 %time_scan
+%off: OPTrg
+%off: OPShutter
+%dacramp: TweezerIntensity twz_intensity*0.2 twz_intensity 10
+%t += 10
+
+%call TrapLowerAndRise(twz_intensity, twz_intensity*0.1, 10, 15)
+
+%t += 15
+
+
+%%%%%%%%%%%%%%  PGC in Tweezer with Probe %%%%%%%%%%%%%%%%%%
+% change the field/laser freq parameter here because the previous section is TOF and no light is on
+call D2InTrapPGCPrb(t_pgc_twz)
+% note the t_pgc_twz should be smaller than 100
+t += 15
+%%%%%%%%%%%%%%% Second Twizzer Image
+% note the previous section should have at least 4 ms dark interval
+call PGCTweezerImaging()
+
+%%%%%%%%%%%%%%  END Sequence  %%%%%%%%%%%%%%%%%%
+t += 100
+pulseon: DO1_0 0.5

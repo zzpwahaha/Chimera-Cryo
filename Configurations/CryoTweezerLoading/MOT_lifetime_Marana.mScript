@@ -50,7 +50,9 @@ on: DipolePushShutter
 off: PrbShutter 
 on: PrbCoolShutter
 off: D1LGMShutter
-off: MOTFlashTrg
+off: D1LGMPrbShutter
+off: OPShutter
+%off: TWZFlashTrg
 on: TweezerTrg
 off: CameraShutter
 
@@ -59,7 +61,7 @@ on: SrcMOTValve
 
 dac: TARepAmp 10
 dac: SrcMOTAmp 10
-dac: SciMOTAmp mot_load_cool_amp %{mot_load_cool_amp_cal mot_pwr} 
+dac: SciMOTAmp 1.1 %mot_load_cool_amp %{mot_load_cool_amp_cal mot_pwr} 
 dac: DipolePushAmp 6
 dac: TweezerIntensity twz_intensity %Converison is 38.7mW per 1V Aug/1/2022 
 dac: PrbRepAmp 10
@@ -69,9 +71,9 @@ ol: ol_cooling d2_cooling_resonance+10 %1216
 ol: ol_repump d2_repump_resonance %5282
 
 dac: MOTCoil mot_gradient
-dac: BiasCoilX bias_x %0.04
-dac: BiasCoilY bias_y %0.4
-dac: BiasCoilZ bias_z %0.0
+dac: BiasCoilX 0.88 %bias_x %0.04
+dac: BiasCoilY -0.86 %bias_y %0.4
+dac: BiasCoilZ 0.22 %bias_z %0.0
 
 t += 10000 %t_loading
 off: SrcMOTTrg
@@ -116,15 +118,15 @@ t += 4000
 
 
 %%%%%%%%%%%%%%%  TOF  %%%%%%%%%%%%%%%%%%
-off: SciMOTTrg
-%%%off: PrbTrg
-%%%off: xyzMOTShutter
-%%%off: PrbShutter 
-%%%off: D1LGMShutter
-t += 35*2.825 %t_tof
-pulseon: DO1_0 1
-on: SciMOTTrg
-t += 100
+%off: SciMOTTrg
+%%%%off: PrbTrg
+%%%%off: xyzMOTShutter
+%%%%off: PrbShutter 
+%%%%off: D1LGMShutter
+%t += 35*2.825 %t_tof
+%pulseon: DO1_0 1
+%on: SciMOTTrg
+%t += 100
 %
 %on: SciMOTTrg
 %dacramp: SciMOTAmp mot_load_cool_amp 1.4 10000
@@ -192,10 +194,10 @@ t += 100
 %%pulseon: SciMOTTrg 10 %t_twz_imaging-7
 %off: CameraShutter
 
-repeat: 400
+repeat: 50 %400
 %pulseon: mako1 0.1
 pulseon: mako2 0.1
-t += 15000
+t += 1000 %15000
 %pulseon: DO1_0 1
 end
 

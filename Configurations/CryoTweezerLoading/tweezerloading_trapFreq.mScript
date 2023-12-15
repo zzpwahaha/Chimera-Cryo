@@ -48,6 +48,7 @@ t += 10
 %t += 2
 
 pulseon: TweezerHold 100
+pulseon: KeysightTrg 100
 t += 105
 
 %dacramp: TweezerIntensity twz_intensity twz_int_low 10 

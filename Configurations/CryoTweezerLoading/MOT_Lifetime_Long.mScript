@@ -106,13 +106,16 @@ t = 1
     on: DipolePushShutter
     off: PrbShutter 
     on: PrbCoolShutter
-    off: MOTFlashTrg
+	off: D1LGMShutter
+	off: D1LGMPrbShutter
+	off: OPShutter
+%    off: TWZFlashTrg
     on: TweezerTrg
 
 
     dac: TARepAmp 10
     dac: SrcMOTAmp 10
-    dac: SciMOTAmp mot_load_cool_amp %{mot_load_cool_amp_cal mot_pwr} %6.8 
+    dac: SciMOTAmp 1.1 %mot_load_cool_amp %{mot_load_cool_amp_cal mot_pwr} %6.8 
     dac: DipolePushAmp 6
     dac: TweezerIntensity twz_intensity %Converison is 38.7mW per 1V Aug/1/2022 
 %    dac: TweezerIntensity twz_dac_intensity-twz_intensityservo_bias % set loading tweezer depth, which is 1mK, 1.7V on PD. Subtract the ofst on servo.
@@ -124,9 +127,9 @@ t = 1
     ol: ol_repump d2_repump_resonance
 
     dac: MOTCoil mot_gradient
-    dac: BiasCoilX bias_x %0.04
-    dac: BiasCoilY bias_y %0.4
-    dac: BiasCoilZ bias_z %0.0
+    dac: BiasCoilX 0.88 %bias_x %0.04
+    dac: BiasCoilY -0.86 %bias_y %0.4
+    dac: BiasCoilZ 0.22 %bias_z %0.0
 
     t = 10000
     

@@ -3,8 +3,12 @@
 def TOF(time_of_flight):
     off: SciMOTTrg
     off: PrbTrg
+    off: D1LGMTrg
+    off: D1LGMEOMTrg
     off: xyzMOTShutter
     off: PrbShutter 
     off: D1LGMShutter
+    off: D1LGMPrbShutter
+    off: OPShutter
     t += time_of_flight
     pulseon: DO1_0 1

@@ -1,4 +1,4 @@
-def MOTLoading():
+def MOTLoading(loading_time):
     pulseon: DO1_0 10
     pulseon: GMLoadTrg 0.003
     t += 1
@@ -40,13 +40,15 @@ def MOTLoading():
     on: TARepShutter
     off: D1LGMTrg
     off: D1LGMEOMTrg
+    off: OPTrg
     on: xyzMOTShutter
     on: xyMOTShutter
     on: DipolePushShutter 
     off: PrbShutter 
     on: PrbCoolShutter
     off: D1LGMShutter
-    off: MOTFlashTrg
+    off: OPShutter
+%    off: TWZFlashTrg
     on: TweezerTrg
     off: CameraShutter
     on: SrcMOTValve
@@ -69,7 +71,7 @@ def MOTLoading():
     dac: BiasCoilY bias_y %0.4
     dac: BiasCoilZ bias_z %0.0
 
-    t += t_loading %1000
+    t += loading_time %1000
     off: SrcMOTTrg
     off: DipolePushTrg
     off: DipolePushShutter

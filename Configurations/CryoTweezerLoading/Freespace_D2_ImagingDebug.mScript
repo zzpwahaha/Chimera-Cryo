@@ -91,6 +91,10 @@ t = 1
 
 
 
+dac: OPAmp 0.0
+on: OPShutter
+off: OPTrg
+
     %%%%%%%%%%%%%%  PGC  %%%%%%%%%%%%%%%%%%
     on: SciMOTTrg
     ol: ol_cooling d2_cooling_resonance-pgc_olcool
@@ -143,26 +147,26 @@ t += 1
 %off: SciMOTTrg
 %
 %%% image with D1 2-2'in Probe and D2 repump to scan frequency
-t += -4
-off: PrbCoolShutter
-on: PrbShutter
-off: xyzMOTShutter
-off: D1LGMShutter
-on: D1LGMPrbShutter
-
-off: D1LGMEOMTrg
-dac: D1LGMEOMAmp 0.0
-
-on: PrbRepTrg
-
-ol: ol_cooling d2_cooling_prb_resonance
-ol: ol_repump d2_repump_prb_resonance
-ol: ol_D1LGM d1_lgmcooling_resonance-resonance_scan
-ol: ol_D1_repump rb87_hfsplitting
-dac: PrbAmp 5
-dac: PrbRepAmp 10
-dac: D1LGMAmp 4
-t += 4
+%t += -4
+%off: PrbCoolShutter
+%on: PrbShutter
+%off: xyzMOTShutter
+%off: D1LGMShutter
+%on: D1LGMPrbShutter
+%
+%off: D1LGMEOMTrg
+%dac: D1LGMEOMAmp 0.0
+%
+%on: PrbRepTrg
+%
+%ol: ol_cooling d2_cooling_prb_resonance
+%ol: ol_repump d2_repump_prb_resonance
+%ol: ol_D1LGM d1_lgmcooling_resonance-resonance_scan
+%ol: ol_D1_repump rb87_hfsplitting
+%dac: PrbAmp 5
+%dac: PrbRepAmp 10
+%dac: D1LGMAmp 4
+%t += 4
 
 
 %%%% image with D1 2-2' and D1 repump to scan frequency
@@ -210,28 +214,54 @@ t += 4
 %dac: D1LGMAmp 4
 %t += 4
 
-
-%%%%%%%%%%%% D2 imaing %%%%%%%%%%%%%
-%ol: ol_cooling d2_cooling_resonance
-%ol: ol_repump d2_repump_resonance
-%dac: SciMOTAmp 10
-%dac: TARepAmp 10
+%%%%% image with D2 2-3'in probe and D2 repump to scan frequency
+%t += -4
+%on: PrbCoolShutter
+%on: PrbShutter
+%off: xyzMOTShutter
+%off: D1LGMShutter
+%off: D1LGMPrbShutter
 %
+%on: PrbRepTrg
+%
+%ol: ol_cooling d2_cooling_prb_resonance-resonance_scan
+%ol: ol_repump d2_repump_prb_resonance
+%dac: PrbAmp 1
+%dac: PrbRepAmp 0.5
+%t += 4
+
+
+%%%%%%%%%%%% D2 imaing with MOT beam%%%%%%%%%%%%%
+%ol: ol_cooling d2_cooling_resonance
+%ol: ol_repump d2_repump_resonance+resonance_scan
+%dac: SciMOTAmp 1
+%dac: TARepAmp 1
+
+
+%%%%%%%%%%%% D2 imaing with OP beam%%%%%%%%%%%%%
+ol: ol_cooling d2_cooling_resonance
+ol: ol_repump d2_repump_resonance+resonance_scan
+dac: SciMOTAmp 0
+dac: TARepAmp 1
+dac: OPAmp {2 op_pwr}
+
 
 %%%%%%%%%%%%%%%  MAKO Image  %%%%%%%%%%%%%%%%%%
 %dac: SciMOTAmp 10
 %dac: TARepAmp 10
 
-pulseon: Mako2 1
-t += 0.1
-%pulseon: SciMOTTrg 0.8
-pulseon: PrbTrg 0.8
-pulseon: D1LGMTrg 0.8
-t += 1
-
 %pulseon: Mako2 1
 %t += 0.1
 %pulseon: SciMOTTrg 0.8
+%pulseon: OPTrg 0.8
+%pulseon: PrbTrg 0.8
+%pulseon: D1LGMTrg 0.8
+%t += 1
+
+pulseon: Mako1 1
+t += 0.1
+%pulseon: SciMOTTrg 0.8
+pulseon: OPTrg 0.8
 %%pulseon: PrbTrg 0.8
 %%pulseon: D1LGMTrg 0.8
 

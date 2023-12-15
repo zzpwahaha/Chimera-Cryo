@@ -1,4 +1,4 @@
 %%%%%%%%%%%%%%%%% Start With 1ms %%%%%%%%%%%%%%%%% 
 def CryoMOTLoadingPGC():
-    call MOTLoading()
+    call MOTLoading(t_loading)
     call FreeSpacePGC(t_pgc_cool_time)

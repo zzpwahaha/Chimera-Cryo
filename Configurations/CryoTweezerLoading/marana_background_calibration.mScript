@@ -1,0 +1,32 @@
+t = 1
+call MOTLoading(50)
+
+t += 15
+    t += -t_shutter
+    on: PrbShutter
+    on: PrbCoolShutter
+    on: PrbRepTrg
+    off: xyzMOTShutter
+    off: SciMOTTrg
+    ol: ol_cooling d2_cooling_resonance+20-probe_olcool
+    ol: ol_repump d2_repump_resonance-20+probe_olrepump
+    dac: BiasCoilX pgc_img_bias_x
+    dac: BiasCoilY pgc_img_bias_y
+    dac: BiasCoilZ pgc_img_bias_z
+    dac: PrbAmp {probe_cool_amp_cal prb_pwr}
+    dac: PrbrepAmp probe_repump_amp
+    t += t_shutter
+
+    t += -7
+    off: CameraShutter
+    t += 7
+
+    pulseon: pixis_trg t_twz_imaging
+    pulseon: PrbTrg t_twz_imaging
+    pulseon: DO1_0 1
+    t += t_twz_imaging
+    off: CameraShutter 
+    off: PrbShutter 
+
+t += 100
+pulseon: DO1_0 1

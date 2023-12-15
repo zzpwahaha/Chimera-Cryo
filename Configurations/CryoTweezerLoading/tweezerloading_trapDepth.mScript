@@ -22,6 +22,36 @@ t += 100-t_pgc_twz
 call PGCTweezerImaging()
 %on: MOTFlashTrg
 
+%    t += -t_shutter
+%    off: PrbShutter
+%    on: PrbCoolShutter
+%    off: PrbRepTrg
+%    on: xyzMOTShutter
+%    off: xyMOTShutter
+%    off: SciMOTTrg
+%    ol: ol_cooling d2_cooling_resonance-probe_olcool
+%    ol: ol_repump d2_repump_resonance+probe_olrepump
+%    dac: BiasCoilX pgc_img_bias_x
+%    dac: BiasCoilY pgc_img_bias_y
+%    dac: BiasCoilZ pgc_img_bias_z
+%    dac: SciMOTAmp {5.9 mot_pwr}
+%    dac: TARepAmp 3
+%    t += t_shutter
+%
+%    t += -7
+%    on: CameraShutter
+%    t += 7
+%
+%    pulseon: pixis_trg t_twz_imaging
+%    pulseon: SciMOTTrg t_twz_imaging
+%    pulseon: DO1_0 1
+%    t += t_twz_imaging
+%    off: CameraShutter 
+%    off: xyzMOTShutter 
+
+
+
+
 t += 5
     dac: BiasCoilX pgc_twz_bias_x
     dac: BiasCoilY pgc_twz_bias_y 
@@ -42,7 +72,6 @@ t += 100-t_pgc_twz
 % note the previous section should have at least 4 ms dark interval. change the field/laser freq parameter here because the previous section is dark, i.e. 100-t_pgc_twz is larger than 4
 call PGCTweezerImaging()
 %on: MOTFlashTrg
-
 
 %%%%%%%%%%%%%%  END Sequence  %%%%%%%%%%%%%%%%%%
 t += 100

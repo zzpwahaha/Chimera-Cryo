@@ -21,11 +21,11 @@ def IntermittentD2PGCPrbCooling():
     %%%%%%%%%%%%%%%%% Intermittent cooling with Probe %%%%%%%%%%%%%%%%%
     off: SciMOTTrg
     off: PrbTrg
-    on: MOTFlashTrg
+    %on: TWZFlashTrg
     t += -4
     t += -10
     t += t_lifetime-10 % reserve 10ms before the lifetime ends, for general purpose, e.g on/off shutter, change bias field for imaging, etc
-    off: MOTFlashTrg
+    %off: TWZFlashTrg
     off: PrbTrg
 
     off: xyzMOTShutter

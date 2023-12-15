@@ -8,6 +8,7 @@ def kickOutTweezer():
     t += -t_shutter
     off: xyzMOTShutter 
     on: PrbShutter
+    on: PrbCoolShutter
     t += t_shutter
     ol: ol_cooling d2_cooling_prb_resonance-kick_olcool
     ol: ol_repump d2_repump_prb_resonance+kick_olrepump

@@ -9,7 +9,7 @@ def releaseRecapture(t_release):
     off: xyzMOTShutter
     off: PrbShutter
     on: TweezerHold
-    off: MOTFlashTrg
+%    off: TWZFlashTrg
     t += 4 % needed to allow actuation of shutters
     off: TweezerTrg % switch off the intensity
     t += t_release 
