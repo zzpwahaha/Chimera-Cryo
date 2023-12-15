@@ -74,7 +74,11 @@ void SiglentCore::outputOn(int channel)
 		thrower("bad value for channel inside outputOn! Channel shoulde be 1 or 2.");
 	}
 	//channel++;
-	visaFlume.write("C" + str(channel) + ":OUTPut ON");
+	std::string outputOn;
+	visaFlume.query("C" + str(channel) + ":OUTP?", outputOn, "%t");
+	if (outputOn.find("OUTP ON") == std::string::npos) {
+		visaFlume.write("C" + str(channel) + ":OUTPut ON");
+	}
 }
 
 
@@ -89,6 +93,19 @@ void SiglentCore::setSync(const deviceOutputInfo& runSettings, ExpThreadWorker* 
 		thrower("Failed to set Siglent output synced, check connection as well as Siglent command syntax in c++ code");
 		//errBox ("Failed to set agilent output synced?!");
 	}
+}
+
+void SiglentCore::setPolarity(int channel, bool polarityInverted, ExpThreadWorker* expWorker)
+{
+	if (channel != 1 && channel != 2) {
+		thrower("Bad value for channel inside setDC! Channel shoulde be 1 or 2.");
+	}
+	//try {
+	//	visaFlume.write("C" + str(channel) + ":INVT " + (polarityInverted ? "ON" : "OFF"));
+	//}
+	//catch (ChimeraError&) {
+	//	throwNested("Seen while programming output polarity for channel " + str(channel) + " (1-indexed).");
+	//}
 }
 
 void SiglentCore::setDC(int channel, dcInfo info, unsigned var) {
@@ -165,12 +182,13 @@ void SiglentCore::programNonArbBurstMode(int channel, bool burstOption)
 		}
 
 		visaFlume.write(sStr + ":BTWV STATE,ON");
+		//visaFlume.write(sStr + ":BTWV GATE_NCYC,NCYC");
+		//visaFlume.write(sStr + ":BTWV DLAY,0"); // This need to be changed when gating is set to NCYC
 		visaFlume.write(sStr + ":BTWV GATE_NCYC,GATE");
 		visaFlume.write(sStr + ":BTWV TRSR,EXT");
 		visaFlume.write(sStr + ":BTWV EDGE,RISE");
 		visaFlume.write(sStr + ":BTWV PLRT,POS");
 		visaFlume.write(sStr + ":BTWV STPS,0");
-		visaFlume.write(sStr + ":BTWV DLAY,0");
 
 		if (TARB) {
 			//visaFlume.write(sStr + ":SRATE MODE,TARB");

@@ -58,6 +58,7 @@ struct preloadedArbInfo : public generalArbGenOutputInfo {
 
 struct channelInfo{
 	ArbGenChannelMode::which option = ArbGenChannelMode::which::No_Control;
+	bool polarityInvert;
 	dcInfo dc;
 	sineInfo sine;
 	squareInfo square;

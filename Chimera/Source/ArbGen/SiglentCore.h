@@ -41,6 +41,7 @@ public:
 	//void logSettings (DataLogger& log, ExpThreadWorker* threadworker);
 
 	void setSync(const deviceOutputInfo& runSettings, ExpThreadWorker* expWorker) override;
+	void setPolarity(int channel, bool polarityInverted, ExpThreadWorker* expWorker) override;
 	void setDC(int channel, dcInfo info, unsigned variation) override;
 	void setExistingWaveform(int channel, preloadedArbInfo info) override;
 	void setSquare(int channel, squareInfo info, unsigned variation) override;

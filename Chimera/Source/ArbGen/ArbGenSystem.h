@@ -62,6 +62,7 @@ class ArbGenSystem : public IChimeraSystem
 		Script arbGenScript;
 		const arbGenSettings initSettings;
 	private:
+		const ArbGenType arbType;
 		ArbGenCore* pCore;
 		//ArbGenCore& core;
 		minMaxDoublet chan2Range;
@@ -81,6 +82,7 @@ class ArbGenSystem : public IChimeraSystem
 		CQCheckBox* syncedButton;
 		CQCheckBox* calibratedButton;
 		CQCheckBox* burstButton;
+		CQCheckBox* polarityButton;
 		CQComboBox* settingCombo;
 		QLabel* optionsFormat;
 		CQPushButton* programNow;

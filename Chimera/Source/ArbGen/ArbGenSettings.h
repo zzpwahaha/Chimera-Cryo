@@ -34,7 +34,7 @@ const arbGenSettings UWAVE_AGILENT_SETTINGS = {
 	// device name (just a convenience, so that the class instance knows 
 	// which device it is
 	"Cryo Agilent",
-	7 - 1, 1,
+	7 - 1, 0,
 	// Configuration file delimiter, used for saving settings for this 
 	// agilent.
 	"MICROWAVE_AGILENT_AWG",
@@ -61,7 +61,7 @@ const arbGenSettings UWAVE_SIGLENT_SETTINGS = {
 	// device name (just a convenience, so that the class instance knows 
 	// which device it is
 	"Cryo Siglent",
-	7 - 1, 2,
+	7 - 1, 1,
 	// Configuration file delimiter, used for saving settings for this 
 	// agilent.
 	"MICROWAVE_SIGLENT_AWG",
@@ -69,9 +69,10 @@ const arbGenSettings UWAVE_SIGLENT_SETTINGS = {
 	{ },
 	/**********make sure be in DDS mode to change burst and sweep***********/
 	{ "C1:OUTPUT OFF", "C2:OUTPUT OFF","C1:SRATE MODE,DDS","C2:SRATE MODE,DDS",
+	"MODE PHASE-LOCKED",/*Both DDS reset when changing frequency. Phase deviation between Ch1&2 is maintained. This command somehow does not work*/
 	"C1:BTWV STATE,ON", "C1:BTWV TRSR,EXT,GATE_NCYC,NCYC,EDGE,RISE,TIME,1,STPS,0","C1:BTWV STATE,OFF",
 	"C2:BTWV STATE,ON", "C2:BTWV TRSR,EXT,GATE_NCYC,NCYC,EDGE,RISE,TIME,1,STPS,0","C2:BTWV STATE,OFF",
-	/*"C1:SRATE MODE,TARB","C2:SRATE MODE,TARB",*/"C1:OUTPUT LOAD, HZ", "C2:OUTPUT LOAD, HZ" } // In TrueArb mode, can not use burst
+	/*"C1:SRATE MODE,TARB","C2:SRATE MODE,TARB",*/"C1:OUTPUT LOAD,HZ,PLRT,NOR", "C2:OUTPUT LOAD,HZ,PLRT,NOR" } // In TrueArb mode, can not use burst
 };
 
 //const agilentSettings TOP_BOTTOM_AGILENT_SETTINGS = { TOP_BOTTOM_AGILENT_SAFEMODE, TOP_BOTTOM_AGILENT_USB_ADDRESS,

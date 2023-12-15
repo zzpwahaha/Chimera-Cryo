@@ -118,6 +118,7 @@ void ArbGenCore::setArbGen(unsigned var, std::vector<parameterType>& params, dev
 	for (auto chan : range(unsigned(2))) {
 		auto& channel = runSettings.channel[chan];
 		auto stdNote = qstr("Programming ArbGen " + arbGenName + " Channel " + str(chan) + " ");
+		setPolarity(chan + 1, channel.polarityInvert, expWorker);
 		try {
 			switch (channel.option) {
 			case ArbGenChannelMode::which::No_Control:
@@ -334,6 +335,7 @@ deviceOutputInfo ArbGenCore::getSettingsFromConfig(ConfigStream& file) {
 		catch (boost::bad_lexical_cast&) {
 			throwNested("Bad channel " + str(chanInc + 1) + " option!");
 		}
+		file >> channel.polarityInvert;
 		std::string calibratedOption;
 		file.get();
 		readFunc(file, channel.dc.dcLevel.expressionStr);
@@ -394,6 +396,7 @@ void ArbGenCore::logSettings(DataLogger& log, ExpThreadWorker* threadworker) {
 			H5::Group channelGroup(singleArbGen.createGroup("Channel-" + str(channelCount)));
 			std::string outputModeName = ArbGenChannelMode::toStr(channel.option);
 			log.writeDataSet(outputModeName, "Output-Mode", channelGroup);
+			log.writeDataSet(channel.polarityInvert, "Polarity-Inverted", channelGroup);
 			H5::Group dcGroup(channelGroup.createGroup("DC-Settings"));
 			log.writeDataSet(channel.dc.dcLevel.expressionStr, "DC-Level", dcGroup);
 			H5::Group sineGroup(channelGroup.createGroup("Sine-Settings"));

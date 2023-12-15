@@ -50,6 +50,7 @@ public:
 
 
 	virtual void setSync(const deviceOutputInfo& runSettings, ExpThreadWorker* expWorker) = 0;//solely used by setArbGen
+	virtual void setPolarity(int channel, bool polarityInverted, ExpThreadWorker* expWorker) = 0;
 	virtual void setDC(int channel, dcInfo info, unsigned variation) = 0;
 	virtual void setExistingWaveform(int channel, preloadedArbInfo info) = 0;
 	virtual void setSquare(int channel, squareInfo info, unsigned variation) = 0;

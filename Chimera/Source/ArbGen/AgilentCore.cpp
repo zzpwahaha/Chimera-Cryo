@@ -220,6 +220,14 @@ void AgilentCore::setSync(const deviceOutputInfo& runSettings, ExpThreadWorker* 
 	}
 }
 
+void AgilentCore::setPolarity(int channel, bool polarityInverted, ExpThreadWorker* expWorker)
+{
+	if (channel != 1 && channel != 2) {
+		thrower("Bad value for channel inside setDC! Channel shoulde be 1 or 2.");
+	}
+	return; // Agilent does not support changing polarity of output
+}
+
 void AgilentCore::setDC (int channel, dcInfo info, unsigned var){
 	if (channel != 1 && channel != 2){
 		thrower ("Bad value for channel inside setDC! Channel shoulde be 1 or 2.");

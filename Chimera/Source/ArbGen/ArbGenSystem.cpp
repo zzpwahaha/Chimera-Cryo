@@ -19,8 +19,9 @@ ArbGenSystem::ArbGenSystem( const arbGenSettings& settings, ArbGenType type, ICh
 	: IChimeraSystem(parent)
 	, initSettings(settings)
 	, arbGenScript(parent)
+	, arbType(type)
 {
-	switch (type) {
+	switch (arbType) {
 	case ArbGenType::Agilent:
 		pCore = new AgilentCore(settings);
 		break;
@@ -49,6 +50,7 @@ void ArbGenSystem::programArbGenNow(std::vector<parameterType> constants){
 	pCore->convertInputToFinalSettings (0, currentGuiInfo, constants);
 	pCore->convertInputToFinalSettings (1, currentGuiInfo, constants);
 	pCore->setArbGen (0, constants, currentGuiInfo, nullptr);
+	pCore->setRunSettings(currentGuiInfo); // This is meant to let the core save the gui setting
 	if (dynamic_cast<SiglentCore*>(pCore)) {
 		burstButton->setChecked(true);
 	}
@@ -139,6 +141,9 @@ void ArbGenSystem::initialize(std::string headerText, IChimeraQtWindow* win)
 	burstButton = new CQCheckBox ("Burst?", win);
 	burstButton->setChecked (false);
 
+	polarityButton = new CQCheckBox("Polarity Invert?", win);
+	polarityButton->setChecked(false);
+
 	programNow = new CQPushButton ("Program", win);
 	win->connect (programNow, &QPushButton::released, [win, this]() {
 		try	{ 
@@ -154,6 +159,7 @@ void ArbGenSystem::initialize(std::string headerText, IChimeraQtWindow* win)
 	layout2->addWidget(syncedButton, 0);
 	layout2->addWidget(calibratedButton, 0);
 	layout2->addWidget(burstButton, 0);
+	layout2->addWidget(polarityButton, 0);
 	layout2->addWidget(programNow, 0);
 
 	layout->addLayout(layout2, 0);
@@ -231,6 +237,7 @@ void ArbGenSystem::readGuiSettings(int chan ){
 	// convert to zero-indexed
 	auto chani = chan - 1;
 	currentGuiInfo.synced = syncedButton->isChecked( );
+	currentGuiInfo.channel[chani].polarityInvert = polarityButton->isChecked();
 	std::string textStr(arbGenScript.getScriptText() );
 	ConfigStream stream;
 	stream << textStr;
@@ -303,13 +310,17 @@ void ArbGenSystem::updateSettingsDisplay(int chan, std::string configPath, RunIn
 	updateButtonDisplay( chan ); 
 	// convert to zero-indexed.
 	chan -= 1;
+	polarityButton->setChecked(currentGuiInfo.channel[chan].polarityInvert);
+	if (arbType == ArbGenType::Agilent) {
+		polarityButton->setDisabled(true);
+	}
 	switch ( currentGuiInfo.channel[chan].option ){
 		case ArbGenChannelMode::which::No_Control:
 			arbGenScript.reset ( );
 			arbGenScript.setScriptText("");
 			arbGenScript.setEnabled ( false, false );
 			settingCombo->setCurrentIndex( 0 );
-			for (auto& but : { calibratedButton ,burstButton ,syncedButton }) {
+			for (auto& but : { calibratedButton ,burstButton ,syncedButton, polarityButton }) {
 				but->setChecked(false);
 				but->setDisabled(true);
 			}
@@ -319,7 +330,7 @@ void ArbGenSystem::updateSettingsDisplay(int chan, std::string configPath, RunIn
 			arbGenScript.setScriptText("");
 			arbGenScript.setEnabled ( false, false );
 			settingCombo->setCurrentIndex ( 1 );
-			for (auto& but : { calibratedButton ,burstButton ,syncedButton }) {
+			for (auto& but : { calibratedButton ,burstButton ,syncedButton, polarityButton }) {
 				but->setChecked(false);
 				but->setDisabled(true);
 			}
@@ -467,6 +478,7 @@ void ArbGenSystem::handleSavingConfig(ConfigStream& saveFile, std::string config
 		auto& channel = currentGuiInfo.channel[chanInc];
 		saveFile << channelStrings[chanInc];
 		saveFile << "\n/*Channel Mode:*/\t\t\t\t" << ArbGenChannelMode::toStr (channel.option);
+		saveFile << "\n/*Polarity Invert:*/\t\t\t" << channel.polarityInvert;
 		saveFile << "\n/*DC Level:*/\t\t\t\t\t" << channel.dc.dcLevel;
 		saveFile << "\n/*DC Calibrated:*/\t\t\t\t" << channel.dc.useCal;
 		saveFile << "\n/*Sine Amplitude:*/\t\t\t\t" << channel.sine.amplitude;
