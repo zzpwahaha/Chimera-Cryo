@@ -86,7 +86,9 @@
 	const int numArbGen = 2;
 	//const std::string UWAVE_AGILENT_ADDRESS = "TCPIP0::10.10.0.5::inst0::INSTR";
 	const std::string UWAVE_AGILENT_ADDRESS = "USB0::0x0957::0x2807::MY57400998::INSTR";
+	const std::pair<unsigned, unsigned> UWAVE_AGILENT_TRIGGER_LINE = std::make_pair(7 - 1, 0); /*the first is the label on the box minus 1, has minus'd 1 explicitly */
 	const std::string UWAVE_SIGLENT_ADDRESS = "USB0::0xF4EC::0x1102::SDG2XCAC6R0238::INSTR";
+	const std::pair<unsigned, unsigned> UWAVE_SIGLENT_TRIGGER_LINE = std::make_pair(7 - 1, 1); /*the first is the label on the box minus 1, has minus'd 1 explicitly */
 	const std::string RAMP_LOCATION = str(CODE_ROOT) + "\\Ramp_Files\\";
 
 	//Analog in 
@@ -111,6 +113,11 @@
 	const std::vector<std::pair<unsigned, unsigned>> GM_TRIGGER_LINE
 		= { std::make_pair(8 - 1,0),std::make_pair(8 - 1,1) }; //load and move
 	/*the first is the label on the box minus 1, has minus'd 1 explicitly and this is not used in the code, just a reminder*/
+
+	//Microwave Windfreak
+	const bool MICROWAVE_SAFEMODE = false;
+	const std::string MICROWAVE_PORT = "COM9";
+	const std::pair<unsigned, unsigned> MW_TRIGGER_LINE = std::make_pair(4 - 1, 2); /*the first is the label on the box minus 1, has minus'd 1 explicitly */
 
 	//Temperature Monitor
 	const bool TEMPMON_SAFEMODE = false;

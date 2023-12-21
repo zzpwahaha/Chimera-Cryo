@@ -210,6 +210,12 @@ std::string QtAndorWindow::getSystemStatusString (){
 	if (!ANDOR_SAFEMODE){
 		statusStr += "\tCode System is Active!\n";
 		statusStr += "\t" + andor.getSystemInfo ();
+		statusStr += "\t";
+		statusStr += "Attached trigger line is \n\t\t";
+		{
+			statusStr += "(" + str(ANDOR_TRIGGER_LINE.first) + "," + str(ANDOR_TRIGGER_LINE.second) + ") ";
+		}
+		statusStr += "\n";
 	}
 	else{
 		statusStr += "\tCode System is disabled! Enable in \"constants.h\"\n";

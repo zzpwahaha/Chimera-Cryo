@@ -34,7 +34,7 @@ const arbGenSettings UWAVE_AGILENT_SETTINGS = {
 	// device name (just a convenience, so that the class instance knows 
 	// which device it is
 	"Cryo Agilent",
-	7 - 1, 0,
+	UWAVE_AGILENT_TRIGGER_LINE.first, UWAVE_AGILENT_TRIGGER_LINE.second,
 	// Configuration file delimiter, used for saving settings for this 
 	// agilent.
 	"MICROWAVE_AGILENT_AWG",
@@ -61,7 +61,7 @@ const arbGenSettings UWAVE_SIGLENT_SETTINGS = {
 	// device name (just a convenience, so that the class instance knows 
 	// which device it is
 	"Cryo Siglent",
-	7 - 1, 1,
+	UWAVE_SIGLENT_TRIGGER_LINE.first, UWAVE_SIGLENT_TRIGGER_LINE.second,
 	// Configuration file delimiter, used for saving settings for this 
 	// agilent.
 	"MICROWAVE_SIGLENT_AWG",

@@ -130,6 +130,12 @@ std::string QtScriptWindow::getSystemStatusString (){
 	std::string status;
 	for (auto name : ArbGenEnum::allAgs) {
 		status += arbGens[(int)name].initSettings.deviceName + ":\n\t" + arbGens[(int)name].getDeviceIdentity();
+		status += "\t";
+		status += "Attached trigger line is \n\t\t";
+		{
+			status += "(" + str(arbGens[(int)name].initSettings.triggerRow) + "," + str(arbGens[(int)name].initSettings.triggerNumber) + ") ";
+		}
+		status += "\n";
 	}
 	return status;
 }

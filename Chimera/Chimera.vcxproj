@@ -139,12 +139,16 @@
     <ClCompile Include="Source\ExperimentMonitoringAndStatus\StatusOptionsWindow.cpp" />
     <ClCompile Include="Source\ExperimentMonitoringAndStatus\TemperatureMonitor.cpp" />
     <ClCompile Include="Source\ExperimentThread\repeatManager.cpp" />
+    <ClCompile Include="Source\GeneralFlumes\WinSerialFlume.cpp" />
     <ClCompile Include="Source\GigaMOOG\GigaMoogCore.cpp" />
     <ClCompile Include="Source\ExperimentMonitoringAndStatus\ExperimentSeqPlotter.cpp" />
     <ClCompile Include="Source\GeneralFlumes\BoostAsyncSerial.cpp" />
     <ClCompile Include="Source\GigaMOOG\GigaMoogSystem.cpp" />
     <ClCompile Include="Source\GigaMOOG\MessagePrinter.cpp" />
     <ClCompile Include="Source\GigaMOOG\MessageSender.cpp" />
+    <ClCompile Include="Source\Microwave\MicrowaveCore.cpp" />
+    <ClCompile Include="Source\Microwave\MicrowaveSystem.cpp" />
+    <ClCompile Include="Source\Microwave\WindFreakFlume.cpp" />
     <ClCompile Include="Source\MiscellaneousExperimentOptions\InExpCalControl.cpp" />
     <ClCompile Include="Source\RealTimeDataAnalysis\atomGrid.cpp" />
     <ClCompile Include="Source\RealTimeMOTAnalysis\MOTAnalysisSystem.cpp" />
@@ -200,6 +204,7 @@
     <QtMoc Include="Source\ExperimentMonitoringAndStatus\StatusOptionsWindow.h" />
     <ClInclude Include="Source\ExperimentThread\ExpRuntimeData.h" />
     <ClInclude Include="Source\ExperimentThread\repeatManager.h" />
+    <ClInclude Include="Source\GeneralFlumes\WinSerialFlume.h" />
     <ClInclude Include="Source\GeneralObjects\TreeItem.h" />
     <ClInclude Include="Source\GigaMOOG\GigaMoogCore.h" />
     <ClInclude Include="Source\GeneralFlumes\BoostAsyncSerial.h" />
@@ -207,6 +212,10 @@
     <ClInclude Include="Source\GigaMOOG\MessagePrinter.h" />
     <ClInclude Include="Source\GigaMOOG\MessageSender.h" />
     <ClInclude Include="Source\GigaMOOG\Messagetypes.h" />
+    <ClInclude Include="Source\Microwave\MicrowaveCore.h" />
+    <ClInclude Include="Source\Microwave\microwaveSettings.h" />
+    <ClInclude Include="Source\Microwave\MicrowaveSystem.h" />
+    <ClInclude Include="Source\Microwave\WindFreakFlume.h" />
     <ClInclude Include="Source\MiscellaneousExperimentOptions\InExpCalControl.h" />
     <ClInclude Include="Source\Plotting\PlotInfo.h" />
     <ClInclude Include="Source\RealTimeMOTAnalysis\MOTAnalysisSystem.h" />

@@ -12,6 +12,7 @@
 #include "AnalogInput/AiSystem.h"
 #include "DirectDigitalSynthesis/DdsSystem.h"
 #include "OffsetLock/OlSystem.h"
+#include "Microwave/MicrowaveSystem.h"
 
 #include "ParameterSystem/ParameterSystem.h"
 #include "Scripts/Script.h"
@@ -119,6 +120,7 @@ class QtAuxiliaryWindow : public IChimeraQtWindow{
 		AiSystem aiSys;
 		DdsSystem dds;
 		OlSystem olSys;
+		MicrowaveSystem mwSys;
 
 		MasterConfiguration masterConfig{ MASTER_CONFIGURATION_FILE_ADDRESS };
 		MachineOptimizer optimizer;

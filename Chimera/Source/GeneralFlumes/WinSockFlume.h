@@ -6,6 +6,10 @@
 class WinSockFlume
 {
 public:
+	// THIS CLASS IS NOT COPYABLE.
+	WinSockFlume& operator=(const WinSockFlume&) = delete;
+	WinSockFlume(const WinSockFlume&) = delete;
+
 	WinSockFlume(bool safemode_option, std::string hostAddress_, std::string hostPort_);
 	~WinSockFlume();
 

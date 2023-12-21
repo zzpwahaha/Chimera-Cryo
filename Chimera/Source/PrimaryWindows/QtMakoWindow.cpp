@@ -84,6 +84,11 @@ std::string QtMakoWindow::getSystemStatusString()
 		}
 		else {
 			msg += "\tCMOS camera at " + MAKO_IPADDRS[idx] + ": " + cam[idx].getMakoCore().CameraName() + " is running \r\n";
+			msg += "\tAttached trigger line is \n\t\t";
+			{
+				msg += "(" + str(MAKO_TRIGGER_LINE[idx].first) + "," + str(MAKO_TRIGGER_LINE[idx].second) + ") ";
+			}
+			msg += "\n";
 		}
 	}
 	

@@ -9,6 +9,10 @@
 class BoostAsyncSerial
 {
 public:
+	// THIS CLASS IS NOT COPYABLE.
+	BoostAsyncSerial& operator=(const BoostAsyncSerial&) = delete;
+	BoostAsyncSerial(const BoostAsyncSerial&) = delete;
+
 	//this is just a simple constructor with default options
 	BoostAsyncSerial(bool safemode, std::string portID, int baudrate);
 	//constructor with all options available

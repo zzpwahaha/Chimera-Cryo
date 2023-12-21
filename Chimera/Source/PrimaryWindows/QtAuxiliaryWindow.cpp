@@ -21,6 +21,7 @@ QtAuxiliaryWindow::QtAuxiliaryWindow (QWidget* parent)
 	, globalParamCtrl (this, "GLOBAL_PARAMETERS")
 	, dds (this, DDS_SAFEMODE)
 	, olSys(this, ttlBoard)
+	, mwSys(this)
 	, calManager(this)
 {	
 	
@@ -67,6 +68,7 @@ void QtAuxiliaryWindow::initializeWidgets (){
 		layout1->addWidget(&dds, 0);
 		//dds.initialize (this, "DDS SYSTEM");
 		//layout3->addWidget(&dds, 1);
+
 		layout1->addStretch(1);
 
 		QVBoxLayout* layout3 = new QVBoxLayout();
@@ -81,15 +83,17 @@ void QtAuxiliaryWindow::initializeWidgets (){
 
 		
 		optimizer.initialize (this);
-		//layout3->addWidget(&optimizer, 1);
+		//layout3->addWidge2t(&optimizer, 1);
 		
 		QVBoxLayout* layout2 = new QVBoxLayout();
 
 		aiSys.initialize(this);
 		calManager.initialize(this, &aiSys, &aoSys, &ttlBoard,
 			scriptWin->getArbGenCore(), andorWin->getPython());
+		mwSys.initialize(this);
 		layout2->addWidget(&aiSys);
 		layout2->addWidget(&calManager);
+		layout2->addWidget(&mwSys, 0);
 		layout2->addStretch(1);
 
 		layout1->setContentsMargins(0, 0, 0, 0);
@@ -173,6 +177,7 @@ void QtAuxiliaryWindow::windowSaveConfig (ConfigStream& saveFile){
 	aoSys.handleSaveConfig (saveFile);
 	dds.handleSaveConfig (saveFile);
 	olSys.handleSaveConfig(saveFile);
+	mwSys.handleSaveConfig(saveFile);
 	aiSys.handleSaveConfig(saveFile);
 	calManager.handleSaveConfig(saveFile);
 }
@@ -187,6 +192,9 @@ void QtAuxiliaryWindow::windowOpenConfig (ConfigStream& configFile){
 		ConfigSystem::standardOpenConfig (configFile, dds.getDelim (), &dds);
 		Sleep(50);
 		ConfigSystem::standardOpenConfig(configFile, olSys.getDelim(), &olSys);
+		microwaveSettings uwsettings;
+		ConfigSystem::stdGetFromConfig(configFile, mwSys.getCore(), uwsettings);
+		mwSys.setMicrowaveSettings(uwsettings);
 		ConfigSystem::standardOpenConfig(configFile, aiSys.getDelim(), &aiSys);
 		ConfigSystem::standardOpenConfig(configFile, calManager.systemDelim, &calManager);
 	}
@@ -653,13 +661,12 @@ std::string QtAuxiliaryWindow::getOtherSystemStatusMsg (){
 		msg += "\tZynq System is disabled! Enable in \"constants.h\" as well as \"ZynqTcp.h\"\n";
 	}
 
-	msg += "Offset Lock:\n";
+	msg += "Offset Lock:\n\t";
 	if (!OFFSETLOCK_SAFEMODE) {
 		for (auto ol_com_port : OL_COM_PORT) {
-			msg += str("\tOffset Lock System is Active at " + ol_com_port + ", ");
+			msg += str("Offset Lock System is Active at " + ol_com_port + ",\n\t");
 		}
-		msg += "\n";
-		msg += "\tAttached trigger line is \n\t\t";
+		msg += "Attached trigger line is \n\t\t";
 		for (const auto& oltrig : OL_TRIGGER_LINE)
 		{
 			msg += "(" + str(oltrig.first) + "," + str(oltrig.second) + ") ";
@@ -668,6 +675,20 @@ std::string QtAuxiliaryWindow::getOtherSystemStatusMsg (){
 	}
 	else {
 		msg += "\tOffset Lock System is disabled! Enable in \"constants.h\" \n";
+	}
+
+	msg += "Microwave System:\n";
+	if (!MICROWAVE_SAFEMODE) {
+		msg += "\tCode System is Active!\n";
+		msg += "\t" + mwSys.getIdentity() + "\n\t";
+		msg += "Attached trigger line is \n\t\t";
+		{
+			msg += "(" + str(MW_TRIGGER_LINE.first) + "," + str(MW_TRIGGER_LINE.second) + ") ";
+		}
+		msg += "\n";
+	}
+	else {
+		msg += "\tCode System is disabled! Enable in \"constants.h\"\n";
 	}
 
 
@@ -689,6 +710,7 @@ std::string QtAuxiliaryWindow::getVisaDeviceStatus (){
 void QtAuxiliaryWindow::fillExpDeviceList (DeviceList& list){
 	//list.list.push_back (dds.getCore ());
 	//list.list.push_back(olSys.getCore());
+	list.list.push_back(mwSys.getCore());
 	list.list.push_back(aiSys.getCore());
 }
 
