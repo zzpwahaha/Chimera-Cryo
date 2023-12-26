@@ -1105,7 +1105,9 @@ void ExpThreadWorker::checkTriggerNumbers (std::vector<parameterType>& expParams
 			auto& andorCamera = input->devices.getSingleDevice<AndorCameraCore>();
 			if (andorCamera.experimentActive) {
 				// check if there is just enough trigger for andor if it is used in the experiment
-				emit notification("Running consistency checks for Andor Camera", 2);
+				if (variationInc == 0) {
+					emit notification("Running consistency checks for Andor Camera", 2);
+				}
 				unsigned actualTrigs = input->ttls.countTriggers(ANDOR_TRIGGER_LINE, variationInc);
 				unsigned expectedTrigs = andorCamera.getAndorRunSettings().picsPerRepetition;
 				if (actualTrigs != expectedTrigs) {
@@ -1120,7 +1122,7 @@ void ExpThreadWorker::checkTriggerNumbers (std::vector<parameterType>& expParams
 			else {
 				// check if there are triggers for andor but the andor is not set active. If so, warn.
 				unsigned actualTrigs = input->ttls.countTriggers(ANDOR_TRIGGER_LINE, variationInc); 
-				if (actualTrigs != 0) {
+				if (actualTrigs != 0 && variationInc == 0) {
 					emit warn("There are " + qstr(actualTrigs) + " triggers sent to Andor trigger in ttl line ("
 						+ qstr(ANDOR_TRIGGER_LINE.first) + "," + qstr(ANDOR_TRIGGER_LINE.second) + "), but the Andor system is not active." +
 						"Make sure that this is what you actually want.\r\n", 0);
@@ -1130,7 +1132,9 @@ void ExpThreadWorker::checkTriggerNumbers (std::vector<parameterType>& expParams
 			auto makoCameras = input->devices.getDevicesByClass<MakoCameraCore>();
 			for (auto makoCam : makoCameras) {
 				if (makoCam.get().getRunningSettings().expActive) {
-					emit notification("Running consistency checks for Mako Camera: "+qstr(makoCam.get().CameraName()), 2);
+					if (variationInc == 0) {
+						emit notification("Running consistency checks for Mako Camera: " + qstr(makoCam.get().CameraName()), 2);
+					}
 					auto triggerLine = makoCam.get().getTriggerLine();
 					unsigned actualTrigs = input->ttls.countTriggers(triggerLine, variationInc);
 					unsigned expectedTrigs = makoCam.get().getRunningSettings().picsPerRep;
@@ -1143,6 +1147,46 @@ void ExpThreadWorker::checkTriggerNumbers (std::vector<parameterType>& expParams
 							+ str(variationInc) + "\r\n");
 					}
 				}
+				else {
+					auto triggerLine = makoCam.get().getTriggerLine();
+					unsigned actualTrigs = input->ttls.countTriggers(triggerLine, variationInc);
+					if (actualTrigs != 0 && variationInc == 0) {
+						emit warn("There are " + qstr(actualTrigs) + " triggers sent to MAKO trigger in ttl line ("
+							+ qstr(triggerLine.first) + "," + qstr(triggerLine.second) + "), but the MAKO system: " + qstr(makoCam.get().CameraName())
+							+ " is not active." + "Make sure that this is what you actually want.\r\n", 0);
+					}
+				}
+			}
+
+			auto& uwaveCore = input->devices.getSingleDevice<MicrowaveCore>();
+			if (uwaveCore.experimentActive) {
+				if (variationInc == 0) {
+					emit notification("Running consistency checks for Microwave system: " + qstr(uwaveCore.queryIdentity()), 2);
+				}
+				auto actualTrigs = input->ttls.countTriggers(uwaveCore.getUWaveTriggerLine(), variationInc);
+				auto expectedTrigs = uwaveCore.getNumTriggers(uwaveCore.experimentSettings);
+				if (actualTrigs != expectedTrigs) {
+					// this is a serious low-level/user error. throw, don't warn.
+					std::string infoString = "Actual/Expected Microwave Triggers: " + str(actualTrigs) + "/"
+						+ str(expectedTrigs) + ".";
+					thrower("The number of Microwave triggers that the ttl system sends to the Microwave does not "
+						"match the list size in microwave control! " + infoString + ", seen in variation #"
+						+ str(variationInc) + "\r\n");
+				}
+			}
+			else {
+				auto triggerLine = uwaveCore.getUWaveTriggerLine();
+				auto actualTrigs = input->ttls.countTriggers(triggerLine, variationInc);
+				if (actualTrigs != 0 && variationInc == 0) {
+					emit warn("There are " + qstr(actualTrigs) + " triggers sent to Microwave trigger in ttl line ("
+						+ qstr(triggerLine.first) + "," + qstr(triggerLine.second) + "), but the Microwave system: " + qstr(uwaveCore.queryIdentity())
+						+ " is not active." + "Make sure that this is what you actually want.\r\n", 0);
+				}
+			}
+			
+			/// check Agilents
+			for (auto& arbGen : input->devices.getDevicesByClass<ArbGenCore>()) {
+				arbGen.get().checkTriggers(variationInc, input->ttls, this);
 			}
 
 		}

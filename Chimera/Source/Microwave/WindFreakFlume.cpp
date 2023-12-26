@@ -133,7 +133,7 @@ void WindFreakFlume::programSingleSetting (microwaveListEntry setting, unsigned 
 	write ("E1");
 	write ("Ld");	// delete prev list
 	write ("w0");
-	write("f" + str(setting.frequency.getValue(varNumber) * 1e3, 7, false, false, true));
+	write("f" + str(setting.frequency.getValue(varNumber), 7, false, false, true));
 	write("W" + str(setting.power.getValue(varNumber), 3, false, false, true));
 }
 
@@ -147,7 +147,7 @@ void WindFreakFlume::programList (std::vector<microwaveListEntry> list, unsigned
 	write ("Ld");
 	for (auto entry : list)	{
 		auto ln = "L" + str (count);
-		write(ln + "f" + str(entry.frequency.getValue(varNum) * 1e3, 7, false, false, true));
+		write(ln + "f" + str(entry.frequency.getValue(varNum), 7, false, false, true));
 		write(ln + "a" + str(entry.power.getValue(varNum), 3, false, false, true));
 		count++;
 	}

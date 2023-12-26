@@ -111,7 +111,7 @@ void MicrowaveSystem::initialize( IChimeraQtWindow* parent ){
 	uwListListview = new QTableWidget (parent);
 	uwListListview->setColumnCount (3);
 	QStringList labels;
-	labels << "#" << "Frequency (GHz)" << "Power (dBm)";
+	labels << "#" << "Frequency (MHz)" << "Power (dBm)";
 	uwListListview->setHorizontalHeaderLabels (labels);
 	uwListListview->horizontalHeader ()->setFixedHeight (20);
 	uwListListview->verticalHeader ()->setFixedWidth (25);

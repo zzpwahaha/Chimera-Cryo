@@ -4,6 +4,8 @@
 #include <DataLogging/DataLogger.h>
 #include <ExperimentThread/ExpThreadWorker.h>
 #include "MicrowaveCore.h"
+#include <qdebug>
+#include <qelapsedtimer.h>
 
 MicrowaveCore::MicrowaveCore() : uwFlume(MICROWAVE_PORT, MICROWAVE_SAFEMODE)
 {
@@ -36,6 +38,8 @@ void MicrowaveCore::programVariation (unsigned variationNumber, std::vector<para
 		return;
 	}
 	//setPmSettings ();
+	QElapsedTimer etimer;
+	etimer.start();
 	try	{
 		if (experimentSettings.list.size () == 1)	{
 			uwFlume.programSingleSetting (experimentSettings.list[0], variationNumber);
@@ -68,6 +72,7 @@ void MicrowaveCore::programVariation (unsigned variationNumber, std::vector<para
 			throwNested ("Failed to program Windfreak!");
 		}
 	}
+	qDebug() << ">> Programmed Microwave System in " << etimer.elapsed() << " ms";
 	if (threadworker != nullptr) {
 		notify({ "Windfreak list setting programmed: " + qstr(getCurrentList()), 2 }, threadworker);
 	}
