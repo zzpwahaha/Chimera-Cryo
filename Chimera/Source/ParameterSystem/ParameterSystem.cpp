@@ -150,7 +150,7 @@ void ParameterSystem::initialize (IChimeraQtWindow* parent, std::string title, P
 	//parametersView->verticalHeader ()->setFixedWidth (40);
 	//parametersView->verticalHeader ()->setDefaultSectionSize (22);
 	parametersView->horizontalHeader ()->setStretchLastSection (true); 
-	parametersView->horizontalHeader ()->setSectionResizeMode (QHeaderView::ResizeToContents);
+	//parametersView->horizontalHeader ()->setSectionResizeMode (QHeaderView::ResizeToContents);
 	parametersView->horizontalHeader ()->setSectionResizeMode (QHeaderView::Interactive);	
 
 	/// More work to allow the column to be dragable, the more important thing is that it is annoying to change the data order in model. -ZZP 06/26/2021

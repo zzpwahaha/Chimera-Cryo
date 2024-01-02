@@ -150,6 +150,7 @@ void SyntaxHighlighter::setLocalParams (std::vector<parameterType> localParams) 
 	for (auto param : localParams) {
 		names.push_back (param.name.c_str());
 	}
+	localParamRules.clear();
 	addRules (names, QColor (0, 255, 0), true, true, localParamRules);
 }
 
@@ -158,7 +159,8 @@ void SyntaxHighlighter::setGlobalParams(std::vector<parameterType> globalParams)
 	for (auto param : globalParams) {
 		names.push_back(param.name.c_str());
 	}
-	addRules(names, QColor(58, 46, 230), true, true, otherParamRules);
+	globalParamRules.clear();
+	addRules(names, QColor(58, 46, 230), true, true, globalParamRules);
 }
 
 void SyntaxHighlighter::setOtherParams (std::vector<parameterType> otherParams) {
@@ -166,6 +168,7 @@ void SyntaxHighlighter::setOtherParams (std::vector<parameterType> otherParams) 
 	for (auto param : otherParams) {
 		names.push_back (param.name.c_str ());
 	}
+	otherParamRules.clear();
 	addRules (names, QColor (97, 224, 47), true, true, otherParamRules);
 }
 
