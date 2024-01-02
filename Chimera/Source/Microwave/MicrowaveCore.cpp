@@ -9,6 +9,9 @@
 
 MicrowaveCore::MicrowaveCore() : uwFlume(MICROWAVE_PORT, MICROWAVE_SAFEMODE)
 {
+	if (MICROWAVE_SAFEMODE) {
+		return;
+	}
 	std::string cmd;
 	try {
 		for (auto cmd : mwSetupCommands) {
