@@ -16,7 +16,6 @@
 #include <qlayout.h>
 
 
-
 ConfigSystem::ConfigSystem(std::string fileSystemPath, IChimeraQtWindow* parent) 
 	: IChimeraSystem(parent)
 	, configurationSavedIndicator(nullptr)
@@ -130,21 +129,30 @@ void ConfigSystem::initializeAtDelim ( ConfigStream& configStream, std::string d
 
 
 void ConfigSystem::jumpToDelimiter ( ConfigStream& configStream, std::string delimiter ){
-	while ( !configStream.eof() ){
-		try{
-			checkDelimiterLine (configStream, delimiter );
-			// if reaches this point it was successful. The file should now be pointing to just beyond the delimiter.
-			return;
-		}
-		catch ( ChimeraError& ){
-			if (configStream.peek () == EOF) {
-				break;
-			}
-			// didn't find delimiter, try next input.
-		}
+	auto startPos = configStream.str().find(delimiter);
+	if (std::string::npos == startPos) {
+		// reached end of file.
+		thrower("Failed to jump to a delimiter! Delimiter was: " + delimiter + ".");
 	}
-	// reached end of file.
-	thrower ( "Failed to jump to a delimiter! Delimiter was: " + delimiter + "." );
+	else {
+		configStream.seekg(startPos); // this should move get pointer to the start of delimiter
+		configStream.getline(); // move to next line
+	}
+	//while ( !configStream.eof() ){
+	//	try{
+	//		checkDelimiterLine (configStream, delimiter );
+	//		// if reaches this point it was successful. The file should now be pointing to just beyond the delimiter.
+	//		return;
+	//	}
+	//	catch ( ChimeraError& ){
+	//		if (configStream.peek () == EOF) {
+	//			break;
+	//		}
+	//		// didn't find delimiter, try next input.
+	//	}
+	//}
+	//// reached end of file.
+	//thrower ( "Failed to jump to a delimiter! Delimiter was: " + delimiter + "." );
 }
 
 // small convenience function that I use while opening a file.

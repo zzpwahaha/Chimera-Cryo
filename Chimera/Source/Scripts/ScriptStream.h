@@ -18,6 +18,9 @@ class ScriptStream : public std::stringstream
 		/* 
 		 The main purpose of this class is really to simplify my repeated use of >> 
 		 using the following overload.
+		 Note in standard C++ basic_istream >>, it will ignore C++ standard white space character, see isspace. And after 
+		 >>, the get pointer will be moved to the first white space after. But then the subsequent >> will ignore those white space so it is fine.
+		 But if were to use getline, need to call get() first to clear this white space char properly.
 		 */
 		ScriptStream & operator>>( std::string& outputString );
 		ScriptStream& operator>>(Expression& Expression);

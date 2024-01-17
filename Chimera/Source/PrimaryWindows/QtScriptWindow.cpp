@@ -280,7 +280,6 @@ void QtScriptWindow::windowOpenConfig (ConfigStream& configFile){
 		return;
 	}
 	try{
-		configFile.get ();
 		auto getlineFunc = ConfigSystem::getGetlineFunc (configFile.ver);
 		std::string masterName/*, gmoogName*/;
 		// order should match the windowsaveconfig
