@@ -64,6 +64,7 @@ void ParameterSystem::handleContextMenu (const QPoint& pos){
 		auto scanDim = paramModel.getParams ()[index.row ()].scanDimension;
 		auto currVarRangeNum = paramModel.getParams()[index.row()].ranges.size();
 		paramModel.setVariationRangeNumber (rangeInfo.numRanges (scanDim) + 1, currVarRangeNum, scanDim);
+		setTableviewColumnSize();
 		});
 	auto* rmRange = new QAction ("Remove Range", &menu);
 	parametersView->connect (rmRange, &QAction::triggered, [this, index]() {
@@ -71,6 +72,7 @@ void ParameterSystem::handleContextMenu (const QPoint& pos){
 		auto scanDim = paramModel.getParams ()[index.row ()].scanDimension;
 		auto currVarRangeNum = paramModel.getParams()[index.row()].ranges.size();
 		paramModel.setVariationRangeNumber (rangeInfo.numRanges (scanDim) - 1, currVarRangeNum, scanDim);
+		setTableviewColumnSize();
 		});
 	// change the selection type from item to rows, so that the drag and drop can work properly, 
 	// having it checked shouldn't affect anything other than that the whole row will be selceted when click on one item
