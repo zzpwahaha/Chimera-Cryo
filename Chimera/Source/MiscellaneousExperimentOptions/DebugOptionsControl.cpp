@@ -18,7 +18,7 @@ void DebugOptionsControl::initialize( IChimeraQtWindow* parent )
 	layout1->setContentsMargins(0, 0, 0, 0);
 	pauseText = new QLabel ("Pause Btwn Variations (ms):", parent);
 	pauseEdit = new QLineEdit ("0", parent);
-	parent->connect(pauseEdit, &QLineEdit::textChanged, configUpdate);
+	parent->connect(pauseEdit, &QLineEdit::textEdited, configUpdate);
 	layout1->addWidget(pauseText, 0);
 	layout1->addWidget(pauseEdit, 1);
 

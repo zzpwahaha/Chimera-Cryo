@@ -8,8 +8,6 @@
 #include <PrimaryWindows/QtMainWindow.h>
 #include <ExcessDialogs/saveWithExplorer.h>
 #include <ExcessDialogs/openWithExplorer.h>
-
-
 #include <qlayout.h>
 
 QtAuxiliaryWindow::QtAuxiliaryWindow (QWidget* parent) 

@@ -23,7 +23,7 @@ void InExpCalControl::initialize(IChimeraQtWindow* parent)
 	layout = new QHBoxLayout();
 	layout->setContentsMargins(0, 0, 0, 0);
 	inExpCalibrationButton = new QCheckBox("In-Exp Calibration?", parent);
-	parent->connect(inExpCalibrationButton, &QCheckBox::stateChanged, parent, configUpdate);
+	parent->connect(inExpCalibrationButton, &QCheckBox::clicked, parent, configUpdate);
 	parent->connect(inExpCalibrationButton, &QCheckBox::stateChanged, parent, [this, changeBkgColor]() {
 		changeBkgColor(inExpCalibrationButton);
 		if (inExpCalibrationButton->isChecked()) {

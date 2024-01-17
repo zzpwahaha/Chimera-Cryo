@@ -97,7 +97,7 @@ void MicrowaveSystem::initialize( IChimeraQtWindow* parent ){
 	triggerStepTimeEdit = new QLineEdit (parent);
 	triggerStepTimeEdit->setMaximumWidth(50);
 	triggerStepTimeEdit->setText("0.5");
-	triggerStepTimeEdit->connect (triggerStepTimeEdit, &QLineEdit::textChanged, [this, parent]() {
+	triggerStepTimeEdit->connect (triggerStepTimeEdit, &QLineEdit::textEdited, [this, parent]() {
 		try {
 			auto time = boost::lexical_cast<double>(str(triggerStepTimeEdit->text ()));
 			core.setTrigTime (time);

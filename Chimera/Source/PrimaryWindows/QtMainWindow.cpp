@@ -233,7 +233,6 @@ void QtMainWindow::windowOpenConfig (ConfigStream& configStream){
 		ConfigSystem::standardOpenConfig (configStream, "DEBUGGING_OPTIONS", &debugger);
 		repetitionControl.setRepetitions (ConfigSystem::stdConfigGetter (configStream, "REPETITIONS",
 			Repetitions::getSettingsFromConfig));
-
 	}
 	catch (ChimeraError&){
 		throwNested ("Main Window failed to read parameters from the configuration file.");

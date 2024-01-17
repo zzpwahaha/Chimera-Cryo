@@ -5,13 +5,13 @@
 ///
 CQLineEdit::CQLineEdit (IChimeraQtWindow* parent) : QLineEdit (parent){
 	if (parent != Q_NULLPTR){
-		parent->connect (this, &QLineEdit::textChanged, parent, &IChimeraQtWindow::configUpdated);
+		parent->connect (this, &QLineEdit::textEdited, parent, &IChimeraQtWindow::configUpdated);
 	}
 }
 
 CQLineEdit::CQLineEdit (const QString& txt, IChimeraQtWindow* parent) : QLineEdit(txt, parent){
 	if (parent != Q_NULLPTR){
-		parent->connect (this, &QLineEdit::textChanged, parent, &IChimeraQtWindow::configUpdated);
+		parent->connect (this, &QLineEdit::textEdited, parent, &IChimeraQtWindow::configUpdated);
 	}
 }
 
@@ -30,13 +30,13 @@ CQTextEdit::CQTextEdit (const QString& txt, IChimeraQtWindow* parent) : QTextEdi
 ///
 CQCheckBox::CQCheckBox (IChimeraQtWindow* parent) : QCheckBox (parent){
 	if (parent != Q_NULLPTR){
-		parent->connect (this, &QCheckBox::stateChanged, parent, &IChimeraQtWindow::configUpdated);
+		parent->connect (this, &QCheckBox::clicked, parent, &IChimeraQtWindow::configUpdated);
 	}
 }
 
 CQCheckBox::CQCheckBox (const QString& txt, IChimeraQtWindow* parent) : QCheckBox (txt, parent){
 	if (parent != Q_NULLPTR){
-		parent->connect (this, &QCheckBox::stateChanged, parent, &IChimeraQtWindow::configUpdated);
+		parent->connect (this, &QCheckBox::clicked, parent, &IChimeraQtWindow::configUpdated);
 	}
 }
 
@@ -57,7 +57,7 @@ CQPushButton::CQPushButton (const QString& txt, IChimeraQtWindow* parent) : QPus
 ///
 CQComboBox::CQComboBox (IChimeraQtWindow* parent) : QComboBox(parent){
 	if (parent != Q_NULLPTR){
-		parent->connect (this, qOverload<int> (&QComboBox::currentIndexChanged), parent, &IChimeraQtWindow::configUpdated);
+		parent->connect (this, qOverload<int> (&QComboBox::activated), parent, &IChimeraQtWindow::configUpdated);
 	}
 }
 

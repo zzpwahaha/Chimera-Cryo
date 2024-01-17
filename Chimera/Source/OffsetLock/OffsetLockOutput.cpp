@@ -20,7 +20,7 @@ void OffsetLockOutput::initialize(IChimeraQtWindow* parent, int whichOL)
 	editFreq = new CQLineEdit(QString("%1").arg(whichOL % size_t(OLGrid::numPERunit)), parent);
 	editFreq->setToolTip(cstr(info.name + ": Freq[" + str(info.minFreq, numFreqDigits, true) + "," + str(info.maxFreq, numFreqDigits, true) + "]" + "\r\n" + info.note));
 	editFreq->installEventFilter(parent);
-	parent->connect(editFreq, &QLineEdit::textChanged,
+	parent->connect(editFreq, &QLineEdit::textEdited,
 		[this, parent]() {
 			handleEdit();
 		});

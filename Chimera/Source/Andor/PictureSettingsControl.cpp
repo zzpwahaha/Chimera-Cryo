@@ -59,7 +59,7 @@ void PictureSettingsControl::initialize( IChimeraQtWindow* parent ){
 	picsPerRepEdit->setValue(1);
 	picsPerRepEdit->setEnabled(false);
 	picsPerRepEdit->setRange(0, 99999);
-	parent->connect(continuousModeChk, &QCheckBox::stateChanged, handleChange);
+	parent->connect(continuousModeChk, &QCheckBox::clicked, handleChange);
 	parent->connect(picsPerRepEdit, qOverload<int>(&QSpinBox::valueChanged), handleChange);
 	layout1->addWidget(continuousModeChk, 0);
 	layout1->addWidget(picsPerRepLabel, 0);
@@ -88,7 +88,7 @@ void PictureSettingsControl::initialize( IChimeraQtWindow* parent ){
 	layout2->addWidget(exposureLabel, 2, 0);
 	for ( auto picInc : range(4) ) {
 		exposureEdits[picInc] = new CQLineEdit (parent);
-		parent->connect (exposureEdits[picInc], &QLineEdit::textChanged, handleChange);
+		parent->connect (exposureEdits[picInc], &QLineEdit::textEdited, handleChange);
 		layout2->addWidget(exposureEdits[picInc], 2, picInc + 1);
 	}
 	setUnofficialExposures(std::vector<float>(4, 10 / 1000.0f));
@@ -98,7 +98,7 @@ void PictureSettingsControl::initialize( IChimeraQtWindow* parent ){
 	layout2->addWidget(thresholdLabel, 3, 0);
 	for ( auto picInc : range(4) ) {
 		thresholdEdits[picInc] = new CQLineEdit ("100", parent);
-		parent->connect (thresholdEdits[picInc], &QLineEdit::textChanged, handleChange);
+		parent->connect (thresholdEdits[picInc], &QLineEdit::textEdited, handleChange);
 		currentPicSettings.thresholds[ picInc ] = { 100 };
 		layout2->addWidget(thresholdEdits[picInc], 3, picInc + 1);
 	}
@@ -131,9 +131,9 @@ void PictureSettingsControl::initialize( IChimeraQtWindow* parent ){
 	for ( auto picInc : range ( 4 ) ) {
 		softwareAccumulateAll[picInc] = new CQCheckBox("All?", parent);
 		softwareAccumulateAll[ picInc ]->setChecked( 0 );
-		parent->connect (softwareAccumulateAll[picInc], &QCheckBox::stateChanged, handleChange);
+		parent->connect (softwareAccumulateAll[picInc], &QCheckBox::clicked, handleChange);
 		softwareAccumulateNum[picInc] = new CQLineEdit ("1", parent);
-		parent->connect (softwareAccumulateNum[picInc], &QLineEdit::textChanged, handleChange);
+		parent->connect (softwareAccumulateNum[picInc], &QLineEdit::textEdited, handleChange);
 		QHBoxLayout* tmp = new QHBoxLayout(this);
 		tmp->addWidget(softwareAccumulateAll[picInc], 0);
 		tmp->addWidget(softwareAccumulateNum[picInc], 1);

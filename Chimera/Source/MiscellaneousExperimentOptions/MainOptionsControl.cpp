@@ -21,12 +21,12 @@ void MainOptionsControl::initialize( IChimeraQtWindow* parent )
 		: chkBox->setStyleSheet("QCheckBox { background-color: (240,240,240) }"); };
 
 	randomizeVariationsButton = new QCheckBox ("Randomize Variations?", parent);
-	parent->connect (randomizeVariationsButton, &QCheckBox::stateChanged, configUpdate);
+	parent->connect (randomizeVariationsButton, &QCheckBox::clicked, configUpdate);
 	connect(randomizeVariationsButton, &QCheckBox::stateChanged, [this, changeBkgColor]() {
 		changeBkgColor(randomizeVariationsButton); });
 
 	repetitionFirstButton = new QCheckBox("Repetition First?", parent);
-	parent->connect(repetitionFirstButton, &QCheckBox::stateChanged, configUpdate);
+	parent->connect(repetitionFirstButton, &QCheckBox::clicked, configUpdate);
 	connect(repetitionFirstButton, &QCheckBox::stateChanged, [this, changeBkgColor]() {
 		changeBkgColor(repetitionFirstButton); });
 
@@ -48,7 +48,7 @@ void MainOptionsControl::initialize( IChimeraQtWindow* parent )
 	layout1->setContentsMargins(0, 0, 0, 0);
 	atomThresholdForSkipText = new QLabel ("Atom Threshold for Load Skip:", parent);
 	atomThresholdForSkipEdit = new QLineEdit ("-1", parent);
-	parent->connect (atomThresholdForSkipEdit, &QLineEdit::textChanged, configUpdate);
+	parent->connect (atomThresholdForSkipEdit, &QLineEdit::textEdited, configUpdate);
 
 	layout1->addWidget(atomThresholdForSkipText, 0);
 	layout1->addWidget(atomThresholdForSkipEdit, 1);

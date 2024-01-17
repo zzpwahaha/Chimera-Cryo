@@ -22,7 +22,7 @@ void DdsOutput::initialize(IChimeraQtWindow* parent, int whichDDS)
 	editFreq = new CQLineEdit(QString("%1").arg(whichDDS % size_t(DDSGrid::numPERunit)), parent);
 	editFreq->setToolTip(cstr(info.name + ": Freq[" + str(info.minFreq, numFreqDigits, true) + "," + str(info.maxFreq, numFreqDigits, true) + "]" + "\r\n" + info.note));
 	editFreq->installEventFilter(parent);
-	parent->connect(editFreq, &QLineEdit::textChanged,
+	parent->connect(editFreq, &QLineEdit::textEdited,
 		[this, parent]() {
 			handleEdit();
 		});
@@ -37,7 +37,7 @@ void DdsOutput::initialize(IChimeraQtWindow* parent, int whichDDS)
 	editAmp = new CQLineEdit("", parent);
 	editAmp->setToolTip(cstr(info.name + ": Amp[" + str(info.minAmp, numAmplDigits, true) + "," + str(info.maxAmp, numAmplDigits, true) + "]" + "\r\n" + info.note));
 	editAmp->installEventFilter(parent);
-	parent->connect(editAmp, &QLineEdit::textChanged,
+	parent->connect(editAmp, &QLineEdit::textEdited,
 		[this, parent]() {
 			handleEdit();
 		});

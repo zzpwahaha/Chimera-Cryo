@@ -57,7 +57,7 @@ void AndorCameraSettingsControl::initialize ( IChimeraQtWindow* parent, std::vec
 	for (auto mode : AndorRunModes::allModes) {
 		cameraModeCombo->addItem(qstr(AndorRunModes::toStr(mode)));
 	}
-	parent->connect (cameraModeCombo, qOverload<int> (&QComboBox::currentIndexChanged), 
+	parent->connect (cameraModeCombo, qOverload<int> (&QComboBox::activated),
 		[this, parent]() {
 			if (!viewRunningSettings->isChecked ()) {
 				updateCameraMode ();
@@ -71,7 +71,7 @@ void AndorCameraSettingsControl::initialize ( IChimeraQtWindow* parent, std::vec
 	for (auto mode : AndorTriggerMode::allModes) {
 		triggerCombo->addItem(qstr(AndorTriggerMode::toStr(mode)));
 	}
-	parent->connect (triggerCombo, qOverload<int> (&QComboBox::currentIndexChanged),
+	parent->connect (triggerCombo, qOverload<int> (&QComboBox::activated),
 		[this, parent]() {
 			if (!viewRunningSettings->isChecked ()) {
 				updateTriggerMode ();
@@ -103,7 +103,7 @@ void AndorCameraSettingsControl::initialize ( IChimeraQtWindow* parent, std::vec
 	for (auto mode : AndorGainMode::allModes) {
 		gainCombo->addItem(qstr(AndorGainMode::toStr(mode)));
 	}
-	parent->connect(gainCombo, qOverload<int>(&QComboBox::currentIndexChanged),
+	parent->connect(gainCombo, qOverload<int>(&QComboBox::activated),
 		[this, parent]() {
 			if (!viewRunningSettings->isChecked()) {
 				updateGainMode();
@@ -156,7 +156,7 @@ void AndorCameraSettingsControl::initialize ( IChimeraQtWindow* parent, std::vec
 	layout3->setContentsMargins(0, 0, 0, 0);
 
 	frameRateLabel = new QLabel("Frame Rate: ", parent);
-	frameRateEdit = new CQLineEdit(parent);
+	frameRateEdit = new CQLineEdit("1", parent);
 	maxframeRateLabel = new QLabel("Max: -1", parent);
 	connect(frameRateEdit, &CQLineEdit::returnPressed, [this, parent]() {
 		auto& andorCore = parent->andorWin->getCamera();
@@ -284,9 +284,9 @@ void AndorCameraSettingsControl::initialize ( IChimeraQtWindow* parent, std::vec
 	layout->addWidget(&calControl);
 	updateWindowEnabledStatus ();
 
-	emit cameraModeCombo->currentIndexChanged(0);
-	emit triggerCombo->currentIndexChanged(0);
-	emit gainCombo->currentIndexChanged(0);
+	emit cameraModeCombo->activated(0);
+	emit triggerCombo->activated(0);
+	emit gainCombo->activated(0);
 }
 
 

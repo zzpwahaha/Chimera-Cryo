@@ -33,7 +33,7 @@ void Repetitions::initialize(IChimeraQtWindow* parent )
 	// title
 	repetitionText = new QLabel ("Repetition #", parent);
 	repetitionEdit = new CQLineEdit (cstr (repetitionNumber), parent);
-	parent->connect (repetitionEdit, &QLineEdit::textChanged, [parent]() {parent->configUpdated (); });
+	parent->connect (repetitionEdit, &QLineEdit::textEdited, [parent]() {parent->configUpdated (); });
 	repetitionDisp = new QLabel ("-", parent);
 
 	layout->addWidget(repetitionText, 0);

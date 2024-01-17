@@ -24,7 +24,7 @@ void AnalogOutput::initialize ( IChimeraQtWindow* parent, int whichDac)
 	edit = new CQLineEdit ("0", parent);
 	edit->setToolTip(cstr(info.name + ": [" + str(info.minVal, numDigits, true) + "," + str(info.maxVal, numDigits, true) + "]" + "\r\n" + info.note));
 	edit->installEventFilter (parent);
-	parent->connect (edit, &QLineEdit::textChanged, 		
+	parent->connect (edit, &QLineEdit::textEdited,
 		[this, parent]() {
 			handleEdit ();
 		});

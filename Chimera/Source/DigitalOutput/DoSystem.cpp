@@ -163,7 +163,7 @@ void DoSystem::initialize(IChimeraQtWindow* parent) {
 			names[row * size_t(DOGrid::numPERunit) + number] = "do" + str(row + 1) + "_" + str(number); /*default name, always accepted by script*/
 			out.setName(names[row * size_t(DOGrid::numPERunit) + number]);
 			
-			parent->connect(out.check, &QCheckBox::stateChanged, [this, &out, parent]() {
+			parent->connect(out.check, &QCheckBox::clicked, [this, &out, parent]() {
 				try {
 					handleTTLPress(out);
 					emit notification("Handled DO " + qstr(out.getPosition().first + 1) + ","
