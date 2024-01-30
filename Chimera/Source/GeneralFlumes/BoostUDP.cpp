@@ -110,19 +110,16 @@ void BoostUDP::writeVector(std::vector<std::vector<unsigned char>> data)
 	if (!socket_->is_open()) {
 		thrower("UDP socket has not been opened");
 	}
+	size_t totalSize = std::accumulate(data.cbegin(), data.cend(), 0ULL, 
+		[](const size_t acc, const std::vector<unsigned char> d) {
+		return acc + d.size(); });
 
 	std::vector<unsigned char> packet;
-	packet.reserve(280); //this stays allocated even upon clear().
-	for (int i = 0; i < data.size(); i++) {
-		for (auto& byte : data[i]) {
-			packet.push_back(byte);
-		}
-		if (packet.size() > 256 || i >= data.size()-1) //can end up being as large as 20 bytes > than this limit.
-		{
-			socket_->send_to(boost::asio::buffer(packet), remote_endpoint, 0, err);
-			packet.clear();
-		}
+	packet.reserve(totalSize);
+	for (const auto& d : data) {
+		packet.insert(packet.end(), d.begin(), d.end());
 	}
+	write(packet);
 }
 
 void BoostUDP::writeVector(std::vector<std::vector<int>> data)
