@@ -139,6 +139,7 @@
     <ClCompile Include="Source\ExperimentMonitoringAndStatus\StatusOptionsWindow.cpp" />
     <ClCompile Include="Source\ExperimentMonitoringAndStatus\TemperatureMonitor.cpp" />
     <ClCompile Include="Source\ExperimentThread\repeatManager.cpp" />
+    <ClCompile Include="Source\GeneralFlumes\BoostUDP.cpp" />
     <ClCompile Include="Source\GeneralFlumes\WinSerialFlume.cpp" />
     <ClCompile Include="Source\GigaMOOG\GigaMoogCore.cpp" />
     <ClCompile Include="Source\ExperimentMonitoringAndStatus\ExperimentSeqPlotter.cpp" />
@@ -150,6 +151,7 @@
     <ClCompile Include="Source\Microwave\MicrowaveSystem.cpp" />
     <ClCompile Include="Source\Microwave\WindFreakFlume.cpp" />
     <ClCompile Include="Source\MiscellaneousExperimentOptions\InExpCalControl.cpp" />
+    <ClCompile Include="Source\Python\cnpy.cpp" />
     <ClCompile Include="Source\RealTimeDataAnalysis\atomGrid.cpp" />
     <ClCompile Include="Source\RealTimeMOTAnalysis\MOTAnalysisSystem.cpp" />
     <ClCompile Include="Source\PrimaryWindows\QtAnalysisWindow.cpp" />
@@ -204,6 +206,7 @@
     <QtMoc Include="Source\ExperimentMonitoringAndStatus\StatusOptionsWindow.h" />
     <ClInclude Include="Source\ExperimentThread\ExpRuntimeData.h" />
     <ClInclude Include="Source\ExperimentThread\repeatManager.h" />
+    <ClInclude Include="Source\GeneralFlumes\BoostUDP.h" />
     <ClInclude Include="Source\GeneralFlumes\WinSerialFlume.h" />
     <ClInclude Include="Source\GeneralObjects\TreeItem.h" />
     <ClInclude Include="Source\GigaMOOG\GigaMoogCore.h" />
@@ -218,6 +221,7 @@
     <ClInclude Include="Source\Microwave\WindFreakFlume.h" />
     <ClInclude Include="Source\MiscellaneousExperimentOptions\InExpCalControl.h" />
     <ClInclude Include="Source\Plotting\PlotInfo.h" />
+    <ClInclude Include="Source\Python\cnpy.h" />
     <ClInclude Include="Source\RealTimeMOTAnalysis\MOTAnalysisSystem.h" />
     <ClInclude Include="Source\RealTimeMOTAnalysis\MOTAnalysisControl.h" />
     <QtMoc Include="Source\RealTimeMOTAnalysis\MOTAnalysisThreadWoker.h" />
@@ -328,7 +332,7 @@
     <ClCompile Include="Source\PrimaryWindows\QtScriptWindow.cpp" />
     <ClCompile Include="Source\Python\NewPythonHandler.cpp" />
     <ClCompile Include="Source\RealTimeDataAnalysis\AnalysisThreadWorker.cpp" />
-    <ClCompile Include="Source\RealTimeDataAnalysis\AtomCruncherWorker.cpp" />
+    <ClCompile Include="Source\Rearrangement\AtomCruncherWorker.cpp" />
     <ClCompile Include="Source\RealTimeDataAnalysis\DataAnalysisControl.cpp" />
     <ClCompile Include="Source\RealTimeDataAnalysis\MachineOptimizer.cpp" />
     <ClCompile Include="Source\RealTimeDataAnalysis\PlotDesignerDialog.cpp" />
@@ -448,13 +452,14 @@
     <ClInclude Include="Source\Plotting\tinyPlotInfo.h" />
     <ClInclude Include="Source\Python\NewPythonHandler.h" />
     <ClInclude Include="Source\RealTimeDataAnalysis\analysisSettings.h" />
-    <ClInclude Include="Source\RealTimeDataAnalysis\atomCruncherInput.h" />
+    <ClInclude Include="Source\Rearrangement\atomCruncherInput.h" />
     <ClInclude Include="Source\RealTimeDataAnalysis\atomGrid.h" />
     <ClInclude Include="Source\RealTimeDataAnalysis\DataAnalysisControl.h" />
     <ClInclude Include="Source\RealTimeDataAnalysis\PlotDesignerDialog.h" />
     <ClInclude Include="Source\RealTimeDataAnalysis\realTimePlotterInput.h" />
     <ClInclude Include="Source\RealTimeMOTAnalysis\MOTAnalysisType.h" />
     <ClInclude Include="Source\RealTimeMOTAnalysis\MOTThreadInput.h" />
+    <ClInclude Include="Source\Rearrangement\rearrangeStructures.h" />
     <ClInclude Include="Source\Scripts\ScriptableDevices.h" />
     <ClInclude Include="Source\Scripts\ScriptStream.h" />
     <ClInclude Include="Source\stdafx.h" />
@@ -464,7 +469,7 @@
     <QtMoc Include="Source\Scripts\CQCodeEdit.h" />
     <QtMoc Include="Source\RealTimeDataAnalysis\QtPlotDesignerDlg.h" />
     <QtMoc Include="Source\RealTimeDataAnalysis\MachineOptimizer.h" />
-    <QtMoc Include="Source\RealTimeDataAnalysis\AtomCruncherWorker.h" />
+    <QtMoc Include="Source\Rearrangement\AtomCruncherWorker.h" />
     <QtMoc Include="Source\RealTimeDataAnalysis\AnalysisThreadWorker.h" />
     <QtMoc Include="Source\PrimaryWindows\QtScriptWindow.h" />
     <QtMoc Include="Source\PrimaryWindows\QtMainWindow.h" />

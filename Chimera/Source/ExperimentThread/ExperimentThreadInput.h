@@ -16,7 +16,7 @@
 #include "Andor/AndorRunSettings.h"
 #include "RealTimeDataAnalysis/atomGrid.h"
 #include "ConfigurationSystems/profileSettings.h"
-#include "RealTimeDataAnalysis/atomCruncherInput.h"
+#include "Rearrangement/atomCruncherInput.h"
 #include "RealTimeDataAnalysis/realTimePlotterInput.h"
 #include "ExperimentType.h"
 #include "DeviceList.h"

@@ -38,10 +38,6 @@ public:
 	std::string scriptAddress;
 
 private:
-	// the moog script file contents get dumped into this. 
-	//std::string currentMoogScriptText;
-	//ScriptStream currentMoogScript;
-
 	GigaMoogCore core;
 
 };

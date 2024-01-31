@@ -7,7 +7,7 @@
 #include <PrimaryWindows/QtMakoWindow.h>
 #include <PrimaryWindows/QtMainWindow.h>
 #include <RealTimeDataAnalysis/AnalysisThreadWorker.h>
-#include <RealTimeDataAnalysis/AtomCruncherWorker.h>
+#include <Rearrangement/AtomCruncherWorker.h>
 #include <ExperimentThread/ExpThreadWorker.h>
 #include <QThread.h>
 #include <qelapsedtimer.h>

@@ -1,6 +1,6 @@
 #include "stdafx.h"
-#include <RealTimeDataAnalysis/AtomCruncherWorker.h>
-#include <RealTimeDataAnalysis/atomCruncherInput.h>
+#include <Rearrangement/AtomCruncherWorker.h>
+#include <Rearrangement/atomCruncherInput.h>
 
 CruncherThreadWorker::CruncherThreadWorker (std::unique_ptr<atomCruncherInput> input_) 
 	: input(std::move(input_)) 

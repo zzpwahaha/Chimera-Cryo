@@ -16,7 +16,7 @@
 #include "ExperimentMonitoringAndStatus/ExperimentTimer.h"
 #include "DataLogging/DataLogger.h"
 #include "GeneralUtilityFunctions/commonFunctions.h"
-#include "RealTimeDataAnalysis/atomCruncherInput.h"
+#include "Rearrangement/atomCruncherInput.h"
 #include "GeneralObjects/commonTypes.h"
 #include "GeneralObjects/Queues.h"
 #include <Python/NewPythonHandler.h>

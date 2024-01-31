@@ -137,6 +137,18 @@ std::string QtScriptWindow::getSystemStatusString (){
 		}
 		status += "\n";
 	}
+	status += "GIGAMOOG:\n\t";
+	if (!GIGAMOOG_SAFEMODE) {
+		status += str("GIGAMOOG System is Active at " + GIGAMOOG_PORT + ",\n\t");
+		status += "Attached trigger line is \n\t\t";
+		for (const auto& gmtrig : GM_TRIGGER_LINE) {
+			status += "(" + str(gmtrig.first) + "," + str(gmtrig.second) + ") ";
+		}
+		status += "\n";
+	}
+	else {
+		status += "\tGIGAMOOG System is disabled! Enable in \"constants.h\" \n";
+	}
 	return status;
 }
 
