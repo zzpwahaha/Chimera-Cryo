@@ -45,7 +45,16 @@ public:
 	void resetConnection();
 	void readCallback(int byte);
 	void errorCallback(std::string error);
+
+	unsigned short getNumCmdChannel(unsigned short flumeIdx);
 private:
+	// return the index for the offsetlock boxes
+	unsigned short getFlumeIdx(unsigned short channel);
+	//return index for channel number within a particular offsetlock box
+	unsigned short getCmdChannelIdx(unsigned short channel);
+	double getTimeResolution(unsigned short channel);
+	int numTimeDigits(unsigned short channel);
+
 	unsigned long long tmp = 0;
 	std::array<std::string, size_t(OLGrid::total)> names;
 
@@ -68,7 +77,7 @@ public:
 	const unsigned maxCommandNum = 512;
 	constexpr static double olFreqResolution = OffsetLockOutput::olFreqResolution; /*12 bit N + 25bit FRAC, 50MHz phase-freq detector frequency*/
 	const int numFreqDigits = 4/*static_cast<int>(abs(round(log10(olFreqResolution) - 0.49)))*/;
-	const int numTimeDigits= static_cast<int>(abs(round(log10(OL_TIME_RESOLUTION) - 0.49)));
+	//const int numTimeDigits= static_cast<int>(abs(round(log10(OL_TIME_RESOLUTION) - 0.49)));
 
 	
 };

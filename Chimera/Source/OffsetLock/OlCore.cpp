@@ -16,6 +16,10 @@ OlCore::OlCore(bool safemode)
 	BoostAsyncSerial(safemode, OL_COM_PORT[1], 9600, 8,
 		boost::asio::serial_port_base::stop_bits::one,
 		boost::asio::serial_port_base::parity::none,
+		boost::asio::serial_port_base::flow_control::none),
+	BoostAsyncSerial(safemode, OL_COM_PORT[2], 115200, 8,
+		boost::asio::serial_port_base::stop_bits::one,
+		boost::asio::serial_port_base::parity::none,
 		boost::asio::serial_port_base::flow_control::none) }
 	, readComplete(true)
 {
@@ -198,7 +202,7 @@ void OlCore::calculateVariations(std::vector<parameterType>& variables, ExpThrea
 				tempEvent.value = olCommandFormList[eventInc].initVal.evaluate(variables, variationInc);
 				tempEvent.endValue = tempEvent.value;
 				tempEvent.numSteps = 1;
-				tempEvent.rampTime = OL_TIME_RESOLUTION;
+				tempEvent.rampTime = getTimeResolution(tempEvent.line);
 				olCommandList[variationInc].push_back(tempEvent);
 			}
 			else if (olCommandFormList[eventInc].commandName == "ollinspace:")
@@ -232,7 +236,7 @@ void OlCore::calculateVariations(std::vector<parameterType>& variables, ExpThrea
 					tempEvent.value = val;
 					tempEvent.time = currentTime;
 					tempEvent.endValue = val;
-					tempEvent.rampTime = OL_TIME_RESOLUTION;
+					tempEvent.rampTime = getTimeResolution(tempEvent.line);
 					tempEvent.numSteps = 1;
 					olCommandList[variationInc].push_back(tempEvent);
 					currentTime += timeInc;
@@ -242,7 +246,7 @@ void OlCore::calculateVariations(std::vector<parameterType>& variables, ExpThrea
 				tempEvent.value = finalValue;
 				tempEvent.time = initTime + rampTime;
 				tempEvent.endValue = finalValue;
-				tempEvent.rampTime = OL_TIME_RESOLUTION;
+				tempEvent.rampTime = getTimeResolution(tempEvent.line);
 				tempEvent.numSteps = 1;
 				olCommandList[variationInc].push_back(tempEvent);
 			}
@@ -255,7 +259,7 @@ void OlCore::calculateVariations(std::vector<parameterType>& variables, ExpThrea
 				// deal with final value;
 				finalValue = olCommandFormList[eventInc].finalVal.evaluate(variables, variationInc);
 				// set votlage resolution to be maximum allowed by the ramp range and time
-				numSteps = rampTime / OL_TIME_RESOLUTION;
+				numSteps = rampTime / getTimeResolution(tempEvent.line);
 				double rampInc = (finalValue - initValue) / numSteps;
 				if ((fabs(rampInc) < olFreqResolution) && !resolutionWarningPosted)
 				{
@@ -472,7 +476,7 @@ void OlCore::organizeOLCommands(unsigned variation, OlSnapshot initSnap, std::st
 		timeOgzer.clear();
 		// intentionally avoid colliding with DO at t = ZYNQ_DEADTIME since DO will assert state status at that time
 		timeOgzer.push_back({ ZYNQ_DEADTIME * 2,
-			OlCommand{channel,ZYNQ_DEADTIME * 2,initSnap.olValues[channel],initSnap.olValues[channel],1,OL_TIME_RESOLUTION} });
+			OlCommand{channel,ZYNQ_DEADTIME * 2,initSnap.olValues[channel],initSnap.olValues[channel],1,getTimeResolution(channel) } });
 
 		for (unsigned commandInc = 0; commandInc < tempEvents.size(); commandInc++)
 		{
@@ -497,21 +501,21 @@ void OlCore::organizeOLCommands(unsigned variation, OlSnapshot initSnap, std::st
 				// because the events are sorted by time, the time organizer will already be sorted by time, and therefore I 
 				// just need to check the back value's time.
 				double timediff = (tE.time - timeOgzer.back().first); //had better be positive, otherwise indicating a bridge is inserted perviously
-				if (timediff >= OL_TIME_RESOLUTION - 2 * DBL_EPSILON)
+				if (timediff >= getTimeResolution(channel) - 2 * DBL_EPSILON)
 				{
 					timeOgzer.push_back({ tE.time, tE });
 				}
 				else
 				{
-					if (timediff < -OL_TIME_RESOLUTION - 2 * DBL_EPSILON) {
+					if (timediff < -getTimeResolution(channel) - 2 * DBL_EPSILON) {
 						thrower("Error in timeOrganizer, the time seems not sorted. A low level bug.");
 					}
 					// time that cannot be resolved by offset lock, complain it if it is of the same line
 					warning += "Warning from OffsetLock: output(" + OlCore::getName(tE.line)
 						+ "), the time between two consecutive event point t=" + str(timeOgzer.back().first, 3) + " and t="
-						+ str(tE.time, 3) + " is below the offset lock resolution: " + str(OL_TIME_RESOLUTION, 3)
-						+ "ms. Have make the later time exact " + str(3*OL_TIME_RESOLUTION, 3) + "ms away\r\n";
-					timeOgzer.push_back({ timeOgzer.back().first + 3*OL_TIME_RESOLUTION, tE });
+						+ str(tE.time, 3) + " is below the offset lock resolution: " + str(getTimeResolution(channel), 3)
+						+ "ms. Have make the later time exact " + str(3 * getTimeResolution(channel), 3) + "ms away\r\n";
+					timeOgzer.push_back({ timeOgzer.back().first + 3 * getTimeResolution(channel), tE });
 				}
 			}
 
@@ -676,11 +680,11 @@ void OlCore::writeOLs(unsigned variation)
 		std::string buffCmd;
 		for (auto& channelSnap : olChannelSnapshots[variation])
 		{
-			if (channelSnap.channel / static_cast<unsigned short>(OLGrid::numPERunit) == flumesIdx) {
-				buffCmd += "(" + str(channelSnap.channel % static_cast<unsigned short>(OLGrid::numPERunit)) + "," 
+			if (getFlumeIdx( channelSnap.channel ) == flumesIdx) {
+				buffCmd += "(" + str(getCmdChannelIdx(channelSnap.channel)) + ","
 					+ str(channelSnap.val, numFreqDigits) + ","
 					+ str(channelSnap.endVal, numFreqDigits) + "," + str(channelSnap.numSteps) + ","
-					+ str(channelSnap.rampTime, numTimeDigits) + ")";
+					+ str(channelSnap.rampTime, numTimeDigits(channelSnap.channel)) + ")";
 			}
 		}
 		buffCmd += "e";
@@ -786,4 +790,92 @@ void OlCore::readCallback(int byte)
 void OlCore::errorCallback(std::string error)
 {
 	errorMsg = error;
+}
+
+unsigned short OlCore::getNumCmdChannel(unsigned short flumeIdx)
+{
+	auto totalFlume = static_cast<unsigned short>(OLGrid::numOFunit);
+	if (flumeIdx < 0 || flumeIdx >= totalFlume) {
+		thrower("Flume number: " + str(flumeIdx) + ", in offsetlock is out of the total flume number: " + str(totalFlume));
+	}
+	unsigned short channel = -1;
+	switch (flumeIdx) {
+	case 0:
+	case 1:
+		channel = 2;
+		break;
+	case 2:
+		channel = 1;
+		break;
+	default:
+		break;
+	}
+	return channel;
+}
+
+unsigned short OlCore::getFlumeIdx(unsigned short channel)
+{
+	auto totalChannel = static_cast<unsigned short>(OLGrid::total);
+	if (channel < 0 || channel >= totalChannel) {
+		thrower("Channel number: " + str(channel) + ", in offsetlock is out of the total channel number: " + str(totalChannel));
+	}
+	unsigned short flumeIdx = -1;
+	switch (channel) {
+	case 0:
+	case 1:
+		flumeIdx = 0;
+		break;
+	case 2:
+	case 3:
+		flumeIdx = 1;
+		break;
+	case 4:
+		flumeIdx = 2;
+		break;
+	default:
+		break;
+	}
+	return flumeIdx;
+
+};
+
+unsigned short OlCore::getCmdChannelIdx(unsigned short channel)
+{
+	auto flumeIdx = getFlumeIdx(channel);
+	unsigned short cmdChannelIdx = -1;
+	switch (flumeIdx) {
+	case 0:
+	case 1:
+		cmdChannelIdx = channel % 2;
+		break;
+	case 2:
+		cmdChannelIdx = 0;
+		break;
+	default:
+		break;
+	}
+	return cmdChannelIdx;
+};
+
+double OlCore::getTimeResolution(unsigned short channel)
+{
+	auto flumeIdx = getFlumeIdx(channel);
+	double timeResolution = -1.0;
+	switch (flumeIdx) {
+	case 0:
+	case 1:
+		timeResolution = OL_TIME_RESOLUTION;
+		break;
+	case 2:
+		timeResolution = 0.2;
+		break;
+	default:
+		break;
+	}
+	return timeResolution;
+}
+
+int OlCore::numTimeDigits(unsigned short channel)
+{
+	return static_cast<int>(abs(round(log10(getTimeResolution(channel)) - 0.49)));
 }
