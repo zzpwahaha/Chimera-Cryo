@@ -9,8 +9,8 @@
 enum class OLGrid : size_t
 {
 	numPERunit = 2,
-	numOFunit = 2,
-	total = numPERunit * numOFunit
+	numOFunit = 3,
+	total = 5 //numPERunit * numOFunit
 };
 
 struct OlInfo
@@ -18,7 +18,7 @@ struct OlInfo
 	std::string name = "";
 
 	double currFreq = 0;
-	double minFreq = 500.0; //in MHz
+	double minFreq = 25.0; //in MHz // for D1, D2 system, it should be 500MHz for PFD to work well, temporarily lift this to 25MHz for EOM DDS - zzp 02/14/2024
 	double maxFreq = 7501.0;
 	double defaultFreq = 1500.0;
 

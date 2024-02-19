@@ -10,6 +10,7 @@ OlSettingsDialog::OlSettingsDialog(OlSystem* inputPtr)
 	QHBoxLayout* layout = new QHBoxLayout();
 	auto ollayout = std::array<QGridLayout*, size_t(OLGrid::numOFunit)>(/*{ new QGridLayout() }*/);
 	short cnts = 0;
+	short ofst = 0;
 	for (auto* lay : ollayout)
 	{
 		lay = new QGridLayout();
@@ -23,8 +24,8 @@ OlSettingsDialog::OlSettingsDialog(OlSystem* inputPtr)
 			lay->addWidget(new QLabel("Notes"), 1, 4, 1, 2);
 		}
 		auto layofst = 2;
-		auto ofst = cnts * size_t(OLGrid::numPERunit);
-		for (size_t i = 0; i < size_t(OLGrid::numPERunit); i++)
+		//auto ofst = cnts * size_t(OLGrid::numPERunit);
+		for (size_t i = 0; i < input->getCore().getNumCmdChannel(cnts); i++)
 		{
 			numberLabels[ofst + i] = new QLabel(QString("%1").arg(i, 2));
 			lay->addWidget(numberLabels[ofst + i], i + layofst, 0, 1, 1, Qt::AlignRight);
@@ -49,6 +50,7 @@ OlSettingsDialog::OlSettingsDialog(OlSystem* inputPtr)
 
 		}
 		layout->addLayout(lay, 1);
+		ofst += input->getCore().getNumCmdChannel(cnts);
 		cnts++;
 	}
 

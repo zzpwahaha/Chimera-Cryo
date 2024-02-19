@@ -20,7 +20,6 @@
 	constexpr bool DDS_SAFEMODE = true;
 	constexpr bool ANDOR_SAFEMODE = false;
 	const std::pair<unsigned, unsigned> ANDOR_TRIGGER_LINE = std::make_pair(1 - 1, 5); // used for QtAndorWindow::abortCameraRun to give the last trigger and also for consistensy check
-	constexpr bool OFFSETLOCK_SAFEMODE = false;
 	//constexpr bool ANALOG_IN_SAFEMODE = true;
 	#ifdef _DEBUG
 		constexpr bool PYTHON_SAFEMODE = true;
@@ -70,11 +69,13 @@
 	const std::array<unsigned short, 2> DAC_REWIND = { 15, 31 }; // used for the long time run rewind, see AoCore::formatDacForFPGA
 
 	//OffsetLock 
-	const std::vector<std::string> OL_COM_PORT = { "COM3", "COM7" };
+	constexpr bool OFFSETLOCK_SAFEMODE = false;
+	const std::vector<std::string> OL_COM_PORT = { "COM3", "COM7", "COM12"};
 	const double OL_TIME_RESOLUTION = 0.02; //in ms
 	const std::vector<std::pair<unsigned, unsigned>> OL_TRIGGER_LINE
 		= { std::make_pair(3 - 1,6),std::make_pair(3 - 1,7),
-			std::make_pair(4 - 1,6),std::make_pair(4 - 1,7) }; /*the first is the label on the box minus 1, has minus'd 1 explicitly */
+			std::make_pair(4 - 1,6),std::make_pair(4 - 1,7),
+			std::make_pair(5 - 1,6) }; /*the first is the label on the box minus 1, has minus'd 1 explicitly */
 	const double OL_TRIGGER_TIME = 0.01; //in ms i.e. 50us
 
 	//#define DDS_FPGA_ADDRESS "FT1I6IBSB"; //Device Serial: FT1I6IBS, Use FT1I6IBSB in C++ to select Channel B
