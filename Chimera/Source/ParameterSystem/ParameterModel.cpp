@@ -212,6 +212,7 @@ bool ParameterModel::setData (const QModelIndex& index, const QVariant& value, i
 							case 2:
 								rangeInfo (param.scanDimension, rangeNum).variations 
 									= boost::lexical_cast<unsigned int>(cstr (value.toString ()));
+
                         }
                 }
             }

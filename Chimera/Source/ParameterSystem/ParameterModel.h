@@ -36,7 +36,6 @@ class ParameterModel : public QAbstractTableModel
         bool moveRows(const QModelIndex& sourceParent, int sourceRow, int count, const QModelIndex& destinationParent, int destinationChild) override; // never called by qt during testing
         bool dropMimeData(const QMimeData* data, Qt::DropAction action, int row, int column, const QModelIndex& parent) override;
 
-
     private:
         const IndvRangeInfo defaultRangeInfo = { 2,false,true };
         std::vector<parameterType> parameters;

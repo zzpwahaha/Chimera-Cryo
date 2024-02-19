@@ -72,7 +72,7 @@ void CalibrationThreadWorker::calibrate (calSettings& cal, unsigned which) {
 	for (auto dac : cal.aoConfig) {
 		input->ao->setSingleDac (dac.first, dac.second);
 		input->ttls->getCore().FPGAForceOutput(input->ttls->getCurrentStatus()); // ZZP 02/12/2023 - update ttls since now dac/dds gui update will always need separate TTL update as zynq trigger
-		Sleep(50);
+		Sleep(100);
 	}
 	qDebug() << "start to set ttlConfig " << eTimer.elapsed();
 	for (auto ttl : cal.ttlConfig) {
