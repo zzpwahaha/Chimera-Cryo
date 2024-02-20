@@ -1,0 +1,267 @@
+Version 1.0
+do1_0
+1
+do1_1
+1
+opshutter
+1
+do1_3
+1
+dipolepushshutter
+1
+pixis_trg
+1
+xyzmotshutter
+1
+prbshutter
+1
+prbcoolshutter
+1
+tarepshutter
+1
+xymotshutter
+1
+d1lgmshutter
+1
+d1lgmprbshutter
+1
+camerashutter
+1
+srcmotvalve
+1
+srcmotvalveenable
+1
+tweezerhold
+1
+dipolepushreptrg
+1
+d1lgmtrg
+1
+do3_3
+1
+mako1
+1
+mako2
+1
+cooling_ol
+1
+repump_ol
+1
+d1lgmeomtrg
+1
+prbrelayswitch
+1
+mwtrg
+1
+mwamptrg
+1
+do4_4
+1
+do4_5
+1
+d1lgm_ol
+1
+d1lgmeom_ol
+1
+ryd420shutter
+1
+ryd420trg
+1
+do5_2
+1
+do5_3
+1
+do5_4
+1
+do5_5
+1
+ryd840_ol
+1
+do5_7
+1
+tareptrg
+1
+prbreptrg
+1
+optrg
+1
+dipolepushtrg
+1
+prbtrg
+1
+scimottrg
+1
+srcmottrg
+1
+tweezertrg
+1
+keysighttrg
+1
+siglenttrg
+1
+do7_2
+1
+do7_3
+1
+do7_4
+1
+do7_5
+1
+do7_6
+1
+do7_7
+1
+gmloadtrg
+1
+do8_1
+1
+do8_2
+1
+do8_3
+1
+do8_4
+1
+do8_5
+1
+do8_6
+1
+do8_7
+1
+tarepamp
+-9.9 - 10
+0
+dac0_0
+prbrepamp
+-9.9 - 10
+0
+dac0_1
+opamp
+-9.9 - 10
+0
+dac0_2
+dipolepushamp
+0 - 6
+0
+dac0_3
+prbamp
+-9.9 - 10
+0
+dac0_4
+scimotamp
+-9.9 - 10
+0
+dac0_5
+dac0_6
+-9.9 - 10
+0
+dac0_6
+srcmotamp
+-9.9 - 10
+0
+dac0_7
+tweezerintensity
+-5 - 8
+0
+dac0_8
+dipolepushrepamp
+-9.9 - 10
+0
+dac0_9
+dac0_10
+-9.9 - 10
+0
+dac0_10
+d1lgmamp
+-9.9 - 10
+0
+dac0_11
+d1lgmeomamp
+0 - 9
+0
+dac0_12
+ryd420amp
+-9.9 - 10
+0
+dac0_13
+motcoil1
+-9.9 - 10
+0
+dac0_14
+dac0_15
+0 - 8
+0
+dac0_15
+motcoil
+-9.9 - 10
+0
+dac1_0
+biascoilx
+-9.9 - 10
+0
+-5.1_to_+4.5
+biascoily
+-9.9 - 10
+0
+-4.5_to_+4.4
+biascoilz
+-9.9 - 10
+0
+-4.5_to_+4
+mw_iq_i
+-4.5 - 4.5
+0
+-4_to+4
+mw_iq_q
+-4.5 - 4.5
+0
+dac1_5
+dac1_6
+-9.9 - 10
+0
+dac1_6
+dac1_7
+-9.9 - 10
+0
+dac1_7
+dac1_8
+-9.9 - 10
+0
+dac1_8
+dac1_9
+-9.9 - 10
+0
+dac1_9
+dac1_10
+-9.9 - 10
+0
+dac1_10
+dac1_11
+-9.9 - 10
+0
+dac1_11
+dac1_12
+-9.9 - 10
+0
+dac1_12
+dac1_13
+-9.9 - 10
+0
+dac1_13
+dac1_14
+-9.9 - 10
+0
+dac1_14
+dac1_15
+-9.9 - 10
+0
+dac1_15
+7
+d2_cooling_resonance 1206
+d2_repump_resonance 5282
+d2_cooling_prb_resonance 1226
+d2_repump_prb_resonance 5262
+d1_lgmcooling_resonance 784
+rb87_hfsplitting 6834.682
+t_shutter 10
+951 1200 2 811 1060 2
+0 0
