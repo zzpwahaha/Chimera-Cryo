@@ -380,6 +380,13 @@ void DataLogger::logMasterInput( ExperimentThreadInput* input ){
 		}
 		std::string configBuf(str(configF.rdbuf()));
 		writeDataSet(configBuf, "Configuration-Content", runParametersGroup);
+		std::ifstream masterConfigF(MASTER_CONFIGURATION_FILE_ADDRESS);
+		if (!masterConfigF.is_open()) {
+			thrower("While trying to log the master config file content from " + MASTER_CONFIGURATION_FILE_ADDRESS
+				+ ", the master config file failed to open!");
+		}
+		std::string masterConfigBuf(str(masterConfigF.rdbuf()));
+		writeDataSet(masterConfigBuf, "Master-Configuration-Content", runParametersGroup);
 		writeDataSet( true, "Run-Master", runParametersGroup );
 		if ( true /*runmaster*/ ) {
 			std::ifstream masterScript( ConfigSystem::getMasterAddressFromConfig( input->profile ) );
