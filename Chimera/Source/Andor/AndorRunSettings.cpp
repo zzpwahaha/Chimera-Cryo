@@ -6,6 +6,6 @@ unsigned __int64 AndorRunSettings::totalPicsInVariation ( ){
 	return repetitionsPerVariation * picsPerRepetition;
 }
 
-int AndorRunSettings::totalPicsInExperiment ( ){
-	return int ( totalPicsInVariation ( ) * totalVariations );
+unsigned long long AndorRunSettings::totalPicsInExperiment ( ){
+	return  totalPicsInVariation() * totalVariations;
 }

@@ -87,60 +87,64 @@ void CruncherThreadWorker::init () {
 		}
 	}
 	imageCount = 0;
+
+	handleImage();
 }
 
 
-void CruncherThreadWorker::handleImage (NormalImage image){
+void CruncherThreadWorker::handleImage (){
 	// loop watching the image queue.
-	// if no images wait until images. Should probably change to be event based, but want this to be fast...
-	//if (imageCount % 2 == 0) {
-	//	input->catchPicTime->push_back (chronoClock::now ());
-	//}
-	// tempImagePixels[grid][pixel]; only contains the counts for the pixels being monitored.
-	PixListQueue tempImagePixels (input->grids.size ());
-	// tempAtomArray[grid][pixel]; only contains the boolean true/false of whether an atom passed a threshold or not. 
-	atomQueue tempAtomArray (input->grids.size ());
-	for (auto gridInc : range (input->grids.size ())) {
-		tempAtomArray[gridInc].image = std::vector<bool> (monitoredPixelIndecies[gridInc].size ());
-		tempImagePixels[gridInc].image = std::vector<double>(monitoredPixelIndecies[gridInc].size(), 0.0);
-	}
-	for (auto gridInc : range (input->grids.size ())) {
-		tempImagePixels[gridInc].picStat = image.picStat;
-		tempAtomArray[gridInc].picStat = image.picStat;
-		for (auto atomInc : range(monitoredPixelIndecies[gridInc].size())) {
-			///*** Deal with 1st element entirely first, as this is important for the rearranger thread and the 
-			/// load-skip both of which are very time-sensitive.
-			for (auto pixelIndex : monitoredPixelIndecies[gridInc][atomInc]) {
-				if (pixelIndex > image.image.size()) {
-					emit error("Monitored pixel indecies included pixel out of image?!?! pixel: " + qstr(pixelIndex)
-						+ ", size: " + qstr(image.image.size()));
-					// should I return here?
-				}
-				else {
-					tempImagePixels[gridInc].image[atomInc] += image.image.data[pixelIndex];
-				}
-			}
-			tempImagePixels[gridInc].image[atomInc] /= monitoredPixelIndecies[gridInc][atomInc].size();
+	while (true) {
+		//if (imageCount % 2 == 0) {
+		//	input->catchPicTime->push_back (chronoClock::now ());
+		//}
+		auto image = input->imageQueue->pop();
+		// tempImagePixels[grid][pixel]; only contains the counts for the pixels being monitored.
+		PixListQueue tempImagePixels(input->grids.size());
+		// tempAtomArray[grid][pixel]; only contains the boolean true/false of whether an atom passed a threshold or not. 
+		atomQueue tempAtomArray(input->grids.size());
+		for (auto gridInc : range(input->grids.size())) {
+			tempAtomArray[gridInc].image = std::vector<bool>(monitoredPixelIndecies[gridInc].size());
+			tempImagePixels[gridInc].image = std::vector<double>(monitoredPixelIndecies[gridInc].size(), 0.0);
 		}
+		for (auto gridInc : range(input->grids.size())) {
+			tempImagePixels[gridInc].picStat = image.picStat;
+			tempAtomArray[gridInc].picStat = image.picStat;
+			for (auto atomInc : range(monitoredPixelIndecies[gridInc].size())) {
+				///*** Deal with 1st element entirely first, as this is important for the rearranger thread and the 
+				/// load-skip both of which are very time-sensitive.
+				for (auto pixelIndex : monitoredPixelIndecies[gridInc][atomInc]) {
+					if (pixelIndex > image.image.size()) {
+						emit error("Monitored pixel indecies included pixel out of image?!?! pixel: " + qstr(pixelIndex)
+							+ ", size: " + qstr(image.image.size()));
+						// should I return here?
+					}
+					else {
+						tempImagePixels[gridInc].image[atomInc] += image.image.data[pixelIndex];
+					}
+				}
+				tempImagePixels[gridInc].image[atomInc] /= monitoredPixelIndecies[gridInc][atomInc].size();
+			}
 
-		unsigned count = 0;
-		for (auto& pix : tempImagePixels[gridInc].image) {
-			auto& picThresholds = input->thresholds[imageCount % input->picsPerRep];
-			if (pix >= picThresholds[count % picThresholds.size ()]) {
-				tempAtomArray[gridInc].image[count] = true;
+			unsigned count = 0;
+			for (auto& pix : tempImagePixels[gridInc].image) {
+				auto& picThresholds = input->thresholds[imageCount % input->picsPerRep];
+				if (pix >= picThresholds[count % picThresholds.size()]) {
+					tempAtomArray[gridInc].image[count] = true;
+				}
+				count++;
 			}
-			count++;
-		}
-		// explicitly deal with the rearranger thread and load skip as soon as possible, these are time-critical.
-		if (gridInc == 0) {
-			// if last picture of repetition, check for loadskip condition.
-			if (imageCount % input->picsPerRep == input->picsPerRep - 1) {
-				unsigned numAtoms = std::accumulate (tempAtomArray[0].image.begin (), tempAtomArray[0].image.end (), 0);
-				*input->skipNext = (numAtoms >= input->atomThresholdForSkip);
+			// explicitly deal with the rearranger thread and load skip as soon as possible, these are time-critical.
+			if (gridInc == 0) {
+				// if last picture of repetition, check for loadskip condition.
+				if (imageCount % input->picsPerRep == input->picsPerRep - 1) {
+					unsigned numAtoms = std::accumulate(tempAtomArray[0].image.begin(), tempAtomArray[0].image.end(), 0);
+					*input->skipNext = (numAtoms >= input->atomThresholdForSkip);
+				}
 			}
 		}
+		emit atomArray(tempAtomArray);
+		emit pixArray(tempImagePixels);
+		imageCount++;
 	}
-	emit atomArray (tempAtomArray);
-	emit pixArray (tempImagePixels);
-	imageCount++;
 }

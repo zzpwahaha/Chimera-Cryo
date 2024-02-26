@@ -3,7 +3,7 @@
 #include <Andor/AndorCameraCore.h>
 #include <qdebug.h>
 
-AndorCameraThreadWorker::AndorCameraThreadWorker (cameraThreadInput* input_){
+AndorCameraThreadWorker::AndorCameraThreadWorker (cameraThreadWorkerInput* input_){
 	input = input_;
 }
 
@@ -13,9 +13,9 @@ AndorCameraThreadWorker::~AndorCameraThreadWorker () {
 void AndorCameraThreadWorker::process (){
 	//... I'm not sure what this lock is doing here... why not inside while loop?
 	int safeModeCount = 0;
-	long pictureNumber = 0;
+	unsigned long long pictureNumber = 0;
 	bool armed = false;
-	std::unique_lock<std::timed_mutex> lock (*input->runMutex, std::chrono::milliseconds (1000));
+	std::unique_lock<std::timed_mutex> lock (input->runMutex, std::chrono::milliseconds (1000));
 	if (!lock.owns_lock ()) {
 		errBox ("ERROR: ANDOR IMAGING THREAD FAILED TO LOCK THE RUN MUTEX! IMAGING THREAD CLOSING!");
 	}
@@ -30,30 +30,18 @@ void AndorCameraThreadWorker::process (){
 		 * them.
 		 */
 		 // Also, anytime this gets locked, the count should be reset.
-		 //input->signaler.wait( lock, [input]() { return input->expectingAcquisition; } );
-		while (!input->expectingAcquisition) {
+		 // input->signaler.wait( lock, [input]() { return input->expectingAcquisition; } ); // equivalent to code below, check first before lock
+		while (!input->Andor->threadExpectingAcquisition) {
 			input->signaler.wait (lock);
 		}
-		//input->signaler.wait(lock);
-		if (!input->safemode){
+		if (!input->Andor->safemode){
 			try	{
-				//int status = input->Andor->flume.queryStatus ();
 				if (pictureNumber == input->Andor->runSettings.totalPicsInExperiment() && armed) {
-					// get the last picture. acquisition is over so getAcquisitionProgress returns 0.
-					if (false/*input->Andor->isCalibrating ()*/) {
-						//input->comm->sendCameraCalProgress (-1);
-						// signal the end to the main thread.
-						//input->comm->sendCameraCalFin ();
-						armed = false;
-					}
-					else {
-						//emit pictureTaken (-1);
-						//emit acquisitionFinished ();
-						// make sure the thread waits when it hits the condition variable.
-						input->expectingAcquisition = false;
-						pictureNumber = 0;
-						armed = false;
-					}
+					// get the last picture. acquisition is over 					
+					// make sure the thread waits when it hits the condition variable.
+					input->Andor->threadExpectingAcquisition = false;
+					pictureNumber = 0;
+					armed = false;
 				}
 				else{
 					while (true) {
@@ -68,7 +56,7 @@ void AndorCameraThreadWorker::process (){
 								}
 								else {
 									qDebug() << "input->Andor->waitForAcquisition time out for 1000ms, camera NOT running, will abort and reset pic counter";
-									input->expectingAcquisition = false;
+									input->Andor->threadExpectingAcquisition = false;
 									pictureNumber = 0;
 									armed = false;
 								}
@@ -84,26 +72,19 @@ void AndorCameraThreadWorker::process (){
 					}
 					qDebug() << "From Worker thread: get image number" << pictureNumber << " at " << (*input->imageTimes).back().time_since_epoch().count() - (*input->imageTimes)[0].time_since_epoch().count();
 					armed = true;
-					//try {
-					//	input->Andor->flume.getAcquisitionProgress (pictureNumber);
-					//}
-					//catch (ChimeraError& exception) {
-					//	//input->comm->sendError (exception.trace ());
-					//}
-					if (false/*input->Andor->isCalibrating ()*/) {
-						//input->comm->sendCameraCalProgress (pictureNumber);
-					}
-					else if (!input->Andor->cameraIsRunning) {
+					if (!input->Andor->cameraIsRunning) {
 						// aborted by user
-						input->expectingAcquisition = false;
+						input->Andor->threadExpectingAcquisition = false;
 						pictureNumber = 0;
 						armed = false;
 						qDebug() << "CameraThreadWorker aborted from user by awakening it again from the waitForAcquisition";
 					}
 					else {
-						emit pictureTaken (pictureNumber);
+						input->picBufferQueue.push(pictureNumber); // this will wake Grabber thread to grab image from memory with buffer identified by pictureNumber
+						input->Andor->queueBuffers(pictureNumber + 1); // immediately requeue buffer for next image reading
+						input->Andor->setExpRunningExposure(pictureNumber + 1); // set exposure, probably should only use external exposure so do not need to worry about time delay in this function
+						//emit pictureTaken (pictureNumber);
 						pictureNumber++;
-						//input->comm->sendCameraProgress (pictureNumber);
 					}
 				}
 			}
@@ -149,7 +130,7 @@ void AndorCameraThreadWorker::process (){
 					emit acquisitionFinished ();
 					//input->comm->sendCameraFin ();
 				}
-				input->expectingAcquisition = false;
+				input->Andor->threadExpectingAcquisition = false;
 			}
 		}
 	}

@@ -1,12 +1,13 @@
 // created by Mark O. Brown
 #pragma once
 #include <RealTimeDataAnalysis/atomGrid.h>
-#include "GeneralImaging/imageParameters.h"
-#include "GeneralObjects/commonTypes.h"
+#include <GeneralImaging/imageParameters.h>
+#include <GeneralObjects/commonTypes.h>
+#include <GeneralObjects/Queues.h>
+#include <GeneralObjects/ThreadsafeQueue.h>
 #include <atomic>
 #include <vector>
 #include <mutex>
-#include "GeneralObjects/Queues.h"
 #include <array>
 
 
@@ -19,8 +20,7 @@ struct atomCruncherInput
 	std::vector<atomGrid> grids;
 	// the thread watches this to know when to quit.
 	std::atomic<bool>* cruncherThreadActive;
-	// imQueue[queuePositions][pixelNum(flattened)]
-	//imageQueue* imQueue;
+	ThreadsafeQueue<NormalImage>* imageQueue;
 	// options
 	bool plotterActive;
 	bool plotterNeedsImages;

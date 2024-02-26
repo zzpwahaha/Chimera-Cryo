@@ -441,7 +441,6 @@ AndorCameraSettings AndorCameraSettingsControl::getCalibrationSettings( ){
 	callOptions.andor.picsPerRepetition = 1;
 	//callOptions.andor.readMode = 4;
 	callOptions.andor.repetitionsPerVariation = 100;
-	callOptions.andor.showPicsInRealTime = false;
 	callOptions.andor.temperatureSetting = -60;
 	callOptions.andor.totalVariations = 1;
 	callOptions.andor.triggerMode = AndorTriggerMode::mode::External;

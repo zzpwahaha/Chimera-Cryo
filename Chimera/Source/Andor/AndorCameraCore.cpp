@@ -7,6 +7,7 @@
 #include "ConfigurationSystems/ConfigSystem.h"
 #include "MiscellaneousExperimentOptions/Repetitions.h"
 #include <Andor/AndorCameraThreadWorker.h>
+#include <Andor/AndorCameraThreadImageGrabber.h>
 #include <PrimaryWindows/QtMainWindow.h>
 #include <PrimaryWindows/QtAndorWindow.h>
 #include <ExperimentThread/ExpThreadWorker.h>
@@ -137,29 +138,57 @@ AndorCameraCore::AndorCameraCore( bool safemode_opt ) : safemode( safemode_opt )
 	}
 }
 
+AndorCameraCore::~AndorCameraCore()
+{
+}
+
 void AndorCameraCore::initializeClass(IChimeraQtWindow* parent, chronoTimes* imageTimes){
-	threadInput.imageTimes = imageTimes;
-	threadInput.Andor = this;
-	threadInput.expectingAcquisition = false;
-	threadInput.safemode = safemode;
-	threadInput.runMutex = &camThreadMutex;
+	threadExpectingAcquisition = false;
+
+	threadWorkerInput.Andor = this;
+	threadWorkerInput.imageTimes = imageTimes;
 	// begin the camera wait thread.
-	AndorCameraThreadWorker* worker = new AndorCameraThreadWorker (&threadInput);
-	QThread* thread = new QThread;
-	worker->moveToThread (thread);
+	AndorCameraThreadWorker* worker = new AndorCameraThreadWorker (&threadWorkerInput);
+	QThread* workerThread = new QThread;
+	worker->moveToThread (workerThread);
 	parent->mainWin->connect (worker, &AndorCameraThreadWorker::notify,
 							  parent->mainWin, &QtMainWindow::handleNotification);
-
-	parent->andorWin->connect (worker, &AndorCameraThreadWorker::pictureTaken,
-							   parent->andorWin, &QtAndorWindow::onCameraProgress);
+	//parent->andorWin->connect (worker, &AndorCameraThreadWorker::pictureTaken,
+	//						   parent->andorWin, &QtAndorWindow::onCameraProgress);
 	parent->andorWin->connect(worker, &AndorCameraThreadWorker::error,
 		parent->andorWin, &QtAndorWindow::reportErr);
 
-	parent->mainWin->connect (thread, &QThread::started, worker, &AndorCameraThreadWorker::process);
-	parent->mainWin->connect (thread, &QThread::finished, thread, &QObject::deleteLater);
-	parent->mainWin->connect(thread, &QThread::finished, worker, &QObject::deleteLater);
-	thread->start (QThread::TimeCriticalPriority);
+	parent->mainWin->connect (workerThread, &QThread::started, worker, &AndorCameraThreadWorker::process);
+	parent->mainWin->connect (workerThread, &QThread::finished, workerThread, &QObject::deleteLater);
+	parent->mainWin->connect(workerThread, &QThread::finished, worker, &QObject::deleteLater);
+	workerThread->start (QThread::TimeCriticalPriority);
 
+
+	threadGrabberInput.picBufferQueue = &threadWorkerInput.picBufferQueue;
+	threadGrabberInput.Andor = this;
+	threadGrabberInput.imageTimes = imageTimes;
+	// begin the camera image grabber thread.
+	AndorCameraThreadImageGrabber* grabber = new AndorCameraThreadImageGrabber(&threadGrabberInput);
+	QThread* grabberThread = new QThread;
+	grabber->moveToThread(grabberThread);
+	parent->andorWin->connect(grabber, &AndorCameraThreadImageGrabber::pictureGrabbed,
+		parent->andorWin, &QtAndorWindow::onCameraProgress);
+	parent->andorWin->connect(grabber, &AndorCameraThreadImageGrabber::pauseExperiment,
+		parent->mainWin, &QtMainWindow::pauseExperiment);
+	parent->mainWin->connect(grabber, &AndorCameraThreadImageGrabber::notify,
+		parent->mainWin, &QtMainWindow::handleNotification);
+	parent->andorWin->connect(grabber, &AndorCameraThreadImageGrabber::error,
+		parent->andorWin, &QtAndorWindow::reportErr);
+
+	parent->mainWin->connect(grabberThread, &QThread::started, grabber, &AndorCameraThreadImageGrabber::process);
+	parent->mainWin->connect(grabberThread, &QThread::finished, grabberThread, &QObject::deleteLater);
+	parent->mainWin->connect(grabberThread, &QThread::finished, grabber, &QObject::deleteLater);
+	grabberThread->start(QThread::TimeCriticalPriority);
+}
+
+ThreadsafeQueue<NormalImage>* AndorCameraCore::getGrabberQueue()
+{
+	return &threadGrabberInput.imageQueue;
 }
 
 void AndorCameraCore::updatePictureNumber( unsigned __int64 newNumber ){
@@ -171,7 +200,7 @@ void AndorCameraCore::updatePictureNumber( unsigned __int64 newNumber ){
  */
 void AndorCameraCore::pauseThread(){
 	// andor should not be taking images anymore at this point.
-	threadInput.expectingAcquisition = false;
+	threadExpectingAcquisition = false;
 }
 
 /*
@@ -194,7 +223,7 @@ void AndorCameraCore::onFinish(){
 		tempImageBuffers[i] = nullptr;
 	}
 	cameraIsRunning = false;
-	threadInput.expectingAcquisition = false;
+	threadExpectingAcquisition = false;
 }
 
 void AndorCameraCore::setCalibrating( bool cal ){
@@ -238,14 +267,14 @@ std::vector<std::string> AndorCameraCore::getHorShiftSpeeds () {
 	return speeds;
 }
 
-void AndorCameraCore::waitForAcquisition(int pictureNumber, unsigned int timeout)
+void AndorCameraCore::waitForAcquisition(unsigned long long pictureNumber, unsigned int timeout)
 {
-	flume.waitBuffer(&tempImageBuffers[(pictureNumber) % numberOfImageBuffers], &bufferSize, timeout);
+	flume.waitBuffer(&tempImageBuffers[pictureNumber % numberOfImageBuffers], &bufferSize, timeout);
 }
 
-void AndorCameraCore::queueBuffers()
+void AndorCameraCore::queueBuffers(unsigned long long pictureNumber)
 {
-	flume.queueBuffer(acqBuffers[currentPictureNumber % numberOfAcqBuffers].data(), bufferSize);
+	flume.queueBuffer(acqBuffers[pictureNumber % numberOfAcqBuffers].data(), bufferSize);
 }
 
 /* 
@@ -308,25 +337,17 @@ void AndorCameraCore::armCamera( double& minKineticCycleTime ){
 
 	currentPictureNumber = 0;
 	cameraIsRunning = true;
-	//cameraIsArmed = true;
 
 	AT_64 ImageSizeBytes = 0;
 	flume.getInt(L"Image Size Bytes", &ImageSizeBytes);
 	bufferSize = static_cast<int>(ImageSizeBytes);
-	//Allocate a number of memory buffers to store frames
-	//acqBuffers.resize(numberOfAcqBuffers);
-	//tempImageBuffers.resize(numberOfImageBuffers);
 
 	for (int i = 0; i < numberOfAcqBuffers; i++) {
-		//acqBuffers[i] = new unsigned char[bufferSize];
 		acqBuffers[i].clear();
 		acqBuffers[i].resize(bufferSize);
 		tempImageBuffers[i] = nullptr;
 	}
-	//for (int i = 0; i < numberOfAcqBuffers; i++) {
-	//	flume.queueBuffer(acqBuffers[i].data(), bufferSize);
-	//}
-	flume.queueBuffer(acqBuffers[0].data(), bufferSize);
+	queueBuffers(0);
 
 	flume.setEnumString(L"CycleMode", L"Continuous");
 	flume.setEnumString(L"TriggerSource", L"D-Type Connector");
@@ -343,16 +364,13 @@ void AndorCameraCore::armCamera( double& minKineticCycleTime ){
 	// get the min time after setting everything else.
 	//minKineticCycleTime = getMinKineticCycleTime( );
 
-	cameraIsRunning = true;
-	std::unique_lock<std::timed_mutex> lock (camThreadMutex, std::chrono::milliseconds(1000));
-	if (!lock.owns_lock ())
-	{/* Then the thread couldn't get a lock on the spurious wakeup check, but that means that the thread is just
-	 waiting for an acquisition... should fix this behavior, but should be okay to continue.*/	}
-
 	 // remove the spurious wakeup check.
-	threadInput.expectingAcquisition = true;
+	threadExpectingAcquisition = true;
 	// notify the thread that the experiment has started..
-	threadInput.signaler.notify_all();
+	threadWorkerInput.picBufferQueue.clear();
+	threadGrabberInput.imageQueue.clear();
+	threadWorkerInput.signaler.notify_all();
+	threadGrabberInput.signaler.notify_all();
 	
 }
 
@@ -380,35 +398,18 @@ void AndorCameraCore::preparationChecks () {
 
 
 /* 
- * This function checks for new pictures, if they exist it gets them, and shapes them into the array which holds all of
- * the pictures for a given repetition.
+ * This function checks for new pictures as indicated by the image buffer tempImageBuffers[currentPictureNumber % numberOfImageBuffers], 
+ * and shapes them into the array which holds all of the pictures for a given experiment cycle, except continuousMode.
  */
 std::vector<Matrix<long>> AndorCameraCore::acquireImageData (){
 	try	{
-		//try	{
-		//	flume.checkForNewImages ();
-		//}
-		//catch (ChimeraError& err) {
-		//	try {
-		//		flume.andorErrorChecker (flume.queryStatus ());
-		//	}
-		//	catch (ChimeraError & err2){
-		//		throwNested ("Error seen while checking for new images: " + err.trace() 
-		//			+ ", Camera Status:" + err2.trace() + ", Camera is running bool: " + str(cameraIsRunning));
-		//	}
-		//	throwNested ("Error seen while checking for new images: " + err.trace ()
-		//		+ ", Camera Status: DRV_SUCCESS, Camera is running bool: " + str (cameraIsRunning));
-		//}
-		// each image processed from the call from a separate windows message
-		// If there is no data the acquisition must have been aborted
-		int experimentPictureNumber = runSettings.showPicsInRealTime ? 0
-			: ((currentPictureNumber) % runSettings.picsPerRepetition);
+		// each image processed from the call from imageGrabber thread
+		int experimentPictureNumber = (currentPictureNumber) % runSettings.picsPerRepetition;
 		if (runSettings.continuousMode) {
 			experimentPictureNumber = 0;
 		}
 		if (experimentPictureNumber == 0){
 			repImages.clear ();
-			//repImages.resize (runSettings.showPicsInRealTime ? 1 : runSettings.picsPerRepetition);
 		}
 		repImages.push_back(Matrix<long>());
 
@@ -417,12 +418,12 @@ std::vector<Matrix<long>> AndorCameraCore::acquireImageData (){
 		repImages[experimentPictureNumber] = Matrix<long>(imSettings.heightBinned(), imSettings.widthBinned(), 0);
 		if (!safemode){
 			try	{
-				//flume.getOldestImage(tempImage);
+				auto bufferNumber = currentPictureNumber % numberOfImageBuffers;
 				AT_64 Stride, Width, Height;
 				flume.getInt(L"AOIStride", &Stride);
 				flume.getInt(L"AOIWidth", &Width);
 				flume.getInt(L"AOIHeight", &Height);
-				if (tempImageBuffers[currentPictureNumber % numberOfImageBuffers] == nullptr) {
+				if (tempImageBuffers[bufferNumber] == nullptr) {
 					if (cameraIsRunning == true) {
 						throwNested("Andor camera image buffer is empty. Lowlevel bug???");
 					}
@@ -433,7 +434,7 @@ std::vector<Matrix<long>> AndorCameraCore::acquireImageData (){
 				for (AT_64 Row = 0; Row < Height; Row++) {
 					//Cast the raw image buffer to a 16-bit array. 
 					//...Assumes the PixelEncoding is 16-bit. 
-					unsigned short* ImagePixels = reinterpret_cast<unsigned short*>(tempImageBuffers[currentPictureNumber % numberOfImageBuffers]);
+					unsigned short* ImagePixels = reinterpret_cast<unsigned short*>(tempImageBuffers[bufferNumber]);
 					if (ImagePixels == nullptr) {
 						thrower("Andor image pointer is null. This should not happen during experiment but could happen when abort.");
 					}
@@ -441,7 +442,7 @@ std::vector<Matrix<long>> AndorCameraCore::acquireImageData (){
 					for (AT_64 Pixel = 0; Pixel < Width; Pixel++) {
 						tempImage (Row, Pixel) = ImagePixels[Pixel];
 					} //Use Stride to get the memory location of the next row. 
-					tempImageBuffers[currentPictureNumber % numberOfImageBuffers] += Stride;
+					tempImageBuffers[bufferNumber] += Stride;
 				}
 			}
 			catch (ChimeraError &e)	{
@@ -589,11 +590,11 @@ void AndorCameraCore::setExposures(int expoIdx){
 	runSettings.exposureTimes[expoIdx] = expo;
 }
 
-void AndorCameraCore::setExpRunningExposure()
+void AndorCameraCore::setExpRunningExposure(unsigned long long pictureNumber)
 {
 	if (runSettings.triggerMode != AndorTriggerMode::mode::ExternalExposure) {
-		setExposures((currentPictureNumber + 1) % expRunSettings.picsPerRepetition); // set exposure for the next image
-		qDebug() << "Set ExpRunningExposure to" << runSettings.exposureTimes[(currentPictureNumber + 1) % expRunSettings.picsPerRepetition];
+		setExposures(pictureNumber % expRunSettings.picsPerRepetition); // set exposure for the next image
+		qDebug() << "Set ExpRunningExposure to" << runSettings.exposureTimes[pictureNumber % expRunSettings.picsPerRepetition];
 		qDebug() << "Now exposure time is" << runSettings.exposureTime;
 	}
 }

@@ -130,6 +130,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Source\Andor\AndorCameraThreadImageGrabber.cpp" />
     <ClCompile Include="Source\ExperimentMonitoringAndStatus\InfluxTypes.cpp" />
     <ClCompile Include="Source\AnalogInput\AiOutput.cpp" />
     <ClCompile Include="Source\ExcessDialogs\AiSettingsDialog.cpp" />
@@ -198,6 +199,7 @@
     <QtMoc Include="Source\ExperimentMonitoringAndStatus\TemperatureMonitor.h" />
     <QtMoc Include="Source\CMOSCamera\FrameAverager.h" />
     <QtMoc Include="Source\ExcessDialogs\AiSettingsDialog.h" />
+    <QtMoc Include="Source\Andor\AndorCameraThreadImageGrabber.h" />
     <ClInclude Include="Source\ExperimentMonitoringAndStatus\InfluxTypes.h" />
     <ClInclude Include="Source\AnalogInput\AiOutput.h" />
     <ClInclude Include="Source\Andor\AndorBinningMode.h" />
@@ -208,6 +210,7 @@
     <ClInclude Include="Source\ExperimentThread\repeatManager.h" />
     <ClInclude Include="Source\GeneralFlumes\BoostUDP.h" />
     <ClInclude Include="Source\GeneralFlumes\WinSerialFlume.h" />
+    <ClInclude Include="Source\GeneralObjects\ThreadsafeQueue.h" />
     <ClInclude Include="Source\GeneralObjects\TreeItem.h" />
     <ClInclude Include="Source\GigaMOOG\GigaMoogCore.h" />
     <ClInclude Include="Source\GeneralFlumes\BoostAsyncSerial.h" />

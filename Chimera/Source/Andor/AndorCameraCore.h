@@ -32,6 +32,7 @@ class AndorCameraCore : public IDeviceCore{
 		AndorCameraCore& operator=(const AndorCameraCore&) = delete;
 		AndorCameraCore (const AndorCameraCore&) = delete;
 		AndorCameraCore(bool safemode_opt);
+		~AndorCameraCore();
 		AndorRunSettings getSettingsFromConfig (ConfigStream& configFile);
 		AndorRunSettings getAndorRunSettings();
 		void pauseThread();
@@ -41,7 +42,7 @@ class AndorCameraCore : public IDeviceCore{
 		void preparationChecks ();
 		void setTemperature();
 		void setExposures(int expoIdx);
-		void setExpRunningExposure(); // called during experiment in QtAdnorWindow::OnCameraProgress
+		void setExpRunningExposure(unsigned long long pictureNumber); // called during experiment in CameraThreadWorker
 		void setImageParametersToCamera();
 		double setFrameRate();
 		//double getMinKineticCycleTime( );
@@ -60,6 +61,7 @@ class AndorCameraCore : public IDeviceCore{
 		//static unsigned __stdcall cameraThread( void* voidPtr );		
 		std::string getSystemInfo();
 		void initializeClass(IChimeraQtWindow* parent, chronoTimes* imageTimes );
+		ThreadsafeQueue<NormalImage>* getGrabberQueue();
 		void setCalibrating( bool cal );
 		bool isCalibrating( );
 		void abortAcquisition ( );
@@ -78,8 +80,8 @@ class AndorCameraCore : public IDeviceCore{
 		std::vector<std::string> getHorShiftSpeeds ();
 
 
-		void waitForAcquisition(int pictureNumber, unsigned int timeout = AT_INFINITE);
-		void queueBuffers();
+		void waitForAcquisition(unsigned long long pictureNumber, unsigned int timeout = AT_INFINITE);
+		void queueBuffers(unsigned long long pictureNumber);
 		//void onFinish(); // Finish from acquisition, also signal waitAndorToFinish
 
 	private:
@@ -110,18 +112,20 @@ class AndorCameraCore : public IDeviceCore{
 		bool dataSetShouldBeValid = false;
 		unsigned __int64 currentPictureNumber;
 		unsigned __int64 currentRepetitionNumber;
-		std::timed_mutex camThreadMutex;
 		HANDLE plottingMutex;
-		std::vector<Matrix<long> > repImages;
+		std::vector<Matrix<long> > repImages; // images per one exp cycle
 		unsigned cameraThreadID = 0;
 
-		cameraThreadInput threadInput;
+		std::atomic<bool> threadExpectingAcquisition;
+		cameraThreadWorkerInput threadWorkerInput;
+		cameraThreadImageGrabberInput threadGrabberInput;
 
 		friend class AndorCameraThreadWorker;
+		friend class AndorCameraThreadImageGrabber;
 
 		//std::vector<unsigned char*> acqBuffers;
-		static const int numberOfAcqBuffers = 10;
-		static const int numberOfImageBuffers = 10;
+		static const int numberOfAcqBuffers = 20;
+		static const int numberOfImageBuffers = 20;
 		std::array<std::vector<unsigned char>, numberOfAcqBuffers> acqBuffers;
 		std::array<unsigned char*, numberOfImageBuffers> tempImageBuffers;
 		int bufferSize;

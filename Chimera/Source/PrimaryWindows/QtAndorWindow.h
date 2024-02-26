@@ -150,12 +150,13 @@ class QtAndorWindow : public IChimeraQtWindow{
 		std::mutex activePlotMutex;
 		unsigned mostRecentPicNum = 0;
 		unsigned currentPictureNum = 0;
+		std::vector<Matrix<long>> currentRawPictures; // store pictures within one experiment cycle
 		Matrix<long> avgBackground;
 	Q_SIGNALS:
-		void newImage (NormalImage);
+		//void newImage (NormalImage);
 
 	public Q_SLOTS:
-		void onCameraProgress (int picNum);
+		void onCameraProgress(NormalImage);
 		LRESULT onCameraCalFinish (WPARAM wParam, LPARAM lParam);
 		void handlePrepareForAcq (AndorRunSettings* lparam, analysisSettings aSettings);
 		void completePlotterStart ();

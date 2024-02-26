@@ -352,45 +352,31 @@ bool QtAndorWindow::cameraIsRunning (){
 	return andor.isRunning ();
 }
 
-void QtAndorWindow::onCameraProgress (int picNumReported){
-	//andor.setExpRunningExposure(); 
-	//andor.queueBuffers();
+void QtAndorWindow::onCameraProgress(NormalImage picGrabbed){
 	auto timerE = QElapsedTimer();
 	timerE.start();
+	unsigned long long picNumReported = picGrabbed.picStat.picNum;
 	unsigned picNum = currentPictureNum;
 	currentPictureNum++;
 	if (picNum % 2 == 1){
 		mainThreadStartTimes.push_back (std::chrono::high_resolution_clock::now ());
 	}
 	AndorRunSettings curSettings = andor.getAndorRunSettings ();
-	if (picNumReported == -1){
-		// last picture.
-		picNum = curSettings.totalPicsInExperiment();
-	}
-	if (picNumReported != picNum && picNumReported != -1){
-		//if (curSettings.acquisitionMode != AndorRunModes::mode::Video){
-		//	//reportErr ( "WARNING: picture number reported by andor isn't matching the"
-		//	//								  "camera window record?!?!?!?!?" );
-		//}
+	if (picNumReported != picNum){
 		reportErr("WARNING: picture number reported by andor isn't matching the"
 			"camera window record?!?!?!?!?");
 	}
-	// need to call this before acquireImageData().
-	andor.updatePictureNumber (picNum);
-	qDebug() << "Start to acquired Image data" << picNum << "and queued Buffers for image " << (picNum + 1) << " at time " << timerE.elapsed() << " ms";
-	std::vector<Matrix<long>> rawPicData;
-	try	{
-		rawPicData = andor.acquireImageData ();
-		//rawPicData[0].updateString(); // only for debugging purposes, very resource heavy
-		andor.setExpRunningExposure(); // may be this need to be brought to the start of this function so that it is most efficient for image requeue
-		andor.queueBuffers();
+	if (picNum % curSettings.picsPerRepetition == 0) {
+		currentRawPictures.clear();
+		currentRawPictures.reserve(curSettings.picsPerRepetition);
 	}
-	catch (ChimeraError& err){
-		reportErr (qstr (err.trace ()));
-		mainWin->pauseExperiment ();
-		return;
-	}
-	qDebug() << "acquired Image data and queued Buffers for image " << picNum << " at time " << timerE.elapsed() << " ms";
+	//if (picNumReported == curSettings.totalPicsInExperiment() - 1) {
+	//	// last picture.
+	//	picNum = curSettings.totalPicsInExperiment();
+	//}
+	currentRawPictures.push_back(picGrabbed.image);
+	auto& rawPicData = currentRawPictures;
+
 	std::vector<Matrix<long>> calPicData (rawPicData.size ());
 	if (andorSettingsCtrl.getUseCal () && avgBackground.size () == rawPicData.front ().size ()){
 		for (auto picInc : range (rawPicData.size ())){
@@ -406,58 +392,26 @@ void QtAndorWindow::onCameraProgress (int picNumReported){
 	if (picNum % 2 == 1){
 		imageGrabTimes.push_back (std::chrono::high_resolution_clock::now ());
 	}
-	auto repVar = andor.getCurrentRepVarNumber(picNum);
-	size_t currentActivePicNum = curSettings.continuousMode ? 0 : (picNum/* - 1*/) % curSettings.picsPerRepetition;
+	size_t currentActivePicNum = curSettings.continuousMode ? 0 : picNum % curSettings.picsPerRepetition;
+	//emit newImage({ {picNum, repVar.first, repVar.second}, calPicData[currentActivePicNum] });
 
-	emit newImage({ {picNum, repVar.first, repVar.second}, calPicData[currentActivePicNum] });
+	/// send picture data to plotter
 	qDebug() << "send Image data for drawing for image " << picNum << " at time " << timerE.elapsed() << " ms";
 	auto picsToDraw = andorSettingsCtrl.getImagesToDraw (calPicData);
 	try
 	{
-		if (realTimePic){
-			std::pair<int, int> minMax;
-			// draw the most recent pic.
-			minMax = stats.update (picsToDraw.back (), currentActivePicNum, selectedPixel,
-				picNum / curSettings.picsPerRepetition,
-				curSettings.totalPicsInExperiment () / curSettings.picsPerRepetition);
-			QPainter painter (this);
-			pics.drawBitmap (picsToDraw.back (), minMax, currentActivePicNum,
-				analysisHandler.getRunningSettings ().grids, picNum, 
-				analysisHandler.getRunningSettings ().displayGridOption, painter);
+		std::pair<int, int> minMax;
+		// draw the most recent pic.
+		minMax = stats.update (picsToDraw.back (), currentActivePicNum, selectedPixel,
+			picNum / curSettings.picsPerRepetition,
+			curSettings.totalPicsInExperiment () / curSettings.picsPerRepetition);
+		QPainter painter (this);
+		pics.drawBitmap (picsToDraw.back (), minMax, currentActivePicNum,
+			analysisHandler.getRunningSettings ().grids, picNum, 
+			analysisHandler.getRunningSettings ().displayGridOption, painter);
 			
-			timer.update(picNum / curSettings.picsPerRepetition, curSettings.repetitionsPerVariation,
-				curSettings.totalVariations, curSettings.picsPerRepetition, curSettings.repFirst);
-			
-		}
-		else if (picNum % curSettings.picsPerRepetition == 0){
-			int counter = 0;
-			for (auto data : picsToDraw){
-				std::pair<int, int> minMax;
-				minMax = stats.update (data, counter, selectedPixel, picNum / curSettings.picsPerRepetition,
-					curSettings.totalPicsInExperiment () / curSettings.picsPerRepetition);
-				if (minMax.second > 50000){
-					numExcessCounts++;
-					if (numExcessCounts > 2){
-						// POTENTIALLY DANGEROUS TO CAMERA.
-						// AUTO PAUSE THE EXPERIMENT. 
-						// This can happen if a laser, particularly the axial raman laser, is left on during an image.
-						// cosmic rays may occasionally trip it as well.
-						reportErr ("No MOT and andor win wants auto pause!");
-						commonFunctions::handleCommonMessage (ID_ACCELERATOR_F2, this);
-						errBox ("EXCCESSIVE CAMERA COUNTS DETECTED!!!");
-					}
-				}
-				else{
-					numExcessCounts = 0;
-				}
-				QPainter painter (this);
-				pics.drawBitmap ( data, minMax, counter, analysisHandler.getRunningSettings ().grids, picNum+counter,
-								  analysisHandler.getRunningSettings ().displayGridOption, painter );
-				counter++;
-			}
-			timer.update (picNum / curSettings.picsPerRepetition, curSettings.repetitionsPerVariation,
-				curSettings.totalVariations, curSettings.picsPerRepetition, curSettings.repFirst);
-		}
+		timer.update(picNum / curSettings.picsPerRepetition, curSettings.repetitionsPerVariation,
+			curSettings.totalVariations, curSettings.picsPerRepetition, curSettings.repFirst);
 	}
 	catch (ChimeraError& err){
 		reportErr (qstr (err.trace ()));
@@ -468,7 +422,7 @@ void QtAndorWindow::onCameraProgress (int picNumReported){
 			reportErr (qstr (err.trace ()));
 		}
 	}
-	// write the data to the file.
+	/// write the data to the file.
 	qDebug() << "write image to file for image " << picNum << " at time " << timerE.elapsed() << " ms";
 	if (true/*curSettings.acquisitionMode != AndorRunModes::mode::Video*/){
 		try	{
@@ -778,6 +732,7 @@ void QtAndorWindow::completeCruncherStart () {
 	}
 	auto cruncherInput = std::make_unique<atomCruncherInput>();
 	cruncherInput->plotterActive = plotThreadActive;
+	cruncherInput->imageQueue = andor.getGrabberQueue();
 	cruncherInput->imageDims = andorSettingsCtrl.getRunningSettings ().imageSettings;
 	atomCrunchThreadActive = true;
 	cruncherInput->plotterNeedsImages = true;// input.masterInput->plotterInput->needsCounts;
@@ -793,18 +748,15 @@ void QtAndorWindow::completeCruncherStart () {
 	cruncherInput->atomThresholdForSkip = mainWin->getMainOptions ().atomSkipThreshold;
 	cruncherInput->rearrangerConditionWatcher = &rearrangerConditionVariable;
 
-	if (!andorSettingsCtrl.getConfigSettings().andor.continuousMode) {
-		atomCruncherWorker = new CruncherThreadWorker(std::move(cruncherInput));
-		QThread* thread = new QThread;
-		atomCruncherWorker->moveToThread(thread);
-		connect(thread, &QThread::started, atomCruncherWorker, &CruncherThreadWorker::init);
-		connect(mainWin->getExpThread(), &QThread::finished, thread, &QThread::quit);
-		connect(thread, &QThread::finished, atomCruncherWorker, &CruncherThreadWorker::deleteLater);
-		connect(atomCruncherWorker, &QThread::destroyed, thread, &CruncherThreadWorker::deleteLater);
-
-		connect(this, &QtAndorWindow::newImage, atomCruncherWorker, &CruncherThreadWorker::handleImage);
-		thread->start();
-	}
+	atomCruncherWorker = new CruncherThreadWorker(std::move(cruncherInput));
+	QThread* thread = new QThread;
+	atomCruncherWorker->moveToThread(thread);
+	connect(thread, &QThread::started, atomCruncherWorker, &CruncherThreadWorker::init);
+	connect(mainWin->getExpThread(), &QThread::finished, thread, &QThread::quit);
+	connect(thread, &QThread::finished, atomCruncherWorker, &CruncherThreadWorker::deleteLater);
+	connect(atomCruncherWorker, &QThread::destroyed, thread, &CruncherThreadWorker::deleteLater);
+	//connect(this, &QtAndorWindow::newImage, atomCruncherWorker, &CruncherThreadWorker::handleImage);
+	thread->start();
 }
 
 void QtAndorWindow::completePlotterStart () {
