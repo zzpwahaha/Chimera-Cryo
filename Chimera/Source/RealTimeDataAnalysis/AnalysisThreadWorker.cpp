@@ -2,8 +2,6 @@
 #include "AnalysisThreadWorker.h"
 #include "DataAnalysisControl.h"
 #include <vector>
-#include <qdebug.h>
-#include <qthread.h>
 
 AnalysisThreadWorker::AnalysisThreadWorker (std::unique_ptr<realTimePlotterInput> input_)
 	:input(std::move(input_))
@@ -16,8 +14,6 @@ void AnalysisThreadWorker::handleNewPic (atomQueue atomPics) {
 	/// Start loop waiting for plots
 	// if no image, continue. 0th element is queue, 2nd element is grid num, always akot least 1 grid.
 	/// get all the atom data
-	qDebug() << "AnalysisThreadWorker::handleNewPic receive " << atomPics[0].picStat.picNum << " from " << QThread::currentThreadId();
-
 	bool thereIsAtLeastOneAtom = false;
 	for (auto gridCount : range (input->grids.size ())) {
 		unsigned groupNum = input->grids[gridCount].numAtoms();
@@ -80,7 +76,6 @@ void AnalysisThreadWorker::handleNewPix (PixListQueue pixlist) {
 	/// Start loop waiting for plots
 	// if no image, continue. 0th element is queue, 2nd element is grid num, always akot least 1 grid.
 	/// get all the atom data
-	qDebug() << "AnalysisThreadWorker::handleNewPix receive " << pixlist[0].picStat.picNum << " from " << QThread::currentThreadId();
 	if (!input->needsCounts) {
 		return;
 	}
