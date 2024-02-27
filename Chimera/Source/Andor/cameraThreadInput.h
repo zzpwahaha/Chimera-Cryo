@@ -29,5 +29,6 @@ struct cameraThreadImageGrabberInput {
 	// This thread-safe queue is being pop-ed by atomCrucherThread as atomCruncherInput is holding a pointer to this
 	ThreadsafeQueue<NormalImage> imageQueue;
 	AndorCameraCore* Andor;
+	std::atomic<bool>* cruncherThreadActive; // for terminating cruncherThread when acquisition is stopped either by user or normal finish
 	std::vector<std::chrono::time_point<std::chrono::high_resolution_clock>>* imageTimes;
 };

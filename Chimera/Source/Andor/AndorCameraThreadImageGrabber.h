@@ -11,7 +11,7 @@ public:
 
 private:
 	cameraThreadImageGrabberInput* input;
-
+	void prepareCruncherExit();
 public slots:
 	void process();
 

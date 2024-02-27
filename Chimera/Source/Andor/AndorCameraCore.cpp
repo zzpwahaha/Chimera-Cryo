@@ -142,7 +142,7 @@ AndorCameraCore::~AndorCameraCore()
 {
 }
 
-void AndorCameraCore::initializeClass(IChimeraQtWindow* parent, chronoTimes* imageTimes){
+void AndorCameraCore::initializeClass(IChimeraQtWindow* parent, std::atomic<bool>* crunchThreadActive, chronoTimes* imageTimes){
 	threadExpectingAcquisition = false;
 
 	threadWorkerInput.Andor = this;
@@ -166,6 +166,7 @@ void AndorCameraCore::initializeClass(IChimeraQtWindow* parent, chronoTimes* ima
 
 	threadGrabberInput.picBufferQueue = &threadWorkerInput.picBufferQueue;
 	threadGrabberInput.Andor = this;
+	threadGrabberInput.cruncherThreadActive = crunchThreadActive;
 	threadGrabberInput.imageTimes = imageTimes;
 	// begin the camera image grabber thread.
 	AndorCameraThreadImageGrabber* grabber = new AndorCameraThreadImageGrabber(&threadGrabberInput);

@@ -40,7 +40,7 @@ void QtAndorWindow::initializeWidgets (){
 
 	QVBoxLayout* layout1 = new QVBoxLayout(this);
 	layout1->setContentsMargins(0, 0, 0, 0);
-	andor.initializeClass (this, &imageTimes);
+	andor.initializeClass(this, &atomCrunchThreadActive, &imageTimes);
 	alerts.alertMainThread (0);
 	alerts.initialize (this);
 	analysisHandler.initialize (this);
@@ -111,6 +111,8 @@ void QtAndorWindow::manualArmCamera () {
 void QtAndorWindow::handlePrepareForAcq (AndorRunSettings* lparam, analysisSettings aSettings){
 	try {
 		reportStatus ("Preparing Andor Window for Acquisition...\n");
+		currentPictureNum = 0;
+		currentRawPictures.clear();
 		AndorRunSettings* settings = (AndorRunSettings*)lparam;
 		analysisHandler.setRunningSettings (aSettings);
 		armCameraWindow (settings);
@@ -894,7 +896,6 @@ std::string QtAndorWindow::getStartMessage (){
 }
 
 void QtAndorWindow::fillMasterThreadInput (ExperimentThreadInput* input){
-	currentPictureNum = 0;
 	// starting a not-calibration, so reset this.
 	justCalibrated = false;
 	input->rearrangerLock = &rearrangerLock;

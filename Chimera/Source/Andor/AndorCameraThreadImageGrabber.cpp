@@ -1,11 +1,23 @@
 #include "stdafx.h"
 #include "Andor/AndorCameraThreadImageGrabber.h"
 #include <Andor/AndorCameraCore.h>
+#include <qdebug.h>
+#include <qthread.h>
 
 AndorCameraThreadImageGrabber::AndorCameraThreadImageGrabber(cameraThreadImageGrabberInput* input_)
 	:input(input_) {};
 
-AndorCameraThreadImageGrabber::~AndorCameraThreadImageGrabber() {};
+AndorCameraThreadImageGrabber::~AndorCameraThreadImageGrabber() {}
+
+void AndorCameraThreadImageGrabber::prepareCruncherExit()
+{
+	input->Andor->threadExpectingAcquisition = false;
+	*input->cruncherThreadActive = false;
+	// this will invoke cruncherThread and it will then detect cruncherThreadActive=false and therefore quit (-1 is not being recongnized)
+	input->imageQueue.push({ {-1ULL, 0, 0}, Matrix<long>() });
+	qDebug() << "AndorCameraThreadImageGrabber::prepareCruncherExit cruncherThreadActive " << *input->cruncherThreadActive << " from " << QThread::currentThreadId();
+}
+
 
 void AndorCameraThreadImageGrabber::process() 
 {
@@ -15,11 +27,18 @@ void AndorCameraThreadImageGrabber::process()
 		// wait until/unless camera is ready to take images. The signaler should be waked before worker's so that the grabber can wait on 'pop'
 		while (!input->Andor->threadExpectingAcquisition) {
 			input->signaler.wait(lock);
+			input->imageQueue.clear();
+			pictureNumber = 0;
 		}
 		auto popPictureNumber = input->picBufferQueue->pop();
+		if (!input->Andor->cameraIsRunning) {
+			// aborted by user and get rewake-ed up by worker thread
+			prepareCruncherExit();
+			continue;
+		}
 		if (popPictureNumber != pictureNumber) {
-			emit error("AndorCameraThreadImageGrabber error: \r\n The pop-ed pictureNumber from WorkerThread is: " + qstr(popPictureNumber)
-				+ ", but the expected pictureNumber is: " + qstr(pictureNumber)
+			thrower("AndorCameraThreadImageGrabber error: \r\n The pop-ed pictureNumber from WorkerThread is: " + str(popPictureNumber)
+				+ ", but the expected pictureNumber is: " + str(pictureNumber)
 				+ ". This is a low-level error as no other thread should be able to pop the picBufferQueue and the order should be FIFO.", 0);
 		}
 		input->Andor->updatePictureNumber(pictureNumber);
@@ -35,9 +54,14 @@ void AndorCameraThreadImageGrabber::process()
 		catch (ChimeraError& err) {
 			emit error(err.qtrace(), 0);
 			emit pauseExperiment();
-			return;
+			prepareCruncherExit();
+			continue;
 		}
 		pictureNumber++;
+		if (pictureNumber == input->Andor->runSettings.totalPicsInExperiment()) {
+			// get the last picture. acquisition is over 
+			prepareCruncherExit();
+		}
 	}
 
 

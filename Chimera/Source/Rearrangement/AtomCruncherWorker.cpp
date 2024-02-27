@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include <Rearrangement/AtomCruncherWorker.h>
 #include <Rearrangement/atomCruncherInput.h>
+#include <qdebug.h>
+#include <qthread.h>
 
 CruncherThreadWorker::CruncherThreadWorker (std::unique_ptr<atomCruncherInput> input_) 
 	: input(std::move(input_)) 
@@ -99,6 +101,10 @@ void CruncherThreadWorker::handleImage (){
 		//	input->catchPicTime->push_back (chronoClock::now ());
 		//}
 		auto image = input->imageQueue->pop();
+		if (!(*input->cruncherThreadActive)) {
+			qDebug() << "CruncherThreadWorker::handleImage cruncherThreadActive " << *input->cruncherThreadActive << " from " << QThread::currentThreadId();
+			break; // signals for exiting this function so that the thread can be released
+		}
 		// tempImagePixels[grid][pixel]; only contains the counts for the pixels being monitored.
 		PixListQueue tempImagePixels(input->grids.size());
 		// tempAtomArray[grid][pixel]; only contains the boolean true/false of whether an atom passed a threshold or not. 
@@ -145,6 +151,7 @@ void CruncherThreadWorker::handleImage (){
 		}
 		emit atomArray(tempAtomArray);
 		emit pixArray(tempImagePixels);
+		qDebug() << "CruncherThreadWorker::handleImage emit "<< tempAtomArray[0].picStat.picNum << " from " << QThread::currentThreadId();
 		imageCount++;
 	}
 }

@@ -33,6 +33,8 @@ void AndorCameraThreadWorker::process (){
 		 // input->signaler.wait( lock, [input]() { return input->expectingAcquisition; } ); // equivalent to code below, check first before lock
 		while (!input->Andor->threadExpectingAcquisition) {
 			input->signaler.wait (lock);
+			pictureNumber = 0;
+			armed = false;
 		}
 		if (!input->Andor->safemode){
 			try	{
@@ -40,8 +42,7 @@ void AndorCameraThreadWorker::process (){
 					// get the last picture. acquisition is over 					
 					// make sure the thread waits when it hits the condition variable.
 					input->Andor->threadExpectingAcquisition = false;
-					pictureNumber = 0;
-					armed = false;
+					continue;
 				}
 				else{
 					while (true) {
@@ -57,8 +58,6 @@ void AndorCameraThreadWorker::process (){
 								else {
 									qDebug() << "input->Andor->waitForAcquisition time out for 1000ms, camera NOT running, will abort and reset pic counter";
 									input->Andor->threadExpectingAcquisition = false;
-									pictureNumber = 0;
-									armed = false;
 								}
 							}
 							else {
@@ -70,13 +69,12 @@ void AndorCameraThreadWorker::process (){
 					if (pictureNumber % 2 == 0) {
 						(*input->imageTimes).push_back (std::chrono::high_resolution_clock::now ());
 					}
-					qDebug() << "From Worker thread: get image number" << pictureNumber << " at " << (*input->imageTimes).back().time_since_epoch().count() - (*input->imageTimes)[0].time_since_epoch().count();
+					qDebug() << "From Worker thread: get image number" << pictureNumber << " at " << std::chrono::high_resolution_clock::now().time_since_epoch().count()/*(*input->imageTimes).back().time_since_epoch().count()*/ - (*input->imageTimes)[0].time_since_epoch().count();
 					armed = true;
 					if (!input->Andor->cameraIsRunning) {
 						// aborted by user
 						input->Andor->threadExpectingAcquisition = false;
-						pictureNumber = 0;
-						armed = false;
+						input->picBufferQueue.push(-1ULL); // Wake grabber thread with '-1' as arguement (-1 is not being recongnized but just as a signaler) and grabber will reset its counter
 						qDebug() << "CameraThreadWorker aborted from user by awakening it again from the waitForAcquisition";
 					}
 					else {
