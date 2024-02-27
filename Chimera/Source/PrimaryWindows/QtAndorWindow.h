@@ -41,11 +41,8 @@ class QtAndorWindow : public IChimeraQtWindow{
 		void handleBumpAnalysis (profileSettings finishedProfile);
 		/// directly called by the message map or 1 simple step removed.
 		void wakeRearranger ();
-		void handleSpecialGreaterThanMaxSelection ();
-		void handleSpecialLessThanMinSelection ();
 		void readImageParameters ();
 		void passSetTemperaturePress ();
-		void passAlwaysShowGrid ();
 
 		void setDataType (std::string dataType);
 		/// auxiliary functions.
@@ -70,7 +67,6 @@ class QtAndorWindow : public IChimeraQtWindow{
 		void handlePictureSettings ();
 		bool cameraIsRunning ();
 		void abortCameraRun ();
-		void handleAutoscaleSelection ();
 		void assertOff ();
 		void assertDataFileClosed ();
 		void prepareAtomCruncher (AllExperimentInput& input);
@@ -78,7 +74,6 @@ class QtAndorWindow : public IChimeraQtWindow{
 		friend void commonFunctions::handleCommonMessage (int msgID, IChimeraQtWindow* win);
 		bool wantsAutoPause ();
 		std::atomic<bool>* getSkipNextAtomic ();
-		void stopPlotter ();
 		void stopSound ();
 		void handleImageDimsEdit ();
 		void loadCameraCalSettings (AllExperimentInput& input);
@@ -112,7 +107,6 @@ class QtAndorWindow : public IChimeraQtWindow{
         Ui::QtAndorWindow* ui;
 
 		bool justCalibrated = false;
-		unsigned numExcessCounts = 0;
 		AndorCameraCore andor;
 		AndorCameraSettingsControl andorSettingsCtrl;
 		PictureManager pics;
@@ -125,29 +119,17 @@ class QtAndorWindow : public IChimeraQtWindow{
 		DataLogger dataHandler;
 		std::vector<QCustomPlotCtrl*> mainAnalysisPlots;
 		coordinate selectedPixel = { 0,0 };
-		// some picture menu options
-		bool autoScalePictureData;
-		bool alwaysShowGrid;
-		bool specialLessThanMin;
-		bool specialGreaterThanMax;
-		bool realTimePic;
-		// plotting stuff;
-		std::atomic<HANDLE> plotThreadHandle;
+		
+		// rearrange stuff;
 		std::condition_variable rearrangerConditionVariable;
-		std::mutex plotLock;
+		//std::mutex plotLock;
 		std::mutex rearrangerLock;
 
 		dataPoint mostRecentAnalysisResult;
-		// 
-		HANDLE atomCruncherThreadHandle;
+		
 		std::atomic<bool> atomCrunchThreadActive;
-		// 
-		std::atomic<bool> plotThreadActive;
-		std::atomic<bool> plotThreadAborting = false;
 		std::atomic<bool> skipNext = false;
-		std::vector<double> plotterKey;
 		chronoTimes imageTimes, imageGrabTimes, mainThreadStartTimes, crunchSeesTimes, crunchFinTimes;
-		std::mutex activePlotMutex;
 		unsigned mostRecentPicNum = 0;
 		unsigned currentPictureNum = 0;
 		std::vector<Matrix<long>> currentRawPictures; // store pictures within one experiment cycle

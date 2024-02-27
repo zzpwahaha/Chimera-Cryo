@@ -20,11 +20,9 @@ struct atomCruncherInput
 	std::vector<atomGrid> grids;
 	// the thread watches this to know when to quit.
 	std::atomic<bool>* cruncherThreadActive;
-	bool andorContinuousMode;
 	ThreadsafeQueue<NormalImage>* imageQueue;
 	// options
-	bool plotterActive;
-	bool plotterNeedsImages;
+	bool andorContinuousMode;
 	bool rearrangerActive;
 	unsigned picsPerRep;
 	unsigned atomThresholdForSkip = UINT_MAX;

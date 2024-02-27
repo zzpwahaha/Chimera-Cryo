@@ -7,8 +7,7 @@
 
 PictureManager::PictureManager ( bool histOption, std::string configurationFileDelimiter, bool autoscaleDefault, 
 	Qt::TransformationMode mode)
-	: pictures{ {{histOption, mode}, {false, mode}, {false, mode}, {false, mode} } }, configDelim (configurationFileDelimiter),
-	autoScalePictures (autoscaleDefault ){
+	: pictures{ {{histOption, mode}, {false, mode}, {false, mode}, {false, mode} } }, configDelim (configurationFileDelimiter) {
 }
 
 void PictureManager::setSoftwareAccumulationOptions ( std::array<softwareAccumulationOption, 4> opts ){
