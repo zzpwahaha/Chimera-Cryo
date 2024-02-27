@@ -372,10 +372,9 @@ void QtAndorWindow::onCameraProgress(NormalImage picGrabbed){
 		currentRawPictures.clear();
 		currentRawPictures.reserve(curSettings.picsPerRepetition);
 	}
-	//if (picNumReported == curSettings.totalPicsInExperiment() - 1) {
-	//	// last picture.
-	//	picNum = curSettings.totalPicsInExperiment();
-	//}
+	if (curSettings.continuousMode) {
+		currentRawPictures.clear(); // continuesMode only stores the latest image, otherwise need to adapt andorSettingsCtrl.getImagesToDraw
+	}
 	currentRawPictures.push_back(picGrabbed.image);
 	auto& rawPicData = currentRawPictures;
 
@@ -735,7 +734,8 @@ void QtAndorWindow::completeCruncherStart () {
 	auto cruncherInput = std::make_unique<atomCruncherInput>();
 	cruncherInput->plotterActive = plotThreadActive;
 	cruncherInput->imageQueue = andor.getGrabberQueue();
-	cruncherInput->imageDims = andorSettingsCtrl.getRunningSettings ().imageSettings;
+	cruncherInput->imageDims = andorSettingsCtrl.getRunningSettings().imageSettings;
+	cruncherInput->andorContinuousMode = andorSettingsCtrl.getRunningSettings ().continuousMode;
 	atomCrunchThreadActive = true;
 	cruncherInput->plotterNeedsImages = true;// input.masterInput->plotterInput->needsCounts;
 	cruncherInput->cruncherThreadActive = &atomCrunchThreadActive;

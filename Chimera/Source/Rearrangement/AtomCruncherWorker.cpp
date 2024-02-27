@@ -102,6 +102,10 @@ void CruncherThreadWorker::handleImage (){
 		if (!(*input->cruncherThreadActive)) {
 			break; // signals for exiting this function so that the thread can be released
 		}
+		if (input->andorContinuousMode) {
+			// if in continuousMode, currently NOT doing any rearrangment nor realtimeAnalysis, but still pop the queue so that it does not accumulate
+			continue;
+		}
 		// tempImagePixels[grid][pixel]; only contains the counts for the pixels being monitored.
 		PixListQueue tempImagePixels(input->grids.size());
 		// tempAtomArray[grid][pixel]; only contains the boolean true/false of whether an atom passed a threshold or not. 
