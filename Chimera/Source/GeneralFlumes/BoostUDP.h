@@ -8,7 +8,7 @@
 class BoostUDP
 {
 public:
-	BoostUDP(std::string IPAddress, int port);
+	BoostUDP(bool safemode, std::string IPAddress, int port);
 	~BoostUDP();
 
 	void setReadCallback(const boost::function<void(int)> &read_callback);
@@ -18,6 +18,12 @@ public:
 	// These two function is not used and should be tested before deciding to invoke
 	void writeVector(std::vector<std::vector<unsigned char>>);
 	void writeVector(std::vector<std::vector<int>>);
+
+public:
+	const bool safemode;
+	const std::string IPAddress;
+	const int port;
+
 private:
 	boost::asio::io_service io_service_;
 	std::unique_ptr<boost::asio::ip::udp::socket> socket_;

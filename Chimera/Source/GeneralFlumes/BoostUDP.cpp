@@ -2,11 +2,13 @@
 #include "BoostUDP.h"
 
 
-BoostUDP::BoostUDP(std::string IPAddress, int port)
+BoostUDP::BoostUDP(bool safemode, std::string IPAddress, int port)
+	: safemode(safemode)
+	, IPAddress(IPAddress)
+	, port(port)
 {
-	if (port == -1) {
+	if (safemode) {
 		return;
-		//handle AWG safemode.
 	}
 
 	socket_ = std::make_unique<boost::asio::ip::udp::socket>(io_service_);
@@ -20,6 +22,9 @@ BoostUDP::BoostUDP(std::string IPAddress, int port)
 
 BoostUDP::~BoostUDP()
 {
+	if (safemode) {
+		return;
+	}
 	io_service_.stop();
 
 	if (socket_) {
@@ -55,6 +60,9 @@ void BoostUDP::readhandler(const boost::system::error_code & error, std::size_t 
 
 void BoostUDP::read()
 {
+	if (safemode) {
+		return;
+	}
 	// Invokes the readhandler() function with two arguments: 
 	// a value of type boost::system::error_code indicating whether the operation succeeded or failed, and 
 	// a size_t value bytes_transferred specifying the number of bytes received.
@@ -72,6 +80,9 @@ void BoostUDP::read()
 
 void BoostUDP::write(std::vector<unsigned char> data)
 {
+	if (safemode) {
+		return;
+	}
 	if (!socket_->is_open()) {
 		thrower("UDP socket has not been opened");
 	}
@@ -107,6 +118,9 @@ void BoostUDP::write(std::vector<int> data)
 
 void BoostUDP::writeVector(std::vector<std::vector<unsigned char>> data)
 {
+	if (safemode) {
+		return;
+	}
 	if (!socket_->is_open()) {
 		thrower("UDP socket has not been opened");
 	}

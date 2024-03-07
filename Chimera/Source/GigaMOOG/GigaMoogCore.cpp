@@ -6,14 +6,16 @@
 #include "MessagePrinter.h" 
 #include "MessageSender.h" 
 
-GigaMoogCore::GigaMoogCore(bool safemode, std::string portID, int baudrate)
-	: fpga(safemode, portID, baudrate, 8, 
-		boost::asio::serial_port_base::stop_bits::one,
-		boost::asio::serial_port_base::parity::none,
-		boost::asio::serial_port_base::flow_control::none)
-{
+//GigaMoogCore::GigaMoogCore(bool safemode, std::string portID, int baudrate)
+//	: fpga(safemode, portID, baudrate, 8, 
+//		boost::asio::serial_port_base::stop_bits::one,
+//		boost::asio::serial_port_base::parity::none,
+//		boost::asio::serial_port_base::flow_control::none)
+//{}
 
-}
+GigaMoogCore::GigaMoogCore(bool safemode, std::string IPAddress, int port)
+	: fpga(safemode, IPAddress, port)
+{}
 
 std::string GigaMoogCore::getSettingsFromConfig(ConfigStream& configStream)
 {
@@ -90,15 +92,15 @@ void GigaMoogCore::programGMoogNow(std::string fileAddr, std::vector<parameterTy
 
 void GigaMoogCore::disconnectPort()
 {
-	fpga.disconnect();
+	//fpga.disconnect();
 }
 
 void GigaMoogCore::reconnectPort()
 {
-	fpga.reconnect();
+	//fpga.reconnect();
 }
 
-void GigaMoogCore::analyzeMoogScript(std::string fileAddr, std::vector<parameterType>& variables, UINT variation)
+void GigaMoogCore::analyzeMoogScript(std::string fileAddr, std::vector<parameterType>& variables, unsigned variation)
 {
 	ScriptStream currentMoogScript;
 	ExpThreadWorker::loadGMoogScript(fileAddr, currentMoogScript);
@@ -112,10 +114,26 @@ void GigaMoogCore::analyzeMoogScript(std::string fileAddr, std::vector<parameter
 	}
 	std::string word;
 	currentMoogScript >> word;
-	std::vector<UINT> totalRepeatNum, currentRepeatNum;
+	std::vector<unsigned> totalRepeatNum, currentRepeatNum;
 	std::vector<std::streamoff> repeatPos;
 	// the analysis loop. 
 
+	if (moveManager.analyzeMoogScript(word, currentMoogScript, ms, variables, variation)) {}
+	else if (analyzeMoogScript(word, currentMoogScript, ms, variables, variation)) {}
+	else {
+		thrower("ERROR: unrecognized moog script command: \"" + word + "\"");
+	}
+
+	writeTerminator(ms);
+	//send(ms);
+	gigaMoogCommandList.push_back(ms);
+}
+
+bool GigaMoogCore::analyzeMoogScript(std::string word, ScriptStream& currentMoogScript, MessageSender& ms, std::vector<parameterType>& variables, unsigned variation)
+{
+	if (word != "set" && word != "setmove") {
+		return false;
+	}
 	while (!(currentMoogScript.peek() == EOF) || word != "__end__")
 	{
 		if (word == "set") {
@@ -150,29 +168,64 @@ void GigaMoogCore::analyzeMoogScript(std::string fileAddr, std::vector<parameter
 				.frequencyMHz(frequency.evaluate(variables, variation)).amplitudePercent(amplitude.evaluate(variables, variation)).phaseDegrees(phase.evaluate(variables, variation));;
 			ms.enqueue(m);
 		}
-		else
-		{
-			thrower("ERROR: unrecognized moog script command: \"" + word + "\"");
+		else if (word == "setmove") {
+			std::string DAC;
+			Expression channel, amplitude, frequency, phase, ampIncr, freqIncr,
+				jumpFreq, jumpPhase, snapshotID;;
+
+			currentMoogScript >> snapshotID;
+			currentMoogScript >> DAC;
+			currentMoogScript >> channel;
+			currentMoogScript >> jumpFreq;
+			currentMoogScript >> jumpPhase;
+			currentMoogScript >> amplitude;
+			currentMoogScript >> ampIncr;
+			currentMoogScript >> frequency;
+			currentMoogScript >> freqIncr;
+			currentMoogScript >> phase;
+
+			MessageDAC dacset;
+			if (DAC == "dac0") {
+				dacset = MessageDAC::DAC0;
+			}
+			else if (DAC == "dac1") {
+				dacset = MessageDAC::DAC1;
+			}
+			else if (DAC == "dac2") {
+				dacset = MessageDAC::DAC2;
+			}
+			else if (DAC == "dac3") {
+				dacset = MessageDAC::DAC3;
+			}
+			else {
+				thrower("ERROR: unrecognized moog DAC selection: \"" + DAC + "\"");
+			}
+			Message m = Message::make().destination(MessageDestination::KA007)
+				.DAC(dacset).channel(channel.evaluate(variables, variation))
+				.setting(MessageSetting::MOVEFREQUENCY)
+				.frequencyMHz(frequency.evaluate(variables, variation))
+				.amplitudePercent(amplitude.evaluate(variables, variation))
+				.phaseDegrees(phase.evaluate(variables, variation))
+				.instantFTW(static_cast<unsigned>(jumpFreq.evaluate(variables, variation) + 0.5)) /*instantFTW(stoul(jumpFreq, nullptr))*/
+				.ATWIncr(round(ampIncr.evaluate(variables, variation)))
+				.stepSequenceID(static_cast<unsigned>(snapshotID.evaluate(variables, variation) + 0.5))
+				.FTWIncr(round(freqIncr.evaluate(variables, variation)))
+				.phaseJump(static_cast<unsigned>(jumpPhase.evaluate(variables, variation) + 0.5));
+			ms.enqueue(m);
+		}
+		else {
+			thrower("ERROR: unrecognized LOAD moog command: \"" + word + "\"");
 		}
 		word = "";
 		currentMoogScript >> word;
 	}
-
-	{
-		Message m = Message::make().destination(MessageDestination::KA007)
-			.setting(MessageSetting::TERMINATE_SEQ);
-		ms.enqueue(m);
-	}
-
-	//send(ms);
-	gigaMoogCommandList.push_back(ms);
-
+	return true;
 }
 
 
 void GigaMoogCore::writeOff(MessageSender& ms) {
 
-	for (int channel = 0; channel < 64; channel++) {
+	for (int channel = 0; channel < 48; channel++) {
 		Message m = Message::make().destination(MessageDestination::KA007)
 			.DAC(MessageDAC::DAC0).channel(channel)
 			.setting(MessageSetting::LOADFREQUENCY)
@@ -180,7 +233,7 @@ void GigaMoogCore::writeOff(MessageSender& ms) {
 		ms.enqueue(m);
 	}
 
-	for (int channel = 0; channel < 64; channel++) {
+	for (int channel = 0; channel < 48; channel++) {
 		Message m = Message::make().destination(MessageDestination::KA007)
 			.DAC(MessageDAC::DAC1).channel(channel)
 			.setting(MessageSetting::LOADFREQUENCY)
@@ -188,7 +241,7 @@ void GigaMoogCore::writeOff(MessageSender& ms) {
 		ms.enqueue(m);
 	}
 
-	for (int channel = 0; channel < 64; channel++) {
+	for (int channel = 0; channel < 48; channel++) {
 		Message m = Message::make().destination(MessageDestination::KA007)
 			.DAC(MessageDAC::DAC2).channel(channel)
 			.setting(MessageSetting::LOADFREQUENCY)
@@ -196,7 +249,7 @@ void GigaMoogCore::writeOff(MessageSender& ms) {
 		ms.enqueue(m);
 	}
 
-	for (int channel = 0; channel < 64; channel++) {
+	for (int channel = 0; channel < 48; channel++) {
 		Message m = Message::make().destination(MessageDestination::KA007)
 			.DAC(MessageDAC::DAC3).channel(channel)
 			.setting(MessageSetting::LOADFREQUENCY)
@@ -216,19 +269,27 @@ void GigaMoogCore::writeOff(MessageSender& ms) {
 	//fpga.write(ms.getMessageBytes()); 
 }
 
+void GigaMoogCore::writeTerminator(MessageSender& ms)
+{
+	Message m = Message::make().destination(MessageDestination::KA007)
+		.setting(MessageSetting::TERMINATE_SEQ);
+	ms.enqueue(m);
+}
+
 void GigaMoogCore::send(MessageSender& ms)
 {
 	ms.getQueueElementCount();
 	//MessagePrinter rec; 
 	//fpga.setReadCallback(boost::bind(&MessagePrinter::callback, rec, _1)); 
 	fpga.write(ms.getMessageBytes());
-	if (auto e = fpga.lastException()) {
-		try {
-			boost::rethrow_exception(e);
-		}
-		catch (boost::system::system_error& e) {
-			throwNested("Error seen in writing to serial port " + str(fpga.portID) + ". Error: " + e.what());
-		}
-	}
+
+	//if (auto e = fpga.lastException()) {
+	//	try {
+	//		boost::rethrow_exception(e);
+	//	}
+	//	catch (boost::system::system_error& e) {
+	//		throwNested("Error seen in writing to serial port " + str(fpga.portID) + ". Error: " + e.what());
+	//	}
+	//}
 
 }

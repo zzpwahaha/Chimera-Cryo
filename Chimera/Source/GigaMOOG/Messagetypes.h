@@ -221,12 +221,19 @@ struct SetMoveFrequency : KA007_Message_Base
 		bits = p.get<int>("InstantFTW");
 
 		bits = bits << 28;
-		//conversion to 28-bit signed number
+		//conversion to 26-bit signed number. Highest 2 bits in 28 bit message get ignored.
 		int temp = p.get<int>("ATWIncr");
-		if (temp < -134217728)temp = -134217728;
-		if (temp > 134217727)temp = 134217727;
-		if (temp < 0)temp = temp + 268435456;
+		if (temp < -33554432)temp = -33554432;
+		if (temp > 33554431)temp = 33554431;
+		if (temp < 0)temp = temp + 67108864;
 		bits = bits | temp;
+
+		////conversion to 28-bit signed number
+		//int temp = p.get<int>("ATWIncr");
+		//if (temp < -134217728)temp = -134217728;
+		//if (temp > 134217727)temp = 134217727;
+		//if (temp < 0)temp = temp + 268435456;
+		//bits = bits | temp;
 
 		bits = bits << 8;
 		bits = bits | p.get<int>("StepSequenceID");
@@ -341,6 +348,31 @@ public:
 
 	MessageBuilder& phaseDegrees(const double &phase) {
 		message_.parameters_.set("Phase", phase);
+		return *this;
+	}
+
+	MessageBuilder& instantFTW(const bool& freqjump) {
+		message_.parameters_.set("InstantFTW", freqjump);
+		return *this;
+	}
+
+	MessageBuilder& ATWIncr(const int& ampstep) {
+		message_.parameters_.set("ATWIncr", ampstep);
+		return *this;
+	}
+
+	MessageBuilder& stepSequenceID(const int& stepnum) {
+		message_.parameters_.set("StepSequenceID", stepnum);
+		return *this;
+	}
+
+	MessageBuilder& FTWIncr(const int& freqstep) {
+		message_.parameters_.set("FTWIncr", freqstep);
+		return *this;
+	}
+
+	MessageBuilder& phaseJump(const bool& phasejump) {
+		message_.parameters_.set("PhaseJump", phasejump);
 		return *this;
 	}
 
