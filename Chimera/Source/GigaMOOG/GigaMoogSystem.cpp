@@ -17,7 +17,7 @@
 GigaMoogSystem::GigaMoogSystem(IChimeraQtWindow* parent)
 	: IChimeraSystem(parent)
 	, gmoogScript(parent)
-	, core(GIGAMOOG_SAFEMODE, GIGAMOOG_PORT, GIGAMOOG_BAUDRATE)
+	, core(GIGAMOOG_SAFEMODE, GIGAMOOG_IPADDRESS, GIGAMOOG_IPPORT)
 {
 	if (!GIGAMOOG_SAFEMODE) {
 		//writeOff(); 

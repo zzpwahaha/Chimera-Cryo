@@ -15,7 +15,7 @@ public:
 	DynamicMoveManager() {};
 	bool analyzeMoogScript(std::string word, ScriptStream& currentMoogScript, MessageSender& ms, std::vector<parameterType>& variables, unsigned variation);
 	void writeRearrangeMoves(moveSequence input, MessageSender& ms);
-	moveSequence getRearrangeMoves(std::string rearrangeType) {};
+	moveSequence getRearrangeMoves(std::string rearrangeType);
 
 private:
 	// write load for move with LUT
