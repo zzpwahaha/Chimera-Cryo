@@ -9,7 +9,7 @@ public:
 	void callback(int byte);
 private:
 	std::vector<int> received;
-	bool isReceiving;
+	bool isReceiving = false;
 	int expectedBytes;
 	int byteCount;
 
@@ -19,5 +19,5 @@ private:
 	int messagelength;
 	int messagedata_h;
 	int messagedata_l;
-	int headeridx;
+	int headeridx = 0;
 };

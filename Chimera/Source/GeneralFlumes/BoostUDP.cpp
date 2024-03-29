@@ -45,8 +45,20 @@ void BoostUDP::readhandler(const boost::system::error_code & error, std::size_t 
 	boost::mutex::scoped_lock look(mutex_);
 
 	if (error) {
-		//thrower("Error reading UDP message.");
+		std::string errorMsg = error.message();
+		if (errorMsg == "An invalid argument was supplied") {
+			// ignore this for now
+		}
+		else {
+			thrower("Error reading UDP message." + error.message());
+		}
 	}
+	socket_->async_receive_from(boost::asio::buffer(readbuffer), 
+		remote_endpoint,
+		boost::bind(&BoostUDP::readhandler, this,
+		boost::asio::placeholders::error,
+		boost::asio::placeholders::bytes_transferred
+	));
 
 	int c;
 	for (int idx = 0; idx < bytes_transferred; idx++) {
@@ -67,12 +79,11 @@ void BoostUDP::read()
 	// a value of type boost::system::error_code indicating whether the operation succeeded or failed, and 
 	// a size_t value bytes_transferred specifying the number of bytes received.
 	if (!socket_->is_open()) {
-		//thrower("Serial port has not been opened");
+		thrower("Serial port has not been opened");
 	}
 	socket_->async_receive_from(boost::asio::buffer(readbuffer),
 		remote_endpoint,
-		boost::bind(&BoostUDP::readhandler,
-		this,
+		boost::bind(&BoostUDP::readhandler, this,
 		boost::asio::placeholders::error,
 		boost::asio::placeholders::bytes_transferred
 	));

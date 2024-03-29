@@ -3,8 +3,8 @@
 #include <ExperimentThread/ExpThreadWorker.h>
 #include <ConfigurationSystems/ConfigSystem.h>
 #include <DataLogging/DataLogger.h>
-#include "MessagePrinter.h" 
-#include "MessageSender.h" 
+#include <GigaMOOG/MessagePrinter.h>
+
 
 //GigaMoogCore::GigaMoogCore(bool safemode, std::string portID, int baudrate)
 //	: fpga(safemode, portID, baudrate, 8, 
@@ -279,8 +279,8 @@ void GigaMoogCore::writeTerminator(MessageSender& ms)
 void GigaMoogCore::send(MessageSender& ms)
 {
 	ms.getQueueElementCount();
-	//MessagePrinter rec; 
-	//fpga.setReadCallback(boost::bind(&MessagePrinter::callback, rec, _1)); 
+	MessagePrinter rec;
+	fpga.setReadCallback(boost::bind(&MessagePrinter::callback, rec, _1));
 	fpga.write(ms.getMessageBytes());
 
 	//if (auto e = fpga.lastException()) {
