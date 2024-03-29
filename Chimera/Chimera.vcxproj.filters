@@ -489,6 +489,21 @@
     <ClCompile Include="Source\Python\cnpy.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Andor\AndorCameraThreadImageGrabber.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\GigaMOOG\DynamicMoveManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Rearrangement\rearrangeLUT.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\GigaMOOG\MemoryController.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Rearrangement\RearrangeGenerator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="3rd_Party\qcustomplot\qcustomplot.h">
@@ -684,6 +699,9 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="Source\ExcessDialogs\AiSettingsDialog.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\Andor\AndorCameraThreadImageGrabber.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
@@ -1100,6 +1118,24 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\Rearrangement\rearrangeStructures.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\GeneralObjects\ThreadsafeQueue.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\GigaMOOG\DynamicMoveManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Rearrangement\rearrangeLUT.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\GigaMOOG\MemoryController.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Rearrangement\rearrangeParameters.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Rearrangement\RearrangeGenerator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

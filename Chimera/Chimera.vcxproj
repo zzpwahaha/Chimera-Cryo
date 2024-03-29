@@ -130,6 +130,9 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Source\Rearrangement\RearrangeGenerator.cpp" />
+    <ClCompile Include="Source\Rearrangement\rearrangeLUT.cpp" />
+    <ClCompile Include="Source\GigaMOOG\DynamicMoveManager.cpp" />
     <ClCompile Include="Source\Andor\AndorCameraThreadImageGrabber.cpp" />
     <ClCompile Include="Source\ExperimentMonitoringAndStatus\InfluxTypes.cpp" />
     <ClCompile Include="Source\AnalogInput\AiOutput.cpp" />
@@ -146,6 +149,7 @@
     <ClCompile Include="Source\ExperimentMonitoringAndStatus\ExperimentSeqPlotter.cpp" />
     <ClCompile Include="Source\GeneralFlumes\BoostAsyncSerial.cpp" />
     <ClCompile Include="Source\GigaMOOG\GigaMoogSystem.cpp" />
+    <ClCompile Include="Source\GigaMOOG\MemoryController.cpp" />
     <ClCompile Include="Source\GigaMOOG\MessagePrinter.cpp" />
     <ClCompile Include="Source\GigaMOOG\MessageSender.cpp" />
     <ClCompile Include="Source\Microwave\MicrowaveCore.cpp" />
@@ -200,6 +204,9 @@
     <QtMoc Include="Source\CMOSCamera\FrameAverager.h" />
     <QtMoc Include="Source\ExcessDialogs\AiSettingsDialog.h" />
     <QtMoc Include="Source\Andor\AndorCameraThreadImageGrabber.h" />
+    <ClInclude Include="Source\Rearrangement\RearrangeGenerator.h" />
+    <ClInclude Include="Source\Rearrangement\rearrangeLUT.h" />
+    <ClInclude Include="Source\GigaMOOG\DynamicMoveManager.h" />
     <ClInclude Include="Source\ExperimentMonitoringAndStatus\InfluxTypes.h" />
     <ClInclude Include="Source\AnalogInput\AiOutput.h" />
     <ClInclude Include="Source\Andor\AndorBinningMode.h" />
@@ -215,6 +222,7 @@
     <ClInclude Include="Source\GigaMOOG\GigaMoogCore.h" />
     <ClInclude Include="Source\GeneralFlumes\BoostAsyncSerial.h" />
     <ClInclude Include="Source\GigaMOOG\GigaMoogSystem.h" />
+    <ClInclude Include="Source\GigaMOOG\MemoryController.h" />
     <ClInclude Include="Source\GigaMOOG\MessagePrinter.h" />
     <ClInclude Include="Source\GigaMOOG\MessageSender.h" />
     <ClInclude Include="Source\GigaMOOG\Messagetypes.h" />
@@ -462,6 +470,7 @@
     <ClInclude Include="Source\RealTimeDataAnalysis\realTimePlotterInput.h" />
     <ClInclude Include="Source\RealTimeMOTAnalysis\MOTAnalysisType.h" />
     <ClInclude Include="Source\RealTimeMOTAnalysis\MOTThreadInput.h" />
+    <ClInclude Include="Source\Rearrangement\rearrangeParameters.h" />
     <ClInclude Include="Source\Rearrangement\rearrangeStructures.h" />
     <ClInclude Include="Source\Scripts\ScriptableDevices.h" />
     <ClInclude Include="Source\Scripts\ScriptStream.h" />
