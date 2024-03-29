@@ -34,6 +34,8 @@ void GigaMoogSystem::initialize(IChimeraQtWindow* win)
 	QLabel* header = new QLabel("GIGAMOOG", win);
 	expActive = new CQCheckBox("Exp. Active?", win);
 	QPushButton* programNowBtn = new QPushButton("Program", win);
+	QPushButton* trigMoveBtn = new QPushButton("Trig Move", win);
+	QPushButton* trigLoadBtn = new QPushButton("Trig Load", win);
 	QPushButton* disconnectBtn= new QPushButton("Disconnect", win);
 	QPushButton* reconnectBtn = new QPushButton("Reconnect", win);
 	QHBoxLayout* layout1 = new QHBoxLayout();
@@ -43,6 +45,8 @@ void GigaMoogSystem::initialize(IChimeraQtWindow* win)
 	layout2->setContentsMargins(0, 0, 0, 0);
 	layout2->addWidget(disconnectBtn, 0);
 	layout2->addWidget(reconnectBtn, 0);
+	layout2->addWidget(trigLoadBtn, 0);
+	layout2->addWidget(trigMoveBtn, 0);
 	layout2->addWidget(programNowBtn, 0);
 	layout2->addWidget(expActive, 0);
 
@@ -68,6 +72,37 @@ void GigaMoogSystem::initialize(IChimeraQtWindow* win)
 			win->reportErr(qstr("Error while programming GigaMoog " + core.getDelim() + ": " + err.trace() + "\r\n"));
 		win->mainWin->updateConfigurationSavedStatus(false);
 		}});
+
+	connect(trigLoadBtn, &QPushButton::released, this, [this, win]() {
+		win->reportStatus("----------------------\r\nTriggering GigaMoog Move... ");
+		try {
+			auto& doCore = win->auxWin->getTtlCore();
+			auto dostatus = win->auxWin->getTtlSystem().getCurrentStatus();
+			doCore.FPGAForcePulse(dostatus, std::vector<std::pair<unsigned, unsigned>>{GM_TRIGGER_LINE[0]}, GM_TRIGGER_TIME);
+			win->reportStatus("Finished Triggering GigaMoog Load with " + qstr(GM_TRIGGER_TIME) + "ms .\r\n");
+		}
+		catch (ChimeraError& err) {
+			errBox(err.trace());
+			win->reportStatus(": " + err.qtrace() + "\r\n");
+			win->reportErr(qstr("Error while triggering GigaMoog " + core.getDelim() + " Load: " + err.trace() + "\r\n"));
+			win->mainWin->updateConfigurationSavedStatus(false);
+		}});
+
+	connect(trigMoveBtn, &QPushButton::released, this, [this, win]() {
+		win->reportStatus("----------------------\r\nTriggering GigaMoog Move... ");
+		try {
+			auto& doCore = win->auxWin->getTtlCore();
+			auto dostatus = win->auxWin->getTtlSystem().getCurrentStatus();
+			doCore.FPGAForcePulse(dostatus, std::vector<std::pair<unsigned, unsigned>>{GM_TRIGGER_LINE[1]}, GM_TRIGGER_TIME);
+			win->reportStatus("Finished Triggering GigaMoog Move with " + qstr(GM_TRIGGER_TIME) + "ms .\r\n");
+		}
+		catch (ChimeraError& err) {
+			errBox(err.trace());
+			win->reportStatus(": " + err.qtrace() + "\r\n");
+			win->reportErr(qstr("Error while triggering GigaMoog " + core.getDelim() + " Move: " + err.trace() + "\r\n"));
+			win->mainWin->updateConfigurationSavedStatus(false);
+		}});
+
 
 	connect(disconnectBtn, &QPushButton::released, this, [this, win]() {
 		win->reportStatus("----------------------\r\nDisconnect GigaMoog... ");
