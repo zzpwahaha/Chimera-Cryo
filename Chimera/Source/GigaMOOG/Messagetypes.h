@@ -147,7 +147,7 @@ struct SetLoadFrequency : KA007_Message_Base
 
 		std::cout << "Sending bytes: ";
 		for (auto& byte : bytes)
-			std::cout << byte << " ";
+			std::cout << std::hex << byte << " ";
 		std::cout << "\n";
 
 		return bytes;
@@ -195,7 +195,7 @@ struct SetMoveFrequency : KA007_Message_Base
 		//process amplitude
 		//Percent to 16-bit number
 		auto ATW = p.get<double>("Amplitude");
-		if (ATW < 0.0 || ATW > 100.0) throw std::runtime_error("invalid amplitude");
+		if (ATW < 0.0 || ATW > 100.0) thrower("invalid amplitude");
 		ATW *= 655.35;
 		int ATW_bits = (int)ATW;
 
@@ -205,7 +205,7 @@ struct SetMoveFrequency : KA007_Message_Base
 		//process phase
 		//Degrees to 12-bit
 		auto PTW = p.get<double>("Phase");
-		if (PTW < 0.0 || PTW > 360.0) throw std::runtime_error("invalid phase");
+		if (PTW < 0.0 || PTW > 360.0) thrower("invalid phase");
 		PTW /= 360.0;
 		PTW *= 4096;
 		int PTW_bits = (int)PTW;
@@ -259,7 +259,7 @@ struct SetMoveFrequency : KA007_Message_Base
 
 		std::cout << "Sending bytes: ";
 		for (auto& byte : bytes)
-			std::cout << byte << " ";
+			std::cout << std::hex << byte << " ";
 		std::cout << "\n";
 
 		return bytes;
@@ -281,7 +281,7 @@ struct TerminateSequence : KA007_Message_Base
 
 		std::cout << "Sending bytes: ";
 		for (auto& byte : bytes)
-			std::cout << byte << " ";
+			std::cout << std::hex << byte << " ";
 		std::cout << "\n";
 
 		return bytes;
@@ -299,6 +299,11 @@ public:
 
 		factories[MessageSetting::LOADFREQUENCY] = [](KA007ParameterContainer params) {
 			auto bytes = SetLoadFrequency();
+			return bytes.getBytes(params);
+		};
+
+		factories[MessageSetting::MOVEFREQUENCY] = [](KA007ParameterContainer params) {
+			auto bytes = SetMoveFrequency();
 			return bytes.getBytes(params);
 		};
 
