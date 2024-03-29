@@ -33,7 +33,7 @@ private:
 	void read();
 	void run();
 	
-	std::array<unsigned char, 1024> readbuffer;
+	std::array<unsigned char, 65536> readbuffer;
 
 	void readhandler(
 		const boost::system::error_code& error,

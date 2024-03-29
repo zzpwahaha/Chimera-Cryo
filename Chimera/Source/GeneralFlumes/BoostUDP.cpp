@@ -53,12 +53,6 @@ void BoostUDP::readhandler(const boost::system::error_code & error, std::size_t 
 			thrower("Error reading UDP message." + error.message());
 		}
 	}
-	socket_->async_receive_from(boost::asio::buffer(readbuffer), 
-		remote_endpoint,
-		boost::bind(&BoostUDP::readhandler, this,
-		boost::asio::placeholders::error,
-		boost::asio::placeholders::bytes_transferred
-	));
 
 	int c;
 	for (int idx = 0; idx < bytes_transferred; idx++) {
@@ -67,6 +61,13 @@ void BoostUDP::readhandler(const boost::system::error_code & error, std::size_t 
 			read_callback_(c);
 		}
 	}
+
+	socket_->async_receive_from(boost::asio::buffer(readbuffer), 
+		remote_endpoint,
+		boost::bind(&BoostUDP::readhandler, this,
+		boost::asio::placeholders::error,
+		boost::asio::placeholders::bytes_transferred
+	));
 		
 }
 
