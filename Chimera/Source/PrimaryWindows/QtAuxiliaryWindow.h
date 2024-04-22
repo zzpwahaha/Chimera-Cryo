@@ -13,6 +13,7 @@
 #include "DirectDigitalSynthesis/DdsSystem.h"
 #include "OffsetLock/OlSystem.h"
 #include "Microwave/MicrowaveSystem.h"
+#include "PicoScrew/PicoScrewSystem.h"
 
 #include "ParameterSystem/ParameterSystem.h"
 #include "Scripts/Script.h"
@@ -121,6 +122,7 @@ class QtAuxiliaryWindow : public IChimeraQtWindow{
 		DdsSystem dds;
 		OlSystem olSys;
 		MicrowaveSystem mwSys;
+		PicoScrewSystem picoSys;
 
 		MasterConfiguration masterConfig{ MASTER_CONFIGURATION_FILE_ADDRESS };
 		MachineOptimizer optimizer;

@@ -120,6 +120,12 @@
 	const std::string MICROWAVE_PORT = "COM9";
 	const std::pair<unsigned, unsigned> MW_TRIGGER_LINE = std::make_pair(4 - 1, 2); /*the first is the label on the box minus 1, has minus'd 1 explicitly */
 
+	//PicoScrew
+	const bool PICOSCREW_SAFEMODE = false;
+	const std::string PICOSCREW_KEY = "8742 101956";
+	const unsigned PICOSCREW_NUM = 4;
+	const std::array<bool, PICOSCREW_NUM> PICOSCREW_CONNECTED = { true,true,true,true };
+
 	//Temperature Monitor
 	const bool TEMPMON_SAFEMODE = false;
 	const unsigned TEMPMON_NUMBER = 5;
