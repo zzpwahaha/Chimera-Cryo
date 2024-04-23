@@ -39,7 +39,6 @@ public:
 
 	const bool safemode;
 	const std::string configDelim = "PICOSCREW";
-
 	const std::string deviceKey;
 
 private:

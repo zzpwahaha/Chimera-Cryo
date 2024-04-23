@@ -2,6 +2,7 @@
 #include "PicoScrewSystem.h"
 #include <PrimaryWindows/IChimeraQtWindow.h>
 #include <PrimaryWindows/QtMainWindow.h>
+#include <PrimaryWindows/QtAuxiliaryWindow.h>
 #include <qpushbutton.h>
 #include <qlayout.h>
 
@@ -27,11 +28,11 @@ void PicoScrewSystem::initialize()
 	auto programNowButton = new QPushButton("Program PS Now", this);
 	connect(programNowButton, &QPushButton::released, [this]() {
 		try {
-			handleProgramNowPress();
+			handleProgramNowPress(parentWin->auxWin->getUsableConstants());
 			updateCurrentValues();
 		}
 		catch (ChimeraError& err) {
-			parentWin->reportErr(err.qtrace());
+			parentWin->reportErr("Failed to program PicoScrew system! \n" + err.qtrace());
 		}
 		});
 	ctrlButton = new QCheckBox("Ctrl?", this);
@@ -61,8 +62,8 @@ void PicoScrewSystem::initialize()
 	layout2->setContentsMargins(0, 0, 0, 0);
 
 	for (auto ch : range(PICOSCREW_NUM)) {
-		//auto strChan = qstr(ch + 1);
-		//labels[ch] = new QLabel(strChan, this);
+		auto strChan = qstr(ch + 1);
+		labels[ch] = new QLabel(strChan, this);
 		setHomeButtons[ch] = new QPushButton("Set Home", this);
 		edits[ch] = new QLineEdit(this);
 		currentVals[ch] = new QLabel("---", this);
@@ -76,9 +77,7 @@ void PicoScrewSystem::initialize()
 		QHBoxLayout* lay = new QHBoxLayout();
 		lay->setContentsMargins(0, 0, 0, 0);
 		auto strChan = qstr(ch + 1);
-		auto label = new QLabel(strChan, this);
-		//lay->addWidget(labels[ch], 0);
-		lay->addWidget(label, 0);
+		lay->addWidget(labels[ch], 0);
 		lay->addWidget(setHomeButtons[ch], 0);
 		layout2->addLayout(lay, 0, ch);
 		layout2->addWidget(currentVals[ch], 1, ch);
@@ -99,6 +98,27 @@ void PicoScrewSystem::initialize()
 	timer->start(10000);
 }
 
+void PicoScrewSystem::handleOpenConfig(ConfigStream& configFile)
+{
+	auto configVals = core.getSettingsFromConfig(configFile);
+	for (auto ch : range(PICOSCREW_NUM)) {
+		edits[ch]->setText(qstr(configVals.screwPos[ch].expressionStr));
+	}
+	ctrlButton->setChecked(configVals.ctrlScrew);
+	updateCtrlEnable();
+}
+
+void PicoScrewSystem::handleSaveConfig(ConfigStream& configFile)
+{
+	configFile << core.configDelim;
+	for (auto ch : range(PICOSCREW_NUM)) {
+		auto strChan = str(ch + 1);
+		configFile << "\n/* Screw-"+ strChan +" Value:*/ " << Expression(str(edits[ch]->text()));
+	}
+	configFile << "\n/*Control?*/ " << ctrlButton->isChecked()
+		<< "\nEND_" + core.configDelim << "\n";
+}
+
 void PicoScrewSystem::updateCurrentValues()
 {
 	try{
@@ -107,7 +127,7 @@ void PicoScrewSystem::updateCurrentValues()
 		}
 	}
 	catch (ChimeraError& e) {
-		emit error(e.qtrace());
+		emit error("Error in updating picoscrew current values\n" + e.qtrace());
 	}
 
 }
@@ -120,8 +140,10 @@ void PicoScrewSystem::updateCtrlEnable()
 	}
 }
 
-void PicoScrewSystem::handleProgramNowPress()
+void PicoScrewSystem::handleProgramNowPress(std::vector<parameterType> constants)
 {
+	
+	emit notification("Finished programming PicoScrew system!\n", 0);
 
 }
 
