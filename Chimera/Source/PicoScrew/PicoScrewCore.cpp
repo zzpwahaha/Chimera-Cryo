@@ -8,6 +8,9 @@ PicoScrewCore::PicoScrewCore(bool safemode, std::string deviceKey)
 	deviceKey(deviceKey), 
 	screw(safemode, deviceKey)
 {
+	if (safemode) {
+		return;
+	}
 	screw.write("MC"); // Check all motors to determine type
 	for (auto channel : range(PICOSCREW_NUM)) {
 		auto strChan = str(channel + 1);
@@ -125,6 +128,9 @@ int PicoScrewCore::motorPosition(unsigned channel)
 		pos = boost::lexical_cast<int> (posStr);
 	}
 	catch (boost::bad_lexical_cast&) {
+		if (posStr == "SAFEMODE") {
+			return -1;
+		}
 		throwNested("Error in getting motor position for channel " + str(channel));
 	}
 	return pos;
