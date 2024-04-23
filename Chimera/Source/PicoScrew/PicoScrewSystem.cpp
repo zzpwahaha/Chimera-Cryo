@@ -61,8 +61,8 @@ void PicoScrewSystem::initialize()
 	layout2->setContentsMargins(0, 0, 0, 0);
 
 	for (auto ch : range(PICOSCREW_NUM)) {
-		auto strChan = qstr(ch + 1);
-		labels[ch] = new QLabel(strChan, this);
+		//auto strChan = qstr(ch + 1);
+		//labels[ch] = new QLabel(strChan, this);
 		setHomeButtons[ch] = new QPushButton("Set Home", this);
 		edits[ch] = new QLineEdit(this);
 		currentVals[ch] = new QLabel("---", this);
@@ -75,7 +75,10 @@ void PicoScrewSystem::initialize()
 	for (auto ch : range(PICOSCREW_NUM)) {
 		QHBoxLayout* lay = new QHBoxLayout();
 		lay->setContentsMargins(0, 0, 0, 0);
-		lay->addWidget(labels[ch], 0);
+		auto strChan = qstr(ch + 1);
+		auto label = new QLabel(strChan, this);
+		//lay->addWidget(labels[ch], 0);
+		lay->addWidget(label, 0);
 		lay->addWidget(setHomeButtons[ch], 0);
 		layout2->addLayout(lay, 0, ch);
 		layout2->addWidget(currentVals[ch], 1, ch);
@@ -119,6 +122,7 @@ void PicoScrewSystem::updateCtrlEnable()
 
 void PicoScrewSystem::handleProgramNowPress()
 {
+
 }
 
 std::string PicoScrewSystem::getConfigDelim()

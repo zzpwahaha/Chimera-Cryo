@@ -29,7 +29,7 @@ private:
 	bool expActive;
 	PicoScrewCore core;
 	QCheckBox* ctrlButton;
-	std::array<QLabel*, PICOSCREW_NUM> labels;
+	//std::array<QLabel*, PICOSCREW_NUM> labels;
 	std::array<QPushButton*, PICOSCREW_NUM> setHomeButtons;
 	std::array<QLabel*, PICOSCREW_NUM> currentVals;
 	std::array<QLineEdit*, PICOSCREW_NUM> edits;
