@@ -8,10 +8,10 @@ class AndorCameraThreadWorker : public QObject {
     Q_OBJECT
 
     public:
-        AndorCameraThreadWorker (cameraThreadInput* input_);
+        AndorCameraThreadWorker(cameraThreadWorkerInput* input_);
         ~AndorCameraThreadWorker ();
     private:
-        cameraThreadInput* input;
+        cameraThreadWorkerInput * input;
 
     public Q_SLOTS:
         void process ();

@@ -225,7 +225,7 @@ namespace commonFunctions{
 			}
 								   // the rest of these are all one-liners. 			
 			case ID_PROFILE_SAVE_PROFILE: { mainWin->profile.saveConfiguration (win); break; }
-			case ID_PLOTTING_STOPPLOTTER: { andorWin->stopPlotter (); break; }
+			//case ID_PLOTTING_STOPPLOTTER: { andorWin->stopPlotter (); break; }
 			case ID_ACCELERATOR_F2: case ID_RUNMENU_PAUSE: { mainWin->handlePauseToggle (); break; }
 			case ID_CONFIGURATION_RENAME_CURRENT_CONFIGURATION: { mainWin->profile.renameConfiguration (); break; }
 			case ID_CONFIGURATION_DELETE_CURRENT_CONFIGURATION: { mainWin->profile.deleteConfiguration (); break; }

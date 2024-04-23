@@ -108,9 +108,11 @@
 
 	//GIGAMOOG
 	const bool GIGAMOOG_SAFEMODE = false;
-	const std::string GIGAMOOG_PORT = "COM5";
-	const int GIGAMOOG_BAUDRATE = 115200;
-	const double GM_TRIGGER_TIME = 0.001; //in ms i.e. 1us
+	const std::string GIGAMOOG_IPADDRESS = "192.168.7.179";
+	const int GIGAMOOG_IPPORT = 804;
+	//const std::string GIGAMOOG_PORT = "COM5";
+	//const int GIGAMOOG_BAUDRATE = 115200;
+	const double GM_TRIGGER_TIME = 0.0005; //in ms i.e. 0.5us
 	const std::vector<std::pair<unsigned, unsigned>> GM_TRIGGER_LINE
 		= { std::make_pair(8 - 1,0),std::make_pair(8 - 1,1) }; //load and move
 	/*the first is the label on the box minus 1, has minus'd 1 explicitly and this is not used in the code, just a reminder*/

@@ -101,10 +101,7 @@ class PictureControl : public QWidget{
 		QPixmap* pixmap = nullptr;
 
 		RangeSliderIntg slider;
-		//LongQSlider sliderMax;
-		//LongQSlider sliderMin;
 
-		//Control<CPushButton> myButton;
 		QLabel* coordinatesText = nullptr;
 		QLabel* coordinatesDisp = nullptr;
 		QLabel* valueText = nullptr;

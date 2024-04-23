@@ -7,7 +7,7 @@
 
 // info for the picture in the experiment run in which the pic is taken
 struct picureStatus {
-	unsigned picNum;
+	unsigned long long picNum;
 	unsigned repNum;
 	unsigned varNum;
 };

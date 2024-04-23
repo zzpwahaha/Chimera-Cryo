@@ -88,6 +88,7 @@ public:
 		double MHz = 223696213.33333333333333333333333; 
 		return (unsigned long long int)(frequency * MHz);
 	}
+	const bool doPrint = true;
 };
 
 struct SetLoadFrequency : KA007_Message_Base
@@ -145,10 +146,12 @@ struct SetLoadFrequency : KA007_Message_Base
 			bytes.push_back((bits >> (8 * i)) & 0xFF);
 		}
 
-		std::cout << "Sending bytes: ";
-		for (auto& byte : bytes)
-			std::cout << byte << " ";
-		std::cout << "\n";
+		if (doPrint) {
+			std::cout << "Sending bytes: ";
+			for (auto& byte : bytes)
+				std::cout << std::hex << byte << " ";
+			std::cout << "\n";
+		}
 
 		return bytes;
 	}
@@ -195,7 +198,7 @@ struct SetMoveFrequency : KA007_Message_Base
 		//process amplitude
 		//Percent to 16-bit number
 		auto ATW = p.get<double>("Amplitude");
-		if (ATW < 0.0 || ATW > 100.0) throw std::runtime_error("invalid amplitude");
+		if (ATW < 0.0 || ATW > 100.0) thrower("invalid amplitude");
 		ATW *= 655.35;
 		int ATW_bits = (int)ATW;
 
@@ -205,7 +208,7 @@ struct SetMoveFrequency : KA007_Message_Base
 		//process phase
 		//Degrees to 12-bit
 		auto PTW = p.get<double>("Phase");
-		if (PTW < 0.0 || PTW > 360.0) throw std::runtime_error("invalid phase");
+		if (PTW < 0.0 || PTW > 360.0) thrower("invalid phase");
 		PTW /= 360.0;
 		PTW *= 4096;
 		int PTW_bits = (int)PTW;
@@ -221,12 +224,19 @@ struct SetMoveFrequency : KA007_Message_Base
 		bits = p.get<int>("InstantFTW");
 
 		bits = bits << 28;
-		//conversion to 28-bit signed number
+		//conversion to 26-bit signed number. Highest 2 bits in 28 bit message get ignored.
 		int temp = p.get<int>("ATWIncr");
-		if (temp < -134217728)temp = -134217728;
-		if (temp > 134217727)temp = 134217727;
-		if (temp < 0)temp = temp + 268435456;
+		if (temp < -33554432)temp = -33554432;
+		if (temp > 33554431)temp = 33554431;
+		if (temp < 0)temp = temp + 67108864;
 		bits = bits | temp;
+
+		////conversion to 28-bit signed number
+		//int temp = p.get<int>("ATWIncr");
+		//if (temp < -134217728)temp = -134217728;
+		//if (temp > 134217727)temp = 134217727;
+		//if (temp < 0)temp = temp + 268435456;
+		//bits = bits | temp;
 
 		bits = bits << 8;
 		bits = bits | p.get<int>("StepSequenceID");
@@ -250,10 +260,12 @@ struct SetMoveFrequency : KA007_Message_Base
 			bytes.push_back((bits >> (8 * i)) & 0xFF);
 		}
 
-		std::cout << "Sending bytes: ";
-		for (auto& byte : bytes)
-			std::cout << byte << " ";
-		std::cout << "\n";
+		if (doPrint) {
+			std::cout << "Sending bytes: ";
+			for (auto& byte : bytes)
+				std::cout << std::hex << byte << " ";
+			std::cout << "\n";
+		}
 
 		return bytes;
 	}
@@ -272,10 +284,12 @@ struct TerminateSequence : KA007_Message_Base
 		bytes.push_back(0);
 		bytes.push_back(0);
 
-		std::cout << "Sending bytes: ";
-		for (auto& byte : bytes)
-			std::cout << byte << " ";
-		std::cout << "\n";
+		if (doPrint) {
+			std::cout << "Sending bytes: ";
+			for (auto& byte : bytes)
+				std::cout << std::hex << byte << " ";
+			std::cout << "\n";
+		}
 
 		return bytes;
 	}
@@ -292,6 +306,11 @@ public:
 
 		factories[MessageSetting::LOADFREQUENCY] = [](KA007ParameterContainer params) {
 			auto bytes = SetLoadFrequency();
+			return bytes.getBytes(params);
+		};
+
+		factories[MessageSetting::MOVEFREQUENCY] = [](KA007ParameterContainer params) {
+			auto bytes = SetMoveFrequency();
 			return bytes.getBytes(params);
 		};
 
@@ -341,6 +360,31 @@ public:
 
 	MessageBuilder& phaseDegrees(const double &phase) {
 		message_.parameters_.set("Phase", phase);
+		return *this;
+	}
+
+	MessageBuilder& instantFTW(const bool& freqjump) {
+		message_.parameters_.set("InstantFTW", freqjump);
+		return *this;
+	}
+
+	MessageBuilder& ATWIncr(const int& ampstep) {
+		message_.parameters_.set("ATWIncr", ampstep);
+		return *this;
+	}
+
+	MessageBuilder& stepSequenceID(const int& stepnum) {
+		message_.parameters_.set("StepSequenceID", stepnum);
+		return *this;
+	}
+
+	MessageBuilder& FTWIncr(const int& freqstep) {
+		message_.parameters_.set("FTWIncr", freqstep);
+		return *this;
+	}
+
+	MessageBuilder& phaseJump(const bool& phasejump) {
+		message_.parameters_.set("PhaseJump", phasejump);
 		return *this;
 	}
 

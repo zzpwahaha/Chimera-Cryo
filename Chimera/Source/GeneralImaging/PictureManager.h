@@ -49,6 +49,7 @@ class PictureManager : public QWidget
 		QGridLayout* picLayout = nullptr;
 		QVector<QRgb> inferno, greys;
 		QPoint picturesLocation;
+		// to be removed
 		int picturesWidth;
 		int picturesHeight;
 		bool autoScalePictures;

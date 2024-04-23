@@ -15,17 +15,11 @@ class AnalysisThreadWorker;
 
 struct realTimePlotterInput{
 	realTimePlotterInput ( ) { }
-	//AnalysisThreadWorker* worker;
 	//AndorCameraSettings cameraSettings;
 	IChimeraQtWindow* plotParentWindow;
 
 	std::vector<tinyPlotInfo> plotInfo;
 	std::vector<atomGrid> grids;
-	// This gets set to false, e.g. when the experiment ends, but doesn't tell the plotter to immediately stop, the 
-	// plotter can finish it's work if it's backed up on images.
-	std::atomic<bool>* active;
-	// this tells the plotter to immediately stop.
-	std::atomic<bool>* aborting;
 	imageParameters imageShape;
 
 	unsigned picsPerVariation;
@@ -35,7 +29,6 @@ struct realTimePlotterInput{
 	unsigned alertThreshold;
 	bool wantAtomAlerts;
 
-	unsigned numberOfRunsToAverage;
 	bool needsCounts;
 };
 

@@ -3,7 +3,7 @@
 #include <qobject.h>
 #include <string>
 #include <GeneralObjects/Queues.h>
-#include <RealTimeDataAnalysis/atomCruncherInput.h>
+#include <Rearrangement/atomCruncherInput.h>
 
 class CruncherThreadWorker : public QObject {
     Q_OBJECT
@@ -16,7 +16,7 @@ class CruncherThreadWorker : public QObject {
 
     public Q_SLOTS:
         void init ();
-        void handleImage (NormalImage);
+        void handleImage ();
 		 
     Q_SIGNALS:
         void error (QString errstr);
