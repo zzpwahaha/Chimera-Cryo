@@ -11,7 +11,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup>
     <Link>
-      <AdditionalDependencies>python38.lib;atmcd64m.lib;atcorem.lib;usbdll.lib;visa32.lib;ftd2xx.lib;gsl.lib;cblas.lib;VimbaCPP.lib;VimbaImageTransform.lib;InfluxDB.lib;libcurl.lib;libhdf5.lib;libhdf5_cpp.lib;libhdf5_hl.lib;libhdf5_hl_cpp.lib;libhdf5_tools.lib;libszip.lib;libzlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>python38.lib;atmcd64m.lib;atcorem.lib;usbdll_newport.lib;visa32.lib;ftd2xx.lib;gsl.lib;cblas.lib;VimbaCPP.lib;VimbaImageTransform.lib;InfluxDB.lib;libcurl.lib;libhdf5.lib;libhdf5_cpp.lib;libhdf5_hl.lib;libhdf5_hl_cpp.lib;libhdf5_tools.lib;libszip.lib;libzlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>

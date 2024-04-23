@@ -45,12 +45,14 @@ void PicoScrewCore::calculateVariations(std::vector<parameterType>& params, ExpT
 	size_t totalVariations = (params.size() == 0) ? 1 : params.front().keyValues.size();
 	try {
 		for (auto ch : range(PICOSCREW_NUM)) {
-			expSettings.screwPos[ch].assertValid(params, GLOBAL_PARAMETER_SCOPE);
-			expSettings.screwPos[ch].internalEvaluate(params, totalVariations);
-			if (expSettings.screwPos[ch].varies() && !PICOSCREW_CONNECTED[ch]) {
-				thrower("Error in varying picoscrews for channel " + str(ch) +
-					". This channel is NOT connected in constant.h but is varied given expression " +
-					expSettings.screwPos[ch].expressionStr);
+			if (PICOSCREW_CONNECTED[ch]) {
+				expSettings.screwPos[ch].assertValid(params, GLOBAL_PARAMETER_SCOPE);
+				expSettings.screwPos[ch].internalEvaluate(params, totalVariations);
+				if (expSettings.screwPos[ch].varies() && !PICOSCREW_CONNECTED[ch]) {
+					thrower("Error in varying picoscrews for channel " + str(ch) +
+						". This channel is NOT connected in constant.h but is varied given expression " +
+						expSettings.screwPos[ch].expressionStr);
+				}
 			}
 		}
 	}
@@ -105,7 +107,7 @@ void PicoScrewCore::setHomePosition(unsigned channel, int position)
 
 void PicoScrewCore::moveTo(unsigned channel, int position)
 {
-	if (position > 2147483647 || position < -2147483648) {
+	if (position > 2147483647 || position < int(-2147483648)) {
 		thrower("Position value out of allowable range for PicoScrew. Set value is: " + str(position));
 	}
 	auto strChan = str(channel + 1);
