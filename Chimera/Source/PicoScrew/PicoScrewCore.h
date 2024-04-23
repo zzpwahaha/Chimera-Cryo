@@ -6,7 +6,7 @@
 
 class PicoScrewCore;
 
-struct piezoSettings
+struct picoScrewSettings
 {
 	std::array<Expression, PICOSCREW_NUM> screwPos;
 	bool ctrlScrew;
@@ -29,13 +29,14 @@ public:
 	void errorFinish() override {};
 	std::string getDelim() override { return configDelim; };
 
-	piezoSettings getSettingsFromConfig(ConfigStream& file);
+	picoScrewSettings getSettingsFromConfig(ConfigStream& file);
 
 	void setHomePosition(unsigned channel, int position = 0);
 	void moveTo(unsigned channel, int position);
 	bool motionDone(unsigned channel);
 	int motorPosition(unsigned channel);
 	std::string getDeviceInfo();
+	void setScrewExpSetting(picoScrewSettings tmpSetting); // used only for ProgramNow in PicoScrewSystem
 
 	const bool safemode;
 	const std::string configDelim = "PICOSCREW";
@@ -43,6 +44,6 @@ public:
 
 private:
 	PicoScrewFlume screw;
-	piezoSettings expSettings;
+	picoScrewSettings expSettings;
 };
 

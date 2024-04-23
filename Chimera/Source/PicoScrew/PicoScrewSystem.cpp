@@ -37,12 +37,12 @@ void PicoScrewSystem::initialize()
 		});
 	ctrlButton = new QCheckBox("Ctrl?", this);
 	ctrlButton->setChecked(true);
-	if (!expActive) {
-		// never enabled. You should be able to always modify the piezo values in the middle of the experiment safely. 
-		ctrlButton->setEnabled(false);
-		ctrlButton->setText("(Not Used in Exp)");
-	}
-	connect(ctrlButton, &QCheckBox::stateChanged, [this]() {
+	//if (!expActive) {
+	//	// never enabled. You should be able to always modify the piezo values in the middle of the experiment safely. 
+	//	ctrlButton->setEnabled(false);
+	//	ctrlButton->setText("(Not Used in Exp)");
+	//}
+	connect(ctrlButton, &QCheckBox::clicked, [this]() {
 		try {
 			updateCtrlEnable();
 			parentWin->configUpdated();
@@ -69,6 +69,16 @@ void PicoScrewSystem::initialize()
 		currentVals[ch] = new QLabel("---", this);
 
 		connect(edits[ch], &QLineEdit::textChanged, [this]() { parentWin->configUpdated(); });
+		connect(setHomeButtons[ch], &QPushButton::released, [this, ch]() {
+			if (expActive) {
+				return; // do nothing when experiment is active
+			}
+			else {
+				auto strChan = qstr(ch + 1);
+				core.setHomePosition(ch);
+				emit notification("Finished setting current position to zero for PicoScrew number-" + strChan + " !\n", 0);
+			}
+			});
 
 	}
 	updateCurrentValues();
@@ -85,17 +95,17 @@ void PicoScrewSystem::initialize()
 	}
 	layout->addLayout(layout2);
 
-	QTimer* timer = new QTimer(this);
-	connect(timer, &QTimer::timeout, [this]() {
-		try {
-			if (!parentWin->mainWin->expIsRunning()) {
-				updateCurrentValues();
-			}
-		}
-		catch (ChimeraError&) {}
-		});
-	// could probably make this time a front panel option.
-	timer->start(10000);
+	//QTimer* timer = new QTimer(this);
+	//connect(timer, &QTimer::timeout, [this]() {
+	//	try {
+	//		if (!parentWin->mainWin->expIsRunning()) {
+	//			updateCurrentValues();
+	//		}
+	//	}
+	//	catch (ChimeraError&) {}
+	//	});
+	//// could probably make this time a front panel option.
+	//timer->start(10000);
 }
 
 void PicoScrewSystem::handleOpenConfig(ConfigStream& configFile)
@@ -138,11 +148,23 @@ void PicoScrewSystem::updateCtrlEnable()
 	for (auto& e : edits) {
 		e->setEnabled(ctrl);
 	}
+	for (auto& e : setHomeButtons) {
+		e->setEnabled(ctrl);
+	}
 }
 
 void PicoScrewSystem::handleProgramNowPress(std::vector<parameterType> constants)
 {
-	
+	picoScrewSettings tmpSetting;
+	for (auto ch : range(PICOSCREW_NUM)) {
+		tmpSetting.screwPos[ch].expressionStr = str(edits[ch]->text());
+	}
+	tmpSetting.ctrlScrew = true;
+
+	core.setScrewExpSetting(tmpSetting);
+	core.calculateVariations(constants, nullptr);
+	core.programVariation(0, constants, nullptr);
+
 	emit notification("Finished programming PicoScrew system!\n", 0);
 
 }

@@ -81,9 +81,9 @@ void PicoScrewCore::programVariation(unsigned variation, std::vector<parameterTy
 	}
 }
 
-piezoSettings PicoScrewCore::getSettingsFromConfig(ConfigStream& file)
+picoScrewSettings PicoScrewCore::getSettingsFromConfig(ConfigStream& file)
 {
-	piezoSettings tempSettings;
+	picoScrewSettings tempSettings;
 	auto getlineF = ConfigSystem::getGetlineFunc(file.ver);
 	file.get();
 	for (auto ch : range(PICOSCREW_NUM)) {
@@ -139,5 +139,10 @@ int PicoScrewCore::motorPosition(unsigned channel)
 std::string PicoScrewCore::getDeviceInfo()
 {
 	return screw.query("*IDN?");
+}
+
+void PicoScrewCore::setScrewExpSetting(picoScrewSettings tmpSetting)
+{
+	expSettings = tmpSetting;
 }
 
