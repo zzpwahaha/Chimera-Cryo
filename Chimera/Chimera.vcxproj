@@ -14,7 +14,7 @@
     <ProjectGuid>{FB8C9AF1-B1F8-4BF5-85AA-C856B62F6098}</ProjectGuid>
     <Keyword>QtVS_v304</Keyword>
     <WindowsTargetPlatformVersion Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">10.0</WindowsTargetPlatformVersion>
-    <WindowsTargetPlatformVersion Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">10.0.18362.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">10.0</WindowsTargetPlatformVersion>
     <QtMsBuild Condition="'$(QtMsBuild)'=='' OR !Exists('$(QtMsBuild)\qt.targets')">$(MSBuildProjectDirectory)\QtMsBuild</QtMsBuild>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -59,7 +59,7 @@
       <WarningLevel>Level3</WarningLevel>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <LanguageStandard_C>Default</LanguageStandard_C>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ShowIncludes>false</ShowIncludes>
     </ClCompile>
     <Link>
@@ -75,7 +75,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <LanguageStandard_C>Default</LanguageStandard_C>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ShowIncludes>false</ShowIncludes>
     </ClCompile>
     <Link>
@@ -130,6 +130,10 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Source\PicoScrew\NewportUSB.cpp" />
+    <ClCompile Include="Source\PicoScrew\PicoScrewSystem.cpp" />
+    <ClCompile Include="Source\PicoScrew\PicoScrewCore.cpp" />
+    <ClCompile Include="Source\PicoScrew\PicoScrewFlume.cpp" />
     <ClCompile Include="Source\Rearrangement\RearrangeGenerator.cpp" />
     <ClCompile Include="Source\Rearrangement\rearrangeLUT.cpp" />
     <ClCompile Include="Source\GigaMOOG\DynamicMoveManager.cpp" />
@@ -203,6 +207,10 @@
     <QtMoc Include="Source\ExperimentMonitoringAndStatus\TemperatureMonitor.h" />
     <QtMoc Include="Source\CMOSCamera\FrameAverager.h" />
     <QtMoc Include="Source\ExcessDialogs\AiSettingsDialog.h" />
+    <ClInclude Include="Source\PicoScrew\NewportUSB.h" />
+    <ClInclude Include="Source\PicoScrew\PicoScrewSystem.h" />
+    <ClInclude Include="Source\PicoScrew\PicoScrewCore.h" />
+    <ClInclude Include="Source\PicoScrew\PicoScrewFlume.h" />
     <QtMoc Include="Source\Andor\AndorCameraThreadImageGrabber.h" />
     <ClInclude Include="Source\Rearrangement\RearrangeGenerator.h" />
     <ClInclude Include="Source\Rearrangement\rearrangeLUT.h" />

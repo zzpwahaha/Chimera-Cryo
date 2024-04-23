@@ -483,6 +483,18 @@
     <ClCompile Include="Source\GeneralFlumes\WinSerialFlume.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\PicoScrew\NewportUSB.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\PicoScrew\PicoScrewSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\PicoScrew\PicoScrewCore.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\PicoScrew\PicoScrewFlume.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="Source\GeneralFlumes\BoostUDP.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -1109,6 +1121,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\GeneralFlumes\WinSerialFlume.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\PicoScrew\NewportUSB.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\PicoScrew\PicoScrewSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\PicoScrew\PicoScrewCore.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\PicoScrew\PicoScrewFlume.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\GeneralFlumes\BoostUDP.h">

@@ -1,14 +1,14 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <ShowAllFiles>true</ShowAllFiles>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <LocalDebuggerEnvironment>PATH=$(QTDIR)\bin;$(ProjectDir)3rd_Party\Andor\Lib;$(ProjectDir)3rd_Party\FTDI\Lib;$(ProjectDir)3rd_Party\Vimba_4.2\VimbaCPP\Bin\Win64;$(ProjectDir)3rd_Party\Vimba_4.2\VimbaImageTransform\Bin\Win64;$(ProjectDir)3rd_Party\Thorlabs\Lib;$(ProjectDir)3rd_Party\GSL_MSVC\dll\x64\Debug;$(ProjectDir)3rd_Party\GSL_MSVC\dll\x64\Release;$(ProjectDir)3rd_Party\InfluxDB\Bin\Release;$(ProjectDir)3rd_Party\InfluxDB\Bin\Debug;%(Path)%</LocalDebuggerEnvironment>
+    <LocalDebuggerEnvironment>PATH=$(QTDIR)\bin;$(ProjectDir)3rd_Party\Andor\Lib;$(ProjectDir)3rd_Party\FTDI\Lib;$(ProjectDir)3rd_Party\Vimba_4.2\VimbaCPP\Bin\Win64;$(ProjectDir)3rd_Party\Vimba_4.2\VimbaImageTransform\Bin\Win64;$(ProjectDir)3rd_Party\Thorlabs\Lib;$(ProjectDir)3rd_Party\GSL_MSVC\dll\x64\Debug;$(ProjectDir)3rd_Party\GSL_MSVC\dll\x64\Release;$(ProjectDir)3rd_Party\InfluxDB\Bin\Release;$(ProjectDir)3rd_Party\InfluxDB\Bin\Debug;$(ProjectDir)3rd_Party\Newport\Newport_USB_Driver\Lib;%(Path)%</LocalDebuggerEnvironment>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LocalDebuggerEnvironment>PATH=$(QTDIR)\bin;$(ProjectDir)3rd_Party\Andor\Lib;$(ProjectDir)3rd_Party\FTDI\Lib;$(ProjectDir)3rd_Party\Vimba_4.2\VimbaCPP\Bin\Win64;$(ProjectDir)3rd_Party\Vimba_4.2\VimbaImageTransform\Bin\Win64;$(ProjectDir)3rd_Party\Thorlabs\Lib;$(ProjectDir)3rd_Party\GSL_MSVC\dll\x64\Debug;$(ProjectDir)3rd_Party\GSL_MSVC\dll\x64\Release;$(ProjectDir)3rd_Party\InfluxDB\Bin\Release;$(ProjectDir)3rd_Party\InfluxDB\Bin\Debug;%(Path)%</LocalDebuggerEnvironment>
+    <LocalDebuggerEnvironment>PATH=$(QTDIR)\bin;$(ProjectDir)3rd_Party\Andor\Lib;$(ProjectDir)3rd_Party\FTDI\Lib;$(ProjectDir)3rd_Party\Vimba_4.2\VimbaCPP\Bin\Win64;$(ProjectDir)3rd_Party\Vimba_4.2\VimbaImageTransform\Bin\Win64;$(ProjectDir)3rd_Party\Thorlabs\Lib;$(ProjectDir)3rd_Party\GSL_MSVC\dll\x64\Debug;$(ProjectDir)3rd_Party\GSL_MSVC\dll\x64\Release;$(ProjectDir)3rd_Party\InfluxDB\Bin\Release;$(ProjectDir)3rd_Party\InfluxDB\Bin\Debug;$(ProjectDir)3rd_Party\Newport\Newport_USB_Driver\Lib;%(Path)%</LocalDebuggerEnvironment>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

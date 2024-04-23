@@ -20,6 +20,7 @@ QtAuxiliaryWindow::QtAuxiliaryWindow (QWidget* parent)
 	, dds (this, DDS_SAFEMODE)
 	, olSys(this, ttlBoard)
 	, mwSys(this)
+	, picoSys(this)
 	, calManager(this)
 {	
 	
@@ -66,6 +67,9 @@ void QtAuxiliaryWindow::initializeWidgets (){
 		layout1->addWidget(&dds, 0);
 		//dds.initialize (this, "DDS SYSTEM");
 		//layout3->addWidget(&dds, 1);
+
+		picoSys.initialize();
+		layout1->addWidget(&picoSys, 0);
 
 		layout1->addStretch(1);
 
@@ -176,6 +180,7 @@ void QtAuxiliaryWindow::windowSaveConfig (ConfigStream& saveFile){
 	dds.handleSaveConfig (saveFile);
 	olSys.handleSaveConfig(saveFile);
 	mwSys.handleSaveConfig(saveFile);
+	picoSys.handleSaveConfig(saveFile);
 	aiSys.handleSaveConfig(saveFile);
 	calManager.handleSaveConfig(saveFile);
 }
@@ -193,6 +198,7 @@ void QtAuxiliaryWindow::windowOpenConfig (ConfigStream& configFile){
 		microwaveSettings uwsettings;
 		ConfigSystem::stdGetFromConfig(configFile, mwSys.getCore(), uwsettings);
 		mwSys.setMicrowaveSettings(uwsettings);
+		ConfigSystem::standardOpenConfig(configFile, picoSys.getConfigDelim(), &picoSys);
 		ConfigSystem::standardOpenConfig(configFile, aiSys.getDelim(), &aiSys);
 		ConfigSystem::standardOpenConfig(configFile, calManager.systemDelim, &calManager);
 	}
@@ -689,6 +695,15 @@ std::string QtAuxiliaryWindow::getOtherSystemStatusMsg (){
 		msg += "\tCode System is disabled! Enable in \"constants.h\"\n";
 	}
 
+	msg += "PicoScrew System:\n";
+	if (!PICOSCREW_SAFEMODE) {
+		msg += "\tCode System is Active!\n";
+		msg += "\t" + picoSys.getDeviceInfo() + "\n\t";
+		msg += "\n";
+	}
+	else {
+		msg += "\tCode System is disabled! Enable in \"constants.h\"\n";
+	}
 
 	msg += "AI System:\n";
 	if (!AI_SAFEMODE){
@@ -710,5 +725,6 @@ void QtAuxiliaryWindow::fillExpDeviceList (DeviceList& list){
 	//list.list.push_back(olSys.getCore());
 	list.list.push_back(mwSys.getCore());
 	list.list.push_back(aiSys.getCore());
+	list.list.push_back(picoSys.getCore());
 }
 
