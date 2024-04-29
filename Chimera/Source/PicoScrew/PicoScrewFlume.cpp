@@ -8,7 +8,8 @@ PicoScrewFlume::PicoScrewFlume(bool safemode, std::string deviceKey)
 	if (safemode) {
 		return;
 	}
-
+	//newp_usb_SetLogging(true);
+	newp_usb_init_system();
 	// If the devices were not opened successfully
 	if (!npUSB.OpenDevices(0, true)) {
 		thrower("\n***** Error:  Could not open the devices. *****\n\n"
@@ -26,9 +27,11 @@ PicoScrewFlume::PicoScrewFlume(bool safemode, std::string deviceKey)
 		return;
 	}
 	if (deviceTable.find(deviceKey) == deviceTable.end()) {
-		thrower("Error in finding the desired PicoScrew device: " + str(deviceKey) +
-			"Please make sure that the devices are powered on, \n"
-			"connected to the PC, and that the drivers are properly installed.\n\n");
+		// somehow if called newp_usb_init_system() on the top, the deviceTable will be an map with empty key
+		// and if not calling newp_usb_init_system(), will see weird break of the program during starting. 
+		//thrower("Error in finding the desired PicoScrew device: " + str(deviceKey) +
+		//	"Please make sure that the devices are powered on, \n"
+		//	"connected to the PC, and that the drivers are properly installed.\n\n");
 	}
 
 
