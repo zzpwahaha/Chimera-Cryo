@@ -483,9 +483,6 @@
     <ClCompile Include="Source\GeneralFlumes\WinSerialFlume.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\PicoScrew\NewportUSB.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Source\PicoScrew\PicoScrewSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -514,6 +511,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\Rearrangement\RearrangeGenerator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\PicoScrew\NewportUSB.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1123,9 +1123,6 @@
     <ClInclude Include="Source\GeneralFlumes\WinSerialFlume.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\PicoScrew\NewportUSB.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Source\PicoScrew\PicoScrewSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -1160,6 +1157,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\Rearrangement\RearrangeGenerator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\PicoScrew\NewportUSB.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
