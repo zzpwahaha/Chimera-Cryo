@@ -17,7 +17,7 @@ void PicoScrewSystem::initialize()
 {
 	QVBoxLayout* layout = new QVBoxLayout(this);
 	layout->setContentsMargins(0, 0, 0, 0);
-	this->setMaximumWidth(1300);
+	this->setMaximumWidth(600);
 
 	QLabel* title = new QLabel("PICOSCREW", this);
 	layout->addWidget(title, 0);
@@ -63,7 +63,7 @@ void PicoScrewSystem::initialize()
 
 	for (auto ch : range(PICOSCREW_NUM)) {
 		auto strChan = qstr(ch + 1);
-		labels[ch] = new QLabel(strChan, this);
+		labels[ch] = new QLabel(strChan+":", this);
 		setHomeButtons[ch] = new QPushButton("Set Home", this);
 		edits[ch] = new QLineEdit(this);
 		currentVals[ch] = new QLabel("---", this);
@@ -89,23 +89,28 @@ void PicoScrewSystem::initialize()
 		auto strChan = qstr(ch + 1);
 		lay->addWidget(labels[ch], 0);
 		lay->addWidget(setHomeButtons[ch], 0);
+
+		QHBoxLayout* lay1 = new QHBoxLayout();
+		//lay1->addWidget(new QLabel("Cur.Val:", this), 0);
+		lay1->addWidget(currentVals[ch], 0);
+		lay1->addWidget(edits[ch], 0);
+
 		layout2->addLayout(lay, 0, ch);
-		layout2->addWidget(currentVals[ch], 1, ch);
-		layout2->addWidget(edits[ch], 2, ch);
+		layout2->addLayout(lay1, 1, ch);
 	}
 	layout->addLayout(layout2);
 
-	//QTimer* timer = new QTimer(this);
-	//connect(timer, &QTimer::timeout, [this]() {
-	//	try {
-	//		if (!parentWin->mainWin->expIsRunning()) {
-	//			updateCurrentValues();
-	//		}
-	//	}
-	//	catch (ChimeraError&) {}
-	//	});
-	//// could probably make this time a front panel option.
-	//timer->start(10000);
+	QTimer* timer = new QTimer(this);
+	connect(timer, &QTimer::timeout, [this]() {
+		try {
+			if (!parentWin->mainWin->expIsRunning()) {
+				updateCurrentValues();
+			}
+		}
+		catch (ChimeraError&) {}
+		});
+	// could probably make this time a front panel option.
+	timer->start(10000);
 }
 
 void PicoScrewSystem::handleOpenConfig(ConfigStream& configFile)
@@ -123,9 +128,9 @@ void PicoScrewSystem::handleSaveConfig(ConfigStream& configFile)
 	configFile << core.configDelim;
 	for (auto ch : range(PICOSCREW_NUM)) {
 		auto strChan = str(ch + 1);
-		configFile << "\n/* Screw-"+ strChan +" Value:*/ " << Expression(str(edits[ch]->text()));
+		configFile << "\n/* Screw-"+ strChan +" Value:*/\t\t" << Expression(str(edits[ch]->text()));
 	}
-	configFile << "\n/*Control?*/ " << ctrlButton->isChecked()
+	configFile << "\n/*Control?*/\t\t\t" << ctrlButton->isChecked()
 		<< "\nEND_" + core.configDelim << "\n";
 }
 
@@ -146,10 +151,10 @@ void PicoScrewSystem::updateCtrlEnable()
 {
 	auto ctrl = ctrlButton->isChecked();
 	for (auto& e : edits) {
-		e->setEnabled(ctrl);
+		e->setEnabled(!ctrl);
 	}
 	for (auto& e : setHomeButtons) {
-		e->setEnabled(ctrl);
+		e->setEnabled(!ctrl);
 	}
 }
 

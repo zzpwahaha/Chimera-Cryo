@@ -39,7 +39,7 @@ void PicoScrewCore::logSettings(DataLogger& logger, ExpThreadWorker* threadworke
 
 void PicoScrewCore::calculateVariations(std::vector<parameterType>& params, ExpThreadWorker* threadworker)
 {
-	if (!experimentActive) {
+	if (!experimentActive && !expSettings.ctrlScrew) {
 		return;
 	}
 	size_t totalVariations = (params.size() == 0) ? 1 : params.front().keyValues.size();
@@ -63,7 +63,7 @@ void PicoScrewCore::calculateVariations(std::vector<parameterType>& params, ExpT
 
 void PicoScrewCore::programVariation(unsigned variation, std::vector<parameterType>& params, ExpThreadWorker* threadworker)
 {
-	if (!experimentActive) {
+	if (!experimentActive && !expSettings.ctrlScrew) {
 		return;
 	}
 	for (auto ch : range(PICOSCREW_NUM)) {
@@ -87,7 +87,7 @@ picoScrewSettings PicoScrewCore::getSettingsFromConfig(ConfigStream& file)
 {
 	picoScrewSettings tempSettings;
 	auto getlineF = ConfigSystem::getGetlineFunc(file.ver);
-	file.get();
+	//file.get();
 	for (auto ch : range(PICOSCREW_NUM)) {
 		getlineF(file, tempSettings.screwPos[ch].expressionStr);
 	}
@@ -98,7 +98,7 @@ picoScrewSettings PicoScrewCore::getSettingsFromConfig(ConfigStream& file)
 
 void PicoScrewCore::setHomePosition(unsigned channel, int position)
 {
-	if (position > 2147483647 || position < -2147483648) {
+	if (position > 2147483647 || position < int(-2147483648)) {
 		thrower("Position value out of allowable range for PicoScrew. Set value is: " + str(position));
 	}
 	auto strChan = str(channel + 1);

@@ -48,10 +48,10 @@ std::string PicoScrewFlume::read()
 	if (safemode) {
 		return std::string("SAFEMODE");
 	}
-	char szBuffer[npUSB.m_knMaxBufferLength];
+	char szBuffer[NewportUSB::m_knMaxBufferLength];
 	unsigned long lBytesRead = 0;
 
-	int nStatus = npUSB.Read(deviceKey, szBuffer, npUSB.m_knMaxBufferLength, &lBytesRead);
+	int nStatus = npUSB.Read(deviceKey, szBuffer, NewportUSB::m_knMaxBufferLength, &lBytesRead);
 
 	if (nStatus != 0) {
 		thrower("Error:  Device Read Error Code = " + str(nStatus) + ". *****\n\n");

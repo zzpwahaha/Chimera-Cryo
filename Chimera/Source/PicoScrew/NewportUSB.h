@@ -38,11 +38,8 @@ public:
 	bool CreateDeviceKey (int handle, std::string& strDeviceKey);
 	void ParseDeviceKey (char* lpID, std::string& strDeviceKey);
 
-	enum
-	{
 		// The maximum buffer length for a USB I/O transfer.
-		m_knMaxBufferLength = 64
-	};
+	const static int m_knMaxBufferLength = 64;
 
 private:
 	// The device information list.
