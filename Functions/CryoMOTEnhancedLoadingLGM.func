@@ -1,0 +1,4 @@
+%%%%%%%%%%%%%%%%% Start With 1ms %%%%%%%%%%%%%%%%% 
+def CryoMOTEnhancedLoadingLGM():
+    call MOTLoading(t_loading)
+    call FreeSpaceLGMEnhancedLoading()

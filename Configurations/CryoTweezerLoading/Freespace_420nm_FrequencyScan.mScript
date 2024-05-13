@@ -1,0 +1,40 @@
+%%%%%%%%%%%%%%%%% Start With 1ms %%%%%%%%%%%%%%%%% 
+t = 1
+call CryoMOTLoadingPGC()
+%call MOTLoading(t_loading)
+%call FreeSpaceLGM(t_pgc_cool_time)
+
+
+t += -10
+on: Ryd420Shutter
+ddsfreq: Ryd420Brimrose resonance_scan
+dac: Ryd420Amp 10
+t += 10
+%%%%%%%%%%%%%%%  TOF  %%%%%%%%%%%%%%%%%%
+off: SciMOTTrg
+on: xyzMOTShutter
+off: PrbShutter 
+dac: SciMOTAmp 0
+dac: TARepAmp 0
+on: Ryd420Trg
+
+t += 10 %t_tof
+off: Ryd420Trg
+off: Ryd420Shutter
+pulseon: DO1_0 1
+
+
+%%%%%%%%%%%%%%%  MAKO Image  %%%%%%%%%%%%%%%%%%
+t += -0.1
+ol: ol_cooling d2_cooling_resonance
+ol: ol_repump d2_repump_resonance
+dac: SciMOTAmp 10
+dac: TARepAmp 10
+pulseon: Mako2 1
+t += 0.1
+pulseon: SciMOTTrg 0.8
+
+
+%%%%%%%%%%%%%%  END Sequence  %%%%%%%%%%%%%%%%%%
+t += 100
+pulseon: DO1_0 0.5

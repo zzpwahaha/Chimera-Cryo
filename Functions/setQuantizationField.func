@@ -1,0 +1,5 @@
+%%%%%% leave enough time for field to settle down, typically use 750ms
+def setQuantizationField():
+    dac: BiasCoilX -2.5+0.75 %quantization_bias_x
+    dac: BiasCoilY -1.065+0.05+(-0.1) %-2.33 %quantization_bias_y %-0.95 
+    dac: BiasCoilZ -0.05-0.039+0.036 %-0.04 

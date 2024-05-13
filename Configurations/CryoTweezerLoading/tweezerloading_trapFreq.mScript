@@ -1,6 +1,7 @@
 %%%%%%%%%%%%%%%%% Start With 1ms %%%%%%%%%%%%%%%%% 
 t = 1
-call CryoMOTLoadingPGC()
+%call CryoMOTLoadingPGC()
+call CryoMOTEnhancedLoadingLGM()
 
 %%%%%%%%%%%%%%%  TOF  %%%%%%%%%%%%%%%%%%
 off: SciMOTTrg

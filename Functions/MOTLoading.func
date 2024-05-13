@@ -13,8 +13,8 @@ def MOTLoading(loading_time):
     ddsfreq: Prb 100
     ddsamp: Prb 100
     t += 1
-    ddsfreq: dds0_3 80
-    ddsamp: dds0_3 100
+    ddsfreq: Ryd420Brimrose 108
+    ddsamp: Ryd420Brimrose 100
 
     t += 1
     ddsfreq: TARep 80 %also used for tweezer AOM
@@ -44,10 +44,15 @@ def MOTLoading(loading_time):
     on: xyzMOTShutter
     on: xyMOTShutter
     on: DipolePushShutter 
+    off: Ryd420Trg
+    off: Ryd1013Trg
     off: PrbShutter 
     on: PrbCoolShutter
     off: D1LGMShutter
     off: OPShutter
+    off: Ryd420Shutter
+    off: Ryd420ExpShutter
+    off: Ryd1013Shutter
 %    off: TWZFlashTrg
     on: TweezerTrg
     off: CameraShutter
@@ -56,12 +61,16 @@ def MOTLoading(loading_time):
     dac: TARepAmp 10
     dac: SrcMOTAmp 10
     dac: SciMOTAmp mot_load_cool_amp %{mot_load_cool_amp_cal mot_pwr} %6.8 
-    dac: DipolePushAmp 6
+    dac: DipolePushAmp 5
     dac: TweezerIntensity twz_intensity %Converison is 38.7mW per 1V Aug/1/2022 
 %    dac: TweezerIntensity twz_dac_intensity-twz_intensityservo_bias % set loading tweezer depth, which is 1mK, 1.7V on PD. Subtract the ofst on servo.
     dac: PrbRepAmp 10
     dac: PrbAmp 2.5 
+    dac: OpAmp 0
+    dac: MW_IQ_I 0
+    dac: MW_IQ_Q 0
 
+    pulseon: MWTrg 0.4
 
     ol: ol_cooling d2_cooling_resonance+10
     ol: ol_repump d2_repump_resonance
@@ -70,6 +79,12 @@ def MOTLoading(loading_time):
     dac: BiasCoilX bias_x %0.04
     dac: BiasCoilY bias_y %0.4
     dac: BiasCoilZ bias_z %0.0
+
+%t += 10
+%on: Ryd1013Shutter
+%dac: Ryd1013Amp 5
+%t += 10
+%on: Ryd1013Trg 
 
     t += loading_time %1000
     off: SrcMOTTrg

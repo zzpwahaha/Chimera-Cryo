@@ -1,0 +1,21 @@
+%%%%%%%%%%% pump out of F=1 using probe repump 1-2'' %%%%%%%%%%%
+def PrepareF2Manifold():
+    on: PrbShutter
+    off: PrbCoolShutter
+    off: xyzMOTShutter
+    off: D1LGMShutter
+    off: D1LGMPrbShutter
+    off: OPShutter
+    off: PrbRepTrg
+    ol: ol_cooling d2_cooling_prb_resonance-(28.8+266.65)  % detuned on purpose
+    ol: ol_repump d2_repump_prb_resonance+30 %(25) %resonance_scan
+    dac: PrbRepAmp 1 %3.0
+    dac: PrbAmp 5 %5.0
+    t += t_shutter
+
+    on: PrbTrg
+    on: PrbRepTrg
+    t += 0.05 
+    off: PrbRepTrg
+    off: PrbTrg
+    off: PrbShutter

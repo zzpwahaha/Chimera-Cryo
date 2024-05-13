@@ -4,8 +4,6 @@ t = 1
 call CryoMOTEnhancedLoadingLGM()
 call TOF(10)
 
-%%%%%%%%%%%%%%%  TOF  %%%%%%%%%%%%%%%%%%
-%call TOF(t_tof)
 
 %%%%%%%%%%%%%%  PGC in Tweezer %%%%%%%%%%%%%%%%%%
 % change the field/laser freq parameter here because the previous section is TOF and no light is on
@@ -20,16 +18,52 @@ t += 100-t_pgc_twz
 %%%%%%%%%%%%%%  Image TWIZZER  %%%%%%%%%%%%%%%%%%
 % change the field/laser freq parameter here because the previous section is dark, i.e. 100-t_pgc_twz is larger than 4
 call PGCTweezerImaging()
-%on: MOTFlashTrg
 
-t += 100
+t += 15
+call setQuantizationField()
+t += 750
+
+call OpticalPumping22()
+
+t += 10
+on: Ryd420Shutter
+on: Ryd1013Shutter
+ddsfreq: Ryd420Brimrose resonance_scan/2
+dac: Ryd420Amp 9.5
+dac: Ryd1013Amp 5
+%pulseon: MWTrg 0.4
+dacramp: TweezerIntensity twz_intensity twz_intensity*0.1 10
+t += 10
+t += 0.5
+on: Ryd1013Trg
+on: TweezerHold
+t += 0.1
+off: TweezerTrg
+t += 0.001
+on: Ryd420Trg
+t += time_scan
+off: Ryd420Trg
+t += 0.001
+on: TweezerTrg
+t += 0.001
+off: TweezerHold
+dacramp: TweezerIntensity twz_intensity*0.1 twz_intensity 0.06
+%pulseon: MWAmpTrg 0.1
+t += 0.1
+off: Ryd1013Trg
+off: Ryd420Shutter
+off: Ryd1013Shutter
+t += 0.5
+%dacramp: TweezerIntensity twz_intensity*0.1 twz_intensity 10
+%t += 10
+
+%t += 5
+%call StateSelectivePushout()
+
+
+t += 15
 %%%%%%%%%%%%%%  PGC in Tweezer %%%%%%%%%%%%%%%%%%
 % change the field/laser freq parameter here because the previous section is TOF and no light is on
-call D2InTrapPGC(t_pgc_twz)
-% note the t_pgc_twz should be smaller than 100
-t += 100-t_pgc_twz
-
-
 call D2InTrapPGCPrb(t_pgc_twz)
 % note the t_pgc_twz should be smaller than 100
 t += 100-t_pgc_twz
@@ -39,5 +73,5 @@ t += 100-t_pgc_twz
 call PGCTweezerImaging()
 
 %%%%%%%%%%%%%%  END Sequence  %%%%%%%%%%%%%%%%%%
-t += 100
+t += 10
 pulseon: DO1_0 0.5

@@ -2,3 +2,4 @@
 def CryoMOTLoadingPGC():
     call MOTLoading(t_loading)
     call FreeSpacePGC(t_pgc_cool_time)
+%    call FreeSpacePGCLoading()

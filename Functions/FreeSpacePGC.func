@@ -10,10 +10,13 @@ def FreeSpacePGC(pgc_cool_time):
     dac: BiasCoilZ pgc_bias_z
     dac: SciMOTAmp pgc_cool_amp
     dac: TARepAmp pgc_rep_amp
+%    t += 5
+%    dacramp: SciMOTAmp pgc_cool_amp 3 pgc_cool_time-5-2.5
     t += pgc_cool_time
     pulseon: DO1_0 1
 
     % to image PGC cloud for 5ms to make sure everything looks fine
-    t += -5
-    pulseon: Mako1 0.1
-    t += 5
+%    t += -5
+%    pulseon: Mako1 0.1
+%    t += 5
+%

@@ -1,14 +1,13 @@
 %%%%%%%%%%%%%%%%% Start With 1ms %%%%%%%%%%%%%%%%% 
 t = 1
-off: SrcMOTValveEnable
+%on: SrcMOTValveEnable
 t += 1
-call CryoMOTLoadingPGC()
-%call MOTLoading(t_loading)
+%call CryoMOTLoadingPGC()
+call MOTLoading(t_loading)
+call FreeSpaceLGMEnhancedLoading()
+call TOF(10)
 %call FreeSpaceLGM(t_lgm_cool_time)
 
-
-%%%%%%%%%%%%%%%  TOF  %%%%%%%%%%%%%%%%%%
-call TOF(t_tof)
 
 %%%%%%%%%%%%%%  PGC in Tweezer %%%%%%%%%%%%%%%%%%
 % change the field/laser freq parameter here because the previous section is TOF and no light is on
