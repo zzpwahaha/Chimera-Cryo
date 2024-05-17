@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "CMOSSetting.h"
 
-const std::array<CameraInfo::name, MAKO_NUMBER> CameraInfo::allCams = { name::Mako1, name::Mako2 };
+const std::array<CameraInfo::name, MAKO_NUMBER> CameraInfo::allCams = { name::Mako1, name::Mako2, name::Mako3, name::Mako4 };
 
 std::string CameraInfo::toStr(name m_)
 {

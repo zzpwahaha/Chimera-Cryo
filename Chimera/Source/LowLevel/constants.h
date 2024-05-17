@@ -99,7 +99,7 @@
 
 	//Mako camera
 	const unsigned MAKO_NUMBER = 4;
-	const std::array<bool, MAKO_NUMBER> MAKO_SAFEMODE = { true,true,true,true };
+	const std::array<bool, MAKO_NUMBER> MAKO_SAFEMODE = { false,false,false,false};
 	const std::array<std::string, MAKO_NUMBER> MAKO_DELIMS = { "MAKO1_CAM"/*MOT G125*/, "MAKO2_CAM"/*MOT G319*/, "MAKO3_CAM"/*420 MON*/, "MAKO4_CAM"/*1013 MON*/};
 	const std::array<std::string, MAKO_NUMBER> MAKO_IPADDRS = { "10.10.0.6", "10.10.0.7","10.10.0.12","10.10.0.11" };
 	const std::vector<std::pair<unsigned, unsigned>> MAKO_TRIGGER_LINE
