@@ -34,7 +34,7 @@ QtMainWindow::QtMainWindow () :
 		which = "Auxiliary";
 		auxWin = new QtAuxiliaryWindow;
 		which = "CMOS";
-		makoWin = new QtMakoWindow;
+		makoWin = new QtMakoWindow(MakoInfo::camWindow1);
 		which = "Analysis";
 		analysisWin = new QtAnalysisWindow;
 	}

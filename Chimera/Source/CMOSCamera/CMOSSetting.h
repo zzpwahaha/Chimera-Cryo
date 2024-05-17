@@ -4,6 +4,7 @@
 
 struct CameraInfo
 {
+	static const unsigned WINDOW_MAKO_NUMBER = 2;
 	enum class name {
 		Mako1,Mako2
 	};
@@ -17,6 +18,13 @@ struct CameraInfo
 	static CameraInfo::name fromStr(std::string txt);
 
 };
+
+namespace MakoInfo {
+	const CameraInfo camInfo1{ CameraInfo::name::Mako1,MAKO_IPADDRS[0],MAKO_DELIMS[0],MAKO_SAFEMODE[0], MAKO_TRIGGER_LINE[0] };
+	const CameraInfo camInfo2{ CameraInfo::name::Mako2,MAKO_IPADDRS[1],MAKO_DELIMS[1],MAKO_SAFEMODE[1], MAKO_TRIGGER_LINE[1] };
+
+	const std::array<CameraInfo, CameraInfo::WINDOW_MAKO_NUMBER> camWindow1({ camInfo1 ,camInfo2 });
+}
 
 
 struct CMOSAutoExposure {

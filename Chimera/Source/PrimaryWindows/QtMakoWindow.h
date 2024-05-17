@@ -13,7 +13,9 @@ class QtMakoWindow : public IChimeraQtWindow
     Q_OBJECT
 
 public:
-    explicit QtMakoWindow(QWidget* parent = nullptr);
+    static const unsigned WINDOW_MAKO_NUMBER = CameraInfo::WINDOW_MAKO_NUMBER;
+
+    explicit QtMakoWindow(std::array<CameraInfo, WINDOW_MAKO_NUMBER> camInfos, QWidget* parent = nullptr);
     ~QtMakoWindow();
 
     void initializeWidgets();
@@ -28,11 +30,10 @@ public slots: //will this work without qslot? NO zzp 2021/06/01
     void CMOSChkFinished(); // used for counting all cmos camera to finish and close the hdf5 file
 
 public:
-    const CameraInfo camInfo1{ CameraInfo::name::Mako1,MAKO_IPADDRS[0],MAKO_DELIMS[0],MAKO_SAFEMODE[0], MAKO_TRIGGER_LINE[0] };
-    const CameraInfo camInfo2{ CameraInfo::name::Mako2,MAKO_IPADDRS[1],MAKO_DELIMS[1],MAKO_SAFEMODE[1], MAKO_TRIGGER_LINE[1] };
-
+    const std::array<CameraInfo, WINDOW_MAKO_NUMBER> camInfos;
+    
 private:
-    std::array<MakoCamera, MAKO_NUMBER> cam;
+    std::array<MakoCamera, WINDOW_MAKO_NUMBER> cam;
 
 
 };

@@ -10,10 +10,11 @@
 #include <ExcessDialogs/openWithExplorer.h>
 #include <qlayout.h>
 
-QtMakoWindow::QtMakoWindow(QWidget* parent)
+QtMakoWindow::QtMakoWindow(std::array<CameraInfo, WINDOW_MAKO_NUMBER> camInfos, QWidget* parent)
 	: IChimeraQtWindow(parent)
-	, cam{ MakoCamera(camInfo1, this),
-	MakoCamera(camInfo2, this) }
+	, camInfos(camInfos)
+	, cam{ MakoCamera(camInfos[0], this),
+	MakoCamera(camInfos[1], this)}
 {
 	setWindowTitle("Mako Camera Window");
 }
@@ -77,16 +78,17 @@ std::string QtMakoWindow::getSystemStatusString()
 {
 	std::string msg;
 	msg += "CMOS System:\n";
-	for (unsigned idx = 0; idx < MAKO_NUMBER; idx++)
+	for (unsigned idx = 0; idx < WINDOW_MAKO_NUMBER; idx++)
 	{
-		if (MAKO_SAFEMODE[idx]) {
-			msg += "\tCMOS camera at " + MAKO_IPADDRS[idx] + ": is in safemode. Enable in \"constants.h\" \r\n";
+		auto& camInfo = camInfos[idx];
+		if (camInfo.safemode) {
+			msg += "\tCMOS camera at " + camInfo.ip + ": is in safemode. Enable in \"constants.h\" \r\n";
 		}
 		else {
-			msg += "\tCMOS camera at " + MAKO_IPADDRS[idx] + ": " + cam[idx].getMakoCore().CameraName() + " is running \r\n";
+			msg += "\tCMOS camera at " + camInfo.ip + ": " + cam[idx].getMakoCore().CameraName() + " is running \r\n";
 			msg += "\tAttached trigger line is \n\t\t";
 			{
-				msg += "(" + str(MAKO_TRIGGER_LINE[idx].first) + "," + str(MAKO_TRIGGER_LINE[idx].second) + ") ";
+				msg += "(" + str(camInfo.triggerLine.first) + "," + str(camInfo.triggerLine.second) + ") ";
 			}
 			msg += "\n";
 		}
