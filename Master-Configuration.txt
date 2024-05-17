@@ -55,9 +55,9 @@ mwtrg
 1
 mwamptrg
 1
-do4_4
+ryd420hold
 1
-do4_5
+ryd1013hold
 1
 d1lgm_ol
 1
@@ -67,17 +67,17 @@ ryd420shutter
 1
 ryd420trg
 1
-do5_2
+ryd420expshutter
 1
-do5_3
+ryd420mako
 1
-do5_4
+ryd1013trg
 1
-do5_5
+ryd1013shutter
 1
 ryd840_ol
 1
-do5_7
+ryd1013mako
 1
 tareptrg
 1
@@ -183,7 +183,7 @@ ryd420amp
 -9.9 - 10
 0
 dac0_13
-motcoil1
+ryd1013amp
 -9.9 - 10
 0
 dac0_14

@@ -1,0 +1,139 @@
+%%%%%%%%%%%%%%%%% Start With 1ms %%%%%%%%%%%%%%%%% 
+t = 1
+%call CryoMOTLoadingPGC()
+call MOTLoading(t_loading)
+%call FreeSpacePGC(t_pgc_cool_time)
+call FreeSpaceLGM(t_pgc_cool_time)
+%t += -10
+%on: OPShutter
+%off: OPTrg
+%dac: OPAmp 0
+%t += 10
+%%%%%%%%%%%%%%%  TOF  %%%%%%%%%%%%%%%%%%
+off: SciMOTTrg
+%%on: xyzMOTShutter
+on: PrbShutter 
+on: PrbCoolShutter
+    off: SciMOTTrg
+    off: PrbTrg
+    off: D1LGMTrg
+    off: D1LGMEOMTrg
+off: OPTrg
+%    off: xyzMOTShutter
+%    off: PrbShutter 
+%    off: D1LGMShutter
+%    off: D1LGMPrbShutter
+%    off: OPShutter
+dac: SciMOTAmp 0
+dac: TARepAmp 0
+
+
+%    on: PrbShutter
+%    on: PrbCoolShutter
+%    on: PrbRepTrg
+%    ol: ol_cooling d2_cooling_resonance+20 %-probe_olcool-resonance_scan
+%    ol: ol_repump d2_repump_resonance-20+probe_olrepump
+%    dac: BiasCoilX pgc_img_bias_x
+%    dac: BiasCoilY pgc_img_bias_y
+%    dac: BiasCoilZ pgc_img_bias_z
+%    dac: PrbAmp 8 %amplitude_scan %{probe_cool_amp_cal prb_pwr}
+%    dac: PrbrepAmp probe_repump_amp
+
+
+t += 40 %t_tof
+t += -10
+on: OPShutter
+off: OPTrg
+dac: OPAmp 0
+t += 10
+
+%pulseon: DO1_0 1
+
+
+    t += -20 %-(7+time_scan)
+    on: CameraShutter
+    t += 20 %7+time_scan
+%%%%%%%%%%%%%%%  MAKO Image  %%%%%%%%%%%%%%%%%%
+% MOT
+%t += -0.1
+%ol: ol_cooling d2_cooling_resonance
+%ol: ol_repump d2_repump_resonance
+%dac: SciMOTAmp 10
+%dac: TARepAmp 10
+
+% OP 
+t += -0.1
+ol: ol_cooling d2_cooling_resonance
+ol: ol_repump d2_repump_resonance
+dac: OPAmp 10
+dac: TARepAmp 10
+
+%Prb
+%    on: PrbRepTrg
+%    ol: ol_cooling d2_cooling_resonance+20 %-probe_olcool-resonance_scan
+%    ol: ol_repump d2_repump_resonance-20 %+probe_olrepump
+%    dac: PrbAmp 8 
+%    dac: PrbrepAmp 10 %probe_repump_amp
+
+
+%    on: SciMOTTrg
+%    ol: ol_cooling d2_cooling_resonance-90 %pgc_olcool
+%    ol: ol_repump d2_repump_resonance+pgc_olrepump+24
+%    dac: BiasCoilX pgc_bias_x
+%    dac: BiasCoilY pgc_bias_y 
+%    dac: BiasCoilZ pgc_bias_z
+%    dac: SciMOTAmp pgc_cool_amp
+%    dac: TARepAmp pgc_rep_amp
+%
+%    t += 20
+%    pulseon: DO1_0 1
+%
+%
+%t += -20
+pulseon: Mako2 1
+pulseon: Mako1 1
+t += -10
+pulseon: pixis_trg 20
+t += 10
+t += 0.1
+%pulseon: PrbTrg 1 %5 %time_scan %30 %200 %t_twz_imaging
+%pulseon: SciMOTTrg 5
+pulseon: OPTrg 1
+t += 20 %200
+%    off: CameraShutter
+t += 1
+off: Ryd1013Trg
+
+%%%%%%%%%%%%%%  END Sequence  %%%%%%%%%%%%%%%%%%
+t += 100
+pulseon: DO1_0 0.5
+
+
+
+
+%%%%%%%%%%%%% turn on 780 in the l013 beam path
+%on: TARepShutter
+%on: OPShutter
+%%on: ryd1013shutter 
+%%on: DipolePushShutter
+%ol: ol_cooling d2_cooling_resonance-(266.65+0)
+%ol: ol_repump d2_repump_resonance+resonance_scan
+%dac: dipolepushrepamp 10
+%dac: OPAmp {0.1 op_pwr}
+%t += 4
+%
+%%on: Ryd1013Trg
+%t += 0.1
+%on: OPTrg
+%on: DipolePushRepTrg
+%t += 2 %100 %time_scan %0.15 %0.10 %0.05
+%off: OPTrg
+%off: DipolePushRepTrg
+%t += 0.1
+%off: OPShutter
+%off: Ryd1013Trg
+%off: Ryd1013Shutter
+%on: TARepShutter
+%t += 1
+
+

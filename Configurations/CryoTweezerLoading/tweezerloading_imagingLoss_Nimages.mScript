@@ -1,9 +1,8 @@
 %%%%%%%%%%%%%%%%% Start With 1ms %%%%%%%%%%%%%%%%% 
 t = 1
-call CryoMOTLoadingPGC()
-
-%%%%%%%%%%%%%%%  TOF  %%%%%%%%%%%%%%%%%%
-call TOF(t_tof)
+%call CryoMOTLoadingPGC()
+call CryoMOTEnhancedLoadingLGM()
+call TOF(10)
 
 %%%%%%%%%%%%%%  PGC in Tweezer %%%%%%%%%%%%%%%%%%
 % change the field/laser freq parameter here because the previous section is TOF and no light is on
@@ -47,7 +46,7 @@ dac: PrbrepAmp probe_repump_amp
 
 %%%%%%%%%%%%%%% Pulsed PGC 5 times %%%%%%%%%%%%%%%
 %var t_cooling_cycle 2000/repeat_num
-var _wait_time_ 2000
+var _wait_time_ 8000
 repeat: repeat_num
 %    t += (t_cooling_cycle-5-5-t_pulsed_cool)/2
     t += (_wait_time_/repeat_num-5-5-t_twz_imaging)/2

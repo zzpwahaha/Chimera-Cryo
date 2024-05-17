@@ -23,8 +23,8 @@ t += 1
 ddsfreq: PrbRep 80
 ddsamp: PrbRep 100
 t += 1
-ddsfreq: PrbRep_tmp 80
-ddsamp: PrbRep_tmp 100
+%ddsfreq: PrbRep_tmp 80
+%ddsamp: PrbRep_tmp 100
 t += 1
 ddsfreq: dds2_3 80
 ddsamp: dds2_3 100
@@ -82,7 +82,7 @@ dac: BiasCoilY pgc_bias_y
 dac: BiasCoilZ pgc_bias_z
 dac: SciMOTAmp pgc_cool_amp
 dac: TARepAmp pgc_rep_amp
-t += pgc_cool_time
+t += t_pgc_cool_time
 pulseon: DO1_0 1
 
 %%%%%%%%%%%%%%%  TOF  %%%%%%%%%%%%%%%%%%

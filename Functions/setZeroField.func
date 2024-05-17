@@ -1,0 +1,5 @@
+%%%%%% leave enough time for field to settle down, typically use 750ms
+def setZeroField():
+    dac: BiasCoilX 0.75 %quantization_bias_x
+    dac: BiasCoilY -1.065+0.05 %-2.33 %quantization_bias_y %-0.95 
+    dac: BiasCoilZ -0.05-0.039 %-0.04 

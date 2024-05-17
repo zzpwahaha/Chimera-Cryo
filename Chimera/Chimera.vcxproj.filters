@@ -309,7 +309,7 @@
     <ClCompile Include="Source\RealTimeDataAnalysis\AnalysisThreadWorker.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\RealTimeDataAnalysis\AtomCruncherWorker.cpp">
+    <ClCompile Include="Source\Rearrangement\AtomCruncherWorker.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\RealTimeDataAnalysis\DataAnalysisControl.cpp">
@@ -483,6 +483,39 @@
     <ClCompile Include="Source\GeneralFlumes\WinSerialFlume.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\PicoScrew\PicoScrewSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\PicoScrew\PicoScrewCore.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\PicoScrew\PicoScrewFlume.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\GeneralFlumes\BoostUDP.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Python\cnpy.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Andor\AndorCameraThreadImageGrabber.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\GigaMOOG\DynamicMoveManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Rearrangement\rearrangeLUT.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\GigaMOOG\MemoryController.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Rearrangement\RearrangeGenerator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\PicoScrew\NewportUSB.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="3rd_Party\qcustomplot\qcustomplot.h">
@@ -575,7 +608,7 @@
     <QtMoc Include="Source\RealTimeDataAnalysis\AnalysisThreadWorker.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <QtMoc Include="Source\RealTimeDataAnalysis\AtomCruncherWorker.h">
+    <QtMoc Include="Source\Rearrangement\AtomCruncherWorker.h">
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="Source\RealTimeDataAnalysis\MachineOptimizer.h">
@@ -678,6 +711,9 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="Source\ExcessDialogs\AiSettingsDialog.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\Andor\AndorCameraThreadImageGrabber.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
@@ -952,7 +988,7 @@
     <ClInclude Include="Source\RealTimeDataAnalysis\analysisSettings.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\RealTimeDataAnalysis\atomCruncherInput.h">
+    <ClInclude Include="Source\Rearrangement\atomCruncherInput.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\RealTimeDataAnalysis\atomGrid.h">
@@ -1085,6 +1121,45 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\GeneralFlumes\WinSerialFlume.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\PicoScrew\PicoScrewSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\PicoScrew\PicoScrewCore.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\PicoScrew\PicoScrewFlume.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\GeneralFlumes\BoostUDP.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Python\cnpy.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Rearrangement\rearrangeStructures.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\GeneralObjects\ThreadsafeQueue.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\GigaMOOG\DynamicMoveManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Rearrangement\rearrangeLUT.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\GigaMOOG\MemoryController.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Rearrangement\rearrangeParameters.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Rearrangement\RearrangeGenerator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\PicoScrew\NewportUSB.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

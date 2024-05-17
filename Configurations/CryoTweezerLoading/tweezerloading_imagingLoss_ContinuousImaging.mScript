@@ -1,9 +1,7 @@
 %%%%%%%%%%%%%%%%% Start With 1ms %%%%%%%%%%%%%%%%% 
 t = 1
-call CryoMOTLoadingPGC()
-
-%%%%%%%%%%%%%%%  TOF  %%%%%%%%%%%%%%%%%%
-call TOF(t_tof)
+call CryoMOTEnhancedLoadingLGM()
+call TOF(10)
 
 %%%%%%%%%%%%%%  PGC in Tweezer %%%%%%%%%%%%%%%%%%
 % change the field/laser freq parameter here because the previous section is TOF and no light is on
@@ -30,12 +28,16 @@ off: xyzMOTShutter
 
 % wait 20 ms before cooling pulse 
 t += 20
-ol: ol_cooling d2_cooling_prb_resonance-probe_olcool %pgc_twz_olcool %probe_olcool
-ol: ol_repump d2_repump_prb_resonance+probe_olrepump %pgc_twz_olrepump %probe_olrepump
+ol: ol_cooling d2_cooling_prb_resonance-pgc_twz_olcool %probe_olcool
+ol: ol_repump d2_repump_prb_resonance+pgc_twz_olrepump %probe_olrepump
 
-dac: BiasCoilX pgc_img_bias_x
-dac: BiasCoilY pgc_img_bias_y
-dac: BiasCoilZ pgc_img_bias_z
+%dac: BiasCoilX pgc_img_bias_x
+%dac: BiasCoilY pgc_img_bias_y
+%dac: BiasCoilZ pgc_img_bias_z
+dac: BiasCoilX pgc_twz_bias_x
+dac: BiasCoilY pgc_twz_bias_y
+dac: BiasCoilZ pgc_twz_bias_z
+
 dac: PrbAmp {pgcprb_twz_cool_amp_cal prb_pwr} %{probe_cool_amp_cal prb_pwr}
 dac: PrbrepAmp pgcprb_twz_rep_amp %probe_repump_amp
     t += -t_shutter
@@ -49,7 +51,7 @@ dac: PrbrepAmp pgcprb_twz_rep_amp %probe_repump_amp
     t += 7
 %%%%%%%%%%%%%%% Pulsed PGC 5 times %%%%%%%%%%%%%%%
 %var t_cooling_cycle 2000/repeat_num
-var _wait_time_ 8000 %25*8*40 %20188 %20000 %20090 % 205*98=205*7*14
+var _wait_time_ 16000 %25*8*40 %20188 %20000 %20090 % 205*98=205*7*14
 var _total_time_btw_img_ 200 %25*8 %100 %98 % 14*7
 on: PrbTrg
 repeat: int(_wait_time_/_total_time_btw_img_) % repeat_num

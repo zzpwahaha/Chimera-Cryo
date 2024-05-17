@@ -1,0 +1,4 @@
+var IQ_MAX_AMP 2.5
+%var phase_scan 2
+hold IQ_MAX_AMP 1 onceWaitTrig #
+hold IQ_MAX_AMP*cos(phase_scan) 2 onceWaitTrig #

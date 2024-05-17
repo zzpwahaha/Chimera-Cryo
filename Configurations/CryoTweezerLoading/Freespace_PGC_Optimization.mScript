@@ -1,26 +1,110 @@
 %%%%%%%%%%%%%%%%% Start With 1ms %%%%%%%%%%%%%%%%% 
 t = 1
-call CryoMOTLoadingPGC()
+%call CryoMOTLoadingPGC()
+call MOTLoading(t_loading)
+call FreeSpacePGC(t_pgc_cool_time)
+%call FreeSpaceLGM(t_pgc_cool_time)
+t += -10
+on: PrbShutter
+on: PrbCoolShutter
+off: PrbRepTrg
+off: PrbTrg
+dac: PrbAmp 0
+dac: PrbrepAmp 0
 
+on: OPShutter
+off: OPTrg
+dac: OPAmp 0
+t += 10
 %%%%%%%%%%%%%%%  TOF  %%%%%%%%%%%%%%%%%%
-off: SciMOTTrg
-on: xyzMOTShutter
-off: PrbShutter 
+%%on: xyzMOTShutter
+%%on: PrbShutter 
+    off: SciMOTTrg
+    off: PrbTrg
+    off: D1LGMTrg
+    off: D1LGMEOMTrg
+off: OPTrg
+%    off: xyzMOTShutter
+%    off: PrbShutter 
+%    off: D1LGMShutter
+%    off: D1LGMPrbShutter
+%    off: OPShutter
+dac: SciMOTAmp 0
+dac: TARepAmp 0
+
+t += 1 %t_tof
+%pulseon: DO1_0 1
+
+
+%    t += -10 %-(7+time_scan)
+%    on: CameraShutter
+%    t += 10 %7+time_scan
+%%%%%%%%%%%%%%%  MAKO Image  %%%%%%%%%%%%%%%%%%
+% MOT
+t += -0.1
 ol: ol_cooling d2_cooling_resonance
 ol: ol_repump d2_repump_resonance
 dac: SciMOTAmp 10
 dac: TARepAmp 10
 
-t += t_tof
-pulseon: DO1_0 1
+% OP 
+%t += -0.1
+%ol: ol_cooling d2_cooling_resonance
+%ol: ol_repump d2_repump_resonance
+%dac: OPAmp 10
+%dac: TARepAmp 10
 
+%Prb 
+%t += 0.1
+%ol: ol_cooling d2_cooling_prb_resonance
+%ol: ol_repump d2_repump_prb_resonance
+%dac: PrbAmp 8
+%dac: PrbRepAmp 8
 
-%%%%%%%%%%%%%%%  MAKO Image  %%%%%%%%%%%%%%%%%%
 pulseon: Mako2 1
+pulseon: Mako1 1
+%t += -time_scan
+%pulseon: pixis_trg 20
+%t += time_scan
 t += 0.1
-pulseon: SciMOTTrg 0.7
+%pulseon: PrbTrg 5 %time_scan %30 %200 %t_twz_imaging
+pulseon: SciMOTTrg 5
+%pulseon: OPTrg 4
+%t += 20 %200
+%%    off: CameraShutter
 
+t += 10
 
 %%%%%%%%%%%%%%  END Sequence  %%%%%%%%%%%%%%%%%%
 t += 100
 pulseon: DO1_0 0.5
+
+
+
+
+%%%%%%%%%%%%% turn on 780 in the l013 beam path
+%on: TARepShutter
+%on: OPShutter
+%%on: ryd1013shutter 
+%%on: DipolePushShutter
+%ol: ol_cooling d2_cooling_resonance-(266.65+0)
+%ol: ol_repump d2_repump_resonance+resonance_scan
+%dac: dipolepushrepamp 10
+%dac: OPAmp {0.1 op_pwr}
+%t += 4
+%
+%%on: Ryd1013Trg
+%t += 0.1
+%on: OPTrg
+%on: DipolePushRepTrg
+%t += 2 %100 %time_scan %0.15 %0.10 %0.05
+%off: OPTrg
+%off: DipolePushRepTrg
+%t += 0.1
+%off: OPShutter
+%off: Ryd1013Trg
+%off: Ryd1013Shutter
+%on: TARepShutter
+%t += 1
+
+

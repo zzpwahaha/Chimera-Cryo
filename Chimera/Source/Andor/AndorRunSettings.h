@@ -26,7 +26,6 @@ struct AndorRunSettings{
 	AndorTriggerMode::mode triggerMode = AndorTriggerMode::mode::External;
 	AndorGainMode::mode gainMode = AndorGainMode::mode::FastestFrameRate;
 	AndorBinningMode::mode binningMode = AndorBinningMode::mode::oneByOne;
-	bool showPicsInRealTime = false;
 	//
 	double exposureTime = 0.001;
 	double frameRate = 10.0;
@@ -43,7 +42,7 @@ struct AndorRunSettings{
 	std::vector<size_t> variationShuffleIndex; // used for randomize variation case, to look up the true variation
 	bool repFirst = false;
 	// this is an int to reflect that the final number that's programmed to the camera is an int
-	int totalPicsInExperiment();
+	unsigned long long totalPicsInExperiment();
 	int temperatureSetting = 0;
 };
 

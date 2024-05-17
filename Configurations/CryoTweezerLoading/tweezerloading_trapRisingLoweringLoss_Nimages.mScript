@@ -1,0 +1,62 @@
+%%%%%%%%%%%%%%%%% Start With 1ms %%%%%%%%%%%%%%%%% 
+t = 1
+%call CryoMOTLoadingPGC()
+call CryoMOTEnhancedLoadingLGM()
+call TOF(10)
+
+%%%%%%%%%%%%%%  PGC in Tweezer %%%%%%%%%%%%%%%%%%
+% change the field/laser freq parameter here because the previous section is TOF and no light is on
+call D2InTrapPGC(t_pgc_twz)
+% note the t_pgc_twz should be smaller than 100
+t += 100-t_pgc_twz
+
+
+call D2InTrapPGCPrb(t_pgc_twz)
+% note the t_pgc_twz should be smaller than 100
+t += 100-t_pgc_twz
+
+%%%%%%%%%%%%%%  Image TWIZZER  %%%%%%%%%%%%%%%%%%
+% change the field/laser freq parameter here because the previous section is dark, i.e. 100-t_pgc_twz is larger than 4
+call PGCTweezerImaging()
+%on: MOTFlashTrg
+t += 10
+%%%%%%%%%%%%%% Prepare for pulsed PGC with Probe %%%%%%%%%%%%%%%
+dacramp: TweezerIntensity twz_intensity twz_int_lifetime 5
+% wait 100 ms before cooling pulse 
+t += 100
+
+%%%%%%%%%%%%%%% Pulsed PGC 5 times %%%%%%%%%%%%%%%
+var _wait_time_ 8000
+repeat: repeat_num
+    t += (_wait_time_/repeat_num-5-5-t_pulsed_cool)/2
+    dacramp: TweezerIntensity twz_int_lifetime twz_intensity 5
+    t += 5
+
+    t += t_pulsed_cool
+
+    dacramp: TweezerIntensity twz_intensity twz_int_lifetime 5
+    t += 5
+    t += (_wait_time_/repeat_num-5-5-t_pulsed_cool)/2
+end
+% 
+%t += t_wait_before_rr
+%%%%%%%%%%%%% turn probe cool shutter back on %%%%%%%%%%
+on: prbcoolshutter
+on: TARepShutter
+on: xyMOTShutter
+dacramp: TweezerIntensity twz_int_lifetime twz_intensity 5
+t += 5
+
+%call ReleaseRecapture(t_twz_release)
+t += 100
+call D2InTrapPGCPrb(t_pgc_twz)
+% note the t_pgc_twz should be smaller than 100
+t += 100-t_pgc_twz
+%%%%%%%%%%%%%%% Second Twizzer Image
+% note the previous section should have at least 4 ms dark interval
+call PGCTweezerImaging()
+
+
+%%%%%%%%%%%%%%  END Sequence  %%%%%%%%%%%%%%%%%%
+t += 100
+pulseon: DO1_0 0.5

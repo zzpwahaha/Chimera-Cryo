@@ -1,0 +1,5 @@
+%%%%%% leave enough time for field to settle down, typically use 750ms
+def setInTrapPGCField():
+    dac: BiasCoilX pgc_twz_bias_x
+    dac: BiasCoilY pgc_twz_bias_y 
+    dac: BiasCoilZ pgc_twz_bias_z

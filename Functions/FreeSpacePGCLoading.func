@@ -1,0 +1,20 @@
+def FreeSpacePGCLoading():
+    call FreeSpacePGC(200)
+    t += -200
+    t += 40
+    dac: BiasCoilX 2 %shift_bias_x
+    dac: BiasCoilY -1.5 %shift_bias_y
+    dac: BiasCoilZ 0.05
+    t += 40
+    dac: BiasCoilX 1.5 %shift_bias_x
+    dac: BiasCoilY -1 %shift_bias_y
+    dac: BiasCoilZ 0.05
+    t += 40
+    dac: BiasCoilX 1.1
+    dac: BiasCoilY -1.2
+    dac: BiasCoilZ 0.05
+    t += 40
+    dac: BiasCoilX 0.9
+    dac: BiasCoilY -1.1
+    dac: BiasCoilZ 0.05
+    t += 40

@@ -138,7 +138,17 @@ void Script::initialize(IChimeraQtWindow* parent, std::string deviceTypeInput, s
 						 " lines and in between commands, so use whatever such formatting pleases your eyes.\n"
 						 "Accepted Commands:\n"
 						 "(A) set:\n"
-						 "DAC number, channel number, amplitude (%), frequency (MHz), phase (degrees).");
+						 "DAC number, channel number, amplitude (%), frequency (MHz), phase (degrees).\n"
+						 "(B) setmove:\n"
+						 "Snapshot ID, DAC number, channel number, instant frequency jump toggle, phase jump toggle, amplitude (%), amplitude increment, frequency (MHz), frequency increment, phase (degrees).\n"
+						 "Note that step increments must be of correct sign.\n"
+						 "(C) hardreset:\n"
+						 "sets all output and move settings to 0 amp 0 freq.\n"
+						 "(D) rearrange:\n"
+						 "rearrange <ampStep> <freqStep>\n"
+						 "initX <boolean string with 1 in x axis load locations>\n"
+						 "initY <boolean string with 1 in y axis load locations>\n"
+						 "targetStart <boolean 2D array for target locations> targetEnd\n");
 	}
 	else{
 		help->setToolTip ("No Help available");

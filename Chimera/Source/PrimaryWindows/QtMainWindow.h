@@ -85,8 +85,8 @@ class QtMainWindow : public IChimeraQtWindow{
 
 		QThread* getExpThread();
 		ExpThreadWorker* getExpThreadWorker();
-		void pauseExperiment ();
 	public Q_SLOTS:
+		void pauseExperiment();
 		void handleColorboxUpdate (QString color, QString systemDelim);
 		void handleNotification (QString txt, unsigned level=0);
 		void onRepProgress (unsigned int repNum);
