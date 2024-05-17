@@ -37,7 +37,7 @@ const arbGenSettings UWAVE_AGILENT_SETTINGS = {
 	UWAVE_AGILENT_TRIGGER_LINE.first, UWAVE_AGILENT_TRIGGER_LINE.second,
 	// Configuration file delimiter, used for saving settings for this 
 	// agilent.
-	"MICROWAVE_AGILENT_AWG",
+	"AGILENT_AWG",
 	// Calibration coefficients (arb length)
 	{ },
 	{ "output1 off", "output2 off",
@@ -64,7 +64,7 @@ const arbGenSettings UWAVE_SIGLENT_SETTINGS = {
 	UWAVE_SIGLENT_TRIGGER_LINE.first, UWAVE_SIGLENT_TRIGGER_LINE.second,
 	// Configuration file delimiter, used for saving settings for this 
 	// agilent.
-	"MICROWAVE_SIGLENT_AWG",
+	"SIGLENT_AWG",
 	// Calibration coefficients (arb length)
 	{ },
 	/**********make sure be in DDS mode to change burst and sweep***********/
