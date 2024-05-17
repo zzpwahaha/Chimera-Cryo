@@ -15,7 +15,7 @@ class QtMakoWindow : public IChimeraQtWindow
 public:
     static const unsigned WINDOW_MAKO_NUMBER = CameraInfo::WINDOW_MAKO_NUMBER;
 
-    explicit QtMakoWindow(std::array<CameraInfo, WINDOW_MAKO_NUMBER> camInfos, QWidget* parent = nullptr);
+    explicit QtMakoWindow(unsigned id,std::array<CameraInfo, WINDOW_MAKO_NUMBER> camInfos, QWidget* parent = nullptr);
     ~QtMakoWindow();
 
     void initializeWidgets();

@@ -10,13 +10,13 @@
 #include <ExcessDialogs/openWithExplorer.h>
 #include <qlayout.h>
 
-QtMakoWindow::QtMakoWindow(std::array<CameraInfo, WINDOW_MAKO_NUMBER> camInfos, QWidget* parent)
+QtMakoWindow::QtMakoWindow(unsigned id, std::array<CameraInfo, WINDOW_MAKO_NUMBER> camInfos, QWidget* parent)
 	: IChimeraQtWindow(parent)
 	, camInfos(camInfos)
 	, cam{ MakoCamera(camInfos[0], this),
 	MakoCamera(camInfos[1], this)}
 {
-	setWindowTitle("Mako Camera Window");
+	setWindowTitle("Mako Camera Window " + qstr(id));
 }
 
 QtMakoWindow::~QtMakoWindow()

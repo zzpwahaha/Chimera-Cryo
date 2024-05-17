@@ -10,6 +10,10 @@ std::string CameraInfo::toStr(name m_)
 		return "Mako1";
 	case CameraInfo::name::Mako2:
 		return "Mako2";
+	case CameraInfo::name::Mako3:
+		return "Mako3";
+	case CameraInfo::name::Mako4:
+		return "Mako4";
 	}
 	return "";
 }

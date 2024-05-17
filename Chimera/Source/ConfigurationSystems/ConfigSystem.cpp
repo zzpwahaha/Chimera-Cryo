@@ -103,7 +103,8 @@ void ConfigSystem::openConfigFromPath( std::string pathToConfig, IChimeraQtWindo
 		win->scriptWin->windowOpenConfig(cStream );
 		win->andorWin->windowOpenConfig(cStream );
 		win->auxWin->windowOpenConfig(cStream );
-		win->makoWin->windowOpenConfig(cStream);
+		win->makoWin1->windowOpenConfig(cStream);
+		win->makoWin2->windowOpenConfig(cStream);
 		win->mainWin->windowOpenConfig(cStream );
 		win->scriptWin->updateDoAoDdsNames();
 	}
@@ -214,7 +215,8 @@ void ConfigSystem::saveConfiguration(IChimeraQtWindow* win){
 	win->scriptWin->windowSaveConfig(saveStream);
 	win->andorWin->windowSaveConfig(saveStream);
 	win->auxWin->windowSaveConfig(saveStream);
-	win->makoWin->windowSaveConfig(saveStream);
+	win->makoWin1->windowSaveConfig(saveStream);
+	win->makoWin2->windowSaveConfig(saveStream);
 	win->mainWin->windowSaveConfig(saveStream);
 	std::ofstream configSaveFile (currentProfile.configLocation + configNameToSave + "." + CONFIG_EXTENSION);
 	if (!configSaveFile.is_open ()){
@@ -254,7 +256,8 @@ void ConfigSystem::saveConfigurationAs(IChimeraQtWindow* win){
 	win->scriptWin->windowSaveConfig(configSaveStream);
 	win->andorWin->windowSaveConfig(configSaveStream);
 	win->auxWin->windowSaveConfig(configSaveStream);
-	win->makoWin->windowSaveConfig(configSaveStream);
+	win->makoWin1->windowSaveConfig(configSaveStream);
+	win->makoWin2->windowSaveConfig(configSaveStream);
 	win->mainWin->windowSaveConfig(configSaveStream);
 	// check if file already exists
 	std::ofstream configSaveFile (configurationPathToSave);

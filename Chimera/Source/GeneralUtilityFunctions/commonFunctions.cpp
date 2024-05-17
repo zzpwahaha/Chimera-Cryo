@@ -23,7 +23,8 @@ namespace commonFunctions{
 		auto* andorWin = win->andorWin;
 		auto* scriptWin = win->scriptWin;
 		auto* auxWin = win->auxWin;
-		auto* makoWin = win->makoWin;
+		auto* makoWin1 = win->makoWin1;
+		auto* makoWin2 = win->makoWin2;
 		try {
 			switch (msgID) {
 			case ID_FILE_RUN_EVERYTHING:

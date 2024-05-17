@@ -37,7 +37,7 @@ class IChimeraQtWindow : public QMainWindow{
 		void initializeShortcuts ();
 		void initializeMenu ();
 		void loadFriends (QtMainWindow* mainWin_, QtScriptWindow* scriptWin_, QtAuxiliaryWindow* auxWin_,
-						  QtAndorWindow* andorWin_, QtMakoWindow* makoWin_, QtAnalysisWindow* analysisWin_);
+						  QtAndorWindow* andorWin_, QtMakoWindow* makoWin1_, QtMakoWindow* makoWin2_, QtAnalysisWindow* analysisWin_);
 		void reportErr (QString errStr, unsigned errorLevel=0);
 		void reportStatus (QString statusStr, unsigned notificationLevel=0);
 
@@ -46,7 +46,8 @@ class IChimeraQtWindow : public QMainWindow{
 		QtScriptWindow* scriptWin = nullptr;
 		QtAndorWindow* andorWin = nullptr;
 		QtAuxiliaryWindow* auxWin = nullptr;
-		QtMakoWindow* makoWin = nullptr;
+		QtMakoWindow* makoWin1 = nullptr;
+		QtMakoWindow* makoWin2 = nullptr;
 		QtAnalysisWindow* analysisWin = nullptr;
 		static constexpr unsigned numWindows = 6;
 		ColorBox* statBox;

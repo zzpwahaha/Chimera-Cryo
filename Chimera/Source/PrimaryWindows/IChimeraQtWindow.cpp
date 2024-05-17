@@ -22,13 +22,14 @@ void IChimeraQtWindow::reportStatus (QString statusStr, unsigned notificationLev
 }
 
 void IChimeraQtWindow::loadFriends ( QtMainWindow* mainWin_, QtScriptWindow* scriptWin_, QtAuxiliaryWindow* auxWin_,
-									 QtAndorWindow* andorWin_, QtMakoWindow* makoWin_, QtAnalysisWindow* analysisWin_ )
+									 QtAndorWindow* andorWin_, QtMakoWindow* makoWin1_, QtMakoWindow* makoWin2_, QtAnalysisWindow* analysisWin_ )
 {
 	mainWin = mainWin_;
 	scriptWin = scriptWin_;
 	auxWin = auxWin_;
 	andorWin = andorWin_;
-	makoWin = makoWin_;
+	makoWin1 = makoWin1_;
+	makoWin2 = makoWin2_;
 	analysisWin = analysisWin_;
 }
 
@@ -42,7 +43,7 @@ void IChimeraQtWindow::changeBoxColor (std::string sysDelim, std::string color){
 std::vector<IChimeraQtWindow*> IChimeraQtWindow::winList (){
 	std::vector<IChimeraQtWindow*> list = { 
 		(IChimeraQtWindow*)scriptWin, (IChimeraQtWindow*)andorWin, 
-		(IChimeraQtWindow*)auxWin, (IChimeraQtWindow*)makoWin, (IChimeraQtWindow*)analysisWin,
+		(IChimeraQtWindow*)auxWin, (IChimeraQtWindow*)makoWin1, (IChimeraQtWindow*)makoWin2, (IChimeraQtWindow*)analysisWin,
 		(IChimeraQtWindow*)mainWin };
 	return list;
 }

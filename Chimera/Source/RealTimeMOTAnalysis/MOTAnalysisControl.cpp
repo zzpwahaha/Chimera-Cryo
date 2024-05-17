@@ -94,10 +94,33 @@ void MOTAnalysisControl::initialize(IChimeraQtWindow* parent)
 
 	connect(makoSrcCombo, qOverload<int>(&QComboBox::currentIndexChanged), this, [this](int idx) {
 		if (calcActive->isChecked()) {
-			makoCam = this->parentWin->makoWin->getMakoCam(idx);} });
+			switch (idx) {
+			case 0:
+			case 1:
+				makoCam = this->parentWin->makoWin1->getMakoCam(idx % 2);
+				break;
+			case 2:
+			case 3:
+				makoCam = this->parentWin->makoWin2->getMakoCam(idx % 2);
+				break;
+			default:
+				errBox("Wrong index of MAKO camera: " + qstr(idx) + ". This shouldn't happend. A low level error!");
+			}
+		} });
 	connect(calcActive, &QCheckBox::stateChanged, this, [this](int checked) {
 		int makoidx = makoSrcCombo->currentIndex();
-		makoCam = this->parentWin->makoWin->getMakoCam(makoidx); 
+		switch (makoidx) {
+		case 0:
+		case 1:
+			makoCam = this->parentWin->makoWin1->getMakoCam(makoidx % 2);
+			break;
+		case 2:
+		case 3:
+			makoCam = this->parentWin->makoWin2->getMakoCam(makoidx % 2);
+			break;
+		default:
+			errBox("Wrong index of MAKO camera: " + qstr(makoidx) + ". This shouldn't happend. A low level error!");
+		}
 		if (checked) updateXYKeys(); });
 	connect(twoDScanActive, &QCheckBox::stateChanged, this, [this,xkeyvalL,ykeyvalL](int checked) {
 		yKeyCombo->setEnabled(checked);

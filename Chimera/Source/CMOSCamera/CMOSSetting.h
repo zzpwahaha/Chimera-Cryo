@@ -6,7 +6,7 @@ struct CameraInfo
 {
 	static const unsigned WINDOW_MAKO_NUMBER = 2;
 	enum class name {
-		Mako1,Mako2
+		Mako1, Mako2, Mako3, Mako4
 	};
 	static const std::array<name, MAKO_NUMBER> allCams;
 	CameraInfo::name camName;
@@ -22,8 +22,11 @@ struct CameraInfo
 namespace MakoInfo {
 	const CameraInfo camInfo1{ CameraInfo::name::Mako1,MAKO_IPADDRS[0],MAKO_DELIMS[0],MAKO_SAFEMODE[0], MAKO_TRIGGER_LINE[0] };
 	const CameraInfo camInfo2{ CameraInfo::name::Mako2,MAKO_IPADDRS[1],MAKO_DELIMS[1],MAKO_SAFEMODE[1], MAKO_TRIGGER_LINE[1] };
+	const CameraInfo camInfo3{ CameraInfo::name::Mako3,MAKO_IPADDRS[2],MAKO_DELIMS[2],MAKO_SAFEMODE[2], MAKO_TRIGGER_LINE[2] };
+	const CameraInfo camInfo4{ CameraInfo::name::Mako4,MAKO_IPADDRS[3],MAKO_DELIMS[3],MAKO_SAFEMODE[3], MAKO_TRIGGER_LINE[3] };
 
 	const std::array<CameraInfo, CameraInfo::WINDOW_MAKO_NUMBER> camWindow1({ camInfo1 ,camInfo2 });
+	const std::array<CameraInfo, CameraInfo::WINDOW_MAKO_NUMBER> camWindow2({ camInfo3 ,camInfo4 });
 }
 
 

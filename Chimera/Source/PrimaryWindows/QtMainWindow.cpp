@@ -34,7 +34,9 @@ QtMainWindow::QtMainWindow () :
 		which = "Auxiliary";
 		auxWin = new QtAuxiliaryWindow;
 		which = "CMOS";
-		makoWin = new QtMakoWindow(MakoInfo::camWindow1);
+		makoWin1 = new QtMakoWindow(1, MakoInfo::camWindow1);
+		which = "CMOS";
+		makoWin2 = new QtMakoWindow(2, MakoInfo::camWindow2);
 		which = "Analysis";
 		analysisWin = new QtAnalysisWindow;
 	}
@@ -42,11 +44,12 @@ QtMainWindow::QtMainWindow () :
 		errBox ("FATAL ERROR: " + which + " Window constructor failed! Error: " + err.trace ());
 		return;
 	}
-	scriptWin->loadFriends( this, scriptWin, auxWin, andorWin, makoWin, analysisWin);
-	andorWin->loadFriends (this, scriptWin, auxWin, andorWin, makoWin, analysisWin);
-	auxWin->loadFriends (this, scriptWin, auxWin, andorWin, makoWin, analysisWin);
-	makoWin->loadFriends(this, scriptWin, auxWin, andorWin, makoWin, analysisWin);
-	analysisWin->loadFriends(this, scriptWin, auxWin, andorWin, makoWin, analysisWin);
+	scriptWin->loadFriends( this, scriptWin, auxWin, andorWin, makoWin1, makoWin2, analysisWin);
+	andorWin->loadFriends (this, scriptWin, auxWin, andorWin, makoWin1, makoWin2, analysisWin);
+	auxWin->loadFriends (this, scriptWin, auxWin, andorWin, makoWin1, makoWin2, analysisWin);
+	makoWin1->loadFriends(this, scriptWin, auxWin, andorWin, makoWin1, makoWin2, analysisWin);
+	makoWin2->loadFriends(this, scriptWin, auxWin, andorWin, makoWin1, makoWin2, analysisWin);
+	analysisWin->loadFriends(this, scriptWin, auxWin, andorWin, makoWin1, makoWin2, analysisWin);
 	startupTimes.push_back (chronoClock::now ());
 
 	for (auto* window : winList ()) {
@@ -89,7 +92,8 @@ QtMainWindow::QtMainWindow () :
 		initializationString += auxWin->getOtherSystemStatusMsg ();
 		initializationString += andorWin->getSystemStatusString ();
 		initializationString += auxWin->getVisaDeviceStatus ();
-		initializationString += makoWin->getSystemStatusString();
+		initializationString += makoWin1->getSystemStatusString();
+		initializationString += makoWin2->getSystemStatusString();
 		initializationString += scriptWin->getSystemStatusString ();
 		initializationString += analysisWin->getSystemStatusString();
 		reportStatus (qstr(initializationString));
@@ -184,7 +188,8 @@ void QtMainWindow::showHardwareStatus (){
 		initializationString += auxWin->getOtherSystemStatusMsg();
 		initializationString += andorWin->getSystemStatusString();
 		initializationString += auxWin->getVisaDeviceStatus();
-		initializationString += makoWin->getSystemStatusString();
+		initializationString += makoWin1->getSystemStatusString();
+		initializationString += makoWin2->getSystemStatusString();
 		initializationString += scriptWin->getSystemStatusString();
 		initializationString += analysisWin->getSystemStatusString();
 		infoBox (initializationString);
@@ -262,7 +267,8 @@ void QtMainWindow::startExperimentThread (ExperimentThreadInput* input){
 	expWorker->moveToThread (expThread);
 	connect (expWorker, &ExpThreadWorker::updateBoxColor, this, &QtMainWindow::handleColorboxUpdate);
 	connect (expWorker, &ExpThreadWorker::prepareAndor, andorWin, &QtAndorWindow::handlePrepareForAcq, Qt::BlockingQueuedConnection);
-	connect (expWorker, &ExpThreadWorker::prepareMako, makoWin, &QtMakoWindow::prepareWinForAcq, Qt::BlockingQueuedConnection);// want expthread wait untill mako set it up
+	connect (expWorker, &ExpThreadWorker::prepareMako, makoWin1, &QtMakoWindow::prepareWinForAcq, Qt::BlockingQueuedConnection);// want expthread wait untill mako set it up
+	connect (expWorker, &ExpThreadWorker::prepareMako, makoWin2, &QtMakoWindow::prepareWinForAcq, Qt::BlockingQueuedConnection);// want expthread wait untill mako set it up
 	connect (expWorker, &ExpThreadWorker::prepareAnalysis, analysisWin, &QtAnalysisWindow::prepareCalcForAcq);
 	connect (expWorker, &ExpThreadWorker::notification, this, &QtMainWindow::handleNotification);
 	connect (expWorker, &ExpThreadWorker::warn, this, &QtMainWindow::onErrorMessage);
