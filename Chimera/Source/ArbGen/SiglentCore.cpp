@@ -235,7 +235,8 @@ void SiglentCore::setSine(int channel, sineInfo info, unsigned var) {
 		visaFlume.write("C" + str(channel) + ":BSWV WVTP,SINE"
 			",FRQ," + str(info.frequency.getValue(var) * 1000) + "HZ"
 			",AMP," + str(convertPowerToSetPoint(info.amplitude.getValue(var), info.useCal, calibrations[channel - 1])) + "VPP"
-			",OFST,0V,PHSE,0");
+			",OFST,0V"
+			",PHSE," + str(info.phase.getValue(var)));
 		programNonArbBurstMode(channel, info.burstMode);
 		outputOn(channel);
 		//visaFlume.write("C" + str(channel) + ":BTWV CARR,WVTP,SINE"

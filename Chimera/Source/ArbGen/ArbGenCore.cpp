@@ -251,6 +251,7 @@ void ArbGenCore::convertInputToFinalSettings(unsigned chan, deviceOutputInfo& in
 		case ArbGenChannelMode::which::Sine:
 			channel.sine.frequency.internalEvaluate(params, totalVariations);
 			channel.sine.amplitude.internalEvaluate(params, totalVariations);
+			channel.sine.phase.internalEvaluate(params, totalVariations);
 			break;
 		case ArbGenChannelMode::which::Square:
 			channel.square.frequency.internalEvaluate(params, totalVariations);
@@ -345,6 +346,7 @@ deviceOutputInfo ArbGenCore::getSettingsFromConfig(ConfigStream& file) {
 		//}
 		readFunc(file, channel.sine.amplitude.expressionStr);
 		readFunc(file, channel.sine.frequency.expressionStr);
+		readFunc(file, channel.sine.phase.expressionStr);
 		file >> channel.sine.burstMode;
 		//if (file.ver > Version ("2.3")){
 		file >> channel.sine.useCal;
@@ -402,6 +404,7 @@ void ArbGenCore::logSettings(DataLogger& log, ExpThreadWorker* threadworker) {
 			H5::Group sineGroup(channelGroup.createGroup("Sine-Settings"));
 			log.writeDataSet(channel.sine.frequency.expressionStr, "Frequency", sineGroup);
 			log.writeDataSet(channel.sine.amplitude.expressionStr, "Amplitude", sineGroup);
+			log.writeDataSet(channel.sine.phase.expressionStr, "Phase", sineGroup);
 			H5::Group squareGroup(channelGroup.createGroup("Square-Settings"));
 			log.writeDataSet(channel.square.amplitude.expressionStr, "Amplitude", squareGroup);
 			log.writeDataSet(channel.square.frequency.expressionStr, "Frequency", squareGroup);

@@ -309,6 +309,7 @@ void AgilentCore::setSine (int channel, sineInfo info, unsigned var){
 		auto sStr = "SOURCE" + str(channel);
 		visaFlume.write ("SOURCE" + str (channel) + ":APPLY:SINUSOID " + str (info.frequency.getValue(var)) + " KHZ, "
 			+ str (convertPowerToSetPoint (info.amplitude.getValue(var), info.useCal, calibrations[channel - 1])) + " VPP");
+		visaFlume.write("SOURCE" + str(channel) + ":PHASE " + str(info.phase.getValue(var)) + " DEG");
 		if (info.burstMode) {
 			visaFlume.write("BURST:MODE GATED");
 			visaFlume.write("BURST:GATE:POLARITY NORMAL");
@@ -413,7 +414,7 @@ void AgilentCore::setDefault (int channel){
 void AgilentCore::handleScriptVariation (unsigned variation, scriptedArbInfo& scriptInfo, unsigned channel,
 	std::vector<parameterType>& params) {
 	prepArbGenSettings(channel);
-	programSetupCommands ();
+	//programSetupCommands ();
 	if (scriptInfo.wave.isVaried () || variation == 0) {
 		unsigned totalSegmentNumber = scriptInfo.wave.getSegmentNumber ();
 		// Loop through all segments

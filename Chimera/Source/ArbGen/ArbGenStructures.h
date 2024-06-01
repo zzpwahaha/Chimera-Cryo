@@ -44,6 +44,7 @@ struct squareInfo : public generalArbGenOutputInfo {
 struct sineInfo : public generalArbGenOutputInfo {
 	Expression frequency;
 	Expression amplitude;
+	Expression phase;
 	bool burstMode = false;
 };
 

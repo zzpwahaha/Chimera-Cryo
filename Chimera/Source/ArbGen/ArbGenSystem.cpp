@@ -51,9 +51,9 @@ void ArbGenSystem::programArbGenNow(std::vector<parameterType> constants){
 	pCore->convertInputToFinalSettings (1, currentGuiInfo, constants);
 	pCore->setArbGen (0, constants, currentGuiInfo, nullptr);
 	pCore->setRunSettings(currentGuiInfo); // This is meant to let the core save the gui setting
-	if (dynamic_cast<SiglentCore*>(pCore)) {
-		burstButton->setChecked(true);
-	}
+	//if (dynamic_cast<SiglentCore*>(pCore)) {
+	//	burstButton->setChecked(true);
+	//}
 }
 
 std::string ArbGenSystem::getDeviceIdentity (){
@@ -253,6 +253,7 @@ void ArbGenSystem::readGuiSettings(int chan ){
 		case ArbGenChannelMode::which::Sine:
 			stream >> currentGuiInfo.channel[chani].sine.frequency;
 			stream >> currentGuiInfo.channel[chani].sine.amplitude;
+			stream >> currentGuiInfo.channel[chani].sine.phase;
 			currentGuiInfo.channel[chani].sine.burstMode = burstButton->isChecked();
 			currentGuiInfo.channel[chani].sine.useCal = calibratedButton->isChecked ( );
 			break;
@@ -349,8 +350,10 @@ void ArbGenSystem::updateSettingsDisplay(int chan, std::string configPath, RunIn
 			break;
 		case ArbGenChannelMode::which::Sine:
 			arbGenScript.reset ( );
-			arbGenScript.setScriptText(currentGuiInfo.channel[chan].sine.frequency.expressionStr + " "
-										 + currentGuiInfo.channel[chan].sine.amplitude.expressionStr);
+			arbGenScript.setScriptText(
+				currentGuiInfo.channel[chan].sine.frequency.expressionStr + " "
+				+ currentGuiInfo.channel[chan].sine.amplitude.expressionStr + " "
+				+ currentGuiInfo.channel[chan].sine.phase.expressionStr);
 			settingCombo->setCurrentIndex ( 3 );
 			calibratedButton->setChecked( currentGuiInfo.channel[chan].sine.useCal );
 			burstButton->setChecked(currentGuiInfo.channel[chan].sine.burstMode);
@@ -437,7 +440,7 @@ void ArbGenSystem::handleModeCombo(){
 			arbGenScript.setEnabled ( true, false );
 			break;
 		case 3:
-			optionsFormat->setText ( "[Frequency(kHz)] [Amplitude(Vpp)]" );
+			optionsFormat->setText ( "[Frequency(kHz)] [Amplitude(Vpp)] [Phase(Deg)]" );
 			currentGuiInfo.channel[selectedChannel].option = ArbGenChannelMode::which::Sine;
 			arbGenScript.setEnabled ( true, false );
 			break;
@@ -483,6 +486,7 @@ void ArbGenSystem::handleSavingConfig(ConfigStream& saveFile, std::string config
 		saveFile << "\n/*DC Calibrated:*/\t\t\t\t" << channel.dc.useCal;
 		saveFile << "\n/*Sine Amplitude:*/\t\t\t\t" << channel.sine.amplitude;
 		saveFile << "\n/*Sine Freq:*/\t\t\t\t\t" << channel.sine.frequency;
+		saveFile << "\n/*Sine Phase:*/\t\t\t\t\t" << channel.sine.phase;
 		saveFile << "\n/*Sine Burst:*/\t\t\t\t\t" << channel.sine.burstMode;
 		saveFile << "\n/*Sine Calibrated:*/\t\t\t" << channel.sine.useCal;
 		saveFile << "\n/*Square Amplitude:*/\t\t\t" << channel.square.amplitude;
