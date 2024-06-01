@@ -79,7 +79,7 @@ private:
 	//Zynq tcp connection
 	ZynqTCP zynq_tcp;
 	double dacTriggerTime; // used in checkTimingsWork() to see if time of two points in dac is shorter than 1/ramp freq
-	const unsigned maxCommandNum = 512;
+	const unsigned maxCommandNum = 1024;
 	static constexpr double dacResolution = 20.0 / 0xffff; /*16bit dac*/
 	const int numDigits = static_cast<int>(abs(round(log10(dacResolution) - 0.49)));
 
