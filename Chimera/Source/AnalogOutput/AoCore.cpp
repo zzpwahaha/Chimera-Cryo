@@ -404,6 +404,12 @@ void AoCore::calculateVariations(std::vector<parameterType>& params, ExpThreadWo
 						tempEvent.time = initTime;
 						tempEvent.rampTime = rampTime;
 						cmdList.push_back(tempEvent);
+
+						tempEvent.value = finalValue;
+						tempEvent.endValue = finalValue; // the purpose is to keep the value at endValue
+						tempEvent.time += tempEvent.rampTime;
+						tempEvent.rampTime = 0;
+						cmdList.push_back(tempEvent);
 					}
 				}
 				else { // handle the last ramp specifically
