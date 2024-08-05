@@ -516,6 +516,9 @@
     <ClCompile Include="Source\PicoScrew\NewportUSB.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\GeneralFlumes\BoostAsyncTCPServer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="3rd_Party\qcustomplot\qcustomplot.h">
@@ -1160,6 +1163,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\PicoScrew\NewportUSB.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\GeneralFlumes\BoostAsyncTCPServer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
