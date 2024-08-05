@@ -17,6 +17,7 @@
 #include "DataLogging/DataLogger.h"
 #include "ConfigurationSystems/NoteSystem.h"
 #include "ConfigurationSystems/profileSettings.h"
+#include <ExternalController/TCPServerSystem.h>
 #include <ExternalController/CommandModulator.h>
 #include "GeneralUtilityFunctions/commonFunctions.h"
 #include "GeneralObjects/RunInfo.h"
@@ -104,6 +105,7 @@ class QtMainWindow : public IChimeraQtWindow{
 		ConfigSystem profile;
 		MasterConfiguration masterConfig;
 		NoteSystem notes;
+		TCPServerSystem tcpServer;
 		DebugOptionsControl debugger;
 		Repetitions repetitionControl;
 		MainOptionsControl mainOptsCtrl;

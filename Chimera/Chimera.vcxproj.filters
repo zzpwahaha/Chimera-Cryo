@@ -519,6 +519,12 @@
     <ClCompile Include="Source\GeneralFlumes\BoostAsyncTCPServer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\ExternalController\TCPServerSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ExternalController\MessageConsumer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="Source\ExternalController\MessageDisplay.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -723,6 +729,12 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="Source\Andor\AndorCameraThreadImageGrabber.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\ExternalController\TCPServerSystem.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\ExternalController\MessageConsumer.h">
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="Source\ExternalController\MessageDisplay.h">
