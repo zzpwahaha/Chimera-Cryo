@@ -1,5 +1,5 @@
 #pragma once
-#include "CustomQtControls/AutoNotifyCtrls.h"
+#include <CustomQtControls/AutoNotifyCtrls.h>
 #include <PrimaryWindows/IChimeraQtWindow.h>
 #include "qwidget.h"
 

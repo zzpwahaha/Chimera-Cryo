@@ -4,7 +4,7 @@
 #include "GeneralObjects/RunInfo.h"
 #include "ParameterSystem/ParameterSystemStructures.h"
 #include "AnalogOutput/AoStructures.h"
-#include <Scripts/CQCodeEdit.h>
+#include <CustomQtControls/CQCodeEdit.h>
 #include <Scripts/SyntaxHighlighter.h>
 #include <Scripts/ScriptableDevices.h>
 #include "CustomQtControls/functionCombo.h"
