@@ -17,6 +17,7 @@
 #include "DataLogging/DataLogger.h"
 #include "ConfigurationSystems/NoteSystem.h"
 #include "ConfigurationSystems/profileSettings.h"
+#include <ExternalController/CommandModulator.h>
 #include "GeneralUtilityFunctions/commonFunctions.h"
 #include "GeneralObjects/RunInfo.h"
 #include <AnalogInput/calInfo.h>
@@ -119,8 +120,8 @@ class QtMainWindow : public IChimeraQtWindow{
 		RunInfo systemRunningInfo;
 		//
 		friend void commonFunctions::handleCommonMessage (int msgID, IChimeraQtWindow* win);
+		friend class CommandModulator;
 		unsigned autoCalNum = 0;
 
-		
 };
 

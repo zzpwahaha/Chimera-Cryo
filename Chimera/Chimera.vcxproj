@@ -130,6 +130,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Source\ExternalController\CommandModulator.cpp" />
     <ClCompile Include="Source\ExternalController\MessageDisplay.cpp" />
     <ClCompile Include="Source\GeneralFlumes\BoostAsyncTCPServer.cpp" />
     <ClCompile Include="Source\PicoScrew\NewportUSB.cpp" />
@@ -210,6 +211,7 @@
     <QtMoc Include="Source\CMOSCamera\FrameAverager.h" />
     <QtMoc Include="Source\ExcessDialogs\AiSettingsDialog.h" />
     <QtMoc Include="Source\ExternalController\MessageDisplay.h" />
+    <QtMoc Include="Source\ExternalController\CommandModulator.h" />
     <ClInclude Include="Source\GeneralFlumes\BoostAsyncTCPServer.h" />
     <ClInclude Include="Source\PicoScrew\NewportUSB.h" />
     <ClInclude Include="Source\PicoScrew\PicoScrewSystem.h" />

@@ -522,6 +522,9 @@
     <ClCompile Include="Source\ExternalController\MessageDisplay.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\ExternalController\CommandModulator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="3rd_Party\qcustomplot\qcustomplot.h">
@@ -723,6 +726,9 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="Source\ExternalController\MessageDisplay.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\ExternalController\CommandModulator.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
