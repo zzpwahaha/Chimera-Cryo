@@ -357,7 +357,7 @@
     <ClCompile Include="Source\RealTimeDataAnalysis\PlotDesignerDialog.cpp" />
     <ClCompile Include="Source\RealTimeDataAnalysis\QtPlotDesignerDlg.cpp" />
     <ClCompile Include="Source\RealTimeMOTAnalysis\MOTAnalysisType.cpp" />
-    <ClCompile Include="Source\Scripts\CQCodeEdit.cpp" />
+    <ClCompile Include="Source\CustomQtControls\CQCodeEdit.cpp" />
     <ClCompile Include="Source\Scripts\Script.cpp" />
     <ClCompile Include="Source\Scripts\ScriptStream.cpp" />
     <ClCompile Include="Source\Scripts\SyntaxHighlighter.cpp" />
@@ -486,7 +486,7 @@
     <ClInclude Include="Source\ZynqTCP\ZynqTCP.h" />
     <QtMoc Include="Source\Scripts\SyntaxHighlighter.h" />
     <QtMoc Include="Source\Scripts\Script.h" />
-    <QtMoc Include="Source\Scripts\CQCodeEdit.h" />
+    <QtMoc Include="Source\CustomQtControls\CQCodeEdit.h" />
     <QtMoc Include="Source\RealTimeDataAnalysis\QtPlotDesignerDlg.h" />
     <QtMoc Include="Source\RealTimeDataAnalysis\MachineOptimizer.h" />
     <QtMoc Include="Source\Rearrangement\AtomCruncherWorker.h" />

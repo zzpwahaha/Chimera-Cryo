@@ -27,9 +27,7 @@ namespace commonFunctions{
 		auto* makoWin2 = win->makoWin2;
 		try {
 			switch (msgID) {
-			case ID_FILE_RUN_EVERYTHING:
-			case ID_ACCELERATOR_F5:
-			case ID_FILE_MY_WRITE_WAVEFORMS: {
+			case ID_ACCELERATOR_F5: {
 				AllExperimentInput input;
 				try {
 					if (mainWin->masterIsRunning ()) {
@@ -67,8 +65,7 @@ namespace commonFunctions{
 				}
 				break;
 			}
-			case ID_ACCELERATOR_ESC:
-			case ID_FILE_ABORT_GENERATION: {
+			case ID_ACCELERATOR_ESC: {
 				std::string status;
 				bool andorAborted = false, masterAborted = false, baslerAborted = false;
 				andorWin->wakeRearranger ();
@@ -125,16 +122,8 @@ namespace commonFunctions{
 				}
 				break;
 			}
-			case ID_RUNMENU_ABORTMASTER: {
-				if (mainWin->experimentIsPaused ()) {
-					mainWin->reportErr ("Experiment is paused. Please unpause before aborting.\r\n");
-					break;
-				}
-				commonFunctions::abortMaster (win);
-				break;
-			}
-									   /// File Management 
-			case ID_ACCELERATOR40121:
+
+			/// File Management 
 			case ID_FILE_SAVEALL: {
 				try {
 					scriptWin->saveMasterScript ();

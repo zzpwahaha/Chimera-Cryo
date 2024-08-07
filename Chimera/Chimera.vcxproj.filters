@@ -324,7 +324,7 @@
     <ClCompile Include="Source\RealTimeDataAnalysis\QtPlotDesignerDlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Scripts\CQCodeEdit.cpp">
+    <ClCompile Include="Source\CustomQtControls\CQCodeEdit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\Scripts\Script.cpp">
@@ -617,7 +617,7 @@
     <QtMoc Include="Source\RealTimeDataAnalysis\QtPlotDesignerDlg.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <QtMoc Include="Source\Scripts\CQCodeEdit.h">
+    <QtMoc Include="Source\CustomQtControls\CQCodeEdit.h">
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="Source\Scripts\Script.h">
