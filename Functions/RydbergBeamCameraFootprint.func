@@ -1,0 +1,28 @@
+% 420 camera exposure time set to 160us
+def RydbergBeamCameraFootprint():
+    dac: Ryd420Amp 0.30
+    dac: Ryd1013Amp 0.50
+    off: Ryd420Trg
+    off: Ryd1013Trg
+    off: Ryd420ExpShutter
+    t += 10
+    t += -5
+    on: Ryd420Trg
+    t += 1
+    on: Ryd420Hold
+    t += 0.1
+    off: Ryd420Trg
+    t += 0.1
+    on: Ryd420ExpShutter
+    t += 5-1-0.1-0.1
+    t += 3
+    pulseon: Ryd420MAKO 0.6
+    t += 0.1
+    pulseon: Ryd420Trg 0.1/1000
+    t += 1
+    pulseon: Ryd1013Trg 10
+    t += 1
+    pulseon: Ryd1013MAKO 0.6
+    t += 10-1
+
+

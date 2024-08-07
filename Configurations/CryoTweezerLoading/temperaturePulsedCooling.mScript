@@ -1,13 +1,8 @@
 %%%%%%%%%%%%%%%%% Start With 1ms %%%%%%%%%%%%%%%%% 
 t = 1
-call CryoMOTLoadingPGC()
-
-%%%%%%%%%%%%%%%  TOF  %%%%%%%%%%%%%%%%%%
-off: SciMOTTrg
-off: xyzMOTShutter
-off: PrbShutter 
-t += t_tof
-pulseon: DO1_0 1
+%call CryoMOTLoadingPGC()
+call CryoMOTEnhancedLoadingLGM()
+call TOF(10)
 
 %%%%%%%%%%%%%%  PGC in Tweezer %%%%%%%%%%%%%%%%%%
 % change the field/laser freq parameter here because the previous section is TOF and no light is on
@@ -25,7 +20,9 @@ call PGCTweezerImaging()
 %on: MOTFlashTrg
 t += 15
 
-call kickOutTweezer()
+t += 100
+
+%call kickOutTweezer()
 t += 15
 
 %% pulsed cooling for 1 pulse
@@ -36,7 +33,7 @@ t += 15
     ol: ol_repump d2_repump_prb_resonance+pgc_twz_olrepump %probe_olrepump %pgc_twz_olrepump
     dac: PrbAmp {pgcprb_twz_cool_amp_cal prb_pwr}
     dac: PrbRepAmp pgcprb_twz_rep_amp
-    dac: BiasCoilX pgc_twz_bias_x
+    dac: BiasCoilX pgc_twz_bias_x %amplitude_scan 
     dac: BiasCoilY pgc_twz_bias_y
     dac: BiasCoilZ pgc_twz_bias_z
     on: PrbRepTrg

@@ -1,9 +1,7 @@
-% This requires 4ms before this function is called
 % also note that this function set the time back to before entering the function
 % this function uses probe beam for cooling
 
 def D2InTrapPGCPrb(pgc_time):
-    t += -t_shutter
     on: PrbShutter
     on: PrbCoolShutter
     off: xyzMOTShutter

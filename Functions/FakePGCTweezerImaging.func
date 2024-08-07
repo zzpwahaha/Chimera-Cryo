@@ -5,7 +5,6 @@
 
 
 def FakePGCTweezerImaging():
-    t += -4
     on: PrbShutter
     off: xyzMOTShutter
     off: SciMOTTrg

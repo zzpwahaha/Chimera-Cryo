@@ -3,12 +3,10 @@ t = 1
 %on: SrcMOTValveEnable
 t += 1
 %call CryoMOTLoadingPGC()
-call MOTLoading(t_loading)
-call FreeSpaceLGMEnhancedLoading()
+call CryoMOTEnhancedLoadingLGM()
 call TOF(10)
-%call FreeSpaceLGM(t_lgm_cool_time)
 
-
+%on: UVLampTrg
 %%%%%%%%%%%%%%  PGC in Tweezer %%%%%%%%%%%%%%%%%%
 % change the field/laser freq parameter here because the previous section is TOF and no light is on
 call D2InTrapPGC(t_pgc_twz)
@@ -19,13 +17,14 @@ call D2InTrapPGCPrb(t_pgc_twz)
 % note the t_pgc_twz should be smaller than 100
 t += 100-t_pgc_twz
 
-
+off: UVLampTrg
 %%%%%%%%%%%%%%  Image TWIZZER  %%%%%%%%%%%%%%%%%%
 % change the field/laser freq parameter here because the previous section is dark, i.e. 100-t_pgc_twz is larger than 4
 call PGCTweezerImaging()
 %on: MOTFlashTrg
 
 %%%%%%%%%%%%%% Prepare for pulsed PGC with Probe %%%%%%%%%%%%%%%
+%on: UVLampTrg
 dacramp: TweezerIntensity twz_intensity twz_int_lifetime 5
 %% turn off TA path and turn on Prb path for single beam cooling
 on: PrbCoolShutter
@@ -49,7 +48,10 @@ dac: PrbRepAmp pgcprb_twz_rep_amp
 
 % wait 10ms before cooling pulse 
 t += 10
-var repeat_interval 10000
+var repeat_interval 1000
+%var twz_int_lifetime 1.606 %2.92*0.55
+%pgcprb_twz_cool_amp_cal 1.62 VPD, 25ms t_pulse_cool
+% change it to the same as imaging on 07/18/2024
 %%%%%%%%%%%%%%% Pulsed PGC 5 times %%%%%%%%%%%%%%%
 repeat: int(t_lifetime/repeat_interval) %repeat_num
     t += (repeat_interval-(t_pulsed_cool+5)-6)
@@ -65,15 +67,19 @@ repeat: int(t_lifetime/repeat_interval) %repeat_num
     dac: PrbRepAmp pgcprb_twz_rep_amp %0.3 %
     t += 10
 
-    on: PrbTrg
+	t += -10
+%off: UVLampTrg
     on: Pixis_Trg
+	t += 10
+    on: PrbTrg
+
     t += t_pulsed_cool
     pulseon: DO1_0 1
     off: PrbTrg
     off: PrbShutter
     off: Pixis_Trg
     off: CameraShutter
-
+%on: UVLampTrg
     dacramp: TweezerIntensity twz_intensity twz_int_lifetime 5
     t += 5
 %    t += (repeat_interval-(t_pulsed_cool+5)-6)/2
@@ -101,10 +107,12 @@ t += 6
 call D2InTrapPGCPrb(t_pgc_twz)
 % note the t_pgc_twz should be smaller than 100
 t += 100-t_pgc_twz
+
+%off: UVLampTrg
 %%%%%%%%%%%%%%% Second Twizzer Image
 % note the previous section should have at least 4 ms dark interval
 call PGCTweezerImaging()
-
+%on: UVLampTrg
 
 %%%%%%%%%%%%%%  END Sequence  %%%%%%%%%%%%%%%%%%
 t += 100

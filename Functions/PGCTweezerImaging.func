@@ -1,10 +1,8 @@
-% This requires at least 7ms before this function is called
 % the actual imaging time is t_twz_imaging, the 7ms is the time for the shutter to turn on
 % the camera is exposed for t_twz_imaging time in total
 % also note that this function advance the time by t_twz_imagingms, and the camera shutter will be completely closed
 
 def PGCTweezerImaging():
-    t += -t_shutter
     on: PrbShutter
     on: PrbCoolShutter
     on: PrbRepTrg

@@ -24,8 +24,8 @@ t += 15
 call D2InTrapPGCPrb(t_pgc_twz)
 
 %%%%%%%%%%%%%% Prepare for pulsed PGC %%%%%%%%%%%%%%%
-dacramp: TweezerIntensity twz_intensity twz_int_lifetime 5
-t += 6
+%dacramp: TweezerIntensity twz_intensity twz_int_lifetime 5
+%t += 6
 t += t_wait_before_rr
 
 %%%%%%%%%%%%% release recapture %%%%%%%%%%
@@ -34,8 +34,8 @@ call ReleaseRecapture(t_twz_release)
 %wait a bit before next step
 t += 15
 
-dacramp: TweezerIntensity twz_int_lifetime twz_intensity 5
-t += 6
+%dacramp: TweezerIntensity twz_int_lifetime twz_intensity 5
+%t += 6
 
 call D2InTrapPGCPrb(t_pgc_twz)
 % note the t_pgc_twz should be smaller than 100
@@ -46,5 +46,5 @@ call PGCTweezerImaging()
 
 
 %%%%%%%%%%%%%%  END Sequence  %%%%%%%%%%%%%%%%%%
-t += 100
+t += 50
 pulseon: DO1_0 0.5
