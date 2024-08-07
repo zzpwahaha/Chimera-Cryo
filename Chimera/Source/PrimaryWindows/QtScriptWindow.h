@@ -59,7 +59,7 @@ class QtScriptWindow : public IChimeraQtWindow{
 
 		void newMasterScript ();
 		void openMasterScript (IChimeraQtWindow* parent);
-		void openMasterScript (std::string name);
+		void openMasterScript (std::string name, bool askMove = true);
 		void saveMasterScript ();
 		void saveMasterScriptAs (IChimeraQtWindow* parent);
 		void newMasterFunction ();

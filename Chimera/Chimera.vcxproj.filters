@@ -516,6 +516,21 @@
     <ClCompile Include="Source\PicoScrew\NewportUSB.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\GeneralFlumes\BoostAsyncTCPServer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ExternalController\TCPServerSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ExternalController\MessageConsumer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ExternalController\MessageDisplay.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ExternalController\CommandModulator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="3rd_Party\qcustomplot\qcustomplot.h">
@@ -714,6 +729,18 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="Source\Andor\AndorCameraThreadImageGrabber.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\ExternalController\TCPServerSystem.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\ExternalController\MessageConsumer.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\ExternalController\MessageDisplay.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\ExternalController\CommandModulator.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
@@ -1160,6 +1187,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\PicoScrew\NewportUSB.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\GeneralFlumes\BoostAsyncTCPServer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

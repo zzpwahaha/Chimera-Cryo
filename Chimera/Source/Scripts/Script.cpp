@@ -481,7 +481,7 @@ void Script::newScript(){
 }
 
 
-void Script::openParentScript(std::string parentScriptFileAndPath, std::string configPath, RunInfo info)
+void Script::openParentScript(std::string parentScriptFileAndPath, std::string configPath, RunInfo info, bool askMove)
 {
 	if (parentScriptFileAndPath == "" || parentScriptFileAndPath == "NONE"){
 		return;
@@ -519,7 +519,7 @@ void Script::openParentScript(std::string parentScriptFileAndPath, std::string c
 	std::replace (scriptLocation.begin (), scriptLocation.end (), '\\', '/');
 	int sPos = scriptLocation.find_last_of ('/');
 	scriptLocation = scriptLocation.substr(0, sPos);	
-	if (scriptLocation + "/" != configPath && configPath != ""){
+	if (askMove && scriptLocation + "/" != configPath && configPath != ""){
 		auto answer = QMessageBox::question (nullptr, qstr ("Location?"), qstr ("The requested " + deviceType
 			+ " script: " + parentScriptFileAndPath + " is not "
 			"currently located in the current configuration folder. This is recommended so that "

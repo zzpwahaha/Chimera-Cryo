@@ -130,6 +130,10 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Source\ExternalController\CommandModulator.cpp" />
+    <ClCompile Include="Source\ExternalController\MessageDisplay.cpp" />
+    <ClCompile Include="Source\ExternalController\MessageConsumer.cpp" />
+    <ClCompile Include="Source\GeneralFlumes\BoostAsyncTCPServer.cpp" />
     <ClCompile Include="Source\PicoScrew\NewportUSB.cpp" />
     <ClCompile Include="Source\PicoScrew\PicoScrewSystem.cpp" />
     <ClCompile Include="Source\PicoScrew\PicoScrewCore.cpp" />
@@ -183,6 +187,9 @@
     <ClCompile Include="Source\CMOSCamera\MakoWrapper.cpp" />
     <ClCompile Include="Source\CustomQtControls\LineEditCompleter.cpp" />
     <ClCompile Include="Source\CustomQtControls\TickSlider.cpp" />
+    <ClCompile Include="Source\ExternalController\TCPServerSystem.cpp" />
+    <QtMoc Include="Source\ExternalController\MessageConsumer.h" />
+    <QtMoc Include="Source\ExternalController\TCPServerSystem.h" />
     <QtMoc Include="Source\CustomQtControls\TickSlider.h" />
     <ClCompile Include="Source\GeneralImaging\PictureViewer.cpp" />
     <ClCompile Include="Source\GeneralImaging\csvReader.cpp" />
@@ -207,6 +214,9 @@
     <QtMoc Include="Source\ExperimentMonitoringAndStatus\TemperatureMonitor.h" />
     <QtMoc Include="Source\CMOSCamera\FrameAverager.h" />
     <QtMoc Include="Source\ExcessDialogs\AiSettingsDialog.h" />
+    <QtMoc Include="Source\ExternalController\MessageDisplay.h" />
+    <QtMoc Include="Source\ExternalController\CommandModulator.h" />
+    <ClInclude Include="Source\GeneralFlumes\BoostAsyncTCPServer.h" />
     <ClInclude Include="Source\PicoScrew\NewportUSB.h" />
     <ClInclude Include="Source\PicoScrew\PicoScrewSystem.h" />
     <ClInclude Include="Source\PicoScrew\PicoScrewCore.h" />

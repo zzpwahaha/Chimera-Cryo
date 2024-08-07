@@ -187,14 +187,14 @@ bool ConfigSystem::checkDelimiterLine(ConfigStream& openFile, std::string delimi
 ]- is not a Normal Save, i.e. if the file doesn't already exist or if the user tries to pass an empty name as an argument. It returns 
 ]- false if the configuration got saved, true if something prevented the configuration from being saved.
 */
-void ConfigSystem::saveConfiguration(IChimeraQtWindow* win){
+void ConfigSystem::saveConfiguration(IChimeraQtWindow* win, bool askOverwrite){
 	std::string configNameToSave = currentProfile.configuration;
 	// check to make sure that this is a name.
 	if (configNameToSave == ""){
 		thrower ( "ERROR: Please select a configuration before saving!" );
 	}
 	// check if file already exists
-	if (!ConfigSystem::fileOrFolderExists(currentProfile.configLocation + configNameToSave + "." + CONFIG_EXTENSION)){
+	if (askOverwrite && !ConfigSystem::fileOrFolderExists(currentProfile.configLocation + configNameToSave + "." + CONFIG_EXTENSION)){
 		auto answer = QMessageBox::question (win, qstr ("New Config?"),
 			qstr ("This configuration file appears to not exist in the expected location: " 
 				+ currentProfile.configLocation + configNameToSave
