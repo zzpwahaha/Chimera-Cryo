@@ -33,7 +33,7 @@ class ConfigSystem : public IChimeraSystem
 		void checkSaveEntireProfile(IChimeraQtWindow* win);
 		static std::function<void (ScriptStream&, std::string&)> getGetlineFunc (Version& ver);
 
-		void saveConfiguration(IChimeraQtWindow* win);
+		void saveConfiguration(IChimeraQtWindow* win, bool askOverwrite = true);
 		void saveConfigurationAs(IChimeraQtWindow* win);
 		void renameConfiguration();
 		void deleteConfiguration();

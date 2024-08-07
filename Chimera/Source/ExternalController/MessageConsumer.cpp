@@ -4,7 +4,9 @@
 #include <ctime>
 #include <sstream>
 
-MessageConsumer::MessageConsumer(ThreadsafeQueue<TCPMessageTyep>& queue) : queue_(queue) 
+MessageConsumer::MessageConsumer(ThreadsafeQueue<TCPMessageTyep>& queue, CommandModulator& modulator) : 
+    queue_(queue),
+    modulator_(modulator)
 {}
 
 MessageConsumer::~MessageConsumer()
@@ -27,6 +29,7 @@ void MessageConsumer::consume()
         auto data = queue_.pop();
         auto& message = data.msg;
         auto& connection = data.connection;
+        CommandModulator::ErrorStatus status;
         
         // Process the message
         std::string timeStamp = getCurrentDateTime();
@@ -40,17 +43,51 @@ void MessageConsumer::consume()
             auto args = getArguments(message);
             if (args.size() == 0) {
                 emit logMessage(qstr(timeStamp + ": \t" + "No arguemnt found in command: " + message));
+                connection->do_write("Error\nNo arguemnt found in command: " + message);
+                continue;
             }
-            emit openConfiguration(qstr(args[0]));
-            connection->do_write("Finished opening configuration: " + args[0]);
+            QMetaObject::invokeMethod(&modulator_, [&]() {
+                modulator_.openConfiguration(qstr(args[0]), status);
+                }, Qt::BlockingQueuedConnection);
+            connection->do_write(compileReply("Finished opening configuration: " + args[0], status));
         }
-        else if (stratWith(message, "Open")) {
+        else if (stratWith(message, "Open-Master-Script")) {
+            auto args = getArguments(message);
+            if (args.size() == 0) {
+                emit logMessage(qstr(timeStamp + ": \t" + "No arguemnt found in command: " + message));
+                connection->do_write("Error\nNo arguemnt found in command: " + message);
+                continue;
+            }
+            QMetaObject::invokeMethod(&modulator_, [&]() {
+                modulator_.openMasterScript(qstr(args[0]), status);
+                }, Qt::BlockingQueuedConnection);
+            connection->do_write(compileReply("Finished opening master script: " + args[0], status));
 
+        }
+        else if (stratWith(message, "Save-All")) {
+            QMetaObject::invokeMethod(&modulator_, [&]() {
+                modulator_.saveAll(status);
+                }, Qt::BlockingQueuedConnection);
+            connection->do_write(compileReply("Finished saving all", status));
+        }
+        else if (stratWith(message, "Start-Experiment")) {
+
+            connection->do_write(compileReply("Finished starting experiment", status));
         }
         else {
             emit logMessage(qstr(timeStamp + ": \t" + "Unrecongnized command: " + message));
-            connection->do_write("Unrecongnized command: " + message);
+            connection->do_write("Error\nUnrecongnized command: " + message);
         }
+    }
+}
+
+std::string MessageConsumer::compileReply(std::string normalMsg, CommandModulator::ErrorStatus status)
+{
+    if (status.error) {
+        return str("Error\n") + status.errorMsg;
+    }
+    else {
+        return normalMsg;
     }
 }
 

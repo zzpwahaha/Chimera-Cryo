@@ -360,8 +360,8 @@ void QtScriptWindow::openMasterScript (IChimeraQtWindow* parent){
 	}
 }
 
-void QtScriptWindow::openMasterScript(std::string name) {
-	masterScript.openParentScript(name, getProfile().configLocation, mainWin->getRunInfo());
+void QtScriptWindow::openMasterScript(std::string name, bool askMove) {
+	masterScript.openParentScript(name, getProfile().configLocation, mainWin->getRunInfo(), askMove);
 }
 
 void QtScriptWindow::saveMasterScript (){

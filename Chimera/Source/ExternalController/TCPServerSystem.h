@@ -18,9 +18,9 @@ public:
 
 private:
 	BoostAsyncTCPServer tcpServer;
+	CommandModulator modulator;
 	MessageConsumer consumer;
 	MessageDisplay* logger;
-	CommandModulator modulator;
 
 };
 

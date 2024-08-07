@@ -5,8 +5,8 @@
 TCPServerSystem::TCPServerSystem(IChimeraQtWindow* parent_in) :
 	IChimeraSystem(parent_in),
 	tcpServer("127.0.0.1", 8888),
-	consumer(tcpServer.dataQueue()),
-	modulator()
+	modulator(this),
+	consumer(tcpServer.dataQueue(), modulator)
 {
 	consumer.start();
 }
@@ -24,5 +24,4 @@ void TCPServerSystem::initialize()
 	connect(&consumer, &MessageConsumer::logMessage, logger, &MessageDisplay::appendText);
 
 	modulator.initialize(parentWin);
-	connect(&consumer, &MessageConsumer::openConfiguration, &modulator, &CommandModulator::openConfiguration, Qt::BlockingQueuedConnection);
 }
