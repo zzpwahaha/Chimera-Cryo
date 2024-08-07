@@ -13,7 +13,7 @@ public:
 	OlCore& operator=(const OlCore&) = delete;
 	OlCore(const OlCore&) = delete;
 
-	OlCore(bool safemode);
+	OlCore(std::vector<bool> safemodes);
 	~OlCore();
 
 	void calculateVariations(std::vector<parameterType>& params, ExpThreadWorker* threadworker);

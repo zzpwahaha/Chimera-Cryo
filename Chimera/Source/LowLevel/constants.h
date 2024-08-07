@@ -69,7 +69,7 @@
 	const std::array<unsigned short, 2> DAC_REWIND = { 15, 31 }; // used for the long time run rewind, see AoCore::formatDacForFPGA
 
 	//OffsetLock 
-	constexpr bool OFFSETLOCK_SAFEMODE = false;
+	const std::vector<bool> OFFSETLOCK_SAFEMODE = std::vector<bool>{ false,false,true };
 	const std::vector<std::string> OL_COM_PORT = { "COM3", "COM7", "COM12"};
 	const double OL_TIME_RESOLUTION = 0.02; //in ms
 	const std::vector<std::pair<unsigned, unsigned>> OL_TRIGGER_LINE
