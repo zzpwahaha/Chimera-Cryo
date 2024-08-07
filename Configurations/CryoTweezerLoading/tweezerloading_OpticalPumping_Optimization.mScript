@@ -1,13 +1,12 @@
 %%%%%%%%%%%%%%%%% Start With 1ms %%%%%%%%%%%%%%%%% 
 t = 1
 %call CryoMOTLoadingPGC()
-    call MOTLoading(t_loading)
-    call FreeSpaceLGMEnhancedLoading()
-%    call FreeSpaceLGM(t_lgm_mot_cool_time)
-%    call FreeSpacePGC(t_pgc_cool_time)
+
+
+call CryoMOTEnhancedLoadingLGM()
 
 %%%%%%%%%%%%%%%  TOF  %%%%%%%%%%%%%%%%%%
-call TOF(t_tof)
+call TOF(10)
 
 %%%%%%%%%%%%%%  PGC in Tweezer %%%%%%%%%%%%%%%%%%
 % change the field/laser freq parameter here because the previous section is TOF and no light is on
@@ -38,14 +37,25 @@ t += 15 %+500
 
 
 t += 10
+off: ryd420trg
 %dac: BiasCoilX quantization_bias_x
 %dac: BiasCoilY -1.065+0.05 %-2.33 %quantization_bias_y %-0.95 
 %dac: BiasCoilZ -0.05-0.039 %-0.04 
 
+
+%%%%% cold bias field %%%%% 
+%dac: BiasCoilX -2.5+0.75 
+%dac: BiasCoilY -1.065+0.05+(-0.1) 
+%dac: BiasCoilZ -0.05+(-0.039)+0.036 
+
+
+%%%%% warm bias field %%%%% 
 dac: BiasCoilX -2.5+0.75 %quantization_bias_x
-dac: BiasCoilY -1.065+0.05+(-0.1)+(-2.33)*switch_toggle %+(-0.08) %+(-2.33)*switch_toggle % %quantization_bias_y %-0.95 
-dac: BiasCoilZ -0.05+(-0.039)+0.036 %+0.033 %-0.04 
-t += 750
+dac: BiasCoilY -1.065+(-0.053)+(-2.33)*switch_toggle %+(-0.08) %+(-2.33)*switch_toggle % %quantization_bias_y %-0.95 
+dac: BiasCoilZ -0.05+(0.012) %+0.033 %-0.04 
+
+
+t += 100 %750
 
 %t += 10
 %%%%%%%%%%%% pump out of F=2 using probe cooling 2-2'' %%%%%%%%%%%
@@ -77,6 +87,20 @@ t += 750
 %dac: BiasCoilZ 0.1
 %t += time_scan
 
+%%%%%%% 420 settings
+%t += -10
+%dac: Ryd420Amp 0.3
+%t += 10
+%
+%t += -6
+%on: Ryd420Trg
+%t += 1
+%on: Ryd420Hold
+%t += 1
+%off: Ryd420Trg
+%t += 0.1
+%on: Ryd420ExpShutter
+%t += 6-1-1-0.1
 
 %%%%%%%%%%%%%% optical pumping into |2,2> state with 2-2'' OP, 1-2'' probe %%%%%%%%%%%
 on: PrbShutter
@@ -86,6 +110,9 @@ off: D1LGMShutter
 off: D1LGMPrbShutter
 on: OPShutter
 off: TARepShutter
+%additional 420 commands
+%on: ryd420expshutter
+%end of 420 commands
 ol: ol_cooling d2_cooling_resonance-(29-266.65)  %29
 ol: ol_repump d2_repump_prb_resonance+(29) %29
 dac: PrbRepAmp 8
@@ -152,6 +179,16 @@ off: PrbShutter
 %off: PrbRepTrg
 %off: PrbShutter
 
+%t += 5
+%on: ryd420expshutter
+%t += t_shutter
+%on: ryd420trg
+%t += time_scan_2
+%off: ryd420trg
+%off: ryd420expshutter
+%t += t_shutter
+
+
 t += 15
 %%%%%%% depump out of F=2, other than |2,2> if with circular polarization, using cooling 2-2'', using OP beam %%%%%%%%%%%
 off: PrbShutter
@@ -165,10 +202,9 @@ ol: ol_repump d2_repump_resonance+(28.8+266.65+30) %
 dac: OPAmp {0.1 op_pwr} %time_scan
 t += t_shutter
 on: OPTrg
-t += time_scan*(1-switch_toggle)+time_scan_2*switch_toggle %0.08 %0.04 %0.005 %time_scan %0.001
+t += time_scan*(1-switch_toggle)+time_scan_2*switch_toggle %0.005 %0.08 %0.04 %0.005 %time_scan %0.001
 off: OPTrg
 off: OPShutter
-
 t += 15
 
 
@@ -191,7 +227,7 @@ t += 15
 %off: PrbRepTrg
 
 
-%%%%%%%%%%%%%%% MW %%%%%%%%%%%
+%%%%%%%%%%%%%%%% MW %%%%%%%%%%%
 %var mw_rabi_pi2 0.0447 %0.041 %0.041 %0.01 %0.0599 %0.0296
 %var IQ_MAX_AMP 2.5
 %
@@ -273,20 +309,20 @@ t += 15
 %t += 1
 %dacramp: TweezerIntensity twz_intensity*0.1 twz_intensity 10
 %t += 10
-%
-%
-%%t += 10
-%%dac: BiasCoilX quantization_bias_x
-%%dac: BiasCoilY -1.065 %-2.33 %quantization_bias_y %-0.95 
-%%dac: BiasCoilZ -0.05 %-0.04 
-%%t += 200
-%
-%%dacramp: TweezerIntensity twz_intensity twz_intensity*fraction_scan 10
-%%t += 10
-%%t += 500
-%%dacramp: TweezerIntensity twz_intensity*fraction_scan twz_intensity 10
-%%t += 10
-%%t += 1
+
+
+%t += 10
+%dac: BiasCoilX quantization_bias_x
+%dac: BiasCoilY -1.065 %-2.33 %quantization_bias_y %-0.95 
+%dac: BiasCoilZ -0.05 %-0.04 
+%t += 200
+
+%dacramp: TweezerIntensity twz_intensity twz_intensity*fraction_scan 10
+%t += 10
+%t += 500
+%dacramp: TweezerIntensity twz_intensity*fraction_scan twz_intensity 10
+%t += 10
+%t += 1
 
 
 
@@ -316,6 +352,7 @@ t += 15
 %%call TrapLowerAndRise(twz_intensity, twz_intensity*0.1, 10, 15)
 %t += 15
 
+t += 10
 call StateSelectivePushout()
 t += 5 
 
@@ -329,5 +366,5 @@ t += 15
 call PGCTweezerImaging()
 
 %%%%%%%%%%%%%%  END Sequence  %%%%%%%%%%%%%%%%%%
-t += 100
+t += 10
 pulseon: DO1_0 0.5

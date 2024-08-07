@@ -1,5 +1,4 @@
 def D1InTrapLGMPrb(lgm_time):
-    t += -t_shutter
     off: xyzMOTShutter
     on: D1LGMPrbShutter
     off: D1LGMShutter

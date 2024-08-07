@@ -1,11 +1,9 @@
-% This requires 4ms before this function is called
 % This function shine light onto tweezer array with certain frequency using the probe light
 % This functino also contains a ramp down ramp up after the kick out, total 25ms
 % Things need to be considered is the kick out time and kick out intensity. Those are not made to be local variable, since there are too many
 % This function will advance the time by 2.5+t_kick+2.5+25 ms = 30+t_kick ms
 
 def kickOutTweezer():
-    t += -t_shutter
     off: xyzMOTShutter 
     on: PrbShutter
     on: PrbCoolShutter

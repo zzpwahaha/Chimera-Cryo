@@ -1,10 +1,11 @@
 %%%%%%%%%%%%%%%%% Start With 1ms %%%%%%%%%%%%%%%%% 
 t = 1
-call CryoMOTLoadingPGC()
+%call CryoMOTLoadingPGC()
+call CryoMOTEnhancedLoadingLGM()
+call TOF(10)
 
-%%%%%%%%%%%%%%%  TOF  %%%%%%%%%%%%%%%%%%
-call TOF(t_tof)
-t += 2
+
+
 %%%%%%%%%%%%%%  PGC in Tweezer %%%%%%%%%%%%%%%%%%
 % change the field/laser freq parameter here because the previous section is TOF and no light is on
 call D2InTrapPGC(t_pgc_twz)
@@ -22,12 +23,16 @@ t += 100-t_pgc_twz
 call PGCTweezerImaging()
 %on: MOTFlashTrg
 
-t += 15
+t += 5
 %%%%%%%%%%%%%%  Kickout TWIZZER  %%%%%%%%%%%%%%%%%%
 %call kickOutTweezer()
 %call TrapLowerAndRise(twz_intensity, twz_intensity*0.1, 10, 15)
+dacramp: TweezerIntensity twz_intensity twz_intensity*fraction_scan 10  
+t += 10
 call ReleaseRecapture(t_twz_release)
-t += 15
+t += 1
+dacramp: TweezerIntensity twz_intensity*fraction_scan twz_intensity 10
+t += 10
 
 %%%%%%%%%%%%%%  PGC in Tweezer %%%%%%%%%%%%%%%%%%
 % change the field/laser freq parameter here because the previous section is TOF and no light is on

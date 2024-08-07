@@ -121,11 +121,11 @@ do8_3
 1
 do8_4
 1
-do8_5
+tweezerintensityswitch
 1
-do8_6
+ryd420awgchswitch
 1
-do8_7
+uvlamptrg
 1
 tarepamp
 -9.9 - 10
@@ -140,7 +140,7 @@ opamp
 0
 dac0_2
 dipolepushamp
-0 - 6
+0 - 7.3
 0
 dac0_3
 prbamp
@@ -219,35 +219,35 @@ dac1_6
 -9.9 - 10
 0
 dac1_6
-dac1_7
+electrode1
 -9.9 - 10
 0
 dac1_7
-dac1_8
+electrode2
 -9.9 - 10
 0
 dac1_8
-dac1_9
+electrode3
 -9.9 - 10
 0
 dac1_9
-dac1_10
+electrode4
 -9.9 - 10
 0
 dac1_10
-dac1_11
+electrode5
 -9.9 - 10
 0
 dac1_11
-dac1_12
+electrode6
 -9.9 - 10
 0
 dac1_12
-dac1_13
+electrode7
 -9.9 - 10
 0
 dac1_13
-dac1_14
+electrode8
 -9.9 - 10
 0
 dac1_14
@@ -263,5 +263,5 @@ d2_repump_prb_resonance 5262
 d1_lgmcooling_resonance 784
 rb87_hfsplitting 6834.682
 t_shutter 10
-951 1200 2 811 1060 2
-0 0
+851 1300 2 911 970 2
+0 1

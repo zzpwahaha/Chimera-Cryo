@@ -666,20 +666,25 @@ std::string QtAuxiliaryWindow::getOtherSystemStatusMsg (){
 	}
 
 	msg += "Offset Lock:\n\t";
-	if (!OFFSETLOCK_SAFEMODE) {
-		for (auto ol_com_port : OL_COM_PORT) {
+
+	for (auto ol_com_port_num : range(OL_COM_PORT.size())) {
+		auto ol_com_port = OL_COM_PORT[ol_com_port_num];
+		bool safemode = OFFSETLOCK_SAFEMODE[ol_com_port_num];
+		if (!safemode) {
 			msg += str("Offset Lock System is Active at " + ol_com_port + ",\n\t");
 		}
-		msg += "Attached trigger line is \n\t\t";
-		for (const auto& oltrig : OL_TRIGGER_LINE)
-		{
-			msg += "(" + str(oltrig.first) + "," + str(oltrig.second) + ") ";
+		else {
+			msg += "\tOffset Lock System is disabled! Enable in \"constants.h\" \n";
+
 		}
-		msg += "\n";
 	}
-	else {
-		msg += "\tOffset Lock System is disabled! Enable in \"constants.h\" \n";
+	msg += "Attached trigger line is \n\t\t";
+	for (const auto& oltrig : OL_TRIGGER_LINE)
+	{
+		msg += "(" + str(oltrig.first) + "," + str(oltrig.second) + ") ";
 	}
+	msg += "\n";
+
 
 	msg += "Microwave System:\n";
 	if (!MICROWAVE_SAFEMODE) {

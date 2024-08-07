@@ -1,6 +1,7 @@
 def MOTLoading(loading_time):
     pulseon: DO1_0 10
     pulseon: GMLoadTrg 0.003
+    pulseon: KeySightTrg 0.01
     t += 1
     ddsfreq: dds0_0 80
     ddsamp: dds0_0 100
@@ -13,7 +14,7 @@ def MOTLoading(loading_time):
     ddsfreq: Prb 100
     ddsamp: Prb 100
     t += 1
-    ddsfreq: Ryd420Brimrose 108
+    ddsfreq: Ryd420Brimrose 80
     ddsamp: Ryd420Brimrose 100
 
     t += 1
@@ -30,6 +31,7 @@ def MOTLoading(loading_time):
     ddsamp: dds2_3 100
 
 
+    on: UVLampTrg
     on: TARepTrg
     on: SrcMOTTrg 
     on: SciMOTTrg 
@@ -57,11 +59,12 @@ def MOTLoading(loading_time):
     on: TweezerTrg
     off: CameraShutter
     on: SrcMOTValve
+    off: TweezerIntensitySwitch
 
     dac: TARepAmp 10
     dac: SrcMOTAmp 10
     dac: SciMOTAmp mot_load_cool_amp %{mot_load_cool_amp_cal mot_pwr} %6.8 
-    dac: DipolePushAmp 5
+    dac: DipolePushAmp 7 %5
     dac: TweezerIntensity twz_intensity %Converison is 38.7mW per 1V Aug/1/2022 
 %    dac: TweezerIntensity twz_dac_intensity-twz_intensityservo_bias % set loading tweezer depth, which is 1mK, 1.7V on PD. Subtract the ofst on servo.
     dac: PrbRepAmp 10
@@ -91,6 +94,9 @@ def MOTLoading(loading_time):
     off: DipolePushTrg
     off: DipolePushShutter
     dac: MOTCoil 0
+
+    off: UVLampTrg
+
     pulseon: DO1_0 1
 
 %    t += -4000

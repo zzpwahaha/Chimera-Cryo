@@ -1,0 +1,113 @@
+%%%%%%%%%%%%%%%%% Start With 1ms %%%%%%%%%%%%%%%%% 
+t = 1
+%call CryoMOTLoadingPGC()
+call CryoMOTEnhancedLoadingLGM()
+call TOF(10)
+
+on: UVLampTrg
+%%%%%%%%%%%%%%  PGC in Tweezer %%%%%%%%%%%%%%%%%%
+% change the field/laser freq parameter here because the previous section is TOF and no light is on
+call D2InTrapPGC(t_pgc_twz)
+% note the t_pgc_twz should be smaller than 100
+t += 100-t_pgc_twz
+off: UVLampTrg
+call D2InTrapPGCPrb(t_pgc_twz)
+% note the t_pgc_twz should be smaller than 100
+t += 100-t_pgc_twz
+
+off: UVLampTrg
+
+%%%%%%%%%%%%%%  Image TWIZZER  %%%%%%%%%%%%%%%%%%
+% change the field/laser freq parameter here because the previous section is dark, i.e. 100-t_pgc_twz is larger than 4
+call PGCTweezerImaging()
+
+t += 5
+%on: UVLampTrg
+
+call setQuantizationField()
+t += 200 %100 %750
+
+call OpticalPumping22()
+
+t += 15
+%call StateSelectivePushout()
+    dacramp: TweezerIntensity twz_intensity twz_intensity*0.1 10
+    t += 10
+    on: TARepShutter
+    off: PrbShutter
+    off: xyzMOTShutter
+    off: D1LGMShutter
+    off: D1LGMPrbShutter
+    on: OPShutter
+    ol: ol_cooling d2_cooling_resonance-(2.4*0+4.9*0) 
+    ol: ol_repump d2_repump_resonance+0 % intensional detuned
+    dac: TARepAmp 10
+    dac: OPAmp 8 %{2 op_pwr} %0.1
+
+%var IQ_MAX_AMP 2.5
+%dac: MW_IQ_I IQ_MAX_AMP
+%dac: MW_IQ_Q 0
+
+    t += t_shutter
+
+%pulseon: MWTrg 0.4
+%t += 1
+%pulseon: MWAmpTrg 0.0385
+%t += 0.0385+0.1
+
+
+off: TweezerTrg
+t += 0.5/1000
+on: do8_4
+    on: OPTrg
+    t += time_scan %0.005 %0.2
+    off: OPTrg
+t += 0.5/1000
+on: TweezerTrg
+off: do8_4
+    off: OPShutter
+
+
+
+t += 0.001
+t += -delay_scan %-0.002
+on: TweezerHold
+pulseon: KeySightTrg 0.01
+t += 0.2
+pulseon: KeySightTrg 0.01
+off: TweezerHold
+t += -0.2
+t += delay_scan %0.002
+
+t += -0.08
+dacramp: TweezerIntensity twz_intensity*0.1 twz_intensity 0.06
+t += 0.08
+
+
+
+%    t += 1-0.05 %time_scan 
+%    dacramp: TweezerIntensity twz_intensity*0.1 twz_intensity 10 
+    t += 10
+
+
+
+%%%%%%%%%%%%%%  PGC in Tweezer %%%%%%%%%%%%%%%%%%
+% change the field/laser freq parameter here because the previous section is TOF and no light is on
+call D2InTrapPGCPrb(t_pgc_twz)
+% note the t_pgc_twz should be smaller than 100
+t += 100-t_pgc_twz
+
+off: UVLampTrg
+t += 5
+%%%%%%%%%%%%%%  Image TWIZZER  %%%%%%%%%%%%%%%%%%
+% change the field/laser freq parameter here because the previous section is dark, i.e. 100-t_pgc_twz is larger than 4
+call PGCTweezerImaging()
+
+t += 10
+call RydbergBeamCameraFootprint()
+
+t += 5
+%pulseon: UVLampTrg 5
+%%%%%%%%%%%%%%  END Sequence  %%%%%%%%%%%%%%%%%%
+t += 10
+pulseon: DO1_0 0.5

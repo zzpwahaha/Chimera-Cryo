@@ -24,7 +24,7 @@ PicoScrewCore::PicoScrewCore(bool safemode, std::string deviceKey)
 		}
 		// hardcode the accerleration and velocity for all screws
 		screw.write(strChan + "AC100000");
-		screw.write(strChan + "VA2000"); //maximum velocity
+		screw.write(strChan + "VA750"); //medium velocity for minimizing hysterisis
 	}
 }
 

@@ -20,7 +20,7 @@ call PGCTweezerImaging()
 
 t += 15
 call setQuantizationField()
-t += 750
+t += 100 %750
 %
 %t += 15
 %%%%%%%%%%%% pump out of F=1 using probe repump 1-2'' 
@@ -45,9 +45,9 @@ t += 1
 %t += 0.0874 %time_Scan %0.082+0.1 % 2,2 ->1,1
 pulseon: MWAmpTrg time_scan
 t += time_scan
-
-%pulseon: MWTrg 0.4
-%t += 1
+t += 0.1
+pulseon: MWTrg 0.4
+t += 1
 %pulseon: DO1_0 1
 %t += time_scan %10
 t += 1

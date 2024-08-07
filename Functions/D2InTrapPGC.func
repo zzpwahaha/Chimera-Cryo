@@ -1,8 +1,6 @@
-% This requires 4ms before this function is called
 % also note that this function set the time back to before entering the function
 
 def D2InTrapPGC(pgc_time):
-    t += -t_shutter
     on: xyzMOTShutter
     on: xyMOTShutter
     ol: ol_cooling d2_cooling_resonance-pgc_twz_olcool

@@ -4,20 +4,20 @@
 #include <qDebug>
 #include <qelapsedtimer.h>
 
-OlCore::OlCore(bool safemode)
+OlCore::OlCore(std::vector<bool> safemodes)
 	//: qtFlumes{
 	//QtSerialFlume(safemode, OL_COM_PORT[0]),
 	//QtSerialFlume(safemode, OL_COM_PORT[1]) }
 	: btFlumes{
-	BoostAsyncSerial(safemode, OL_COM_PORT[0], 9600, 8,
+	BoostAsyncSerial(safemodes[0], OL_COM_PORT[0], 9600, 8,
 		boost::asio::serial_port_base::stop_bits::one,
 		boost::asio::serial_port_base::parity::none,
 		boost::asio::serial_port_base::flow_control::none),
-	BoostAsyncSerial(safemode, OL_COM_PORT[1], 9600, 8,
+	BoostAsyncSerial(safemodes[1], OL_COM_PORT[1], 9600, 8,
 		boost::asio::serial_port_base::stop_bits::one,
 		boost::asio::serial_port_base::parity::none,
 		boost::asio::serial_port_base::flow_control::none),
-	BoostAsyncSerial(safemode, OL_COM_PORT[2], 115200, 8,
+	BoostAsyncSerial(safemodes[2], OL_COM_PORT[2], 115200, 8,
 		boost::asio::serial_port_base::stop_bits::one,
 		boost::asio::serial_port_base::parity::none,
 		boost::asio::serial_port_base::flow_control::none) }
