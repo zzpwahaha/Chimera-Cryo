@@ -78,7 +78,7 @@ class ConfigurationFile:
 
 # Example usage:
 # config = ConfigManager('C:\\Chimera\\Chimera-Cryo\\Configurations\\ExperimentAutomation\\tweezerloading.Config')
-config = ConfigurationFile('.\\tweezerloading.Config')
+config = ConfigurationFile('.\\test\\tweezerloading.Config')
 
 # Get a section
 siglent_awg_section = config.get_section('SIGLENT_AWG')
@@ -88,4 +88,4 @@ print(siglent_awg_section)
 config.modify_parameter('SIGLENT_AWG', 'Sine Amplitude', '0.95')
 
 # Save the updated configuration
-config.save('new_config_file.Config')
+config.save('./test/new_config_file.Config')

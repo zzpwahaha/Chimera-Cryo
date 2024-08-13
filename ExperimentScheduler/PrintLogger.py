@@ -26,7 +26,7 @@ class Logger:
 if __name__ == '__main__':
 
     # Usage example
-    logger = Logger('logfile_test.log')
+    logger = Logger('./test/logfile_test.log')
     sys.stdout = logger
 
     print("This message will be logged to the file and displayed on the terminal.")
