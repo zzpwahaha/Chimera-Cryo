@@ -1,8 +1,8 @@
 import time
 import subprocess
 import os
-from ZynqTCPClient import ZynqTCPClient
-from SynaccessClient import SynaccessClient
+from ZynqController.ZynqTCPClient import ZynqTCPClient
+from ZynqController.SynaccessClient import SynaccessClient
 
 class ZynqStarter:
     def __init__(self, zynq_host, zynq_port, synaccess_host_zynq, synaccess_host_coil):

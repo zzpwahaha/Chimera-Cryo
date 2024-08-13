@@ -1,7 +1,7 @@
 import socket
 import sys
 from time import sleep
-from TCPClient import TCPClient
+from ZynqController.TCPClient import TCPClient
 
 
 class ZynqTCPClient(TCPClient):
