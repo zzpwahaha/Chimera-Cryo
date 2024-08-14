@@ -33,12 +33,12 @@ class ZynqStarter:
         """Ping a target repeatedly until successful or until total timeout is reached."""
         start_time = time.time()
         while time.time() - start_time < total_timeout:
-            success, output = self.ping(target, timeout=ping_timeout)
+            success, output, time_used = self.ping(target, timeout=ping_timeout)
             if success:
-                return True, output
+                return True, output, time.time() - start_time
             print(f"Retrying {target} after {time.time() - start_time:.2f}s")
             time.sleep(ping_interval)
-        return False, f"Total timeout of {total_timeout}s reached"
+        return False, f"Total timeout of {total_timeout}s reached", time.time() - start_time
 
     def reboot_zynq(self):
         """Reboot the Zynq device."""
@@ -64,16 +64,16 @@ class ZynqStarter:
 
             tcp_zynq.send_message("QUIT")
             time.sleep(0.1)
-            syna_zynq.reboot(outlet_number=1)
+            syna_zynq.reboot(outlet_number=1, wait_time = 5)
 
-            ping_success, ping_output = self.ping_until_success(self.zynq_host, total_timeout=120)
+            ping_success, ping_output = self.ping_until_success(self.zynq_host, total_timeout=180)
             if not ping_success:
                 print(f"Failed to ping {self.zynq_host}. Restarting Zynq control...")
                 self.restart_zynq_control()
                 return
 
             # Path to the script to run
-            script_directory = r"C:/Chimera/Chimera-Cryo/ExperimentScheduler"
+            script_directory = r"C:/Chimera/Chimera-Cryo/ExperimentScheduler/ZynqController"
             script_name = "SSHClient.py"
             script_path = os.path.join(script_directory, script_name)
             command = f'python "{script_path}"'
