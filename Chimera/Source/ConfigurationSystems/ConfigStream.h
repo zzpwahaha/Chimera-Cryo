@@ -45,7 +45,9 @@ constexpr bool is_streamable_v = is_streamable<T>::value;
 template<typename T>
 inline ConfigStream& ConfigStream::operator<<(const T& value)
 {
-	if constexpr (std::is_same_v<T, const char*> || std::is_same_v<T, std::string>) {
+	if constexpr (std::is_same_v<T, char[1]> || 
+		std::is_same_v<T, const char*> || 
+		std::is_same_v<T, std::string>) {
 		// Use stringstream's operator<< for strings
 		std::string inputString(value);
 		if (inputString == "") {

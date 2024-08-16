@@ -361,9 +361,9 @@ void CalibrationManager::handleSaveMasterConfigIndvCal(ConfigStream& configStrea
 		}
 	}
 	configStream << "\n/*Data Point Average Number: */ " << cal.avgNum
-		<< "\n/*Use Agilent: */" << cal.useAg
-		<< "\n/*Which Agilent: */" << ArbGenEnum::toStr(cal.whichAg)
-		<< "\n/*Which Agilent Channel: */" << cal.agChannel;
+		<< "\n/*Use Agilent: */ " << cal.useAg
+		<< "\n/*Which Agilent: */ " << ArbGenEnum::toStr(cal.whichAg)
+		<< "\n/*Which Agilent Channel: */ " << cal.agChannel;
 		//<< "\n/*Include Sqrt on Next Cal: */" << cal.includeSqrt;
 	configStream << "\n/*Recent Calibration Result:*/"; 
 	handleSaveMasterConfigIndvResult (configStream, cal.result);
@@ -377,10 +377,10 @@ void CalibrationManager::handleSaveMasterConfigIndvResult (ConfigStream& configS
 		<< "\n/*Calibration Coefficients: */ " << calBase::dblVecToString (result.calibrationCoefficients)
 		<< "\n/*Calibration BSpline order: */ " << result.orderBSpline
 		<< "\n/*Calibration BSpline breakpoints: */ " << result.nBreak
-		<< "\n/*Number of Control Vals: */" << result.ctrlVals.size ()
-		<< "\n/*Control Vals: */" << calBase::dblVecToString (result.ctrlVals)
-		<< "\n/*Number of Result Vals: */" << result.resVals.size ()
-		<< "\n/*Result Vals: */" << calBase::dblVecToString (result.resVals);
+		<< "\n/*Number of Control Vals: */ " << result.ctrlVals.size ()
+		<< "\n/*Control Vals: */ " << calBase::dblVecToString (result.ctrlVals)
+		<< "\n/*Number of Result Vals: */ " << result.resVals.size ()
+		<< "\n/*Result Vals: */ " << calBase::dblVecToString (result.resVals);
 }
 
 void CalibrationManager::handleOpenMasterConfigIndvResult (ConfigStream& configStream, calResult& result) 
@@ -466,6 +466,9 @@ calSettings CalibrationManager::handleOpenMasterConfigIndvCal (ConfigStream& con
 		configStream >> tmpInfo.active;
 		unsigned numSettings;
 		configStream >> numSettings;
+		if (numSettings == 0) {
+			auto line = configStream.jumpline(); // remove the ConfigStream::emptyStringTxt
+		}
 		tmpInfo.ttlConfig.resize (numSettings);
 		for (auto& ttl : tmpInfo.ttlConfig) {
 			configStream >> configValue;
@@ -475,6 +478,9 @@ calSettings CalibrationManager::handleOpenMasterConfigIndvCal (ConfigStream& con
 			}
 		}
 		configStream >> numSettings;
+		if (numSettings == 0) {
+			auto line = configStream.jumpline(); // remove the ConfigStream::emptyStringTxt
+		}
 		tmpInfo.aoConfig.resize (numSettings);
 		for (auto& aoc : tmpInfo.aoConfig) {
 			configStream >> configValue >> aoc.second;
