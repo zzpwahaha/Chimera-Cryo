@@ -71,8 +71,29 @@ void MessageConsumer::consume()
             connection->do_write(compileReply("Finished saving all", status));
         }
         else if (stratWith(message, "Start-Experiment")) {
-
+            auto args = getArguments(message);
+            if (args.size() == 0) {
+                emit logMessage(qstr(timeStamp + ": \t" + "No arguemnt found in command: " + message));
+                connection->do_write("Error\nNo arguemnt found in command: " + message);
+                continue;
+            }
+            QMetaObject::invokeMethod(&modulator_, [&]() {
+                modulator_.startExperiment(qstr(args[0]), status);
+                }, Qt::BlockingQueuedConnection);
             connection->do_write(compileReply("Finished starting experiment", status));
+        }
+        else if (stratWith(message, "Abort-Experiment")) {
+            auto args = getArguments(message);
+            if (args.size() < 2) {
+                emit logMessage(qstr(timeStamp + ": \t" + "No arguemnt found in command: " + message));
+                connection->do_write("Error\nNo arguemnt found in command: " + message);
+                continue;
+            }
+            QMetaObject::invokeMethod(&modulator_, [&]() {
+                bool keepData = !stratWith(str(args[0]), "delete");
+                modulator_.abortExperiment(keepData, qstr(args[1]), status);
+                }, Qt::BlockingQueuedConnection);
+            connection->do_write(compileReply("Finished aborting experiment", status));
         }
         else {
             emit logMessage(qstr(timeStamp + ": \t" + "Unrecongnized command: " + message));

@@ -26,9 +26,12 @@ public slots:
 	void openConfiguration(QString addressName, ErrorStatus& status);
 	void openMasterScript(QString addressName, ErrorStatus& status);
 	void saveAll(ErrorStatus& status);
-	void startExperiment(ErrorStatus& status);
-	void abortExperiment(ErrorStatus& status);
+	void startExperiment(QString expDataName, ErrorStatus& status);
+	void abortExperiment(bool keepData, QString dataName, ErrorStatus& status);
 	void isExperimentRunning(bool& running, ErrorStatus& status);
+
+private:
+	std::string convertToUnixPath(std::string mixedPath);
 
 private:
 	QtMainWindow* mainWin = nullptr;
