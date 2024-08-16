@@ -1,11 +1,10 @@
 import re
 from collections import OrderedDict
 
-class ConfigurationSection:
+class ConfigurationItems():
     """Represents a section in the config file."""
-    def __init__(self, name, data_chunk):
+    def __init__(self, data_chunk):
         self.PARAMETER_PATTERN = re.compile(r"/\*(.*?)\*/\s*(.*)")
-        self.name = name
         self.parameters = OrderedDict()
         self.parse(data_chunk=data_chunk)
 
@@ -25,10 +24,9 @@ class ConfigurationSection:
 
     def print(self):
         """Returns the string representation of the section."""
-        result = [f"{self.name}"]
+        result = []
         for name, value in self.parameters.items():
             result.append(f"/*{name}*/ {value}")
-        result.append(f"END_{self.name}")
         return "\n".join(result)
     
     def __str__(self):

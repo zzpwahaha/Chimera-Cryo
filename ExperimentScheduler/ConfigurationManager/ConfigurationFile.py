@@ -1,8 +1,12 @@
 import re
 from collections import OrderedDict
 from ConfigurationManager.Version import Version
-from ConfigurationManager.ConfigurationSection import ConfigurationSection
+from ConfigurationManager.ConfigurationSectionClass.ConfigurationSection import ConfigurationSection
+from ConfigurationManager.ConfigurationSectionClass.ConfigurationStaticSection import ConfigurationStaticSection
 from ConfigurationManager.ConfigurationScanParameter.ConfigurationParameter import ConfigurationParameter
+from ConfigurationManager.ConfigurationDevices.ArbGenSection import ArbGenSection
+from ConfigurationManager.ConfigurationDevices.MicrowaveSection import MicrowaveSection
+from ConfigurationManager.ConfigurationDevices.CalibrationSection import CalibrationSection
 
 class ConfigurationFile:
     """Represents the entire config file."""
@@ -29,7 +33,16 @@ class ConfigurationFile:
             section_content = match.group(2).strip()
            
             if section_name == "CONFIG_PARAMETERS":
-                self.config_param = ConfigurationParameter(content)
+                self.config_param = ConfigurationParameter(section_content)
+            elif re.search(".*AWG", section_name):
+                self.sections[section_name] = ArbGenSection(section_name, section_content)
+            elif re.search("MICROWAVE_SYSTEM", section_name):
+                self.sections[section_name] = MicrowaveSection(section_name, section_content)                
+            elif (re.search("DATA_ANALYSIS", section_name) or 
+                  re.search("ANDOR_PICTURE_MANAGER", section_name)):
+                self.sections[section_name] = ConfigurationStaticSection(section_name, section_content)
+            elif re.search("CALIBRATION_MANAGER", section_name):
+                self.sections[section_name] = CalibrationSection(section_name, section_content)
             else:
                 section = ConfigurationSection(section_name, section_content)
                 self.sections[section_name] = section
@@ -52,7 +65,7 @@ class ConfigurationFile:
         version_str = str(self.version)
         section_str = "\n\n".join(str(section) for section in self.sections.values())
         parameter_str = str(self.config_param)
-        totol_strs = [version_str, section_str, parameter_str]
+        totol_strs = [version_str, section_str, parameter_str] 
         return "\n".join(totol_strs)
 
     def sort_sections(self):
@@ -85,7 +98,7 @@ siglent_awg_section = config.get_section('SIGLENT_AWG')
 print(siglent_awg_section)
 
 # Update a parameter
-config.modify_parameter('SIGLENT_AWG', 'Sine Amplitude', '0.95')
+# config.modify_parameter('SIGLENT_AWG', 'Sine Amplitude', '0.95')
 
 # Save the updated configuration
 config.save('./test/new_config_file.Config')

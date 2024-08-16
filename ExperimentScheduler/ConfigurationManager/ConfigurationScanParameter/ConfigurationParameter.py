@@ -27,7 +27,7 @@ class ConfigurationParameter:
 
         # Extract the chunk between /*# Variables: */ and the end
         num_var = 0
-        match = re.search(r"(/\*# Variations:\s*\*/.*?)END_CONFIG_PARAMETERS", data_chunk, re.DOTALL)
+        match = re.search(r"(/\*# Variations:\s*\*/.*?)\Z", data_chunk, re.DOTALL)
         if match:
             variable_chunk = match.group(1).strip()
             if _match := re.search(r'/\*# Variables:\s*\*/\s*(\d+)', variable_chunk):
