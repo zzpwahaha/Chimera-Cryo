@@ -33,7 +33,7 @@ class ZynqStarter:
         """Ping a target repeatedly until successful or until total timeout is reached."""
         start_time = time.time()
         while time.time() - start_time < total_timeout:
-            success, output, time_used = self.ping(target, timeout=ping_timeout)
+            success, output = self.ping(target, timeout=ping_timeout)
             if success:
                 return True, output, time.time() - start_time
             print(f"Retrying {target} after {time.time() - start_time:.2f}s")
@@ -66,9 +66,19 @@ class ZynqStarter:
             time.sleep(0.1)
             syna_zynq.reboot(outlet_number=1, wait_time = 5)
 
-            ping_success, ping_output = self.ping_until_success(self.zynq_host, total_timeout=180)
+            ping_success, ping_output, time_used = self.ping_until_success(self.zynq_host, total_timeout=180)
             if not ping_success:
                 print(f"Failed to ping {self.zynq_host}. Restarting Zynq control...")
+                del tcp_zynq
+                del syna_zynq
+                del syna_coil
+                self.restart_zynq_control()
+                return
+            
+            if time_used < 4:
+                del tcp_zynq
+                del syna_zynq
+                del syna_coil
                 self.restart_zynq_control()
                 return
 
