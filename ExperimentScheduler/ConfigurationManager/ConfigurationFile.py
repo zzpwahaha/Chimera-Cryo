@@ -89,16 +89,35 @@ class ConfigurationFile:
         with open(path, 'w') as file:
             file.write(str(self))
 
-# Example usage:
-# config = ConfigManager('C:\\Chimera\\Chimera-Cryo\\Configurations\\ExperimentAutomation\\tweezerloading.Config')
-config = ConfigurationFile('.\\test\\tweezerloading.Config')
 
-# Get a section
-siglent_awg_section = config.get_section('SIGLENT_AWG')
-print(siglent_awg_section)
 
-# Update a parameter
-# config.modify_parameter('SIGLENT_AWG', 'Sine Amplitude', '0.95')
+if __name__ == "__main__":
+    # Example usage:
+    # config = ConfigManager('C:\\Chimera\\Chimera-Cryo\\Configurations\\ExperimentAutomation\\tweezerloading.Config')
+    config = ConfigurationFile('.\\test\\tweezerloading.Config')
 
-# Save the updated configuration
-config.save('./test/new_config_file.Config')
+    # Get a section
+    # siglent_awg_section = config.get_section('SIGLENT_AWG')
+    # print(siglent_awg_section)
+
+    # Update a parameter
+    # config.modify_parameter('SIGLENT_AWG', 'Sine Amplitude', '0.95')
+
+    config.config_param.update_variable("resonance_scan", 
+                                        scan_type="Variable", scan_dimension=None, 
+                                        new_initial_values=None, new_final_values=None, 
+                                        constant_value=80, scope=None)
+    config.config_param.update_scan_dimension(0, new_index=None, 
+                                              range_index=1, new_range=None, new_ranges=None,
+                                              left_inclusive=None, right_inclusive=None, variations=5)
+    
+    new_ranges = config.config_param.get_scan_dimension(0).ranges[:2]
+    config.config_param.update_scan_dimension(0, new_index=None, 
+                                              range_index=None, new_range=None, new_ranges=new_ranges,
+                                              left_inclusive=None, right_inclusive=None, variations=None)
+
+
+
+    # Save the updated configuration
+    config.save('./test/new_config_file.Config')
+    config.save('C:/Chimera/Chimera-Cryo/Configurations/CryoTweezerLoading/new_config_file.Config')

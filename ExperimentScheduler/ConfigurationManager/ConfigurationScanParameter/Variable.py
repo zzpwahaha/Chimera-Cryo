@@ -41,14 +41,26 @@ class Variable:
         assert len(self.initial_values)==len(self.final_values), "Initial and Final values must match in count."
         self.scan_range = len(self.initial_values)
 
-    def update_values(self, new_initial_values, new_final_values):
-        """Update the initial and final values with new lists."""
-        if len(new_initial_values) != len(new_final_values):
-            raise ValueError("New initial and final value lists must have the same length.")
-        
-        self.initial_values = new_initial_values
-        self.final_values = new_final_values
-        self.scan_range = len(self.initial_values)  # Update scan_range after values are updated
+    def update(self, name=None, scan_type=None, scan_dimension=None, 
+               new_initial_values=None, new_final_values=None, 
+               constant_value=None, scope=None):
+        """Update the attributes of the variable."""
+        if name is not None:
+            self.name = name
+        if scan_type is not None:
+            self.scan_type = scan_type
+        if scan_dimension is not None:
+            self.scan_dimension = scan_dimension
+        if new_initial_values is not None and new_final_values is not None:
+            if len(new_initial_values) != len(new_final_values):
+                raise ValueError("New initial and final value lists must have the same length.")
+            self.initial_values = new_initial_values
+            self.final_values = new_final_values
+            self.scan_range = len(self.initial_values)  # Update scan_range after values are updated
+        if constant_value is not None:
+            self.constant_value = constant_value
+        if scope is not None:
+            self.scope = scope
 
     def print(self):
         """Returns a string representation of the variable."""

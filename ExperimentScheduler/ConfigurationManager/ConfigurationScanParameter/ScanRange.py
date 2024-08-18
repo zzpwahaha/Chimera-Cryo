@@ -9,7 +9,7 @@ class ScanRange:
 
     def parse(self, data_chunk):
         if _match := re.search(r'/\*Range #(\d+):\*/', data_chunk):
-            self.index = int(_match.group(1))
+            self.index = int(_match.group(1))-1 # change it back to zero based
 
         # Regex pattern to capture key-value pairs
         pattern = re.compile(r'/\*(.*?)\s*\*/(?:\t*)(.*)')
@@ -27,7 +27,7 @@ class ScanRange:
         left_inclusive_str = f"/*Left-Inclusive?*/\t\t{int(self.left_inclusive)}"
         right_inclusive_str = f"/*Right-Inclusive?*/\t{int(self.right_inclusive)}"
         variations_str = f"/*# Variations: */\t\t{self.variations}"
-        return (f"/*Range #{self.index}:*/\n"
+        return (f"/*Range #{self.index+1}:*/\n"
                 f"{left_inclusive_str}\n"
                 f"{right_inclusive_str}\n"
                 f"{variations_str}")
@@ -38,6 +38,14 @@ class ScanRange:
     def __repr__(self):
         return self.print()
     
+    def update(self, left_inclusive=None, right_inclusive=None, variations=None):
+        if left_inclusive is not None:
+            self.left_inclusive = left_inclusive
+        if right_inclusive is not None:
+            self.right_inclusive = right_inclusive
+        if variations is not None:
+            self.variations = variations
+
 
 if __name__ == "__main__":
     data_chunk = \
