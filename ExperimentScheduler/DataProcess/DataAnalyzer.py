@@ -7,7 +7,7 @@ FITTER_DIR = CHIMERA_GENTOOL_DIR + "fitters"
 sys.path.append(CHIMERA_GENTOOL_DIR)
 sys.path.append(FITTER_DIR)
 
-
+from typing import List
 import numpy as np
 import ExpFile as exp
 import AnalysisHelpers as ah
@@ -80,7 +80,7 @@ class DataAnalysis:
         )
         return maximaLocs_MP
 
-    def analyze_data(self, function = gaussian, debug=False):
+    def analyze_data(self, function = gaussian, debug=False) -> List[ah.unc.UFloat]:
         result = ah.getAtomSurvivalData(
             self.andor_datas,
             atomLocation=self.maximaLocs,
@@ -108,7 +108,7 @@ class DataAnalysis:
 
         return punc
 
-    def analyze_data_2D(self, function_d0 = Quadratic, function_d1 = gaussian, debug=False):
+    def analyze_data_2D(self, function_d0 = Quadratic, function_d1 = gaussian, debug=False) -> List[ah.unc.UFloat]:
         result = ah.getAtomSurvivalData(
             self.andor_datas,
             atomLocation=self.maximaLocs,

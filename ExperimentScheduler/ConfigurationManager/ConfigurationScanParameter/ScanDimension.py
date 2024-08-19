@@ -25,7 +25,7 @@ class ScanDimension:
 
         for range_chunk in range_chunks:
             # Create a new Range instance for each range chunk
-            range_instance = ScanRange(range_chunk[0].strip())
+            range_instance = ScanRange(data_chunk=range_chunk[0].strip())
             self.ranges.append(range_instance)
         assert num_ranges==len(self.ranges), "len of ranges should match the one in the config."
 

@@ -8,6 +8,8 @@ from ZynqController.TCPClient import TCPClient
 from Logging.PrintLogger import Logger
 import DataProcess.DataAnalyzer as da
 from ConfigurationManager.ConfigurationFile import ConfigurationFile
+from ConfigurationManager.ConfigurationScanParameter.ScanRange import ScanRange
+
 
 class ExperimentProcedure:
     CONFIGURATION_DIR = "C:/Chimera/Chimera-Cryo/Configurations/ExperimentAutomation/"
@@ -101,12 +103,14 @@ def EfieldCalibrationProcedure():
     config_file.config_param.update_variable("bias_e_z", scan_type="Constant", new_initial_values=[-1.0], new_final_values=[1.0])
     config_file.config_param.update_variable("resonance_scan", scan_type="Variable", new_initial_values=[73], new_final_values=[87])
 
+    exp.hardware_controller.restart_zynq_control()
+
     # E_x
     YEAR, MONTH, DAY = today()
-    config_file.config_param.update_variable("resonance_scan", scan_dimension=0, scan_type="Variable")
-    config_file.config_param.update_variable("bias_e_x", scan_dimension=1, scan_type="Variable")
-    config_file.config_param.update_variable("bias_e_y", scan_dimension=1, scan_type="Constant")
-    config_file.config_param.update_variable("bias_e_z", scan_dimension=1, scan_type="Constant")
+    config_file.config_param.update_variable("resonance_scan", scan_dimension=1, scan_type="Variable")
+    config_file.config_param.update_variable("bias_e_x", scan_dimension=0, scan_type="Variable")
+    config_file.config_param.update_variable("bias_e_y", scan_dimension=0, scan_type="Constant")
+    config_file.config_param.update_variable("bias_e_z", scan_dimension=0, scan_type="Constant")
     config_file.save()
 
     exp_name = "EFIELD-X"
@@ -122,17 +126,17 @@ def EfieldCalibrationProcedure():
                             annotate_title = exp_name, annotate_note=" ")
     analysis_result = data_analysis.analyze_data_2D()
     optimal_field = analysis_result[1]
-    print(f"Optimal field for {exp_name} is {optimal_field:.2S} ")
+    print(f"Optimal field for {exp_name} is {optimal_field:.3S} ")
 
     exp.hardware_controller.restart_zynq_control()
 
     # E_y
     YEAR, MONTH, DAY = today()
-    config_file.config_param.update_variable("resonance_scan", scan_dimension=0, scan_type="Variable")
-    config_file.config_param.update_variable("bias_e_x", scan_dimension=1, scan_type="Constant")
-    config_file.config_param.update_variable("bias_e_y", scan_dimension=1, scan_type="Variable")
-    config_file.config_param.update_variable("bias_e_z", scan_dimension=1, scan_type="Constant")
-    config_file.config_param.update_variable("bias_e_x", constant_value = optimal_field.n)
+    config_file.config_param.update_variable("resonance_scan", scan_dimension=1, scan_type="Variable")
+    config_file.config_param.update_variable("bias_e_x", scan_dimension=0, scan_type="Constant")
+    config_file.config_param.update_variable("bias_e_y", scan_dimension=0, scan_type="Variable")
+    config_file.config_param.update_variable("bias_e_z", scan_dimension=0, scan_type="Constant")
+    config_file.config_param.update_variable("bias_e_x", constant_value = round(optimal_field.n, 3))
     config_file.save()
 
     exp_name = "EFIELD-Y"
@@ -148,17 +152,17 @@ def EfieldCalibrationProcedure():
                             annotate_title = exp_name, annotate_note=" ")
     analysis_result = data_analysis.analyze_data_2D()
     optimal_field = analysis_result[1]
-    print(f"Optimal field for {exp_name} is {optimal_field:.2S} ")
+    print(f"Optimal field for {exp_name} is {optimal_field:.3S} ")
 
     exp.hardware_controller.restart_zynq_control()
 
     # E_z
     YEAR, MONTH, DAY = today()
-    config_file.config_param.update_variable("resonance_scan", scan_dimension=0, scan_type="Variable")
-    config_file.config_param.update_variable("bias_e_x", scan_dimension=1, scan_type="Constant")
-    config_file.config_param.update_variable("bias_e_y", scan_dimension=1, scan_type="Constant")
-    config_file.config_param.update_variable("bias_e_z", scan_dimension=1, scan_type="Variable")
-    config_file.config_param.update_variable("bias_e_y", constant_value = optimal_field.n)
+    config_file.config_param.update_variable("resonance_scan", scan_dimension=1, scan_type="Variable")
+    config_file.config_param.update_variable("bias_e_x", scan_dimension=0, scan_type="Constant")
+    config_file.config_param.update_variable("bias_e_y", scan_dimension=0, scan_type="Constant")
+    config_file.config_param.update_variable("bias_e_z", scan_dimension=0, scan_type="Variable")
+    config_file.config_param.update_variable("bias_e_y", constant_value = round(optimal_field.n, 3))
     config_file.save()
 
     exp_name = "EFIELD-Z"
@@ -174,7 +178,7 @@ def EfieldCalibrationProcedure():
                             annotate_title = exp_name, annotate_note=" ")
     analysis_result = data_analysis.analyze_data_2D()
     optimal_field = analysis_result[1]
-    print(f"Optimal field for {exp_name} is {optimal_field:.2S} ")
+    print(f"Optimal field for {exp_name} is {optimal_field:.3S} ")
 
 
 # Example usage:

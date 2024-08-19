@@ -1,11 +1,15 @@
 import re
 class ScanRange:
-    def __init__(self, data_chunk):
-        self.index = None
-        self.left_inclusive = None
-        self.right_inclusive = None
-        self.variations = None
-        self.parse(data_chunk)
+    def __init__(self, data_chunk=None, index=None, left_inclusive=None, right_inclusive=None, variations=None):
+        if data_chunk is not None:
+            # If data_chunk is provided, parse it
+            self.parse(data_chunk)
+        else:
+            # Otherwise, use direct initialization
+            self.index : int = index
+            self.left_inclusive : bool = left_inclusive
+            self.right_inclusive : bool = right_inclusive
+            self.variations : int = variations
 
     def parse(self, data_chunk):
         if _match := re.search(r'/\*Range #(\d+):\*/', data_chunk):
@@ -54,6 +58,6 @@ if __name__ == "__main__":
     /*Right-Inclusive?*/    1
     /*# Variations: */      16"""
 
-    variable = ScanRange(data_chunk)
+    variable = ScanRange(data_chunk = data_chunk)
     a = variable.__str__()
     print(variable)
