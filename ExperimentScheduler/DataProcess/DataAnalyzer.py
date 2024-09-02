@@ -64,9 +64,9 @@ class DataAnalysis:
         self.andor_datas = self.exp_file.get_pics(image_num_per_rep=self.exp_file.pics_per_rep)
 
         if self.maximaLocs is None:
-            self.maximaLocs = self.findAtomLocs()
+            self.maximaLocs = self.findAtomLocs(self.thresholds)
 
-    def findAtomLocs(self):
+    def findAtomLocs(self, image_threshold):
         maximaLocs_MP = ah.findAtomLocs(
             pic=ah.softwareBinning(None, self.andor_datas[0].mean(axis=(0, 1))),
             n_cluster_row=1,
@@ -75,7 +75,7 @@ class DataAnalysis:
             window=self.window,
             sort='MatchArray',
             debug_plot=False,
-            advanced_option=dict({"active": True, "image_threshold": 99, "score_threshold": 10}),
+            advanced_option=dict({"active": True, "image_threshold": image_threshold, "score_threshold": 10}),
             multi_points_option=dict({"active": True, "search_square": 3, "num_points": 3})
         )
         return maximaLocs_MP

@@ -54,6 +54,13 @@ class ExperimentProcedure:
         if self.chimera_command("Save-All"):
             self.chimera_command(f"Start-Experiment ${name}")
 
+    def abort_experiment(self, save=True, file_name="placeholder"):
+        action = 'save' if save else 'delete'
+        if not save and file_name=="placeholder":
+            print('Failed to abort and delete data: no valid file name provided.')
+            return
+        self.chimera_command(f"Abort-Experiment ${action} ${file_name}")
+
     def open_configuration(self, config_path_name: str):
         self.chimera_command(f"Open-Configuration ${config_path_name}")
 

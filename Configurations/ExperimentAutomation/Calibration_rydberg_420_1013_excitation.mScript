@@ -32,11 +32,11 @@ t += 5
 on: UVLampTrg
 
 call setQuantizationField()
-t += 200 %100 %750
+t += 750 %100 %750
 
 call OpticalPumping22()
 
-off: UVLampTrg
+%off: UVLampTrg
 on: Ryd1013Shutter
 
 t += 15

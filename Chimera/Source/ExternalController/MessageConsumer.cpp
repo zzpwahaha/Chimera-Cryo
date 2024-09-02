@@ -95,6 +95,14 @@ void MessageConsumer::consume()
                 }, Qt::BlockingQueuedConnection);
             connection->do_write(compileReply("Finished aborting experiment", status));
         }
+        else if (stratWith(message, "Is-Experiment-Running?")) {
+            bool isRunning;
+            QMetaObject::invokeMethod(&modulator_, [&]() {
+                modulator_.isExperimentRunning(isRunning, status);
+                }, Qt::BlockingQueuedConnection);
+            std::string isRunningStr = isRunning ? "TRUE" : "FALSE";
+            connection->do_write(compileReply(isRunningStr + "\tFinished asking if experiment is running", status));
+        }
         else {
             emit logMessage(qstr(timeStamp + ": \t" + "Unrecongnized command: " + message));
             connection->do_write("Error\nUnrecongnized command: " + message);
