@@ -5,6 +5,7 @@
 #include <qcheckbox.h>
 #include <qlabel.h>
 #include <qlineedit.h>
+#include <qpushbutton.h>
 
 class IChimeraQtWindow;
 

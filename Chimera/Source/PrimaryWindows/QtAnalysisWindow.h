@@ -3,6 +3,7 @@
 #include "ExperimentThread/ExperimentThreadInput.h"
 #include <RealTimeMOTAnalysis/MOTAnalysisSystem.h>
 #include <ExperimentMonitoringAndStatus/ExperimentSeqPlotter.h>
+#include <StaticAnalogOutput/StaticAoSystem.h>
 
 
 namespace Ui {
@@ -33,6 +34,7 @@ private:
 public:
 	MOTAnalysisSystem MOTAnalySys;
 	ExperimentSeqPlotter SeqPlotter;
+	StaticAoSystem staticDac;
 
 private:
 	Ui::QtAnalysisWindow* ui;
