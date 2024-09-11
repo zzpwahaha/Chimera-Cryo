@@ -62,6 +62,11 @@ void CommandModulator::startExperiment(QString expDataName, ErrorStatus& status)
 {
 	try {
 		status.error = false;
+		CalibrationManager& calManager = auxWin->getCalibManager();
+		if (calManager.isCalibrationRunning()) {
+			thrower("Calibration is still running.");
+		}
+
 		AllExperimentInput input;
 		if (mainWin->masterIsRunning()) {
 			thrower("Experiment is still running.");
@@ -152,6 +157,43 @@ void CommandModulator::isExperimentRunning(bool& running, ErrorStatus& status)
 {
 	status.error = false;
 	running = mainWin->masterIsRunning();
+}
+
+void CommandModulator::startCalibration(QString calName, ErrorStatus& status)
+{
+	try {
+		status.error = false;
+		CalibrationManager& calManager = auxWin->getCalibManager();
+		if (mainWin->masterIsRunning()) {
+			thrower("Experiment is still running.");
+		}
+		if (calManager.isCalibrationRunning()) {
+			thrower("Calibration is still running.");
+		}
+
+		std::string calNameStr = str(calName);
+		auto& cals = calManager.calibrations; // need reference as the calibrateThreaded input
+		auto it = std::find_if(cals.begin(), cals.end(), [calNameStr](const calSettings& calS) {
+			return (calS.result.calibrationName == calNameStr);
+			});
+		if (it == cals.end()) {
+			thrower("Failed to find the calibration name in the current calibration list. Callibration name is: " + calNameStr);
+		}
+		auto& tobeCalibrated = *it;
+		calManager.calibrateThreaded(tobeCalibrated, -1); // unsigned which in calibrateThreaded is not used
+	}
+	catch (ChimeraError& err) {
+		mainWin->reportErr("ERROR in remote calibration!\n " + err.qtrace());
+		status.error = true;
+		status.errorMsg = err.trace();
+	}
+}
+
+void CommandModulator::isCalibrationRunning(bool& running, ErrorStatus& status)
+{
+	status.error = false;
+	CalibrationManager& calManager = auxWin->getCalibManager();
+	running = calManager.isCalibrationRunning();
 }
 
 std::string CommandModulator::convertToUnixPath(std::string mixedPath)

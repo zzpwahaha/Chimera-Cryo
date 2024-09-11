@@ -80,7 +80,7 @@ var Ryd_pi2_us 0.08
 var Ryd_pi_us 0.15 %0.20 %0.185
 
 t += 0.5
-
+on: TweezerHold
 t += 0.001
 
 off: TweezerTrg
@@ -101,15 +101,16 @@ t += -0.4/1000
 t += 0.25/1000 %0.00025
 on: TweezerTrg
 t += 0.001
-
-t += -0.002
-on: TweezerHold
-pulseon: KeySightTrg 0.01
-t += 0.2
-pulseon: KeySightTrg 0.01
 off: TweezerHold
-t += -0.2
-t += 0.002
+
+%t += -0.002
+%on: TweezerHold
+%pulseon: KeySightTrg 0.01
+%t += 0.2
+%pulseon: KeySightTrg 0.01
+%off: TweezerHold
+%t += -0.2
+%t += 0.002
 
 t += -0.08
 dacramp: TweezerIntensity twz_intensity*0.1 twz_intensity 0.06

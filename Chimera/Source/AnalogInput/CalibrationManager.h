@@ -83,6 +83,8 @@ class CalibrationManager : public IChimeraSystem {
 		// for expThread in-exp calibration
 		std::mutex calibrationLock;
 		std::condition_variable calibrationConditionVariable;
+
+		friend class CommandModulator;
 };
 
 

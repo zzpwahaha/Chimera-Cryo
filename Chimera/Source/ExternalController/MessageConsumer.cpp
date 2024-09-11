@@ -103,6 +103,26 @@ void MessageConsumer::consume()
             std::string isRunningStr = isRunning ? "TRUE" : "FALSE";
             connection->do_write(compileReply(isRunningStr + "\tFinished asking if experiment is running", status));
         }
+        else if (stratWith(message, "Start-Calibration")) {
+            auto args = getArguments(message);
+            if (args.size() == 0) {
+                emit logMessage(qstr(timeStamp + ": \t" + "No arguemnt found in command: " + message));
+                connection->do_write("Error\nNo arguemnt found in command: " + message);
+                continue;
+            }
+            QMetaObject::invokeMethod(&modulator_, [&]() {
+                modulator_.startCalibration(qstr(args[0]), status);
+                }, Qt::BlockingQueuedConnection);
+            connection->do_write(compileReply("Finished starting calibration", status));
+        }
+        else if (stratWith(message, "Is-Calibration-Running?")) {
+            bool isRunning;
+            QMetaObject::invokeMethod(&modulator_, [&]() {
+                modulator_.isCalibrationRunning(isRunning, status);
+                }, Qt::BlockingQueuedConnection);
+            std::string isRunningStr = isRunning ? "TRUE" : "FALSE";
+            connection->do_write(compileReply(isRunningStr + "\tFinished asking if calibration is running", status));
+        }
         else {
             emit logMessage(qstr(timeStamp + ": \t" + "Unrecongnized command: " + message));
             connection->do_write("Error\nUnrecongnized command: " + message);

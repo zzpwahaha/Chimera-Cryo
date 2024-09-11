@@ -29,6 +29,8 @@ public slots:
 	void startExperiment(QString expDataName, ErrorStatus& status);
 	void abortExperiment(bool keepData, QString dataName, ErrorStatus& status);
 	void isExperimentRunning(bool& running, ErrorStatus& status);
+	void startCalibration(QString calName, ErrorStatus& status);
+	void isCalibrationRunning(bool& running, ErrorStatus& status);
 
 private:
 	std::string convertToUnixPath(std::string mixedPath);
