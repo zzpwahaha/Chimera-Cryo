@@ -32,6 +32,11 @@ public slots:
 	void startCalibration(QString calName, ErrorStatus& status);
 	void isCalibrationRunning(bool& running, ErrorStatus& status);
 
+	void setDAC(ErrorStatus& status);
+	void setOL(ErrorStatus& status);
+	void setDDS(ErrorStatus& status);
+
+
 private:
 	std::string convertToUnixPath(std::string mixedPath);
 

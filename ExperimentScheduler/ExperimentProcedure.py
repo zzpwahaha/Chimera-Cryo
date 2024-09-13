@@ -1,6 +1,7 @@
 import sys
 from datetime import datetime
 from time import sleep
+import time
 import numpy as np
 
 from ZynqController.ZynqStarter import ZynqStarter
@@ -51,7 +52,7 @@ class ExperimentProcedure:
             return False
 
     def run_experiment(self, name: str):
-        if self.chimera_command("Save-All"):
+        if self.save_all():
             self.chimera_command(f"Start-Experiment ${name}")
 
     def abort_experiment(self, save=True, file_name="placeholder"):
@@ -68,7 +69,7 @@ class ExperimentProcedure:
         self.chimera_command(f"Open-Master-Script ${script_path_name}")
 
     def save_all(self):
-        self.chimera_command(f"Save-All")
+        return self.chimera_command(f"Save-All")
 
     def is_experiment_running(self) -> bool:
         result = self.chimera_client.query("Is-Experiment-Running?")
@@ -79,7 +80,77 @@ class ExperimentProcedure:
             return False
         else:
             print(f"Unexpected response received: {result}")
-        
+    
+    def run_calibration(self, name: str):
+        if self.save_all():
+            self.chimera_command(f"Start-Calibration ${name}")
+
+    def is_calibration_running(self) -> bool:
+        result = self.chimera_client.query("Is-Calibration-Running?")
+        self._judge_message_failure(result)
+        if 'TRUE' in result:
+            return True
+        elif 'FALSE' in result:
+            return False
+        else:
+            print(f"Unexpected response received: {result}")
+
+    def setDAC(self):
+        return self.chimera_command(f"Set-DAC")
+    
+    def setDDS(self):
+        return self.chimera_command(f"Set-DDS")
+
+    def setOL(self):
+        return self.chimera_command(f"Set-OL")
+
+    def setZynqOutput(self):
+        self.setDAC()
+        time.sleep(1)
+        self.setDDS()
+        time.sleep(1)
+        self.setOL()
+        time.sleep(1)
+
+def experiment_monitoring(exp : ExperimentProcedure, timeout_control = {'use':False, 'timeout':600}):
+    # Monitor experiment status
+    exp_start_time = time.time()
+    timeout = timeout_control.get('timeout', 600)
+    time.sleep(1)
+    while exp.is_experiment_running():
+        elapsed_time = time.time() - exp_start_time
+        if timeout_control.get('use', False) and elapsed_time > timeout:
+            exp.abort_experiment(save=True)
+            print(f"Experiment aborted after {timeout} seconds due to timeout.")
+            time.sleep(10)
+            break
+        print("Waiting for experiment to finish...")
+        time.sleep(10) 
+    return
+
+def analog_in_calibration_monitoring(exp : ExperimentProcedure, timeout_control = {'use':False, 'timeout':100}):
+    # Monitor experiment status
+    exp_start_time = time.time()
+    timeout = timeout_control.get('timeout', 100)
+    time.sleep(1)
+    while exp.is_calibration_running():
+        elapsed_time = time.time() - exp_start_time
+        if timeout_control.get('use', False) and elapsed_time > timeout:
+            # exp.abort_experiment(save=True)
+            print(f"Calibration aborted after {timeout} seconds due to timeout. THIS SHOULDN'T HAPPEN!!!!")
+            time.sleep(10)
+            break
+        print("Waiting for calibration to finish...")
+        time.sleep(1) 
+    time.sleep(5) 
+    return
+
+def analog_in_calibration(exp : ExperimentProcedure, name : str):
+    # Setup calibration details
+    exp.run_calibration(name)
+    # Monitor calibration status
+    analog_in_calibration_monitoring(exp = exp);
+
 def today():
     today = datetime.now()
     # Extract year, month, and day
@@ -190,4 +261,7 @@ def EfieldCalibrationProcedure():
 
 # Example usage:
 if __name__ == "__main__":
-    EfieldCalibrationProcedure()
+    # EfieldCalibrationProcedure()
+    exp = ExperimentProcedure()
+    exp.run_calibration("prb_pwr")
+

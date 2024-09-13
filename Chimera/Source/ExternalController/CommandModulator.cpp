@@ -196,6 +196,59 @@ void CommandModulator::isCalibrationRunning(bool& running, ErrorStatus& status)
 	running = calManager.isCalibrationRunning();
 }
 
+void CommandModulator::setDAC(ErrorStatus& status)
+{
+	auxWin->reportStatus("----------------------\r\nSetting Dacs... ");
+	try {
+		status.error = false;
+		auxWin->reportStatus("Setting Dacs...\r\n");
+		auxWin->getAoSys().handleSetDacsButtonPress(true);
+		auxWin->getTtlSystem().setTtlStatus(auxWin->getTtlSystem().getCurrentStatus());
+		auxWin->reportStatus("Finished Setting Dacs.\r\n");
+	}
+	catch (ChimeraError& err) {
+		mainWin->reportStatus(": " + err.qtrace() + "\r\n");
+		mainWin->reportErr(err.qtrace());
+		status.error = true;
+		status.errorMsg = err.trace();
+	}
+}
+
+void CommandModulator::setOL(ErrorStatus& status)
+{
+	auxWin->reportStatus("----------------------\r\nSetting Offsetlocks... ");
+	try {
+		status.error = false;
+		auxWin->reportStatus("Setting Ols...\r\n");
+		auxWin->getOlSys().handleSetOlsButtonPress(auxWin->getTtlSystem().getCore(), auxWin->getTtlSystem().getCurrentStatus());
+		auxWin->reportStatus("Finished Setting Offsetlocks.\r\n");
+	}
+	catch (ChimeraError& err) {
+		mainWin->reportStatus(": " + err.qtrace() + "\r\n");
+		mainWin->reportErr(err.qtrace());
+		status.error = true;
+		status.errorMsg = err.trace();
+	}
+}
+
+void CommandModulator::setDDS(ErrorStatus& status)
+{
+	auxWin->reportStatus("----------------------\r\nSetting DDSs... ");
+	try {
+		status.error = false;
+		auxWin->reportStatus("Setting Ddss...\r\n");
+		auxWin->getDdsSys().handleSetDdsButtonPress(true);
+		auxWin->getTtlSystem().setTtlStatus(auxWin->getTtlSystem().getCurrentStatus());
+		auxWin->reportStatus("Finished Setting DDSs.\r\n");
+	}
+	catch (ChimeraError& err) {
+		mainWin->reportStatus(": " + err.qtrace() + "\r\n");
+		mainWin->reportErr(err.qtrace());
+		status.error = true;
+		status.errorMsg = err.trace();
+	}
+}
+
 std::string CommandModulator::convertToUnixPath(std::string mixedPath)
 {
 	// not that the mixed syntax path wouldn't work. 

@@ -1,5 +1,6 @@
 import numpy as np
 from ExperimentProcedure import *
+from ExperimentProcedure import experiment_monitoring, analog_in_calibration_monitoring
 import time
 
 
@@ -17,29 +18,14 @@ for variable in config_file.config_param.variables:
 config_file.config_param.update_variable("resonance_scan", scan_type="Variable", new_initial_values=[76], new_final_values=[84])
 config_file.config_param.update_scan_dimension(0, range_index=0, variations=33)
 
+exp.open_configuration("\\ExperimentAutomation\\" + config_name)
+
 # analysis grid
 window = [0, 0, 200, 30]
 thresholds = 65
 binnings = np.linspace(0, 240, 241)
 analysis_locs = da.DataAnalysis(year='2024', month='August', day='26', data_name='data_1', 
                                 window=window, thresholds=70, binnings=binnings)
-
-def experiment_monitoring(timeout_control = {'use':False, 'timeout':600}):
-    # Monitor experiment status
-    exp_start_time = time.time()
-    timeout = timeout_control.get('timeout', 600)
-    sleep(1)
-    while exp.is_experiment_running():
-        elapsed_time = time.time() - exp_start_time
-        if timeout_control.get('use', False) and elapsed_time > timeout:
-            exp.abort_experiment(save=True)
-            print(f"Experiment aborted after {timeout} seconds due to timeout.")
-            time.sleep(10)
-            break
-        print("Waiting for experiment to finish...")
-        time.sleep(10) 
-    return
-
 
 
 def resonace_scan(exp_idx, timeout_control = {'use':False, 'timeout':600}):
@@ -61,7 +47,7 @@ def resonace_scan(exp_idx, timeout_control = {'use':False, 'timeout':600}):
     exp.run_experiment(exp_name)
     
     # Monitor experiment status
-    experiment_monitoring(timeout_control=timeout_control)
+    experiment_monitoring(exp=exp, timeout_control=timeout_control)
 
     # Analyze the data
     data_analysis = da.DataAnalysis(YEAR, MONTH, DAY, exp_name, maximaLocs=analysis_locs.maximaLocs,
@@ -100,7 +86,7 @@ def rabi_scan(exp_idx, timeout_control = {'use':False, 'timeout':600}):
     exp.run_experiment(exp_name)
 
     # Monitor experiment status
-    experiment_monitoring(timeout_control=timeout_control)
+    experiment_monitoring(exp=exp, timeout_control=timeout_control)
 
     data_analysis = da.DataAnalysis(YEAR, MONTH, DAY, exp_name, maximaLocs=analysis_locs.maximaLocs,
                             window=window, thresholds=thresholds, binnings=binnings, 
@@ -126,7 +112,7 @@ def ramsey_scan(exp_idx, timeout_control = {'use':False, 'timeout':600}):
     exp.run_experiment(exp_name)
 
     # Monitor experiment status
-    experiment_monitoring(timeout_control=timeout_control)
+    experiment_monitoring(exp=exp, timeout_control=timeout_control)
 
     data_analysis = da.DataAnalysis(YEAR, MONTH, DAY, exp_name, maximaLocs=analysis_locs.maximaLocs,
                             window=window, thresholds=thresholds, binnings=binnings, 
@@ -152,16 +138,22 @@ def ramsey_scan_bothOff(exp_idx, timeout_control = {'use':False, 'timeout':600})
     exp.run_experiment(exp_name)
     
     # Monitor experiment status
-    experiment_monitoring(timeout_control=timeout_control)
+    experiment_monitoring(exp=exp, timeout_control=timeout_control)
 
     data_analysis = da.DataAnalysis(YEAR, MONTH, DAY, exp_name, maximaLocs=analysis_locs.maximaLocs,
                             window=window, thresholds=thresholds, binnings=binnings, 
                             annotate_title = exp_name, annotate_note=" ")
     return
 
+def _calibration():
+    exp.setZynqOutput()
+    analog_in_calibration(exp=exp, name = "prb_pwr")
+    exp.save_all()
+    config_file.reopen()
 
 def calibration(exp_idx):
     try:
+        _calibration()
         resonace_scan(exp_idx=exp_idx, timeout_control = {'use':True, 'timeout':900})
     except Exception as e:
         print(e)
@@ -169,8 +161,9 @@ def calibration(exp_idx):
         # calibration(exp_idx)
         return
     try:
+        _calibration()
         exp.hardware_controller.restart_zynq_control()
-        rabi_scan(exp_idx=exp_idx, timeout_control = {'use':True, 'timeout':1200})
+        rabi_scan(exp_idx=exp_idx, timeout_control = {'use':True, 'timeout':1500})
         sleep(1)
         # exp.hardware_controller.restart_zynq_control()
         # ramsey_scan(exp_idx=exp_idx, timeout_control = {'use':True, 'timeout':1200})
@@ -182,6 +175,7 @@ def calibration(exp_idx):
         exp.hardware_controller.restart_zynq_control()
         return
 
+
 def procedure():
     for idx in np.arange(200):
         # if idx<=28: continue
@@ -189,6 +183,7 @@ def procedure():
         if idx != 0:
             exp.hardware_controller.restart_zynq_control()
         calibration(idx)
+
 
 def test(exp_idx):
     resonace_scan(exp_idx=exp_idx)

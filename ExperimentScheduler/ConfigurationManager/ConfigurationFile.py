@@ -19,6 +19,9 @@ class ConfigurationFile:
         self.config_param = None
         self.read_file()
 
+    def reopen(self):
+        self.__init__(self.file_path)
+
     def read_file(self):
         """Reads the content from the config file."""
         with open(self.file_path, 'r') as file:

@@ -123,6 +123,24 @@ void MessageConsumer::consume()
             std::string isRunningStr = isRunning ? "TRUE" : "FALSE";
             connection->do_write(compileReply(isRunningStr + "\tFinished asking if calibration is running", status));
         }
+        else if (stratWith(message, "Set-DAC")) {
+            QMetaObject::invokeMethod(&modulator_, [&]() {
+                modulator_.setDAC(status);
+                }, Qt::BlockingQueuedConnection);
+            connection->do_write(compileReply("Finished saving all", status));
+        }
+        else if (stratWith(message, "Set-DDS")) {
+            QMetaObject::invokeMethod(&modulator_, [&]() {
+                modulator_.setDDS(status);
+                }, Qt::BlockingQueuedConnection);
+            connection->do_write(compileReply("Finished saving all", status));
+        }
+        else if (stratWith(message, "Set-OL")) {
+            QMetaObject::invokeMethod(&modulator_, [&]() {
+                modulator_.setOL(status);
+                }, Qt::BlockingQueuedConnection);
+            connection->do_write(compileReply("Finished saving all", status));
+        }
         else {
             emit logMessage(qstr(timeStamp + ": \t" + "Unrecongnized command: " + message));
             connection->do_write("Error\nUnrecongnized command: " + message);
