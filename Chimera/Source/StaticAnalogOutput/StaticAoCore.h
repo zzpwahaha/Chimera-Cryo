@@ -42,7 +42,7 @@ private:
     StaticAOSettings expSettings;
 
     static constexpr double dacResolutionInst = 20.0 / 0xfffff; /*20bit dac*/
-    const int numDigitsInst = static_cast<int>(abs(round(log10(numDigitsInst) - 0.49)));
+    const int numDigitsInst = static_cast<int>(abs(round(log10(dacResolutionInst) - 0.49)));
     const double minVal = -10.0;
     const double maxVal =  10.0;
 

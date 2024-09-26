@@ -12,6 +12,7 @@ QtAnalysisWindow::QtAnalysisWindow(QWidget* parent)
 	, MOTAnalySys(this)
 	, SeqPlotter(this)
 	, staticDac(this)
+	, staticDds(this)
 {
 	setWindowTitle("Analysis Window");
 }
@@ -25,6 +26,10 @@ std::string QtAnalysisWindow::getSystemStatusString()
 		msg += str("\tStatic AO System is Active at ") + STATICAO_IPADDRESS + ", at port " + str(STATICAO_IPPORT) + "\n";
 		msg += "\t" + staticDac.getDeviceInfo() + "\n";
 	}
+	if (!STATICDDS_SAFEMODE) {
+		msg += str("\tStatic DDS System is Active at port") + STATICDDS_PORT + ", with baudrate " + str(STATICDDS_BAUDRATE) + "\n";
+		msg += "\t" + staticDds.getDeviceInfo() + "\n";
+	}
 	else {
 		msg += "\tStatic AO System is disabled! Enable in \"constants.h\"\n";
 	}
@@ -35,6 +40,7 @@ void QtAnalysisWindow::windowOpenConfig(ConfigStream& configFile)
 {
 	try {
 		ConfigSystem::standardOpenConfig(configFile, staticDac.getConfigDelim(), &staticDac);
+		ConfigSystem::standardOpenConfig(configFile, staticDds.getConfigDelim(), &staticDds);
 	}
 	catch (ChimeraError&) {
 		throwNested("Analysis Window failed to read parameters from the configuration file.");
@@ -44,11 +50,13 @@ void QtAnalysisWindow::windowOpenConfig(ConfigStream& configFile)
 void QtAnalysisWindow::windowSaveConfig(ConfigStream& configFile)
 {
 	staticDac.handleSaveConfig(configFile);
+	staticDds.handleSaveConfig(configFile);
 }
 
 void QtAnalysisWindow::fillExpDeviceList(DeviceList& list)
 {
 	list.list.push_back(staticDac.getCore());
+	list.list.push_back(staticDds.getCore());
 }
 
 void QtAnalysisWindow::initializeWidgets()
@@ -85,6 +93,9 @@ void QtAnalysisWindow::initializeWidgets()
 	layoutAux->setContentsMargins(0, 0, 0, 0);
 	staticDac.initialize();
 	layoutAux->addWidget(&staticDac);
+	staticDds.initialize();
+	layoutAux->addWidget(&staticDds);
+
 	layoutAux->addStretch(1);
 
 	layout->addLayout(layoutAux);

@@ -543,6 +543,18 @@
     <ClCompile Include="Source\GeneralFlumes\BoostSyncUDP.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\StaticDirectDigitalSynthesis\StaticDdsCore.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\GeneralFlumes\BoostSyncSerial.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\StaticDirectDigitalSynthesis\StaticDDSFlume.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\StaticDirectDigitalSynthesis\StaticDdsSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="3rd_Party\qcustomplot\qcustomplot.h">
@@ -756,6 +768,9 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="Source\StaticAnalogOutput\StaticAoSystem.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\StaticDirectDigitalSynthesis\StaticDdsSystem.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
@@ -1217,6 +1232,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\GeneralFlumes\BoostSyncUDP.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\StaticDirectDigitalSynthesis\StaticDdsStructures.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\StaticDirectDigitalSynthesis\StaticDdsCore.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\GeneralFlumes\BoostSyncSerial.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\StaticDirectDigitalSynthesis\StaticDDSFlume.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

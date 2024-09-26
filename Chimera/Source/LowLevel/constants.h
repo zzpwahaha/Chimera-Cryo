@@ -133,6 +133,11 @@
 	const std::string STATICAO_IPADDRESS = "192.168.7.165";
 	const int STATICAO_IPPORT = 804;
 
+	//static DDS
+	const bool STATICDDS_SAFEMODE = false;
+	const std::string STATICDDS_PORT = "COM12";
+	const unsigned int STATICDDS_BAUDRATE = 115200;
+
 	//Temperature Monitor
 	const bool TEMPMON_SAFEMODE = false;
 	const unsigned TEMPMON_NUMBER = 5;

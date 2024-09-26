@@ -4,6 +4,7 @@
 #include <RealTimeMOTAnalysis/MOTAnalysisSystem.h>
 #include <ExperimentMonitoringAndStatus/ExperimentSeqPlotter.h>
 #include <StaticAnalogOutput/StaticAoSystem.h>
+#include <StaticDirectDigitalSynthesis/StaticDdsSystem.h>
 
 
 namespace Ui {
@@ -35,6 +36,7 @@ public:
 	MOTAnalysisSystem MOTAnalySys;
 	ExperimentSeqPlotter SeqPlotter;
 	StaticAoSystem staticDac;
+	StaticDdsSystem staticDds;
 
 private:
 	Ui::QtAnalysisWindow* ui;
