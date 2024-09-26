@@ -29,7 +29,7 @@ def resonace_scan(exp_idx, exp_name_prefix, timeout_control = {'use':False, 'tim
     script_name = "Calibration_rydberg_420_1013_excitation.mScript"
 
     # Update configuration
-    config_file.modify_parameter("REPETITIONS", "Reps:", str(3))
+    config_file.modify_parameter("REPETITIONS", "Reps:", str(4))
     for variable in config_file.config_param.variables:
         config_file.config_param.update_variable(variable.name, scan_type="Constant", scan_dimension=0)    
     config_file.config_param.update_scan_dimension(0, new_ranges=[ScanRange(index=0,left_inclusive=True, right_inclusive=True, variations=22)])
@@ -64,7 +64,7 @@ def resonace_scan(exp_idx, exp_name_prefix, timeout_control = {'use':False, 'tim
 
 def efield(scan_name_prefix, e_field_name, e_field_value1, e_field_value2):
     START_NUM = 0
-    SCAN_NUM1 = 28
+    SCAN_NUM1 = 30
     SCAN_NUM2 = 5
 
     config_file.config_param.update_variable(e_field_name, constant_value = e_field_value1)
@@ -104,13 +104,13 @@ def efield(scan_name_prefix, e_field_name, e_field_value1, e_field_value2):
 
 
 def efield_tracing_procedure():
-    efield(scan_name_prefix="EFIELD-RESONANCE-SCAN-X-PLUS", e_field_name='bias_e_x', e_field_value1= 0.53+1.0, e_field_value2= 0.53)
+    # efield(scan_name_prefix="EFIELD-RESONANCE-SCAN-X-PLUS", e_field_name='bias_e_x', e_field_value1= 0.53+1.0, e_field_value2= 0.53)
+    # sleep(10)
+    # efield(scan_name_prefix="EFIELD-RESONANCE-SCAN-X-MINUS", e_field_name='bias_e_x', e_field_value1= 0.53-1.0, e_field_value2= 0.53)
+    # sleep(10)
+    efield(scan_name_prefix="EFIELD-RESONANCE-SCAN-Y-PLUS", e_field_name='bias_e_y', e_field_value1=-0.42+0.8, e_field_value2=-0.42)
     sleep(10)
-    efield(scan_name_prefix="EFIELD-RESONANCE-SCAN-X-MINUS", e_field_name='bias_e_x', e_field_value1= 0.53-1.0, e_field_value2= 0.53)
-    sleep(10)
-    efield(scan_name_prefix="EFIELD-RESONANCE-SCAN-Y-PLUS", e_field_name='bias_e_y', e_field_value1=-0.42+0.9, e_field_value2=-0.42)
-    sleep(10)
-    efield(scan_name_prefix="EFIELD-RESONANCE-SCAN-Y-MINUS", e_field_name='bias_e_y', e_field_value1=-0.42-0.9, e_field_value2=-0.42)
+    efield(scan_name_prefix="EFIELD-RESONANCE-SCAN-Y-MINUS", e_field_name='bias_e_y', e_field_value1=-0.42-0.8, e_field_value2=-0.42)
     sleep(10)
     efield(scan_name_prefix="EFIELD-RESONANCE-SCAN-Z-PLUS", e_field_name='bias_e_z', e_field_value1= 0.06+1.0, e_field_value2= 0.06)
     sleep(10)

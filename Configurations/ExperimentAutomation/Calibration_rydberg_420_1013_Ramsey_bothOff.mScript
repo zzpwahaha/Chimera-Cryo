@@ -32,7 +32,7 @@ t += 5
 on: UVLampTrg
 
 call setQuantizationField()
-t += 200 %100 %750
+t += t_field_settling %750 %100 %750
 
 call OpticalPumping22()
 

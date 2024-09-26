@@ -14,7 +14,7 @@ dac: electrode7 (bias_E_y-bias_E_z)
 dac: electrode8 (-bias_E_x+bias_E_y)
 
 
-on: UVLampTrg
+%on: UVLampTrg
 %%%%%%%%%%%%%%  PGC in Tweezer %%%%%%%%%%%%%%%%%%
 % change the field/laser freq parameter here because the previous section is TOF and no light is on
 call D2InTrapPGC(t_pgc_twz)
@@ -29,14 +29,13 @@ t += 100-t_pgc_twz
 call PGCTweezerImaging()
 
 t += 5
-on: UVLampTrg
 
 call setQuantizationField()
-t += t_field_settling %750
+t += 700 %100 %750
 
 call OpticalPumping22()
 
-%off: UVLampTrg
+off: UVLampTrg
 on: Ryd1013Shutter
 
 t += 15
@@ -80,7 +79,7 @@ var Ryd_pi2_us 0.08
 var Ryd_pi_us 0.15 %0.20 %0.185
 
 t += 0.5
-on: TweezerHold
+
 t += 0.001
 
 off: TweezerTrg
@@ -89,19 +88,17 @@ t += 0.4/1000 %0.00025
 
 %%%%% Rabi %%%%%%
 on: do8_4 %dummy trigger for picoscope
-on: Ryd420Trg % scan to get Rabi
+%on: Ryd420Trg % scan to get Rabi
 t += time_scan_us/1000 %time_scan_us/1000
-off: Ryd420Trg
+%off: Ryd420Trg
 off: do8_4 
 t += 0.4/1000
 on: MWAmpTrg
 t += -0.4/1000
 
-
 t += 0.25/1000 %0.00025
 on: TweezerTrg
 t += 0.001
-off: TweezerHold
 
 %t += -0.002
 %on: TweezerHold
@@ -127,22 +124,23 @@ off: MWAmpTrg
 %dacramp: TweezerIntensity twz_intensity*0.1 twz_intensity 10
 %t += 10
 
-%t += 15
-%call StateSelectivePushout()
-
 t += 15
+%call StateSelectivePushout()
+%call setZeroField()
+%t += 400
+
+%%%%%%%%%%%%%  RnR after rydberg sequence, before cooling %%%%
+call ReleaseRecapture(t_twz_release)
 
 %%%%%%%%%%%%%%  PGC in Tweezer %%%%%%%%%%%%%%%%%%
 % change the field/laser freq parameter here because the previous section is TOF and no light is on
-call D2InTrapPGCPrb(t_pgc_twz)
+call D2InTrapPGCPrb(t_pgc_twz) %t_pgc_twz
 % note the t_pgc_twz should be smaller than 100
-t += 100-t_pgc_twz
+t += 100-t_pgc_twz %t_pgc_twz
 
-off: UVLampTrg
 t += 5
 %%%%%%%%%%%%%%  Image TWIZZER  %%%%%%%%%%%%%%%%%%
 % change the field/laser freq parameter here because the previous section is dark, i.e. 100-t_pgc_twz is larger than 4
-t += -10
 call PGCTweezerImaging()
 
 t += 10

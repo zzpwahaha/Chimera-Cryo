@@ -70,13 +70,20 @@ def rabi_scan(exp_idx, timeout_control = {'use':False, 'timeout':600}):
     config_file.modify_parameter("REPETITIONS", "Reps:", str(7))
     for variable in config_file.config_param.variables:
         config_file.config_param.update_variable(variable.name, scan_type="Constant", scan_dimension=0)    
+    # config_file.config_param.update_scan_dimension(0, new_ranges=[
+    #     ScanRange(index=0,left_inclusive=True, right_inclusive=True, variations=21),
+    #     ScanRange(index=1,left_inclusive=True, right_inclusive=True, variations=11),
+    #     ScanRange(index=2,left_inclusive=True, right_inclusive=True, variations=11),
+    #     ScanRange(index=2,left_inclusive=True, right_inclusive=True, variations=11),
+    #     ScanRange(index=2,left_inclusive=True, right_inclusive=True, variations=11)])
+    # config_file.config_param.update_variable("time_scan_us", scan_type="Variable", new_initial_values=[0.01,1.5,3.0,4.5,6.0], new_final_values=[0.41,1.8,3.3,4.8,6.3])
+    
     config_file.config_param.update_scan_dimension(0, new_ranges=[
         ScanRange(index=0,left_inclusive=True, right_inclusive=True, variations=21),
         ScanRange(index=1,left_inclusive=True, right_inclusive=True, variations=11),
-        ScanRange(index=2,left_inclusive=True, right_inclusive=True, variations=11),
-        ScanRange(index=2,left_inclusive=True, right_inclusive=True, variations=11),
         ScanRange(index=2,left_inclusive=True, right_inclusive=True, variations=11)])
-    config_file.config_param.update_variable("time_scan_us", scan_type="Variable", new_initial_values=[0.01,1.5,3.0,4.5,6.0], new_final_values=[0.41,1.8,3.3,4.8,6.3])
+    config_file.config_param.update_variable("time_scan_us", scan_type="Variable", new_initial_values=[0.01,1.5,3.0], new_final_values=[0.41,1.8,3.3])
+
     config_file.save()
     
     YEAR, MONTH, DAY = today()
@@ -163,11 +170,13 @@ def calibration(exp_idx):
     try:
         _calibration()
         exp.hardware_controller.restart_zynq_control()
-        rabi_scan(exp_idx=exp_idx, timeout_control = {'use':True, 'timeout':1500})
+        rabi_scan(exp_idx=exp_idx, timeout_control = {'use':True, 'timeout':1200}) #1500
         sleep(1)
+        # _calibration()
         # exp.hardware_controller.restart_zynq_control()
         # ramsey_scan(exp_idx=exp_idx, timeout_control = {'use':True, 'timeout':1200})
         # sleep(1)
+        # _calibration()
         # exp.hardware_controller.restart_zynq_control()
         # ramsey_scan_bothOff(exp_idx=exp_idx, timeout_control = {'use':True, 'timeout':1200})
     except Exception as e:
@@ -177,8 +186,8 @@ def calibration(exp_idx):
 
 
 def procedure():
-    for idx in np.arange(200):
-        # if idx<=28: continue
+    for idx in np.arange(100):
+        # if idx<=0: continue
         print(f"Running experiment sets number {idx}")
         if idx != 0:
             exp.hardware_controller.restart_zynq_control()
