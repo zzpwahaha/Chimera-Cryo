@@ -93,6 +93,7 @@ std::string StaticDdsCore::getDDSCommand(double ddsfreqVal)
 		+ str(ddsfreqVal/*channelSnap.endVal*/, numFreqDigits) + "," + str(1/*channelSnap.numSteps*/) + ","
 		+ str(1.0/*channelSnap.rampTime*/, 2/*numTimeDigits(channelSnap.channel)*/) + ")";
 	buffCmd += "e";
+	return buffCmd;
 }
 
 void StaticDdsCore::writeDDSs(std::array<double, size_t(StaticDDSGrid::total)> outputs)
