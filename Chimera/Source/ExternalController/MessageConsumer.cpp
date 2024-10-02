@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "MessageConsumer.h"
+#include "boost\lexical_cast.hpp"
 #include <chrono>
 #include <ctime>
 #include <sstream>
@@ -122,6 +123,27 @@ void MessageConsumer::consume()
                 }, Qt::BlockingQueuedConnection);
             std::string isRunningStr = isRunning ? "TRUE" : "FALSE";
             connection->do_write(compileReply(isRunningStr + "\tFinished asking if calibration is running", status));
+        }
+        else if (stratWith(message, "Set-Static-DDS")) {
+            auto args = getArguments(message);
+            if (args.size() != 2) {
+                emit logMessage(qstr(timeStamp + ": \t" + "Not enough arguemnt found in command: " + message));
+                connection->do_write("Error\nNot enough arguemnt found in command: " + message);
+                continue;
+            }
+            unsigned channel;
+            try {
+                channel = boost::lexical_cast<unsigned>(args[1]);
+            }
+            catch (boost::bad_lexical_cast&) { 
+                emit logMessage(qstr(timeStamp + ": \t" + "Error in converting command argument to number: " + message));
+                connection->do_write("Error\nError in converting command argument to number: " + message);
+                continue;
+            }
+            QMetaObject::invokeMethod(&modulator_, [&]() {
+                modulator_.setStaticDDS(args[0], channel, status);
+                }, Qt::BlockingQueuedConnection);
+            connection->do_write(compileReply("Finished setting static DDS", status));
         }
         else if (stratWith(message, "Set-DAC")) {
             QMetaObject::invokeMethod(&modulator_, [&]() {

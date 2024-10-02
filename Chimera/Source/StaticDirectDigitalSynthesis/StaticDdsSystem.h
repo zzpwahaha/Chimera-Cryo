@@ -22,6 +22,7 @@ public:
 	StaticDdsCore& getCore() { return core; };
 	std::string getDeviceInfo();
 
+	void setDdsEditValue(std::string ddsfreq, unsigned channel); // should only be used in CommandModulator
 private:
 	bool expActive;
 	StaticDdsCore core;

@@ -37,14 +37,15 @@ private:
     void writeDACs(std::array<double, size_t(StaticAOGrid::total)> outputs);
     bool checkBound(double dacVal);
 
-private:
-    BoostSyncUDP fpga;
-    StaticAOSettings expSettings;
-
+public:
     static constexpr double dacResolutionInst = 20.0 / 0xfffff; /*20bit dac*/
     const int numDigitsInst = static_cast<int>(abs(round(log10(dacResolutionInst) - 0.49)));
     const double minVal = -10.0;
-    const double maxVal =  10.0;
+    const double maxVal = 10.0;
+
+private:
+    BoostSyncUDP fpga;
+    StaticAOSettings expSettings;
 
 };
 

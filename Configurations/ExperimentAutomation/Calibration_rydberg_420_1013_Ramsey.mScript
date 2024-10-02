@@ -76,7 +76,7 @@ t += 0.1
 %off: Ryd1013Trg
 t += 6-1-0.1
 
-var Ryd_pi2_us 0.09
+var Ryd_pi2_us 0.08
 var Ryd_pi_us 0.15 %0.20 %0.185
 
 t += 0.5

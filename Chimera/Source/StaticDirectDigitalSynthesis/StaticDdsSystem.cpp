@@ -19,13 +19,13 @@ void StaticDdsSystem::initialize()
 	layout->setContentsMargins(0, 0, 0, 0);
 	this->setMaximumWidth(600);
 
-	QLabel* title = new QLabel("STATIC DAC", this);
+	QLabel* title = new QLabel("STATIC DDS", this);
 	layout->addWidget(title, 0);
 
 	QHBoxLayout* layout1 = new QHBoxLayout();
 	layout1->setContentsMargins(0, 0, 0, 0);
 
-	auto programNowButton = new QPushButton("Program DAC Now", this);
+	auto programNowButton = new QPushButton("Program DDS Now", this);
 	connect(programNowButton, &QPushButton::released, [this]() {
 		try {
 			handleProgramNowPress(parentWin->auxWin->getUsableConstants());
@@ -122,4 +122,12 @@ void StaticDdsSystem::handleProgramNowPress(std::vector<parameterType> constants
 std::string StaticDdsSystem::getDeviceInfo()
 {
 	return core.getDeviceInfo();
+}
+
+void StaticDdsSystem::setDdsEditValue(std::string ddsfreq, unsigned channel)
+{
+	if (channel >= size_t(StaticDDSGrid::total)) {
+		thrower("Channel " + str(channel) + " outside range of static DDS " + str(size_t(StaticDDSGrid::total)));
+	}
+	edits[channel]->setText(qstr(ddsfreq));
 }

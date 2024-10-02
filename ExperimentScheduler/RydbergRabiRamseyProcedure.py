@@ -57,17 +57,19 @@ def resonace_scan(exp_idx, timeout_control = {'use':False, 'timeout':600}):
     optimal_field = analysis_result[1]
     print(f"Optimal resoance for {exp_name} is {optimal_field:.3S} ")
 
-    if (optimal_field.s > 1) or (analysis_result[0].n > 0) or (analysis_result[0].n < -2):
+    fit_fail = (optimal_field.s > 1) or (analysis_result[0].n > 0) or (analysis_result[0].n < -2)
+    if fit_fail:
         raise ValueError(f"Optimal resoance {optimal_field:.3S} has a variance larger than 1 or {analysis_result[0]:.3S} is outside the normal range, this typically means bad data.")
 
     # Update configuration with the optimal field
     config_file.config_param.update_variable("resonance_scan", constant_value = round(optimal_field.n, 3))
     config_file.save()
-    return 
+    exp.open_configuration("\\ExperimentAutomation\\" + config_name)
+    return  fit_fail
 
 def rabi_scan(exp_idx, timeout_control = {'use':False, 'timeout':600}):
     script_name = "Calibration_rydberg_420_1013_excitation.mScript"
-    config_file.modify_parameter("REPETITIONS", "Reps:", str(7))
+    config_file.modify_parameter("REPETITIONS", "Reps:", str(6))
     for variable in config_file.config_param.variables:
         config_file.config_param.update_variable(variable.name, scan_type="Constant", scan_dimension=0)    
     # config_file.config_param.update_scan_dimension(0, new_ranges=[
@@ -78,11 +80,21 @@ def rabi_scan(exp_idx, timeout_control = {'use':False, 'timeout':600}):
     #     ScanRange(index=2,left_inclusive=True, right_inclusive=True, variations=11)])
     # config_file.config_param.update_variable("time_scan_us", scan_type="Variable", new_initial_values=[0.01,1.5,3.0,4.5,6.0], new_final_values=[0.41,1.8,3.3,4.8,6.3])
     
+    # config_file.config_param.update_scan_dimension(0, new_ranges=[
+    #     ScanRange(index=0,left_inclusive=True, right_inclusive=True, variations=21),
+    #     ScanRange(index=1,left_inclusive=True, right_inclusive=True, variations=11),
+    #     ScanRange(index=2,left_inclusive=True, right_inclusive=True, variations=11)])
+    # config_file.config_param.update_variable("time_scan_us", scan_type="Variable", new_initial_values=[0.01,1.5,3.0], new_final_values=[0.41,1.8,3.3])
+
     config_file.config_param.update_scan_dimension(0, new_ranges=[
-        ScanRange(index=0,left_inclusive=True, right_inclusive=True, variations=21),
+        ScanRange(index=0,left_inclusive=True, right_inclusive=True, variations=16),
         ScanRange(index=1,left_inclusive=True, right_inclusive=True, variations=11),
-        ScanRange(index=2,left_inclusive=True, right_inclusive=True, variations=11)])
-    config_file.config_param.update_variable("time_scan_us", scan_type="Variable", new_initial_values=[0.01,1.5,3.0], new_final_values=[0.41,1.8,3.3])
+        ScanRange(index=2,left_inclusive=True, right_inclusive=True, variations=11),
+        ScanRange(index=2,left_inclusive=True, right_inclusive=True, variations=11)
+        ])
+    config_file.config_param.update_variable("time_scan_us", scan_type="Variable", 
+                                             new_initial_values=[0.01,1.5,3.0,4.5], 
+                                             new_final_values=[0.61,1.9,3.4,4.9])
 
     config_file.save()
     
@@ -187,9 +199,9 @@ def calibration(exp_idx):
 
 def procedure():
     for idx in np.arange(100):
-        # if idx<=0: continue
+        if idx<=27: continue
         print(f"Running experiment sets number {idx}")
-        if idx != 0:
+        if idx != 28:
             exp.hardware_controller.restart_zynq_control()
         calibration(idx)
 

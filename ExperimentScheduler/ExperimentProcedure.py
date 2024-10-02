@@ -95,6 +95,9 @@ class ExperimentProcedure:
         else:
             print(f"Unexpected response received: {result}")
 
+    def setStaticDDS(self, ddsfreq : float, channel : int):
+        return self.chimera_command(f"Set-Static-DDS ${ddsfreq:.6f} ${channel:d}") # Hz resoultion, in MHz unit
+
     def setDAC(self):
         return self.chimera_command(f"Set-DAC")
     
@@ -263,5 +266,6 @@ def EfieldCalibrationProcedure():
 if __name__ == "__main__":
     # EfieldCalibrationProcedure()
     exp = ExperimentProcedure()
-    exp.run_calibration("prb_pwr")
+    # exp.run_calibration("prb_pwr")
+    exp.setStaticDDS(580.9,0)
 

@@ -45,8 +45,8 @@ off: Ryd420ExpShutter
 %on: Ryd1013Shutter
 off: Ryd420AWGchswitch
 ddsfreq: Ryd420Brimrose resonance_scan
-dac: Ryd420Amp 0.18 %0.30 %0.34
-dac: Ryd1013Amp 0.45 %0.55 %0.60 %0.68
+dac: Ryd420Amp ryd_420_amplitude %0.18 %0.30 %0.34
+dac: Ryd1013Amp ryd_1013_amplitude %0.45 %0.55 %0.60 %0.68
 %pulseon: MWTrg 0.4
 
 var IQ_MAX_AMP 2.5

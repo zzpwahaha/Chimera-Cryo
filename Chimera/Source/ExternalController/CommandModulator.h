@@ -31,6 +31,7 @@ public slots:
 	void isExperimentRunning(bool& running, ErrorStatus& status);
 	void startCalibration(QString calName, ErrorStatus& status);
 	void isCalibrationRunning(bool& running, ErrorStatus& status);
+	void setStaticDDS(std::string ddsfreq, unsigned channel, ErrorStatus& status);
 
 	void setDAC(ErrorStatus& status);
 	void setOL(ErrorStatus& status);

@@ -24,6 +24,7 @@ public:
 	void initializeWidgets() override;
 	void fillMasterThreadInput(ExperimentThreadInput* input) override {};
 	//MOTAnalysisControl
+	StaticDdsSystem& getStaticDds() { return staticDds; };
 
 public slots:
 	void prepareCalcForAcq();

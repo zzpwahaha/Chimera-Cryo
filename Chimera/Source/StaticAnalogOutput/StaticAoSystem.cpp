@@ -123,3 +123,4 @@ std::string StaticAoSystem::getDeviceInfo()
 {
 	return core.getDeviceInfo();
 }
+

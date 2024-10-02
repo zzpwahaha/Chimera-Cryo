@@ -37,18 +37,14 @@ private:
     void writeDDSs(std::array<double, size_t(StaticDDSGrid::total)> outputs);
     bool checkBound(double ddsfreqVal);
 
-private:
-    StaticDDSFlume sddsFlume;
-    std::atomic<bool> readComplete;
-    std::vector<unsigned char> readRegister;
-    std::string errorMsg;
-
-    StaticDDSSettings expSettings;
-
+public:
     static constexpr double ddsResolutionInst = 1e-6; // 1 Hz
     const int numFreqDigits = static_cast<int>(abs(round(log10(ddsResolutionInst) - 0.49)));
     const double minVal = 0.1;
     const double maxVal = 1000;
 
+private:
+    StaticDDSFlume sddsFlume;
+    StaticDDSSettings expSettings;    
 };
 

@@ -4,6 +4,7 @@
 #include "PrimaryWindows/QtMainWindow.h"
 #include "PrimaryWindows/QtAndorWindow.h"
 #include "PrimaryWindows/QtAuxiliaryWindow.h"
+#include "PrimaryWindows/QtAnalysisWindow.h"
 #include "PrimaryWindows/QtMakoWindow.h"
 #include "PrimaryWindows/QtScriptWindow.h"
 #include <GeneralUtilityFunctions/commonFunctions.h>
@@ -19,6 +20,7 @@ void CommandModulator::initialize(IChimeraQtWindow* win)
 	andorWin = win->andorWin;
 	scriptWin = win->scriptWin;
 	auxWin = win->auxWin;
+	analysisWin = win->analysisWin;
 	makoWin1 = win->makoWin1;
 	makoWin2 = win->makoWin2;
 }
@@ -194,6 +196,22 @@ void CommandModulator::isCalibrationRunning(bool& running, ErrorStatus& status)
 	status.error = false;
 	CalibrationManager& calManager = auxWin->getCalibManager();
 	running = calManager.isCalibrationRunning();
+}
+
+void CommandModulator::setStaticDDS(std::string ddsfreq, unsigned channel, ErrorStatus& status)
+{
+	auxWin->reportStatus("----------------------\r\nSetting static Ddss... ");
+	try {
+		auto& staticDds = analysisWin->getStaticDds();
+		staticDds.setDdsEditValue(ddsfreq, channel);
+		staticDds.handleProgramNowPress(auxWin->getUsableConstants());
+	}
+	catch (ChimeraError& err) {
+		mainWin->reportStatus(": " + err.qtrace() + "\r\n");
+		mainWin->reportErr(err.qtrace());
+		status.error = true;
+		status.errorMsg = err.trace();
+	}
 }
 
 void CommandModulator::setDAC(ErrorStatus& status)
