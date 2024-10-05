@@ -34,11 +34,20 @@ class TCPClient:
         else:
             print("Not connected to server.")
 
-    def read(self, bufsize: int = 1024) -> str:
+    def read(self, bufsize: int = 4096) -> bytes:
         if self.sock:
             try:
+                # data = self.sock.recv(bufsize)
+                # return data.decode('utf-8')
                 data = self.sock.recv(bufsize)
-                return data.decode('utf-8')
+                return data
+                # data = b""
+                # while True:
+                #     part = self.sock.recv(bufsize)  # Receive data in chunks
+                #     if not part:
+                #         break
+                #     data += part
+                # return data
             except Exception as e:
                 print(f"Failed to read data: {e}")
                 return ""
@@ -46,7 +55,7 @@ class TCPClient:
             print("Not connected to server.")
             return ""
 
-    def query(self, message: Union[str, bytes], bufsize: int = 1024) -> str:
+    def query(self, message: Union[str, bytes], bufsize: int = 4096) -> bytes:
         if self.sock:
             try:
                 self.send_message(message)  # Send the message
@@ -82,7 +91,7 @@ if __name__ == "__main__":
             message = input("Enter message to send (or 'exit' to quit): ")
             if message.lower() == 'exit':
                 break
-            print(client.query(message))
+            print(client.query(message).decode('utf-8'))
     finally:
         client.close()
 

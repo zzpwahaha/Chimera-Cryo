@@ -149,19 +149,32 @@ void MessageConsumer::consume()
             QMetaObject::invokeMethod(&modulator_, [&]() {
                 modulator_.setDAC(status);
                 }, Qt::BlockingQueuedConnection);
-            connection->do_write(compileReply("Finished saving all", status));
+            connection->do_write(compileReply("Finished setting DAC", status));
         }
         else if (stratWith(message, "Set-DDS")) {
             QMetaObject::invokeMethod(&modulator_, [&]() {
                 modulator_.setDDS(status);
                 }, Qt::BlockingQueuedConnection);
-            connection->do_write(compileReply("Finished saving all", status));
+            connection->do_write(compileReply("Finished setting DDS", status));
         }
         else if (stratWith(message, "Set-OL")) {
             QMetaObject::invokeMethod(&modulator_, [&]() {
                 modulator_.setOL(status);
                 }, Qt::BlockingQueuedConnection);
-            connection->do_write(compileReply("Finished saving all", status));
+            connection->do_write(compileReply("Finished setting OL", status));
+        }
+        else if (stratWith(message, "Get-MAKO-Image")) {
+            auto args = getArguments(message);
+            if (args.size() != 1) {
+                emit logMessage(qstr(timeStamp + ": \t" + "Not enough arguemnt found in command: " + message));
+                connection->do_write("Error\nNot enough arguemnt found in command: " + message);
+                continue;
+            }
+            QVector<double> image;
+            QMetaObject::invokeMethod(&modulator_, [&]() {
+                modulator_.getMakoImage(qstr(args[0]), image, status);
+                }, Qt::BlockingQueuedConnection);
+            connection->do_write(compileReply("Finished getting MAKO image", image.toStdVector(), status));
         }
         else {
             emit logMessage(qstr(timeStamp + ": \t" + "Unrecongnized command: " + message));
@@ -178,6 +191,23 @@ std::string MessageConsumer::compileReply(std::string normalMsg, CommandModulato
     else {
         return normalMsg;
     }
+}
+
+std::vector<char> MessageConsumer::compileReply(std::string normalMsg, std::vector<double> data, CommandModulator::ErrorStatus status)
+{
+    std::vector<char> buffer; // normalMsg + delimiter($) + size of vector + vector
+
+    std::size_t size = data.size();
+    buffer.reserve(normalMsg.size() + 1 + sizeof(size) + sizeof(double) * size);
+    // Copy the message and add the delimiter
+    buffer.insert(buffer.end(), normalMsg.begin(), normalMsg.end());
+    buffer.push_back(delimiter_);
+    // Copy the size of the vector
+    buffer.insert(buffer.end(), reinterpret_cast<char*>(&size), reinterpret_cast<char*>(&size) + sizeof(size));
+    // Copy the vector data
+    buffer.insert(buffer.end(), reinterpret_cast<const char*>(data.data()), reinterpret_cast<const char*>(data.data()) + sizeof(double) * size);
+
+    return buffer;
 }
 
 std::string MessageConsumer::getCurrentDateTime()

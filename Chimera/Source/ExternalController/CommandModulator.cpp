@@ -267,6 +267,35 @@ void CommandModulator::setDDS(ErrorStatus& status)
 	}
 }
 
+void CommandModulator::getMakoImage(QString whichMako, QVector<double>& img, ErrorStatus& status)
+{
+	// get the corresponding camera
+	QStringList makos = { "mako1", "mako2", "mako3", "mako4" };
+	MakoCamera* cam;
+	if (makos.contains(whichMako)) {
+		QString numberStr = whichMako.mid(4); // Get the substring after "mako"
+		int number = numberStr.toInt();
+		if (whichMako == "mako1" || whichMako == "mako2") {
+			cam = makoWin1->getMakoCam((number - 1) % 2);
+		}
+		else if (whichMako == "mako3" || whichMako == "mako4") {
+			cam = makoWin2->getMakoCam((number - 1) % 2);
+		}
+	}
+	else {
+		status.error = true;
+		status.errorMsg = "whichMako = " + str(whichMako) + " does not match the mako list. Valid lists are " + str(makos.join(", "));
+	}
+
+	try {
+		img = cam->getCurrentImageInBuffer();
+	}
+	catch (ChimeraError& e) {
+		status.error = true;
+		status.errorMsg = "Error in getting Mako image: " + e.trace();
+	}
+}
+
 std::string CommandModulator::convertToUnixPath(std::string mixedPath)
 {
 	// not that the mixed syntax path wouldn't work. 

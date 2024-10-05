@@ -17,6 +17,7 @@ public:
 private:
     void consume();
     std::string compileReply(std::string normalMsg, CommandModulator::ErrorStatus status);
+    std::vector<char> compileReply(std::string normalMsg, std::vector<double> data, CommandModulator::ErrorStatus status);
     std::string getCurrentDateTime();
     std::vector<std::string> getArguments(const std::string& command);
     std::vector<std::string> splitString(const std::string& input, char delimiter);

@@ -37,6 +37,7 @@ public slots:
 	void setOL(ErrorStatus& status);
 	void setDDS(ErrorStatus& status);
 
+	void getMakoImage(QString whichMako, QVector<double>& img, ErrorStatus& status);
 
 private:
 	std::string convertToUnixPath(std::string mixedPath);

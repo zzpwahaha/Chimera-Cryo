@@ -80,6 +80,28 @@ class DataAnalysis:
         )
         return maximaLocs_MP
 
+    def get_survival_result_1D(self):
+        result = ah.getAtomSurvivalData(
+            self.andor_datas,
+            atomLocation=self.maximaLocs,
+            window=self.window,
+            bins=self.binnings,
+            thresholds=self.thresholds
+        )
+        x, y, yerr = self.exp_file.individual_keys[0][:], result['survival_mean'][:], result['survival_err'][:]
+        return x,y,yerr
+
+    def get_loading_result_1D(self):
+        result = ah.getAtomSurvivalData(
+            self.andor_datas,
+            atomLocation=self.maximaLocs,
+            window=self.window,
+            bins=self.binnings,
+            thresholds=self.thresholds
+        )
+        x, y, yerr = self.exp_file.individual_keys[0][:], result['loading_rate'][:], result['loading_rate_err'][:]
+        return x,y,yerr
+
     def analyze_data(self, function = gaussian, debug=False) -> List[ah.unc.UFloat]:
         result = ah.getAtomSurvivalData(
             self.andor_datas,
