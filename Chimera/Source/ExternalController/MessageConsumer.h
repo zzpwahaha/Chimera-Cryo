@@ -20,6 +20,7 @@ private:
     std::vector<char> compileReply(std::string normalMsg, std::vector<char> data, CommandModulator::ErrorStatus status);
     std::string getCurrentDateTime();
     std::vector<std::string> getArguments(const std::string& command);
+    std::vector<std::string> getArguments(const std::string& command, unsigned expectNumArg, bool& success, std::shared_ptr<TCPSession>connection);
     std::vector<std::string> splitString(const std::string& input, char delimiter);
     std::vector<std::string> splitString(const std::string& input, const std::string& delimiter);
 

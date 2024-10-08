@@ -31,6 +31,7 @@ void MessageConsumer::consume()
         auto& message = data.msg;
         auto& connection = data.connection;
         CommandModulator::ErrorStatus status;
+        bool argValid = false;
         
         // Process the message
         std::string timeStamp = getCurrentDateTime();
@@ -41,24 +42,16 @@ void MessageConsumer::consume()
             continue;
         }
         else if (stratWith(message, "Open-Configuration")) {
-            auto args = getArguments(message);
-            if (args.size() == 0) {
-                emit logMessage(qstr(timeStamp + ": \t" + "No arguemnt found in command: " + message));
-                connection->do_write("Error\nNo arguemnt found in command: " + message);
-                continue;
-            }
+            auto args = getArguments(message, 1, argValid, connection);
+            if (!argValid) continue;
             QMetaObject::invokeMethod(&modulator_, [&]() {
                 modulator_.openConfiguration(qstr(args[0]), status);
                 }, Qt::BlockingQueuedConnection);
             connection->do_write(compileReply("Finished opening configuration: " + args[0], status));
         }
         else if (stratWith(message, "Open-Master-Script")) {
-            auto args = getArguments(message);
-            if (args.size() == 0) {
-                emit logMessage(qstr(timeStamp + ": \t" + "No arguemnt found in command: " + message));
-                connection->do_write("Error\nNo arguemnt found in command: " + message);
-                continue;
-            }
+            auto args = getArguments(message, 1, argValid, connection);
+            if (!argValid) continue;
             QMetaObject::invokeMethod(&modulator_, [&]() {
                 modulator_.openMasterScript(qstr(args[0]), status);
                 }, Qt::BlockingQueuedConnection);
@@ -72,24 +65,16 @@ void MessageConsumer::consume()
             connection->do_write(compileReply("Finished saving all", status));
         }
         else if (stratWith(message, "Start-Experiment")) {
-            auto args = getArguments(message);
-            if (args.size() == 0) {
-                emit logMessage(qstr(timeStamp + ": \t" + "No arguemnt found in command: " + message));
-                connection->do_write("Error\nNo arguemnt found in command: " + message);
-                continue;
-            }
+            auto args = getArguments(message, 1, argValid, connection);
+            if (!argValid) continue;
             QMetaObject::invokeMethod(&modulator_, [&]() {
                 modulator_.startExperiment(qstr(args[0]), status);
                 }, Qt::BlockingQueuedConnection);
             connection->do_write(compileReply("Finished starting experiment", status));
         }
         else if (stratWith(message, "Abort-Experiment")) {
-            auto args = getArguments(message);
-            if (args.size() < 2) {
-                emit logMessage(qstr(timeStamp + ": \t" + "No arguemnt found in command: " + message));
-                connection->do_write("Error\nNo arguemnt found in command: " + message);
-                continue;
-            }
+            auto args = getArguments(message, 2, argValid, connection);
+            if (!argValid) continue;
             QMetaObject::invokeMethod(&modulator_, [&]() {
                 bool keepData = !stratWith(str(args[0]), "delete");
                 modulator_.abortExperiment(keepData, qstr(args[1]), status);
@@ -105,12 +90,8 @@ void MessageConsumer::consume()
             connection->do_write(compileReply(isRunningStr + "\tFinished asking if experiment is running", status));
         }
         else if (stratWith(message, "Start-Calibration")) {
-            auto args = getArguments(message);
-            if (args.size() == 0) {
-                emit logMessage(qstr(timeStamp + ": \t" + "No arguemnt found in command: " + message));
-                connection->do_write("Error\nNo arguemnt found in command: " + message);
-                continue;
-            }
+            auto args = getArguments(message, 1, argValid, connection);
+            if (!argValid) continue;
             QMetaObject::invokeMethod(&modulator_, [&]() {
                 modulator_.startCalibration(qstr(args[0]), status);
                 }, Qt::BlockingQueuedConnection);
@@ -125,36 +106,24 @@ void MessageConsumer::consume()
             connection->do_write(compileReply(isRunningStr + "\tFinished asking if calibration is running", status));
         }
         else if (stratWith(message, "Set-Static-DDS")) {
-            auto args = getArguments(message);
-            if (args.size() != 2) {
-                emit logMessage(qstr(timeStamp + ": \t" + "Not enough arguemnt found in command: " + message));
-                connection->do_write("Error\nNot enough arguemnt found in command: " + message);
-                continue;
-            }
+            auto args = getArguments(message, 2, argValid, connection);
+            if (!argValid) continue;
             QMetaObject::invokeMethod(&modulator_, [&]() {
                 modulator_.setStaticDDS(qstr(args[0]), qstr(args[1]), status);
                 }, Qt::BlockingQueuedConnection);
             connection->do_write(compileReply("Finished setting static DDS", status));
         }
         else if (stratWith(message, "Set-TTL")) {
-            auto args = getArguments(message);
-            if (args.size() != 2) {
-                emit logMessage(qstr(timeStamp + ": \t" + "Not enough arguemnt found in command: " + message));
-                connection->do_write("Error\nNot enough arguemnt found in command: " + message);
-                continue;
-            }
+            auto args = getArguments(message, 2, argValid, connection);
+            if (!argValid) continue;
             QMetaObject::invokeMethod(&modulator_, [&]() {
                 modulator_.setTTL(qstr(args[0]), qstr(args[1]), status);
                 }, Qt::BlockingQueuedConnection);
             connection->do_write(compileReply("Finished setting DAC", status));
         }
         else if (stratWith(message, "Set-DAC")) {
-            auto args = getArguments(message);
-            if (args.size() != 2) {
-                emit logMessage(qstr(timeStamp + ": \t" + "Not enough arguemnt found in command: " + message));
-                connection->do_write("Error\nNot enough arguemnt found in command: " + message);
-                continue;
-            }
+            auto args = getArguments(message, 2, argValid, connection);
+            if (!argValid) continue;
             QMetaObject::invokeMethod(&modulator_, [&]() {
                 modulator_.setDAC(qstr(args[0]), qstr(args[1]), status);
                 }, Qt::BlockingQueuedConnection);
@@ -173,12 +142,8 @@ void MessageConsumer::consume()
             connection->do_write(compileReply("Finished setting OL", status));
         }
         else if (stratWith(message, "Get-MAKO-Image")) {
-            auto args = getArguments(message);
-            if (args.size() != 1) {
-                emit logMessage(qstr(timeStamp + ": \t" + "Not enough arguemnt found in command: " + message));
-                connection->do_write("Error\nNot enough arguemnt found in command: " + message);
-                continue;
-            }
+            auto args = getArguments(message, 1, argValid, connection);
+            if (!argValid) continue;
             QVector<char> image;
             QMetaObject::invokeMethod(&modulator_, [&]() {
                 modulator_.getMakoImage(qstr(args[0]), image, status);
@@ -186,12 +151,8 @@ void MessageConsumer::consume()
             connection->do_write(compileReply("Finished getting MAKO image", image.toStdVector(), status));
         }
         else if (stratWith(message, "Get-MAKO-Dimension")) {
-            auto args = getArguments(message);
-            if (args.size() != 1) {
-                emit logMessage(qstr(timeStamp + ": \t" + "Not enough arguemnt found in command: " + message));
-                connection->do_write("Error\nNot enough arguemnt found in command: " + message);
-                continue;
-            }
+            auto args = getArguments(message, 1, argValid, connection);
+            if (!argValid) continue;
             QVector<char> imageDim;
             QMetaObject::invokeMethod(&modulator_, [&]() {
                 modulator_.getMakoImageDimension(qstr(args[0]), imageDim, status);
@@ -199,12 +160,8 @@ void MessageConsumer::consume()
             connection->do_write(compileReply("Finished getting MAKO image dimension", imageDim.toStdVector(), status));
         }
         else if (stratWith(message, "Get-MAKO-Feature-Value")) {
-            auto args = getArguments(message);
-            if (args.size() != 3) {
-                emit logMessage(qstr(timeStamp + ": \t" + "Not enough arguemnt found in command: " + message));
-                connection->do_write("Error\nNot enough arguemnt found in command: " + message);
-                continue;
-            }
+            auto args = getArguments(message, 3, argValid, connection);
+            if (!argValid) continue;
             QVector<char> featureValue;
             QMetaObject::invokeMethod(&modulator_, [&]() {
                 modulator_.getMakoFeatureValue(qstr(args[0]), qstr(args[1]), qstr(args[2]), featureValue, status);
@@ -212,12 +169,8 @@ void MessageConsumer::consume()
             connection->do_write(compileReply("Finished getting MAKO image dimension", featureValue.toStdVector(), status));
         }
         else if (stratWith(message, "Set-MAKO-Feature-Value")) {
-        auto args = getArguments(message);
-            if (args.size() != 4) {
-                emit logMessage(qstr(timeStamp + ": \t" + "Not enough arguemnt found in command: " + message));
-                connection->do_write("Error\nNot enough arguemnt found in command: " + message);
-                continue;
-            }
+            auto args = getArguments(message, 4, argValid, connection);
+            if (!argValid) continue;
             QVector<char> featureValue;
             QMetaObject::invokeMethod(&modulator_, [&]() {
                 modulator_.setMakoFeatureValue(qstr(args[0]), qstr(args[1]), qstr(args[2]), qstr(args[3]), status);
@@ -280,6 +233,18 @@ std::vector<std::string> MessageConsumer::getArguments(const std::string& comman
         result.erase(result.begin());
     }
     return result;
+}
+
+std::vector<std::string> MessageConsumer::getArguments(const std::string& command, unsigned expectNumArg, bool& success, std::shared_ptr<TCPSession> connection)
+{
+    auto args = getArguments(command);
+    if (args.size() != expectNumArg) {
+        emit logMessage(qstr(getCurrentDateTime() + ": \t" + "Not enough arguemnt found in command: " + command + ". Expecting " + str(expectNumArg) + ", but only get " + str(args.size())));
+        connection->do_write("Error\nNot enough arguemnt found in command: " + command + ". Expecting " +str(expectNumArg) + ", but only get " + str(args.size()));
+        success = false;
+    }
+    success = true;
+    return args;
 }
 
 std::vector<std::string> MessageConsumer::splitString(const std::string& input, char delimiter)
