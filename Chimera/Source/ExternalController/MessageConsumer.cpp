@@ -136,6 +136,18 @@ void MessageConsumer::consume()
                 }, Qt::BlockingQueuedConnection);
             connection->do_write(compileReply("Finished setting static DDS", status));
         }
+        else if (stratWith(message, "Set-TTL")) {
+            auto args = getArguments(message);
+            if (args.size() != 2) {
+                emit logMessage(qstr(timeStamp + ": \t" + "Not enough arguemnt found in command: " + message));
+                connection->do_write("Error\nNot enough arguemnt found in command: " + message);
+                continue;
+            }
+            QMetaObject::invokeMethod(&modulator_, [&]() {
+                modulator_.setTTL(qstr(args[0]), qstr(args[1]), status);
+                }, Qt::BlockingQueuedConnection);
+            connection->do_write(compileReply("Finished setting DAC", status));
+        }
         else if (stratWith(message, "Set-DAC")) {
             auto args = getArguments(message);
             if (args.size() != 2) {

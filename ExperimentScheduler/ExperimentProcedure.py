@@ -129,6 +129,9 @@ class ExperimentProcedure:
     def setStaticDDS(self, ddsfreq : float, channel : int):
         return self.chimera_command(f"Set-Static-DDS ${ddsfreq:.6f} ${channel:d}") # Hz resoultion, in MHz unit
 
+    def setTTL(self, name:str, value:bool):
+        return self.chimera_command(f"Set-TTL ${name}${int(value)}")
+    
     def setDAC(self, name:str= "", value:float=0.0):
         return self.chimera_command(f"Set-DAC ${name}${value:.4f}")
     
@@ -228,6 +231,8 @@ if __name__ == "__main__":
     exp = ExperimentProcedure()
     # exp.run_calibration("prb_pwr")
     # exp.setStaticDDS(580.9,0)
+    exp.setTTL(name="ryd1013trg", value=True)
+    exp.setTTL(name="ryd420trg", value=True)
     exp.setDAC()
     exp.setDAC(name='ryd420amp', value=-0.013)
     import matplotlib.pyplot as plt

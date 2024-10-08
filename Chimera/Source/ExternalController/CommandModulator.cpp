@@ -225,6 +225,33 @@ void CommandModulator::setStaticDDS(QString ddsfreqStr, QString channelStr, Erro
 	}
 }
 
+void CommandModulator::setTTL(QString name, QString value, ErrorStatus& status)
+{
+	unsigned int row, number;
+	auto ttlIdn = auxWin->getTtlCore().getNameIdentifier(str(name), row, number);
+	if (ttlIdn == -1) {
+		status.error = true;
+		status.errorMsg = "Error\nError in converting command argument " + str(name) + " to TtlIdentifier ";
+		return;
+	}
+	bool ttlVal;
+	try {
+		ttlVal = boost::lexical_cast<bool>(str(value));
+	}
+	catch (boost::bad_lexical_cast&) {
+		status.error = true;
+		status.errorMsg = "Error\nError in converting command argument " + str(value) + " to bool";
+		return;
+	}
+	try {
+		auxWin->getTtlSystem().setSingleTtlGui(row, number, ttlVal);
+	}
+	catch (ChimeraError& err) {
+		status.error = true;
+		status.errorMsg = err.trace();
+	}
+}
+
 void CommandModulator::setDAC(QString name, QString value, ErrorStatus& status)
 {
 	if (name == "") {

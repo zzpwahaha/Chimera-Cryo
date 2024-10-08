@@ -33,7 +33,7 @@ public slots:
 	void startCalibration(QString calName, ErrorStatus& status);
 	void isCalibrationRunning(bool& running, ErrorStatus& status);
 	void setStaticDDS(QString ddsfreqStr, QString channelStr, ErrorStatus& status);
-
+	void setTTL(QString name, QString value, ErrorStatus& status);
 	void setDAC(QString name, QString value, ErrorStatus& status);
 	void setOL(ErrorStatus& status);
 	void setDDS(ErrorStatus& status);
