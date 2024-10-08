@@ -37,9 +37,8 @@ class TCPClient:
     def read(self, bufsize: int = 4096) -> bytes:
         if self.sock:
             try:
-                # data = self.sock.recv(bufsize)
-                # return data.decode('utf-8')
                 data = self.sock.recv(bufsize)
+                # return data.decode('utf-8')
                 return data
                 # data = b""
                 # while True:

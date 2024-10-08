@@ -131,23 +131,20 @@ void MessageConsumer::consume()
                 connection->do_write("Error\nNot enough arguemnt found in command: " + message);
                 continue;
             }
-            unsigned channel;
-            try {
-                channel = boost::lexical_cast<unsigned>(args[1]);
-            }
-            catch (boost::bad_lexical_cast&) { 
-                emit logMessage(qstr(timeStamp + ": \t" + "Error in converting command argument to number: " + message));
-                connection->do_write("Error\nError in converting command argument to number: " + message);
-                continue;
-            }
             QMetaObject::invokeMethod(&modulator_, [&]() {
-                modulator_.setStaticDDS(args[0], channel, status);
+                modulator_.setStaticDDS(qstr(args[0]), qstr(args[1]), status);
                 }, Qt::BlockingQueuedConnection);
             connection->do_write(compileReply("Finished setting static DDS", status));
         }
         else if (stratWith(message, "Set-DAC")) {
+            auto args = getArguments(message);
+            if (args.size() != 2) {
+                emit logMessage(qstr(timeStamp + ": \t" + "Not enough arguemnt found in command: " + message));
+                connection->do_write("Error\nNot enough arguemnt found in command: " + message);
+                continue;
+            }
             QMetaObject::invokeMethod(&modulator_, [&]() {
-                modulator_.setDAC(status);
+                modulator_.setDAC(qstr(args[0]), qstr(args[1]), status);
                 }, Qt::BlockingQueuedConnection);
             connection->do_write(compileReply("Finished setting DAC", status));
         }
@@ -170,11 +167,50 @@ void MessageConsumer::consume()
                 connection->do_write("Error\nNot enough arguemnt found in command: " + message);
                 continue;
             }
-            QVector<double> image;
+            QVector<char> image;
             QMetaObject::invokeMethod(&modulator_, [&]() {
                 modulator_.getMakoImage(qstr(args[0]), image, status);
                 }, Qt::BlockingQueuedConnection);
             connection->do_write(compileReply("Finished getting MAKO image", image.toStdVector(), status));
+        }
+        else if (stratWith(message, "Get-MAKO-Dimension")) {
+            auto args = getArguments(message);
+            if (args.size() != 1) {
+                emit logMessage(qstr(timeStamp + ": \t" + "Not enough arguemnt found in command: " + message));
+                connection->do_write("Error\nNot enough arguemnt found in command: " + message);
+                continue;
+            }
+            QVector<char> imageDim;
+            QMetaObject::invokeMethod(&modulator_, [&]() {
+                modulator_.getMakoImageDimension(qstr(args[0]), imageDim, status);
+                }, Qt::BlockingQueuedConnection);
+            connection->do_write(compileReply("Finished getting MAKO image dimension", imageDim.toStdVector(), status));
+        }
+        else if (stratWith(message, "Get-MAKO-Feature-Value")) {
+            auto args = getArguments(message);
+            if (args.size() != 3) {
+                emit logMessage(qstr(timeStamp + ": \t" + "Not enough arguemnt found in command: " + message));
+                connection->do_write("Error\nNot enough arguemnt found in command: " + message);
+                continue;
+            }
+            QVector<char> featureValue;
+            QMetaObject::invokeMethod(&modulator_, [&]() {
+                modulator_.getMakoFeatureValue(qstr(args[0]), qstr(args[1]), qstr(args[2]), featureValue, status);
+                }, Qt::BlockingQueuedConnection);
+            connection->do_write(compileReply("Finished getting MAKO image dimension", featureValue.toStdVector(), status));
+        }
+        else if (stratWith(message, "Set-MAKO-Feature-Value")) {
+        auto args = getArguments(message);
+            if (args.size() != 4) {
+                emit logMessage(qstr(timeStamp + ": \t" + "Not enough arguemnt found in command: " + message));
+                connection->do_write("Error\nNot enough arguemnt found in command: " + message);
+                continue;
+            }
+            QVector<char> featureValue;
+            QMetaObject::invokeMethod(&modulator_, [&]() {
+                modulator_.setMakoFeatureValue(qstr(args[0]), qstr(args[1]), qstr(args[2]), qstr(args[3]), status);
+                }, Qt::BlockingQueuedConnection);
+            connection->do_write(compileReply("Finished setting MAKO image dimension", status));
         }
         else {
             emit logMessage(qstr(timeStamp + ": \t" + "Unrecongnized command: " + message));
@@ -193,20 +229,20 @@ std::string MessageConsumer::compileReply(std::string normalMsg, CommandModulato
     }
 }
 
-std::vector<char> MessageConsumer::compileReply(std::string normalMsg, std::vector<double> data, CommandModulator::ErrorStatus status)
+std::vector<char> MessageConsumer::compileReply(std::string normalMsg, std::vector<char> data, CommandModulator::ErrorStatus status)
 {
+    if (status.error) {
+        std::string errorMessage = str("Error\n") + status.errorMsg;
+        return std::vector<char>(errorMessage.begin(), errorMessage.end());
+    }
     std::vector<char> buffer; // normalMsg + delimiter($) + size of vector + vector
 
     std::size_t size = data.size();
-    buffer.reserve(normalMsg.size() + 1 + sizeof(size) + sizeof(double) * size);
+    buffer.reserve(normalMsg.size() + 1 + sizeof(size) + sizeof(char) * size);
     // Copy the message and add the delimiter
     buffer.insert(buffer.end(), normalMsg.begin(), normalMsg.end());
     buffer.push_back(delimiter_);
-    // Copy the size of the vector
-    buffer.insert(buffer.end(), reinterpret_cast<char*>(&size), reinterpret_cast<char*>(&size) + sizeof(size));
-    // Copy the vector data
-    buffer.insert(buffer.end(), reinterpret_cast<const char*>(data.data()), reinterpret_cast<const char*>(data.data()) + sizeof(double) * size);
-
+    buffer.insert(buffer.end(), data.begin(), data.end());
     return buffer;
 }
 

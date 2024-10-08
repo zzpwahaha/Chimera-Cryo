@@ -9,6 +9,7 @@ class QtMakoWindow;
 class QtAuxiliaryWindow;
 class QtScriptWindow;
 class QtAnalysisWindow;
+class MakoCamera;
 
 // THIS SHOULD LIVE IN MAIN THREAD DUE TO QT GUI OPREATIONS
 class CommandModulator : public QObject
@@ -31,16 +32,23 @@ public slots:
 	void isExperimentRunning(bool& running, ErrorStatus& status);
 	void startCalibration(QString calName, ErrorStatus& status);
 	void isCalibrationRunning(bool& running, ErrorStatus& status);
-	void setStaticDDS(std::string ddsfreq, unsigned channel, ErrorStatus& status);
+	void setStaticDDS(QString ddsfreqStr, QString channelStr, ErrorStatus& status);
 
-	void setDAC(ErrorStatus& status);
+	void setDAC(QString name, QString value, ErrorStatus& status);
 	void setOL(ErrorStatus& status);
 	void setDDS(ErrorStatus& status);
 
-	void getMakoImage(QString whichMako, QVector<double>& img, ErrorStatus& status);
+	void getMakoImage(QString whichMako, QVector<char>& imgResult, ErrorStatus& status);
+	void getMakoImageDimension(QString whichMako, QVector<char>& imgDimParamResult, ErrorStatus& status);
+	void getMakoFeatureValue(QString whichMako, QString featureName, QString featureType, QVector<char>& featureValue, ErrorStatus& status);
+	void setMakoFeatureValue(QString whichMako, QString featureName, QString featureType, QString featureValue, ErrorStatus& status);
 
+public:
+	template<typename T>
+	static std::vector<char> vectorToVectorChar(const std::vector<T>& data);
 private:
 	std::string convertToUnixPath(std::string mixedPath);
+	MakoCamera* getMakoCameraPtr(QString whichMako, ErrorStatus& status);
 
 private:
 	QtMainWindow* mainWin = nullptr;
@@ -52,4 +60,3 @@ private:
 	QtAnalysisWindow* analysisWin = nullptr;
 
 };
-

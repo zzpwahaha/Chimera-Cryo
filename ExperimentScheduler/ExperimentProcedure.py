@@ -37,32 +37,53 @@ class ExperimentProcedure:
         # Establish connection with Chimera
         self.chimera_client.connect()
 
-    def _chimera_command(self, command: str) :
-        result = self.chimera_client.query(command)
-        result_message, result_data = self.decode_reply(result)
+    def _chimera_command(self, command: str, bufsize = 4096, data_type = 'double') :
+        result = self.chimera_client.query(command, bufsize)
+        result_message, result_data = self.decode_reply(result, data_type)
         print(result_message)
         return (not self._judge_message_failure(result_message)), result_data
         
     def chimera_command(self, command: str) -> bool:
         return self._chimera_command(command)[0]
 
-    def chimera_data_command(self, command: str) -> bool:
-        return self._chimera_command(command)
+    def chimera_bool_command(self, command: str) -> bool:
+        result = self.chimera_client.query(command)
+        result_message, _ = self.decode_reply(result)
+        self._judge_message_failure(result_message)
+        if 'TRUE' in result_message:
+            return True
+        elif 'FALSE' in result_message:
+            return False
+        else:
+            print(f"Unexpected response received: {result}")
+
+    def chimera_data_command(self, command: str, bufsize=4096, data_type = 'double') -> bool:
+        return self._chimera_command(command, bufsize, data_type)[1]
 
     @staticmethod
-    def decode_reply(result_message: bytes):
+    def decode_reply(result_message: bytes, data_type = 'double'):
         # Decode the message
         if b'$' not in result_message:
             return result_message.decode('utf-8'), np.array([])
         # Find the delimiter '$'        
         delimiter_index = result_message.index(b'$')
         message = result_message[:delimiter_index].decode('utf-8')  # Get the string message
-        # Get the size of the vector (4 bytes), size of the size_t in Chimera MessageConsumer::compileReply
-        size_bytes = result_message[delimiter_index + 1:delimiter_index + 5]
-        size = struct.unpack('I', size_bytes)[0]  # Unpack as unsigned int
+        # Get the size of the vector (8 bytes), size of the size_t in Chimera MessageConsumer::compileReply
+        size_bytes = result_message[delimiter_index + 1:delimiter_index + 1 + 8]
+        size = struct.unpack('<Q', size_bytes)[0]  # Unpack as unsigned int, little endian for intel x86 and AMD
         # Get the vector data
-        vector_data = result_message[delimiter_index + 5:delimiter_index + 5 + size * 8]  # 8 bytes per double
-        vector = struct.unpack(f'{size}d', vector_data)  # Unpack as double values
+        start_of_data = delimiter_index + 1 + 8
+        if data_type=='double':
+            vector_data = result_message[start_of_data:start_of_data + size * 8]  # 8 bytes per double
+            vector = struct.unpack(f'<{size}d', vector_data)  # Unpack as double values
+        elif data_type == 'int':
+            vector_data = result_message[start_of_data:start_of_data + size * 8]  # 8 bytes per int
+            vector = struct.unpack(f'<{size}q', vector_data)  # Unpack as int values
+        elif data_type == 'char' or data_type == 'string':
+            vector_data = result_message[start_of_data:start_of_data + size * 1]  # 1 bytes per char
+            vector = struct.unpack(f'<{size}s', vector_data)  # Unpack as char values
+        else:
+            raise ValueError("Unknown type of data_type in decode_reply")
         return message, np.array(vector)
 
     @staticmethod
@@ -96,36 +117,20 @@ class ExperimentProcedure:
         return self.chimera_command(f"Save-All")
 
     def is_experiment_running(self) -> bool:
-        result = self.chimera_client.query("Is-Experiment-Running?")
-        result_message, _ = self.decode_reply(result)
-        self._judge_message_failure(result_message)
-        if 'TRUE' in result_message:
-            return True
-        elif 'FALSE' in result_message:
-            return False
-        else:
-            print(f"Unexpected response received: {result}")
+        return self.chimera_bool_command("Is-Experiment-Running?")
     
     def run_calibration(self, name: str):
         if self.save_all():
             self.chimera_command(f"Start-Calibration ${name}")
 
     def is_calibration_running(self) -> bool:
-        result = self.chimera_client.query("Is-Calibration-Running?")
-        result_message, _ = self.decode_reply(result)
-        self._judge_message_failure(result_message)
-        if 'TRUE' in result_message:
-            return True
-        elif 'FALSE' in result_message:
-            return False
-        else:
-            print(f"Unexpected response received: {result}")
+        return self.chimera_bool_command("Is-Calibration-Running?")
 
     def setStaticDDS(self, ddsfreq : float, channel : int):
         return self.chimera_command(f"Set-Static-DDS ${ddsfreq:.6f} ${channel:d}") # Hz resoultion, in MHz unit
 
-    def setDAC(self):
-        return self.chimera_command(f"Set-DAC")
+    def setDAC(self, name:str= "", value:float=0.0):
+        return self.chimera_command(f"Set-DAC ${name}${value:.4f}")
     
     def setDDS(self):
         return self.chimera_command(f"Set-DDS")
@@ -140,6 +145,34 @@ class ExperimentProcedure:
         time.sleep(1)
         self.setOL()
         time.sleep(1)
+
+    def getMakoImage(self, mako_idx: int):
+        if mako_idx not in [1,2,3,4]:
+            print("mako_idx out of the range. Ranges are " + str([1,2,3,4]))
+            return
+        return self.chimera_data_command(f"Get-MAKO-Image $mako{mako_idx:d}", 16*65536*8) # .reshape(height, width)
+
+    def getMakoImageDimension(self, mako_idx: int):
+        if mako_idx not in [1,2,3,4]:
+            print("mako_idx out of the range. Ranges are " + str([1,2,3,4]))
+            return
+        t,l,b,r = self.chimera_data_command(f"Get-MAKO-Dimension $mako{mako_idx:d}") # top, left, bottom, right
+        return map(round, (l,b,r-l+1,t-b+1)) # left, bottom, width, height
+
+    def getMakoFeatureValue(self, mako_idx: int, feature_name: str, feature_type: str):
+        if mako_idx not in [1,2,3,4]:
+            print("mako_idx out of the range. Ranges are " + str([1,2,3,4]))
+            return
+        result = self.chimera_data_command(f"Get-MAKO-Feature-Value $mako{mako_idx:d}${feature_name}${feature_type}", data_type=feature_type)
+        if feature_type == 'string':
+            result = result.tobytes().decode('ascii')
+        return result
+        
+    def setMakoFeatureValue(self, mako_idx: int, feature_name: str, feature_type: str, feature_value: str):
+        if mako_idx not in [1,2,3,4]:
+            print("mako_idx out of the range. Ranges are " + str([1,2,3,4]))
+            return
+        return self.chimera_command(f"Set-MAKO-Feature-Value $mako{mako_idx:d}${feature_name}${feature_type}${feature_value}")
 
 def experiment_monitoring(exp : ExperimentProcedure, timeout_control = {'use':False, 'timeout':600}):
     # Monitor experiment status
@@ -194,5 +227,18 @@ if __name__ == "__main__":
     # EfieldCalibrationProcedure()
     exp = ExperimentProcedure()
     # exp.run_calibration("prb_pwr")
-    exp.setStaticDDS(580.9,0)
+    # exp.setStaticDDS(580.9,0)
+    exp.setDAC()
+    exp.setDAC(name='ryd420amp', value=-0.013)
+    import matplotlib.pyplot as plt
+    t,l,w,h = exp.getMakoImageDimension(4)
+    img = exp.getMakoImage(4)
+    # exposure = exp.getMakoFeatureValue(4, "ExposureTimeAbs", "double")
+    # frame_rate = exp.getMakoFeatureValue(4, "AcquisitionFrameRateAbs", "double")
+    # trigger_source = exp.getMakoFeatureValue(4, "TriggerSource", "string")
+    exp.setMakoFeatureValue(4, "TriggerSource", "string", "FixedRate")
+    plt.pcolormesh(img.reshape(h,w)) # height, width
+    plt.gca().set_aspect('equal')
+    # plt.plot(img)
+    plt.show()
 

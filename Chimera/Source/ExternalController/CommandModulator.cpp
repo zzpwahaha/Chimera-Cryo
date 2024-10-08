@@ -198,8 +198,19 @@ void CommandModulator::isCalibrationRunning(bool& running, ErrorStatus& status)
 	running = calManager.isCalibrationRunning();
 }
 
-void CommandModulator::setStaticDDS(std::string ddsfreq, unsigned channel, ErrorStatus& status)
+void CommandModulator::setStaticDDS(QString ddsfreqStr, QString channelStr, ErrorStatus& status)
 {
+	unsigned channel;
+	std::string ddsfreq = str(ddsfreqStr);
+	try {
+		channel = boost::lexical_cast<unsigned>(str(channelStr));
+	}
+	catch (boost::bad_lexical_cast&) {
+		status.error = true;
+		status.errorMsg = "Error\nError in converting command argument to number";
+		return;
+	}
+
 	auxWin->reportStatus("----------------------\r\nSetting static Ddss... ");
 	try {
 		auto& staticDds = analysisWin->getStaticDds();
@@ -214,22 +225,50 @@ void CommandModulator::setStaticDDS(std::string ddsfreq, unsigned channel, Error
 	}
 }
 
-void CommandModulator::setDAC(ErrorStatus& status)
+void CommandModulator::setDAC(QString name, QString value, ErrorStatus& status)
 {
-	auxWin->reportStatus("----------------------\r\nSetting Dacs... ");
-	try {
-		status.error = false;
-		auxWin->reportStatus("Setting Dacs...\r\n");
-		auxWin->getAoSys().handleSetDacsButtonPress(true);
-		auxWin->getTtlSystem().setTtlStatus(auxWin->getTtlSystem().getCurrentStatus());
-		auxWin->reportStatus("Finished Setting Dacs.\r\n");
+	if (name == "") {
+		auxWin->reportStatus("----------------------\r\nSetting Dacs... ");
+		try {
+			status.error = false;
+			auxWin->reportStatus("Setting Dacs...\r\n");
+			auxWin->getAoSys().handleSetDacsButtonPress(true);
+			auxWin->getTtlSystem().setTtlStatus(auxWin->getTtlSystem().getCurrentStatus());
+			auxWin->reportStatus("Finished Setting Dacs.\r\n");
+		}
+		catch (ChimeraError& err) {
+			mainWin->reportStatus(": " + err.qtrace() + "\r\n");
+			mainWin->reportErr(err.qtrace());
+			status.error = true;
+			status.errorMsg = err.trace();
+		}
 	}
-	catch (ChimeraError& err) {
-		mainWin->reportStatus(": " + err.qtrace() + "\r\n");
-		mainWin->reportErr(err.qtrace());
-		status.error = true;
-		status.errorMsg = err.trace();
+	else {
+		int dacIdn = auxWin->getAoSys().getCore().getDacIdentifier(str(name));
+		if (dacIdn == -1) {
+			status.error = true;
+			status.errorMsg = "Error\nError in converting command argument " + str(name) + " to DacIdentifier ";
+			return;
+		}
+		double dacVal;
+		try {
+			dacVal = boost::lexical_cast<double>(str(value));
+		}
+		catch (boost::bad_lexical_cast&) {
+			status.error = true;
+			status.errorMsg = "Error\nError in converting command argument " + str(value) + " to number";
+			return;
+		}
+		try {
+			auxWin->getAoSys().setSingleDacGui(dacIdn, dacVal);
+		}
+		catch (ChimeraError& err) {
+			status.error = true;
+			status.errorMsg = err.trace();
+		}
 	}
+
+
 }
 
 void CommandModulator::setOL(ErrorStatus& status)
@@ -267,33 +306,140 @@ void CommandModulator::setDDS(ErrorStatus& status)
 	}
 }
 
-void CommandModulator::getMakoImage(QString whichMako, QVector<double>& img, ErrorStatus& status)
+void CommandModulator::getMakoImage(QString whichMako, QVector<char>& imgResult, ErrorStatus& status)
 {
-	// get the corresponding camera
-	QStringList makos = { "mako1", "mako2", "mako3", "mako4" };
-	MakoCamera* cam;
-	if (makos.contains(whichMako)) {
-		QString numberStr = whichMako.mid(4); // Get the substring after "mako"
-		int number = numberStr.toInt();
-		if (whichMako == "mako1" || whichMako == "mako2") {
-			cam = makoWin1->getMakoCam((number - 1) % 2);
-		}
-		else if (whichMako == "mako3" || whichMako == "mako4") {
-			cam = makoWin2->getMakoCam((number - 1) % 2);
-		}
-	}
-	else {
-		status.error = true;
-		status.errorMsg = "whichMako = " + str(whichMako) + " does not match the mako list. Valid lists are " + str(makos.join(", "));
+	auto* cam = getMakoCameraPtr(whichMako, status);
+	if (status.error) {
+		return;
 	}
 
 	try {
-		img = cam->getCurrentImageInBuffer();
+		auto img = cam->getCurrentImageInBuffer().toStdVector();
+		imgResult = QVector<char>::fromStdVector(vectorToVectorChar<double>(img));
 	}
 	catch (ChimeraError& e) {
 		status.error = true;
 		status.errorMsg = "Error in getting Mako image: " + e.trace();
 	}
+}
+
+void CommandModulator::getMakoImageDimension(QString whichMako, QVector<char>& imgDimParamResult, ErrorStatus& status)
+{
+	auto* cam = getMakoCameraPtr(whichMako, status);
+	if (status.error) {
+		return;
+	}
+
+	try {
+		auto& camCore = cam->getMakoCore();
+		camCore.updateCurrentSettings();
+		auto dim = camCore.getRunningSettings().dims;
+		auto imgDimParam = std::vector<double>({ static_cast<double>(dim.top), static_cast<double>(dim.left), 
+			static_cast<double>(dim.bottom), static_cast<double>(dim.right) });
+		imgDimParamResult = QVector<char>::fromStdVector(vectorToVectorChar<double>(imgDimParam));
+	}
+	catch (ChimeraError& e) {
+		status.error = true;
+		status.errorMsg = "Error in getting Mako image: " + e.trace();
+	}
+}
+
+void CommandModulator::getMakoFeatureValue(QString whichMako, QString featureName, QString featureType, QVector<char>& featureValue, ErrorStatus& status)
+{
+	auto* cam = getMakoCameraPtr(whichMako, status);
+	if (status.error) {
+		return;
+	}
+	auto& makoCtrl = cam->getMakoCore().getMakoCtrl();
+	try {
+		std::string errStr;
+		//std::any value;
+		std::vector<char> result;
+		if (featureType == "string") {
+			auto value = makoCtrl.getFeatureValue<std::string>(str(featureName), errStr);
+			result = std::vector<char>(value.begin(), value.end());
+			result = vectorToVectorChar(result);
+		}
+		else if (featureType == "double") {
+			double value = makoCtrl.getFeatureValue<double>(str(featureName), errStr);
+			result = vectorToVectorChar<double>(std::vector<double>({ value }));
+		}
+		else if (featureType == "int") {
+			int value = makoCtrl.getFeatureValue<VmbInt64_t>(str(featureName), errStr);
+			result = vectorToVectorChar<int>(std::vector<int>({ value }));
+		}
+		else {
+			status.error = false;
+			status.errorMsg = "Error in getting Mako feature " + str(featureName) + " : Unrecongized feature type: " + str(featureType);
+		}
+		featureValue = QVector<char>::fromStdVector(result);
+	}
+	catch (ChimeraError& e) {
+		status.error = true;
+		status.errorMsg = "Error in getting Mako feature " + str(featureName) + " : " + e.trace();
+	}
+}
+
+void CommandModulator::setMakoFeatureValue(QString whichMako, QString featureName, QString featureType, QString featureValue, ErrorStatus& status)
+{
+	auto* cam = getMakoCameraPtr(whichMako, status);
+	if (status.error) {
+		return;
+	}
+	auto& makoCtrl = cam->getMakoCore().getMakoCtrl();
+	try {
+		std::string errStr;
+		//std::any value;
+		std::vector<char> result;
+		if (featureType == "string") {
+			makoCtrl.setFeatureValue(str(featureName), featureValue.toStdString().c_str(), errStr); // implicitly using const char*
+		}
+		else if (featureType == "double") {
+			double value;
+			try {
+				value = boost::lexical_cast<double>(str(featureValue));
+			}
+			catch (boost::bad_lexical_cast& e){
+				throwNested("Error in converting " + str(featureName) + "'s value.");
+			}
+			makoCtrl.setFeatureValue<double>(str(featureName), value, errStr);
+		}
+		else if (featureType == "int") {
+			int value;
+			try {
+				value = boost::lexical_cast<int>(str(featureValue));
+			}
+			catch (boost::bad_lexical_cast& e) {
+				throwNested("Error in converting " + str(featureName) + "'s value.");
+			}
+			makoCtrl.setFeatureValue<VmbInt64_t>(str(featureName), value, errStr);
+		}
+		else {
+			status.error = false;
+			status.errorMsg = "Error in setting Mako feature " + str(featureName) + " : Unrecongized feature type: " + str(featureType);
+		}
+	}
+	catch (ChimeraError& e) {
+		status.error = true;
+		status.errorMsg = "Error in getting Mako feature " + str(featureName) + " : " + e.trace();
+	}
+}
+
+
+template<typename T>
+static std::vector<char> CommandModulator::vectorToVectorChar(const std::vector<T>& data)
+{
+	std::vector<char> buffer; // size of vector + vector
+
+	std::size_t size = data.size();
+	buffer.reserve(sizeof(size) + sizeof(T) * size);
+	// Copy the size of the vector
+	buffer.insert(buffer.end(), reinterpret_cast<const char*>(&size), reinterpret_cast<const char*>(&size) + sizeof(size)); // Little-endian for intel x86 and AMD
+	// Copy the vector data
+	//buffer.insert(buffer.end(), reinterpret_cast<const char*>(data.data()), reinterpret_cast<const char*>(data.data()) + sizeof(T) * size);
+	buffer.resize(buffer.size() + sizeof(T) * size); // Resize the buffer to accommodate new data
+	std::memcpy(buffer.data() + sizeof(size), data.data(), sizeof(T) * size); // Copy the data
+	return buffer;
 }
 
 std::string CommandModulator::convertToUnixPath(std::string mixedPath)
@@ -320,5 +466,28 @@ std::string CommandModulator::convertToUnixPath(std::string mixedPath)
 		}
 	}
 	return result;
+}
+
+MakoCamera* CommandModulator::getMakoCameraPtr(QString whichMako, ErrorStatus& status)
+{
+	// get the corresponding camera
+	QStringList makos = { "mako1", "mako2", "mako3", "mako4" };
+	MakoCamera* cam;
+	if (makos.contains(whichMako)) {
+		QString numberStr = whichMako.mid(4); // Get the substring after "mako"
+		int number = numberStr.toInt();
+		if (whichMako == "mako1" || whichMako == "mako2") {
+			cam = makoWin1->getMakoCam((number - 1) % 2);
+		}
+		else if (whichMako == "mako3" || whichMako == "mako4") {
+			cam = makoWin2->getMakoCam((number - 1) % 2);
+		}
+	}
+	else {
+		status.error = true;
+		status.errorMsg = "whichMako = " + str(whichMako) + " does not match the mako list. Valid lists are " + str(makos.join(", "));
+		cam = nullptr;
+	}
+	return cam;
 }
 
