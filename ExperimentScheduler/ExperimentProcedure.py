@@ -177,6 +177,15 @@ class ExperimentProcedure:
             return
         return self.chimera_command(f"Set-MAKO-Feature-Value $mako{mako_idx:d}${feature_name}${feature_type}${feature_value}")
 
+    def setPicoScrewPosition(self, pico_idx: int, position: int):
+        if pico_idx not in [1,2,3,4]:
+            print("pico_idx out of the range. Ranges are " + str([1,2,3,4]))
+            return
+        if position>500 or position<-500:
+            print("Are you sure you want to move this much???")
+            return
+        return self.chimera_command(f"Set-PicoScrew-Position ${pico_idx:d}${position:d}")
+
 def experiment_monitoring(exp : ExperimentProcedure, timeout_control = {'use':False, 'timeout':600}):
     # Monitor experiment status
     exp_start_time = time.time()
@@ -231,6 +240,7 @@ if __name__ == "__main__":
     exp = ExperimentProcedure()
     # exp.run_calibration("prb_pwr")
     # exp.setStaticDDS(580.9,0)
+    exp.setPicoScrewPosition(1,0)
     exp.setTTL(name="ryd1013trg", value=True)
     exp.setTTL(name="ryd420trg", value=True)
     exp.setDAC()

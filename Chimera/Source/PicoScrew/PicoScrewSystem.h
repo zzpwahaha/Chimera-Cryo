@@ -21,6 +21,7 @@ public:
 	void handleOpenConfig(ConfigStream& configFile);
 	void handleSaveConfig(ConfigStream& configFile);
 	void updateCurrentValues();
+	void updateCurrentEditValue(unsigned channel, int pos); // used in external control
 	void updateCtrlEnable();
 	void handleProgramNowPress(std::vector<parameterType> constants);
 	std::string getConfigDelim();

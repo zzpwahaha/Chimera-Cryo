@@ -166,7 +166,7 @@ void MessageConsumer::consume()
             QMetaObject::invokeMethod(&modulator_, [&]() {
                 modulator_.getMakoFeatureValue(qstr(args[0]), qstr(args[1]), qstr(args[2]), featureValue, status);
                 }, Qt::BlockingQueuedConnection);
-            connection->do_write(compileReply("Finished getting MAKO image dimension", featureValue.toStdVector(), status));
+            connection->do_write(compileReply("Finished getting MAKO feature value", featureValue.toStdVector(), status));
         }
         else if (stratWith(message, "Set-MAKO-Feature-Value")) {
             auto args = getArguments(message, 4, argValid, connection);
@@ -175,7 +175,15 @@ void MessageConsumer::consume()
             QMetaObject::invokeMethod(&modulator_, [&]() {
                 modulator_.setMakoFeatureValue(qstr(args[0]), qstr(args[1]), qstr(args[2]), qstr(args[3]), status);
                 }, Qt::BlockingQueuedConnection);
-            connection->do_write(compileReply("Finished setting MAKO image dimension", status));
+            connection->do_write(compileReply("Finished setting MAKO feature value", status));
+        }
+        else if (stratWith(message, "Set-PicoScrew-Position")) {
+            auto args = getArguments(message, 2, argValid, connection);
+            if (!argValid) continue;
+            QMetaObject::invokeMethod(&modulator_, [&]() {
+                modulator_.setPicoScrewPosition(qstr(args[0]), qstr(args[1]), status);
+                }, Qt::BlockingQueuedConnection);
+            connection->do_write(compileReply("Finished setting PicoScrew position", status));
         }
         else {
             emit logMessage(qstr(timeStamp + ": \t" + "Unrecongnized command: " + message));

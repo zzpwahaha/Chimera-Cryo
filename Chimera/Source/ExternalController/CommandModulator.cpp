@@ -452,6 +452,31 @@ void CommandModulator::setMakoFeatureValue(QString whichMako, QString featureNam
 	}
 }
 
+void CommandModulator::setPicoScrewPosition(QString whichScrew, QString value, ErrorStatus& status)
+{
+	auto& picoSys = auxWin->getPsSys();
+	unsigned channel;
+	try {
+		channel = boost::lexical_cast<unsigned>(str(whichScrew));
+	}
+	catch (boost::bad_lexical_cast&) {
+		status.error = true;
+		status.errorMsg = "Error\nError in converting command argument to number";
+		return;
+	}
+	int pos;
+	try {
+		pos = boost::lexical_cast<int>(str(value));
+	}
+	catch (boost::bad_lexical_cast&) {
+		status.error = true;
+		status.errorMsg = "Error\nError in converting command argument to number";
+		return;
+	}
+	picoSys.updateCurrentEditValue(channel - 1, pos);
+	picoSys.handleProgramNowPress(auxWin->getUsableConstants());
+}
+
 
 template<typename T>
 static std::vector<char> CommandModulator::vectorToVectorChar(const std::vector<T>& data)
