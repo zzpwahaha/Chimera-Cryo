@@ -38,11 +38,14 @@ public slots:
 	void setOL(ErrorStatus& status);
 	void setDDS(ErrorStatus& status);
 
+	void startMako(QString whichMako, ErrorStatus& status);
+	void stopMako(QString whichMako, ErrorStatus& status);
 	void getMakoImage(QString whichMako, QVector<char>& imgResult, ErrorStatus& status);
 	void getMakoImageDimension(QString whichMako, QVector<char>& imgDimParamResult, ErrorStatus& status);
 	void getMakoFeatureValue(QString whichMako, QString featureName, QString featureType, QVector<char>& featureValue, ErrorStatus& status);
 	void setMakoFeatureValue(QString whichMako, QString featureName, QString featureType, QString featureValue, ErrorStatus& status);
 	void setPicoScrewPosition(QString whichScrew, QString value, ErrorStatus& status);
+	void getPicoScrewPositions(QVector<char>& positionValue, ErrorStatus& status);
 
 public:
 	template<typename T>

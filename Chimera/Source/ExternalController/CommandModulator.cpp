@@ -334,6 +334,36 @@ void CommandModulator::setDDS(ErrorStatus& status)
 	}
 }
 
+void CommandModulator::startMako(QString whichMako, ErrorStatus& status)
+{
+	auto* cam = getMakoCameraPtr(whichMako, status);
+	if (status.error) {
+		return;
+	}
+	try {
+		cam->acquisitionStartStopFromCtrler("AcquisitionStart");
+	}
+	catch (ChimeraError& e) {
+		status.error = true;
+		status.errorMsg = "Error in starting Mako: " + e.trace();
+	}
+}
+
+void CommandModulator::stopMako(QString whichMako, ErrorStatus& status)
+{
+	auto* cam = getMakoCameraPtr(whichMako, status);
+	if (status.error) {
+		return;
+	}
+	try {
+		cam->acquisitionStartStopFromCtrler("AcquisitionStop");
+	}
+	catch (ChimeraError& e) {
+		status.error = true;
+		status.errorMsg = "Error in stopping Mako: " + e.trace();
+	}
+}
+
 void CommandModulator::getMakoImage(QString whichMako, QVector<char>& imgResult, ErrorStatus& status)
 {
 	auto* cam = getMakoCameraPtr(whichMako, status);
@@ -476,6 +506,17 @@ void CommandModulator::setPicoScrewPosition(QString whichScrew, QString value, E
 	}
 	picoSys.updateCurrentEditValue(channel - 1, pos);
 	picoSys.handleProgramNowPress(auxWin->getUsableConstants());
+}
+
+void CommandModulator::getPicoScrewPositions(QVector<char>& positionValue, ErrorStatus& status)
+{
+	auto& picoCore = auxWin->getPsSys().getCore();
+	std::vector<int> position;
+	for (auto id : range(PICOSCREW_NUM)) {
+		position.push_back(picoCore.motorPosition(id));
+	}
+	std::vector<char> positionChar = vectorToVectorChar(position);
+	positionValue = QVector<char>::fromStdVector(positionChar);
 }
 
 
