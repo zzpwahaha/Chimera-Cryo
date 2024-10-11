@@ -288,6 +288,7 @@ void CommandModulator::setDAC(QString name, QString value, ErrorStatus& status)
 		}
 		try {
 			auxWin->getAoSys().setSingleDacGui(dacIdn, dacVal);
+			auxWin->getTtlSystem().getCore().FPGAForceOutput(auxWin->getTtlSystem().getCurrentStatus());
 		}
 		catch (ChimeraError& err) {
 			status.error = true;
