@@ -100,7 +100,7 @@ def high_to_low_direction(exp_idx):
         exp.hardware_controller.restart_zynq_control()
 
 def low_to_high_direction(exp_idx):
-    EOM_center_freqs = np.linspace(255, 205, 6)
+    EOM_center_freqs = np.linspace(255, 225, 4)
     previous_f = 255
     for idx, eom_f in enumerate(EOM_center_freqs):
         _move_EOM_resonance(previous_f, eom_f, step=-0.1)
@@ -122,8 +122,8 @@ def efield_tracing_procedure():
         # print(f"Running experiment sets number {idx}")
         # if idx != 0:
         #     exp.hardware_controller.restart_zynq_control()
-        high_to_low_direction(1)
-        # low_to_high_direction(idx)
+        # high_to_low_direction(0)
+        low_to_high_direction(0)
 
 
 if __name__=='__main__':

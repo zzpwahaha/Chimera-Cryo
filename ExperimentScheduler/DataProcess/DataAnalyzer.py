@@ -12,7 +12,7 @@ import numpy as np
 import ExpFile as exp
 import AnalysisHelpers as ah
 import MatplotlibPlotters as mp
-from fitters import decaying_cos
+from fitters import decaying_cos, trigonometric
 from fitters.Gaussian import gaussian
 from fitters.Polynomial import Quadratic
 from remoteDataPaths import get_data_files
@@ -167,11 +167,14 @@ class DataAnalysis:
             if xkey.shape != y.shape:
                 raise ValueError("xkey shape does not match y!")
             x = xkey.copy()
-        x_fit = x[yerr!=0]; y_fit = y[yerr!=0]; yerr_fit = yerr[yerr!=0]
+        # x_fit = x[yerr!=0]; y_fit = y[yerr!=0]; yerr_fit = yerr[yerr!=0]
+        x_fit,y_fit, yerr_fit = x.copy(),y.copy(),yerr.copy()
+        yerr_fit[yerr==0] = yerr[yerr!=0].min()
         if p0 is None:
             p0 = function.guess(x, y)
         p, c = ah.fit(function.f, x_fit, y_fit, sigma=yerr_fit, p0=p0)
         punc = ah.getConfidentialInterval(p, c, n_sample=x.size)
+        ah.fit_data(x,y,yerr, fit_function=function, p0=p0, use_unc=True, ignore_zero_unc=False)
         print(ah.printFittingResult(func=function, popt_unc=punc)[1])
 
         if debug:

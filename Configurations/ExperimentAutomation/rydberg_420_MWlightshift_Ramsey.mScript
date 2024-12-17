@@ -39,7 +39,7 @@ dac: Ryd420Amp 0.07 %amplitude_scan %0.01 %0.05 %0.34
 t += 15
 
 %%%%%%%%%%%%%%% MW %%%%%%%%%%%
-var mw_rabi_pi2 0.0447 %0.041 %0.041 %0.01 %0.0599 %0.0296
+%var mw_rabi_pi2 0.0447 %0.041 %0.041 %0.01 %0.0599 %0.0296
 var IQ_MAX_AMP 2.5
 
 
@@ -71,18 +71,25 @@ t += 10-3-2-0.1
 pulseon: MWTrg 0.4
 t += 1
 
-t += 0.1
+on: do8_4
+on: MWAmpTrg
+t += mw_pi2
+off: MWAmpTrg
+
 on: Ryd420Trg
-t += 0.001
-
-pulseon: do8_4 time_scan
-pulseon: MWAmpTrg time_scan %0.082 %0.09
-t += time_scan+0.1 %0.082+0.1 
-
-t += 0.001
+t += time_scan
 off: Ryd420Trg
-t += 0.001
-off: Ryd420Hold
+
+on: MWAmpTrg
+t += mw_pi
+off: MWAmpTrg
+
+t += time_scan
+
+on: MWAmpTrg
+t += mw_pi2
+off: MWAmpTrg
+off: do8_4
 
 pulseon: DO1_0 1
 %t += time_scan %10

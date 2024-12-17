@@ -103,12 +103,12 @@ def rabi_scan(exp_idx, timeout_control = {'use':False, 'timeout':600}):
         ScanRange(index=1,left_inclusive=True, right_inclusive=True, variations=11),
         ScanRange(index=2,left_inclusive=True, right_inclusive=True, variations=11)
         ])
-    # config_file.config_param.update_variable("time_scan_us", scan_type="Variable", 
-    #                                          new_initial_values=[0.01,2.6,4.5], 
-    #                                          new_final_values=[0.65,3.0,4.9])
     config_file.config_param.update_variable("time_scan_us", scan_type="Variable", 
-                                             new_initial_values=[0.01,1.7,3.6], 
-                                             new_final_values=[0.49,2.0,3.9])
+                                             new_initial_values=[0.01,2.6,4.5], 
+                                             new_final_values=[0.65,3.0,4.9])
+    # config_file.config_param.update_variable("time_scan_us", scan_type="Variable", 
+    #                                          new_initial_values=[0.01,1.7,3.6], 
+    #                                          new_final_values=[0.49,2.0,3.9])
 
 
     config_file.save()
@@ -154,7 +154,7 @@ def pi_pi2_time_scan(exp_idx, timeout_control = {'use':False, 'timeout':600}):
     #                         annotate_title = f"RABI-SCAN-{exp_idx}", annotate_note=" ")
     # rabi_guess = rabi_analysis.analyze_data(function = da.decaying_cos)
     # rabi_guess = da.ah.nominal(rabi_guess)
-    RABI_GUESS = [1,5,4.35,0,0.5]
+    RABI_GUESS = [1,5,3.,0,0.5]
     data_analysis = da.DataAnalysis(YEAR, MONTH, DAY, exp_name, maximaLocs=analysis_locs.maximaLocs,
                             window=window, thresholds=thresholds, binnings=binnings, 
                             annotate_title = exp_name, annotate_note=" ")
@@ -194,8 +194,8 @@ def pi_pi2_time_scan(exp_idx, timeout_control = {'use':False, 'timeout':600}):
     exp.open_configuration("\\ExperimentAutomation\\" + config_name)
 
 def ryd_1013_mw_lightshift_scan(exp_idx, timeout_control = {'use':False, 'timeout':600}):
-    script_name = "rydberg_1013_MWlighshift.mScript"
-    MW_COMMAND = 'rb87_hfsplitting+mw_resonance+7.215-amplitude_scan*0.18'
+    script_name = "rydberg_1013_MWlightshift.mScript"
+    MW_COMMAND = 'rb87_hfsplitting+mw_resonance+7.23-amplitude_scan*0.18'
 
     config_name_mw = "Microwave.Config"
     config_path_mw = exp.CONFIGURATION_DIR + config_name_mw
@@ -209,10 +209,10 @@ def ryd_1013_mw_lightshift_scan(exp_idx, timeout_control = {'use':False, 'timeou
 
     for variable in config_file.config_param.variables:
         config_file.config_param.update_variable(variable.name, scan_type="Constant", scan_dimension=0)    
-    config_file.config_param.update_variable("mw_resonance", scan_type="Variable", scan_dimension=1, new_initial_values=[-0.02], new_final_values=[0.02])
+    config_file.config_param.update_variable("mw_resonance", scan_type="Variable", scan_dimension=1, new_initial_values=[-0.03], new_final_values=[0.03])
     config_file.config_param.update_variable("amplitude_scan", scan_type="Variable", scan_dimension=0, new_initial_values=[0], new_final_values=[0.45])
-    config_file.config_param.update_scan_dimension(0, range_index=0, variations=3)
-    config_file.config_param.update_scan_dimension(1, range_index=0, variations=21)
+    config_file.config_param.update_scan_dimension(0, new_ranges=[ScanRange(index=0,left_inclusive=True, right_inclusive=True, variations=3)])
+    config_file.config_param.update_scan_dimension(1, new_ranges=[ScanRange(index=0,left_inclusive=True, right_inclusive=True, variations=21)])
     config_file.save()
     
     # Setup experiment details
@@ -407,7 +407,8 @@ def calibration(exp_idx):
 
 def procedure():
     for idx in np.arange(100):
-        # if idx<=1: continue
+        # if idx<12: continue
+        if idx<12: continue
         print(f"Running experiment sets number {idx}")
         if idx != 0:
             exp.hardware_controller.restart_zynq_control()
