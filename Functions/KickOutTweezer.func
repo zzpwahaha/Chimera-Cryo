@@ -11,7 +11,7 @@ def kickOutTweezer():
     ol: ol_cooling d2_cooling_prb_resonance-kick_olcool
     ol: ol_repump d2_repump_prb_resonance+kick_olrepump
     dac: PrbRepAmp kick_repump_amp
-    dac: PrbAmp kick_cool_amp
+    dac: PrbAmp {kick_cool_amp_cal prb_pwr}
     t += 2.5
     pulseon: PrbTrg t_kick
     pulseon: DO1_0 1

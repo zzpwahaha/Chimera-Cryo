@@ -43,5 +43,5 @@ t += 100-t_pgc_twz
 call PGCTweezerImaging()
 
 %%%%%%%%%%%%%%  END Sequence  %%%%%%%%%%%%%%%%%%
-t += 100
+t += 10
 pulseon: DO1_0 0.5
