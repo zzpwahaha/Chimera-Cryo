@@ -77,8 +77,8 @@ def rydberg_420_lightshift_DLS(exp_postfix: str, timeout_control = {'use':False,
     for variable in config_file.config_param.variables:
         config_file.config_param.update_variable(variable.name, scan_type="Constant", scan_dimension=0)    
     config_file.config_param.update_variable("time_scan", constant_value = 0.11)
-    config_file.config_param.update_variable("resonance_scan", scan_type="Variable", new_initial_values=[7.13], new_final_values=[7.23])
-    config_file.config_param.update_scan_dimension(0, range_index=0, variations=26)
+    config_file.config_param.update_variable("resonance_scan", scan_type="Variable", new_initial_values=[7.18], new_final_values=[7.24])
+    config_file.config_param.update_scan_dimension(0, range_index=0, variations=31)
 
     config_file.save()
 
@@ -170,7 +170,7 @@ def rydberg_1013_lightshift_DLS(exp_postfix: str, timeout_control = {'use':False
         config_file.config_param.update_variable(variable.name, scan_type="Constant", scan_dimension=0)    
     config_file.config_param.update_variable("time_scan", constant_value = 0.11)
     config_file.config_param.update_variable("resonance_scan", scan_type="Variable", new_initial_values=[7.14], new_final_values=[7.24])
-    config_file.config_param.update_scan_dimension(0, range_index=0, variations=26)
+    config_file.config_param.update_scan_dimension(0, range_index=0, variations=51)
 
     config_file.save()
 
@@ -280,7 +280,7 @@ def rydberg_420_alignment(exp_postfix: str, pico_idx: int, timeout_control = {'u
 
 def rydberg_420_alignment_DLS(exp_postfix: str, pico_idx: int, timeout_control = {'use':False, 'timeout':1200}):
     NUM_POSITION_VAR = 9
-    NUM_RESONANCE_VAR = 31
+    NUM_RESONANCE_VAR = 26
     if pico_idx not in [1,2]:
         raise ValueError("pico_idx out of the range. Ranges are " + str([1,2,3,4]))
     VERTICAL = 1; HORIZONTAL = 2;
@@ -308,7 +308,7 @@ def rydberg_420_alignment_DLS(exp_postfix: str, pico_idx: int, timeout_control =
     for variable in config_file.config_param.variables:
         config_file.config_param.update_variable(variable.name, scan_type="Constant", scan_dimension=0)    
     config_file.config_param.update_variable("integer_scan", scan_type="Variable", scan_dimension=0, new_initial_values=[-200], new_final_values=[200])
-    config_file.config_param.update_variable("resonance_scan", scan_type="Variable", scan_dimension=1, new_initial_values=[7.15], new_final_values=[7.24])
+    config_file.config_param.update_variable("resonance_scan", scan_type="Variable", scan_dimension=1, new_initial_values=[7.19], new_final_values=[7.24])
     config_file.config_param.update_scan_dimension(0, range_index=0, variations=NUM_POSITION_VAR)
     config_file.config_param.update_scan_dimension(1, range_index=0, variations=NUM_RESONANCE_VAR)
     config_file.save()
@@ -440,7 +440,7 @@ def rydberg_1013_alignment(exp_postfix: str, pico_idx: int, timeout_control = {'
 
 def rydberg_1013_alignment_DLS(exp_postfix: str, pico_idx: int, timeout_control = {'use':False, 'timeout':1200}):
     NUM_POSITION_VAR = 9
-    NUM_RESONANCE_VAR = 21
+    NUM_RESONANCE_VAR = 31
     if pico_idx not in [3,4]:
         raise ValueError("pico_idx out of the range. Ranges are " + str([1,2,3,4]))
     VERTICAL = 1; HORIZONTAL = 2;
@@ -457,7 +457,7 @@ def rydberg_1013_alignment_DLS(exp_postfix: str, pico_idx: int, timeout_control 
     config_file = ConfigurationFile(config_path)
 
     # # Update configuration
-    config_file.modify_parameter("REPETITIONS", "Reps:", str(4))
+    config_file.modify_parameter("REPETITIONS", "Reps:", str(3))
     config_file.modify_parameter("MAIN_OPTIONS", "Randomize Variations?", str(0))
     config_file.modify_parameter("MAIN_OPTIONS", "Repetition First Over Variation?", str(1))
     config_file.modify_parameter("PICOSCREW", "Control?", str(1))
@@ -567,20 +567,20 @@ if __name__ == '__main__':
     # rydberg_1013_lightshift(exp_postfix="2D-postAlignment")
     # sleep(10)
 
-    rydberg_420_lightshift_DLS(exp_postfix="2D-preAlignment-2")
-    exp.hardware_controller.restart_zynq_control()
-    rydberg_420_alignment_DLS(exp_postfix="2D-2", pico_idx=1)
-    exp.hardware_controller.restart_zynq_control()
-    rydberg_420_alignment_DLS(exp_postfix="2D-2", pico_idx=2)
-    exp.hardware_controller.restart_zynq_control()
-    rydberg_420_lightshift_DLS(exp_postfix="2D-postAlignment-2")
-    sleep(10)
-
-    # rydberg_1013_lightshift_DLS(exp_postfix="2D-preAlignment")
+    # rydberg_420_lightshift_DLS(exp_postfix="2D-preAlignment-2")
     # exp.hardware_controller.restart_zynq_control()
-    # rydberg_1013_alignment_DLS(exp_postfix="2D", pico_idx=3)
+    # rydberg_420_alignment_DLS(exp_postfix="2D-2", pico_idx=1)
     # exp.hardware_controller.restart_zynq_control()
-    # rydberg_1013_alignment_DLS(exp_postfix="2D", pico_idx=4)
+    # rydberg_420_alignment_DLS(exp_postfix="2D-2", pico_idx=2)
     # exp.hardware_controller.restart_zynq_control()
-    # rydberg_1013_lightshift_DLS(exp_postfix="2D-postAlignment")
+    # rydberg_420_lightshift_DLS(exp_postfix="2D-postAlignment-2")
     # sleep(10)
+
+    rydberg_1013_lightshift_DLS(exp_postfix="2D-preAlignment")
+    exp.hardware_controller.restart_zynq_control()
+    rydberg_1013_alignment_DLS(exp_postfix="2D", pico_idx=3)
+    exp.hardware_controller.restart_zynq_control()
+    rydberg_1013_alignment_DLS(exp_postfix="2D", pico_idx=4)
+    exp.hardware_controller.restart_zynq_control()
+    rydberg_1013_lightshift_DLS(exp_postfix="2D-postAlignment")
+    sleep(10)

@@ -173,9 +173,9 @@ RYDBERG_BEAM_1013_POSITION = (33.10,26.91) #(33.02, 27.0) #(32.68, 26.60) #(32.3
 # RYDBERG_BEAM_420_POSITION = (68.65,67.7)
 if __name__=="__main__":
     exp = ExperimentProcedure()
-    # move_beam_to_target(exp, mako_idx=3, pico_idx=(1,2), target_position=(74,68.7), tolerance=0.3,max_iterations=50, gain=(-8, 8))
-    move_beam_to_target(exp, mako_idx=3, pico_idx=(1,2), target_position=RYDBERG_BEAM_420_POSITION, tolerance=0.1,max_iterations=50, gain=(-8, 8))
-    print("asd")
+    move_beam_to_target(exp, mako_idx=3, pico_idx=(1,2), target_position=(68.25,67.84), tolerance=0.1,max_iterations=50, gain=(-8, 8))
+    # move_beam_to_target(exp, mako_idx=3, pico_idx=(1,2), target_position=RYDBERG_BEAM_420_POSITION, tolerance=0.1,max_iterations=50, gain=(-8, 8))
+    # print("asd")
 
-    move_beam_to_target(exp, mako_idx=4, pico_idx=(3,4), target_position=RYDBERG_BEAM_1013_POSITION, tolerance=0.1,max_iterations=50, gain=(-8, 8))
-    print("asd")
+    # move_beam_to_target(exp, mako_idx=4, pico_idx=(3,4), target_position=RYDBERG_BEAM_1013_POSITION, tolerance=0.1,max_iterations=50, gain=(-8, 8))
+    # print("asd")
