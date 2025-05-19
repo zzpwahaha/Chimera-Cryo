@@ -311,10 +311,10 @@ void AgilentCore::setSine (int channel, sineInfo info, unsigned var){
 			+ str (convertPowerToSetPoint (info.amplitude.getValue(var), info.useCal, calibrations[channel - 1])) + " VPP");
 		visaFlume.write("SOURCE" + str(channel) + ":PHASE " + str(info.phase.getValue(var)) + " DEG");
 		if (info.burstMode) {
-			visaFlume.write("BURST:MODE GATED");
-			visaFlume.write("BURST:GATE:POLARITY NORMAL");
-			visaFlume.write("BURST:PHASE 0");
-			visaFlume.write("BURST:STATE ON");
+			visaFlume.write(sStr + ":BURST:MODE GATED");
+			visaFlume.write(sStr + ":BURST:GATE:POLARITY NORMAL");
+			visaFlume.write(sStr + ":BURST:PHASE 0");
+			visaFlume.write(sStr + ":BURST:STATE ON");
 		}
 
 	}
