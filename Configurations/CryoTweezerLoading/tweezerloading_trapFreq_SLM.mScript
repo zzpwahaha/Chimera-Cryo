@@ -29,7 +29,7 @@ var measure_trap_depth_at 4.0
 dacramp: SLMTweezerIntensity slm_twz_intensity measure_trap_depth_at 10 
 t += 10
 
-pulseon: TweezerHold 100
+%pulseon: TweezerHold 100
 pulseon: SLMTweezerHold 100
 pulseon: KeysightTrg 100
 t += 105

@@ -56,8 +56,8 @@ def MOTLoading(loading_time):
     off: Ryd420ExpShutter
     off: Ryd1013Shutter
 %    off: TWZFlashTrg
-    off: TweezerTrg
-    on: SLMTweezerTrg
+    on: TweezerTrg
+    off: SLMTweezerTrg
     off: CameraShutter
     on: SrcMOTValve
     off: TweezerIntensitySwitch

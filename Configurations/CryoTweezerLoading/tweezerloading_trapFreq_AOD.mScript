@@ -26,7 +26,7 @@ t += 10
 
 
 %%%%%%%%%%%%%%  Kickout TWIZZER  %%%%%%%%%%%%%%%%%%
-var measure_trap_depth_at 4.0
+var measure_trap_depth_at 1.33
 dacramp: TweezerIntensity twz_intensity measure_trap_depth_at 10 
 t += 10
 
