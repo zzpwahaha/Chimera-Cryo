@@ -21,7 +21,7 @@ void AndorCameraThreadImageGrabber::process()
 	unsigned long long pictureNumber = 0;
 	std::unique_lock<std::mutex> lock(input->runMutex);
 	while (!input->Andor->cameraThreadExitIndicator) {
-		if (!input->Andor->safemode) {
+		if (true/*!input->Andor->safemode*/) {
 			// wait until/unless camera is ready to take images. The signaler should be waked before worker's so that the grabber can wait on 'pop'
 			while (!input->Andor->threadExpectingAcquisition) {
 				input->signaler.wait(lock);

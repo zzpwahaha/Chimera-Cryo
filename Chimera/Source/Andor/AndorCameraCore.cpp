@@ -482,7 +482,7 @@ std::vector<Matrix<long>> AndorCameraCore::acquireImageData (){
 			//		repImages[experimentPictureNumber] (rowI, colI) = tempImage (tempImage.getRows()-colI-1, rowI);
 			//	}
 			//}
-			H5::H5File fp(PLOT_FILES_SAVE_LOCATION + "\\test_data" + "\\test_20230213.hdf5", H5F_ACC_RDONLY);
+			H5::H5File fp(PLOT_FILES_SAVE_LOCATION + "\\test_data" + "\\test_20250526.hdf5", H5F_ACC_RDONLY);
 			H5::DataSet dset = fp.openDataSet("/default");
 			H5::DataSpace dspace = dset.getSpace();
 			hsize_t dims[3];

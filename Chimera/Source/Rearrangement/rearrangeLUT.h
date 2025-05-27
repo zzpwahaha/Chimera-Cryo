@@ -15,8 +15,8 @@ public:
 private:
 
 public:
-	const std::string TWEEZER_AMPLITUDE_LUT_FILE_ADDRESS = str(CODE_ROOT) + "\\Tweezer LUT\\ampLUT.npy";
-	const std::string TWEEZER_FREQUENCY_LUT_FILE_ADDRESS = str(CODE_ROOT)+ "\\Tweezer LUT\\freqLUT.npy";
+	const std::string TWEEZER_AMPLITUDE_LUT_FILE_ADDRESS = str(CODE_ROOT) + "\\TweezerLUT\\ampLUT.npy";
+	const std::string TWEEZER_FREQUENCY_LUT_FILE_ADDRESS = str(CODE_ROOT)+ "\\TweezerLUT\\freqLUT.npy";
 
 
 private:
