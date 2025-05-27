@@ -676,7 +676,7 @@ std::vector<std::string> DataAnalysisControl::getGridFileNames()
 	std::string path(PLOT_FILES_SAVE_LOCATION);
 	std::string ext(atomGrid::GRID_FILE_EXTENSION);
 	try {
-		for (auto& p : std::filesystem::recursive_directory_iterator(path))
+		for (auto& p : std::filesystem::directory_iterator(path))
 		{
 			if (p.path().extension() == ext) {
 				gridDirs.push_back(p.path().stem().string());
