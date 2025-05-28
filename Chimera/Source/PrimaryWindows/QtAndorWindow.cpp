@@ -628,7 +628,7 @@ AndorCameraCore& QtAndorWindow::getCamera (){
 	return andor;
 }
 
-
+// seems never get called - ZZP 20250527
 void QtAndorWindow::prepareAtomCruncher (AllExperimentInput& input){
 	input.cruncherInput = new atomCruncherInput;
 	//input.cruncherInput->plotterActive = plotThreadActive;
@@ -673,6 +673,7 @@ void QtAndorWindow::completeCruncherStart () {
 	skipNext = false;
 	cruncherInput->skipNext = &skipNext;
 	cruncherInput->rearrangerActive = false;
+	cruncherInput->gmoog = &(scriptWin->getGigaMoogCore());
 	cruncherInput->grids = analysisHandler.getRunningSettings ().grids;
 	cruncherInput->thresholds = andorSettingsCtrl.getConfigSettings ().thresholds;
 	cruncherInput->picsPerRep = andorSettingsCtrl.getRunningSettings ().picsPerRepetition;

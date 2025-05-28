@@ -539,3 +539,8 @@ std::vector<std::reference_wrapper<ArbGenCore>> QtScriptWindow::getArbGenCore()
 	}
 	return agCores;
 }
+
+GigaMoogCore& QtScriptWindow::getGigaMoogCore()
+{
+	return gigaMoog.getCore();
+}

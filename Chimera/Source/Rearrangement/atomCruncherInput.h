@@ -1,4 +1,3 @@
-// created by Mark O. Brown
 #pragma once
 #include <RealTimeDataAnalysis/atomGrid.h>
 #include <GeneralImaging/imageParameters.h>
@@ -10,7 +9,7 @@
 #include <mutex>
 #include <array>
 
-
+class GigaMoogCore;
 struct atomCruncherInput
 {
 	// timing info is stored in these.
@@ -33,6 +32,7 @@ struct atomCruncherInput
 	//std::mutex* imageQueueLock;
 	//std::mutex* plotLock;
 	//std::mutex* rearrangerLock;
+	GigaMoogCore* gmoog;
 	std::condition_variable* rearrangerConditionWatcher;
 	// what the thread fills.
 	//multiGridImageQueue* plotterImageQueue;

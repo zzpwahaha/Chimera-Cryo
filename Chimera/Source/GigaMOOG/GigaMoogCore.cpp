@@ -100,6 +100,11 @@ void GigaMoogCore::reconnectPort()
 	//fpga.reconnect();
 }
 
+rearrangeParameters GigaMoogCore::getRearrangeParameters()
+{
+	return moveManager.getRearrangeParameters();
+}
+
 void GigaMoogCore::analyzeMoogScript(std::string fileAddr, std::vector<parameterType>& variables, unsigned variation)
 {
 	ScriptStream currentMoogScript;

@@ -1,9 +1,11 @@
 #include "stdafx.h"
 #include <Rearrangement/AtomCruncherWorker.h>
 #include <Rearrangement/atomCruncherInput.h>
+#include <GigaMOOG/GigaMoogCore.h>
 
 CruncherThreadWorker::CruncherThreadWorker (std::unique_ptr<atomCruncherInput> input_) 
-	: input(std::move(input_)) 
+	: input(std::move(input_)), 
+	rearrangeGenerator(input->gmoog->moveManager.getRearrangeParameters())
 {}
 
 CruncherThreadWorker::~CruncherThreadWorker () {
@@ -143,6 +145,8 @@ void CruncherThreadWorker::handleImage (){
 			}
 			// explicitly deal with the rearranger thread and load skip as soon as possible, these are time-critical.
 			if (gridInc == 0) {
+				// rearrangement only use the first grid (by default there should be only one grid anyway)
+				handleRearrangement(tempAtomArray[0]);
 				// if last picture of repetition, check for loadskip condition.
 				if (imageCount % input->picsPerRep == input->picsPerRep - 1) {
 					unsigned numAtoms = std::accumulate(tempAtomArray[0].image.begin(), tempAtomArray[0].image.end(), 0);
@@ -154,4 +158,30 @@ void CruncherThreadWorker::handleImage (){
 		emit pixArray(tempImagePixels);
 		imageCount++;
 	}
+}
+
+void CruncherThreadWorker::handleRearrangement(AtomImage atomImage)
+{
+	// only start move procedure if gigamoog is in move script
+	if (!input->gmoog->moveManager.isMoveActive()) {
+		return;
+	}
+	// only start move procedure with the first image per experiment sequence
+	if (atomImage.picStat.picNum % input->picsPerRep != 0) {
+		return;
+	}
+	// only start move procedure with enough atoms
+	int atomNum = std::accumulate(atomImage.image.begin(), atomImage.image.end(), 0);
+	if (atomNum < input->gmoog->moveManager.getRearrangeParameters().targetNumber) {
+		return;
+	}
+
+	rearrangeGenerator.loadAtomImage(atomImage);
+	
+	MessageSender ms;
+	input->gmoog->writeOff(ms); //Important to start with load tones off, so that every tone has explicit settings.
+	input->gmoog->moveManager.writeRearrangeMoves(rearrangeGenerator.getRearrangeMoves(), ms);
+	input->gmoog->writeTerminator(ms);
+	input->gmoog->send(ms);
+
 }

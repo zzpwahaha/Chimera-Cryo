@@ -86,6 +86,7 @@ class QtScriptWindow : public IChimeraQtWindow{
 
 		std::vector<std::reference_wrapper<ArbGenSystem>> getArbGenSystem();
 		std::vector<std::reference_wrapper<ArbGenCore>> getArbGenCore();
+		GigaMoogCore& getGigaMoogCore();;
 
     private:
         Ui::QtScriptWindow* ui;

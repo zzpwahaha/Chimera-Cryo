@@ -7,6 +7,8 @@ bool DynamicMoveManager::analyzeMoogScript(std::string word, ScriptStream& curre
 	if (word != "rearrange") {
 		return false;
 	}
+	// DOES NOT SUPPORT VARIATION FOR NOW
+	moveActive = true;
 
 	Expression ampStepNew, freqStepNew, ampStepPaintNew, freqStepPaintNew, xoff, yoff, yPaintStartExpr, yPaintEndExpr, scrunchSpacingExpression;
 	std::string tmp, initAOX, initAOY, filterAOX, filterAOY;
@@ -18,16 +20,25 @@ bool DynamicMoveManager::analyzeMoogScript(std::string word, ScriptStream& curre
 	}
 
 	currentMoogScript >> scrunchSpacingExpression;
+	if (scrunchSpacingExpression.varies()) {
+		thrower("Error: Variation in variable " + scrunchSpacingExpression.expressionStr + " is not allowed in rearrangement(gigamoog) script for now.");
+	}
 	moveParam.scrunchSpacing = scrunchSpacingExpression.evaluate(variables, variation);
 
 	currentMoogScript >> ampStepNew;
 	currentMoogScript >> freqStepNew;
 
+	if (ampStepNew.varies()) {
+		thrower("Error: Variation in variable " + ampStepNew.expressionStr + " is not allowed in rearrangement(gigamoog) script for now.");
+	}
 	moveParam.ampStepMag = std::round(ampStepNew.evaluate(variables, variation));
 	if (moveParam.ampStepMag > 134217727 || moveParam.ampStepMag < 0) {
 		thrower("Warning: gmoog amplitude step out of range [-134217728, 134217727]. Need to be positive.");
 	}
 
+	if (freqStepNew.varies()) {
+		thrower("Error: Variation in variable " + freqStepNew.expressionStr + " is not allowed in rearrangement(gigamoog) script for now.");
+	}
 	moveParam.freqStepMag = round(freqStepNew.evaluate(variables, variation));
 	if (moveParam.freqStepMag > 511 || moveParam.freqStepMag < 0) {
 		thrower("Warning: gmoog frequency step out of range [-512, 511]. Need to be positive.");
@@ -36,6 +47,9 @@ bool DynamicMoveManager::analyzeMoogScript(std::string word, ScriptStream& curre
 	currentMoogScript >> tmp;
 	if (tmp == "xoffset") {
 		currentMoogScript >> xoff;
+		if (xoff.varies()) {
+			thrower("Error: Variation in variable " + xoff.expressionStr + " is not allowed in rearrangement(gigamoog) script for now.");
+		}
 		moveParam.xOffsetManual = xoff.evaluate(variables, variation);
 	}
 	else {
@@ -45,6 +59,9 @@ bool DynamicMoveManager::analyzeMoogScript(std::string word, ScriptStream& curre
 	currentMoogScript >> tmp;
 	if (tmp == "yoffset") {
 		currentMoogScript >> yoff;
+		if (yoff.varies()) {
+			thrower("Error: Variation in variable " + yoff.expressionStr + " is not allowed in rearrangement(gigamoog) script for now.");
+		}
 		moveParam.yOffsetManual = yoff.evaluate(variables, variation);
 	}
 	else {
@@ -195,7 +212,9 @@ bool DynamicMoveManager::analyzeMoogScript(std::string word, ScriptStream& curre
 
 void DynamicMoveManager::writeRearrangeMoves(moveSequence input, MessageSender& ms)
 {
-	//Important: this function automatically writes the terminator and sends the data
+	//Write load settings so that tweezers can be reset immediately after moves.
+	writeLoad(ms);
+
 	unsigned nMoves = input.nMoves();
 
 	MemoryController memoryDAC0;
@@ -247,10 +266,10 @@ void DynamicMoveManager::writeRearrangeMoves(moveSequence input, MessageSender& 
 		std::vector<int> hardwareChannelsDAC1;
 		if (ny == 1) {
 			hardwareChannelsDAC0 = memoryDAC0.getNextChannels(nx);
-			hardwareChannelsDAC1 = memoryDAC1.getNextChannels(3);
+			hardwareChannelsDAC1 = memoryDAC1.getNextChannels(TONES_REPEAT);
 		}
 		else if (nx == 1) {
-			hardwareChannelsDAC0 = memoryDAC0.getNextChannels(3);
+			hardwareChannelsDAC0 = memoryDAC0.getNextChannels(TONES_REPEAT);
 			hardwareChannelsDAC1 = memoryDAC1.getNextChannels(ny);
 		}
 		else {
@@ -260,7 +279,7 @@ void DynamicMoveManager::writeRearrangeMoves(moveSequence input, MessageSender& 
 
 		//step 1: ramp up tones at initial locations and phases
 		for (int channel = 0; channel < MAX_XTONES; channel++) {
-			if (ny > 1 && nx == 1 && channel < 3) {
+			if (ny > 1 && nx == 1 && channel < TONES_REPEAT) {
 				//Triple up tones if only a single tone on, assuming y axis not already tripled.
 				size_t hardwareChannel = hardwareChannelsDAC0[channel];
 				freq = moveLUT.getFreqX(input.moves[stepID].startAOX[0], input.moves[stepID].startAOY[0]);
@@ -287,7 +306,7 @@ void DynamicMoveManager::writeRearrangeMoves(moveSequence input, MessageSender& 
 		}
 
 		for (int channel = 0; channel < MAX_YTONES; channel++) {
-			if (nx != 0 && ny == 1 && channel < 3) {
+			if (nx != 0 && ny == 1 && channel < TONES_REPEAT) {
 				//Triple up tones if only a single tone on. 
 				size_t hardwareChannel = hardwareChannelsDAC1[channel];
 				freq = moveLUT.getFreqY(input.moves[stepID].startAOX[0], input.moves[stepID].startAOY[0]);
@@ -315,7 +334,7 @@ void DynamicMoveManager::writeRearrangeMoves(moveSequence input, MessageSender& 
 
 		//step 2: ramp to new locations
 		for (int channel = 0; channel < MAX_XTONES; channel++) {
-			if (ny > 1 && nx == 1 && channel < 3) {
+			if (ny > 1 && nx == 1 && channel < TONES_REPEAT) {
 				//Triple up tones if only a single tone on.
 				size_t hardwareChannel = hardwareChannelsDAC0[channel];
 				freqPrev = moveLUT.getFreqX(input.moves[stepID].startAOX[0], input.moves[stepID].startAOY[0]);
@@ -355,7 +374,7 @@ void DynamicMoveManager::writeRearrangeMoves(moveSequence input, MessageSender& 
 		}
 
 		for (int channel = 0; channel < MAX_YTONES; channel++) {
-			if (nx != 0 && ny == 1 && channel < 3) {
+			if (nx != 0 && ny == 1 && channel < TONES_REPEAT) {
 				//Triple up tones if only a single tone on. 
 				size_t hardwareChannel = hardwareChannelsDAC1[channel];
 
@@ -398,7 +417,7 @@ void DynamicMoveManager::writeRearrangeMoves(moveSequence input, MessageSender& 
 
 		//step 3: ramp all tones to 0
 		for (int channel = 0; channel < MAX_XTONES; channel++) {
-			if (ny > 1 && nx == 1 && channel < 3)  {
+			if (ny > 1 && nx == 1 && channel < TONES_REPEAT)  {
 				//Triple up tones if only a single tone on.
 				size_t hardwareChannel = hardwareChannelsDAC0[channel];
 				freq = moveLUT.getFreqX(input.moves[stepID].endAOX[0], input.moves[stepID].endAOY[0]);
@@ -423,7 +442,7 @@ void DynamicMoveManager::writeRearrangeMoves(moveSequence input, MessageSender& 
 		}
 
 		for (int channel = 0; channel < MAX_YTONES; channel++) {
-			if (nx != 0 && ny == 1 && channel < 3) {
+			if (nx != 0 && ny == 1 && channel < TONES_REPEAT) {
 				//Triple up tones if only a single tone on. 
 				size_t hardwareChannel = hardwareChannelsDAC1[channel];
 				freq = moveLUT.getFreqY(input.moves[stepID].endAOX[0], input.moves[stepID].endAOY[0]);
@@ -566,3 +585,12 @@ void DynamicMoveManager::writeMoveOff(MessageSender& ms)
 	}
 }
 
+rearrangeParameters DynamicMoveManager::getRearrangeParameters()
+{
+	return moveParam;
+}
+
+bool DynamicMoveManager::isMoveActive()
+{
+	return moveActive;
+}
