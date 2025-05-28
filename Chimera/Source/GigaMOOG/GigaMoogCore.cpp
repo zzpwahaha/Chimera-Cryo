@@ -284,8 +284,8 @@ void GigaMoogCore::writeTerminator(MessageSender& ms)
 void GigaMoogCore::send(MessageSender& ms)
 {
 	ms.getQueueElementCount();
-	MessagePrinter rec;
-	fpga.setReadCallback(boost::bind(&MessagePrinter::callback, rec, _1));
+	//MessagePrinter rec;
+	//fpga.setReadCallback(boost::bind(&MessagePrinter::callback, rec, _1));
 	fpga.write(ms.getMessageBytes());
 
 	//if (auto e = fpga.lastException()) {
