@@ -5,8 +5,10 @@
 bool DynamicMoveManager::analyzeMoogScript(std::string word, ScriptStream& currentMoogScript, MessageSender& ms, std::vector<parameterType>& variables, unsigned variation)
 {
 	if (word != "rearrange") {
+		moveActive = false;
 		return false;
 	}
+	moveLUT.refreshLUT();
 	// DOES NOT SUPPORT VARIATION FOR NOW
 	moveActive = true;
 
@@ -212,7 +214,8 @@ bool DynamicMoveManager::analyzeMoogScript(std::string word, ScriptStream& curre
 
 void DynamicMoveManager::writeRearrangeMoves(moveSequence input, MessageSender& ms)
 {
-	//Write load settings so that tweezers can be reset immediately after moves.
+	// Write load settings so that tweezers can be reset immediately after moves.
+	// This is important since in the rep-first setting, there is no programVariation to set the Load for gigamoog
 	writeLoad(ms);
 
 	unsigned nMoves = input.nMoves();
@@ -499,6 +502,7 @@ void DynamicMoveManager::writeLoad(MessageSender& ms)
 
 	moveParam.xOffset = moveParam.xOffsetManual;
 	moveParam.yOffset = moveParam.yOffsetManual;
+	moveLUT.setOffset(moveParam.xOffset, moveParam.yOffset);
 
 	//Write load settings based on initXY
 

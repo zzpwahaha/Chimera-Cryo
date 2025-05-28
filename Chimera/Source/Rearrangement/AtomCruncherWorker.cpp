@@ -145,7 +145,7 @@ void CruncherThreadWorker::handleImage (){
 			}
 			// explicitly deal with the rearranger thread and load skip as soon as possible, these are time-critical.
 			if (gridInc == 0) {
-				// rearrangement only use the first grid (by default there should be only one grid anyway)
+				// rearrangement only use the first grid by default
 				handleRearrangement(tempAtomArray[0]);
 				// if last picture of repetition, check for loadskip condition.
 				if (imageCount % input->picsPerRep == input->picsPerRep - 1) {

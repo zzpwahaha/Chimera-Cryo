@@ -1,9 +1,13 @@
-rearrange scrunchX 2 6000 511 %amprate moverate
+%rearrange mode scrunchspacing amprate moverate 
+rearrange scrunchX 1 6000 511 
 xoffset 0
 yoffset 0
 
 initx   1111111111111111111111111111111111111
 inity   1
+
+filterx 0000000011111111111111111111100000000
+filtery 1
 
 targetstart 
 0000000011111111111111111111100000000
