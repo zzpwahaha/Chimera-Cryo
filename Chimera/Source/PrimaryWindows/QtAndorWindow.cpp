@@ -39,7 +39,7 @@ void QtAndorWindow::initializeWidgets (){
 
 	QVBoxLayout* layout1 = new QVBoxLayout(this);
 	layout1->setContentsMargins(0, 0, 0, 0);
-	andor.initializeClass(this, &atomCrunchThreadActive, &imageTimes);
+	andor.initializeClass(this, &atomCrunchThreadActive, &imageTimes, &imageGrabTimes);
 	alerts.alertMainThread (0);
 	alerts.initialize (this);
 	analysisHandler.initialize (this);
@@ -331,10 +331,10 @@ void QtAndorWindow::onCameraProgress(NormalImage picGrabbed){
 	unsigned long long picNumReported = picGrabbed.picStat.picNum;
 	unsigned picNum = currentPictureNum;
 	currentPictureNum++;
-	if (picNum % 2 == 1){
-		mainThreadStartTimes.push_back (std::chrono::high_resolution_clock::now ());
-	}
 	AndorRunSettings curSettings = andor.getAndorRunSettings ();
+	if (picNum % curSettings.picsPerRepetition == 0) {
+		mainThreadStartTimes.push_back(std::chrono::high_resolution_clock::now());
+	}
 	if (picNumReported != picNum){
 		reportErr("WARNING: picture number reported by andor isn't matching the"
 			"camera window record?!?!?!?!?");
@@ -361,9 +361,6 @@ void QtAndorWindow::onCameraProgress(NormalImage picGrabbed){
 	}
 	else { calPicData = rawPicData; }
 
-	if (picNum % 2 == 1){
-		imageGrabTimes.push_back (std::chrono::high_resolution_clock::now ());
-	}
 	size_t currentActivePicNum = curSettings.continuousMode ? 0 : picNum % curSettings.picsPerRepetition;
 	//emit newImage({ {picNum, repVar.first, repVar.second}, calPicData[currentActivePicNum] });
 
@@ -420,11 +417,6 @@ void QtAndorWindow::onCameraProgress(NormalImage picGrabbed){
 	if (picNum == curSettings.totalPicsInExperiment() - 1) {
 		andor.onFinish();
 	}
-}
-
-void QtAndorWindow::wakeRearranger (){
-	std::unique_lock<std::mutex> lock (rearrangerLock);
-	rearrangerConditionVariable.notify_all ();
 }
 
 LRESULT QtAndorWindow::onCameraCalFinish (WPARAM wParam, LPARAM lParam){
@@ -628,33 +620,6 @@ AndorCameraCore& QtAndorWindow::getCamera (){
 	return andor;
 }
 
-// seems never get called - ZZP 20250527
-void QtAndorWindow::prepareAtomCruncher (AllExperimentInput& input){
-	input.cruncherInput = new atomCruncherInput;
-	//input.cruncherInput->plotterActive = plotThreadActive;
-	input.cruncherInput->imageDims = andorSettingsCtrl.getRunningSettings().imageSettings;
-	atomCrunchThreadActive = true;
-	//input.cruncherInput->plotterNeedsImages = input.masterInput->plotterInput->needsCounts;
-	input.cruncherInput->cruncherThreadActive = &atomCrunchThreadActive;
-	skipNext = false;
-	input.cruncherInput->skipNext = &skipNext;
-	//input.cruncherInput->imQueue = &imQueue;
-	// options
-	if (input.masterInput){
-		input.cruncherInput->rearrangerActive = false;
-	}
-	else{
-		input.cruncherInput->rearrangerActive = false;
-	}
-	input.cruncherInput->grids = analysisHandler.getRunningSettings ().grids;
-	input.cruncherInput->thresholds = andorSettingsCtrl.getConfigSettings ().thresholds;
-	input.cruncherInput->picsPerRep = andorSettingsCtrl.getRunningSettings ().picsPerRepetition;
-	input.cruncherInput->catchPicTime = &crunchSeesTimes;
-	input.cruncherInput->finTime = &crunchFinTimes;
-	input.cruncherInput->atomThresholdForSkip = mainWin->getMainOptions ().atomSkipThreshold;
-	input.cruncherInput->rearrangerConditionWatcher = &rearrangerConditionVariable;
-}
-
 bool QtAndorWindow::wantsAutoPause (){
 	return alerts.wantsAutoPause ();
 }
@@ -672,15 +637,14 @@ void QtAndorWindow::completeCruncherStart () {
 	cruncherInput->cruncherThreadActive = &atomCrunchThreadActive;
 	skipNext = false;
 	cruncherInput->skipNext = &skipNext;
-	cruncherInput->rearrangerActive = false;
 	cruncherInput->gmoog = &(scriptWin->getGigaMoogCore());
 	cruncherInput->grids = analysisHandler.getRunningSettings ().grids;
 	cruncherInput->thresholds = andorSettingsCtrl.getConfigSettings ().thresholds;
 	cruncherInput->picsPerRep = andorSettingsCtrl.getRunningSettings ().picsPerRepetition;
-	cruncherInput->catchPicTime = &crunchSeesTimes;
-	cruncherInput->finTime = &crunchFinTimes;
+	cruncherInput->imageGrabTimes = &imageGrabTimes;
+	cruncherInput->catchPicTimes = &crunchSeesTimes;
+	cruncherInput->finTimes = &crunchFinTimes;
 	cruncherInput->atomThresholdForSkip = mainWin->getMainOptions ().atomSkipThreshold;
-	cruncherInput->rearrangerConditionWatcher = &rearrangerConditionVariable;
 
 	atomCruncherWorker = new CruncherThreadWorker(std::move(cruncherInput));
 	QThread* thread = new QThread;
@@ -823,10 +787,8 @@ std::string QtAndorWindow::getStartMessage (){
 void QtAndorWindow::fillMasterThreadInput (ExperimentThreadInput* input){
 	// starting a not-calibration, so reset this.
 	justCalibrated = false;
-	input->rearrangerLock = &rearrangerLock;
 	input->andorsImageTimes = &imageTimes;
 	input->grabTimes = &imageGrabTimes;
-	input->conditionVariableForRerng = &rearrangerConditionVariable;
 }
 
 void QtAndorWindow::setTimerText (std::string timerText){
@@ -880,7 +842,6 @@ void QtAndorWindow::fillExpDeviceList (DeviceList& list){
 }
 
 void QtAndorWindow::handleNormalFinish (profileSettings finishedProfile) {
-	wakeRearranger ();
 	cleanUpAfterExp ();
 	handleBumpAnalysis (finishedProfile);
 }

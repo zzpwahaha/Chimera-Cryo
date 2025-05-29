@@ -68,7 +68,6 @@ namespace commonFunctions{
 			case ID_ACCELERATOR_ESC: {
 				std::string status;
 				bool andorAborted = false, masterAborted = false, baslerAborted = false;
-				andorWin->wakeRearranger ();
 				try {
 					if (mainWin->expIsRunning ()) {
 						status = "MASTER";

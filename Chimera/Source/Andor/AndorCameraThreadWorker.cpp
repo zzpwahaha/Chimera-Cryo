@@ -16,6 +16,7 @@ void AndorCameraThreadWorker::process (){
 	unsigned long long pictureNumber = 0;
 	bool armed = false;
 	std::unique_lock<std::timed_mutex> lock (input->runMutex, std::chrono::milliseconds (1000));
+	const int debugPicsPerRep = 2;
 	if (!lock.owns_lock ()) {
 		errBox ("ERROR: ANDOR IMAGING THREAD FAILED TO LOCK THE RUN MUTEX! IMAGING THREAD CLOSING!");
 	}
@@ -66,10 +67,10 @@ void AndorCameraThreadWorker::process (){
 						}
 						break;
 					}
-					if (pictureNumber % 2 == 0) {
+					if (pictureNumber % debugPicsPerRep == 0) {
 						(*input->imageTimes).push_back (std::chrono::high_resolution_clock::now ());
+						if (pictureNumber > 0) { qDebug() << "From Worker thread: get image number" << pictureNumber << " at " << std::chrono::duration_cast<std::chrono::nanoseconds>(*std::next(input->imageTimes->rbegin(), 1) - input->imageTimes->back()).count() << "ns, relative to last experiment run"; }
 					}
-					qDebug() << "From Worker thread: get image number" << pictureNumber << " at " << std::chrono::high_resolution_clock::now().time_since_epoch().count()/*(*input->imageTimes).back().time_since_epoch().count()*/ - (*input->imageTimes)[0].time_since_epoch().count();
 					armed = true;
 					if (!input->Andor->cameraIsRunning) {
 						// aborted by user
@@ -101,10 +102,10 @@ void AndorCameraThreadWorker::process (){
 			else {
 				Sleep(500);
 				qDebug() << "Andor safemode debug: " << std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-				if (pictureNumber % 2 == 0) {
+				if (pictureNumber % debugPicsPerRep == 0) {
 					(*input->imageTimes).push_back(std::chrono::high_resolution_clock::now());
+					if (pictureNumber > 0) { qDebug() << "From Worker thread: get image number" << pictureNumber << " at " << std::chrono::duration_cast<std::chrono::nanoseconds>(*std::next(input->imageTimes->rbegin(), 1) - input->imageTimes->back()).count() << "ns, relative to last experiment run"; }
 				}
-				qDebug() << "From Worker thread: get image number" << pictureNumber << " at " << std::chrono::high_resolution_clock::now().time_since_epoch().count() - (*input->imageTimes)[0].time_since_epoch().count();
 				armed = true;
 				if (!input->Andor->cameraIsRunning) {
 					// aborted by user

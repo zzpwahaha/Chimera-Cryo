@@ -68,11 +68,8 @@ struct ExperimentThreadInput{
 	atomGrid analysisGrid;
 	ExperimentType expType = ExperimentType::Normal;
 	// only for rearrangement.
-	std::mutex* rearrangerLock;
-	atomQueue* atomQueueForRearrangement;
-	chronoTimes* andorsImageTimes;
-	chronoTimes* grabTimes;
-	std::condition_variable* conditionVariableForRerng;
+	chronoTimesHR* andorsImageTimes;
+	chronoTimesHR* grabTimes;
 };
 
 

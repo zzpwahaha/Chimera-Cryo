@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Andor/AndorCameraThreadImageGrabber.h"
 #include <Andor/AndorCameraCore.h>
+#include <qdebug.h>
 
 AndorCameraThreadImageGrabber::AndorCameraThreadImageGrabber(cameraThreadImageGrabberInput* input_)
 	:input(input_) {};
@@ -18,6 +19,7 @@ void AndorCameraThreadImageGrabber::prepareCruncherExit()
 
 void AndorCameraThreadImageGrabber::process() 
 {
+	const int debugPicsPerRep = 2;
 	unsigned long long pictureNumber = 0;
 	std::unique_lock<std::mutex> lock(input->runMutex);
 	while (!input->Andor->cameraThreadExitIndicator) {
@@ -29,6 +31,10 @@ void AndorCameraThreadImageGrabber::process()
 				pictureNumber = 0;
 			}
 			auto popPictureNumber = input->picBufferQueue->pop();
+			if (popPictureNumber % debugPicsPerRep == 0) {
+				(*input->imageGrabTimes).push_back(std::chrono::high_resolution_clock::now());
+				qDebug() << "From Grabber thread: get image number" << pictureNumber << " at " << std::chrono::duration_cast<std::chrono::nanoseconds>(input->imageGrabTimes->back() - input->imageTimes->back()).count() << " ns relative to worker thread";
+			}
 			if (!input->Andor->cameraIsRunning) {
 				// aborted by user and get rewake-ed up by worker thread
 				prepareCruncherExit();

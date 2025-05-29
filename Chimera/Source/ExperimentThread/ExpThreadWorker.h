@@ -71,10 +71,8 @@ class ExpThreadWorker : public QObject
 		void handlePause (std::atomic<bool>& isPaused, std::atomic<bool>& isAborting);
 		void initVariation (unsigned variationInc,
 			std::vector<parameterType> expParams);
-		void normalFinish (ExperimentType& expType, bool runMaster,
-			std::chrono::time_point<chronoClock> startTime);
-		void errorFinish (std::atomic<bool>& isAborting, ChimeraError& exception,
-			std::chrono::time_point<chronoClock> startTime);
+		void normalFinish (ExperimentType& expType, bool runMaster, chronoTime startTime);
+		void errorFinish (std::atomic<bool>& isAborting, ChimeraError& exception, chronoTime startTime);
 		void startRep (unsigned repInc, unsigned variationInc, bool skip);
 		//std::string abortString;
 		void loadExperimentRuntime (ConfigStream& config, ExpRuntimeData& runtime);

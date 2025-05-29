@@ -60,7 +60,8 @@ class AndorCameraCore : public IDeviceCore{
 
 		//static unsigned __stdcall cameraThread( void* voidPtr );		
 		std::string getSystemInfo();
-		void initializeClass(IChimeraQtWindow* parent, std::atomic<bool>* crunchThreadActive, chronoTimes* imageTimes);
+		void initializeClass(IChimeraQtWindow* parent, std::atomic<bool>* crunchThreadActive, 
+			chronoTimesHR* imageTimes, chronoTimesHR* imageGrabTimes);
 		ThreadsafeQueue<NormalImage>* getGrabberQueue();
 		void setCalibrating( bool cal );
 		bool isCalibrating( );

@@ -13,8 +13,9 @@ class GigaMoogCore;
 struct atomCruncherInput
 {
 	// timing info is stored in these.
-	chronoTimes* catchPicTime;
-	chronoTimes* finTime;
+	chronoTimesHR* imageGrabTimes;
+	chronoTimesHR* catchPicTimes;
+	chronoTimesHR* finTimes;
 	// instructions.
 	std::vector<atomGrid> grids;
 	// the thread watches this to know when to quit.
@@ -22,21 +23,12 @@ struct atomCruncherInput
 	ThreadsafeQueue<NormalImage>* imageQueue;
 	// options
 	bool andorContinuousMode;
-	bool rearrangerActive;
 	unsigned picsPerRep;
 	unsigned atomThresholdForSkip = UINT_MAX;
 	// outer vector here is for each location in the first grid.
 	std::array<std::vector<int>, 4> thresholds;
 	imageParameters imageDims;
-	// locks
-	//std::mutex* imageQueueLock;
-	//std::mutex* plotLock;
-	//std::mutex* rearrangerLock;
 	GigaMoogCore* gmoog;
-	std::condition_variable* rearrangerConditionWatcher;
 	// what the thread fills.
-	//multiGridImageQueue* plotterImageQueue;
-	//multiGridAtomQueue* plotterAtomQueue;
-	//atomQueue* rearrangerAtomQueue;
 	std::atomic<bool>* skipNext;
 };
