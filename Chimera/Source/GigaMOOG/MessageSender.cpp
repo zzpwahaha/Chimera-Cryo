@@ -19,7 +19,7 @@ void MessageSender::enqueue(Message &m)
 
 void MessageSender::getQueueElementCount()
 {
-	std::cout << "Queued messages: " << queue.size() << "\n";
+	std::cout << "MessageSender::getQueueElementCount: Queued messages: " << queue.size() << "\n";
 }
 
 std::vector<int> MessageSender::getMessageBytes()
