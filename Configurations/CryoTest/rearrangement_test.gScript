@@ -1,5 +1,5 @@
 %rearrange mode scrunchspacing amprate moverate 
-rearrange scrunchX 1 6000 511 
+rearrange scrunchX 1 1 1 
 xoffset 0
 yoffset 0
 

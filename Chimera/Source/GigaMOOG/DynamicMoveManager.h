@@ -26,8 +26,8 @@ private:
 
 public:
 	const unsigned MAX_XTONES = 38; // could be changed to 48 if using more tones for rearrangement
-	const unsigned MAX_YTONES = 24; // could be changed to 48 if using more tones for rearrangement
-	const unsigned TONES_REPEAT = 4; // repeat certain tones by this fold. Power is increased by TONES_REPEAT^2
+	const unsigned MAX_YTONES = 7; // could be changed to 48 if using more tones for rearrangement
+	const unsigned TONES_REPEAT = 6; // repeat certain tones by this fold. Power is increased by TONES_REPEAT^2
 
 private:
 	bool moveActive;

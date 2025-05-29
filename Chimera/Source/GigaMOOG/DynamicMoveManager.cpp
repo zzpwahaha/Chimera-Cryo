@@ -235,8 +235,9 @@ void DynamicMoveManager::writeRearrangeMoves(moveSequence input, MessageSender& 
 	int ampstep, freqstep;
 
 	//step 0: turn off all load tones.
+	auto numChannelX = moveParam.nTweezerX == 1 ? TONES_REPEAT : moveParam.nTweezerX;
 	for (unsigned channel = 0; channel < MAX_XTONES; channel++) {
-		if (channel < moveParam.nTweezerX) {
+		if (channel < numChannelX) {
 			size_t hardwareChannel = (channel * 8) % 48 + (channel * 8) / 48;
 			memoryDAC0.moveChannel(hardwareChannel / 8);
 			Message m = Message::make().destination(MessageDestination::KA007)
@@ -247,8 +248,9 @@ void DynamicMoveManager::writeRearrangeMoves(moveSequence input, MessageSender& 
 			ms.enqueue(m);
 		}
 	}
+	auto numChannelY = moveParam.nTweezerY == 1 ? TONES_REPEAT : moveParam.nTweezerY;
 	for (unsigned channel = 0; channel < MAX_YTONES; channel++) {
-		if (channel < moveParam.nTweezerY) {
+		if (channel < numChannelY) {
 			size_t hardwareChannel = (channel * 8) % 48 + (channel * 8) / 48;
 			memoryDAC1.moveChannel(hardwareChannel / 8);
 			Message m = Message::make().destination(MessageDestination::KA007)
@@ -507,9 +509,9 @@ void DynamicMoveManager::writeLoad(MessageSender& ms)
 	//Write load settings based on initXY
 
 	size_t iTweezerX = 0;
-	size_t iMaskX = 0;
+	size_t iMaskX = 0, lastLoadedMaskX = 0;
+	double phase;
 	for (auto const& channelBool : moveParam.initialPositionsX) {
-		double phase, amp, freq;
 		if (iTweezerX > MAX_XTONES) {
 			thrower("For safety, maximum number of x tones is limited to " + str(MAX_XTONES) + " in rearrangement mode");
 		}
@@ -522,14 +524,30 @@ void DynamicMoveManager::writeLoad(MessageSender& ms)
 				.frequencyMHz(moveLUT.getFreqX(iMaskX, 0)).amplitudePercent(moveLUT.getAmpX(iMaskX, 0)).phaseDegrees(phase);
 			ms.enqueue(m);
 			iTweezerX++;
+			lastLoadedMaskX = iMaskX;
 		}
 		iMaskX++;
 	}
+	// If only one tone was loaded, repeat it to boost power
+	if (iTweezerX == 1) { 
+		for (const auto& repeatIdx : range(TONES_REPEAT - 1)) {
+			const auto& toneIdx = repeatIdx + 1;
+			if (toneIdx > MAX_XTONES) {
+				thrower("For safety, maximum number of x tones is limited to " + str(MAX_XTONES) + " in rearrangement mode");
+			}
+			size_t hardwareChannel = (toneIdx * 8) % 48 + (toneIdx * 8) / 48;
+			Message m = Message::make().destination(MessageDestination::KA007)
+				.DAC(MessageDAC::DAC0).channel(hardwareChannel)
+				.setting(MessageSetting::LOADFREQUENCY)
+				.frequencyMHz(moveLUT.getFreqX(lastLoadedMaskX, 0)).amplitudePercent(moveLUT.getAmpX(lastLoadedMaskX, 0)).phaseDegrees(phase);
+			ms.enqueue(m);
+		}
+	}
+
 
 	size_t iTweezerY = 0;
-	size_t iMaskY = 0;
+	size_t iMaskY = 0, lastLoadedMaskY = 0;
 	for (auto const& channelBool : moveParam.initialPositionsY) {
-		double phase, amp, freq;
 		if (iTweezerY > MAX_YTONES) {
 			thrower("For safety, maximum number of y tones is limited to " + str(MAX_YTONES) + " in rearrangement mode");
 		}
@@ -542,8 +560,24 @@ void DynamicMoveManager::writeLoad(MessageSender& ms)
 				.frequencyMHz(moveLUT.getFreqY(0, iMaskY)).amplitudePercent(moveLUT.getAmpY(0, iMaskY)).phaseDegrees(phase);
 			ms.enqueue(m);
 			iTweezerY++;
+			lastLoadedMaskY = iMaskY;
 		}
 		iMaskY++;
+	}
+	// If only one tone was loaded, repeat it to boost power
+	if (iTweezerY == 1) {
+		for (const auto& repeatIdx : range(TONES_REPEAT - 1)) {
+			const auto& toneIdx = repeatIdx + 1;
+			if (toneIdx > MAX_XTONES) {
+				thrower("For safety, maximum number of x tones is limited to " + str(MAX_XTONES) + " in rearrangement mode");
+			}
+			size_t hardwareChannel = (toneIdx * 8) % 48 + (toneIdx * 8) / 48;
+			Message m = Message::make().destination(MessageDestination::KA007)
+				.DAC(MessageDAC::DAC1).channel(hardwareChannel)
+				.setting(MessageSetting::LOADFREQUENCY)
+				.frequencyMHz(moveLUT.getFreqY(lastLoadedMaskY, 0)).amplitudePercent(moveLUT.getAmpY(lastLoadedMaskY, 0)).phaseDegrees(phase);
+			ms.enqueue(m);
+		}
 	}
 }
 
