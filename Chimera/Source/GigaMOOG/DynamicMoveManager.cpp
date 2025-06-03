@@ -17,6 +17,7 @@ bool DynamicMoveManager::analyzeMoogScript(std::string word, ScriptStream& curre
 	currentMoogScript >> moveParam.rearrangeMode;
 	auto rearrangeMode = moveParam.rearrangeMode;
 	if (rearrangeMode != "scrunchx" && rearrangeMode != "scrunchy" && rearrangeMode != "scrunchxy"
+		&& rearrangeMode != "centerscrunchx" && rearrangeMode != "centerscrunchy"
 		&& rearrangeMode != "scrunchyx" && rearrangeMode != "centerscrunchyx" && rearrangeMode != "tetris") {
 		thrower("Invalid rearrangement mode. Valid options are scrunchx, scrunchy, scrunchxy, scrunchyx, centerscrunchyx, and tetris.");
 	}
@@ -525,6 +526,7 @@ void DynamicMoveManager::writeLoad(MessageSender& ms)
 			ms.enqueue(m);
 			iTweezerX++;
 			lastLoadedMaskX = iMaskX;
+			//std::cout << "set DAC0 " << hardwareChannel << " " << moveLUT.getAmpX(iMaskX, 0) << " " << moveLUT.getFreqX(iMaskX, 0) << " " << phase << std::endl;
 		}
 		iMaskX++;
 	}
@@ -541,6 +543,7 @@ void DynamicMoveManager::writeLoad(MessageSender& ms)
 				.setting(MessageSetting::LOADFREQUENCY)
 				.frequencyMHz(moveLUT.getFreqX(lastLoadedMaskX, 0)).amplitudePercent(moveLUT.getAmpX(lastLoadedMaskX, 0)).phaseDegrees(phase);
 			ms.enqueue(m);
+			//std::cout << "set DAC0 " << hardwareChannel << " " << moveLUT.getAmpX(lastLoadedMaskX, 0) << " " << moveLUT.getFreqX(lastLoadedMaskX, 0) << " " << phase << std::endl;
 		}
 	}
 
@@ -561,6 +564,7 @@ void DynamicMoveManager::writeLoad(MessageSender& ms)
 			ms.enqueue(m);
 			iTweezerY++;
 			lastLoadedMaskY = iMaskY;
+			//std::cout << "set DAC1 " << hardwareChannel << " " << moveLUT.getAmpY(iMaskY, 0) << " " << moveLUT.getFreqY(iMaskY, 0) << " " << phase << std::endl;
 		}
 		iMaskY++;
 	}
@@ -577,6 +581,7 @@ void DynamicMoveManager::writeLoad(MessageSender& ms)
 				.setting(MessageSetting::LOADFREQUENCY)
 				.frequencyMHz(moveLUT.getFreqY(lastLoadedMaskY, 0)).amplitudePercent(moveLUT.getAmpY(lastLoadedMaskY, 0)).phaseDegrees(phase);
 			ms.enqueue(m);
+			//std::cout << "set DAC1 " << hardwareChannel << " " << moveLUT.getAmpY(lastLoadedMaskY, 0) << " " << moveLUT.getFreqY(lastLoadedMaskY, 0) << " " << phase << std::endl;
 		}
 	}
 }
