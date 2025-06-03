@@ -23,49 +23,89 @@ t += 15
 call PGCTweezerImaging()
 t += 15 
 
-call setZeroField()
-t += 100 %750
+
+    dac: BiasCoilX pgc_twz_bias_x
+    dac: BiasCoilY pgc_twz_bias_y 
+    dac: BiasCoilZ pgc_twz_bias_z
+    on: PrbRepTrg
+    ol: ol_cooling d2_cooling_resonance+20-pgc_twz_olcool
+    ol: ol_repump d2_repump_resonance-20+pgc_twz_olrepump
+
+t += 100
+
+    on: PrbRepTrg
+    on: PrbShutter
+    on: PrbCoolShutter
+    off: xyzMOTShutter
+    dac: PrbAmp {pgcprb_twz_cool_amp_cal prb_pwr}
+    dac: PrbrepAmp 1 %pgcprb_twz_rep_amp
+    t += t_shutter
 
 
-t += 15
-%%%%%%%%%%% pump out of F=1 using probe repump 1-2'' %%%%%%%%%%%
-call PrepareF2Manifold()
- 
-var measure_trap_depth_at 3.5
+var SLM_depth 3.5
+
+dacramp: SLMTweezerIntensity slm_twz_intensity SLM_depth 10
 t += 10
-%dacramp: TweezerIntensity twz_intensity measure_trap_depth_at 10
-dacramp: SLMTweezerIntensity slm_twz_intensity measure_trap_depth_at 10
+
+
+on: PrbTrg
+pulseon: GMLoadTrg 0.0005
+dac: TweezerIntensity 7.5
+t += 1
+on: TweezerTrg
+t += 1 
+
+%dacramp: TweezerIntensity 0 4.5 10
+%t += 10
+
+
+%t += 1
+on: TweezerHold
+t += 1
+pulseon: GMMoveTrg 0.0005
+t += 1
+off: PrbTrg
+on: TweezerTrg
+
+dacramp: SLMTweezerIntensity SLM_depth SLM_depth*0.5 10
 t += 10
 
-%%%%% push out F=2 using 2-3'', using OP beam
-off: TARepShutter
-off: PrbShutter
-off: xyzMOTShutter
-off: D1LGMShutter
-off: D1LGMPrbShutter
-on: OPShutter
-ol: ol_cooling d2_cooling_resonance-resonance_scan %(5) %resonance_scan %(2.5) %(5) %(1.5) %(4)  %3(-3) %20 %resonance_scan %(28.8)
-ol: ol_repump d2_repump_resonance+20 %resonance_scan %(28.8) %(28.8+266/2) %resonance_scan % % intensional
-%dac: TARepAmp 3
-dac: OPAmp {0.1 op_pwr} %0.1
-t += t_shutter
-on: OPTrg
-t += 0.055 %time_scan %0.10 %0.05
-off: OPTrg
-off: OPShutter
-t += 1-0.055 %time_scan %0.05 %
-%dacramp: TweezerIntensity measure_trap_depth_at twz_intensity 10 
-dacramp: SLMTweezerIntensity measure_trap_depth_at slm_twz_intensity 10
-t += 10
-t += 5
+pulseon: GMMoveTrg 0.0005
+t += 0.1
+on: PrbTrg
+t += 1
+pulseon: do8_4 1
 
-%call TrapLowerAndRise(twz_intensity, twz_intensity*0.1, 10, 15)
-    dacramp: SLMTweezerIntensity slm_twz_intensity slm_twz_intensity*0.1 10
-    t += 10
-    t += 15
-    dacramp: SLMTweezerIntensity slm_twz_intensity*0.1  slm_twz_intensity 10
-    t += 10
-t += 15
+
+pulseon: GMMoveTrg 0.0005
+t += 2
+off: PrbTrg
+
+pulseon: GMMoveTrg 0.0005
+
+t += 1
+
+
+
+t += 1
+off: TweezerTrg
+off: PrbTrg
+off: TweezerHold
+
+
+
+dacramp: SLMTweezerIntensity SLM_depth*0.5 SLM_depth 10
+t += 10
+
+    t += 1
+    pulseon: DO1_0 1
+    off: PrbTrg
+    off: PrbShutter 
+
+
+t += 1
+dacramp: SLMTweezerIntensity SLM_depth slm_twz_intensity 10
+t += 10
 
 %%%%%%%%%%%%%%  PGC in Tweezer with Probe %%%%%%%%%%%%%%%%%%
 % change the field/laser freq parameter here because the previous section is TOF and no light is on
@@ -75,6 +115,18 @@ t += 15
 %%%%%%%%%%%%%%% Second Twizzer Image
 % note the previous section should have at least 4 ms dark interval
 call PGCTweezerImaging()
+
+
+t += 10
+
+repeat: 2
+pulseon: GMMoveTrg 0.0005
+t += 10
+end
+
+
+
+pulseon: GMMoveTrg 0.0005
 
 %%%%%%%%%%%%%%  END Sequence  %%%%%%%%%%%%%%%%%%
 t += 10

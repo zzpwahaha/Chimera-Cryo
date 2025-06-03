@@ -15,6 +15,11 @@ from ConfigurationManager.ConfigurationScanParameter.ScanRange import ScanRange
 
 class ExperimentProcedure:
     CONFIGURATION_DIR = "C:/Chimera/Chimera-Cryo/Configurations/ExperimentAutomation/"
+    DATA_FILE_LOCATION = "C:/Chimera/Chimera-Cryo/tmpDataSave/"
+    GRID_FILE_LOCATION = "C:/Chimera/Chimera-Cryo/Plotting/"
+    ARCHIVED_GRID_FILE_LOCATION = "C:/Chimera/Chimera-Cryo/Plotting/ArchivedGridFiles/"
+    LUT_FILE_LOCATION = "C:/Chimera/Chimera-Cryo/TweezerLUT/"
+    ARCHIEVD_LUT_FILE_LOCATION = "C:/Chimera/Chimera-Cryo/TweezerLUT/ArchivedLUTFiles/"
     CHIMERA_HOST = 'localhost'
     CHIMERA_PORT = 8888
     ZYNQ_HOST = '10.10.0.2'
