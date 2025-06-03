@@ -69,7 +69,7 @@ void AndorCameraThreadWorker::process (){
 					}
 					if (pictureNumber % debugPicsPerRep == 0) {
 						(*input->imageTimes).push_back (std::chrono::high_resolution_clock::now ());
-						if (pictureNumber > 0) { qDebug() << "From Worker thread: get image number" << pictureNumber << " at " << std::chrono::duration_cast<std::chrono::nanoseconds>(*std::next(input->imageTimes->rbegin(), 1) - input->imageTimes->back()).count() << "ns, relative to last experiment run"; }
+						if (pictureNumber > 0) { qDebug() << "From Worker thread: get image number" << pictureNumber << " at " << std::chrono::duration_cast<std::chrono::nanoseconds>(*std::next(input->imageTimes->rbegin(), 1) - input->imageTimes->back()).count() / 1e6 << "ms, relative to last experiment run"; }
 					}
 					armed = true;
 					if (!input->Andor->cameraIsRunning) {
@@ -104,7 +104,7 @@ void AndorCameraThreadWorker::process (){
 				qDebug() << "Andor safemode debug: " << std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
 				if (pictureNumber % debugPicsPerRep == 0) {
 					(*input->imageTimes).push_back(std::chrono::high_resolution_clock::now());
-					if (pictureNumber > 0) { qDebug() << "From Worker thread: get image number" << pictureNumber << " at " << std::chrono::duration_cast<std::chrono::nanoseconds>(*std::next(input->imageTimes->rbegin(), 1) - input->imageTimes->back()).count() << "ns, relative to last experiment run"; }
+					if (pictureNumber > 0) { qDebug() << "From Worker thread: get image number" << pictureNumber << " at " << std::chrono::duration_cast<std::chrono::nanoseconds>(*std::next(input->imageTimes->rbegin(), 1) - input->imageTimes->back()).count() / 1e6 << "ms, relative to last experiment run"; }
 				}
 				armed = true;
 				if (!input->Andor->cameraIsRunning) {
