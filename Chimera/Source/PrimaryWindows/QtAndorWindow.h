@@ -41,7 +41,6 @@ class QtAndorWindow : public IChimeraQtWindow{
 
 		void handleBumpAnalysis (profileSettings finishedProfile);
 		/// directly called by the message map or 1 simple step removed.
-		void wakeRearranger ();
 		void readImageParameters ();
 		void passSetTemperaturePress ();
 
@@ -70,7 +69,6 @@ class QtAndorWindow : public IChimeraQtWindow{
 		void abortCameraRun (bool askDelete = true);
 		void assertOff ();
 		void assertDataFileClosed ();
-		void prepareAtomCruncher (AllExperimentInput& input);
 		void writeVolts (unsigned currentVoltNumber, std::vector<float64> data);
 		bool wantsAutoPause ();
 		std::atomic<bool>* getSkipNextAtomic ();
@@ -122,17 +120,12 @@ class QtAndorWindow : public IChimeraQtWindow{
 		DataLogger dataHandler;
 		std::vector<QCustomPlotCtrl*> mainAnalysisPlots;
 		coordinate selectedPixel = { 0,0 };
-		
-		// rearrange stuff;
-		std::condition_variable rearrangerConditionVariable;
-		//std::mutex plotLock;
-		std::mutex rearrangerLock;
 
 		dataPoint mostRecentAnalysisResult;
 		
 		std::atomic<bool> atomCrunchThreadActive;
 		std::atomic<bool> skipNext = false;
-		chronoTimes imageTimes, imageGrabTimes, mainThreadStartTimes, crunchSeesTimes, crunchFinTimes;
+		chronoTimesHR imageTimes, imageGrabTimes, mainThreadStartTimes, crunchSeesTimes, crunchFinTimes;
 		unsigned mostRecentPicNum = 0;
 		unsigned currentPictureNum = 0;
 		std::vector<Matrix<long>> currentRawPictures; // store pictures within one experiment cycle

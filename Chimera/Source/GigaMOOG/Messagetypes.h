@@ -88,7 +88,7 @@ public:
 		double MHz = 223696213.33333333333333333333333; 
 		return (unsigned long long int)(frequency * MHz);
 	}
-	const bool doPrint = true;
+	const bool doPrint = false;
 };
 
 struct SetLoadFrequency : KA007_Message_Base

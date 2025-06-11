@@ -103,17 +103,17 @@ do7_2
 1
 do7_3
 1
-do7_4
+d1statetransfertrg
 1
-do7_5
+d1ramantrg
 1
-do7_6
+slmtweezerhold
 1
-do7_7
+slmtweezertrg
 1
 gmloadtrg
 1
-do8_1
+gmmovetrg
 1
 do8_2
 1
@@ -167,7 +167,7 @@ dipolepushrepamp
 -9.9 - 10
 0
 dac0_9
-dac0_10
+slmtweezerintensity
 -9.9 - 10
 0
 dac0_10
@@ -215,11 +215,11 @@ mw_iq_q
 -4.5 - 4.5
 0
 dac1_5
-dac1_6
+d1statetransferamp
 -9.9 - 10
 0
 dac1_6
-electrode1
+d1ramanamp
 -9.9 - 10
 0
 dac1_7
@@ -264,5 +264,5 @@ d1_lgmcooling_resonance 784
 rb87_hfsplitting 6834.682
 t_shutter 10
 t_field_settling 750
-851 1300 2 911 970 2
+836 1275 1 931 965 1
 0 1

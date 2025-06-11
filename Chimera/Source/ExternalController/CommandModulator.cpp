@@ -96,7 +96,6 @@ void CommandModulator::abortExperiment(bool keepData, QString dataName, ErrorSta
 {
 	status.error = false;
 	bool andorAborted = false, masterAborted = false;
-	andorWin->wakeRearranger();
 	try {
 		if (mainWin->expIsRunning()) {
 			commonFunctions::abortMaster(mainWin);

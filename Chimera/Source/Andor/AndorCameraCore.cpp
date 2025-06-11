@@ -142,7 +142,8 @@ AndorCameraCore::~AndorCameraCore()
 {
 }
 
-void AndorCameraCore::initializeClass(IChimeraQtWindow* parent, std::atomic<bool>* crunchThreadActive, chronoTimes* imageTimes){
+void AndorCameraCore::initializeClass(IChimeraQtWindow* parent, std::atomic<bool>* crunchThreadActive, 
+	chronoTimesHR* imageTimes, chronoTimesHR* imageGrabTimes){
 	threadExpectingAcquisition = false;
 
 	threadWorkerInput.Andor = this;
@@ -153,8 +154,6 @@ void AndorCameraCore::initializeClass(IChimeraQtWindow* parent, std::atomic<bool
 	worker->moveToThread (workerThread);
 	parent->mainWin->connect (worker, &AndorCameraThreadWorker::notify,
 							  parent->mainWin, &QtMainWindow::handleNotification);
-	//parent->andorWin->connect (worker, &AndorCameraThreadWorker::pictureTaken,
-	//						   parent->andorWin, &QtAndorWindow::onCameraProgress);
 	parent->andorWin->connect(worker, &AndorCameraThreadWorker::error,
 		parent->andorWin, &QtAndorWindow::reportErr);
 
@@ -168,6 +167,7 @@ void AndorCameraCore::initializeClass(IChimeraQtWindow* parent, std::atomic<bool
 	threadGrabberInput.Andor = this;
 	threadGrabberInput.cruncherThreadActive = crunchThreadActive;
 	threadGrabberInput.imageTimes = imageTimes;
+	threadGrabberInput.imageGrabTimes = imageGrabTimes;
 	// begin the camera image grabber thread.
 	AndorCameraThreadImageGrabber* grabber = new AndorCameraThreadImageGrabber(&threadGrabberInput);
 	QThread* grabberThread = new QThread;
@@ -403,6 +403,8 @@ void AndorCameraCore::preparationChecks () {
  * and shapes them into the array which holds all of the pictures for a given experiment cycle, except continuousMode.
  */
 std::vector<Matrix<long>> AndorCameraCore::acquireImageData (){
+	auto timerE = QElapsedTimer();
+	timerE.start();
 	try	{
 		// each image processed from the call from imageGrabber thread
 		int experimentPictureNumber = (currentPictureNumber) % runSettings.picsPerRepetition;
@@ -450,12 +452,16 @@ std::vector<Matrix<long>> AndorCameraCore::acquireImageData (){
 				// let the blank image roll through to keep the image numbers going sensibly. // ??? WTF zzp 20220913
 				throwNested ("Error while calling getOldestImage.\n"+e.trace());
 			}
+			qDebug() << "std::vector<Matrix<long>> AndorCameraCore::acquireImageData: extracted image at time " << timerE.elapsed() << " ms";
+
 			// immediately rotate
 			for (auto imageVecInc : range(repImages[experimentPictureNumber].size ())){
 				//repImages[experimentPictureNumber].data[imageVecInc] = tempImage.data[((imageVecInc
 				//	% imSettings.width ()) + 1) * imSettings.height () - imageVecInc / imSettings.width () - 1];
 				repImages[experimentPictureNumber].data[imageVecInc] = tempImage.data[imageVecInc];
 			}
+			qDebug() << "std::vector<Matrix<long>> AndorCameraCore::acquireImageData: rotated " << timerE.elapsed() << " ms";
+
 		}
 		else{
 			//for (auto imageVecInc : range (repImages[experimentPictureNumber].size ()))	{
@@ -482,7 +488,7 @@ std::vector<Matrix<long>> AndorCameraCore::acquireImageData (){
 			//		repImages[experimentPictureNumber] (rowI, colI) = tempImage (tempImage.getRows()-colI-1, rowI);
 			//	}
 			//}
-			H5::H5File fp(PLOT_FILES_SAVE_LOCATION + "\\test_data" + "\\test_20230213.hdf5", H5F_ACC_RDONLY);
+			H5::H5File fp(PLOT_FILES_SAVE_LOCATION + "\\test_data" + "\\test_20250526.hdf5", H5F_ACC_RDONLY);
 			H5::DataSet dset = fp.openDataSet("/default");
 			H5::DataSpace dspace = dset.getSpace();
 			hsize_t dims[3];

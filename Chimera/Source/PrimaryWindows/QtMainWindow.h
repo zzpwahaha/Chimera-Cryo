@@ -100,7 +100,6 @@ class QtMainWindow : public IChimeraQtWindow{
         Ui::QtMainWindow* ui;
 
 		chronoTimes startupTimes;
-		chronoTime* programStartTime;
 		// members that have gui elements
 		ConfigSystem profile;
 		MasterConfiguration masterConfig;

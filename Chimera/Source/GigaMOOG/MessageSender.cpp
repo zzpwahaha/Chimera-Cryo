@@ -19,7 +19,7 @@ void MessageSender::enqueue(Message &m)
 
 void MessageSender::getQueueElementCount()
 {
-	std::cout << "Queued messages: " << queue.size() << "\n";
+	std::cout << "MessageSender::getQueueElementCount: Queued messages: " << queue.size() << "\n";
 }
 
 std::vector<int> MessageSender::getMessageBytes()
@@ -30,7 +30,7 @@ std::vector<int> MessageSender::getMessageBytes()
 			bytevector.push_back(byte);
 		}
 	}
-	queue.clear();
+	//queue.clear(); ZZP: commented out 20250607. This shouldn't clear the queue otherwise can not call this function again. Not sure what is their initial idea
 	return bytevector;
 }
 

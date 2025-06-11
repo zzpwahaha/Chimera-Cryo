@@ -31,6 +31,8 @@ public:
 	void programGMoogNow(std::string fileAddr, std::vector<parameterType> constants, DoCore& doCore, DOStatus dostatus);
 	void disconnectPort();
 	void reconnectPort();
+	rearrangeParameters getRearrangeParameters();
+
 private:
 	//Attempt to parse moog script 
 	void analyzeMoogScript(std::string fileAddr, std::vector<parameterType>& variables, unsigned variation);
@@ -41,16 +43,14 @@ private:
 
 public:
 	const std::string configDelim = "GMOOG";
+
+private:
 	//BoostAsyncSerial fpga;
 	BoostUDP fpga;
 	std::string fileAddress;
+	std::vector<MessageSender> gigaMoogCommandList;
 	DynamicMoveManager moveManager;
 
-private:
-	std::vector<MessageSender> gigaMoogCommandList;
-
-
-
-
+	friend class CruncherThreadWorker;
 };
 

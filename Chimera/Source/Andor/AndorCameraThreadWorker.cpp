@@ -16,6 +16,7 @@ void AndorCameraThreadWorker::process (){
 	unsigned long long pictureNumber = 0;
 	bool armed = false;
 	std::unique_lock<std::timed_mutex> lock (input->runMutex, std::chrono::milliseconds (1000));
+	const int debugPicsPerRep = 2;
 	if (!lock.owns_lock ()) {
 		errBox ("ERROR: ANDOR IMAGING THREAD FAILED TO LOCK THE RUN MUTEX! IMAGING THREAD CLOSING!");
 	}
@@ -66,10 +67,10 @@ void AndorCameraThreadWorker::process (){
 						}
 						break;
 					}
-					if (pictureNumber % 2 == 0) {
+					if (pictureNumber % debugPicsPerRep == 0) {
 						(*input->imageTimes).push_back (std::chrono::high_resolution_clock::now ());
+						if (pictureNumber > 0) { qDebug() << "From Worker thread: get image number" << pictureNumber << " at " << std::chrono::duration_cast<std::chrono::nanoseconds>(*std::next(input->imageTimes->rbegin(), 1) - input->imageTimes->back()).count() / 1e6 << "ms, relative to last experiment run"; }
 					}
-					qDebug() << "From Worker thread: get image number" << pictureNumber << " at " << std::chrono::high_resolution_clock::now().time_since_epoch().count()/*(*input->imageTimes).back().time_since_epoch().count()*/ - (*input->imageTimes)[0].time_since_epoch().count();
 					armed = true;
 					if (!input->Andor->cameraIsRunning) {
 						// aborted by user
@@ -91,44 +92,33 @@ void AndorCameraThreadWorker::process (){
 			}
 		}
 		else { // safemode
-			// simulate an actual wait.
-			Sleep (500);
-			qDebug() << "Andor safemode debug: " << std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-			if (pictureNumber % 2 == 0) {
-				(*input->imageTimes).push_back (std::chrono::high_resolution_clock::now ());
-			}
-			if (input->Andor->cameraIsRunning && safeModeCount < input->Andor->runSettings.totalPicsInExperiment ()) {
-				if (true/*input->Andor->runSettings.acquisitionMode == AndorRunModes::mode::Kinetic*/) {
-					if (input->Andor->isCalibrating ()) {
-						//input->comm->sendCameraCalProgress (safeModeCount);
-					}
-					else {
-						emit pictureTaken (safeModeCount);
-						//input->comm->sendCameraProgress (safeModeCount);
-					}
-					safeModeCount++;
-				}
-				else {
-					if (input->Andor->isCalibrating ()) {
-						//input->comm->sendCameraCalProgress (1);
-					}
-					else {
-						emit pictureTaken (1);
-						//input->comm->sendCameraProgress (1);
-					}
-				}
-			}
-			else{
-				input->Andor->cameraIsRunning = false;
-				safeModeCount = 0;
-				if (input->Andor->isCalibrating ()) {
-					//input->comm->sendCameraCalFin ();
-				}
-				else {
-					emit acquisitionFinished ();
-					//input->comm->sendCameraFin ();
-				}
+
+			if (pictureNumber == input->Andor->runSettings.totalPicsInExperiment() && armed) {
+				// get the last picture. acquisition is over 					
+				// make sure the thread waits when it hits the condition variable.
 				input->Andor->threadExpectingAcquisition = false;
+				continue;
+			}
+			else {
+				Sleep(500);
+				qDebug() << "Andor safemode debug: " << std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+				if (pictureNumber % debugPicsPerRep == 0) {
+					(*input->imageTimes).push_back(std::chrono::high_resolution_clock::now());
+					if (pictureNumber > 0) { qDebug() << "From Worker thread: get image number" << pictureNumber << " at " << std::chrono::duration_cast<std::chrono::nanoseconds>(*std::next(input->imageTimes->rbegin(), 1) - input->imageTimes->back()).count() / 1e6 << "ms, relative to last experiment run"; }
+				}
+				armed = true;
+				if (!input->Andor->cameraIsRunning) {
+					// aborted by user
+					input->Andor->threadExpectingAcquisition = false;
+					input->picBufferQueue.push(-1ULL); // Wake grabber thread with '-1' as arguement (-1 is not being recongnized but just as a signaler) and grabber will reset its counter
+					qDebug() << "CameraThreadWorker aborted from user by awakening it again from the waitForAcquisition";
+				}
+				else {
+					input->picBufferQueue.push(pictureNumber); // this will wake Grabber thread to grab image from memory with buffer identified by pictureNumber
+					//input->Andor->queueBuffers(pictureNumber + 1); // immediately requeue buffer for next image reading
+					//input->Andor->setExpRunningExposure(pictureNumber + 1); // set exposure, probably should only use external exposure so do not need to worry about time delay in this function
+					pictureNumber++;
+				}
 			}
 		}
 	}

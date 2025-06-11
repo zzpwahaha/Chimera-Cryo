@@ -2,11 +2,11 @@
 
 #include <memory>
 #include <vector>
-#include <chrono>
 #include <mutex>
 #include <condition_variable>
 #include <GeneralObjects/ThreadsafeQueue.h>
 #include <GeneralObjects/Queues.h>
+#include <GeneralObjects/commonTypes.h>
 
 class AndorCameraCore;
 
@@ -30,5 +30,6 @@ struct cameraThreadImageGrabberInput {
 	ThreadsafeQueue<NormalImage> imageQueue;
 	AndorCameraCore* Andor;
 	std::atomic<bool>* cruncherThreadActive; // for terminating cruncherThread when acquisition is stopped either by user or normal finish
-	std::vector<std::chrono::time_point<std::chrono::high_resolution_clock>>* imageTimes;
+	chronoTimesHR* imageTimes;
+	chronoTimesHR* imageGrabTimes;
 };

@@ -1,4 +1,3 @@
-// created by Mark O. Brown
 #pragma once
 #include <RealTimeDataAnalysis/atomGrid.h>
 #include <GeneralImaging/imageParameters.h>
@@ -10,12 +9,13 @@
 #include <mutex>
 #include <array>
 
-
+class GigaMoogCore;
 struct atomCruncherInput
 {
 	// timing info is stored in these.
-	chronoTimes* catchPicTime;
-	chronoTimes* finTime;
+	chronoTimesHR* imageGrabTimes;
+	chronoTimesHR* catchPicTimes;
+	chronoTimesHR* finTimes;
 	// instructions.
 	std::vector<atomGrid> grids;
 	// the thread watches this to know when to quit.
@@ -23,20 +23,12 @@ struct atomCruncherInput
 	ThreadsafeQueue<NormalImage>* imageQueue;
 	// options
 	bool andorContinuousMode;
-	bool rearrangerActive;
 	unsigned picsPerRep;
 	unsigned atomThresholdForSkip = UINT_MAX;
 	// outer vector here is for each location in the first grid.
 	std::array<std::vector<int>, 4> thresholds;
 	imageParameters imageDims;
-	// locks
-	//std::mutex* imageQueueLock;
-	//std::mutex* plotLock;
-	//std::mutex* rearrangerLock;
-	std::condition_variable* rearrangerConditionWatcher;
+	GigaMoogCore* gmoog;
 	// what the thread fills.
-	//multiGridImageQueue* plotterImageQueue;
-	//multiGridAtomQueue* plotterAtomQueue;
-	//atomQueue* rearrangerAtomQueue;
 	std::atomic<bool>* skipNext;
 };

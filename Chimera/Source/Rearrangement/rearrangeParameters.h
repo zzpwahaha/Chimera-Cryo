@@ -9,7 +9,8 @@ struct rearrangeParameters {
 	int freqStepMag/* = 511*/;
 
 	double xOffset, yOffset;
-	double xOffsetManual, yOffsetManual;
+	std::vector<double> xOffsetManual, yOffsetManual;
+	unsigned repeatX, repeatY;
 
 	unsigned nTweezerX, nTweezerY, nFilterTweezerX, nFilterTweezerY;
 	std::vector<bool> initialPositionsX, initialPositionsY, initialPositions,

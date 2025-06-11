@@ -1382,7 +1382,7 @@ void ExpThreadWorker::waitForAndorFinish () {
 }
 
 void ExpThreadWorker::errorFinish (std::atomic<bool>& isAborting, ChimeraError& exception,
-	std::chrono::time_point<chronoClock> startTime) {
+	chronoTime startTime) {
 	//setExperimentGUIcolor();
 	try {
 		input->zynqExp.sendCommand("resetSeq");
@@ -1423,7 +1423,7 @@ void ExpThreadWorker::errorFinish (std::atomic<bool>& isAborting, ChimeraError& 
 }
 
 void ExpThreadWorker::normalFinish (ExperimentType& expType, bool runMaster,
-	std::chrono::time_point<chronoClock> startTime) {
+	chronoTime startTime) {
 	auto exp_t = std::chrono::duration_cast<std::chrono::seconds>((chronoClock::now () - startTime)).count ();
 	try {
 		setExperimentGUIcolor();

@@ -21,8 +21,8 @@ void rearrangeLUT::refreshLUT()
 			" and frequency LUT (" + str(arrFreqLUT.shape[0]) + ", " + str(arrFreqLUT.shape[1]) + ", " + str(arrFreqLUT.shape[2]) + "), do not match.");
 	}
 
-	xDim = arrAmpLUT.shape[0];
-	yDim = arrAmpLUT.shape[1]; 
+	xDim = arrAmpLUT.shape[1];
+	yDim = arrAmpLUT.shape[0]; 
 	//xDimPaint = arrPaintAmpLUT.shape[0];
 	//yDimPaint = arrPaintAmpLUT.shape[1];
 	//xDimPaintMask = arrPaintMaskLUT.shape[0];
@@ -57,7 +57,7 @@ double rearrangeLUT::getFreqX(int xIndex, int yIndex)
 		return 300 + xOffset;
 	}
 	else if (xIndex < xDim && xIndex >= 0 && yIndex < yDim && yIndex >= 0) {
-		return FTW_LUT[2 * yDim * xIndex + 2 * yIndex + 0] + xOffset;
+		return roundToTwoDecimalPlaces(FTW_LUT[2 * xDim * yIndex + 2 * xIndex + 0] + xOffset);
 	}
 	else {
 		thrower("Invalid LUT index: (" + str(xIndex) + ", " + str(yIndex) + ") while looking up for FreqX.");
@@ -74,7 +74,7 @@ double rearrangeLUT::getFreqY(int xIndex, int yIndex)
 		return 300 + yOffset;
 	}
 	else if (xIndex < xDim && xIndex >= 0 && yIndex < yDim && yIndex >= 0) {
-		return FTW_LUT[2 * yDim * xIndex + 2 * yIndex + 1] + yOffset;
+		return roundToTwoDecimalPlaces(FTW_LUT[2 * xDim * yIndex + 2 * xIndex + 1] + yOffset);
 	}
 	else {
 		thrower("Invalid LUT index: (" + str(xIndex) + ", " + str(yIndex) + ") while looking up for FreqY.");
@@ -85,10 +85,10 @@ double rearrangeLUT::getAmpX(int xIndex, int yIndex)
 {
 	yIndex = (yIndex < 0) ? 0 : yIndex;
 	if (xIndex == -1 || xIndex == -2) { //special handling for atom removal
-		return ATW_LUT[2 * yDim * 0 + 2 * yIndex + 0];
+		return ATW_LUT[2 * xDim * yIndex + 2 * 0 + 0];
 	}
 	else if (xIndex >= 0 && yIndex >= 0) {
-		return ATW_LUT[2 * yDim * xIndex + 2 * yIndex + 0];
+		return ATW_LUT[2 * xDim * yIndex + 2 * xIndex + 0];
 	}
 	else {
 		thrower("Invalid LUT index: (" + str(xIndex) + ", " + str(yIndex) + ") while looking up for AmpX.");
@@ -99,12 +99,17 @@ double rearrangeLUT::getAmpY(int xIndex, int yIndex)
 {
 	xIndex = (xIndex < 0) ? 0 : xIndex;
 	if (yIndex == -1 || yIndex == -2) { //special handling for atom removal
-		return ATW_LUT[2 * yDim * xIndex + 2 * 0 + 1];
+		return ATW_LUT[2 * xDim * 0 + 2 * xIndex + 1];
 	}
 	else if (xIndex < xDim && xIndex >= 0 && yIndex < yDim && yIndex >= 0) {
-		return ATW_LUT[2 * yDim * xIndex + 2 * yIndex + 1];
+		return ATW_LUT[2 * xDim * yIndex + 2 * xIndex + 1];
 	}
 	else {
 		thrower("Invalid LUT index: (" + str(xIndex) + ", " + str(yIndex) + ") while looking up for AmpY.");
 	}
+}
+
+double rearrangeLUT::roundToTwoDecimalPlaces(double value)
+{
+	return std::round(value * 100.0) / 100.0;
 }

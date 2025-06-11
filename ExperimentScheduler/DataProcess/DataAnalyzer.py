@@ -16,12 +16,14 @@ from fitters import decaying_cos, trigonometric
 from fitters.Gaussian import gaussian
 from fitters.Polynomial import Quadratic
 from remoteDataPaths import get_data_files
+import AtomCountExtractor as ace
+from skimage.transform import PolynomialTransform
 
 class DataAnalysis:
     def __init__(self, year, month, day, data_name, 
-                 window, thresholds, binnings, maximaLocs=None,
+                 window, thresholds, binnings, maximaLocs=None, n_cluster_row=1,
                  annotate_title="", annotate_note="",
-                 save_cache=False, read_cache=False, cache_path=None):
+                 save_cache=False, read_cache=False, cache_path=None, **atomLoc_kwargs):
         self.year = year
         self.month = month
         self.day = day
@@ -38,14 +40,15 @@ class DataAnalysis:
         self.andor_datas = None
 
         # Instance variables for analysis parameters, with defaults
+        self.n_cluster_row = n_cluster_row
         self.window = window
         self.thresholds = thresholds
         self.binnings = binnings
         self.maximaLocs = maximaLocs
         
-        self._initialize_data()
+        self._initialize_data(**atomLoc_kwargs)
 
-    def _initialize_data(self):
+    def _initialize_data(self,**atomLoc_kwargs):
         datas, remote_data_folder, cached_data_folder = get_data_files(
             year=self.year, month=self.month, day=self.day, data_runs=self.data_name, 
             save_cache=self.save_cache, read_cache=self.read_cache, cache_path=self.cache_path
@@ -65,20 +68,24 @@ class DataAnalysis:
         self.andor_datas = self.exp_file.get_pics(image_num_per_rep=self.exp_file.pics_per_rep)
 
         if self.maximaLocs is None:
-            self.maximaLocs = self.findAtomLocs(self.thresholds)
+            self.maximaLocs = self.findAtomLocs(**atomLoc_kwargs)
 
-    def findAtomLocs(self, image_threshold):
+    def findAtomLocs(self, neighborhood_size=11, threshold_findLocs=None, 
+                     expected_grid_shape = None, advanced_option=None, 
+                     multi_points_option=dict({"active": True, "search_square": 3, "num_points": 3})):
+        if advanced_option is None:
+            advanced_option=dict({"active": True, "image_threshold": self.thresholds, "score_threshold": 10})
+        if threshold_findLocs is None:
+            threshold_findLocs = self.thresholds
         maximaLocs_MP = ah.findAtomLocs(
             pic=ah.softwareBinning(None, self.andor_datas[0].mean(axis=(0, 1))),
-            n_cluster_row=1,
-            neighborhood_size=11,
-            threshold=0,
+            n_cluster_row=self.n_cluster_row,
             window=self.window,
             sort='MatchArray',
             debug_plot=False,
-            advanced_option=dict({"active": True, "image_threshold": image_threshold, "score_threshold": 10}),
-            multi_points_option=dict({"active": True, "search_square": 3, "num_points": 3})
-        )
+            expected_grid_shape = expected_grid_shape,
+            neighborhood_size=neighborhood_size, threshold=threshold_findLocs,
+            advanced_option=advanced_option, multi_points_option=multi_points_option)
         return maximaLocs_MP
 
     def get_survival_result_1D(self):
@@ -244,6 +251,40 @@ class DataAnalysis:
             mp.plt.show()
 
         return punc
+
+    def getAveragedAtomLocationOnCamera(self, expected_grid_shape,
+                                        neighborhood_size=50, threshold_findLocs=10,
+                                        advanced_option = dict({"active":False, "image_threshold":110, "score_threshold":12}),
+                                        multi_points_option = dict({"active":True, "search_square":4, "num_points":12})):
+        self.maximaLocs = self.findAtomLocs(neighborhood_size=neighborhood_size, threshold_findLocs=threshold_findLocs, 
+                                            expected_grid_shape = expected_grid_shape,
+                                            advanced_option=advanced_option, multi_points_option=multi_points_option)
+        # generate camera position for tweezer arrays
+        res0 = ah.getAtomSurvivalData(data=self.andor_datas, atomLocation=self.maximaLocs, bins=self.binnings, thresholds=self.thresholds,window=self.window)
+        ace_psf = ace.AtomCountExtractor(data=self.andor_datas[0], 
+                            maximumLoc=self.maximaLocs, extend=6, atom_exists = res0["first_exists"], 
+                            window = self.window, magnification = 11*30/500)
+        PSF_params_uncs = ace_psf._fit_results_with_normal_gaussian()
+        m_left, m_bottom, _, _ = self.exp_file.get_image_dimension('andor') #left, bottom, top, right
+        pts_Marana = ah.nominal(PSF_params_uncs[:,1:3]) + self.maximaLocs[:,0,:] + self.window[:2] + np.array([[m_left,m_bottom]])
+        return pts_Marana.reshape(*expected_grid_shape, 2) # [row_atom_grid][col_atom_grid][x_coord][y_coord]
+
+    def getFrequencyCalibration(self, dac0_freq, dac1_freq, **avgAtomLoc_kwargs):
+        pts_AOD = np.array(np.meshgrid(dac0_freq, dac1_freq, indexing='ij')).T[:,::-1,:].reshape(-1,2) # Marana left is AOD0 high frequency
+        pts_Marana = self.getAveragedAtomLocationOnCamera(**avgAtomLoc_kwargs).reshape(-1,2) # flatten it to [indx][x][y]
+        # generate tranformation from camera coordinate to AOD frequency
+        self.tform_camera_to_AOD = PolynomialTransform()
+        self.tform_camera_to_AOD.estimate(src=pts_Marana, dst=pts_AOD, order=2) #, 1,x,y,x**2,xy,y**2 (order=2), ...
+        dist = self.tform_camera_to_AOD.residuals(src=pts_Marana, dst=pts_AOD) # in AOD frequency MHz, same as np.linalg.norm(pts_AOD - tform_camera_to_AOD(pts_Marana), axis=1)
+        print("DataAnalysis::generateFrequencyCalibration: Residuals of transformation from Marana camera to AOD frequency: \n"+
+              f"{repr(dist)}")
+
+    def saveGridFile(self, file_name = None, gridShape = None):
+        # if file_name is not None, it will use file_name, else gridShape can not be none and it will the grishaoe and num_points and exp_file to generate file name
+        ah.saveAtomGridForRealtimeAnalysis(self.maximaLocs, window = self.window, 
+                                           file_name=file_name, gridShape=None, 
+                                           num_points=self.maximaLocs.shape[1], exp_file=self.exp_file)
+
 
 # Usage example
 if __name__ == "__main__":

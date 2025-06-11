@@ -77,6 +77,7 @@ void GigaMoogCore::calculateVariations(std::vector<parameterType>& params, ExpTh
 
 void GigaMoogCore::programVariation(unsigned variation, std::vector<parameterType>& params, ExpThreadWorker* threadworker)
 {
+	moveManager.updataParameterForVariation(variation);
 	send(gigaMoogCommandList[variation]);
 }
 
@@ -98,6 +99,11 @@ void GigaMoogCore::disconnectPort()
 void GigaMoogCore::reconnectPort()
 {
 	//fpga.reconnect();
+}
+
+rearrangeParameters GigaMoogCore::getRearrangeParameters()
+{
+	return moveManager.getRearrangeParameters();
 }
 
 void GigaMoogCore::analyzeMoogScript(std::string fileAddr, std::vector<parameterType>& variables, unsigned variation)
@@ -279,8 +285,8 @@ void GigaMoogCore::writeTerminator(MessageSender& ms)
 void GigaMoogCore::send(MessageSender& ms)
 {
 	ms.getQueueElementCount();
-	MessagePrinter rec;
-	fpga.setReadCallback(boost::bind(&MessagePrinter::callback, rec, _1));
+	//MessagePrinter rec;
+	//fpga.setReadCallback(boost::bind(&MessagePrinter::callback, rec, _1));
 	fpga.write(ms.getMessageBytes());
 
 	//if (auto e = fpga.lastException()) {

@@ -6,9 +6,16 @@
 class RearrangeGenerator
 {
 public:
+	// THIS CLASS IS NOT COPYABLE.
+	RearrangeGenerator& operator=(const RearrangeGenerator&) = delete;
+	RearrangeGenerator(const RearrangeGenerator&) = delete;
+	RearrangeGenerator(rearrangeParameters moveParam);
+	void loadAtomImage(AtomImage atomImage);
+	moveSequence getRearrangeMoves();
 	moveSequence getRearrangeMoves(std::string rearrangeType);
 
 private:
+	std::vector<unsigned> generateCoordinates(std::vector<bool> positions);
 	void filterAtomQueue();
 	int sourceColumnSum(int iColumn, const std::vector<bool>& atomImg);
 	int sourceRowSum(int iRow, const std::vector<bool>& atomImg);
@@ -22,14 +29,13 @@ private:
 	void compressX2(moveSequence& moveseq);
 	void filterReservoir(moveSequence& moveseq);
 
-
 public:
 
 private:
 	AtomImage atomImage;
-	rearrangeParameters moveParam;
-	std::vector<unsigned> positionCoordinatesX, positionCoordinatesY;
+	const rearrangeParameters moveParam;
+	const std::vector<unsigned> positionCoordinatesX, positionCoordinatesY;
 
-
+	std::vector<bool> positionsX, positionsY; // will be assigned with moveParam.initialPositionsX/Y and could be changed within getRearrangeMoves
 };
 

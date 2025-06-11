@@ -4,6 +4,7 @@
 #include <string>
 #include <GeneralObjects/Queues.h>
 #include <Rearrangement/atomCruncherInput.h>
+#include <Rearrangement/RearrangeGenerator.h>
 
 class CruncherThreadWorker : public QObject {
     Q_OBJECT
@@ -15,8 +16,9 @@ class CruncherThreadWorker : public QObject {
         ~CruncherThreadWorker ();
 
     public Q_SLOTS:
-        void init ();
-        void handleImage ();
+        void init();
+        void handleImage();
+        void handleRearrangement(AtomImage atomImage);
 		 
     Q_SIGNALS:
         void error (QString errstr);
@@ -24,6 +26,7 @@ class CruncherThreadWorker : public QObject {
         void pixArray (PixListQueue pixlist);
     private:
         std::unique_ptr<atomCruncherInput> input;
+        RearrangeGenerator rearrangeGenerator;
         unsigned imageCount;
         std::vector<std::vector<std::vector<long>>> monitoredPixelIndecies; // grid -> atom -> monitored pixels
 };

@@ -1,35 +1,33 @@
 #include "stdafx.h"
 #include "RearrangeGenerator.h"
 
+RearrangeGenerator::RearrangeGenerator(rearrangeParameters moveParam)
+	: moveParam(moveParam), 
+	positionCoordinatesX(generateCoordinates(moveParam.initialPositionsX)),
+	positionCoordinatesY(generateCoordinates(moveParam.initialPositionsY))
+{
+	positionsX = moveParam.initialPositionsX;
+	positionsY = moveParam.initialPositionsY;
+}
+
+void RearrangeGenerator::loadAtomImage(AtomImage atomImage)
+{
+	this->atomImage = atomImage;
+}
+
+moveSequence RearrangeGenerator::getRearrangeMoves()
+{
+	return getRearrangeMoves(moveParam.rearrangeMode);
+}
+
 moveSequence RearrangeGenerator::getRearrangeMoves(std::string rearrangeType)
 {
 	moveSequence moveseq;
 
 	const auto& positions = moveParam.initialPositions;
-	auto& positionsX = moveParam.initialPositionsX;
-	auto& positionsY = moveParam.initialPositionsY;
+	positionsX = moveParam.initialPositionsX;
+	positionsY = moveParam.initialPositionsY;
 	const auto& targetPositionsTemp = moveParam.targetPositions; //Make a copy of the target positions that can be modified.
-
-	//define coordinate representation for convenience.
-	//std::vector<unsigned> positionCoordinatesX, positionCoordinatesY;
-	positionCoordinatesX.clear();
-	positionCoordinatesY.clear();
-	positionCoordinatesX.reserve(positionsX.size());
-	positionCoordinatesY.reserve(positionsY.size());
-	int ix = 0;
-	for (auto const& channelBoolX : positionsX) {
-		if (channelBoolX) {
-			positionCoordinatesX.push_back(ix);
-		}
-		ix++;
-	}
-	int iy = 0;
-	for (auto const& channelBoolY : positionsY) {
-		if (channelBoolY) {
-			positionCoordinatesY.push_back(iy);
-		}
-		iy++;
-	}
 
 	filterAtomQueue();
 
@@ -509,6 +507,21 @@ moveSequence RearrangeGenerator::getRearrangeMoves(std::string rearrangeType)
 	}
 
 	return moveseq;
+}
+
+std::vector<unsigned> RearrangeGenerator::generateCoordinates(std::vector<bool> positions)
+{
+	//define coordinate representation for convenience.
+	std::vector<unsigned> positionCoordinates;
+	positionCoordinates.reserve(positions.size());
+	int ix = 0;
+	for (auto const& channelBool : positions) {
+		if (channelBool) {
+			positionCoordinates.push_back(ix);
+		}
+		ix++;
+	}
+	return positionCoordinates;
 }
 
 void RearrangeGenerator::filterAtomQueue()

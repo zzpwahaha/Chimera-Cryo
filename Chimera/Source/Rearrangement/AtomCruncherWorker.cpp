@@ -1,9 +1,12 @@
 #include "stdafx.h"
 #include <Rearrangement/AtomCruncherWorker.h>
 #include <Rearrangement/atomCruncherInput.h>
+#include <GigaMOOG/GigaMoogCore.h>
+#include <qdebug.h>
 
 CruncherThreadWorker::CruncherThreadWorker (std::unique_ptr<atomCruncherInput> input_) 
-	: input(std::move(input_)) 
+	: input(std::move(input_)), 
+	rearrangeGenerator(input->gmoog->moveManager.getRearrangeParameters())
 {}
 
 CruncherThreadWorker::~CruncherThreadWorker () {
@@ -94,10 +97,8 @@ void CruncherThreadWorker::init () {
 
 void CruncherThreadWorker::handleImage (){
 	// loop watching the image queue.
+	const int debugPicsPerRep = 2;
 	while (true) {
-		//if (imageCount % 2 == 0) {
-		//	input->catchPicTime->push_back (chronoClock::now ());
-		//}
 		auto image = input->imageQueue->pop();
 		if (!(*input->cruncherThreadActive)) {
 			break; // signals for exiting this function so that the thread can be released
@@ -105,6 +106,10 @@ void CruncherThreadWorker::handleImage (){
 		if (input->andorContinuousMode) {
 			// if in continuousMode, currently NOT doing any rearrangment nor realtimeAnalysis, but still pop the queue so that it does not accumulate
 			continue;
+		}
+		if (image.picStat.picNum % debugPicsPerRep == 0) {
+			input->catchPicTimes->push_back(chronoClockHR::now());
+			qDebug() << "From Cruncher thread: get image number" << image.picStat.picNum << " at " << std::chrono::duration_cast<std::chrono::nanoseconds>(input->catchPicTimes->back() - input->imageGrabTimes->back()).count() / 1e6 << "ms, relative to grabber thread";
 		}
 		// tempImagePixels[grid][pixel]; only contains the counts for the pixels being monitored.
 		PixListQueue tempImagePixels(input->grids.size());
@@ -143,6 +148,8 @@ void CruncherThreadWorker::handleImage (){
 			}
 			// explicitly deal with the rearranger thread and load skip as soon as possible, these are time-critical.
 			if (gridInc == 0) {
+				// rearrangement only use the first grid by default
+				handleRearrangement(tempAtomArray[0]);
 				// if last picture of repetition, check for loadskip condition.
 				if (imageCount % input->picsPerRep == input->picsPerRep - 1) {
 					unsigned numAtoms = std::accumulate(tempAtomArray[0].image.begin(), tempAtomArray[0].image.end(), 0);
@@ -154,4 +161,34 @@ void CruncherThreadWorker::handleImage (){
 		emit pixArray(tempImagePixels);
 		imageCount++;
 	}
+}
+
+void CruncherThreadWorker::handleRearrangement(AtomImage atomImage)
+{
+	// only start move procedure if gigamoog is in move script
+	if (!input->gmoog->moveManager.isMoveActive()) {
+		return;
+	}
+	// only start move procedure with the first image per experiment sequence
+	if (atomImage.picStat.picNum % input->picsPerRep != 0) {
+		return;
+	}
+	// only start move procedure with enough atoms
+	int atomNum = std::accumulate(atomImage.image.begin(), atomImage.image.end(), 0);
+	if (atomNum < input->gmoog->moveManager.getRearrangeParameters().targetNumber) {
+		return;
+	}
+
+	qDebug() << "From Cruncher thread: ready to calculated rearrange for image number" << atomImage.picStat.picNum << " at " << std::chrono::duration_cast<std::chrono::nanoseconds>(chronoClockHR::now() - input->imageGrabTimes->back()).count() / 1e6 << "ms, relative to grabber thread";
+	rearrangeGenerator.loadAtomImage(atomImage);
+
+	MessageSender ms;
+	//input->gmoog->writeOff(ms); //Important to start with load tones off, so that every tone has explicit settings.
+	input->gmoog->moveManager.writeRearrangeMoves(rearrangeGenerator.getRearrangeMoves(), ms, atomImage.picStat.varNum);
+	input->gmoog->writeTerminator(ms);
+	qDebug() << "From Cruncher thread: ready to send rearrange for image number" << atomImage.picStat.picNum << " at " << std::chrono::duration_cast<std::chrono::nanoseconds>(chronoClockHR::now() - input->imageGrabTimes->back()).count() / 1e6 << "ms, relative to grabber thread";
+	input->gmoog->send(ms);
+
+	input->finTimes->push_back(chronoClockHR::now());
+	qDebug() << "From Cruncher thread: ready to trigger rearrange for image number" << atomImage.picStat.picNum << " at " << std::chrono::duration_cast<std::chrono::nanoseconds>(input->finTimes->back() - input->imageGrabTimes->back()).count() / 1e6 << "ms, relative to grabber thread";
 }
