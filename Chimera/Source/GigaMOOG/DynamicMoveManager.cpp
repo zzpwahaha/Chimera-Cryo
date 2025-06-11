@@ -8,11 +8,15 @@ bool DynamicMoveManager::analyzeMoogScript(std::string word, ScriptStream& curre
 		moveActive = false;
 		return false;
 	}
-	moveLUT.refreshLUT();
-	// DOES NOT SUPPORT VARIATION FOR NOW
-	moveActive = true;
+	if (variation == 0) {
+		moveLUT.refreshLUT();
+		moveParam.xOffsetManual.clear();
+		moveParam.yOffsetManual.clear();
+		// DOES NOT SUPPORT VARIATION FOR NOW EXCEPT X/YOFFSET
+		moveActive = true;
+	}
 
-	Expression ampStepNew, freqStepNew, ampStepPaintNew, freqStepPaintNew, xoff, yoff, yPaintStartExpr, yPaintEndExpr, scrunchSpacingExpression;
+	Expression ampStepNew, freqStepNew, ampStepPaintNew, freqStepPaintNew, repeatX, repeatY, xoff, yoff, yPaintStartExpr, yPaintEndExpr, scrunchSpacingExpression;
 	std::string tmp, initAOX, initAOY, filterAOX, filterAOY;
 	currentMoogScript >> moveParam.rearrangeMode;
 	auto rearrangeMode = moveParam.rearrangeMode;
@@ -48,12 +52,36 @@ bool DynamicMoveManager::analyzeMoogScript(std::string word, ScriptStream& curre
 	}
 
 	currentMoogScript >> tmp;
+	if (tmp == "repeatx") {
+		currentMoogScript >> repeatX;
+		if (repeatX.varies()) {
+			thrower("Error: Variation in variable " + repeatX.expressionStr + " is not allowed in rearrangement(gigamoog) script for now.");
+		}
+		moveParam.repeatX = static_cast<unsigned>(std::round(repeatX.evaluate(variables, variation)));
+	}
+	else {
+		thrower("Error: must first specify number of repeats for tones in X axis.");
+	}
+
+	currentMoogScript >> tmp;
+	if (tmp == "repeaty") {
+		currentMoogScript >> repeatY;
+		if (repeatY.varies()) {
+			thrower("Error: Variation in variable " + repeatY.expressionStr + " is not allowed in rearrangement(gigamoog) script for now.");
+		}
+		moveParam.repeatY = static_cast<unsigned>(std::round(repeatY.evaluate(variables, variation)));
+	}
+	else {
+		thrower("Error: must first specify number of repeats for tones in X axis.");
+	}
+
+	currentMoogScript >> tmp;
 	if (tmp == "xoffset") {
 		currentMoogScript >> xoff;
 		if (xoff.varies()) {
-			thrower("Error: Variation in variable " + xoff.expressionStr + " is not allowed in rearrangement(gigamoog) script for now.");
+			//thrower("Error: Variation in variable " + xoff.expressionStr + " is not allowed in rearrangement(gigamoog) script for now.");
 		}
-		moveParam.xOffsetManual = xoff.evaluate(variables, variation);
+		moveParam.xOffsetManual.push_back(xoff.evaluate(variables, variation));
 	}
 	else {
 		thrower("Error: must first specify x frequency offset.");
@@ -63,9 +91,9 @@ bool DynamicMoveManager::analyzeMoogScript(std::string word, ScriptStream& curre
 	if (tmp == "yoffset") {
 		currentMoogScript >> yoff;
 		if (yoff.varies()) {
-			thrower("Error: Variation in variable " + yoff.expressionStr + " is not allowed in rearrangement(gigamoog) script for now.");
+			//thrower("Error: Variation in variable " + yoff.expressionStr + " is not allowed in rearrangement(gigamoog) script for now.");
 		}
-		moveParam.yOffsetManual = yoff.evaluate(variables, variation);
+		moveParam.yOffsetManual.push_back(yoff.evaluate(variables, variation));
 	}
 	else {
 		thrower("Error: must first specify y frequency offset.");
@@ -209,22 +237,23 @@ bool DynamicMoveManager::analyzeMoogScript(std::string word, ScriptStream& curre
 		word = "";
 		currentMoogScript >> word;
 	}
-	writeLoad(ms);
+	checkTotalPower();
+	writeLoad(ms, variation);
 	return true;
 }
 
-void DynamicMoveManager::writeRearrangeMoves(moveSequence input, MessageSender& ms)
+void DynamicMoveManager::writeRearrangeMoves(moveSequence input, MessageSender& ms, unsigned variation)
 {
 	// Write load settings so that tweezers can be reset immediately after moves.
 	// This is important since in the rep-first setting, there is no programVariation to set the Load for gigamoog
-	writeLoad(ms);
+	//writeLoad(ms, variation);
 
 	unsigned nMoves = input.nMoves();
 
 	MemoryController memoryDAC0;
 	MemoryController memoryDAC1;
 
-	if (nMoves > 256 / 3) {
+	if (nMoves > 256 / (3 * moveParam.repeatX) || nMoves > 256 / (3 * moveParam.repeatY)) {
 		thrower("ERROR: too many moves for gmoog buffer");
 	}
 	writeMoveOff(ms);
@@ -236,31 +265,27 @@ void DynamicMoveManager::writeRearrangeMoves(moveSequence input, MessageSender& 
 	int ampstep, freqstep;
 
 	//step 0: turn off all load tones.
-	auto numChannelX = moveParam.nTweezerX == 1 ? TONES_REPEAT : moveParam.nTweezerX;
-	for (unsigned channel = 0; channel < MAX_XTONES; channel++) {
-		if (channel < numChannelX) {
-			size_t hardwareChannel = (channel * 8) % 48 + (channel * 8) / 48;
-			memoryDAC0.moveChannel(hardwareChannel / 8);
-			Message m = Message::make().destination(MessageDestination::KA007)
-				.DAC(MessageDAC::DAC0).channel(hardwareChannel)
-				.setting(MessageSetting::MOVEFREQUENCY)
-				.frequencyMHz(0).amplitudePercent(0.01).phaseDegrees(0)
-				.instantFTW(1).ATWIncr(-ampStepMag).stepSequenceID(0).FTWIncr(0).phaseJump(1);;
-			ms.enqueue(m);
-		}
+	auto numChannelX = moveParam.nTweezerX * moveParam.repeatX;
+	for (unsigned channel = 0; channel < numChannelX && channel < MAX_XTONES; channel++) {
+		size_t hardwareChannel = (channel * 8) % 48 + (channel * 8) / 48;
+		memoryDAC0.moveChannel(hardwareChannel / 8);
+		Message m = Message::make().destination(MessageDestination::KA007)
+			.DAC(MessageDAC::DAC0).channel(hardwareChannel)
+			.setting(MessageSetting::MOVEFREQUENCY)
+			.frequencyMHz(0).amplitudePercent(0.01).phaseDegrees(0)
+			.instantFTW(1).ATWIncr(-ampStepMag).stepSequenceID(0).FTWIncr(0).phaseJump(1);;
+		ms.enqueue(m);
 	}
-	auto numChannelY = moveParam.nTweezerY == 1 ? TONES_REPEAT : moveParam.nTweezerY;
-	for (unsigned channel = 0; channel < MAX_YTONES; channel++) {
-		if (channel < numChannelY) {
-			size_t hardwareChannel = (channel * 8) % 48 + (channel * 8) / 48;
-			memoryDAC1.moveChannel(hardwareChannel / 8);
-			Message m = Message::make().destination(MessageDestination::KA007)
-				.DAC(MessageDAC::DAC1).channel(hardwareChannel)
-				.setting(MessageSetting::MOVEFREQUENCY)
-				.frequencyMHz(0).amplitudePercent(0.01).phaseDegrees(0)
-				.instantFTW(1).ATWIncr(-ampStepMag).stepSequenceID(0).FTWIncr(0).phaseJump(1);;
-			ms.enqueue(m);
-		}
+	auto numChannelY = moveParam.nTweezerY * moveParam.repeatY;
+	for (unsigned channel = 0; channel < numChannelY && channel < MAX_YTONES; channel++) {
+		size_t hardwareChannel = (channel * 8) % 48 + (channel * 8) / 48;
+		memoryDAC1.moveChannel(hardwareChannel / 8);
+		Message m = Message::make().destination(MessageDestination::KA007)
+			.DAC(MessageDAC::DAC1).channel(hardwareChannel)
+			.setting(MessageSetting::MOVEFREQUENCY)
+			.frequencyMHz(0).amplitudePercent(0.01).phaseDegrees(0)
+			.instantFTW(1).ATWIncr(-ampStepMag).stepSequenceID(0).FTWIncr(0).phaseJump(1);;
+		ms.enqueue(m);
 	}
 
 	for (size_t stepID = 0; stepID < nMoves; stepID++) {
@@ -268,212 +293,109 @@ void DynamicMoveManager::writeRearrangeMoves(moveSequence input, MessageSender& 
 		ny = input.moves[stepID].ny();
 
 		//Get most hardware efficient channels to use. Also handle tripling up of tones.
-		std::vector<int> hardwareChannelsDAC0;
-		std::vector<int> hardwareChannelsDAC1;
-		if (ny == 1) {
-			hardwareChannelsDAC0 = memoryDAC0.getNextChannels(nx);
-			hardwareChannelsDAC1 = memoryDAC1.getNextChannels(TONES_REPEAT);
-		}
-		else if (nx == 1) {
-			hardwareChannelsDAC0 = memoryDAC0.getNextChannels(TONES_REPEAT);
-			hardwareChannelsDAC1 = memoryDAC1.getNextChannels(ny);
-		}
-		else {
-			hardwareChannelsDAC0 = memoryDAC0.getNextChannels(nx);
-			hardwareChannelsDAC1 = memoryDAC1.getNextChannels(ny);
-		}
+		std::vector<int> hardwareChannelsDAC0 = memoryDAC0.getNextChannels(nx * moveParam.repeatX);
+		std::vector<int> hardwareChannelsDAC1 = memoryDAC0.getNextChannels(ny * moveParam.repeatY);
 
 		//step 1: ramp up tones at initial locations and phases
-		for (int channel = 0; channel < MAX_XTONES; channel++) {
-			if (ny > 1 && nx == 1 && channel < TONES_REPEAT) {
-				//Triple up tones if only a single tone on, assuming y axis not already tripled.
-				size_t hardwareChannel = hardwareChannelsDAC0[channel];
-				freq = moveLUT.getFreqX(input.moves[stepID].startAOX[0], input.moves[stepID].startAOY[0]);
-				amp = moveLUT.getAmpX(input.moves[stepID].startAOX[0], input.moves[stepID].startAOY[0]);
-				Message m = Message::make().destination(MessageDestination::KA007)
-					.DAC(MessageDAC::DAC0).channel(hardwareChannel)
-					.setting(MessageSetting::MOVEFREQUENCY)
-					.frequencyMHz(freq).amplitudePercent(amp).phaseDegrees(0)
-					.instantFTW(1).ATWIncr(ampStepMag).stepSequenceID(3 * stepID + 1).FTWIncr(0).phaseJump(1);
-				ms.enqueue(m);
-			}
-			else if (ny != 0 && nx != 0 && channel < nx) {
-				size_t hardwareChannel = hardwareChannelsDAC0[channel];
-				freq = moveLUT.getFreqX(input.moves[stepID].startAOX[channel], input.moves[stepID].startAOY[0]);
-				amp = moveLUT.getAmpX(input.moves[stepID].startAOX[channel], input.moves[stepID].startAOY[0]);
-				phase = fmod(180 * pow(channel + 1, 2) / nx, 360); //this assumes comb of even tones, imperfect, but also short duration so not super critical, and fast.
-				Message m = Message::make().destination(MessageDestination::KA007)
-					.DAC(MessageDAC::DAC0).channel(hardwareChannel)
-					.setting(MessageSetting::MOVEFREQUENCY)
-					.frequencyMHz(freq).amplitudePercent(amp).phaseDegrees(phase)
-					.instantFTW(1).ATWIncr(ampStepMag).stepSequenceID(3 * stepID + 1).FTWIncr(0).phaseJump(1);;
-				ms.enqueue(m);
-			}
-		}
+		for (int channel = 0; channel < nx * moveParam.repeatX && channel < MAX_XTONES; channel++) {
+			int logicalChannel = channel / moveParam.repeatX;
+			size_t hardwareChannel = hardwareChannelsDAC0[channel];
 
-		for (int channel = 0; channel < MAX_YTONES; channel++) {
-			if (nx != 0 && ny == 1 && channel < TONES_REPEAT) {
-				//Triple up tones if only a single tone on. 
-				size_t hardwareChannel = hardwareChannelsDAC1[channel];
-				freq = moveLUT.getFreqY(input.moves[stepID].startAOX[0], input.moves[stepID].startAOY[0]);
-				amp = moveLUT.getAmpY(input.moves[stepID].startAOX[0], input.moves[stepID].startAOY[0]);
-				Message m = Message::make().destination(MessageDestination::KA007)
-					.DAC(MessageDAC::DAC1).channel(hardwareChannel)
-					.setting(MessageSetting::MOVEFREQUENCY)
-					.frequencyMHz(freq).amplitudePercent(amp).phaseDegrees(0)
-					.instantFTW(1).ATWIncr(ampStepMag).stepSequenceID(3 * stepID + 1).FTWIncr(0).phaseJump(1);;
-				ms.enqueue(m);
-			}
-			else if (nx != 0 && ny != 0 && channel < ny) {
-				size_t hardwareChannel = hardwareChannelsDAC1[channel];
-				freq = moveLUT.getFreqY(input.moves[stepID].startAOX[0], input.moves[stepID].startAOY[channel]);
-				amp = moveLUT.getAmpY(input.moves[stepID].startAOX[0], input.moves[stepID].startAOY[channel]);
-				phase = fmod(180 * pow(channel + 1, 2) / ny, 360);
-				Message m = Message::make().destination(MessageDestination::KA007)
-					.DAC(MessageDAC::DAC1).channel(hardwareChannel)
-					.setting(MessageSetting::MOVEFREQUENCY)
-					.frequencyMHz(freq).amplitudePercent(amp).phaseDegrees(phase)
-					.instantFTW(1).ATWIncr(ampStepMag).stepSequenceID(3 * stepID + 1).FTWIncr(0).phaseJump(1);;
-				ms.enqueue(m);
-			}
+			freq = moveLUT.getFreqX(input.moves[stepID].startAOX[logicalChannel], input.moves[stepID].startAOY[0]);
+			amp = moveLUT.getAmpX(input.moves[stepID].startAOX[logicalChannel], input.moves[stepID].startAOY[0]);
+			phase = fmod(180 * pow(logicalChannel + 1, 2) / nx, 360); //this assumes comb of even tones, imperfect, but also short duration so not super critical, and fast.
+
+			Message m = Message::make().destination(MessageDestination::KA007)
+				.DAC(MessageDAC::DAC0).channel(hardwareChannel)
+				.setting(MessageSetting::MOVEFREQUENCY)
+				.frequencyMHz(freq).amplitudePercent(amp).phaseDegrees(phase)
+				.instantFTW(1).ATWIncr(ampStepMag).stepSequenceID(3 * stepID + 1).FTWIncr(0).phaseJump(1);;
+			ms.enqueue(m);
+		}
+		for (int channel = 0; channel < ny * moveParam.repeatY && channel < MAX_YTONES; channel++) {
+			int logicalChannel = channel / moveParam.repeatY;
+			size_t hardwareChannel = hardwareChannelsDAC1[channel];
+
+			freq = moveLUT.getFreqY(input.moves[stepID].startAOX[0], input.moves[stepID].startAOY[logicalChannel]);
+			amp = moveLUT.getAmpY(input.moves[stepID].startAOX[0], input.moves[stepID].startAOY[logicalChannel]);
+			phase = fmod(180 * pow(logicalChannel + 1, 2) / ny, 360);
+
+			Message m = Message::make().destination(MessageDestination::KA007)
+				.DAC(MessageDAC::DAC1).channel(hardwareChannel)
+				.setting(MessageSetting::MOVEFREQUENCY)
+				.frequencyMHz(freq).amplitudePercent(amp).phaseDegrees(phase)
+				.instantFTW(1).ATWIncr(ampStepMag).stepSequenceID(3 * stepID + 1).FTWIncr(0).phaseJump(1);;
+			ms.enqueue(m);
 		}
 
 		//step 2: ramp to new locations
-		for (int channel = 0; channel < MAX_XTONES; channel++) {
-			if (ny > 1 && nx == 1 && channel < TONES_REPEAT) {
-				//Triple up tones if only a single tone on.
-				size_t hardwareChannel = hardwareChannelsDAC0[channel];
-				freqPrev = moveLUT.getFreqX(input.moves[stepID].startAOX[0], input.moves[stepID].startAOY[0]);
-				ampPrev = moveLUT.getAmpX(input.moves[stepID].startAOX[0], input.moves[stepID].startAOY[0]);
+		for (int channel = 0; channel < nx * moveParam.repeatX && channel < MAX_XTONES; channel++) {
+			int logicalChannel = channel / moveParam.repeatX;
+			size_t hardwareChannel = hardwareChannelsDAC0[channel];
 
-				freq = moveLUT.getFreqX(input.moves[stepID].endAOX[0], input.moves[stepID].endAOY[0]);
-				amp = moveLUT.getAmpX(input.moves[stepID].endAOX[0], input.moves[stepID].endAOY[0]);
+			freqPrev = moveLUT.getFreqX(input.moves[stepID].startAOX[logicalChannel], input.moves[stepID].startAOY[0]);
+			ampPrev = moveLUT.getAmpX(input.moves[stepID].startAOX[logicalChannel], input.moves[stepID].startAOY[0]);
 
-				ampstep = (amp < ampPrev) ? -ampStepMag : ampStepMag; //Change sign of steps appropriately.
-				freqstep = (freq < freqPrev) ? -freqStepMag : freqStepMag;
+			freq = moveLUT.getFreqX(input.moves[stepID].endAOX[logicalChannel], input.moves[stepID].endAOY[0]);
+			amp = moveLUT.getAmpX(input.moves[stepID].endAOX[logicalChannel], input.moves[stepID].endAOY[0]);
 
-				Message m = Message::make().destination(MessageDestination::KA007)
-					.DAC(MessageDAC::DAC0).channel(hardwareChannel)
-					.setting(MessageSetting::MOVEFREQUENCY)
-					.frequencyMHz(freq).amplitudePercent(amp).phaseDegrees(0)
-					.instantFTW(0).ATWIncr(ampstep).stepSequenceID(3 * stepID + 1 + 1).FTWIncr(freqstep).phaseJump(0);;
-				ms.enqueue(m);
-			}
-			else if (ny != 0 && nx != 0 && channel < nx) {
-				size_t hardwareChannel = hardwareChannelsDAC0[channel];
-				freqPrev = moveLUT.getFreqX(input.moves[stepID].startAOX[channel], input.moves[stepID].startAOY[0]);
-				ampPrev = moveLUT.getAmpX(input.moves[stepID].startAOX[channel], input.moves[stepID].startAOY[0]);
+			ampstep = (amp < ampPrev) ? -ampStepMag : ampStepMag; //Change sign of steps appropriately.
+			freqstep = (freq < freqPrev) ? -freqStepMag : freqStepMag;
 
-				freq = moveLUT.getFreqX(input.moves[stepID].endAOX[channel], input.moves[stepID].endAOY[0]);
-				amp = moveLUT.getAmpX(input.moves[stepID].endAOX[channel], input.moves[stepID].endAOY[0]);
-
-				ampstep = (amp < ampPrev) ? -ampStepMag : ampStepMag; //Change sign of steps appropriately.
-				freqstep = (freq < freqPrev) ? -freqStepMag : freqStepMag;
-
-				Message m = Message::make().destination(MessageDestination::KA007)
-					.DAC(MessageDAC::DAC0).channel(hardwareChannel)
-					.setting(MessageSetting::MOVEFREQUENCY)
-					.frequencyMHz(freq).amplitudePercent(amp).phaseDegrees(0)
-					.instantFTW(0).ATWIncr(ampstep).stepSequenceID(3 * stepID + 1 + 1).FTWIncr(freqstep).phaseJump(0);;
-				ms.enqueue(m);
-			}
+			Message m = Message::make().destination(MessageDestination::KA007)
+				.DAC(MessageDAC::DAC0).channel(hardwareChannel)
+				.setting(MessageSetting::MOVEFREQUENCY)
+				.frequencyMHz(freq).amplitudePercent(amp).phaseDegrees(0)
+				.instantFTW(0).ATWIncr(ampstep).stepSequenceID(3 * stepID + 1 + 1).FTWIncr(freqstep).phaseJump(0);;
+			ms.enqueue(m);
 		}
+		for (int channel = 0; channel < ny * moveParam.repeatY && channel < MAX_YTONES; channel++) {
+			int logicalChannel = channel / moveParam.repeatY;
+			size_t hardwareChannel = hardwareChannelsDAC1[channel];
 
-		for (int channel = 0; channel < MAX_YTONES; channel++) {
-			if (nx != 0 && ny == 1 && channel < TONES_REPEAT) {
-				//Triple up tones if only a single tone on. 
-				size_t hardwareChannel = hardwareChannelsDAC1[channel];
+			freqPrev = moveLUT.getFreqY(input.moves[stepID].startAOX[0], input.moves[stepID].startAOY[logicalChannel]);
+			ampPrev = moveLUT.getAmpY(input.moves[stepID].startAOX[0], input.moves[stepID].startAOY[logicalChannel]);
 
-				freqPrev = moveLUT.getFreqY(input.moves[stepID].startAOX[0], input.moves[stepID].startAOY[0]);
-				ampPrev = moveLUT.getAmpY(input.moves[stepID].startAOX[0], input.moves[stepID].startAOY[0]);
+			freq = moveLUT.getFreqY(input.moves[stepID].endAOX[0], input.moves[stepID].endAOY[logicalChannel]);
+			amp = moveLUT.getAmpY(input.moves[stepID].endAOX[0], input.moves[stepID].endAOY[logicalChannel]);
 
-				freq = moveLUT.getFreqY(input.moves[stepID].endAOX[0], input.moves[stepID].endAOY[0]);
-				amp = moveLUT.getAmpY(input.moves[stepID].endAOX[0], input.moves[stepID].endAOY[0]);
+			ampstep = (amp < ampPrev) ? -ampStepMag : ampStepMag; //Change sign of steps appropriately.
+			freqstep = (freq < freqPrev) ? -freqStepMag : freqStepMag;
 
-				ampstep = (amp < ampPrev) ? -ampStepMag : ampStepMag; //Change sign of steps appropriately.
-				freqstep = (freq < freqPrev) ? -freqStepMag : freqStepMag;
-
-				Message m = Message::make().destination(MessageDestination::KA007)
-					.DAC(MessageDAC::DAC1).channel(hardwareChannel)
-					.setting(MessageSetting::MOVEFREQUENCY)
-					.frequencyMHz(freq).amplitudePercent(amp).phaseDegrees(0)
-					.instantFTW(0).ATWIncr(ampstep).stepSequenceID(3 * stepID + 1 + 1).FTWIncr(freqstep).phaseJump(0);;
-				ms.enqueue(m);
-			}
-			else if (nx != 0 && ny != 0 && channel < ny) {
-				size_t hardwareChannel = hardwareChannelsDAC1[channel];
-
-				freqPrev = moveLUT.getFreqY(input.moves[stepID].startAOX[0], input.moves[stepID].startAOY[channel]);
-				ampPrev = moveLUT.getAmpY(input.moves[stepID].startAOX[0], input.moves[stepID].startAOY[channel]);
-
-				freq = moveLUT.getFreqY(input.moves[stepID].endAOX[0], input.moves[stepID].endAOY[channel]);
-				amp = moveLUT.getAmpY(input.moves[stepID].endAOX[0], input.moves[stepID].endAOY[channel]);
-
-				ampstep = (amp < ampPrev) ? -ampStepMag : ampStepMag; //Change sign of steps appropriately.
-				freqstep = (freq < freqPrev) ? -freqStepMag : freqStepMag;
-
-				Message m = Message::make().destination(MessageDestination::KA007)
-					.DAC(MessageDAC::DAC1).channel(hardwareChannel)
-					.setting(MessageSetting::MOVEFREQUENCY)
-					.frequencyMHz(freq).amplitudePercent(amp).phaseDegrees(0)
-					.instantFTW(0).ATWIncr(ampstep).stepSequenceID(3 * stepID + 1 + 1).FTWIncr(freqstep).phaseJump(0);;
-				ms.enqueue(m);
-			}
+			Message m = Message::make().destination(MessageDestination::KA007)
+				.DAC(MessageDAC::DAC1).channel(hardwareChannel)
+				.setting(MessageSetting::MOVEFREQUENCY)
+				.frequencyMHz(freq).amplitudePercent(amp).phaseDegrees(0)
+				.instantFTW(0).ATWIncr(ampstep).stepSequenceID(3 * stepID + 2).FTWIncr(freqstep).phaseJump(0);
+			ms.enqueue(m);
 		}
 
 		//step 3: ramp all tones to 0
-		for (int channel = 0; channel < MAX_XTONES; channel++) {
-			if (ny > 1 && nx == 1 && channel < TONES_REPEAT)  {
-				//Triple up tones if only a single tone on.
-				size_t hardwareChannel = hardwareChannelsDAC0[channel];
-				freq = moveLUT.getFreqX(input.moves[stepID].endAOX[0], input.moves[stepID].endAOY[0]);
-				Message m = Message::make().destination(MessageDestination::KA007)
-					.DAC(MessageDAC::DAC0).channel(hardwareChannel)
-					.setting(MessageSetting::MOVEFREQUENCY)
-					.frequencyMHz(freq).amplitudePercent(0.01).phaseDegrees(0)
-					.instantFTW(1).ATWIncr(-ampStepMag).stepSequenceID(3 * stepID + 2 + 1).FTWIncr(0).phaseJump(0);;
-				ms.enqueue(m);
-			}
-			else if (ny != 0 && nx != 0 && channel < nx) {
-				size_t hardwareChannel = hardwareChannelsDAC0[channel];
-				freq = moveLUT.getFreqX(input.moves[stepID].endAOX[channel], input.moves[stepID].endAOY[0]);
-				Message m = Message::make().destination(MessageDestination::KA007)
-					.DAC(MessageDAC::DAC0).channel(hardwareChannel)
-					.setting(MessageSetting::MOVEFREQUENCY)
-					.frequencyMHz(freq).amplitudePercent(0.01).phaseDegrees(0)
-					.instantFTW(1).ATWIncr(-ampStepMag).stepSequenceID(3 * stepID + 2 + 1).FTWIncr(0).phaseJump(0);;
-				ms.enqueue(m);
-				//Has trouble with ramping to 0 amp for some reason - set to ~1 LSB = 100/65535.
-			}
+		for (int channel = 0; channel < nx * moveParam.repeatX && channel < MAX_XTONES; channel++) {
+			int logicalChannel = channel / moveParam.repeatX;
+			size_t hardwareChannel = hardwareChannelsDAC0[channel];
+			freq = moveLUT.getFreqX(input.moves[stepID].endAOX[logicalChannel], input.moves[stepID].endAOY[0]);
+			Message m = Message::make().destination(MessageDestination::KA007)
+				.DAC(MessageDAC::DAC0).channel(hardwareChannel)
+				.setting(MessageSetting::MOVEFREQUENCY)
+				.frequencyMHz(freq).amplitudePercent(0.01).phaseDegrees(0)
+				.instantFTW(1).ATWIncr(-ampStepMag).stepSequenceID(3 * stepID + 3).FTWIncr(0).phaseJump(0);;
+			ms.enqueue(m);
+			//Has trouble with ramping to 0 amp for some reason - set to ~1 LSB = 100/65535.
 		}
-
-		for (int channel = 0; channel < MAX_YTONES; channel++) {
-			if (nx != 0 && ny == 1 && channel < TONES_REPEAT) {
-				//Triple up tones if only a single tone on. 
-				size_t hardwareChannel = hardwareChannelsDAC1[channel];
-				freq = moveLUT.getFreqY(input.moves[stepID].endAOX[0], input.moves[stepID].endAOY[0]);
-				Message m = Message::make().destination(MessageDestination::KA007)
-					.DAC(MessageDAC::DAC1).channel(hardwareChannel)
-					.setting(MessageSetting::MOVEFREQUENCY)
-					.frequencyMHz(freq).amplitudePercent(0.01).phaseDegrees(0)
-					.instantFTW(1).ATWIncr(-ampStepMag).stepSequenceID(3 * stepID + 2 + 1).FTWIncr(0).phaseJump(0);;
-				ms.enqueue(m);
-			}
-			else if (nx != 0 && ny != 0 && channel < ny) {
-				size_t hardwareChannel = hardwareChannelsDAC1[channel];
-				freq = moveLUT.getFreqY(input.moves[stepID].endAOX[0], input.moves[stepID].endAOY[channel]);
-				Message m = Message::make().destination(MessageDestination::KA007)
-					.DAC(MessageDAC::DAC1).channel(hardwareChannel)
-					.setting(MessageSetting::MOVEFREQUENCY)
-					.frequencyMHz(freq).amplitudePercent(0.01).phaseDegrees(0)
-					.instantFTW(1).ATWIncr(-ampStepMag).stepSequenceID(3 * stepID + 2 + 1).FTWIncr(0).phaseJump(0);;
-				ms.enqueue(m);
-			}
+		for (int channel = 0; channel < ny * moveParam.repeatY && channel < MAX_YTONES; channel++) {
+			int logicalChannel = channel / moveParam.repeatY;
+			size_t hardwareChannel = hardwareChannelsDAC1[channel];
+			freq = moveLUT.getFreqY(input.moves[stepID].endAOX[0], input.moves[stepID].endAOY[logicalChannel]);
+			Message m = Message::make().destination(MessageDestination::KA007)
+				.DAC(MessageDAC::DAC1).channel(hardwareChannel)
+				.setting(MessageSetting::MOVEFREQUENCY)
+				.frequencyMHz(freq).amplitudePercent(0.01).phaseDegrees(0)  // near-zero amp (~1 LSB)
+				.instantFTW(1).ATWIncr(-ampStepMag).stepSequenceID(3 * stepID + 3).FTWIncr(0).phaseJump(0);
+			ms.enqueue(m);
 		}
 	}
-
 	//additional snapshot ramping down all channels - unclear why needed, but prevents extra trigger issues.
-
 	for (unsigned channel = 0; channel < 48; channel++) {
 		Message m0 = Message::make().destination(MessageDestination::KA007)
 			.DAC(MessageDAC::DAC0).channel(channel)
@@ -491,98 +413,56 @@ void DynamicMoveManager::writeRearrangeMoves(moveSequence input, MessageSender& 
 	}
 }
 
-void DynamicMoveManager::writeLoad(MessageSender& ms)
+void DynamicMoveManager::writeLoad(MessageSender& ms, unsigned variation)
 {
-	//Since writeLoad always called before rearrange, just do auto tweezer offset here.
-	//if (autoTweezerOffsetActive) {
-	//	xOffset = xOffsetManual + xOffsetAuto;
-	//	yOffset = yOffsetManual + yOffsetAuto;
-	//}
-	//else {
-	//	xOffset = xOffsetManual;
-	//	yOffset = yOffsetManual;
-	//}
-
-	moveParam.xOffset = moveParam.xOffsetManual;
-	moveParam.yOffset = moveParam.yOffsetManual;
-	moveLUT.setOffset(moveParam.xOffset, moveParam.yOffset);
-
+	updataParameterForVariation(variation);
 	//Write load settings based on initXY
-
-	size_t iTweezerX = 0;
-	size_t iMaskX = 0, lastLoadedMaskX = 0;
-	double phase;
-	for (auto const& channelBool : moveParam.initialPositionsX) {
-		if (iTweezerX > MAX_XTONES) {
+	size_t iTweezerX = 0, iMaskX = 0;
+	for (bool channelBool : moveParam.initialPositionsX) {
+		if (iTweezerX >= MAX_XTONES / moveParam.repeatX) {
 			thrower("For safety, maximum number of x tones is limited to " + str(MAX_XTONES) + " in rearrangement mode");
 		}
 		if (channelBool) {
-			size_t hardwareChannel = (iTweezerX * 8) % 48 + (iTweezerX * 8) / 48;
-			phase = fmod(180 * pow(iTweezerX + 1, 2) / moveParam.nTweezerX, 360); //this assumes comb of even tones.
-			Message m = Message::make().destination(MessageDestination::KA007)
-				.DAC(MessageDAC::DAC0).channel(hardwareChannel)
-				.setting(MessageSetting::LOADFREQUENCY)
-				.frequencyMHz(moveLUT.getFreqX(iMaskX, 0)).amplitudePercent(moveLUT.getAmpX(iMaskX, 0)).phaseDegrees(phase);
-			ms.enqueue(m);
+			double phase = fmod(180 * pow(iTweezerX + 1, 2) / moveParam.nTweezerX, 360); //this assumes comb of even tones.
+			for (size_t r = 0; r < moveParam.repeatX; r++) {
+				size_t toneIdx = iTweezerX * moveParam.repeatX + r;
+				size_t hardwareChannel = (toneIdx * 8) % 48 + (toneIdx * 8) / 48;
+				Message m = Message::make().destination(MessageDestination::KA007)
+					.DAC(MessageDAC::DAC0).channel(hardwareChannel)
+					.setting(MessageSetting::LOADFREQUENCY)
+					.frequencyMHz(moveLUT.getFreqX(iMaskX, 0))
+					.amplitudePercent(moveLUT.getAmpX(iMaskX, 0))
+					.phaseDegrees(phase);
+				ms.enqueue(m);
+				//std::cout << "set DAC0 " << hardwareChannel << " " << moveLUT.getAmpX(iMaskX, 0) << " " << moveLUT.getFreqX(iMaskX, 0) << " " << phase << std::endl;
+			}
 			iTweezerX++;
-			lastLoadedMaskX = iMaskX;
-			//std::cout << "set DAC0 " << hardwareChannel << " " << moveLUT.getAmpX(iMaskX, 0) << " " << moveLUT.getFreqX(iMaskX, 0) << " " << phase << std::endl;
 		}
 		iMaskX++;
 	}
-	// If only one tone was loaded, repeat it to boost power
-	if (iTweezerX == 1) { 
-		for (const auto& repeatIdx : range(TONES_REPEAT - 1)) {
-			const auto& toneIdx = repeatIdx + 1;
-			if (toneIdx > MAX_XTONES) {
-				thrower("For safety, maximum number of x tones is limited to " + str(MAX_XTONES) + " in rearrangement mode");
-			}
-			size_t hardwareChannel = (toneIdx * 8) % 48 + (toneIdx * 8) / 48;
-			Message m = Message::make().destination(MessageDestination::KA007)
-				.DAC(MessageDAC::DAC0).channel(hardwareChannel)
-				.setting(MessageSetting::LOADFREQUENCY)
-				.frequencyMHz(moveLUT.getFreqX(lastLoadedMaskX, 0)).amplitudePercent(moveLUT.getAmpX(lastLoadedMaskX, 0)).phaseDegrees(phase);
-			ms.enqueue(m);
-			//std::cout << "set DAC0 " << hardwareChannel << " " << moveLUT.getAmpX(lastLoadedMaskX, 0) << " " << moveLUT.getFreqX(lastLoadedMaskX, 0) << " " << phase << std::endl;
-		}
-	}
 
-
-	size_t iTweezerY = 0;
-	size_t iMaskY = 0, lastLoadedMaskY = 0;
-	for (auto const& channelBool : moveParam.initialPositionsY) {
-		if (iTweezerY > MAX_YTONES) {
-			thrower("For safety, maximum number of y tones is limited to " + str(MAX_YTONES) + " in rearrangement mode");
+	size_t iTweezerY = 0, iMaskY = 0;
+	for (bool channelBool : moveParam.initialPositionsY) {
+		if (iTweezerY >= MAX_YTONES / moveParam.repeatY) {
+			thrower("Exceeded MAX_YTONES (" + str(MAX_YTONES) + ") in rearrangement mode");
 		}
 		if (channelBool) {
-			size_t hardwareChannel = (iTweezerY * 8) % 48 + (iTweezerY * 8) / 48;
-			phase = fmod(180 * pow(iTweezerY + 1, 2) / moveParam.nTweezerY, 360); //this assumes comb of even tones.
-			Message m = Message::make().destination(MessageDestination::KA007)
-				.DAC(MessageDAC::DAC1).channel(hardwareChannel)
-				.setting(MessageSetting::LOADFREQUENCY)
-				.frequencyMHz(moveLUT.getFreqY(0, iMaskY)).amplitudePercent(moveLUT.getAmpY(0, iMaskY)).phaseDegrees(phase);
-			ms.enqueue(m);
+			double phase = fmod(180 * pow(iTweezerY + 1, 2) / moveParam.nTweezerY, 360);
+			for (size_t r = 0; r < moveParam.repeatY; ++r) {
+				size_t toneIdx = iTweezerY * moveParam.repeatY + r;
+				size_t hardwareChannel = (toneIdx * 8) % 48 + (toneIdx * 8) / 48;
+				Message m = Message::make().destination(MessageDestination::KA007)
+					.DAC(MessageDAC::DAC1).channel(hardwareChannel)
+					.setting(MessageSetting::LOADFREQUENCY)
+					.frequencyMHz(moveLUT.getFreqY(0, iMaskY))
+					.amplitudePercent(moveLUT.getAmpY(0, iMaskY))
+					.phaseDegrees(phase);
+				ms.enqueue(m);
+				std::cout << "set DAC1 " << hardwareChannel << " " << moveLUT.getAmpY(iMaskY, 0) << " " << moveLUT.getFreqY(iMaskY, 0) << " " << phase << std::endl;
+			}
 			iTweezerY++;
-			lastLoadedMaskY = iMaskY;
-			//std::cout << "set DAC1 " << hardwareChannel << " " << moveLUT.getAmpY(iMaskY, 0) << " " << moveLUT.getFreqY(iMaskY, 0) << " " << phase << std::endl;
 		}
 		iMaskY++;
-	}
-	// If only one tone was loaded, repeat it to boost power
-	if (iTweezerY == 1) {
-		for (const auto& repeatIdx : range(TONES_REPEAT - 1)) {
-			const auto& toneIdx = repeatIdx + 1;
-			if (toneIdx > MAX_XTONES) {
-				thrower("For safety, maximum number of x tones is limited to " + str(MAX_XTONES) + " in rearrangement mode");
-			}
-			size_t hardwareChannel = (toneIdx * 8) % 48 + (toneIdx * 8) / 48;
-			Message m = Message::make().destination(MessageDestination::KA007)
-				.DAC(MessageDAC::DAC1).channel(hardwareChannel)
-				.setting(MessageSetting::LOADFREQUENCY)
-				.frequencyMHz(moveLUT.getFreqY(lastLoadedMaskY, 0)).amplitudePercent(moveLUT.getAmpY(lastLoadedMaskY, 0)).phaseDegrees(phase);
-			ms.enqueue(m);
-			//std::cout << "set DAC1 " << hardwareChannel << " " << moveLUT.getAmpY(lastLoadedMaskY, 0) << " " << moveLUT.getFreqY(lastLoadedMaskY, 0) << " " << phase << std::endl;
-		}
 	}
 }
 
@@ -628,6 +508,49 @@ void DynamicMoveManager::writeMoveOff(MessageSender& ms)
 	}
 }
 
+void DynamicMoveManager::checkTotalPower()
+{
+	size_t iTweezerX = 0, iMaskX = 0;
+	double totalPowerX = 0.0, maxPowerX = 0.0;
+	for (bool channelBool : moveParam.initialPositionsX) {
+		if (iTweezerX >= MAX_XTONES / moveParam.repeatX) {
+			thrower("For safety, maximum number of x tones is limited to " + str(MAX_XTONES) + " in rearrangement mode");
+		}
+		if (channelBool) {
+			totalPowerX += moveParam.repeatX * moveParam.repeatX * moveLUT.getAmpX(iMaskX, 0) * moveLUT.getAmpX(iMaskX, 0);
+			iTweezerX++;
+		}
+		maxPowerX += moveParam.repeatX * moveParam.repeatX * moveLUT.getAmpX(iMaskX, 0) * moveLUT.getAmpX(iMaskX, 0);
+		iMaskX++;
+	}
+	std::cout << "DynamicMoveManager::checkTotalPower: Total  power in X axis: " << str(totalPowerX) << ", maximum power in X axis: " << str(maxPowerX) << std::endl;
+
+	size_t iTweezerY = 0, iMaskY = 0;
+	double totalPowerY = 0.0, maxPowerY = 0.0;
+	for (bool channelBool : moveParam.initialPositionsY) {
+		if (iTweezerY >= MAX_YTONES / moveParam.repeatY) {
+			thrower("For safety, maximum number of Y tones is limited to " + str(MAX_YTONES) + " in rearrangement mode");
+		}
+		if (channelBool) {
+			totalPowerY += moveParam.repeatY * moveParam.repeatY * moveLUT.getAmpY(iMaskY, 0) * moveLUT.getAmpY(iMaskY, 0);
+			iTweezerY++;
+		}
+		maxPowerY += moveParam.repeatY * moveParam.repeatY * moveLUT.getAmpY(iMaskY, 0) * moveLUT.getAmpY(iMaskY, 0);
+		iMaskY++;
+	}
+	std::cout << "DynamicMoveManager::checkTotalPower: Total  power in Y axis: " << str(totalPowerY) << ", maximum power in Y axis: " << str(maxPowerY) << std::endl;
+
+	if (maxPowerX > 1.1 * MAX_XPOWER) {
+		thrower("Maximum power for the grid in the X axis is " + str(maxPowerX) + ", and is greater than 1.5W."
+			" If you believe it is fine, please change the alter threshold.");
+	}
+	if (totalPowerY > 1.1 * MAX_YPOWER) {
+		thrower("Maximum power for the grid in the Y axis is " + str(maxPowerY) + ", and is greater than 1.5W."
+			" If you believe it is fine, please change the alter threshold.");
+	}
+
+}
+
 rearrangeParameters DynamicMoveManager::getRearrangeParameters()
 {
 	return moveParam;
@@ -636,4 +559,21 @@ rearrangeParameters DynamicMoveManager::getRearrangeParameters()
 bool DynamicMoveManager::isMoveActive()
 {
 	return moveActive;
+}
+
+void DynamicMoveManager::updataParameterForVariation(unsigned variation)
+{
+	//Since writeLoad always called before rearrange, just do auto tweezer offset here.
+	//if (autoTweezerOffsetActive) {
+	//	xOffset = xOffsetManual + xOffsetAuto;
+	//	yOffset = yOffsetManual + yOffsetAuto;
+	//}
+	//else {
+	//	xOffset = xOffsetManual;
+	//	yOffset = yOffsetManual;
+	//}
+
+	moveParam.xOffset = moveParam.xOffsetManual[variation];
+	moveParam.yOffset = moveParam.yOffsetManual[variation];
+	moveLUT.setOffset(moveParam.xOffset, moveParam.yOffset);
 }

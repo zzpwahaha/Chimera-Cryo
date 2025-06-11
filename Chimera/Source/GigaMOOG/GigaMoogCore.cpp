@@ -77,6 +77,7 @@ void GigaMoogCore::calculateVariations(std::vector<parameterType>& params, ExpTh
 
 void GigaMoogCore::programVariation(unsigned variation, std::vector<parameterType>& params, ExpThreadWorker* threadworker)
 {
+	moveManager.updataParameterForVariation(variation);
 	send(gigaMoogCommandList[variation]);
 }
 

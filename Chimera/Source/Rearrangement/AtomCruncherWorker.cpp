@@ -183,8 +183,8 @@ void CruncherThreadWorker::handleRearrangement(AtomImage atomImage)
 	rearrangeGenerator.loadAtomImage(atomImage);
 
 	MessageSender ms;
-	input->gmoog->writeOff(ms); //Important to start with load tones off, so that every tone has explicit settings.
-	input->gmoog->moveManager.writeRearrangeMoves(rearrangeGenerator.getRearrangeMoves(), ms);
+	//input->gmoog->writeOff(ms); //Important to start with load tones off, so that every tone has explicit settings.
+	input->gmoog->moveManager.writeRearrangeMoves(rearrangeGenerator.getRearrangeMoves(), ms, atomImage.picStat.varNum);
 	input->gmoog->writeTerminator(ms);
 	qDebug() << "From Cruncher thread: ready to send rearrange for image number" << atomImage.picStat.picNum << " at " << std::chrono::duration_cast<std::chrono::nanoseconds>(chronoClockHR::now() - input->imageGrabTimes->back()).count() / 1e6 << "ms, relative to grabber thread";
 	input->gmoog->send(ms);
