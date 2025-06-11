@@ -38,7 +38,7 @@ t += 100
     on: PrbCoolShutter
     off: xyzMOTShutter
     dac: PrbAmp {pgcprb_twz_cool_amp_cal prb_pwr}
-    dac: PrbrepAmp 1 %pgcprb_twz_rep_amp
+    dac: PrbrepAmp 10 %pgcprb_twz_rep_amp
     t += t_shutter
 
 
@@ -47,10 +47,13 @@ var SLM_depth 3.5
 dacramp: SLMTweezerIntensity slm_twz_intensity SLM_depth 10
 t += 10
 
+% SLM image
+pulseon: Mako2 0.01
+t += 1.1
 
 on: PrbTrg
 pulseon: GMLoadTrg 0.0005
-dac: TweezerIntensity 7.5
+dac: TweezerIntensity 6.5
 t += 1
 on: TweezerTrg
 t += 1 
@@ -62,6 +65,17 @@ t += 1
 %t += 1
 on: TweezerHold
 t += 1
+
+% AOD full array image
+off: TweezerTrg
+t += 0.1
+pulseon: Mako2 0.01 
+t += 0.2
+pulseon: TweezerTrg 0.1
+t += 1.1
+
+t += 1
+
 pulseon: GMMoveTrg 0.0005
 t += 1
 off: PrbTrg
@@ -81,16 +95,16 @@ pulseon: GMMoveTrg 0.0005
 t += 2
 off: PrbTrg
 
+% after all rearrangement, this would turn off GM completely
 pulseon: GMMoveTrg 0.0005
 
 t += 1
-
-
 
 t += 1
 off: TweezerTrg
 off: PrbTrg
 off: TweezerHold
+pulseon: GMLoadTrg 0.0005
 
 
 

@@ -87,21 +87,21 @@ def AOD_frequency_calibration(exp_idx=None, timeout_control = {'use':False, 'tim
     binnings = np.linspace(50, 150, 201)
     gridShape = [7,7]
     neighborhood_size = 50
-    threshold_findLocs = 10
+    threshold_findLocs = 5
     advanced_option = dict({"active":False, "image_threshold":110, "score_threshold":12})
     multi_points_option = dict({"active":True, "search_square":4, "num_points":12})
     
     # Analyze the data
     analysis_locs = da.DataAnalysis(year='2025', month='June', day='2', data_name='data_1', 
                                     window=window, thresholds=thresholds, binnings=binnings, 
-                                    n_cluster_row=7, neighborhood_size=neighborhood_size, threshold_findLocs=threshold_findLocs, 
+                                    n_cluster_row=gridShape[0], neighborhood_size=neighborhood_size, threshold_findLocs=10, 
                                     advanced_option=advanced_option, multi_points_option=multi_points_option)
     # get AOD frequency mapping, hard coding the frequencies since they are unlikely to change
     dac0_freq = np.array([ 80.,  86.,  92.,  98., 104., 110., 116.])
     dac1_freq = np.array([ 76.,  82.,  88.,  94., 100., 106., 112.])
     data_analysis = da.DataAnalysis(YEAR, MONTH, DAY, exp_name, maximaLocs=analysis_locs.maximaLocs,
                         window=window, thresholds=thresholds, binnings=binnings, 
-                        n_cluster_row=7,
+                        n_cluster_row=gridShape[0],
                         annotate_title = exp_name, annotate_note=" ")
     data_analysis.getFrequencyCalibration(dac0_freq=dac0_freq, dac1_freq=dac1_freq, expected_grid_shape = gridShape,
                                           neighborhood_size=neighborhood_size, threshold_findLocs=threshold_findLocs, 
@@ -139,10 +139,12 @@ def SLM_frequency_LUT_generation(exp_idx = None, timeout_control = {'use':False,
     experiment_monitoring(exp=exp, timeout_control=timeout_control)
 
     # analysis grid
-    window = [0,0,440,30]
+    # window = [0,0,440,30]
+    window = [0,0,440,40]
     thresholds = 100
     binnings = np.linspace(50, 150, 201)
-    gridShape = [1,37]
+    # gridShape = [1,37]
+    gridShape = [2,19]
     neighborhood_size = 50
     threshold_findLocs = 10
     advanced_option = dict({"active":True, "image_threshold":100, "score_threshold":2})
@@ -151,12 +153,12 @@ def SLM_frequency_LUT_generation(exp_idx = None, timeout_control = {'use':False,
     # Analyze the data
     analysis_locs = da.DataAnalysis(year='2025', month='June', day='2', data_name='data_2', 
                                     window=window, thresholds=thresholds, binnings=binnings, 
-                                    n_cluster_row=1, neighborhood_size=neighborhood_size, threshold_findLocs=threshold_findLocs, 
+                                    n_cluster_row=gridShape[0], neighborhood_size=neighborhood_size, threshold_findLocs=threshold_findLocs, 
                                     advanced_option=advanced_option, multi_points_option=multi_points_option)
     # get SLM camera trap site camera position
     data_analysis = da.DataAnalysis(YEAR, MONTH, DAY, exp_name, maximaLocs=analysis_locs.maximaLocs,
                         window=window, thresholds=thresholds, binnings=binnings, 
-                        n_cluster_row=1,
+                        n_cluster_row=gridShape[0],
                         annotate_title = exp_name, annotate_note=" ")
     pts_Marana = \
         data_analysis.getAveragedAtomLocationOnCamera(expected_grid_shape = gridShape,
@@ -221,9 +223,11 @@ if __name__ == "__main__":
     YEAR, MONTH, DAY = today()
     data_file_path = f"{exp.DATA_FILE_LOCATION}{YEAR}/{MONTH}/{MONTH} {DAY}/Raw Data/"
     file_count, largest_idx = find_largest_file_number(directory=data_file_path, name_prefix="AOD-FREQUENCY-CALIBRATION")
-    tform_camera_to_AOD = AOD_frequency_calibration(exp_idx=0)
-    pts_Marana_SLM, grid_full_name = SLM_frequency_LUT_generation(exp_idx=0)
-    generate_LUT(tform_camera_to_AOD, pts_Marana_SLM, exp_idx=0)
+    exp_idx = largest_idx + 1
+    # exp_idx=0
+    tform_camera_to_AOD = AOD_frequency_calibration(exp_idx=exp_idx)
+    pts_Marana_SLM, grid_full_name = SLM_frequency_LUT_generation(exp_idx=exp_idx)
+    generate_LUT(tform_camera_to_AOD, pts_Marana_SLM, exp_idx=exp_idx)
     print(grid_full_name)
 
 
