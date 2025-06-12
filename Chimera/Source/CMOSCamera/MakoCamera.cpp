@@ -185,10 +185,11 @@ void MakoCamera::initialize()
         }
         auto MaxMin = imgCThread.dataMaxMin();
         m_DataMaxMinLabel->setText("Max/Min: (" + qstr(MaxMin.first) + "/" + qstr(MaxMin.second) + ")");
-        imgCThread.mutex().lock();
+        //imgCThread.mutex().lock();
         QMouseEvent event(QMouseEvent::None, imgCThread.mousePos(), Qt::NoButton, 0, 0);
         viewer.onSetMousePosInCMap(&event, m_CursorScenePosLabel);
-        imgCThread.mutex().unlock(); });
+        //imgCThread.mutex().unlock(); 
+        }, Qt::BlockingQueuedConnection);
 
     connect(viewer.plot(), &QCustomPlot::mouseMove, this, [this](QMouseEvent* mouseEvn) {
         imgCThread.updateMousePos(mouseEvn); });
