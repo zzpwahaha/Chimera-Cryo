@@ -572,8 +572,9 @@ void DynamicMoveManager::updataParameterForVariation(unsigned variation)
 	//	xOffset = xOffsetManual;
 	//	yOffset = yOffsetManual;
 	//}
-
-	moveParam.xOffset = moveParam.xOffsetManual[variation];
-	moveParam.yOffset = moveParam.yOffsetManual[variation];
-	moveLUT.setOffset(moveParam.xOffset, moveParam.yOffset);
+	if (moveActive) {
+		moveParam.xOffset = moveParam.xOffsetManual[variation];
+		moveParam.yOffset = moveParam.yOffsetManual[variation];
+		moveLUT.setOffset(moveParam.xOffset, moveParam.yOffset);
+	}
 }
