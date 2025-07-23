@@ -11,3 +11,14 @@ C:\Software\Boost\boost_1_76_0> .\dist\bin\bcp.exe asio ..\myBoost\
 
 20241121, add format 
 C:\Software\Boost\boost_1_76_0> .\dist\bin\bcp.exe format ..\myBoost\
+
+
+20250704, add math for PondermotiveIntegratorBoost
+C:\Software\Boost\boost_1_76_0> .\dist\bin\bcp.exe math ..\PondermotiveIntegratorBoost\
+
+To build the new boost:
+https://stackoverflow.com/questions/28565416/build-dependent-boost-libs-after-doing-bcp
+C:\Software\Boost\boost_1_76_0> .\dist\bin\bcp.exe build ../PondermotiveIntegratorBoost
+C:\Software\Boost\boost_1_76_0> cd ..\PondermotiveIntegratorBoost\
+C:\Software\Boost\PondermotiveIntegratorBoost> .\bootstrap.bat
+C:\Software\Boost\PondermotiveIntegratorBoost> ./b2
