@@ -403,6 +403,8 @@ void AndorCameraCore::preparationChecks () {
  * and shapes them into the array which holds all of the pictures for a given experiment cycle, except continuousMode.
  */
 std::vector<Matrix<long>> AndorCameraCore::acquireImageData (){
+	auto timerE = QElapsedTimer();
+	timerE.start();
 	try	{
 		// each image processed from the call from imageGrabber thread
 		int experimentPictureNumber = (currentPictureNumber) % runSettings.picsPerRepetition;
@@ -450,12 +452,16 @@ std::vector<Matrix<long>> AndorCameraCore::acquireImageData (){
 				// let the blank image roll through to keep the image numbers going sensibly. // ??? WTF zzp 20220913
 				throwNested ("Error while calling getOldestImage.\n"+e.trace());
 			}
+			qDebug() << "std::vector<Matrix<long>> AndorCameraCore::acquireImageData: extracted image at time " << timerE.elapsed() << " ms";
+
 			// immediately rotate
 			for (auto imageVecInc : range(repImages[experimentPictureNumber].size ())){
 				//repImages[experimentPictureNumber].data[imageVecInc] = tempImage.data[((imageVecInc
 				//	% imSettings.width ()) + 1) * imSettings.height () - imageVecInc / imSettings.width () - 1];
 				repImages[experimentPictureNumber].data[imageVecInc] = tempImage.data[imageVecInc];
 			}
+			qDebug() << "std::vector<Matrix<long>> AndorCameraCore::acquireImageData: rotated " << timerE.elapsed() << " ms";
+
 		}
 		else{
 			//for (auto imageVecInc : range (repImages[experimentPictureNumber].size ()))	{

@@ -57,7 +57,7 @@ double rearrangeLUT::getFreqX(int xIndex, int yIndex)
 		return 300 + xOffset;
 	}
 	else if (xIndex < xDim && xIndex >= 0 && yIndex < yDim && yIndex >= 0) {
-		return FTW_LUT[2 * xDim * yIndex + 2 * xIndex + 0] + xOffset;
+		return roundToTwoDecimalPlaces(FTW_LUT[2 * xDim * yIndex + 2 * xIndex + 0] + xOffset);
 	}
 	else {
 		thrower("Invalid LUT index: (" + str(xIndex) + ", " + str(yIndex) + ") while looking up for FreqX.");
@@ -74,7 +74,7 @@ double rearrangeLUT::getFreqY(int xIndex, int yIndex)
 		return 300 + yOffset;
 	}
 	else if (xIndex < xDim && xIndex >= 0 && yIndex < yDim && yIndex >= 0) {
-		return FTW_LUT[2 * xDim * yIndex + 2 * xIndex + 1] + yOffset;
+		return roundToTwoDecimalPlaces(FTW_LUT[2 * xDim * yIndex + 2 * xIndex + 1] + yOffset);
 	}
 	else {
 		thrower("Invalid LUT index: (" + str(xIndex) + ", " + str(yIndex) + ") while looking up for FreqY.");
@@ -107,4 +107,9 @@ double rearrangeLUT::getAmpY(int xIndex, int yIndex)
 	else {
 		thrower("Invalid LUT index: (" + str(xIndex) + ", " + str(yIndex) + ") while looking up for AmpY.");
 	}
+}
+
+double rearrangeLUT::roundToTwoDecimalPlaces(double value)
+{
+	return std::round(value * 100.0) / 100.0;
 }

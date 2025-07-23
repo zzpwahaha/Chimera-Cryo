@@ -13,7 +13,7 @@ public:
 	double getAmpY(int xIndex, int yIndex);
 
 private:
-
+	double roundToTwoDecimalPlaces(double value);
 public:
 	const std::string TWEEZER_AMPLITUDE_LUT_FILE_ADDRESS = str(CODE_ROOT) + "\\TweezerLUT\\ampLUT.npy";
 	const std::string TWEEZER_FREQUENCY_LUT_FILE_ADDRESS = str(CODE_ROOT)+ "\\TweezerLUT\\freqLUT.npy";

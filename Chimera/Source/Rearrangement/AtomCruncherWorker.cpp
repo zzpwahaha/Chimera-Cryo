@@ -109,7 +109,7 @@ void CruncherThreadWorker::handleImage (){
 		}
 		if (image.picStat.picNum % debugPicsPerRep == 0) {
 			input->catchPicTimes->push_back(chronoClockHR::now());
-			qDebug() << "From Cruncher thread: get image number" << image.picStat.picNum << " at " << std::chrono::duration_cast<std::chrono::nanoseconds>(input->catchPicTimes->back() - input->imageGrabTimes->back()).count() << "ns, relative to grabber thread";
+			qDebug() << "From Cruncher thread: get image number" << image.picStat.picNum << " at " << std::chrono::duration_cast<std::chrono::nanoseconds>(input->catchPicTimes->back() - input->imageGrabTimes->back()).count() / 1e6 << "ms, relative to grabber thread";
 		}
 		// tempImagePixels[grid][pixel]; only contains the counts for the pixels being monitored.
 		PixListQueue tempImagePixels(input->grids.size());
@@ -179,16 +179,16 @@ void CruncherThreadWorker::handleRearrangement(AtomImage atomImage)
 		return;
 	}
 
-	qDebug() << "From Cruncher thread: ready to calculated rearrange for image number" << atomImage.picStat.picNum << " at " << std::chrono::duration_cast<std::chrono::nanoseconds>(chronoClockHR::now() - input->imageGrabTimes->back()).count() << "ns, relative to grabber thread";
+	qDebug() << "From Cruncher thread: ready to calculated rearrange for image number" << atomImage.picStat.picNum << " at " << std::chrono::duration_cast<std::chrono::nanoseconds>(chronoClockHR::now() - input->imageGrabTimes->back()).count() / 1e6 << "ms, relative to grabber thread";
 	rearrangeGenerator.loadAtomImage(atomImage);
 
 	MessageSender ms;
-	input->gmoog->writeOff(ms); //Important to start with load tones off, so that every tone has explicit settings.
-	input->gmoog->moveManager.writeRearrangeMoves(rearrangeGenerator.getRearrangeMoves(), ms);
+	//input->gmoog->writeOff(ms); //Important to start with load tones off, so that every tone has explicit settings.
+	input->gmoog->moveManager.writeRearrangeMoves(rearrangeGenerator.getRearrangeMoves(), ms, atomImage.picStat.varNum);
 	input->gmoog->writeTerminator(ms);
-	qDebug() << "From Cruncher thread: ready to send rearrange for image number" << atomImage.picStat.picNum << " at " << std::chrono::duration_cast<std::chrono::nanoseconds>(chronoClockHR::now() - input->imageGrabTimes->back()).count() << "ns, relative to grabber thread";
+	qDebug() << "From Cruncher thread: ready to send rearrange for image number" << atomImage.picStat.picNum << " at " << std::chrono::duration_cast<std::chrono::nanoseconds>(chronoClockHR::now() - input->imageGrabTimes->back()).count() / 1e6 << "ms, relative to grabber thread";
 	input->gmoog->send(ms);
 
 	input->finTimes->push_back(chronoClockHR::now());
-	qDebug() << "From Cruncher thread: ready to trigger rearrange for image number" << atomImage.picStat.picNum << " at " << std::chrono::duration_cast<std::chrono::nanoseconds>(input->finTimes->back() - input->imageGrabTimes->back()).count() << "ns, relative to grabber thread";
+	qDebug() << "From Cruncher thread: ready to trigger rearrange for image number" << atomImage.picStat.picNum << " at " << std::chrono::duration_cast<std::chrono::nanoseconds>(input->finTimes->back() - input->imageGrabTimes->back()).count() / 1e6 << "ms, relative to grabber thread";
 }

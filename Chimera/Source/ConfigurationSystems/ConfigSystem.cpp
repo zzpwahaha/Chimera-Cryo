@@ -261,6 +261,7 @@ void ConfigSystem::saveConfigurationAs(IChimeraQtWindow* win){
 	win->auxWin->windowSaveConfig(configSaveStream);
 	win->makoWin1->windowSaveConfig(configSaveStream);
 	win->makoWin2->windowSaveConfig(configSaveStream);
+	win->analysisWin->windowSaveConfig(configSaveStream);
 	win->mainWin->windowSaveConfig(configSaveStream);
 	// check if file already exists
 	std::ofstream configSaveFile (configurationPathToSave);
