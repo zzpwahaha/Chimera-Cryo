@@ -39,7 +39,7 @@ class EthernetClient:
 if __name__=="__main__":
     client = EthernetClient(host='6.1.1.71', port=8080)
     client.connect()
-    client.send("Zernike 4 0.75")
+    client.send("Zernike 4 0.53")
     # client.send("Test message")
     # client.send("Zernike 12 0")
     # client.send("Zernike 4 -4")

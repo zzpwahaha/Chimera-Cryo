@@ -22,7 +22,7 @@ t += 1.1
 
 
 % holding the tweezer at amplitude_scan
-dac: TweezerIntensity 0.8
+dac: TweezerIntensity 0.4
 t += 0.5
 on: TweezerTrg
 %pulseon: Mako2 0.01 
@@ -94,10 +94,10 @@ on: TweezerTrg
 pulseon: do8_4 0.01
 t += 0.1
 on: OPTrg
-t += 0.075 %time_scan %0.10 %0.05
+t += 0.065 %time_scan %0.10 %0.05
 off: OPTrg
 off: OPShutter
-t += 0.1-0.075 %time_scan %0.05 %
+t += 0.1-0.065 %time_scan %0.05 %
 off: TweezerTrg
 dacramp: SLMTweezerIntensity SLM_depth slm_twz_intensity 10
 t += 10

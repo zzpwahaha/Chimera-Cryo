@@ -31,7 +31,7 @@ analysis_locs = da.DataAnalysis(year='2025', month='June', day='6', data_name='d
 client = EthernetClient.EthernetClient(host='6.1.1.71', port=8080)
 
 
-def trap_depth_scan(amplitude, AODon=True, postfix="", timeout_control = {'use':False, 'timeout':1000}):
+def trap_depth_scan(amplitude, AODon=True, postfix="", timeout_control = {'use':True, 'timeout':1000}):
     script_name_AODon = "tweezerloading_rearrangement_lightshift_from_AOD.mScript"
     script_name_AODoff = "tweezerloading_rearrangement_lightshift_from_AOD_AODoff.mScript"
 
@@ -84,7 +84,7 @@ def trap_depth_scan(amplitude, AODon=True, postfix="", timeout_control = {'use':
     #     print(f"Optimal resoance {optimal_field:.3S} has a variance larger than 1 or {analysis_result[0]:.3S} is outside the normal range, this typically means bad data.")
     return  False #fit_fail
 
-def trap_depth_scan_2D(amplitude, postfix="", timeout_control = {'use':False, 'timeout':4800}):
+def trap_depth_scan_2D(amplitude, postfix="", timeout_control = {'use':True, 'timeout':4800}):
     script_name = "tweezerloading_rearrangement_lightshift_from_AOD.mScript"
     gscript_name = "AOD_rearrangement_2x19.gScript"
 
@@ -128,7 +128,10 @@ def procedure():
     client.connect()
     # amplitudes = np.linspace(-0.75,1.5, 10)
     # amplitudes = np.linspace(-1.75,-1, 4)
-    amplitudes = np.linspace(-1.5,1.5, 4)
+    # amplitudes = np.linspace(-1.5,1.5, 4)
+    # amplitudes = np.array([-2,-1, 0, 1, 2, 2.5])
+    # amplitudes = np.array([0, -1.5, -1, -0.5, 0.5, 1, 1.5, 2, 2.5])
+    amplitudes = np.array([2.5])
     ZERNIKE_IDX = 4
     ZERNIKE_CMD = "Zernike"
 
