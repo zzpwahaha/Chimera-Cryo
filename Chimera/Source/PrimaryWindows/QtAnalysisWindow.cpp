@@ -40,8 +40,12 @@ std::string QtAnalysisWindow::getSystemStatusString()
 	}
 	msg += "Elliptec System:\n";
 	if (!ELLIPTEC_SAFEMODE) {
-		msg += str("\tElliptec rotation stage System is Active at port") + ELLIPTEC_PORT + ", with baudrate " + str(9600) + "\n";
-		msg += "\t" + elliptec.getDeviceInfo() + "\n";
+		std::string ellPortStr= "";
+		for (auto p : ELLIPTEC_PORT) {
+			ellPortStr += p + ", ";
+		}
+		msg += str("\tElliptec rotation stage System is Active at port ") + ellPortStr + " with baudrate " + str(9600) + "\n";
+		msg += "\t\t" + elliptec.getDeviceInfo() + "\n";
 	}
 	else {
 		msg += "\tElliptec System is disabled! Enable in \"constants.h\"\n";

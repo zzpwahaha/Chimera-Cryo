@@ -14,7 +14,7 @@ public:
     // THIS CLASS IS NOT COPYABLE.
     ElliptecCore(const ElliptecCore&) = delete;
     ElliptecCore& operator=(const ElliptecCore&) = delete;
-    ElliptecCore(bool safemode, const std::string& port);
+    ElliptecCore(bool safemode, const std::array<std::string, size_t(ElliptecGrid::numOFunit)> ports);
 
     virtual void loadExpSettings(ConfigStream& stream) override;
     virtual void logSettings(DataLogger& logger, ExpThreadWorker* threadworker) override;
@@ -52,7 +52,7 @@ public:
     const double minVal = -360.0;
 
 private:
-    ElliptecFlume ellFlume;
+    std::array<ElliptecFlume, size_t(ElliptecGrid::numOFunit)> ellFlumes;
     ElliptecSettings expSettings;
 
 };

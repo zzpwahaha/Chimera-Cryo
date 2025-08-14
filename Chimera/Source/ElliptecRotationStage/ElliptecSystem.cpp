@@ -68,7 +68,7 @@ void ElliptecSystem::initialize()
 		lay->addWidget(labels[ch], 0);
 		lay->addWidget(edits[ch], 0);
 		lay->addStretch(1);
-		layout2->addLayout(lay, ch / 4, ch % 4);
+		layout2->addLayout(lay, ch / size_t(ElliptecGrid::numPERunit), ch % size_t(ElliptecGrid::numPERunit));
 	}
 	layout->addLayout(layout2);
 

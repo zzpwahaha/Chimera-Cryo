@@ -4,7 +4,7 @@
 enum class ElliptecGrid : size_t
 {
 	numPERunit = 4,
-	numOFunit = 1,
+	numOFunit = ELLIPTEC_CTRL_NUM,
 	total = numPERunit * numOFunit
 };
 
