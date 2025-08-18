@@ -7,9 +7,13 @@
 #include <qdebug>
 #include <qelapsedtimer.h>
 
-MicrowaveCore::MicrowaveCore() : uwFlume(MICROWAVE_PORT, MICROWAVE_SAFEMODE)
+MicrowaveCore::MicrowaveCore(std::string delim, bool safemode, std::string port, std::pair<unsigned, unsigned> uwaveTriggerLine) : 
+	configDelim(delim),
+	safemode(safemode),
+	uwFlume(port, safemode),
+	uwaveTriggerLine(uwaveTriggerLine)
 {
-	if (MICROWAVE_SAFEMODE) {
+	if (safemode) {
 		return;
 	}
 	std::string cmd;

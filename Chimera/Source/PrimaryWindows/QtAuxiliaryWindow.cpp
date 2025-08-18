@@ -19,7 +19,7 @@ QtAuxiliaryWindow::QtAuxiliaryWindow (QWidget* parent)
 	, globalParamCtrl (this, "GLOBAL_PARAMETERS")
 	, dds (this, DDS_SAFEMODE)
 	, olSys(this, ttlBoard)
-	, mwSys(this)
+	, mwSys1("MW1", MICROWAVE_SAFEMODES[0], MICROWAVE_PORTS[0], MW_TRIGGER_LINES[0], this)
 	, picoSys(this)
 	, calManager(this)
 {	
@@ -92,10 +92,10 @@ void QtAuxiliaryWindow::initializeWidgets (){
 		aiSys.initialize(this);
 		calManager.initialize(this, &aiSys, &aoSys, &ttlBoard,
 			scriptWin->getArbGenCore(), andorWin->getPython());
-		mwSys.initialize(this);
+		mwSys1.initialize(this);
 		layout2->addWidget(&aiSys);
 		layout2->addWidget(&calManager);
-		layout2->addWidget(&mwSys, 0);
+		layout2->addWidget(&mwSys1, 0);
 		layout2->addStretch(1);
 
 		layout1->setContentsMargins(0, 0, 0, 0);
@@ -179,7 +179,7 @@ void QtAuxiliaryWindow::windowSaveConfig (ConfigStream& saveFile){
 	aoSys.handleSaveConfig (saveFile);
 	dds.handleSaveConfig (saveFile);
 	olSys.handleSaveConfig(saveFile);
-	mwSys.handleSaveConfig(saveFile);
+	mwSys1.handleSaveConfig(saveFile);
 	picoSys.handleSaveConfig(saveFile);
 	aiSys.handleSaveConfig(saveFile);
 	calManager.handleSaveConfig(saveFile);
@@ -196,8 +196,8 @@ void QtAuxiliaryWindow::windowOpenConfig (ConfigStream& configFile){
 		Sleep(50);
 		ConfigSystem::standardOpenConfig(configFile, olSys.getDelim(), &olSys);
 		microwaveSettings uwsettings;
-		ConfigSystem::stdGetFromConfig(configFile, mwSys.getCore(), uwsettings);
-		mwSys.setMicrowaveSettings(uwsettings);
+		ConfigSystem::stdGetFromConfig(configFile, mwSys1.getCore(), uwsettings);
+		mwSys1.setMicrowaveSettings(uwsettings);
 		ConfigSystem::standardOpenConfig(configFile, picoSys.getConfigDelim(), &picoSys);
 		ConfigSystem::standardOpenConfig(configFile, aiSys.getDelim(), &aiSys);
 		ConfigSystem::standardOpenConfig(configFile, calManager.systemDelim, &calManager);
@@ -692,12 +692,12 @@ std::string QtAuxiliaryWindow::getOtherSystemStatusMsg (){
 
 
 	msg += "Microwave System:\n";
-	if (!MICROWAVE_SAFEMODE) {
+	if (!mwSys1.getCore().safemode) {
 		msg += "\tCode System is Active!\n";
-		msg += "\t" + mwSys.getIdentity() + "\n\t";
+		msg += "\t" + mwSys1.getIdentity() + "\n\t";
 		msg += "Attached trigger line is \n\t\t";
 		{
-			msg += "(" + str(MW_TRIGGER_LINE.first) + "," + str(MW_TRIGGER_LINE.second) + ") ";
+			msg += "(" + str(mwSys1.getCore().uwaveTriggerLine.first) + "," + str(mwSys1.getCore().uwaveTriggerLine.second) + ") ";
 		}
 		msg += "\n";
 	}
@@ -733,7 +733,7 @@ std::string QtAuxiliaryWindow::getVisaDeviceStatus (){
 void QtAuxiliaryWindow::fillExpDeviceList (DeviceList& list){
 	//list.list.push_back (dds.getCore ());
 	//list.list.push_back(olSys.getCore());
-	list.list.push_back(mwSys.getCore());
+	list.list.push_back(mwSys1.getCore());
 	list.list.push_back(aiSys.getCore());
 	list.list.push_back(picoSys.getCore());
 }

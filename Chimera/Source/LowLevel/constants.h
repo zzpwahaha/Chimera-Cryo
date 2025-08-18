@@ -118,9 +118,10 @@
 	/*the first is the label on the box minus 1, has minus'd 1 explicitly and this is not used in the code, just a reminder*/
 
 	//Microwave Windfreak
-	const bool MICROWAVE_SAFEMODE = false;
-	const std::string MICROWAVE_PORT = "COM9";
-	const std::pair<unsigned, unsigned> MW_TRIGGER_LINE = std::make_pair(4 - 1, 2); /*the first is the label on the box minus 1, has minus'd 1 explicitly */
+	const unsigned MICROWAVE_NUM = 2;
+	const std::array<bool, MICROWAVE_NUM> MICROWAVE_SAFEMODES = { true,true };
+	const std::array<std::string, MICROWAVE_NUM> MICROWAVE_PORTS = { "COM9","COM15" };
+	const std::array<std::pair<unsigned, unsigned>, MICROWAVE_NUM> MW_TRIGGER_LINES = { std::make_pair(4 - 1, 2), std::make_pair(4 - 1, 1) }; /*the first is the label on the box minus 1, has minus'd 1 explicitly */
 
 	//PicoScrew
 	const bool PICOSCREW_SAFEMODE = false;

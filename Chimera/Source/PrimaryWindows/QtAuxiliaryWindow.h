@@ -122,7 +122,7 @@ class QtAuxiliaryWindow : public IChimeraQtWindow{
 		AiSystem aiSys;
 		DdsSystem dds;
 		OlSystem olSys;
-		MicrowaveSystem mwSys;
+		MicrowaveSystem mwSys1;
 		PicoScrewSystem picoSys;
 
 		MasterConfiguration masterConfig{ MASTER_CONFIGURATION_FILE_ADDRESS };

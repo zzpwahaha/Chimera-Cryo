@@ -6,6 +6,7 @@
 #include <StaticAnalogOutput/StaticAoSystem.h>
 #include <StaticDirectDigitalSynthesis/StaticDdsSystem.h>
 #include <ElliptecRotationStage/ElliptecSystem.h>
+#include <Microwave/MicrowaveSystem.h>
 
 
 namespace Ui {
@@ -40,6 +41,7 @@ public:
 	StaticAoSystem staticDac;
 	StaticDdsSystem staticDds;
 	ElliptecSystem elliptec;
+	MicrowaveSystem mwSys2;
 
 private:
 	Ui::QtAnalysisWindow* ui;

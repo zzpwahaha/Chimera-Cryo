@@ -14,6 +14,7 @@ QtAnalysisWindow::QtAnalysisWindow(QWidget* parent)
 	, staticDac(this)
 	, staticDds(this)
 	, elliptec(this)
+	, mwSys2("MW2", MICROWAVE_SAFEMODES[1], MICROWAVE_PORTS[1], MW_TRIGGER_LINES[1], this)
 {
 	setWindowTitle("Analysis Window");
 }
@@ -30,6 +31,7 @@ std::string QtAnalysisWindow::getSystemStatusString()
 	else {
 		msg += "\tStatic AO System is disabled! Enable in \"constants.h\"\n";
 	}
+
 	msg += "Static DDS System:\n";
 	if (!STATICDDS_SAFEMODE) {
 		msg += str("\tStatic DDS System is Active at port") + STATICDDS_PORT + ", with baudrate " + str(STATICDDS_BAUDRATE) + "\n";
@@ -38,6 +40,7 @@ std::string QtAnalysisWindow::getSystemStatusString()
 	else {
 		msg += "\tStatic DDS System is disabled! Enable in \"constants.h\"\n";
 	}
+
 	msg += "Elliptec System:\n";
 	if (!ELLIPTEC_SAFEMODE) {
 		std::string ellPortStr= "";
@@ -51,6 +54,21 @@ std::string QtAnalysisWindow::getSystemStatusString()
 		msg += "\tElliptec System is disabled! Enable in \"constants.h\"\n";
 	}
 
+	msg += "Microwave System:\n";
+	if (!mwSys2.getCore().safemode) {
+		msg += "\tCode System is Active!\n";
+		msg += "\t" + mwSys2.getIdentity() + "\n\t";
+		msg += "Attached trigger line is \n\t\t";
+		{
+			msg += "(" + str(mwSys2.getCore().uwaveTriggerLine.first) + "," + str(mwSys2.getCore().uwaveTriggerLine.second) + ") ";
+		}
+		msg += "\n";
+	}
+	else {
+		msg += "\tCode System is disabled! Enable in \"constants.h\"\n";
+	}
+
+
 	return msg;
 }
 
@@ -60,6 +78,9 @@ void QtAnalysisWindow::windowOpenConfig(ConfigStream& configFile)
 		ConfigSystem::standardOpenConfig(configFile, staticDac.getConfigDelim(), &staticDac);
 		ConfigSystem::standardOpenConfig(configFile, staticDds.getConfigDelim(), &staticDds);
 		ConfigSystem::standardOpenConfig(configFile, elliptec.getConfigDelim(), &elliptec);
+		microwaveSettings uwsettings;
+		ConfigSystem::stdGetFromConfig(configFile, mwSys2.getCore(), uwsettings);
+		mwSys2.setMicrowaveSettings(uwsettings);
 	}
 	catch (ChimeraError&) {
 		throwNested("Analysis Window failed to read parameters from the configuration file.");
@@ -71,6 +92,7 @@ void QtAnalysisWindow::windowSaveConfig(ConfigStream& configFile)
 	staticDac.handleSaveConfig(configFile);
 	staticDds.handleSaveConfig(configFile);
 	elliptec.handleSaveConfig(configFile);
+	mwSys2.handleSaveConfig(configFile);
 }
 
 void QtAnalysisWindow::fillExpDeviceList(DeviceList& list)
@@ -78,6 +100,7 @@ void QtAnalysisWindow::fillExpDeviceList(DeviceList& list)
 	list.list.push_back(staticDac.getCore());
 	list.list.push_back(staticDds.getCore());
 	list.list.push_back(elliptec.getCore());
+	list.list.push_back(mwSys2.getCore());
 }
 
 void QtAnalysisWindow::initializeWidgets()
@@ -118,6 +141,8 @@ void QtAnalysisWindow::initializeWidgets()
 	layoutAux->addWidget(&staticDds);
 	elliptec.initialize();
 	layoutAux->addWidget(&elliptec);
+	mwSys2.initialize(this);
+	layoutAux->addWidget(&mwSys2);
 
 	layoutAux->addStretch(1);
 

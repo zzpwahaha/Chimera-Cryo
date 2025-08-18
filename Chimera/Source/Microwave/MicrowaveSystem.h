@@ -21,7 +21,7 @@ class AuxiliaryWindow;
 /**/
 class MicrowaveSystem : public IChimeraSystem{
 	public:
-		MicrowaveSystem(IChimeraQtWindow* parent);
+		MicrowaveSystem(std::string delim, bool safemode, std::string port, std::pair<unsigned, unsigned> uwaveTriggerLine, IChimeraQtWindow* parent);
 		void handleContextMenu (const QPoint& pos);
 		void initialize(IChimeraQtWindow* parentWin );
 		std::string getIdentity();

@@ -8,7 +8,11 @@
 #include "PrimaryWindows/QtMainWindow.h"
 #include <QTableWidget.h>
 
-MicrowaveSystem::MicrowaveSystem(IChimeraQtWindow* parent) : IChimeraSystem(parent) {}
+MicrowaveSystem::MicrowaveSystem(std::string delim, bool safemode, std::string port, std::pair<unsigned, unsigned> uwaveTriggerLine,
+	IChimeraQtWindow* parent) :
+	IChimeraSystem(parent),
+	core(delim, safemode, port, uwaveTriggerLine)
+{}
 
 std::string MicrowaveSystem::getIdentity(){ 
 	return core.queryIdentity();
@@ -31,7 +35,7 @@ void MicrowaveSystem::handleContextMenu (const QPoint& pos){
 void MicrowaveSystem::initialize( IChimeraQtWindow* parent ){
 	QVBoxLayout* layout = new QVBoxLayout(this);
 	layout->setContentsMargins(0, 0, 0, 0);
-	header = new QLabel ("MICROWAVE SYSTEM", parent); 
+	header = new QLabel (qstr(core.getDelim()), parent);
 	layout->addWidget(header);
 
 	QHBoxLayout* layout1 = new QHBoxLayout(this);
@@ -132,6 +136,7 @@ void MicrowaveSystem::initialize( IChimeraQtWindow* parent ){
 	//layout->addLayout(layout3);
 	//layout->addLayout(layout4);
 	layout->addWidget(uwListListview);
+	this->setMaximumWidth(650);
 
 	emit notification(qstr(core.queryIdentity()), 0);
 }
@@ -211,10 +216,10 @@ void MicrowaveSystem::refreshListview (){
 	for (auto listElem : currentList){
 		auto ind = uwListListview->rowCount ();
 		uwListListview->insertRow (ind);
-		uwListListview->setItem (ind, 0, new QTableWidgetItem (cstr(count)));
+		uwListListview->setItem (ind, 0, new QTableWidgetItem (qstr(count)));
 		uwListListview->item (ind, 0)->setFlags (uwListListview->item (ind, 0)->flags () ^ Qt::ItemIsEnabled);
-		uwListListview->setItem (ind, 1, new QTableWidgetItem (cstr (listElem.frequency.expressionStr)));
-		uwListListview->setItem (ind, 2, new QTableWidgetItem (cstr (listElem.power.expressionStr)));
+		uwListListview->setItem (ind, 1, new QTableWidgetItem (qstr (listElem.frequency.expressionStr)));
+		uwListListview->setItem (ind, 2, new QTableWidgetItem (qstr (listElem.power.expressionStr)));
 		count++;
 	}
 }

@@ -7,7 +7,7 @@
 
 class MicrowaveCore : public IDeviceCore{
 	public:
-		MicrowaveCore ();
+		MicrowaveCore(std::string delim, bool safemode, std::string port, std::pair<unsigned, unsigned> uwaveTriggerLine);
 		std::string queryIdentity ();
 		void setFmSettings ();
 		void setPmSettings ();
@@ -16,7 +16,7 @@ class MicrowaveCore : public IDeviceCore{
 		std::pair<unsigned, unsigned> getUWaveTriggerLine ();
 		unsigned getNumTriggers (microwaveSettings settings);
 		microwaveSettings getSettingsFromConfig (ConfigStream& openFile);
-		std::string configDelim = "MICROWAVE_SYSTEM";
+		const std::string configDelim;
 		std::string getDelim () { return configDelim; }
 		void logSettings (DataLogger& log, ExpThreadWorker* threadworker);
 		void loadExpSettings (ConfigStream& stream);
@@ -24,7 +24,9 @@ class MicrowaveCore : public IDeviceCore{
 		void errorFinish () {};
 		std::string getCurrentList ();
 		microwaveSettings experimentSettings;
+		const bool safemode;
 		WindFreakFlume uwFlume;
+		const std::pair<unsigned, unsigned> uwaveTriggerLine;
 		void setTrigTime (double time);
 
 		const std::vector<std::string> mwSetupCommands = {
@@ -38,5 +40,4 @@ class MicrowaveCore : public IDeviceCore{
 
 	private:
 		double triggerTime = 0.5;
-		const std::pair<unsigned, unsigned> uwaveTriggerLine = MW_TRIGGER_LINE;
 };
