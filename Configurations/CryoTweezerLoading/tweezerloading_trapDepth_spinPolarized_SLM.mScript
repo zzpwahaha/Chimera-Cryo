@@ -1,7 +1,7 @@
 %%%%%%%%%%%%%%%%% Start With 1ms %%%%%%%%%%%%%%%%% 
 t = 1
-%call CryoMOTLoadingPGC()
-call CryoMOTEnhancedLoadingLGM()
+call CryoMOTLoadingPGC()
+%call CryoMOTEnhancedLoadingLGM()
 
 
 %%%%%%%%%%%%%%%  TOF  %%%%%%%%%%%%%%%%%%
@@ -24,7 +24,7 @@ call PGCTweezerImaging()
 t += 15 
 
 call setZeroField()
-t += 100 %750
+t += 750 %100 %750
 
 
 t += 15

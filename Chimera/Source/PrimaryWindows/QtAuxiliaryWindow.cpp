@@ -19,7 +19,7 @@ QtAuxiliaryWindow::QtAuxiliaryWindow (QWidget* parent)
 	, globalParamCtrl (this, "GLOBAL_PARAMETERS")
 	, dds (this, DDS_SAFEMODE)
 	, olSys(this, ttlBoard)
-	, mwSys1("MW1", MICROWAVE_SAFEMODES[0], MICROWAVE_PORTS[0], MW_TRIGGER_LINES[0], this)
+	, mwSys1(MICROWAVE_DELIMS[0], MICROWAVE_SAFEMODES[0], MICROWAVE_PORTS[0], MW_TRIGGER_LINES[0], this)
 	, picoSys(this)
 	, calManager(this)
 {	

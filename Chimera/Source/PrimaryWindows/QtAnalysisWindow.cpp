@@ -14,7 +14,7 @@ QtAnalysisWindow::QtAnalysisWindow(QWidget* parent)
 	, staticDac(this)
 	, staticDds(this)
 	, elliptec(this)
-	, mwSys2("MW2", MICROWAVE_SAFEMODES[1], MICROWAVE_PORTS[1], MW_TRIGGER_LINES[1], this)
+	, mwSys2(MICROWAVE_DELIMS[1], MICROWAVE_SAFEMODES[1], MICROWAVE_PORTS[1], MW_TRIGGER_LINES[1], this)
 {
 	setWindowTitle("Analysis Window");
 }

@@ -39,7 +39,7 @@ class MicrowaveSystem : public IChimeraSystem{
 		QLineEdit* writeTxt;
 		QPushButton* readNow;
 		QLabel* readTxt;
-		
+
 		QLabel* triggerStepTimeLabel;
 		QLineEdit* triggerStepTimeEdit;
 
@@ -47,6 +47,7 @@ class MicrowaveSystem : public IChimeraSystem{
 		QCheckBox* controlOptionCheck;
 		QPushButton* programNowPush;
 		QPushButton* reconnectPush;
+		QPushButton* trigNowPush;
 		std::vector<microwaveListEntry> currentList;
 
 		void refreshListview ();

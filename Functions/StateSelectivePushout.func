@@ -1,6 +1,6 @@
 %%%%% push out F=2 using 2-3'', using OP beam %%%%%
 def StateSelectivePushout():
-    dacramp: TweezerIntensity twz_intensity twz_intensity*0.1 10
+    dacramp: SLMTweezerIntensity slm_twz_intensity slm_twz_intensity*0.1 10
     t += 10
     off: TARepShutter
     off: PrbShutter
@@ -18,5 +18,5 @@ def StateSelectivePushout():
     off: OPTrg
     off: OPShutter
     t += 1-0.05 %time_scan 
-    dacramp: TweezerIntensity twz_intensity*0.1 twz_intensity 10 
+    dacramp: SLMTweezerIntensity slm_twz_intensity*0.1 slm_twz_intensity 10 
     t += 10

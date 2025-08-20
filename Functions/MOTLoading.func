@@ -48,6 +48,7 @@ def MOTLoading(loading_time):
     on: DipolePushShutter 
     off: Ryd420Trg
     off: Ryd1013Trg
+    off: D1StateTransferTrg
     off: PrbShutter 
     on: PrbCoolShutter
     off: D1LGMShutter
@@ -55,12 +56,14 @@ def MOTLoading(loading_time):
     off: Ryd420Shutter
     off: Ryd420ExpShutter
     off: Ryd1013Shutter
+    off: D1StateTransferShutter
 %    off: TWZFlashTrg
     off: TweezerTrg
     on: SLMTweezerTrg
     off: CameraShutter
     on: SrcMOTValve
     off: TweezerIntensitySwitch
+
 
     dac: TARepAmp 10
     dac: SrcMOTAmp 10

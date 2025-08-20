@@ -1,0 +1,85 @@
+%%%%%%%%%%%%%%%%% Start With 1ms %%%%%%%%%%%%%%%%% 
+t = 1
+%call CryoMOTLoadingPGC()
+call CryoMOTEnhancedLoadingLGM()
+call TOF(10)
+
+%%%%%%%%%%%%%%  PGC in Tweezer %%%%%%%%%%%%%%%%%%
+% change the field/laser freq parameter here because the previous section is TOF and no light is on
+call D2InTrapPGC(t_pgc_twz)
+% note the t_pgc_twz should be smaller than 100
+t += 100-t_pgc_twz
+
+%%%%%%%%%%%%%%  PGC in Tweezer with Probe %%%%%%%%%%%%%%%%%%
+% change the field/laser freq parameter here because the previous section is TOF and no light is on
+call D2InTrapPGCPrb(t_pgc_twz)
+% note the t_pgc_twz should be smaller than 100
+t += 100-t_pgc_twz
+
+%%%%%%%%%%%%%%  Image TWIZZER  %%%%%%%%%%%%%%%%%%% change the field/laser freq parameter here because the previous section is dark, i.e. 100-t_pgc_twz is larger than 4
+call PGCTweezerImaging()
+t += 15 %+500
+
+
+call setQuantizationField()
+
+t += 750 %100
+
+
+%%%%%%%%%%%%%% optical pumping into |2,2> state with 2-2'' OP, 1-2'' probe %%%%%%%%%%%
+call OpticalPumping22()
+t += 1
+
+%pulseon: QubitMWTrg 0.4
+
+%%%%%%%%%%%%%%% MW %%%%%%%%%%%
+var mw_rabi_pi2 0.0447 %0.041 %0.041 %0.01 %0.0599 %0.0296
+
+% Winfreak always on
+dacramp: SLMTweezerIntensity slm_twz_intensity slm_twz_intensity*0.1 10
+t += 10
+
+t += -10
+dac: D1StateTransferAmp -6
+off: D1StateTransferShutter 
+t += 2
+on: D1StateTransferTrg
+t += 1
+on: D1StateTransferHold
+t += 0.1
+off: D1StateTransferTrg
+on: D1StateTransferShutter 
+t += 10-(2+1+0.1)
+
+pulseon: do8_4 0.1 %dummy trigger for picoscope
+
+on: D1StateTransferTrg
+t += time_scan_us/1000
+off: D1StateTransferTrg
+
+
+t += 1
+dacramp: SLMTweezerIntensity slm_twz_intensity*0.1 slm_twz_intensity 10
+t += 10
+
+
+t += 10
+call StateSelectivePushout()
+
+%call TrapLowerAndRise(twz_intensity, twz_intensity*0.1, 10, 15)
+t += 15
+
+%%%%%%%%%%%%%%  PGC in Tweezer with Probe %%%%%%%%%%%%%%%%%%
+% change the field/laser freq parameter here because the previous section is TOF and no light is on
+call D2InTrapPGCPrb(t_pgc_twz)
+% note the t_pgc_twz should be smaller than 100
+t += 100-t_pgc_twz
+%%%%%%%%%%%%%%% Second Twizzer Image
+% note the previous section should have at least 4 ms dark interval
+call PGCTweezerImaging()
+
+%%%%%%%%%%%%%%  END Sequence  %%%%%%%%%%%%%%%%%%
+t += 10
+%call RydbergBeamCameraFootprint()
+t += 10
+pulseon: DO1_0 0.5

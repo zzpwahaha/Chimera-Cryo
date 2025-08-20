@@ -1,9 +1,7 @@
 %%%%%%%%%%%%%%%%% Start With 1ms %%%%%%%%%%%%%%%%% 
 t = 1
-%call CryoMOTLoadingPGC()
-
-
-call CryoMOTEnhancedLoadingLGM()
+call CryoMOTLoadingPGC()
+%call CryoMOTEnhancedLoadingLGM()
 
 %%%%%%%%%%%%%%%  TOF  %%%%%%%%%%%%%%%%%%
 call TOF(10)
@@ -44,15 +42,15 @@ off: ryd420trg
 
 
 %%%%% cold bias field %%%%% 
-%dac: BiasCoilX -2.5+0.75 
-%dac: BiasCoilY -1.065+0.05+(-0.1) 
-%dac: BiasCoilZ -0.05+(-0.039)+0.036 
+dac: BiasCoilX -2.5+0.75 
+dac: BiasCoilY -1.065+0.05+(-0.1)+0.297+(-2.33)*switch_toggle
+dac: BiasCoilZ -0.05+(-0.039)+0.036+0.0156
 
 
 %%%%% warm bias field %%%%% 
-dac: BiasCoilX -2.5+0.75 %quantization_bias_x
-dac: BiasCoilY -1.065+(-0.053)+(-2.33)*switch_toggle %+(-0.08) %+(-2.33)*switch_toggle % %quantization_bias_y %-0.95 
-dac: BiasCoilZ -0.05+(0.012) %+0.033 %-0.04 
+%dac: BiasCoilX -2.5+0.75 %quantization_bias_x
+%dac: BiasCoilY -1.065+(-0.053)+(-2.33)*switch_toggle %+(-0.08) %+(-2.33)*switch_toggle % %quantization_bias_y %-0.95 
+%dac: BiasCoilZ -0.05+(0.012) %+0.033 %-0.04 
 
 
 t += 750 %100 %750

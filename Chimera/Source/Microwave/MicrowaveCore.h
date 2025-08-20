@@ -15,6 +15,7 @@ class MicrowaveCore : public IDeviceCore{
 		void calculateVariations (std::vector<parameterType>& params, ExpThreadWorker* threadworker);
 		std::pair<unsigned, unsigned> getUWaveTriggerLine ();
 		unsigned getNumTriggers (microwaveSettings settings);
+		double getTriggerTime();
 		microwaveSettings getSettingsFromConfig (ConfigStream& openFile);
 		const std::string configDelim;
 		std::string getDelim () { return configDelim; }

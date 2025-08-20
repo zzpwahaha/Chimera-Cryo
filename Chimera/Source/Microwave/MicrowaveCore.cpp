@@ -145,6 +145,11 @@ unsigned MicrowaveCore::getNumTriggers (microwaveSettings settings){
 	return settings.list.size () == 1 ? 0 : settings.list.size ();
 }
 
+double MicrowaveCore::getTriggerTime()
+{
+	return triggerTime;
+}
+
 microwaveSettings MicrowaveCore::getSettingsFromConfig (ConfigStream& openFile){
 	microwaveSettings settings;
 	auto getlineF = ConfigSystem::getGetlineFunc (openFile.ver);

@@ -44,6 +44,7 @@ void MicrowaveSystem::initialize( IChimeraQtWindow* parent ){
 	controlOptionCheck = new QCheckBox ("Control?", parent);
 	reconnectPush = new QPushButton("Reconnect", parent);
 	programNowPush = new QPushButton ("Program Now", parent);
+	trigNowPush = new QPushButton("Trigger Now", parent);
 
 	parent->connect(reconnectPush, &QPushButton::released, [this, parent]() {
 		emit notification("----------------------\r\nReconnect Offsetlocks... \n");
@@ -66,8 +67,25 @@ void MicrowaveSystem::initialize( IChimeraQtWindow* parent ){
 			parent->reportErr ("Failed to program microwave system! " + err.qtrace ());
 		}
 	});
+
+	connect(trigNowPush, &QPushButton::released, this, [this, parent]() {
+		parent->reportStatus("----------------------\r\nTriggering Microwave List for " + qstr(core.getDelim()) + " ... ");
+		try {
+			auto& doCore = parent->auxWin->getTtlCore();
+			auto dostatus = parent->auxWin->getTtlSystem().getCurrentStatus();
+			doCore.FPGAForcePulse(dostatus, std::vector<std::pair<unsigned, unsigned>>{core.uwaveTriggerLine}, core.getTriggerTime() * 0.8);
+			parent->reportStatus("Finished Triggering Microwave List " + qstr(core.getDelim()) + " with " + qstr(core.getTriggerTime() * 0.8, 5) + " ms .\r\n");
+		}
+		catch (ChimeraError& err) {
+			errBox(err.trace());
+			parent->reportStatus(": " + err.qtrace() + "\r\n");
+			parent->reportErr(qstr("Error while triggering Microwave " + core.getDelim() + " List: " + err.trace() + "\r\n"));
+			parent->mainWin->updateConfigurationSavedStatus(false);
+		}});
+
 	layout1->addWidget(reconnectPush);
 	layout1->addWidget(programNowPush);
+	layout1->addWidget(trigNowPush);
 	layout1->addWidget(controlOptionCheck);
 
 	QHBoxLayout* layout2 = new QHBoxLayout(this);
@@ -179,6 +197,7 @@ void MicrowaveSystem::handleWritePress (){
 
 
 void MicrowaveSystem::programNow(std::vector<parameterType> constants){
+	refreshCurrentUwList();
 	// ignore the check if the user literally presses program now.
 	core.experimentSettings.control = true;
 	core.experimentSettings.list = currentList;
@@ -193,8 +212,17 @@ void MicrowaveSystem::programNow(std::vector<parameterType> constants){
 
 void MicrowaveSystem::handleSaveConfig (ConfigStream& saveFile){
 	refreshCurrentUwList ();
+	//double time;
+	//try {
+	//	time = boost::lexical_cast<double>(str(triggerStepTimeEdit->text()));
+	//	core.setTrigTime(time);
+	//}
+	//catch (boost::bad_lexical_cast&) {
+	//	thrower("Bad value encountered while converting Windfreak Trigger Time: " + str(triggerStepTimeEdit->text()));
+	//} 
 	saveFile << core.configDelim
-		<< "\n/*Control?*/ " << controlOptionCheck->isChecked ()
+		<< "\n/*Control?*/ " << controlOptionCheck->isChecked()
+		//<< "\n/*Trig Time*/ " << time
 		<< "\n/*List Size:*/ " << currentList.size ();
 	for (auto listElem : currentList){
 		saveFile << "\n/*Freq:*/ " << listElem.frequency 
