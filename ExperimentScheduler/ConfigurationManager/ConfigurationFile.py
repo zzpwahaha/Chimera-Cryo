@@ -39,7 +39,7 @@ class ConfigurationFile:
                 self.config_param = ConfigurationParameter(section_content)
             elif re.search(".*AWG", section_name):
                 self.sections[section_name] = ArbGenSection(section_name, section_content)
-            elif re.search("MICROWAVE_SYSTEM", section_name):
+            elif re.search("MW", section_name):
                 self.sections[section_name] = MicrowaveSection(section_name, section_content)                
             elif (re.search("DATA_ANALYSIS", section_name) or 
                   re.search("ANDOR_PICTURE_MANAGER", section_name)):
@@ -97,7 +97,8 @@ class ConfigurationFile:
 if __name__ == "__main__":
     # Example usage:
     # config = ConfigManager('C:\\Chimera\\Chimera-Cryo\\Configurations\\ExperimentAutomation\\tweezerloading.Config')
-    config = ConfigurationFile('.\\test\\tweezerloading.Config')
+    # config = ConfigurationFile('.\\test\\tweezerloading.Config')
+    config = ConfigurationFile('.\\test\\RamanStateTransfer_Rabi_backup.Config')
 
     # Get a section
     # siglent_awg_section = config.get_section('SIGLENT_AWG')

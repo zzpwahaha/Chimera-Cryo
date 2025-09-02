@@ -89,10 +89,10 @@ void MicrowaveCore::logSettings (DataLogger& log, ExpThreadWorker* threadworker)
 	try {
 		H5::Group microwaveGroup;
 		try {
-			microwaveGroup = log.file.createGroup ("/Microwave");
+			microwaveGroup = log.file.createGroup("/Microwave-" + str(configDelim));
 		}
 		catch (H5::Exception&) {
-			microwaveGroup = log.file.openGroup ("/Microwave");
+			microwaveGroup = log.file.openGroup ("/Microwave-" + str(configDelim));
 		}
 		log.writeDataSet (experimentSettings.control, str ("Control"), microwaveGroup);
 		unsigned count = 0;
