@@ -119,7 +119,7 @@ double ElliptecCore::normalizeToRange(double angle, double min, double max)
 double ElliptecCore::getElliptecPosition(unsigned channel)
 {
 	if (channel >= size_t(ElliptecGrid::total)) {
-		thrower("Channel of Elliptec out of range in getElliptecCommand as " + str(channel));
+		thrower("Channel of Elliptec out of range in getElliptecPosition as " + str(channel));
 	}
 	if (safemode || !ELLIPTEC_CONNECTED[channel]) {
 		return 0.0;

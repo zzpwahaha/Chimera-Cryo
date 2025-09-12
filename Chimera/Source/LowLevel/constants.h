@@ -136,9 +136,10 @@
 	const int STATICAO_IPPORT = 804;
 
 	//static DDS
-	const bool STATICDDS_SAFEMODE = false;
-	const std::string STATICDDS_PORT = "COM12";
-	const unsigned int STATICDDS_BAUDRATE = 115200;
+	const unsigned STATICDDS_NUM = 2;
+	const std::array<bool, STATICDDS_NUM> STATICDDS_SAFEMODE = { true, true };
+	const std::array<std::string, STATICDDS_NUM> STATICDDS_PORT = { "COM12", "COM18"};
+	const std::array<unsigned int, STATICDDS_NUM> STATICDDS_BAUDRATE = { 115200,115200 };
 
 	//Elliptec rotation stage
 	const bool ELLIPTEC_SAFEMODE = false;

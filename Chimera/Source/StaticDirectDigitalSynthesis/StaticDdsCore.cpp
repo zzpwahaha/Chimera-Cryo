@@ -4,9 +4,13 @@
 #include <ConfigurationSystems/ConfigSystem.h>
 #include <DataLogging/DataLogger.h>
 
-StaticDdsCore::StaticDdsCore(bool safemode, const std::string& port, unsigned baudrate) :
-	safemode(safemode), 
-	sddsFlume(port, baudrate, safemode)
+StaticDdsCore::StaticDdsCore(
+	const std::array<bool, size_t(StaticDDSGrid::numOFunit)> safemodes,
+	const std::array<std::string, size_t(StaticDDSGrid::numOFunit)> ports,
+	const std::array<unsigned, size_t(StaticDDSGrid::numOFunit)> baudrates) :
+	safemodes(safemodes),
+	sddsFlumes{ StaticDDSFlume(ports[0], baudrates[0], safemodes[0]), 
+	StaticDDSFlume(ports[1], baudrates[1], safemodes[1]) }
 {
 }
 
@@ -29,7 +33,7 @@ void StaticDdsCore::calculateVariations(std::vector<parameterType>&params, ExpTh
 		for (auto ch : range(size_t(StaticDDSGrid::total))) {
 			expSettings.staticDDSs[ch].assertValid(params, GLOBAL_PARAMETER_SCOPE);
 			expSettings.staticDDSs[ch].internalEvaluate(params, totalVariations);
-			if (expSettings.staticDDSs[ch].varies() && safemode) {
+			if (expSettings.staticDDSs[ch].varies() && safemodes[ch / size_t(StaticDDSGrid::numPERunit)]) {
 				thrower("Error in varying static DDS for channel " + str(ch) +
 					". The DDS is in SAFEMODE in constant.h but is varied given expression " +
 					expSettings.staticDDSs[ch].expressionStr);
@@ -101,13 +105,14 @@ void StaticDdsCore::writeDDSs(std::array<double, size_t(StaticDDSGrid::total)> o
 	std::string command;
 	for (auto ch : range(size_t(StaticDDSGrid::total))) {
 		command = getDDSCommand(outputs[ch]);
-	}
-	sddsFlume.write(command);
-	if (!safemode) {
-		std::string recv = sddsFlume.read();
-		std::transform(recv.begin(), recv.end(), recv.begin(), ::tolower); /*:: without namespace select from global namespce, see https://stackoverflow.com/questions/5539249/why-cant-transforms-begin-s-end-s-begin-tolower-be-complied-successfu*/
-		if (recv.find("error") != std::string::npos) {
-			thrower("Error in static DDS programming, from Arduino: " + recv);
+		size_t unitNum = ch / size_t(StaticDDSGrid::numPERunit);
+		sddsFlumes[unitNum].write(command);
+		if (!safemodes[unitNum]) {
+			std::string recv = sddsFlumes[unitNum].read();
+			std::transform(recv.begin(), recv.end(), recv.begin(), ::tolower); /*:: without namespace select from global namespce, see https://stackoverflow.com/questions/5539249/why-cant-transforms-begin-s-end-s-begin-tolower-be-complied-successfu*/
+			if (recv.find("error") != std::string::npos) {
+				thrower("Error in static DDS programming, from Arduino: " + recv);
+			}
 		}
 	}
 }

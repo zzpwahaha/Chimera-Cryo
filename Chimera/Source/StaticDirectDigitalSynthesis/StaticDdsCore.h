@@ -14,7 +14,9 @@ public:
     StaticDdsCore(const StaticDdsCore&) = delete;
     StaticDdsCore& operator=(const StaticDdsCore&) = delete;
 
-    StaticDdsCore(bool safemode, const std::string& port, unsigned baudrate);
+    StaticDdsCore(const std::array<bool, size_t(StaticDDSGrid::numOFunit)> safemodes, 
+        const std::array<std::string, size_t(StaticDDSGrid::numOFunit)> ports, 
+        const std::array<unsigned, size_t(StaticDDSGrid::numOFunit)> baudrates);
 
     virtual void loadExpSettings(ConfigStream& stream) override;
     virtual void logSettings(DataLogger& logger, ExpThreadWorker* threadworker) override;
@@ -31,7 +33,7 @@ public:
     void setStaticDDSExpSetting(StaticDDSSettings tmpSetting); // used only for ProgramNow in StaticAOSystem
 
     const std::string configDelim = "STATIC_DDS_SYSTEM";
-    const bool safemode;
+    const std::array<bool, size_t(StaticDDSGrid::numOFunit)> safemodes;
 private:
     std::string getDDSCommand(double ddsfreqVal);
     void writeDDSs(std::array<double, size_t(StaticDDSGrid::total)> outputs);
@@ -44,7 +46,7 @@ public:
     const double maxVal = 1000;
 
 private:
-    StaticDDSFlume sddsFlume;
+    std::array<StaticDDSFlume, size_t(StaticDDSGrid::numOFunit)> sddsFlumes;
     StaticDDSSettings expSettings;    
 };
 

@@ -33,12 +33,15 @@ std::string QtAnalysisWindow::getSystemStatusString()
 	}
 
 	msg += "Static DDS System:\n";
-	if (!STATICDDS_SAFEMODE) {
-		msg += str("\tStatic DDS System is Active at port") + STATICDDS_PORT + ", with baudrate " + str(STATICDDS_BAUDRATE) + "\n";
-		msg += "\t" + staticDds.getDeviceInfo() + "\n";
-	}
-	else {
-		msg += "\tStatic DDS System is disabled! Enable in \"constants.h\"\n";
+	for (int i = 0; i < STATICDDS_NUM; ++i) {
+		if (!STATICDDS_SAFEMODE[i]) {
+			msg += "\tStatic DDS System is Active at port " + STATICDDS_PORT[i];
+			msg += ", with baudrate " + std::to_string(STATICDDS_BAUDRATE[i]) + "\n";
+			msg += "\t" + staticDds.getDeviceInfo() + "\n";
+		}
+		else {
+			msg += "\tStatic DDS System is disabled! Enable in \"constants.h\"\n";
+		}
 	}
 
 	msg += "Elliptec System:\n";

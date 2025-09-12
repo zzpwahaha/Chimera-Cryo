@@ -4,7 +4,7 @@
 enum class StaticDDSGrid : size_t
 {
 	numPERunit = 1,
-	numOFunit = 1,
+	numOFunit = STATICDDS_NUM,
 	total = numPERunit * numOFunit
 };
 
