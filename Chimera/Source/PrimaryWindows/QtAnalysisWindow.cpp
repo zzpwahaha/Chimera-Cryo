@@ -12,7 +12,8 @@ QtAnalysisWindow::QtAnalysisWindow(QWidget* parent)
 	, MOTAnalySys(this)
 	, SeqPlotter(this)
 	, staticDac(this)
-	, staticDds(this)
+	//, staticDds(this)
+	, staticDas(this)
 	, elliptec(this)
 	, mwSys2(MICROWAVE_DELIMS[1], MICROWAVE_SAFEMODES[1], MICROWAVE_PORTS[1], MW_TRIGGER_LINES[1], this)
 {
@@ -32,12 +33,24 @@ std::string QtAnalysisWindow::getSystemStatusString()
 		msg += "\tStatic AO System is disabled! Enable in \"constants.h\"\n";
 	}
 
-	msg += "Static DDS System:\n";
-	for (int i = 0; i < STATICDDS_NUM; ++i) {
-		if (!STATICDDS_SAFEMODE[i]) {
-			msg += "\tStatic DDS System is Active at port " + STATICDDS_PORT[i];
-			msg += ", with baudrate " + std::to_string(STATICDDS_BAUDRATE[i]) + "\n";
-			msg += "\t" + staticDds.getDeviceInfo() + "\n";
+	//msg += "Static DDS System:\n";
+	//for (int i = 0; i < STATICDDS_NUM; ++i) {
+	//	if (!STATICDDS_SAFEMODE[i]) {
+	//		msg += "\tStatic DDS System is Active at port " + STATICDDS_PORT[i];
+	//		msg += ", with baudrate " + std::to_string(STATICDDS_BAUDRATE[i]) + "\n";
+	//		msg += "\t" + staticDds.getDeviceInfo() + "\n";
+	//	}
+	//	else {
+	//		msg += "\tStatic DDS System is disabled! Enable in \"constants.h\"\n";
+	//	}
+	//}
+
+	msg += "Static DAS System:\n";
+	for (int i = 0; i < STATICDAS_NUM; ++i) {
+		if (!STATICDAS_SAFEMODE[i]) {
+			msg += "\tStatic DAS System is Active at port " + STATICDAS_PORT[i];
+			msg += ", with baudrate " + std::to_string(STATICDAS_BAUDRATE[i]) + "\n";
+			msg += "\t" + staticDas.getDeviceInfo() + "\n";
 		}
 		else {
 			msg += "\tStatic DDS System is disabled! Enable in \"constants.h\"\n";
@@ -79,7 +92,8 @@ void QtAnalysisWindow::windowOpenConfig(ConfigStream& configFile)
 {
 	try {
 		ConfigSystem::standardOpenConfig(configFile, staticDac.getConfigDelim(), &staticDac);
-		ConfigSystem::standardOpenConfig(configFile, staticDds.getConfigDelim(), &staticDds);
+		//ConfigSystem::standardOpenConfig(configFile, staticDds.getConfigDelim(), &staticDds);
+		ConfigSystem::standardOpenConfig(configFile, staticDas.getConfigDelim(), &staticDas);
 		ConfigSystem::standardOpenConfig(configFile, elliptec.getConfigDelim(), &elliptec);
 		microwaveSettings uwsettings;
 		ConfigSystem::stdGetFromConfig(configFile, mwSys2.getCore(), uwsettings);
@@ -93,7 +107,8 @@ void QtAnalysisWindow::windowOpenConfig(ConfigStream& configFile)
 void QtAnalysisWindow::windowSaveConfig(ConfigStream& configFile)
 {
 	staticDac.handleSaveConfig(configFile);
-	staticDds.handleSaveConfig(configFile);
+	//staticDds.handleSaveConfig(configFile);
+	staticDas.handleSaveConfig(configFile);
 	elliptec.handleSaveConfig(configFile);
 	mwSys2.handleSaveConfig(configFile);
 }
@@ -101,7 +116,8 @@ void QtAnalysisWindow::windowSaveConfig(ConfigStream& configFile)
 void QtAnalysisWindow::fillExpDeviceList(DeviceList& list)
 {
 	list.list.push_back(staticDac.getCore());
-	list.list.push_back(staticDds.getCore());
+	//list.list.push_back(staticDds.getCore());
+	list.list.push_back(staticDas.getCore());
 	list.list.push_back(elliptec.getCore());
 	list.list.push_back(mwSys2.getCore());
 }
@@ -140,8 +156,10 @@ void QtAnalysisWindow::initializeWidgets()
 	layoutAux->setContentsMargins(0, 0, 0, 0);
 	staticDac.initialize();
 	layoutAux->addWidget(&staticDac);
-	staticDds.initialize();
-	layoutAux->addWidget(&staticDds);
+	//staticDds.initialize();
+	//layoutAux->addWidget(&staticDds);
+	staticDas.initialize();
+	layoutAux->addWidget(&staticDas);
 	elliptec.initialize();
 	layoutAux->addWidget(&elliptec);
 	mwSys2.initialize(this);
