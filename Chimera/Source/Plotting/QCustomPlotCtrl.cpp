@@ -152,9 +152,15 @@ void QCustomPlotCtrl::init(IChimeraQtWindow* parent, QString titleIn, unsigned n
 		|| this->style == plotStyle::DensityPlot 
 		|| this->style == plotStyle::DensityPlotWithHisto) {
 		autoScale = true;
-		autoScaleCMap = false; // not used for GeneralErrorPlot
+		autoScaleCMap = false; // not used for GeneralErrorPlot and BinomialDataPlot
 		connect(plot, &QCustomPlot::mouseDoubleClick, this, [this]() {
 			plot->rescaleAxes();
+			plot->replot(); });
+	}
+	if (this->style == plotStyle::BinomialDataPlot) {
+		connect(plot, &QCustomPlot::mouseDoubleClick, this, [this]() {
+			plot->yAxis->setRange({ 0,1 });
+			plot->xAxis->rescale();
 			plot->replot(); });
 	}
 
@@ -284,7 +290,8 @@ void QCustomPlotCtrl::handleContextMenu(const QPoint& pos) {
 	}
 	if (this->style == plotStyle::GeneralErrorPlot 
 		|| this->style == plotStyle::DensityPlotWithHisto
-		|| this->style == plotStyle::DensityPlot) {
+		|| this->style == plotStyle::DensityPlot
+		|| this->style == plotStyle::BinomialDataPlot) {
 		auto* autos = menu.addAction("Disable Auto Scale");
 		autos->setCheckable(true);
 		autos->setChecked(!autoScale);
@@ -582,8 +589,10 @@ void QCustomPlotCtrl::resetChart() {
 	}
 
 	if (style == plotStyle::BinomialDataPlot) {
-		plot->yAxis->setRange({ 0,1 });
-		plot->xAxis->rescale();
+		if (autoScale) {
+			plot->yAxis->setRange({ 0,1 });
+			plot->xAxis->rescale();
+		}
 	}
 	else if (style == plotStyle::HistPlot) {
 		plot->yAxis->rescale();
