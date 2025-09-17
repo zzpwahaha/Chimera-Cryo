@@ -1,23 +1,24 @@
 #include "stdafx.h"
-#include "StaticDDSFlume.h"
+#include "StaticDASFlume.h"
 
-StaticDDSFlume::StaticDDSFlume(std::string portAddress, unsigned baudrate, bool safemode)
+StaticDASFlume::StaticDASFlume(std::string portAddress, unsigned baudrate, bool safemode)
 	: boostFlume(safemode, portAddress, baudrate)
 	, SAFEMODE(safemode)
 	, readComplete(true)
 {
-	boostFlume.setReadCallback(boost::bind(&StaticDDSFlume::readCallback, this, _1));
-	boostFlume.setErrorCallback(boost::bind(&StaticDDSFlume::errorCallback, this, _1));
+	boostFlume.setReadCallback(boost::bind(&StaticDASFlume::readCallback, this, _1));
+	boostFlume.setErrorCallback(boost::bind(&StaticDASFlume::errorCallback, this, _1));
 }
 
-std::string StaticDDSFlume::query(std::string msg)
+std::string StaticDASFlume::query(std::string msg)
 {
 	write(msg);
-    return read();
+	return read();
 }
 
-void StaticDDSFlume::write(std::string msg)
+void StaticDASFlume::write(std::string msg)
 {
+	msg += commandTerminator;
 	readRegister.clear();
 	errorMsg.clear();
 	readComplete = false;
@@ -37,10 +38,10 @@ void StaticDDSFlume::write(std::string msg)
 
 // This should be called with a expectation of reading something, e.g. after writing and that is why the reading register etc is not initialized. 
 // Otherwise it will throw
-std::string StaticDDSFlume::read()
+std::string StaticDASFlume::read()
 {
 	if (SAFEMODE) {
-		return std::string("static DDS is in safemode.");
+		return std::string("static DAS is in safemode.");
 	}
 	std::string recv;
 	/*read register after write*/
@@ -56,20 +57,20 @@ std::string StaticDDSFlume::read()
 		thrower("Reading is empty and timed out for 200ms in reading from windfreak serial port " + str(boostFlume.portID) + ".");
 	}
 	if (!errorMsg.empty()) {
-		thrower("Nothing feeded back from static DDS, something might be wrong with it." + recv + "\r\nError message: " + errorMsg);
+		thrower("Nothing feeded back from static DAS, something might be wrong with it." + recv + "\r\nError message: " + errorMsg);
 	}
 	recv.erase(std::remove(recv.begin(), recv.end(), '\n'), recv.end());
 	return recv;
 }
 
-void StaticDDSFlume::resetConnection()
+void StaticDASFlume::resetConnection()
 {
 	boostFlume.disconnect();
 	Sleep(10);
 	boostFlume.reconnect();
 }
 
-void StaticDDSFlume::readCallback(int byte)
+void StaticDASFlume::readCallback(int byte)
 {
 	if (byte < 0 || byte >255) {
 		thrower("Byte value readed needs to be in range 0-255.");
@@ -80,7 +81,7 @@ void StaticDDSFlume::readCallback(int byte)
 	}
 }
 
-void StaticDDSFlume::errorCallback(std::string error)
+void StaticDASFlume::errorCallback(std::string error)
 {
 	errorMsg = error;
 }

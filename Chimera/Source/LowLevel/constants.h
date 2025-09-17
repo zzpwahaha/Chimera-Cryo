@@ -141,6 +141,12 @@
 	const std::array<std::string, STATICDDS_NUM> STATICDDS_PORT = { "COM12", "COM18"};
 	const std::array<unsigned int, STATICDDS_NUM> STATICDDS_BAUDRATE = { 115200,115200 };
 
+	//static DAS
+	const unsigned STATICDAS_NUM = 1;
+	const std::array<bool, STATICDAS_NUM> STATICDAS_SAFEMODE = { false };
+	const std::array<std::string, STATICDAS_NUM> STATICDAS_PORT = { "COM3" };
+	const std::array<unsigned int, STATICDAS_NUM> STATICDAS_BAUDRATE = { 115200 };
+
 	//Elliptec rotation stage
 	const bool ELLIPTEC_SAFEMODE = false;
 	const unsigned ELLIPTEC_CTRL_NUM = 2;

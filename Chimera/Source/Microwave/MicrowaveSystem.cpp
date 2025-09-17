@@ -47,7 +47,7 @@ void MicrowaveSystem::initialize( IChimeraQtWindow* parent ){
 	trigNowPush = new QPushButton("Trigger Now", parent);
 
 	parent->connect(reconnectPush, &QPushButton::released, [this, parent]() {
-		emit notification("----------------------\r\nReconnect Offsetlocks... \n");
+		emit notification("----------------------\r\nReconnect MicrowaveSystem... \n");
 		try {
 			core.uwFlume.resetConnection();
 			emit notification("Finished Reconnecting UWSYSTEM WINDFREAK.\r\n");
@@ -192,7 +192,6 @@ void MicrowaveSystem::handleWritePress (){
 	catch (ChimeraError& e) {
 		emit error("Error seen in trying to write to Microwave System:\n" + e.qtrace());
 	}
-	
 }
 
 

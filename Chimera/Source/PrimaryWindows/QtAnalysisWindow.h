@@ -5,6 +5,7 @@
 #include <ExperimentMonitoringAndStatus/ExperimentSeqPlotter.h>
 #include <StaticAnalogOutput/StaticAoSystem.h>
 #include <StaticDirectDigitalSynthesis/StaticDdsSystem.h>
+#include <StaticDirectAnalogSynthesis/StaticDasSystem.h>
 #include <ElliptecRotationStage/ElliptecSystem.h>
 #include <Microwave/MicrowaveSystem.h>
 
@@ -26,7 +27,8 @@ public:
 	void initializeWidgets() override;
 	void fillMasterThreadInput(ExperimentThreadInput* input) override {};
 	//MOTAnalysisControl
-	StaticDdsSystem& getStaticDds() { return staticDds; };
+	//StaticDdsSystem& getStaticDds() { return staticDds; };
+	StaticDasSystem& getStaticDas() { return staticDas; };
 
 public slots:
 	void prepareCalcForAcq();
@@ -39,7 +41,8 @@ public:
 	MOTAnalysisSystem MOTAnalySys;
 	ExperimentSeqPlotter SeqPlotter;
 	StaticAoSystem staticDac;
-	StaticDdsSystem staticDds;
+	//StaticDdsSystem staticDds;
+	StaticDasSystem staticDas;
 	ElliptecSystem elliptec;
 	MicrowaveSystem mwSys2;
 
