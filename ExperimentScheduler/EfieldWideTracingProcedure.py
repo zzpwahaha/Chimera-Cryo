@@ -127,7 +127,12 @@ def efield_tracing_procedure():
 
 
 if __name__=='__main__':
-    efield_tracing_procedure()
+    # efield_tracing_procedure()
     # _raw_move_EOM_resonance(exp, start_freq=581,end_freq=586,step=0.1)
     # _raw_move_EOM_resonance(exp, start_freq=205,end_freq=225,step=0.25)
     # _raw_move_EOM_resonance(exp, start_freq=324,end_freq=224,step=-0.5)
+    # _raw_move_EOM_resonance(exp, start_freq=155,end_freq=239,step=0.5)
+    # _raw_move_EOM_resonance(exp, start_freq=239,end_freq=195,step=-0.5)
+    # _raw_move_EOM_resonance(exp, start_freq=201,end_freq=227,step=0.5)
+    # _raw_move_EOM_resonance(exp, start_freq=227,end_freq=155,step=-0.5)
+    _raw_move_EOM_resonance(exp, start_freq=686,end_freq=676,step=-0.5)

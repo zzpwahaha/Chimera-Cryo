@@ -1,0 +1,50 @@
+%%%%%%%%%%%%%%%%% Start With 1ms %%%%%%%%%%%%%%%%% 
+t = 1
+%call CryoMOTLoadingPGC()
+call CryoMOTEnhancedLoadingLGM()
+
+call TOF(10)
+
+%%%%%%%%%%%%%%  PGC in Tweezer %%%%%%%%%%%%%%%%%%
+% change the field/laser freq parameter here because the previous section is TOF and no light is on
+call D2InTrapPGC(t_pgc_twz)
+% note the t_pgc_twz should be smaller than 100
+t += 100-t_pgc_twz
+
+call D2InTrapPGCPrb(t_pgc_twz)
+% note the t_pgc_twz should be smaller than 100
+t += 100-t_pgc_twz
+
+%%%%%%%%%%%%%%  Image TWIZZER  %%%%%%%%%%%%%%%%%%
+% change the field/laser freq parameter here because the previous section is dark, i.e. 100-t_pgc_twz is larger than 4
+call PGCTweezerImaging()
+%on: MOTFlashTrg
+
+t += 15
+call D2InTrapPGCPrb(t_pgc_twz)
+
+%%%%%%%%%%%%%% Prepare for pulsed PGC %%%%%%%%%%%%%%%
+dacramp: SLMTweezerIntensity slm_twz_intensity fraction_scan*slm_twz_intensity  10
+t += 10
+t += t_wait_before_rr
+
+%%%%%%%%%%%%% release recapture %%%%%%%%%%
+
+call ReleaseRecaptureSLM(t_twz_release)
+%wait a bit before next step
+t += 15
+
+dacramp: SLMTweezerIntensity fraction_scan*slm_twz_intensity  slm_twz_intensity 10
+t += 10
+
+call D2InTrapPGCPrb(t_pgc_twz)
+% note the t_pgc_twz should be smaller than 100
+t += 100-t_pgc_twz
+%%%%%%%%%%%%%%% Second Twizzer Image
+% note the previous section should have at least 4 ms dark interval
+call PGCTweezerImaging()
+
+
+%%%%%%%%%%%%%%  END Sequence  %%%%%%%%%%%%%%%%%%
+t += 10
+pulseon: DO1_0 0.5

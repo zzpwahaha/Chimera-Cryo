@@ -31,7 +31,7 @@ t += 15
 %%%%%%%%%%% pump out of F=1 using probe repump 1-2'' %%%%%%%%%%%
 call PrepareF2Manifold()
  
-var measure_trap_depth_at 3.5
+var measure_trap_depth_at 1.08
 t += 10
 %dacramp: TweezerIntensity twz_intensity measure_trap_depth_at 10
 dacramp: SLMTweezerIntensity slm_twz_intensity measure_trap_depth_at 10

@@ -1,7 +1,7 @@
 %%%%%%%%%%%%%%%%% Start With 1ms %%%%%%%%%%%%%%%%% 
 t = 1
-call CryoMOTLoadingPGC()
-%call CryoMOTEnhancedLoadingLGM()
+%call CryoMOTLoadingPGC()
+call CryoMOTEnhancedLoadingLGM()
 
 %%%%%%%%%%%%%%%  TOF  %%%%%%%%%%%%%%%%%%
 call TOF(10)
@@ -42,18 +42,18 @@ off: ryd420trg
 
 
 %%%%% cold bias field %%%%% 
-dac: BiasCoilX -2.5+0.75 
-dac: BiasCoilY -1.065+0.05+(-0.1)+0.297+(-2.33)*switch_toggle
-dac: BiasCoilZ -0.05+(-0.039)+0.036+0.0156
+%dac: BiasCoilX -2.5+0.75-2.5
+%dac: BiasCoilY -1.065+0.05+(-0.1)+0.297+(-2.33)*switch_toggle
+%dac: BiasCoilZ -0.05+(-0.039)+0.036+0.0156-0.015
 
 
 %%%%% warm bias field %%%%% 
-%dac: BiasCoilX -2.5+0.75 %quantization_bias_x
-%dac: BiasCoilY -1.065+(-0.053)+(-2.33)*switch_toggle %+(-0.08) %+(-2.33)*switch_toggle % %quantization_bias_y %-0.95 
-%dac: BiasCoilZ -0.05+(0.012) %+0.033 %-0.04 
+dac: BiasCoilX -2.5+0.75-2.5 %quantization_bias_x
+dac: BiasCoilY -1.065+(-0.053)+0.275+0.004 %+(amplitude_scan)*switch_toggle %+(-0.08) %+(-2.33)*switch_toggle % %quantization_bias_y %-0.95 
+dac: BiasCoilZ -0.05+(0.012)+(-0.01)+(-2.23)*switch_toggle %+0.033 %-0.04 
 
 
-t += 750 %100 %750
+t += 100 %750
 
 %t += 10
 %%%%%%%%%%%% pump out of F=2 using probe cooling 2-2'' %%%%%%%%%%%
@@ -120,7 +120,7 @@ t += t_shutter
 on: OPTrg
 on: PrbRepTrg
 on: PrbTrg
-t += 0.04 %0.01
+t += 0.06 %0.01
 off: OPTrg
 t += 0.005
 off: PrbTrg
@@ -189,20 +189,23 @@ off: PrbShutter
 
 t += 15
 %%%%%%% depump out of F=2, other than |2,2> if with circular polarization, using cooling 2-2'', using OP beam %%%%%%%%%%%
+%dacramp: SLMTweezerIntensity slm_twz_intensity slm_twz_intensity*fraction_scan 10
 off: PrbShutter
 on: OPShutter
 off: TARepShutter
 off: xyzMOTShutter
 off: D1LGMShutter
 off: D1LGMPrbShutter
-ol: ol_cooling d2_cooling_resonance-(29-266.65) %resonance_scan
+ol: ol_cooling d2_cooling_resonance-(3.22+30-266.65) % 30 MHz light shift and 3.22 differential zeeman for 22 to 22 %resonance_scan
 ol: ol_repump d2_repump_resonance+(28.8+266.65+30) %
-dac: OPAmp {0.1 op_pwr} %time_scan
-t += t_shutter
+%dac: OPAmp {0.1 op_pwr} %time_scan
+dac: OPAmp {0.03 op_pwr} %time_scan
+t += 10
 on: OPTrg
 t += time_scan*(1-switch_toggle)+time_scan_2*switch_toggle %0.005 %0.08 %0.04 %0.005 %time_scan %0.001
 off: OPTrg
 off: OPShutter
+%dacramp: SLMTweezerIntensity slm_twz_intensity*fraction_scan slm_twz_intensity 10
 t += 15
 
 

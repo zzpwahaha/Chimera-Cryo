@@ -1,0 +1,119 @@
+%%%%%%%%%%%%%%%%% Start With 1ms %%%%%%%%%%%%%%%%% 
+t = 1
+%on: SrcMOTValveEnable
+t += 1
+%call CryoMOTLoadingPGC()
+call CryoMOTEnhancedLoadingLGM()
+call TOF(10)
+
+%on: UVLampTrg
+%%%%%%%%%%%%%%  PGC in Tweezer %%%%%%%%%%%%%%%%%%
+% change the field/laser freq parameter here because the previous section is TOF and no light is on
+call D2InTrapPGC(t_pgc_twz)
+% note the t_pgc_twz should be smaller than 100
+t += 100-t_pgc_twz
+
+call D2InTrapPGCPrb(t_pgc_twz)
+% note the t_pgc_twz should be smaller than 100
+t += 100-t_pgc_twz
+
+off: UVLampTrg
+%%%%%%%%%%%%%%  Image TWIZZER  %%%%%%%%%%%%%%%%%%
+% change the field/laser freq parameter here because the previous section is dark, i.e. 100-t_pgc_twz is larger than 4
+call PGCTweezerImaging()
+%on: MOTFlashTrg
+
+%%%%%%%%%%%%%% Prepare for pulsed PGC with Probe %%%%%%%%%%%%%%%
+%on: UVLampTrg
+dacramp: TweezerIntensity slm_twz_intensity 0.4*slm_twz_intensity 5
+%% turn off TA path and turn on Prb path for single beam cooling
+on: PrbCoolShutter
+off: TARepShutter
+off: xyMOTShutter
+
+off: PrbShutter
+off: xyzMOTShutter
+
+%set ol frequencies since there is a memory limit for the ol
+ol: ol_cooling d2_cooling_prb_resonance-pgc_twz_olcool
+ol: ol_repump d2_repump_prb_resonance+pgc_twz_olrepump
+
+% Set bias fields during pulsed cooling
+dac: BiasCoilX pgc_twz_bias_x
+dac: BiasCoilY pgc_twz_bias_y
+dac: BiasCoilZ pgc_twz_bias_z
+
+dac: PrbAmp {pgcprb_twz_cool_amp_cal prb_pwr}
+dac: PrbRepAmp pgcprb_twz_rep_amp
+
+% wait 10ms before cooling pulse 
+t += 10
+var repeat_interval 2000
+%var twz_int_lifetime 1.606 %2.92*0.55
+%pgcprb_twz_cool_amp_cal 1.62 VPD, 25ms t_pulse_cool
+% change it to the same as imaging on 07/18/2024
+%%%%%%%%%%%%%%% Pulsed PGC 5 times %%%%%%%%%%%%%%%
+repeat: int(t_lifetime/repeat_interval) %repeat_num
+    t += (repeat_interval-(t_pulsed_cool+5)-6)
+    dacramp: SLMTweezerIntensity 0.4*slm_twz_intensity slm_twz_intensity 5
+    t += 6
+    t += -10
+    ol: ol_cooling d2_cooling_prb_resonance-pgc_twz_olcool %(-50) %(-40) %pgc_twz_olcool %probe_olcool 
+    ol: ol_repump d2_repump_prb_resonance+pgc_twz_olrepump %pgc_twz_olrepump %probe_olrepump %pgc_twz_olrepump %probe_olrepump 
+    on: PrbShutter
+    on: PrbRepTrg
+    on: CameraShutter
+    dac: PrbAmp {pgcprb_twz_cool_amp_cal prb_pwr} %2.75 %
+    dac: PrbRepAmp pgcprb_twz_rep_amp %0.3 %
+    t += 10
+
+	t += -10
+%off: UVLampTrg
+    on: Pixis_Trg
+	t += 10
+    on: PrbTrg
+
+    t += t_pulsed_cool
+    pulseon: DO1_0 1
+    off: PrbTrg
+    off: PrbShutter
+    off: Pixis_Trg
+    off: CameraShutter
+%on: UVLampTrg
+    dacramp: SLMTweezerIntensity slm_twz_intensity 0.4*slm_twz_intensity 5
+    t += 5
+%    t += (repeat_interval-(t_pulsed_cool+5)-6)/2
+end
+
+t += t_lifetime-int(t_lifetime/repeat_interval)*repeat_interval+1
+
+%%%%%%%%%%%%% turn probe cool shutter back on %%%%%%%%%%
+on: PrbCoolShutter
+on: TARepShutter
+on: xyMOTShutter
+
+t += 5
+
+%call ReleaseRecapture(t_twz_release)
+%wait a bit before next step
+t += 10
+
+% wait 500ms before imaging intrap PGC
+%t += 500
+%
+dacramp: SLMTweezerIntensity 0.4*slm_twz_intensity slm_twz_intensity 5
+t += 6
+
+call D2InTrapPGCPrb(t_pgc_twz)
+% note the t_pgc_twz should be smaller than 100
+t += 100-t_pgc_twz
+
+%off: UVLampTrg
+%%%%%%%%%%%%%%% Second Twizzer Image
+% note the previous section should have at least 4 ms dark interval
+call PGCTweezerImaging()
+%on: UVLampTrg
+
+%%%%%%%%%%%%%%  END Sequence  %%%%%%%%%%%%%%%%%%
+t += 100
+pulseon: DO1_0 0.5

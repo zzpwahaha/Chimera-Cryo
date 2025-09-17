@@ -1,7 +1,7 @@
 def MOTLoading(loading_time):
     pulseon: DO1_0 10
     pulseon: GMLoadTrg 0.003
-    pulseon: KeySightTrg 0.01
+%    pulseon: KeySightTrg 0.01
     t += 1
     ddsfreq: dds0_0 80
     ddsamp: dds0_0 100

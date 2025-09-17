@@ -1,0 +1,79 @@
+%%%%%%%%%%%%%%%%% Start With 1ms %%%%%%%%%%%%%%%%% 
+t = 1
+%call CryoMOTLoadingPGC()
+call CryoMOTEnhancedLoadingLGM()
+call TOF(10)
+off: DipolePushRepTrg 
+dac: DipolePushRepAmp 0.0
+%%%%%%%%%%%%%%  PGC in Tweezer %%%%%%%%%%%%%%%%%%
+% change the field/laser freq parameter here because the previous section is TOF and no light is on
+call D2InTrapPGC(t_pgc_twz)
+% note the t_pgc_twz should be smaller than 100
+t += 100-t_pgc_twz
+
+%%%%%%%%%%%%%%  PGC in Tweezer with Probe %%%%%%%%%%%%%%%%%%
+% change the field/laser freq parameter here because the previous section is TOF and no light is on
+call D2InTrapPGCPrb(t_pgc_twz)
+% note the t_pgc_twz should be smaller than 1000
+t += 100-t_pgc_twz
+
+%%%%%%%%%%%%%%  Image TWIZZER  %%%%%%%%%%%%%%%%%%% change the field/laser freq parameter here because the previous section is dark, i.e. 100-t_pgc_twz is larger than 4
+call PGCTweezerImaging()
+t += 15 %+500
+
+
+t += 10
+
+%call setQuantizationField()
+%
+%t += t_field_settling
+call setZeroField()
+t += 400
+call PrepareF1Manifold()
+t += 10
+
+%%%%%%%%%%%%%% pushout using DipolePushRep mixed in the 1013 fiber (after 1013 AOM)  %%%%%%%%%%%
+%call OpticalPumping22()
+%t += 10
+
+on: PrbShutter
+off: PrbRepTrg
+dac: PrbRepAmp 0
+dac: PrbAmp 0
+
+dacramp: SLMTweezerIntensity slm_twz_intensity slm_twz_intensity*0.1 10
+t += 10
+
+
+ol: ol_Repump d2_repump_resonance+0 %resonance_scan
+dac: DipolePushRepAmp 8.0
+dac: PrbAmp 5.0
+t += 1
+on: DipolePushRepTrg 
+on: PrbTrg
+pulseon: DO8_4 0.1
+pulseon: Ryd1013Mako 0.1
+t += 200
+off: DipolePushRepTrg
+off: PrbTrg
+dac: DipolePushRepAmp 0.0
+off: PrbShutter
+
+dacramp: SLMTweezerIntensity slm_twz_intensity*0.1 slm_twz_intensity 10
+t += 10
+
+
+%%%%%%%%%%%%%%  PGC in Tweezer with Probe %%%%%%%%%%%%%%%%%%
+% change the field/laser freq parameter here because the previous section is TOF and no light is on
+call D2InTrapPGCPrb(t_pgc_twz)
+% note the t_pgc_twz should be smaller than 100
+t += 100-t_pgc_twz
+%%%%%%%%%%%%%%% Second Twizzer Image
+% note the previous section should have at least 4 ms dark interval
+call PGCTweezerImaging()
+
+%%%%%%%%%%%%%%  END Sequence  %%%%%%%%%%%%%%%%%%
+t += 10
+%call RydbergBeamCameraFootprint()
+t += 10
+pulseon: DO1_0 0.5

@@ -3,7 +3,7 @@ t = 1
 %call CryoMOTLoadingPGC()
 call CryoMOTEnhancedLoadingLGM()
 call TOF(10)
-
+off: Ryd420ExpShutter
 %%%%%%%%%%%%%%  PGC in Tweezer %%%%%%%%%%%%%%%%%%
 % change the field/laser freq parameter here because the previous section is TOF and no light is on
 call D2InTrapPGC(t_pgc_twz)
@@ -19,40 +19,46 @@ t += 100-t_pgc_twz
 call PGCTweezerImaging()
 
 t += 15
-call setQuantizationField()
-t += 100 
+%call setQuantizationField()
+call setZeroField()
+t += 400
+%t += t_field_settling 
 
 %t += 15
 %%%%%%%%%% pump out of F=1 using probe repump 1-2'' 
+%call PrepareF2Manifold()
 call PrepareF2Manifold()
 
 %call OpticalPumping22()
 
+
+t += 10
 %off: Ryd420Trg
+off: Ryd420ExpShutter
+dac: Ryd420Amp -0.007 %0.00 %0.005 %amplitude_scan %0.03 %2.5
 t += 15
 %%%%%%%%%%% turn on 420 light %%%%%%%%%%%%%
 on: Ryd420Shutter
-off: Ryd420ExpShutter
 on: PrbShutter
 off: PrbCoolShutter
-dac: Ryd420Amp 0.0 %0.00 %0.005 %amplitude_scan %0.03 %2.5
 dac: PrbRepAmp 5 %1 %3.0
 dac: PrbAmp 5 %5.0
-ol: ol_repump d2_repump_prb_resonance+23.7*0.1
+ol: ol_repump d2_repump_prb_resonance+30*0.1 %23.7*0.1
 %ddsfreq: Ryd420Brimrose resonance_scan
 %on: TweezerHold
-dacramp: TweezerIntensity twz_intensity twz_intensity*0.1 10
+ddsfreq: ryd420brimrose 80 %resonance_scan %80 %resonance_scan
+dacramp: SLMTweezerIntensity slm_twz_intensity slm_twz_intensity*0.1 10
 t += 10
 
-t += -5
+t += -12
 on: Ryd420Trg
-t += 1
+t += 6
 on: Ryd420Hold
 t += 0.1
 off: Ryd420Trg
 t += 0.1
 on: Ryd420ExpShutter
-t += 5-1-0.1-0.1
+t += 12-6-0.1-0.1
 
 
 on: PrbTrg
@@ -75,7 +81,8 @@ off: Ryd1013Trg
 off: Ryd1013Shutter
 %off: TweezerHold
 off: Ryd420Hold
-dacramp: TweezerIntensity twz_intensity*0.1 twz_intensity 10
+t += 1
+dacramp: SLMTweezerIntensity slm_twz_intensity*0.1 slm_twz_intensity 10
 t += 25
 
 
@@ -92,11 +99,11 @@ call PGCTweezerImaging()
 
 t += 10
 on: Ryd420ExpShutter
-dac: Ryd420Amp 3
+dac: Ryd420Amp -0.0
 t += 10
 pulseon: Ryd420MAKO 0.6
 t += 0.1
-pulseon: Ryd420Trg 0.002
+pulseon: Ryd420Trg 0.01/1000
 
 %%%%%%%%%%%%%%  END Sequence  %%%%%%%%%%%%%%%%%%
 t += 10

@@ -1,7 +1,15 @@
 %%%%%%%%%%%%%%%%% Start With 1ms %%%%%%%%%%%%%%%%% 
 t = 1
 %call CryoMOTLoadingPGC()
-call MOTLoading(t_loading)
+var t_loading_dipoletrap 1500
+call MOTLoading(t_loading_dipoletrap)
+t += -0.75*t_loading_dipoletrap
+on: Ryd1013Shutter
+dac: Ryd1013Amp 4.0
+t += 10
+on: Ryd1013Trg
+t += 0.75*t_loading_dipoletrap-10
+
 %call FreeSpacePGC(t_pgc_cool_time)
 call FreeSpaceLGM(t_pgc_cool_time)
 %t += -10
@@ -40,7 +48,7 @@ dac: TARepAmp 0
 %    dac: PrbrepAmp probe_repump_amp
 
 
-t += 40 %t_tof
+t += 200 %t_tof
 t += -10
 on: OPShutter
 off: OPTrg
@@ -50,9 +58,9 @@ t += 10
 %pulseon: DO1_0 1
 
 
-    t += -20 %-(7+time_scan)
+    t += -40 %-(7+time_scan)
     on: CameraShutter
-    t += 20 %7+time_scan
+    t += 40 %7+time_scan
 %%%%%%%%%%%%%%%  MAKO Image  %%%%%%%%%%%%%%%%%%
 % MOT
 %t += -0.1
@@ -92,20 +100,24 @@ dac: TARepAmp 10
 %t += -20
 pulseon: Mako2 1
 pulseon: Mako1 1
-t += -10
-pulseon: pixis_trg 20
-t += 10
+pulseon: Ryd1013Mako 1
+t += -40
+%pulseon: pixis_trg 20
+on: pixis_trg
+pulseon: do8_4 0.1
+t += 40
 t += 0.1
 %pulseon: PrbTrg 1 %5 %time_scan %30 %200 %t_twz_imaging
 %pulseon: SciMOTTrg 5
 pulseon: OPTrg 1
 t += 20 %200
-%    off: CameraShutter
+off: pixis_trg
+off: CameraShutter
 t += 1
 off: Ryd1013Trg
 
 %%%%%%%%%%%%%%  END Sequence  %%%%%%%%%%%%%%%%%%
-t += 100
+t += 10
 pulseon: DO1_0 0.5
 
 

@@ -15,6 +15,7 @@ import MatplotlibPlotters as mp
 from fitters import decaying_cos, trigonometric
 from fitters.Gaussian import gaussian
 from fitters.Polynomial import Quadratic
+from fitters.Sinc_Squared import sinc_sq
 from remoteDataPaths import get_data_files
 import AtomCountExtractor as ace
 from skimage.transform import PolynomialTransform

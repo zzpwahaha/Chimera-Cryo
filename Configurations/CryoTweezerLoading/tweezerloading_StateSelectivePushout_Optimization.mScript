@@ -1,0 +1,88 @@
+%%%%%%%%%%%%%%%%% Start With 1ms %%%%%%%%%%%%%%%%% 
+t = 1
+%call CryoMOTLoadingPGC()
+call CryoMOTEnhancedLoadingLGM()
+call TOF(10)
+
+%%%%%%%%%%%%%%  PGC in Tweezer %%%%%%%%%%%%%%%%%%
+% change the field/laser freq parameter here because the previous section is TOF and no light is on
+call D2InTrapPGC(t_pgc_twz)
+% note the t_pgc_twz should be smaller than 100
+t += 100-t_pgc_twz
+
+%%%%%%%%%%%%%%  PGC in Tweezer with Probe %%%%%%%%%%%%%%%%%%
+% change the field/laser freq parameter here because the previous section is TOF and no light is on
+call D2InTrapPGCPrb(t_pgc_twz)
+% note the t_pgc_twz should be smaller than 100
+t += 100-t_pgc_twz
+
+%%%%%%%%%%%%%%  Image TWIZZER  %%%%%%%%%%%%%%%%%%% change the field/laser freq parameter here because the previous section is dark, i.e. 100-t_pgc_twz is larger than 4
+call PGCTweezerImaging()
+t += 15 %+500
+
+
+call setQuantizationField()
+%dacramp: SLMTweezerIntensity slm_twz_intensity slm_twz_intensity*0.1 10
+%t += 10
+t += 750 %750 %100
+%dacramp: SLMTweezerIntensity slm_twz_intensity*0.1 slm_twz_intensity 10
+%t += 10
+
+%%%%%%%%%%%%%% optical pumping into |2,2> state with 2-2'' OP, 1-2'' probe %%%%%%%%%%%
+call OpticalPumping22()
+%call PrepareF1Manifold()
+%call PrepareF2Manifold() 
+
+t += 10
+%call StateSelectivePushout()
+
+var FullTrapLightShift 30 % MHz
+var Bfield 7 %G
+var DifferentialZeemanCoef 1.4 % MHz/G
+var PushoutTrapFraction 0.1
+    dacramp: SLMTweezerIntensity slm_twz_intensity slm_twz_intensity*PushoutTrapFraction 10
+    off: TARepShutter
+    off: PrbShutter
+    off: xyzMOTShutter
+    off: D1LGMShutter
+    off: D1LGMPrbShutter
+    on: OPShutter
+%    off: OPShutter
+    ol: ol_cooling d2_cooling_resonance-(FullTrapLightShift*PushoutTrapFraction+DifferentialZeemanCoef*Bfield) %(7.3) 
+    ol: ol_repump d2_repump_resonance+20 % intensional detuned
+
+    dac: OPAmp {0.1 op_pwr} %0.1
+    t += 10 %t_shutter
+
+    t += 0.05
+    on: OPTrg
+    t += time_scan %0.01 %time_scan %0.05
+    off: OPTrg
+    off: OPShutter
+    t += 0.05-time_scan 
+    dacramp: SLMTweezerIntensity slm_twz_intensity*PushoutTrapFraction slm_twz_intensity 10 
+    t += 10
+
+
+
+%call TrapLowerAndRise(twz_intensity, twz_intensity*0.1, 10, 15)
+t += 15
+
+    dac: BiasCoilX pgc_twz_bias_x
+    dac: BiasCoilY pgc_twz_bias_y 
+    dac: BiasCoilZ pgc_twz_bias_z
+t += 100
+
+
+%%%%%%%%%%%%%%  PGC in Tweezer with Probe %%%%%%%%%%%%%%%%%%
+% change the field/laser freq parameter here because the previous section is TOF and no light is on
+call D2InTrapPGCPrb(t_pgc_twz)
+% note the t_pgc_twz should be smaller than 100
+t += 100-t_pgc_twz
+%%%%%%%%%%%%%%% Second Twizzer Image
+% note the previous section should have at least 4 ms dark interval
+call PGCTweezerImaging()
+
+%%%%%%%%%%%%%%  END Sequence  %%%%%%%%%%%%%%%%%%
+t += 10
+pulseon: DO1_0 0.5

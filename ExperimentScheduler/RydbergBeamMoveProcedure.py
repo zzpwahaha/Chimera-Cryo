@@ -13,7 +13,7 @@ def extract_beam_position_on_mako(exp : ExperimentProcedure, mako_idx:int, avera
 
     if mako_idx==3: # 420 blue camera
         exp.setTTL(name="ryd420trg", value=True)
-        exp.setDAC(name='ryd420amp', value=-0.0135)
+        exp.setDAC(name='ryd420amp', value=-0.0131)
         exp.setMakoFeatureValue(mako_idx, "TriggerSource", "string", "FixedRate")
         exp.setMakoFeatureValue(mako_idx, "AcquisitionFrameRateAbs", "double", "5.0")
         exp.setMakoFeatureValue(mako_idx, "ExposureTimeAbs", "double", "16") # in us
@@ -53,7 +53,7 @@ def extract_beam_position_on_mako(exp : ExperimentProcedure, mako_idx:int, avera
         # exp.getMakoFeatureValue(mako_idx=mako_idx)
     elif mako_idx==4: # 1013 blue camera
         exp.setTTL(name="ryd1013trg", value=True)
-        exp.setDAC(name='ryd1013amp', value=0.45)
+        exp.setDAC(name='ryd1013amp', value=3.5)
         exp.setMakoFeatureValue(mako_idx, "TriggerSource", "string", "FixedRate")
         exp.setMakoFeatureValue(mako_idx, "AcquisitionFrameRateAbs", "double", "5.0")
         exp.setMakoFeatureValue(mako_idx, "ExposureTimeAbs", "double", "1000") # in us
@@ -166,16 +166,17 @@ def move_beam_to_target(exp: ExperimentProcedure, mako_idx: int, pico_idx: tuple
     return False
 
 
-RYDBERG_BEAM_420_POSITION = (11.86,27.46) #(13.60, 28.60) #(13.10, 29.50) #(13.3, 27.5) #(16.21,28.80) #(15.75,27.46) #(16.12,28.30) #(14.81,28.74) #(16.48,28.57) #(16.95,28.71)
-RYDBERG_BEAM_1013_POSITION = (33.10,26.91) #(33.02, 27.0) #(32.68, 26.60) #(32.31, 26.02) #(31.88, 27.06) #(31.31,26.33) #(31.89,26.19) #(32.02,25.56) #(33.65,26.38)
+# RYDBERG_BEAM_420_POSITION = (11.86,27.46) #(13.60, 28.60) #(13.10, 29.50) #(13.3, 27.5) #(16.21,28.80) #(15.75,27.46) #(16.12,28.30) #(14.81,28.74) #(16.48,28.57) #(16.95,28.71)
+# RYDBERG_BEAM_1013_POSITION = (33.10,26.91) #(33.02, 27.0) #(32.68, 26.60) #(32.31, 26.02) #(31.88, 27.06) #(31.31,26.33) #(31.89,26.19) #(32.02,25.56) #(33.65,26.38)
 
 
-# RYDBERG_BEAM_420_POSITION = (68.65,67.7)
+RYDBERG_BEAM_420_POSITION = (45.88,41.72)
+RYDBERG_BEAM_1013_POSITION = (104.46, 121.08)
+
 if __name__=="__main__":
     exp = ExperimentProcedure()
-    move_beam_to_target(exp, mako_idx=3, pico_idx=(1,2), target_position=(68.25,67.84), tolerance=0.1,max_iterations=50, gain=(-8, 8))
     # move_beam_to_target(exp, mako_idx=3, pico_idx=(1,2), target_position=RYDBERG_BEAM_420_POSITION, tolerance=0.1,max_iterations=50, gain=(-8, 8))
     # print("asd")
 
-    # move_beam_to_target(exp, mako_idx=4, pico_idx=(3,4), target_position=RYDBERG_BEAM_1013_POSITION, tolerance=0.1,max_iterations=50, gain=(-8, 8))
+    move_beam_to_target(exp, mako_idx=4, pico_idx=(3,4), target_position=RYDBERG_BEAM_1013_POSITION, tolerance=0.1,max_iterations=50, gain=(-8, 8))
     # print("asd")

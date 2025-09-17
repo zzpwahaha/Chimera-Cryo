@@ -49,7 +49,7 @@ repump_ol
 1
 d1lgmeomtrg
 1
-prbrelayswitch
+qubitmwtrg
 1
 mwtrg
 1
@@ -99,9 +99,9 @@ keysighttrg
 1
 siglenttrg
 1
-do7_2
+d1statetransferhold
 1
-do7_3
+d1statetransfershutter
 1
 d1statetransfertrg
 1
@@ -113,7 +113,7 @@ slmtweezertrg
 1
 gmloadtrg
 1
-gmmovetrg
+do8_1
 1
 do8_2
 1
@@ -140,7 +140,7 @@ opamp
 0
 dac0_2
 dipolepushamp
-0 - 7.3
+0 - 7.5
 0
 dac0_3
 prbamp
@@ -164,7 +164,7 @@ tweezerintensity
 0
 dac0_8
 dipolepushrepamp
--9.9 - 10
+-9.9 - 8
 0
 dac0_9
 slmtweezerintensity
@@ -255,7 +255,7 @@ dac1_15
 -9.9 - 10
 0
 dac1_15
-8
+9
 d2_cooling_resonance 1206
 d2_repump_resonance 5282
 d2_cooling_prb_resonance 1226
@@ -263,6 +263,7 @@ d2_repump_prb_resonance 5262
 d1_lgmcooling_resonance 784
 rb87_hfsplitting 6834.682
 t_shutter 10
-t_field_settling 750
-836 1275 1 931 965 1
+t_field_settling 100
+rydberg_ionization_frequency 6350
+1026 1090 1 925 964 1
 0 1
