@@ -138,7 +138,7 @@
 	//static DDS
 	const unsigned STATICDDS_NUM = 1;
 	const std::array<bool, STATICDDS_NUM> STATICDDS_SAFEMODE = { false/*, true*/ };
-	const std::array<std::string, STATICDDS_NUM> STATICDDS_PORT = { "COM5" /*"COM12", "COM18"*/};
+	const std::array<std::string, STATICDDS_NUM> STATICDDS_PORT = { "COM21" /*"COM12", "COM18"*/};
 	const std::array<unsigned int, STATICDDS_NUM> STATICDDS_BAUDRATE = { 115200/*,115200*/ };
 
 	//static DAS

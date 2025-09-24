@@ -212,8 +212,9 @@ void CommandModulator::setStaticDDS(QString ddsfreqStr, QString channelStr, Erro
 
 	auxWin->reportStatus("----------------------\r\nSetting static Dass... ");
 	try {
-		auto& staticDas = analysisWin->getStaticDas();
-		staticDas.setDasEditValue(ddsfreq, channel);
+		//auto& staticDas = analysisWin->getStaticDas();
+		auto& staticDas = analysisWin->getStaticDds();
+		staticDas.setDdsEditValue(ddsfreq, channel);
 		staticDas.handleProgramNowPress(auxWin->getUsableConstants());
 	}
 	catch (ChimeraError& err) {
