@@ -9,8 +9,7 @@ StaticDdsCore::StaticDdsCore(
 	const std::array<std::string, size_t(StaticDDSGrid::numOFunit)> ports,
 	const std::array<unsigned, size_t(StaticDDSGrid::numOFunit)> baudrates) :
 	safemodes(safemodes),
-	sddsFlumes{ StaticDDSFlume(ports[0], baudrates[0], safemodes[0]), 
-	StaticDDSFlume(ports[1], baudrates[1], safemodes[1]) }
+	sddsFlumes{ RC035DDSFlume(ports[0], baudrates[0], safemodes[0])/*, StaticDDSFlume(ports[1], baudrates[1], safemodes[1])*/ }
 {
 }
 
@@ -89,6 +88,13 @@ void StaticDdsCore::setStaticDDSExpSetting(StaticDDSSettings tmpSetting)
 	expSettings = tmpSetting;
 }
 
+void StaticDdsCore::configureDDS()
+{
+	for (auto& dds : sddsFlumes) {
+		dds.configureDDS();
+	}
+}
+
 std::string StaticDdsCore::getDDSCommand(double ddsfreqVal)
 {
 	std::string buffCmd;
@@ -106,13 +112,14 @@ void StaticDdsCore::writeDDSs(std::array<double, size_t(StaticDDSGrid::total)> o
 	for (auto ch : range(size_t(StaticDDSGrid::total))) {
 		command = getDDSCommand(outputs[ch]);
 		size_t unitNum = ch / size_t(StaticDDSGrid::numPERunit);
-		sddsFlumes[unitNum].write(command);
+		//sddsFlumes[unitNum].write(command);
+		sddsFlumes[unitNum].setDDSFreq(outputs[ch], ch % size_t(StaticDDSGrid::numPERunit));
 		if (!safemodes[unitNum]) {
-			std::string recv = sddsFlumes[unitNum].read();
-			std::transform(recv.begin(), recv.end(), recv.begin(), ::tolower); /*:: without namespace select from global namespce, see https://stackoverflow.com/questions/5539249/why-cant-transforms-begin-s-end-s-begin-tolower-be-complied-successfu*/
-			if (recv.find("error") != std::string::npos) {
-				thrower("Error in static DDS programming, from Arduino: " + recv);
-			}
+			//std::string recv = sddsFlumes[unitNum].read();
+			//std::transform(recv.begin(), recv.end(), recv.begin(), ::tolower); /*:: without namespace select from global namespce, see https://stackoverflow.com/questions/5539249/why-cant-transforms-begin-s-end-s-begin-tolower-be-complied-successfu*/
+			//if (recv.find("error") != std::string::npos) {
+			//	thrower("Error in static DDS programming, from Arduino: " + recv);
+			//}
 		}
 	}
 }

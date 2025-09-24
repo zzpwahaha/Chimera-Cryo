@@ -564,6 +564,21 @@
     <ClCompile Include="Source\ElliptecRotationStage\ElliptecSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\StaticDirectAnalogSynthesis\StaticDasCore.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\StaticDirectAnalogSynthesis\StaticDASFlume.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\StaticDirectAnalogSynthesis\StaticDasSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\StaticDirectDigitalSynthesis\MessageTypesRC035.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\StaticDirectDigitalSynthesis\RC035DDSFlume.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="3rd_Party\qcustomplot\qcustomplot.h">
@@ -792,6 +807,9 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="Source\PicoScrew\PicoScrewSystem.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Source\StaticDirectAnalogSynthesis\StaticDasSystem.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
@@ -1265,6 +1283,21 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\ElliptecRotationStage\ElliptecSettings.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\StaticDirectAnalogSynthesis\StaticDasCore.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\StaticDirectAnalogSynthesis\StaticDASFlume.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\StaticDirectAnalogSynthesis\StaticDasStructures.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\StaticDirectDigitalSynthesis\MessageTypesRC035.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\StaticDirectDigitalSynthesis\RC035DDSFlume.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
