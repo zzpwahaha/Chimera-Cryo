@@ -49,7 +49,7 @@ public:
     const double maxVal = 1000;
 
     const std::vector<std::string> dasSetupCommands = {
-        "SOURCE0", /*set control controlling channel to Source 0*/
+        "SOURCE1", /*set control controlling channel to Source 0*/
         "MODE CW", /*set to CW mode*/
         "REF 20 MHz", /*set reference frequency to 20MHz*/
         "REFS 0", /*Set reference to internal*/
@@ -64,7 +64,7 @@ public:
         "PLEV 3", /*set relative power to largest*/
         "ATT 3", /*set output attenuation: 0 dB attenuation = 15 dBm output power*/
 
-        "SOURCE1", /*set control controlling channel to Source 1*/
+        "SOURCE2", /*set control controlling channel to Source 1*/
         "MODE CW", /*set to CW mode*/
         "REF 20 MHz", /*set reference frequency to 20MHz*/
         "REFS 0", /*Set reference to internal*/
@@ -77,7 +77,7 @@ public:
         "PDN 1", /*PDN 1 turns the source on*/
         "OEN 1", /*Enables RF output buffer amplifiers while leaving the synthesizer PLL locked*/
         "PLEV 3", /*set relative power to largest*/
-        "ATT 3", /*set output attenuation: 0 dB attenuation = 15 dBm output power*/
+        "ATT 5", /*set output attenuation: 0 dB attenuation = 15 dBm output power*/
 
         "SAVE",
     };

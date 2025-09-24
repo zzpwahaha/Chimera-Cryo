@@ -144,7 +144,7 @@
 	//static DAS
 	const unsigned STATICDAS_NUM = 1;
 	const std::array<bool, STATICDAS_NUM> STATICDAS_SAFEMODE = { false };
-	const std::array<std::string, STATICDAS_NUM> STATICDAS_PORT = { "COM3" };
+	const std::array<std::string, STATICDAS_NUM> STATICDAS_PORT = { "COM19" };
 	const std::array<unsigned int, STATICDAS_NUM> STATICDAS_BAUDRATE = { 115200 };
 
 	//Elliptec rotation stage
