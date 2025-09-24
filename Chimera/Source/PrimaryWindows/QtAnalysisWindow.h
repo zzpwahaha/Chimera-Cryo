@@ -27,8 +27,8 @@ public:
 	void initializeWidgets() override;
 	void fillMasterThreadInput(ExperimentThreadInput* input) override {};
 	//MOTAnalysisControl
-	//StaticDdsSystem& getStaticDds() { return staticDds; };
-	StaticDasSystem& getStaticDas() { return staticDas; };
+	StaticDdsSystem& getStaticDds() { return staticDds; };
+	//StaticDasSystem& getStaticDas() { return staticDas; };
 
 public slots:
 	void prepareCalcForAcq();
@@ -41,8 +41,8 @@ public:
 	MOTAnalysisSystem MOTAnalySys;
 	ExperimentSeqPlotter SeqPlotter;
 	StaticAoSystem staticDac;
-	//StaticDdsSystem staticDds;
-	StaticDasSystem staticDas;
+	StaticDdsSystem staticDds;
+	//StaticDasSystem staticDas;
 	ElliptecSystem elliptec;
 	MicrowaveSystem mwSys2;
 

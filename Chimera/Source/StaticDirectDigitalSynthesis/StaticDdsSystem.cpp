@@ -34,6 +34,17 @@ void StaticDdsSystem::initialize()
 			parentWin->reportErr("Failed to program Static DDS system! \n" + err.qtrace());
 		}
 		});
+
+	auto configureDDS = new QPushButton("Configure DDS", this);
+	connect(configureDDS, &QPushButton::released, [this]() {
+		try {
+			core.configureDDS();
+		}
+		catch (ChimeraError& err) {
+			parentWin->reportErr("Failed to initialize1 Static DDS system! \n" + err.qtrace());
+		}
+		});
+
 	ctrlButton = new QCheckBox("Ctrl?", this);
 	ctrlButton->setChecked(false);
 	connect(ctrlButton, &QCheckBox::clicked, [this]() {
@@ -47,6 +58,7 @@ void StaticDdsSystem::initialize()
 		});
 
 	layout1->addWidget(programNowButton, 0);
+	layout1->addWidget(configureDDS, 0);
 	layout1->addWidget(ctrlButton, 0);
 	layout1->addStretch(1);
 	layout->addLayout(layout1, 0);

@@ -199,6 +199,8 @@
     <ClCompile Include="Source\StaticDirectAnalogSynthesis\StaticDasCore.cpp" />
     <ClCompile Include="Source\StaticDirectAnalogSynthesis\StaticDASFlume.cpp" />
     <ClCompile Include="Source\StaticDirectAnalogSynthesis\StaticDasSystem.cpp" />
+    <ClCompile Include="Source\StaticDirectDigitalSynthesis\MessageTypesRC035.cpp" />
+    <ClCompile Include="Source\StaticDirectDigitalSynthesis\RC035DDSFlume.cpp" />
     <ClCompile Include="Source\StaticDirectDigitalSynthesis\StaticDdsCore.cpp" />
     <ClCompile Include="Source\StaticDirectDigitalSynthesis\StaticDDSFlume.cpp" />
     <ClCompile Include="Source\StaticDirectDigitalSynthesis\StaticDdsSystem.cpp" />
@@ -214,6 +216,8 @@
     <ClInclude Include="Source\StaticDirectAnalogSynthesis\StaticDasCore.h" />
     <ClInclude Include="Source\StaticDirectAnalogSynthesis\StaticDASFlume.h" />
     <ClInclude Include="Source\StaticDirectAnalogSynthesis\StaticDasStructures.h" />
+    <ClInclude Include="Source\StaticDirectDigitalSynthesis\MessageTypesRC035.h" />
+    <ClInclude Include="Source\StaticDirectDigitalSynthesis\RC035DDSFlume.h" />
     <ClInclude Include="Source\StaticDirectDigitalSynthesis\StaticDdsCore.h" />
     <ClInclude Include="Source\StaticDirectDigitalSynthesis\StaticDDSFlume.h" />
     <QtMoc Include="Source\StaticDirectDigitalSynthesis\StaticDdsSystem.h" />

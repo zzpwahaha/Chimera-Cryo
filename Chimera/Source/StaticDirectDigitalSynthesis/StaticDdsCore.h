@@ -2,6 +2,7 @@
 #include <GeneralObjects/IDeviceCore.h>
 #include <StaticDirectDigitalSynthesis/StaticDdsStructures.h>
 #include <StaticDirectDigitalSynthesis/StaticDDSFlume.h>
+#include <StaticDirectDigitalSynthesis/RC035DDSFlume.h>
 #include <ParameterSystem/ParameterSystemStructures.h>
 
 class ConfigStream;
@@ -31,6 +32,7 @@ public:
 
     std::string getDeviceInfo();
     void setStaticDDSExpSetting(StaticDDSSettings tmpSetting); // used only for ProgramNow in StaticAOSystem
+    void configureDDS();
 
     const std::string configDelim = "STATIC_DDS_SYSTEM";
     const std::array<bool, size_t(StaticDDSGrid::numOFunit)> safemodes;
@@ -46,7 +48,8 @@ public:
     const double maxVal = 1000;
 
 private:
-    std::array<StaticDDSFlume, size_t(StaticDDSGrid::numOFunit)> sddsFlumes;
+    //std::array<StaticDDSFlume, size_t(StaticDDSGrid::numOFunit)> sddsFlumes;
+    std::array<RC035DDSFlume, size_t(StaticDDSGrid::numOFunit)> sddsFlumes;
     StaticDDSSettings expSettings;    
 };
 
