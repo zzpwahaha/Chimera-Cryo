@@ -20,23 +20,23 @@ call PGCTweezerImaging()
 t += 5
 
 call setQuantizationField()
-dacramp: SLMTweezerIntensity slm_twz_intensity slm_twz_intensity*0.1 10
+%dacramp: SLMTweezerIntensity slm_twz_intensity slm_twz_intensity*0.1 10
 t += 10
 t += t_field_settling-20
-dacramp: SLMTweezerIntensity slm_twz_intensity*0.1 slm_twz_intensity 10
+%dacramp: SLMTweezerIntensity slm_twz_intensity*0.1 slm_twz_intensity 10
 t += 10
 
 call OpticalPumping22()
 
 on: Ryd1013Shutter
-ddsfreq: Ryd420Brimrose resonance_scan
-t += 15
+ddsfreq: Ryd420Brimrose ryd420_resonance
+t += 5
 %on: Ryd420Shutter
 off: Ryd420ExpShutter
 %on: Ryd1013Shutter
 off: Ryd420AWGchswitch
 dac: Ryd420Amp 0.2 %0.55 %0.30 %0.34
-dac: Ryd1013Amp 4.0 %0.55 %0.60 %0.68
+dac: Ryd1013Amp 2.0 %0.55 %0.60 %0.68
 
 var IQ_MAX_AMP 2.5
 dac: MW_IQ_I IQ_MAX_AMP
@@ -76,8 +76,8 @@ t += 0.001
 off: SLMTweezerTrg
 
 %%%%% Rabi %%%%%%
-t += 0.2/1000
-t += -1.0/1000 %time for 420 AOM to turn since the beam is quite far away from the AOM actuator
+t += 0.25/1000
+t += -0.95/1000 %time for 420 AOM to turn since the beam is quite far away from the AOM actuator
 on: do8_4 %dummy trigger for picoscope
 on: Ryd420Trg % scan to get Rabi
 t += time_scan_us/1000 %time_scan_us/1000
@@ -88,8 +88,8 @@ t += 0.4/1000
 on: MWAmpTrg
 t += -0.4/1000
 
-t += 1.0/1000
-t += 0.2/1000
+t += 0.95/1000
+t += 0.25/1000
 on: SLMTweezerTrg
 
 t += 0.1
@@ -97,8 +97,8 @@ off: MWAmpTrg
 t += -0.1
 
 t += -0.08
-dacramp: SLMTweezerIntensity slm_twz_intensity*0.1 slm_twz_intensity 0.08
-t += 0.08
+dacramp: SLMTweezerIntensity slm_twz_intensity*0.1 slm_twz_intensity 10.08
+t += 10.08
 t += 0.08
 
 %pulseon: MWAmpTrg 0.1
@@ -107,16 +107,18 @@ off: Ryd1013Trg
 off: Ryd1013Hold
 off: Ryd420Shutter
 off: Ryd1013Shutter
+off: Ryd420Hold
 t += 0.5
 
 
-t += 15
+t += 5
 %call StateSelectivePushout()
 %call setZeroField()
-    dac: BiasCoilX pgc_twz_bias_x
-    dac: BiasCoilY pgc_twz_bias_y 
-    dac: BiasCoilZ pgc_twz_bias_z
-t += 100
+
+%    dac: BiasCoilX pgc_twz_bias_x
+%    dac: BiasCoilY pgc_twz_bias_y 
+%    dac: BiasCoilZ pgc_twz_bias_z
+%t += 100
 %%%%%%%%%%%%%%  PGC in Tweezer %%%%%%%%%%%%%%%%%%
 % change the field/laser freq parameter here because the previous section is TOF and no light is on
 call D2InTrapPGCPrb(t_pgc_twz)

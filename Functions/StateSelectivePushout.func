@@ -44,7 +44,9 @@ def StateSelectivePushout():
     t += PushoutTime %time_scan %0.05
     off: OPTrg
     off: OPShutter
-    t += 0.05-PushoutTime 
+    t += 0.05-PushoutTime
+    on: TARepShutter 
     dacramp: SLMTweezerIntensity slm_twz_intensity*PushoutTrapFraction slm_twz_intensity 10 
     t += 10
+
 

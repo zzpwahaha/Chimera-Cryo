@@ -1,7 +1,7 @@
 %%%%%%%%%%%%%%%%% Start With 1ms %%%%%%%%%%%%%%%%% 
 t = 1
-call CryoMOTLoadingPGC()
-%call CryoMOTEnhancedLoadingLGM()
+%call CryoMOTLoadingPGC()
+call CryoMOTEnhancedLoadingLGM()
 call TOF(10)
 
 %%%%%%%%%%%%%%  PGC in Tweezer %%%%%%%%%%%%%%%%%%
@@ -21,9 +21,9 @@ call PGCTweezerImaging()
 t += 15 %+500
 
 
-%%%%%%%%%%%%%%  Set quantization field %%%%%%%%%%%%%%%%%%%
-call setQuantizationField()
+t += 10
 
+call setQuantizationField()
 dacramp: SLMTweezerIntensity slm_twz_intensity slm_twz_intensity*0.1 10
 t += 10
 t += t_field_settling-20
@@ -32,29 +32,43 @@ t += 10
 
 %%%%%%%%%%%%%% optical pumping into |2,2> state with 2-2'' OP, 1-2'' probe %%%%%%%%%%%
 call OpticalPumping22()
-t += 1
-
 t += 5
 
-%%%%%%%%%%%%%%% MW %%%%%%%%%%%
-var mw_rabi_pi2 0.0447 %0.041 %0.041 %0.01 %0.0599 %0.0296
-var d1_rabi_pi_us 15
+%%%%%%%%%%%%%%%%%% Brendan smart code
+off: Ryd420Shutter
+off: Ryd420ExpShutter
 
 dacramp: SLMTweezerIntensity slm_twz_intensity slm_twz_intensity*0.1 10
 t += 10
 
-%%%% 420 sample and hold %%%%
-t += -15
-dac: Ryd420Amp amplitude_scan %0.2 %0.01 %0.05 %0.34
-on: Ryd420Trg
-t += 4.0
-on: Ryd420Hold
-t += 4.0
-off: Ryd420Trg
-t += 0.1
-on: Ryd420ExpShutter
-t += 15-(4+4+0.1)
-%%%% 420 sample and hold %%%%
+%%%%%% 1013 sample and hold %%%%
+%t += -15
+%dac: Ryd1013Amp amplitude_scan %1.0
+%on: Ryd1013Trg
+%	% trigger mako camera to record beam position
+%	t += 1
+%	pulseon: ryd1013Mako 0.1
+%	t += -1
+%t += 13.0
+%on: Ryd1013Hold
+%t += 1.0
+%off: Ryd1013Trg
+%t += 0.1
+%%on: Ryd1013ExpShutter
+%t += 15-(13+1+0.1)
+%%%%%% 1013 sample and hold %%%%
+
+%%%% 1013 directly on %%%%
+t += -5
+dac: Ryd1013Amp amplitude_scan %1.0
+on: Ryd1013Trg
+	% trigger mako camera to record beam position
+	t += 1
+	pulseon: ryd1013Mako 0.1
+	t += -1
+t += 5
+%%%% 1013 directly on %%%%
+
 %%%% D1 state transfer sample and hold %%%%
 t += -15
 dac: D1StateTransferAmp -1.0
@@ -72,53 +86,54 @@ t += 15-(4+4+0.1)
 t += 0.5
 pulseon: do8_4 0.1 %dummy trigger for picoscope
 
-    %%%%% Rabi/Resonance sequence with D1
-    on: Ryd420Trg
-    t += 0.005 
-    on: D1StateTransferTrg
-    t += d1_rabi_pi_us/1000
-    off: D1StateTransferTrg
-    t += 0.005
-    off: Ryd420Trg
 
-%    %%%%% Ramsey sequence with D1
-%    var d1_rabi_pi_us 16.62
-%    var d1_rabi_pi2_us 8.31
-%    var d1_ramsey_echo_waittime 0.41
-%    on: D1StateTransferTrg
-%    t += d1_rabi_pi2_us/1000
-%    off: D1StateTransferTrg
+%%%%%% Rabi/Resonance sequence with D1
+on: D1StateTransferTrg
+t += time_scan_us/1000
+off: D1StateTransferTrg
+%%%%%% Rabi/Resonance sequence with D1
+
+
+%%%%%% Ramsey sequence with D1
+%var d1_rabi_pi_us 16.67
+%var d1_rabi_pi2_us 8.33
+%var d1_ramsey_echo_waittime 0.41
+%on: D1StateTransferTrg
+%t += d1_rabi_pi2_us/1000
+%off: D1StateTransferTrg
 %
-%    t += d1_ramsey_echo_waittime/2
+%t += d1_ramsey_echo_waittime/2
 %
-%    t += -(d1_ramsey_echo_waittime/4+(time_scan_us/1000)/2)
-%    on: Ryd420Trg
-%    t += (time_scan_us/1000)
-%    off: Ryd420Trg
-%    t += d1_ramsey_echo_waittime/4-(time_scan_us/1000)/2
+%t += -(d1_ramsey_echo_waittime/4+(time_scan_us/1000)/2)
+%on: Ryd1013Trg
+%t += (time_scan_us/1000)
+%off: Ryd1013Trg
+%t += d1_ramsey_echo_waittime/4-(time_scan_us/1000)/2
 %
-%    on: D1StateTransferTrg
-%    t += d1_rabi_pi_us/1000
-%    off: D1StateTransferTrg
+%on: D1StateTransferTrg
+%t += d1_rabi_pi_us/1000
+%off: D1StateTransferTrg
 %
-%    t += d1_ramsey_echo_waittime/2
+%t += d1_ramsey_echo_waittime/2
 %
-%    on: D1StateTransferTrg
-%    t += d1_rabi_pi2_us/1000
-%    off: D1StateTransferTrg
-%    %%%%% Ramsey sequence with D1
+%on: D1StateTransferTrg
+%t += d1_rabi_pi2_us/1000
+%off: D1StateTransferTrg
+%%%%%% Ramsey sequence with D1
+
 
 t += 0.1
-off: Ryd420Hold
-off: Ryd420Shutter
+dac: Ryd1013Amp 0.0 
+off: Ryd1013Trg
 off: D1StateTransferHold
 off: D1StateTransferShutter 
 t += 0.5
 
+% Ramp tweezer strength back up
 dacramp: SLMTweezerIntensity slm_twz_intensity*0.1 slm_twz_intensity 10
 t += 10
 
-
+% Wait longer(why?) and then do state selective imaging
 t += 10
 call StateSelectivePushout()
 
@@ -126,7 +141,7 @@ call StateSelectivePushout()
 %dac: BiasCoilY pgc_twz_bias_y 
 %dac: BiasCoilZ pgc_twz_bias_z
 %t += 100
-t += 15
+
 
 %%%%%%%%%%%%%%  PGC in Tweezer with Probe %%%%%%%%%%%%%%%%%%
 % change the field/laser freq parameter here because the previous section is TOF and no light is on
@@ -139,6 +154,6 @@ call PGCTweezerImaging()
 
 %%%%%%%%%%%%%%  END Sequence  %%%%%%%%%%%%%%%%%%
 t += 10
-call RydbergBeamCameraFootprint()
+%call RydbergBeamCameraFootprint()
 t += 10
 pulseon: DO1_0 0.5

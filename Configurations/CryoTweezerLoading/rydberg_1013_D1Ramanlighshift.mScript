@@ -32,22 +32,45 @@ t += 10
 
 %%%%%%%%%%%%%% optical pumping into |2,2> state with 2-2'' OP, 1-2'' probe %%%%%%%%%%%
 call OpticalPumping22()
-t += 10
+t += 5
 
-%%%%%%%%%%%%%%%%%% Brendan stupid code
-
-% Make sure 420 stuff is off. Is this necesary? Why would it be on in the first place?
+%%%%%%%%%%%%%%%%%% Brendan smart code
 off: Ryd420Shutter
 off: Ryd420ExpShutter
 
-% Ramp down tweezer intensity? Why? Reduce disordered light shifts?
 dacramp: SLMTweezerIntensity slm_twz_intensity slm_twz_intensity*0.1 10
 t += 10
 
-% Do some time travelling
-t += -15
+%%%%%% 1013 sample and hold %%%%
+%t += -15
+%dac: Ryd1013Amp amplitude_scan %1.0
+%on: Ryd1013Trg
+%	% trigger mako camera to record beam position
+%	t += 1
+%	pulseon: ryd1013Mako 0.1
+%	t += -1
+%t += 13.0
+%on: Ryd1013Hold
+%t += 1.0
+%off: Ryd1013Trg
+%t += 0.1
+%%on: Ryd1013ExpShutter
+%t += 15-(13+1+0.1)
+%%%%%% 1013 sample and hold %%%%
 
-% Do state transfer beam sample and hold preparation
+%%%% 1013 directly on %%%%
+t += -5
+dac: Ryd1013Amp 1.0
+on: Ryd1013Trg
+	% trigger mako camera to record beam position
+	t += 1
+	pulseon: ryd1013Mako 0.1
+	t += -1
+t += 5
+%%%% 1013 directly on %%%%
+
+%%%% D1 state transfer sample and hold %%%%
+t += -15
 dac: D1StateTransferAmp -1.0
 off: D1StateTransferShutter 
 t += 4
@@ -58,32 +81,53 @@ t += 0.1
 off: D1StateTransferTrg
 on: D1StateTransferShutter 
 t += 15-(4+4+0.1)
+%%%% D1 state transfer sample and hold %%%%
 
-% Turn on the 1013 light (is this a good time to do it?)
-dac: Ryd1013Amp 1.0 %amplitude_scan %1.0
-on: Ryd1013Trg
-t += 5
-
-% trigger mako camera to record beam position
-t += -1
-pulseon: ryd1013Mako 0.1
-t += 1
-
+t += 0.5
 pulseon: do8_4 0.1 %dummy trigger for picoscope
 
-% Start doing state transfer on the atoms
+
+%%%%%% Rabi/Resonance sequence with D1
 on: D1StateTransferTrg
 t += time_scan_us/1000
 off: D1StateTransferTrg
-off: D1StateTransferHold
+%%%%%% Rabi/Resonance sequence with D1
 
-t += 1
-off: D1StateTransferShutter 
 
-% Turn the 1013 light off
+%%%%%% Ramsey sequence with D1
+%var d1_rabi_pi_us 16.67
+%var d1_rabi_pi2_us 8.33
+%var d1_ramsey_echo_waittime 0.41
+%on: D1StateTransferTrg
+%t += d1_rabi_pi2_us/1000
+%off: D1StateTransferTrg
+%
+%t += d1_ramsey_echo_waittime/2
+%
+%t += -(d1_ramsey_echo_waittime/4+(time_scan_us/1000)/2)
+%on: Ryd1013Trg
+%t += (time_scan_us/1000)
+%off: Ryd1013Trg
+%t += d1_ramsey_echo_waittime/4-(time_scan_us/1000)/2
+%
+%on: D1StateTransferTrg
+%t += d1_rabi_pi_us/1000
+%off: D1StateTransferTrg
+%
+%t += d1_ramsey_echo_waittime/2
+%
+%on: D1StateTransferTrg
+%t += d1_rabi_pi2_us/1000
+%off: D1StateTransferTrg
+%%%%%% Ramsey sequence with D1
+
+
+t += 0.1
 dac: Ryd1013Amp 0.0 
 off: Ryd1013Trg
-t += 1
+off: D1StateTransferHold
+off: D1StateTransferShutter 
+t += 0.5
 
 % Ramp tweezer strength back up
 dacramp: SLMTweezerIntensity slm_twz_intensity*0.1 slm_twz_intensity 10
@@ -93,10 +137,10 @@ t += 10
 t += 10
 call StateSelectivePushout()
 
-dac: BiasCoilX pgc_twz_bias_x
-dac: BiasCoilY pgc_twz_bias_y 
-dac: BiasCoilZ pgc_twz_bias_z
-t += 100
+%dac: BiasCoilX pgc_twz_bias_x
+%dac: BiasCoilY pgc_twz_bias_y 
+%dac: BiasCoilZ pgc_twz_bias_z
+%t += 100
 
 
 %%%%%%%%%%%%%%  PGC in Tweezer with Probe %%%%%%%%%%%%%%%%%%

@@ -12,11 +12,11 @@ def extract_beam_position_on_mako(exp : ExperimentProcedure, mako_idx:int, avera
     fit_results = []
 
     if mako_idx==3: # 420 blue camera
-        exp.setTTL(name="ryd420trg", value=True)
-        exp.setDAC(name='ryd420amp', value=-0.0131)
+        exp.setTTL(name="ryd420trg", value=False)
+        exp.setDAC(name='ryd420amp', value=0.4) #
         exp.setMakoFeatureValue(mako_idx, "TriggerSource", "string", "FixedRate")
         exp.setMakoFeatureValue(mako_idx, "AcquisitionFrameRateAbs", "double", "5.0")
-        exp.setMakoFeatureValue(mako_idx, "ExposureTimeAbs", "double", "16") # in us
+        exp.setMakoFeatureValue(mako_idx, "ExposureTimeAbs", "double", "1000") # in us
         sleep(0.1)
         exp.startMako(mako_idx)
         sleep(5)
@@ -170,13 +170,13 @@ def move_beam_to_target(exp: ExperimentProcedure, mako_idx: int, pico_idx: tuple
 # RYDBERG_BEAM_1013_POSITION = (33.10,26.91) #(33.02, 27.0) #(32.68, 26.60) #(32.31, 26.02) #(31.88, 27.06) #(31.31,26.33) #(31.89,26.19) #(32.02,25.56) #(33.65,26.38)
 
 
-RYDBERG_BEAM_420_POSITION = (45.88,41.72)
-RYDBERG_BEAM_1013_POSITION = (104.46, 121.08)
+RYDBERG_BEAM_420_POSITION = (44.26,45.12) #(45.88,41.72)
+RYDBERG_BEAM_1013_POSITION = (102.5, 34.53) #(102.5, 118.29) #(105.90, 121)
 
 if __name__=="__main__":
     exp = ExperimentProcedure()
-    # move_beam_to_target(exp, mako_idx=3, pico_idx=(1,2), target_position=RYDBERG_BEAM_420_POSITION, tolerance=0.1,max_iterations=50, gain=(-8, 8))
+    move_beam_to_target(exp, mako_idx=3, pico_idx=(1,2), target_position=RYDBERG_BEAM_420_POSITION, tolerance=0.1,max_iterations=50, gain=(-8, 8))
     # print("asd")
 
     move_beam_to_target(exp, mako_idx=4, pico_idx=(3,4), target_position=RYDBERG_BEAM_1013_POSITION, tolerance=0.1,max_iterations=50, gain=(-8, 8))
-    # print("asd")
+    print("asd")

@@ -38,7 +38,6 @@ t += 5
 
 %%%%%%%%%%%%%%% MW %%%%%%%%%%%
 var mw_rabi_pi2 0.0447 %0.041 %0.041 %0.01 %0.0599 %0.0296
-var d1_rabi_pi_us 15
 
 dacramp: SLMTweezerIntensity slm_twz_intensity slm_twz_intensity*0.1 10
 t += 10
@@ -73,10 +72,10 @@ t += 0.5
 pulseon: do8_4 0.1 %dummy trigger for picoscope
 
     %%%%% Rabi/Resonance sequence with D1
-    on: Ryd420Trg
+%    on: Ryd420Trg
     t += 0.005 
     on: D1StateTransferTrg
-    t += d1_rabi_pi_us/1000
+    t += time_scan_us/1000
     off: D1StateTransferTrg
     t += 0.005
     off: Ryd420Trg

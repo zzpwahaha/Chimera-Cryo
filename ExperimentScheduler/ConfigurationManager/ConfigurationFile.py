@@ -7,6 +7,7 @@ from ConfigurationManager.ConfigurationScanParameter.ConfigurationParameter impo
 from ConfigurationManager.ConfigurationDevices.ArbGenSection import ArbGenSection
 from ConfigurationManager.ConfigurationDevices.MicrowaveSection import MicrowaveSection
 from ConfigurationManager.ConfigurationDevices.CalibrationSection import CalibrationSection
+from ConfigurationManager.ConfigurationDevices.DataAnalysisSection import DataAnalysisSection
 
 class ConfigurationFile:
     """Represents the entire config file."""
@@ -41,9 +42,10 @@ class ConfigurationFile:
                 self.sections[section_name] = ArbGenSection(section_name, section_content)
             elif re.search("MW", section_name):
                 self.sections[section_name] = MicrowaveSection(section_name, section_content)                
-            elif (re.search("DATA_ANALYSIS", section_name) or 
-                  re.search("ANDOR_PICTURE_MANAGER", section_name)):
+            elif re.search("ANDOR_PICTURE_MANAGER", section_name):
                 self.sections[section_name] = ConfigurationStaticSection(section_name, section_content)
+            elif re.search("DATA_ANALYSIS", section_name):
+                self.sections[section_name] = DataAnalysisSection(section_name, section_content)                           
             elif re.search("CALIBRATION_MANAGER", section_name):
                 self.sections[section_name] = CalibrationSection(section_name, section_content)
             else:

@@ -3,6 +3,7 @@ from ExperimentProcedure import *
 from ExperimentProcedure import experiment_monitoring, analog_in_calibration_monitoring
 from RydbergBeamMoveProcedure import move_beam_to_target, RYDBERG_BEAM_420_POSITION, RYDBERG_BEAM_1013_POSITION
 from EthernetClient import EthernetClient
+import UtilityFunctions as uf
 import time
 import os
 import re
@@ -12,46 +13,6 @@ import shutil
 YEAR, MONTH, DAY = today()
 exp = ExperimentProcedure()
 
-def find_largest_file_number(directory, name_prefix = "AOD-FREQUENCY-CALIBRATION", extension = ".h5"):
-    # List all files in the given directory
-    files = os.listdir(directory)
-    # Regex pattern to match the filename "AOD-FREQUENCY-CALIBRATION-xx.h5"
-    pattern = rf"{name_prefix}-(\d+){extension}"
-    # Initialize a list to store the numeric parts (xx)
-    numbers = []
-    # Loop through files and check for the pattern
-    for file in files:
-        match = re.match(pattern, file)
-        if match:
-            # Extract the numeric part (xx)
-            number = int(match.group(1))
-            numbers.append(number)
-    if numbers:
-        # Find the largest xx
-        largest_number = max(numbers)
-        return len(numbers), largest_number
-    else:
-        return 0, 0-1
-
-def move_files(parent_dir, new_parent_dir, file_extension=".grid"):
-    """
-    Moves files with a given extension from all subdirectories of `parent_dir` into a specified new folder
-    Args:
-        parent_dir (str): Path to the directory containing folders to search.
-        file_extension (str): Extension of files to move (e.g., '.npy').
-        new_parent_dir (str): Path to the new directory to move files into.
-    """
-    os.makedirs(new_parent_dir, exist_ok=True)
-
-    for filename in os.listdir(parent_dir):
-        if filename.endswith(file_extension):
-            src_path = os.path.join(parent_dir, filename)
-            dst_path = os.path.join(new_parent_dir, filename)
-            if os.path.isfile(src_path):
-                if os.path.exists(dst_path):
-                    print(f"Overwrite: {filename} already exists in {new_parent_dir}")
-                shutil.move(src_path, dst_path)
-                print(f"Moved {filename} to {new_parent_dir}")
 
 def AOD_frequency_calibration(exp_idx=None, timeout_control = {'use':False, 'timeout':600}):
     config_name = "AOD_frequency_calibration.Config"
@@ -70,7 +31,7 @@ def AOD_frequency_calibration(exp_idx=None, timeout_control = {'use':False, 'tim
     name_prefix = "AOD-FREQUENCY-CALIBRATION"
     if exp_idx is None:
         data_file_path = f"{exp.DATA_FILE_LOCATION}{YEAR}/{MONTH}/{MONTH} {DAY}/Raw Data/"
-        file_count, largest_idx = find_largest_file_number(directory=data_file_path, name_prefix=name_prefix)
+        file_count, largest_idx = uf.find_largest_file_number(directory=data_file_path, name_prefix=name_prefix)
         exp_idx = largest_idx+1
     exp_name = f"{name_prefix}-{exp_idx}"
 
@@ -127,7 +88,7 @@ def SLM_frequency_LUT_generation(exp_idx = None, timeout_control = {'use':False,
     name_prefix = "SLM-FREQUENCY-LUT-GENERATION"
     if exp_idx is None:
         data_file_path = f"{exp.DATA_FILE_LOCATION}{YEAR}/{MONTH}/{MONTH} {DAY}/Raw Data/"
-        file_count, largest_idx = find_largest_file_number(directory=data_file_path, name_prefix=name_prefix)
+        file_count, largest_idx = uf.find_largest_file_number(directory=data_file_path, name_prefix=name_prefix)
         exp_idx = largest_idx + 1
     exp_name = f"{name_prefix}-{exp_idx}"
 
@@ -174,7 +135,7 @@ def SLM_frequency_LUT_generation(exp_idx = None, timeout_control = {'use':False,
     grid_full_path = f"{data_file_path}{grid_full_name}"
     data_analysis.saveGridFile(file_name=grid_full_path)
     # move the grid file already in the GRID folder to archived to make space for the new grid file 
-    move_files(parent_dir=exp.GRID_FILE_LOCATION, new_parent_dir=exp.ARCHIVED_GRID_FILE_LOCATION, file_extension=".grid")
+    uf.move_files(parent_dir=exp.GRID_FILE_LOCATION, new_parent_dir=exp.ARCHIVED_GRID_FILE_LOCATION, file_extension=".grid")
     shutil.copy(grid_full_path, os.path.join(exp.GRID_FILE_LOCATION, grid_full_name))
 
     return pts_Marana, grid_full_name
@@ -191,7 +152,7 @@ def generate_LUT(tform_camera_to_AOD, pts_Marana_SLM, exp_idx = None):
 
     # === Determine filenames ===
     if exp_idx is None:
-        file_count, largest_idx = find_largest_file_number(directory=data_dir, name_prefix="freqLUT", extension=".npy")
+        file_count, largest_idx = uf.find_largest_file_number(directory=data_dir, name_prefix="freqLUT", extension=".npy")
         exp_idx = largest_idx+1
     timestamped_filename = f"freqLUT-{YEAR}-{MONTH}-{DAY}-{row}x{col}-{exp_idx}.npy"
     latest_lut_filename = "freqLUT.npy"
@@ -222,7 +183,7 @@ def generate_LUT(tform_camera_to_AOD, pts_Marana_SLM, exp_idx = None):
 if __name__ == "__main__":
     YEAR, MONTH, DAY = today()
     data_file_path = f"{exp.DATA_FILE_LOCATION}{YEAR}/{MONTH}/{MONTH} {DAY}/Raw Data/"
-    file_count, largest_idx = find_largest_file_number(directory=data_file_path, name_prefix="AOD-FREQUENCY-CALIBRATION")
+    file_count, largest_idx = uf.find_largest_file_number(directory=data_file_path, name_prefix="AOD-FREQUENCY-CALIBRATION")
     exp_idx = largest_idx + 1
     # exp_idx=0
     tform_camera_to_AOD = AOD_frequency_calibration(exp_idx=exp_idx)
