@@ -1,7 +1,7 @@
 %%%%%%%%%%%%%%%%% Start With 1ms %%%%%%%%%%%%%%%%% 
 t = 1
-call CryoMOTLoadingPGC()
-%call CryoMOTEnhancedLoadingLGM()
+%call CryoMOTLoadingPGC()
+call CryoMOTEnhancedLoadingLGM()
 call TOF(10)
 
 %%%%%%%%%%%%%%  PGC in Tweezer %%%%%%%%%%%%%%%%%%
@@ -56,7 +56,7 @@ t += 15-(4+4+0.1)
 %%%% 420 sample and hold %%%%
 %%%% D1 state transfer sample and hold %%%%
 t += -15
-dac: D1StateTransferAmp -1.0
+dac: D1StateTransferAmp -1.0/25
 off: D1StateTransferShutter 
 t += 4
 on: D1StateTransferTrg
@@ -72,7 +72,7 @@ t += 0.5
 pulseon: do8_4 0.1 %dummy trigger for picoscope
 
     %%%%% Rabi/Resonance sequence with D1
-%    on: Ryd420Trg
+    on: Ryd420Trg
     t += 0.005 
     on: D1StateTransferTrg
     t += time_scan_us/1000

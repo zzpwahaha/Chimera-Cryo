@@ -12,11 +12,13 @@ exp = ExperimentProcedure()
 window = [0, 0, 65, 40]
 thresholds = 100
 binnings = np.linspace(0, 240, 241)
-analysis_locs = da.DataAnalysis(year='2025', month='September', day='18', data_name='data_18', 
-                                window=window, thresholds=thresholds, binnings=binnings)
-grid_file_name = 'atomgrid_5x7_8points_2025-9-1'
+analysis_locs = da.DataAnalysis(year='2025', month='October', day='19', data_name='data_8', 
+                                window=window, thresholds=thresholds, binnings=binnings, multi_points_option = dict({"active":True, "search_square":2, "num_points":8}))
+grid_file_name = 'atomgrid_5x7_8points_2025-10-19'
 camera_image_dim = {'Left:':1026, 'Right:':1090, 'H-Bin:':1, 'Bottom:': 924, 'Top:': 963, 'V-Bin:': 1}
 tweezer_intensity_setpoint = 2.9 #V
+repetitions = 4
+
 
 # # analysis grid for 2x7 grid - 20250922
 # window = [0,0,90,20]
@@ -27,6 +29,20 @@ tweezer_intensity_setpoint = 2.9 #V
 # grid_file_name = 'atomgrid_1x13_4points_2025-9-8'
 # camera_image_dim = {'Left:':971, 'Right:':1150, 'H-Bin:':2, 'Bottom:': 923, 'Top:': 962, 'V-Bin:': 2}
 # tweezer_intensity_setpoint = 1.22 #V
+# repetitions = 4
+
+
+# # analysis grid for 1x7 grid - 20250930
+# window = [0,0,90,20]
+# thresholds = 100
+# binnings = np.linspace(0, 240, 241)
+# analysis_locs = da.DataAnalysis(year='2025', month='September', day='30', data_name='data_19', 
+#                                 window=window, thresholds=thresholds, binnings=binnings)
+# grid_file_name = 'atomgrid_1x7_4points_2025-9-30'
+# camera_image_dim = {'Left:':971, 'Right:':1150, 'H-Bin:':2, 'Bottom:': 923, 'Top:': 962, 'V-Bin:': 2}
+# tweezer_intensity_setpoint = 0.61 #V
+# repetitions = 8
+
 
 
 def update_camera_image_dimension(config_file: ConfigurationFile, camera_image_dim: dict):
@@ -43,7 +59,7 @@ def shuttle_grid_files(grid_file_name: str):
     # move the required grid file in the archived folder to GRID folder 
     uf.move_files(parent_dir=exp.ARCHIVED_GRID_FILE_LOCATION, new_parent_dir=exp.GRID_FILE_LOCATION, file_extension=".grid", file_name=grid_file_name, throw=True)
 
-def rydberg_420_lightshift_DLS_D1(exp_postfix: str, amplitude: float = 0.2, timeout_control = {'use':False, 'timeout':600}):
+def rydberg_420_lightshift_DLS_D1(exp_postfix: str, amplitude: float = 0.2, timeout_control = {'use':True, 'timeout':900}):
     exp_name_prefix = f"RYDBERG-LIGHTSHIFT-DLS-D1-420-{amplitude:.3f}"
     script_name = "rydberg_420_D1Ramanlightshift.mScript"
 
@@ -52,7 +68,7 @@ def rydberg_420_lightshift_DLS_D1(exp_postfix: str, amplitude: float = 0.2, time
     config_file = ConfigurationFile(config_path)
 
     # Update configuration
-    config_file.modify_parameter("REPETITIONS", "Reps:", str(5))
+    config_file.modify_parameter("REPETITIONS", "Reps:", str(repetitions))
     config_file.modify_parameter("MAIN_OPTIONS", "Randomize Variations?", str(1))
     config_file.modify_parameter("MAIN_OPTIONS", "Repetition First Over Variation?", str(0))
     config_file.modify_parameter("MW1", "Control?", str(0))
@@ -79,6 +95,7 @@ def rydberg_420_lightshift_DLS_D1(exp_postfix: str, amplitude: float = 0.2, time
     exp.open_master_script("\\ExperimentAutomation\\" + script_name)
     
     start_and_stop_camera(exp)
+    zeroScrews(exp)
     # _calibration(exp=exp, config_file=config_file)
     
     exp.run_experiment(exp_name)
@@ -96,8 +113,8 @@ def rydberg_420_lightshift_DLS_D1(exp_postfix: str, amplitude: float = 0.2, time
     print(f"420 lightshift for {exp_name} is {optimal_field:.3S}  with"
           f" position ({vertical_pos.mean():.3S}, {horizontal_pos.mean():.3S})")
 
-def rydberg_1013_lightshift_DLS_D1(exp_postfix: str, amplitude: float = 1.0, timeout_control = {'use':False, 'timeout':600}):
-    exp_name_prefix = f"RYDBERG-LIGHTSHIFT-DLS-1013-{amplitude:.3f}"
+def rydberg_1013_lightshift_DLS_D1(exp_postfix: str, amplitude: float = 1.0, timeout_control = {'use':True, 'timeout':900}):
+    exp_name_prefix = f"RYDBERG-LIGHTSHIFT-DLS-D1-1013-{amplitude:.3f}"
     script_name = "rydberg_1013_D1Ramanlightshift.mScript"
 
     config_name = "1013alignment_with_d1.Config"
@@ -105,7 +122,7 @@ def rydberg_1013_lightshift_DLS_D1(exp_postfix: str, amplitude: float = 1.0, tim
     config_file = ConfigurationFile(config_path)
 
     # Update configuration
-    config_file.modify_parameter("REPETITIONS", "Reps:", str(5))
+    config_file.modify_parameter("REPETITIONS", "Reps:", str(repetitions))
     config_file.modify_parameter("MAIN_OPTIONS", "Randomize Variations?", str(1))
     config_file.modify_parameter("MAIN_OPTIONS", "Repetition First Over Variation?", str(0))
     config_file.modify_parameter("MW1", "Control?", str(0))
@@ -132,6 +149,7 @@ def rydberg_1013_lightshift_DLS_D1(exp_postfix: str, amplitude: float = 1.0, tim
     exp.open_master_script("\\ExperimentAutomation\\" + script_name)
     
     start_and_stop_camera(exp)
+    zeroScrews(exp)
 
     # _calibration(exp=exp, config_file=config_file)
     
@@ -150,9 +168,9 @@ def rydberg_1013_lightshift_DLS_D1(exp_postfix: str, amplitude: float = 1.0, tim
     print(f"1013 lightshift for {exp_name} is {optimal_field:.3S}  with"
           f" position ({vertical_pos.mean():.3S}, {horizontal_pos.mean():.3S})")
 
-def rydberg_420_alignment_DLS(exp_postfix: str, pico_idx: int, timeout_control = {'use':False, 'timeout':2400}):
-    NUM_POSITION_VAR = 9
-    NUM_RESONANCE_VAR = 26
+def rydberg_420_alignment_DLS(exp_postfix: str, pico_idx: int, amplitude: float = 0.2, timeout_control = {'use':True, 'timeout':3000}):
+    NUM_POSITION_VAR = 11
+    NUM_RESONANCE_VAR = 21
     if pico_idx not in [1,2]:
         raise ValueError("pico_idx out of the range. Ranges are " + str([1,2,3,4]))
     VERTICAL = 1; HORIZONTAL = 2;
@@ -161,7 +179,7 @@ def rydberg_420_alignment_DLS(exp_postfix: str, pico_idx: int, timeout_control =
         align_axis = VERTICAL
     else:
         align_axis = HORIZONTAL
-    exp_name_prefix = "RYDBERG-ALIGNMENT-DLS-420"
+    exp_name_prefix = "RYDBERG-ALIGNMENT-DLS-D1-420"
     script_name = "rydberg_420_D1Ramanlightshift.mScript"
 
     config_name = "420alignment_with_d1.Config"
@@ -169,7 +187,7 @@ def rydberg_420_alignment_DLS(exp_postfix: str, pico_idx: int, timeout_control =
     config_file = ConfigurationFile(config_path)
 
     # # Update configuration
-    config_file.modify_parameter("REPETITIONS", "Reps:", str(4))
+    config_file.modify_parameter("REPETITIONS", "Reps:", str(repetitions))
     config_file.modify_parameter("MAIN_OPTIONS", "Randomize Variations?", str(0))
     config_file.modify_parameter("MAIN_OPTIONS", "Repetition First Over Variation?", str(1))
     config_file.modify_parameter("MW1", "Control?", str(0))
@@ -188,6 +206,8 @@ def rydberg_420_alignment_DLS(exp_postfix: str, pico_idx: int, timeout_control =
         config_file.config_param.update_variable(variable.name, scan_type="Constant", scan_dimension=0)    
     config_file.config_param.update_variable("integer_scan", scan_type="Variable", scan_dimension=0, new_initial_values=[-250], new_final_values=[250])
     config_file.config_param.update_variable("d1_resonance", scan_type="Variable", scan_dimension=1, new_initial_values=[14.5], new_final_values=[14.8])
+    config_file.config_param.update_variable("amplitude_scan", constant_value = amplitude)
+    config_file.config_param.update_variable("time_scan_us", constant_value = 15)
     config_file.config_param.update_scan_dimension(0, range_index=0, variations=NUM_POSITION_VAR)
     config_file.config_param.update_scan_dimension(1, range_index=0, variations=NUM_RESONANCE_VAR)
     config_file.save()
@@ -231,15 +251,15 @@ def rydberg_420_alignment_DLS(exp_postfix: str, pico_idx: int, timeout_control =
     screws_position = exp.getPicoScrewPositions()
     exp.setPicoScrewPosition(1,screws_position[0], update=False)
     exp.setPicoScrewPosition(2,screws_position[1], update=False)
-    move_beam_to_target(exp, mako_idx=3, pico_idx=(1,2), target_position=target_position, tolerance=0.3)
+    move_beam_to_target(exp, mako_idx=3, pico_idx=(1,2), target_position=target_position, tolerance=0.1)
     sleep(1)
     exp.setPicoScrewHomes()
     exp.setPicoScrewPosition(1,position=0, update=False)
     exp.setPicoScrewPosition(2,position=0, update=False)
 
-def rydberg_1013_alignment_DLS(exp_postfix: str, pico_idx: int, timeout_control = {'use':False, 'timeout':1200}):
-    NUM_POSITION_VAR = 9
-    NUM_RESONANCE_VAR = 26
+def rydberg_1013_alignment_DLS(exp_postfix: str, pico_idx: int, amplitude: float = 1.0, timeout_control = {'use':True, 'timeout':3000}):
+    NUM_POSITION_VAR = 11
+    NUM_RESONANCE_VAR = 21
     if pico_idx not in [3,4]:
         raise ValueError("pico_idx out of the range. Ranges are " + str([1,2,3,4]))
     VERTICAL = 1; HORIZONTAL = 2;
@@ -248,7 +268,7 @@ def rydberg_1013_alignment_DLS(exp_postfix: str, pico_idx: int, timeout_control 
         align_axis = VERTICAL
     else:
         align_axis = HORIZONTAL
-    exp_name_prefix = "RYDBERG-ALIGNMENT-DLS-1013"
+    exp_name_prefix = "RYDBERG-ALIGNMENT-DLS-D1-1013"
     script_name = "rydberg_1013_D1Ramanlightshift.mScript"
 
     config_name = "1013alignment_with_d1.Config"
@@ -256,7 +276,7 @@ def rydberg_1013_alignment_DLS(exp_postfix: str, pico_idx: int, timeout_control 
     config_file = ConfigurationFile(config_path)
 
     # # Update configuration
-    config_file.modify_parameter("REPETITIONS", "Reps:", str(4))
+    config_file.modify_parameter("REPETITIONS", "Reps:", str(repetitions))
     config_file.modify_parameter("MAIN_OPTIONS", "Randomize Variations?", str(0))
     config_file.modify_parameter("MAIN_OPTIONS", "Repetition First Over Variation?", str(1))
     config_file.modify_parameter("MW1", "Control?", str(0))
@@ -274,11 +294,12 @@ def rydberg_1013_alignment_DLS(exp_postfix: str, pico_idx: int, timeout_control 
     for variable in config_file.config_param.variables:
         config_file.config_param.update_variable(variable.name, scan_type="Constant", scan_dimension=0)
     if pico_idx==3: # vertical
-        config_file.config_param.update_variable("integer_scan", scan_type="Variable", scan_dimension=0, new_initial_values=[-750], new_final_values=[750])
+        config_file.config_param.update_variable("integer_scan", scan_type="Variable", scan_dimension=0, new_initial_values=[750], new_final_values=[-750])
     else: # horizontal
         config_file.config_param.update_variable("integer_scan", scan_type="Variable", scan_dimension=0, new_initial_values=[-50], new_final_values=[50])
-    
     config_file.config_param.update_variable("d1_resonance", scan_type="Variable", scan_dimension=1, new_initial_values=[14.5], new_final_values=[14.8])
+    config_file.config_param.update_variable("amplitude_scan", constant_value = amplitude)
+    config_file.config_param.update_variable("time_scan_us", constant_value = 15)
     config_file.config_param.update_scan_dimension(0, range_index=0, variations=NUM_POSITION_VAR)
     config_file.config_param.update_scan_dimension(1, range_index=0, variations=NUM_RESONANCE_VAR)
     config_file.save()
@@ -293,11 +314,11 @@ def rydberg_1013_alignment_DLS(exp_postfix: str, pico_idx: int, timeout_control 
     exp.open_configuration("\\ExperimentAutomation\\" + config_name)
     exp.open_master_script("\\ExperimentAutomation\\" + script_name)
 
-    _calibration(exp=exp, config_file=config_file)
+    # _calibration(exp=exp, config_file=config_file)
 
     exp.run_experiment(exp_name)
     
-    # # Monitor experiment status
+    # Monitor experiment status
     experiment_monitoring(exp=exp, timeout_control=timeout_control)
 
     # Analyze the data
@@ -322,7 +343,7 @@ def rydberg_1013_alignment_DLS(exp_postfix: str, pico_idx: int, timeout_control 
     screws_position = exp.getPicoScrewPositions()
     exp.setPicoScrewPosition(3,screws_position[2], update=False)
     exp.setPicoScrewPosition(4,screws_position[3], update=False)
-    move_beam_to_target(exp, mako_idx=4, pico_idx=(3,4), target_position=target_position, tolerance=0.3)
+    move_beam_to_target(exp, mako_idx=4, pico_idx=(3,4), target_position=target_position, tolerance=0.1)
     sleep(1)
     exp.setPicoScrewHomes()
     exp.setPicoScrewPosition(3,position=0, update=False)
@@ -364,27 +385,29 @@ if __name__ == '__main__':
     # rydberg_420_lightshift_DLS_D1(exp_postfix="2D-preAlignment", amplitude=0.0)
 
 
-
-    # rydberg_420_lightshift(exp_postfix="2D-preAlignment")
+    rydberg_1013_lightshift_DLS_D1(exp_postfix="2D-preAlignment-1", amplitude=1.0)
+    rydberg_1013_lightshift_DLS_D1(exp_postfix="2D-preAlignment-1", amplitude=0.0)
     # exp.hardware_controller.restart_zynq_control()
-    # rydberg_420_alignment(exp_postfix="2D", pico_idx=1)
+    # rydberg_1013_alignment_DLS(exp_postfix="2D-3", pico_idx=4)
     # exp.hardware_controller.restart_zynq_control()
-    # rydberg_420_alignment(exp_postfix="2D", pico_idx=2)
+    # rydberg_1013_alignment_DLS(exp_postfix="2D-1", pico_idx=3)
     # exp.hardware_controller.restart_zynq_control()
-    # rydberg_420_lightshift(exp_postfix="2D-postAlignment")
+    # rydberg_1013_lightshift_DLS_D1(exp_postfix="2D-postAlignment-3", amplitude=1.0)
+    # rydberg_1013_lightshift_DLS_D1(exp_postfix="2D-postAlignment-3", amplitude=0.0)
     # sleep(10)
+    # exp.hardware_controller.restart_zynq_control()
 
-
-    rydberg_1013_lightshift_DLS_D1(exp_postfix="2D-preAlignment", amplitude=1.0)
-    rydberg_1013_lightshift_DLS_D1(exp_postfix="2D-preAlignment", amplitude=0.0)
-    exp.hardware_controller.restart_zynq_control()
-    rydberg_1013_alignment_DLS(exp_postfix="2D", pico_idx=3)
-    exp.hardware_controller.restart_zynq_control()
-    rydberg_1013_alignment_DLS(exp_postfix="2D", pico_idx=4)
-    exp.hardware_controller.restart_zynq_control()
-    rydberg_1013_lightshift_DLS_D1(exp_postfix="2D-preAlignment", amplitude=1.0)
-    rydberg_1013_lightshift_DLS_D1(exp_postfix="2D-preAlignment", amplitude=0.0)
-    sleep(10)
+    # rydberg_420_lightshift_DLS_D1(exp_postfix="2D-preAlignment", amplitude=0.2)
+    # rydberg_420_lightshift_DLS_D1(exp_postfix="2D-preAlignment", amplitude=0.0)
+    # exp.hardware_controller.restart_zynq_control()
+    # rydberg_420_alignment_DLS(exp_postfix="2D", pico_idx=1)
+    # exp.hardware_controller.restart_zynq_control()
+    # rydberg_420_alignment_DLS(exp_postfix="2D", pico_idx=2)
+    # exp.hardware_controller.restart_zynq_control()
+    # rydberg_420_lightshift_DLS_D1(exp_postfix="2D-postAlignment", amplitude=0.2)
+    # rydberg_420_lightshift_DLS_D1(exp_postfix="2D-postAlignment", amplitude=0.0)
+    # sleep(10)
+    # exp.hardware_controller.restart_zynq_control()
 
     # rydberg_420_lightshift_DLS(exp_postfix="2D-preAlignment-2")
     # exp.hardware_controller.restart_zynq_control()

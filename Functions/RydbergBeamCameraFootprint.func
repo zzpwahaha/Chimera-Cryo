@@ -19,11 +19,11 @@ def RydbergBeamCameraFootprint():
     t += 3
     pulseon: Ryd420MAKO 0.6
     t += 0.1
-    pulseon: Ryd420Trg 0.05/1000
+    pulseon: Ryd420Trg 2/1000 %0.05/1000
     t += 1
     pulseon: Ryd1013Trg 10
     t += 1
-    pulseon: Ryd1013MAKO 0.6
+%    pulseon: Ryd1013MAKO 0.6
     t += 10-1
 
 

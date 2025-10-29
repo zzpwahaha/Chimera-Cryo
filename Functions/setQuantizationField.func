@@ -10,7 +10,12 @@ def setQuantizationField():
 %    dac: BiasCoilY -1.065+0.05+(-0.1)+0.297 %-2.33 %quantization_bias_y %-0.95 
 %    dac: BiasCoilZ -0.05-0.039+0.036+0.0156-0.015 %-0.04 
 
-% warm
+% warm 
+%    dac: BiasCoilX -2.5+0.75-2.5 
+%    dac: BiasCoilY -1.065+(-0.053)+0.279
+%    dac: BiasCoilZ -0.05+(0.012)+(-0.01) 
+
+% warm - after realign OP
     dac: BiasCoilX -2.5+0.75-2.5 
-    dac: BiasCoilY -1.065+(-0.053)+0.279
-    dac: BiasCoilZ -0.05+(0.012)+(-0.01) 
+    dac: BiasCoilY -1.065+(-0.053)+0.279+(-0.002)
+    dac: BiasCoilZ -0.05+(0.012)+(-0.01)+(-0.0183) 

@@ -131,8 +131,13 @@ class DataAnalysis:
             tmp = []
             for idr, mrep in enumerate(mvar):
                 hori, vert = mrep.mean(axis=0), mrep.mean(axis=1)
-                _1 = ah.fit_data(np.arange(hori.size), hori, fit_function=function, use_unc=False)[0][1]
-                _2 = ah.fit_data(np.arange(vert.size), vert, fit_function=function, use_unc=False)[0][1]
+                if idr!=0: pre1,pre2 = (_1,_2)
+                try:
+                    _1 = ah.fit_data(np.arange(hori.size), hori, fit_function=function, use_unc=False)[0][1]
+                    _2 = ah.fit_data(np.arange(vert.size), vert, fit_function=function, use_unc=False)[0][1]
+                except Exception as e:
+                    print(e)
+                    _1,_2=(pre1,pre2)
                 tmp.append([_1,_2])
             positions.append(tmp)
         positions = np.array(positions)

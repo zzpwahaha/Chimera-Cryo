@@ -2,6 +2,8 @@
 import os
 import re
 import shutil
+from ExperimentProcedure import ConfigurationFile, ExperimentProcedure
+
 
 def find_largest_file_number(directory, name_prefix = "AOD-FREQUENCY-CALIBRATION", extension = ".h5"):
     # List all files in the given directory
@@ -77,3 +79,73 @@ def move_files(parent_dir, new_parent_dir, file_extension=".grid", file_name=Non
                 print(f"Overwrite: {target_filename} already exists in {new_parent_dir}")
             shutil.move(src_path, dst_path)
             print(f"Moved {target_filename} to {new_parent_dir}")
+
+def update_camera_image_dimension(config_file: ConfigurationFile, camera_image_dim: dict):
+    config_file.modify_parameter("CAMERA_IMAGE_DIMENSIONS", "Left:", str(camera_image_dim['Left:']))
+    config_file.modify_parameter("CAMERA_IMAGE_DIMENSIONS", "Right:", str(camera_image_dim['Right:']))
+    config_file.modify_parameter("CAMERA_IMAGE_DIMENSIONS", "H-Bin:", str(camera_image_dim['H-Bin:']))
+    config_file.modify_parameter("CAMERA_IMAGE_DIMENSIONS", "Bottom:", str(camera_image_dim['Bottom:']))
+    config_file.modify_parameter("CAMERA_IMAGE_DIMENSIONS", "Top:", str(camera_image_dim['Top:']))
+    config_file.modify_parameter("CAMERA_IMAGE_DIMENSIONS", "V-Bin:", str(camera_image_dim['V-Bin:']))
+
+def shuttle_grid_files(grid_file_name: str):
+    # move the grid file already in the GRID folder to archived to make space for the new grid file 
+    move_files(parent_dir=ExperimentProcedure.GRID_FILE_LOCATION, new_parent_dir=ExperimentProcedure.ARCHIVED_GRID_FILE_LOCATION, file_extension=".grid")
+    # move the required grid file in the archived folder to GRID folder 
+    move_files(parent_dir=ExperimentProcedure.ARCHIVED_GRID_FILE_LOCATION, new_parent_dir=ExperimentProcedure.GRID_FILE_LOCATION, file_extension=".grid", file_name=grid_file_name, throw=True)
+
+
+if __name__ == '__main__':
+
+    # analysis grid for 5x7 grid - 20250922
+    # window = [0, 0, 65, 40]
+    # thresholds = 100
+    # binnings = np.linspace(0, 240, 241)
+    # analysis_locs = da.DataAnalysis(year='2025', month='September', day='18', data_name='data_18', 
+    #                                 window=window, thresholds=thresholds, binnings=binnings)
+
+    grid_file_name = 'atomgrid_5x7_8points_2025-10-19'
+    camera_image_dim = {'Left:':1026, 'Right:':1090, 'H-Bin:':1, 'Bottom:': 924, 'Top:': 963, 'V-Bin:': 1}
+    tweezer_intensity_setpoint = 2.9 #V
+    repetitions = 4
+
+
+    # # analysis grid for 2x7 grid - 20250922
+    # window = [0,0,90,20]
+    # thresholds = 100
+    # binnings = np.linspace(0, 240, 241)
+    # analysis_locs = da.DataAnalysis(year='2025', month='September', day='19', data_name='data_13', 
+    #                                 window=window, thresholds=thresholds, binnings=binnings)
+    # grid_file_name = 'atomgrid_1x13_4points_2025-9-8'
+    # camera_image_dim = {'Left:':971, 'Right:':1150, 'H-Bin:':2, 'Bottom:': 923, 'Top:': 962, 'V-Bin:': 2}
+    # tweezer_intensity_setpoint = 1.22 #V
+    # repetitions = 4
+
+
+    # # analysis grid for 1x7 grid - 20250930
+    # window = [0,0,90,20]
+    # thresholds = 100
+    # binnings = np.linspace(0, 240, 241)
+    # analysis_locs = da.DataAnalysis(year='2025', month='September', day='30', data_name='data_19', 
+    #                                 window=window, thresholds=thresholds, binnings=binnings)
+
+    grid_file_name = 'atomgrid_1x7_4points_2025-9-30'
+    camera_image_dim = {'Left:':971, 'Right:':1150, 'H-Bin:':2, 'Bottom:': 923, 'Top:': 962, 'V-Bin:': 2}
+    tweezer_intensity_setpoint = 0.61 #V
+    repetitions = 8
+
+
+    # config_name = "420alignment_with_d1.Config"
+    # config_path = ExperimentProcedure.CONFIGURATION_DIR + config_name
+    config_name = "tweezerloading.Config"
+    config_path = 'C:/Chimera/Chimera-Cryo/Configurations/CryoTweezerLoading/' + config_name
+    config_file = ConfigurationFile(config_path)
+
+
+    shuttle_grid_files(grid_file_name=grid_file_name)
+    config_file.modify_parameter("DATA_ANALYSIS", "Grid File Name:", grid_file_name)
+    update_camera_image_dimension(config_file=config_file, camera_image_dim=camera_image_dim)
+    config_file.config_param.update_variable("slm_twz_intensity", constant_value = tweezer_intensity_setpoint)
+    config_file.save()
+
+    pass

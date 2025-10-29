@@ -28,31 +28,17 @@ t += 10
 
 call OpticalPumping22()
 
-%%change field to original OP befor angle
-%t += 5
-%    dac: BiasCoilX -2.5+0.75-2.5 
-%    dac: BiasCoilY -0.839
-%    dac: BiasCoilZ -0.048
-%% warm
-%dacramp: SLMTweezerIntensity slm_twz_intensity slm_twz_intensity*0.1 10
-%t += 10
-%t += 50-20
-%dacramp: SLMTweezerIntensity slm_twz_intensity*0.1 slm_twz_intensity 10
-%t += 10
-
-
 %%%%%%%%%%%%%%  Prepare Rydberg beams %%%%%%%%%%%%%%%%%%
 var zero1013SetPoint -0.01
-var ryd1013SetPoint 2.0
+%var ryd1013SetPoint 2.0
 
 on: Ryd1013Shutter
 ddsfreq: Ryd420Brimrose ryd420_resonance
 t += 5
-%on: Ryd420Shutter
 off: Ryd420ExpShutter
 %on: Ryd1013Shutter
 off: Ryd420AWGchswitch
-dac: Ryd420Amp 0.2 %amplitude_scan %0.8 %0.1 %0.55 %0.30 %0.34
+dac: Ryd420Amp ryd420_amplitude %0.8 %0.1 %0.55 %0.30 %0.34
 dac: Ryd1013Amp zero1013SetPoint %2.0 %0.55 %0.60 %0.68
 
 var IQ_MAX_AMP 2.5
@@ -79,7 +65,7 @@ t += 10-3-1-0.1
 t += -10
 on: Ryd1013Trg
 t += 1
-dacramp: Ryd1013Amp zero1013SetPoint ryd1013SetPoint 4
+dacramp: Ryd1013Amp zero1013SetPoint ryd1013_amplitude 4
 t += 1
 %on: Ryd1013Hold
 t += 0.1
@@ -191,7 +177,7 @@ t += 10.08
 %t += 0.1
 
 t += -9
-dacramp: Ryd1013Amp ryd1013SetPoint zero1013SetPoint 9
+dacramp: Ryd1013Amp ryd1013_amplitude zero1013SetPoint 9
 t += 9
 
 %pulseon: MWAmpTrg 0.1

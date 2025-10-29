@@ -1,0 +1,145 @@
+%%%%%%%%%%%%%%%%% Start With 1ms %%%%%%%%%%%%%%%%% 
+t = 1
+%call CryoMOTLoadingPGC()
+call CryoMOTEnhancedLoadingLGM()
+
+%%%%%%%%%%%%%%%  TOF  %%%%%%%%%%%%%%%%%%
+call TOF(10)
+
+%%%%%%%%%%%%%%  PGC in Tweezer %%%%%%%%%%%%%%%%%%
+% change the field/laser freq parameter here because the previous section is TOF and no light is on
+call D2InTrapPGC(t_pgc_twz)
+% note the t_pgc_twz should be smaller than 100
+t += 100-t_pgc_twz
+
+%%%%%%%%%%%%%%  PGC in Tweezer with Probe %%%%%%%%%%%%%%%%%%
+% change the field/laser freq parameter here because the previous section is TOF and no light is on
+call D2InTrapPGCPrb(t_pgc_twz)
+% note the t_pgc_twz should be smaller than 100
+t += 100-t_pgc_twz
+
+%%%%%%%%%%%%%%  Image TWIZZER  %%%%%%%%%%%%%%%%%%% change the field/laser freq parameter here because the previous section is dark, i.e. 100-t_pgc_twz is larger than 4
+call PGCTweezerImaging()
+t += 15 %+500
+
+call setQuantizationField()
+%call setZeroField()
+
+dacramp: SLMTweezerIntensity slm_twz_intensity slm_twz_intensity*0.1 10
+t += 10
+t += t_field_settling-20
+dacramp: SLMTweezerIntensity slm_twz_intensity*0.1 slm_twz_intensity 10
+t += 10
+
+call OpticalPumping22()
+%call PrepareF2Manifold()
+
+
+t += 10
+
+%%%%% cold bias field %%%%% 
+%dac: BiasCoilX -2.5+0.75-2.5
+%dac: BiasCoilY -1.065+0.05+(-0.1)+0.297+(-2.33)*switch_toggle
+%dac: BiasCoilZ -0.05+(-0.039)+0.036+0.0156-0.015
+
+
+%%%%% warm bias field %%%%% 
+dac: BiasCoilX -2.5+0.75-2.5 %quantization_bias_x
+dac: BiasCoilY -1.065+(-0.053)+0.279
+dac: BiasCoilZ -0.05+(0.012)+(-0.01) %+(-2.23)*switch_toggle %+0.033 %-0.04 
+
+
+t += 50 %750
+
+ddsfreq: Ryd420Brimrose resonance_scan %ryd420_resonance
+dac: Ryd420Amp 0.25 %amplitude_scan %0.3 %-0.01
+t += 5
+
+%%%%%%% depump out of F=2, other than |2,2> if with circular polarization, using cooling 2-2'', using OP beam %%%%%%%%%%%
+%dacramp: SLMTweezerIntensity slm_twz_intensity slm_twz_intensity*fraction_scan 10
+off: PrbShutter
+off: OPShutter
+off: TARepShutter
+off: xyzMOTShutter
+off: D1LGMShutter
+off: D1LGMPrbShutter
+%ol: ol_cooling d2_cooling_resonance-(3.22+30-266.65) % 30 MHz light shift and 3.22 differential zeeman for 22 to 22 %resonance_scan
+%ol: ol_repump d2_repump_resonance+(28.8+266.65+30) %
+
+%on: PrbShutter
+%off: PrbCoolShutter
+%dac: PrbRepAmp 5 %1 %3.0
+%dac: PrbAmp 5 %5.0
+%ol: ol_repump d2_repump_prb_resonance+30 %23.7*0.1
+t += 10
+
+%%%%% 420 sample and hold %%%%
+t += -10
+%on: Ryd420Trg
+t += 4.0
+%on: Ryd420Hold
+t += 1.0
+%off: Ryd420Trg
+t += 0.1
+on: Ryd420ExpShutter
+t += 10-4-1-0.1
+%%%%% 420 sample and hold %%%%
+t += 0.1
+
+pulseon: DO8_4 0.1
+
+%on: PrbTrg
+%on: PrbRepTrg
+%t += 0.1
+
+on: Ryd420Trg
+t += time_scan_us/1000 %0.1/1000
+off: Ryd420Trg
+off: Ryd420ExpShutter
+
+%t += 0.1
+%off: PrbRepTrg
+%off: PrbTrg
+%on: PrbCoolShutter
+
+%dacramp: SLMTweezerIntensity slm_twz_intensity*fraction_scan slm_twz_intensity 10
+%t += 15
+t += 10
+
+
+%%%%%%%%%%%%%% D1 driving 22-11 %%%%%%%%%%%%%
+%%%%%% D1 state transfer sample and hold %%%%
+%t += -10
+%dac: D1StateTransferAmp -1.0
+%off: D1StateTransferShutter 
+%on: D1StateTransferTrg
+%t += 4
+%on: D1StateTransferHold
+%t += 0.1
+%off: D1StateTransferTrg
+%on: D1StateTransferShutter 
+%t += 10-(4+0.1)
+%%%%% D1 state transfer sample and hold %%%%
+%on: D1StateTransferTrg
+%t += time_scan_us/1000
+%off: D1StateTransferTrg
+%off: D1StateTransferShutter 
+%t += 10
+
+
+
+call StateSelectivePushout()
+t += 5 
+
+%%%%%%%%%%%%%%  PGC in Tweezer with Probe %%%%%%%%%%%%%%%%%%
+% change the field/laser freq parameter here because the previous section is TOF and no light is on
+call D2InTrapPGCPrb(t_pgc_twz)
+% note the t_pgc_twz should be smaller than 100
+t += 15
+%%%%%%%%%%%%%%% Second Twizzer Image
+% note the previous section should have at least 4 ms dark interval
+call PGCTweezerImaging()
+
+%%%%%%%%%%%%%%  END Sequence  %%%%%%%%%%%%%%%%%%
+t += 10
+pulseon: DO1_0 0.5

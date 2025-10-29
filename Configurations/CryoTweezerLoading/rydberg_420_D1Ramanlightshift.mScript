@@ -36,16 +36,26 @@ t += 1
 
 t += 5
 
+%%change field 
+%    dac: BiasCoilX -2.5+0.75-2.5 
+%    dac: BiasCoilY -0.839
+%    dac: BiasCoilZ -0.048+amplitude_scan
+%% warm
+%dacramp: SLMTweezerIntensity slm_twz_intensity slm_twz_intensity*0.1 10
+%t += 10
+%t += 50-20
+%dacramp: SLMTweezerIntensity slm_twz_intensity*0.1 slm_twz_intensity 10
+%t += 10
+
 %%%%%%%%%%%%%%% MW %%%%%%%%%%%
 var mw_rabi_pi2 0.0447 %0.041 %0.041 %0.01 %0.0599 %0.0296
-var d1_rabi_pi_us 15
 
 dacramp: SLMTweezerIntensity slm_twz_intensity slm_twz_intensity*0.1 10
 t += 10
 
 %%%% 420 sample and hold %%%%
 t += -15
-dac: Ryd420Amp amplitude_scan %0.2 %0.01 %0.05 %0.34
+dac: Ryd420Amp 0.8 %amplitude_scan %0.01 %0.05 %0.34
 on: Ryd420Trg
 t += 4.0
 on: Ryd420Hold
@@ -55,9 +65,10 @@ t += 0.1
 on: Ryd420ExpShutter
 t += 15-(4+4+0.1)
 %%%% 420 sample and hold %%%%
+
 %%%% D1 state transfer sample and hold %%%%
 t += -15
-dac: D1StateTransferAmp -1.0
+dac: D1StateTransferAmp -1 %-3.0 %-1.0
 off: D1StateTransferShutter 
 t += 4
 on: D1StateTransferTrg
@@ -69,51 +80,53 @@ on: D1StateTransferShutter
 t += 15-(4+4+0.1)
 %%%% D1 state transfer sample and hold %%%%
 
-t += 0.5
+t += 1
 pulseon: do8_4 0.1 %dummy trigger for picoscope
 
-    %%%%% Rabi/Resonance sequence with D1
+%    %%%%% Rabi/Resonance sequence with D1
+%%    on: Ryd420Trg
+%    t += 0.005 
+%    on: D1StateTransferTrg
+%    t += time_scan_us/1000
+%    off: D1StateTransferTrg
+%    t += 0.005
+%%    off: Ryd420Trg
+%    %%%%% Ramsey sequence without echo
+
+
+%%    %%%%% Ramsey sequence with D1
+    var d1_rabi_pi_us 16.89 %5.5 %5.59 %16.50
+    var d1_rabi_pi2_us 8.45 %2.75 %2.80 %8.25
+    var d1_ramsey_echo_waittime 0.81
+    on: D1StateTransferTrg
+    t += d1_rabi_pi2_us/1000
+    off: D1StateTransferTrg
+
+    t += d1_ramsey_echo_waittime/2
+
+    t += -(d1_ramsey_echo_waittime/4+(time_scan_us/1000)/2) %exp(integer_scan*ln(1.182))
     on: Ryd420Trg
-    t += 0.005 
+    t += (time_scan_us/1000)
+    off: Ryd420Trg
+    t += d1_ramsey_echo_waittime/4-(time_scan_us/1000)/2
+
     on: D1StateTransferTrg
     t += d1_rabi_pi_us/1000
     off: D1StateTransferTrg
-    t += 0.005
-    off: Ryd420Trg
 
-%    %%%%% Ramsey sequence with D1
-%    var d1_rabi_pi_us 16.62
-%    var d1_rabi_pi2_us 8.31
-%    var d1_ramsey_echo_waittime 0.41
-%    on: D1StateTransferTrg
-%    t += d1_rabi_pi2_us/1000
-%    off: D1StateTransferTrg
-%
-%    t += d1_ramsey_echo_waittime/2
-%
-%    t += -(d1_ramsey_echo_waittime/4+(time_scan_us/1000)/2)
-%    on: Ryd420Trg
-%    t += (time_scan_us/1000)
-%    off: Ryd420Trg
-%    t += d1_ramsey_echo_waittime/4-(time_scan_us/1000)/2
-%
-%    on: D1StateTransferTrg
-%    t += d1_rabi_pi_us/1000
-%    off: D1StateTransferTrg
-%
-%    t += d1_ramsey_echo_waittime/2
-%
-%    on: D1StateTransferTrg
-%    t += d1_rabi_pi2_us/1000
-%    off: D1StateTransferTrg
-%    %%%%% Ramsey sequence with D1
+    t += d1_ramsey_echo_waittime/2
+
+    on: D1StateTransferTrg
+    t += d1_rabi_pi2_us/1000
+    off: D1StateTransferTrg
+%%    %%%%% Ramsey sequence with D1
 
 t += 0.1
 off: Ryd420Hold
 off: Ryd420Shutter
 off: D1StateTransferHold
 off: D1StateTransferShutter 
-t += 0.5
+t += 1
 
 dacramp: SLMTweezerIntensity slm_twz_intensity*0.1 slm_twz_intensity 10
 t += 10

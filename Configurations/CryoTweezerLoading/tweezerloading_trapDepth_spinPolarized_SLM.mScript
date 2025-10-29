@@ -1,7 +1,7 @@
 %%%%%%%%%%%%%%%%% Start With 1ms %%%%%%%%%%%%%%%%% 
 t = 1
-call CryoMOTLoadingPGC()
-%call CryoMOTEnhancedLoadingLGM()
+%call CryoMOTLoadingPGC()
+call CryoMOTEnhancedLoadingLGM()
 
 
 %%%%%%%%%%%%%%%  TOF  %%%%%%%%%%%%%%%%%%
@@ -24,14 +24,14 @@ call PGCTweezerImaging()
 t += 15 
 
 call setZeroField()
-t += 750 %100 %750
+t += 100 %100 %750
 
 
 t += 15
 %%%%%%%%%%% pump out of F=1 using probe repump 1-2'' %%%%%%%%%%%
 call PrepareF2Manifold()
  
-var measure_trap_depth_at 1.08
+var measure_trap_depth_at 0.65
 t += 10
 %dacramp: TweezerIntensity twz_intensity measure_trap_depth_at 10
 dacramp: SLMTweezerIntensity slm_twz_intensity measure_trap_depth_at 10

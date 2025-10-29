@@ -1,4 +1,4 @@
-def MOTLoading(loading_time):
+def MOTLoadingSLM(loading_time):
     pulseon: DO1_0 10
     pulseon: GMLoadTrg 0.003
     pulseon: KeySightTrg 0.01
@@ -43,6 +43,7 @@ def MOTLoading(loading_time):
     off: D1LGMTrg
     off: D1LGMEOMTrg
     off: OPTrg
+    off: D1StateTransferTrg
     on: xyzMOTShutter
     on: xyMOTShutter
     on: DipolePushShutter 
@@ -52,6 +53,7 @@ def MOTLoading(loading_time):
     on: PrbCoolShutter
     off: D1LGMShutter
     off: OPShutter
+    off: D1StateTransferShutter
     off: Ryd420Shutter
     off: Ryd420ExpShutter
     off: Ryd1013Shutter

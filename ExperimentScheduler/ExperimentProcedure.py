@@ -212,6 +212,7 @@ class ExperimentProcedure:
 
 def experiment_monitoring(exp : ExperimentProcedure, timeout_control = {'use':False, 'timeout':600}):
     # Monitor experiment status
+    aborted = False
     exp_start_time = time.time()
     timeout = timeout_control.get('timeout', 600)
     time.sleep(1)
@@ -219,12 +220,13 @@ def experiment_monitoring(exp : ExperimentProcedure, timeout_control = {'use':Fa
         elapsed_time = time.time() - exp_start_time
         if timeout_control.get('use', False) and elapsed_time > timeout:
             exp.abort_experiment(save=True)
+            aborted = True
             print(f"Experiment aborted after {timeout} seconds due to timeout.")
             time.sleep(10)
             break
         print("Waiting for experiment to finish...")
         time.sleep(10) 
-    return
+    return aborted
 
 def analog_in_calibration_monitoring(exp : ExperimentProcedure, timeout_control = {'use':False, 'timeout':100}):
     # Monitor experiment status

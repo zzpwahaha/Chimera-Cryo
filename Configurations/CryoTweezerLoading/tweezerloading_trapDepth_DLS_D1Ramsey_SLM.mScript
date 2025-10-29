@@ -37,13 +37,13 @@ t += 1
 t += 5
 
 %%%%%%%%%%%%%% Ramsey with D1 %%%%%%%%%%%%%%
-var measure_trap_depth_at 1.08
+var measure_trap_depth_at 0.6
 dacramp: SLMTweezerIntensity slm_twz_intensity measure_trap_depth_at 10
 t += 10
 
 %%%% D1 state transfer sample and hold %%%%
 t += -15
-dac: D1StateTransferAmp -4.0
+dac: D1StateTransferAmp -1.0
 off: D1StateTransferShutter 
 t += 4
 on: D1StateTransferTrg
@@ -64,20 +64,24 @@ t += 1
 %off: D1StateTransferTrg
 
 
-var pi2_us 1.95
-var pi_us 3.91
-var ramsey_time_us 15
-on: SLMTweezerHold
+var pi2_us 8.75
+var pi_us 17.5
+var ramsey_time_us 10000
+var ramsey_time 10
+var RamseyFringeTrapFraction 0.1
+
 t += 0.1
 pulseon: D1StateTransferTrg pi2_us/1000
 t += pi2_us/1000
 
 t += ramsey_time_us/2/1000
-t += -ramsey_time_us/2/1000/2
-off: SLMTweezerTrg
-t += time_scan_us/1000
-on: SLMTweezerTrg
-t += ramsey_time_us/2/1000/2-time_scan_us/1000
+t += -(ramsey_time_us/2/1000/2+1+time_scan/2)
+dacramp: SLMTweezerIntensity measure_trap_depth_at measure_trap_depth_at*RamseyFringeTrapFraction 1
+t += 1
+t += time_scan
+dacramp: SLMTweezerIntensity measure_trap_depth_at*RamseyFringeTrapFraction measure_trap_depth_at 1
+t += 1
+t += ramsey_time_us/2/1000/2-(1+time_scan/2)
 
 pulseon: do8_4 0.001 
 pulseon: D1StateTransferTrg pi_us/1000
@@ -87,29 +91,27 @@ t += ramsey_time_us/2/1000
 pulseon: D1StateTransferTrg pi2_us/1000
 t += pi2_us/1000
 
+
 t += 1
-off: SLMTweezerHold
 off: D1StateTransferHold
 off: D1StateTransferShutter 
-
-
 
 dacramp: SLMTweezerIntensity measure_trap_depth_at slm_twz_intensity 10
 t += 10
 
 call StateSelectivePushout()
 
-dac: BiasCoilX pgc_twz_bias_x
-dac: BiasCoilY pgc_twz_bias_y 
-dac: BiasCoilZ pgc_twz_bias_z
-t += 100+15
+%dac: BiasCoilX pgc_twz_bias_x
+%dac: BiasCoilY pgc_twz_bias_y 
+%dac: BiasCoilZ pgc_twz_bias_z
+%t += 100+15
 
 
 %%%%%%%%%%%%%%  PGC in Tweezer with Probe %%%%%%%%%%%%%%%%%%
 % change the field/laser freq parameter here because the previous section is TOF and no light is on
 call D2InTrapPGCPrb(25)
 % note the t_pgc_twz should be smaller than 100
-t += 15
+t += 200
 %%%%%%%%%%%%%%% Second Twizzer Image
 % note the previous section should have at least 4 ms dark interval
 call PGCTweezerImaging()
