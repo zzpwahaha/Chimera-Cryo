@@ -19,7 +19,27 @@ void ElliptecCore::loadExpSettings(ConfigStream& stream)
 }
 
 void ElliptecCore::logSettings(DataLogger& logger, ExpThreadWorker* threadworker)
-{}
+{
+	try {
+		H5::Group elliptecGroup;
+		try {
+			elliptecGroup = logger.file.createGroup("/" + str(configDelim));
+		}
+		catch (H5::Exception&) {
+			elliptecGroup = logger.file.openGroup("/" + str(configDelim));
+		}
+		logger.writeDataSet(expSettings.ctrlEll, str("Control"), elliptecGroup);
+		for (auto ch : range(size_t(ElliptecGrid::total))) {
+			double angle = getElliptecPosition(ch);
+			auto listEllGroup = elliptecGroup.createGroup("Elliptec" + str(ch));
+			logger.writeDataSet(angle, "Angle", listEllGroup);
+			Sleep(10);
+		}
+	}
+	catch (H5::Exception&) {
+		throwNested("Failed to save elliptec settings to H5 File!");
+	}
+}
 
 void ElliptecCore::calculateVariations(std::vector<parameterType>& params, ExpThreadWorker* threadworker)
 {

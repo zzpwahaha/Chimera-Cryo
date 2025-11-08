@@ -46,10 +46,6 @@ MakoCameraCore::~MakoCameraCore()
 void MakoCameraCore::logSettings(DataLogger& log, ExpThreadWorker* threadworker)
 {
     try {
-        if (!experimentActive) {
-            H5::Group makoGroup(log.file.createGroup("/Mako:Off"));
-            return;
-        }
         H5::Group makoGroup;
         try {
             makoGroup = log.file.openGroup("/Mako");
@@ -58,6 +54,9 @@ void MakoCameraCore::logSettings(DataLogger& log, ExpThreadWorker* threadworker)
             makoGroup = log.file.createGroup("/Mako");
         }
         H5::Group makoSubGroup(makoGroup.createGroup(CameraInfo::toStr(camInfo.camName)));
+        if (!experimentActive) {
+            return;
+        }
         hsize_t rank1[] = { 1 };
         // pictures. These are permanent members of the class for speed during the writing process.	
         hsize_t setDims[] = { unsigned __int64(expRunSettings.totalPictures()), expRunSettings.dims.height(),

@@ -79,8 +79,8 @@ void ExpThreadWorker::experimentThreadProcedure () {
 				if (device.get ().experimentActive) {
 					emit notification (qstr ("Logging Device " + device.get ().getDelim ()
 						+ " Settings...\n"), 1);
-					device.get ().logSettings (input->logger, this);
 				}
+				device.get().logSettings(input->logger, this);
 			}
 		}
 
