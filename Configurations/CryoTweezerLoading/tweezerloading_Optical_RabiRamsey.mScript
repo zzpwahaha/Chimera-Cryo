@@ -30,7 +30,31 @@ t += 10
 
 
 %%%%%%%%%%%%%% optical pumping into |2,2> state with 2-2'' OP, 1-2'' probe %%%%%%%%%%%
-call OpticalPumping22()
+%call OpticalPumping22()
+	on: PrbShutter
+	off: PrbCoolShutter
+	off: xyzMOTShutter
+	off: D1LGMShutter
+	off: D1LGMPrbShutter
+	on: OPShutter
+	off: TARepShutter
+	ol: ol_cooling d2_cooling_resonance-(29-266.65)  %29
+	ol: ol_repump d2_repump_prb_resonance+(29) %29
+	dac: PrbRepAmp 8
+	dac: PrbAmp 8
+	dac: OPAmp {0.1 op_pwr}
+	t += t_shutter
+	on: OPTrg
+	on: PrbRepTrg
+	on: PrbTrg
+	t += 0.20 %time_scan %0.20 %0.06 %0.04
+	off: OPTrg
+	t += 0.005
+	off: PrbTrg
+	off: PrbRepTrg
+	off: OPShutter
+	off: PrbShutter
+
 
 t += 1
 
@@ -121,8 +145,8 @@ t += 10
 %
 %on: qubitmwtrg
 %%%%%%%%%%%%%%%
-var D1_Rabi_pi_us 16.63
-var MW_Rabi_2111_pi 0.01838
+var D1_Rabi_pi_us 16.47
+var MW_Rabi_2111_pi 0.01742
 %pulseon: mako1 0.1
 t += 1
 
@@ -138,9 +162,9 @@ pulseon: do8_4 0.1 %dummy trigger for picoscope
 %t += D1_Rabi_pi_us/1000
 %off: D1StateTransferTrg
 
-%t += 0.010
-%pulseon: MWAmpTrg time_scan %MW_Rabi_2111_pi 
-%t += time_scan %MW_Rabi_2111_pi 
+t += 0.010
+pulseon: MWAmpTrg MW_Rabi_2111_pi  %time_scan
+t += MW_Rabi_2111_pi %time_scan
 %%%%%%%%%% MW after D1 %%%%%%%%%% 
 
 

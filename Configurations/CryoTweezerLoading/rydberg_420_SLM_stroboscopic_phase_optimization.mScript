@@ -28,18 +28,7 @@ dacramp: SLMTweezerIntensity slm_twz_intensity*0.1 slm_twz_intensity 10
 t += 10
 
 call OpticalPumping22()
-%call PrepareF2Manifold()
 
-%t += 5
-%    dac: BiasCoilX -2.5+0.75-2.5 
-%    dac: BiasCoilY -0.839+0.087
-%    dac: BiasCoilZ -0.048+0.014 
-%% warm
-%dacramp: SLMTweezerIntensity slm_twz_intensity slm_twz_intensity*0.1 10
-%t += 10
-%t += 50-20
-%dacramp: SLMTweezerIntensity slm_twz_intensity*0.1 slm_twz_intensity 10
-%t += 10
 
 %%%%%%%%%%%%%%  Prepare Rydberg beams %%%%%%%%%%%%%%%%%%
 var zero1013SetPoint -0.01
@@ -81,102 +70,35 @@ on: Ryd420ExpShutter
 t += 10-4.0-1-0.1
 %%%% 420 sample and hold %%%%
 
-%%%%% Repump %%%%%
-%t += -10
-%on: PrbShutter
-%off: PrbCoolShutter
-%off: xyzMOTShutter
-%off: D1LGMShutter
-%off: D1LGMPrbShutter
-%off: OPShutter
-%off: TARepShutter
-%%ol: ol_cooling d2_cooling_resonance-(29-266.65)  %29
-%ol: ol_repump d2_repump_prb_resonance+(3) %29
-%dac: PrbRepAmp 8
-%dac: PrbAmp 8
-%t += 10
-%%%%% Repump %%%%%
 
-%%% OP %%%%%
-%t += -10
-%%on: PrbShutter
-%off: PrbCoolShutter
-%off: xyzMOTShutter
-%off: D1LGMShutter
-%off: D1LGMPrbShutter
-%on: OPShutter
-%off: TARepShutter
-%ol: ol_cooling d2_cooling_resonance-(fraction_scan*30-266.65)  %29
-%ol: ol_repump d2_repump_prb_resonance+(fraction_scan*30) %29
-%dac: PrbRepAmp 8
-%dac: PrbAmp 8
-%dac: OPAmp {0.1 op_pwr}
-%t += 10
-%%% OP %%%%%
-
-%%%% OP without repump %%%%%
-%t += -10
-%off: PrbShutter
-%off: PrbCoolShutter
-%off: xyzMOTShutter
-%off: D1LGMShutter
-%off: D1LGMPrbShutter
-%on: OPShutter
-%off: TARepShutter
-%ol: ol_cooling d2_cooling_resonance-(fraction_scan*30-266.65) 
-%%ol: ol_repump d2_repump_prb_resonance+(0.1*30) %29
-%dac: PrbRepAmp 0
-%dac: PrbAmp 0
-%dac: OPAmp {0.7 op_pwr}
-%t += 10
-%%%% OP without repump  %%%%%
-
-%%%%% OP push out %%%%%
-%t += -10
-%off: PrbShutter
-%off: PrbCoolShutter
-%off: xyzMOTShutter
-%off: D1LGMShutter
-%off: D1LGMPrbShutter
-%on: OPShutter
-%off: TARepShutter
-%ol: ol_cooling d2_cooling_resonance-(resonance_scan)  %29
-%%ol: ol_repump d2_repump_prb_resonance+(0.1*30) %29
-%dac: PrbRepAmp 0
-%dac: PrbAmp 0
-%dac: OPAmp {0.1 op_pwr}
-%t += 10
-%%%%% OP push out %%%%%
-
-%%%% D1 state transfer sample and hold %%%%
-%t += -15
-%dac: D1StateTransferAmp -1 %-3.0 %-1.0
-%off: D1StateTransferShutter 
-%t += 4
-%on: D1StateTransferTrg
-%t += 4
-%on: D1StateTransferHold
-%t += 0.1
-%off: D1StateTransferTrg
-%on: D1StateTransferShutter 
-%t += 15-(4+4+0.1)
-%%%% D1 state transfer sample and hold %%%%
-
-
-%%%% 1013 sample and hold %%%%
+%%%% OP %%%%%
 t += -10
-on: Ryd1013Trg
-t += 1
-dacramp: Ryd1013Amp zero1013SetPoint ryd1013_amplitude 4
-t += 1
-%on: Ryd1013Hold
-t += 0.1
-%off: Ryd1013Trg
-t += 10-1-1-0.1
-%%%% 1013 sample and hold %%%%
+on: PrbShutter
+off: PrbCoolShutter
+off: xyzMOTShutter
+off: D1LGMShutter
+off: D1LGMPrbShutter
+on: OPShutter
+off: TARepShutter
+ol: ol_cooling d2_cooling_resonance-(fraction_scan*30-266.65)  %29
+ol: ol_repump d2_repump_prb_resonance+(fraction_scan*30) %29
+dac: PrbRepAmp 8
+dac: PrbAmp 8
+dac: OPAmp {0.1 op_pwr}
+t += 10
+%%%% OP %%%%%
 
-%var Ryd_pi2_us 0.09
-%var Ryd_pi_us 0.09 %0.20 %0.185
+%%% 1013 sample and hold %%%%
+%t += -10
+%on: Ryd1013Trg
+%t += 1
+%dacramp: Ryd1013Amp zero1013SetPoint ryd1013_amplitude 4
+%t += 1
+%%on: Ryd1013Hold
+%t += 0.1
+%%off: Ryd1013Trg
+%t += 10-1-1-0.1
+%%% 1013 sample and hold %%%%
 
 %dac: Ryd420Amp zero420SetPoint
 t += 0.5
@@ -194,22 +116,14 @@ on: SLMTweezerHold
 
 
 %%%%% Rabi %%%%%%
-%on: PrbRepTrg
-%on: PrbTrg
-%on: OPTrg
+on: PrbRepTrg
+on: PrbTrg
+on: OPTrg
 t += 0.005
 %off: SLMTweezerTrg
 t += 0.35/1000
 
 t += -0.95/1000 %time for 420 AOM to turn since the beam is quite far away from the AOM actuator
-
-%on: do8_4 %dummy trigger for picoscope
-%%on: OPTrg
-%on: Ryd420Trg % scan to get Rabi
-%t += time_scan_us/1000 %time_scan
-%off: Ryd420Trg
-%%off: OPTrg
-%off: do8_4 
 
 on: do8_4 %dummy trigger for picoscope
 t += -2/1000
@@ -223,10 +137,11 @@ on: Ryd420Trg
 t += time_scan
 %dacramp: Ryd420Amp ryd420SetPoint zero420SetPoint 0.06
 %t += 0.06
+
 off: Ryd420Trg 
-t += 2/1000
+t += 1/1000
 off: SiglentTrg
-t += -2/1000
+t += -1/1000
 off: do8_4 %dummy trigger for picoscope
 
 
@@ -275,9 +190,9 @@ dacramp: SLMTweezerIntensity slm_twz_intensity*fraction_scan slm_twz_intensity 1
 t += 10.08
 t += 0.1
 
-t += -9
-dacramp: Ryd1013Amp ryd1013_amplitude zero1013SetPoint 9
-t += 9
+%t += -9
+%dacramp: Ryd1013Amp ryd1013_amplitude zero1013SetPoint 9
+%t += 9
 
 %pulseon: MWAmpTrg 0.1
 t += 0.1

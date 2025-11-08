@@ -15,9 +15,9 @@ binnings = np.linspace(0, 240, 241)
 analysis_locs = da.DataAnalysis(year='2025', month='October', day='19', data_name='data_8', 
                                 window=window, thresholds=thresholds, binnings=binnings, multi_points_option = dict({"active":True, "search_square":2, "num_points":8}))
 grid_file_name = 'atomgrid_5x7_8points_2025-10-19'
-camera_image_dim = {'Left:':1026, 'Right:':1090, 'H-Bin:':1, 'Bottom:': 924, 'Top:': 963, 'V-Bin:': 1}
+camera_image_dim = {'Left:':1026, 'Right:':1090, 'H-Bin:':1, 'Bottom:': 926, 'Top:': 965, 'V-Bin:': 1}
 tweezer_intensity_setpoint = 2.9 #V
-repetitions = 4
+repetitions = 6
 
 
 # # analysis grid for 2x7 grid - 20250922
@@ -162,11 +162,11 @@ def rydberg_1013_lightshift_DLS_D1(exp_postfix: str, amplitude: float = 1.0, tim
     data_analysis = da.DataAnalysis(YEAR, MONTH, DAY, exp_name, maximaLocs=analysis_locs.maximaLocs,
                             window=window, thresholds=thresholds, binnings=binnings, 
                             annotate_title = exp_name, annotate_note=" ")
-    analysis_result = data_analysis.analyze_data()
-    optimal_field = analysis_result[1]
-    vertical_pos, horizontal_pos = data_analysis.analyze_mako_data(mako_idx=4, function = da.gaussian)
-    print(f"1013 lightshift for {exp_name} is {optimal_field:.3S}  with"
-          f" position ({vertical_pos.mean():.3S}, {horizontal_pos.mean():.3S})")
+    # analysis_result = data_analysis.analyze_data()
+    # optimal_field = analysis_result[1]
+    # vertical_pos, horizontal_pos = data_analysis.analyze_mako_data(mako_idx=4, function = da.gaussian)
+    # print(f"1013 lightshift for {exp_name} is {optimal_field:.3S}  with"
+    #       f" position ({vertical_pos.mean():.3S}, {horizontal_pos.mean():.3S})")
 
 def rydberg_420_alignment_DLS(exp_postfix: str, pico_idx: int, amplitude: float = 0.2, timeout_control = {'use':True, 'timeout':3000}):
     NUM_POSITION_VAR = 11
@@ -385,15 +385,22 @@ if __name__ == '__main__':
     # rydberg_420_lightshift_DLS_D1(exp_postfix="2D-preAlignment", amplitude=0.0)
 
 
-    rydberg_1013_lightshift_DLS_D1(exp_postfix="2D-preAlignment-1", amplitude=1.0)
-    rydberg_1013_lightshift_DLS_D1(exp_postfix="2D-preAlignment-1", amplitude=0.0)
-    # exp.hardware_controller.restart_zynq_control()
-    # rydberg_1013_alignment_DLS(exp_postfix="2D-3", pico_idx=4)
-    # exp.hardware_controller.restart_zynq_control()
-    # rydberg_1013_alignment_DLS(exp_postfix="2D-1", pico_idx=3)
-    # exp.hardware_controller.restart_zynq_control()
-    # rydberg_1013_lightshift_DLS_D1(exp_postfix="2D-postAlignment-3", amplitude=1.0)
-    # rydberg_1013_lightshift_DLS_D1(exp_postfix="2D-postAlignment-3", amplitude=0.0)
+    rydberg_1013_lightshift_DLS_D1(exp_postfix="2D-preAlignment-newWP", amplitude=1.0)
+    rydberg_1013_lightshift_DLS_D1(exp_postfix="2D-preAlignment-newWP", amplitude=0.0)
+
+    # for idx in range(9,100):
+    #     rydberg_1013_lightshift_DLS_D1(exp_postfix=f"2D-preAlignment-{idx}", amplitude=1.0, timeout_control = {'use':True, 'timeout':420})
+    #     rydberg_1013_lightshift_DLS_D1(exp_postfix=f"2D-preAlignment-{idx}", amplitude=0.0, timeout_control = {'use':True, 'timeout':420})
+    #     # sleep(600)
+    #     exp.hardware_controller.restart_zynq_control()
+
+    exp.hardware_controller.restart_zynq_control()
+    rydberg_1013_alignment_DLS(exp_postfix="2D-newWP", pico_idx=4)
+    exp.hardware_controller.restart_zynq_control()
+    rydberg_1013_alignment_DLS(exp_postfix="2D-newWP", pico_idx=3)
+    exp.hardware_controller.restart_zynq_control()
+    rydberg_1013_lightshift_DLS_D1(exp_postfix="2D-postAlignment-newWP", amplitude=1.0)
+    rydberg_1013_lightshift_DLS_D1(exp_postfix="2D-postAlignment-newWP", amplitude=0.0)
     # sleep(10)
     # exp.hardware_controller.restart_zynq_control()
 

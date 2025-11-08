@@ -22,7 +22,7 @@ def StateSelectivePushout():
 %    t += 10
 
     var FullTrapLightShift 30 % MHz
-    var Bfield 7 %G
+    var Bfield 3.5 %G
     var DifferentialZeemanCoef 1.4 % MHz/G
     var PushoutTrapFraction 0.1
     var PushoutTime 0.01 %ms

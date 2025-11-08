@@ -48,9 +48,9 @@ off: ryd420trg
 
 
 %%%%% warm bias field %%%%% 
-dac: BiasCoilX -2.5+0.75-2.5 %quantization_bias_x
-dac: BiasCoilY -1.065+(-0.053)+0.275+0.004+(-0.002) %+(amplitude_scan) %+(-0.08) %+(-2.33)*switch_toggle % %quantization_bias_y %-0.95 
-dac: BiasCoilZ -0.05+(0.012)+(-0.01)+(-0.0183)+(-2.23)*switch_toggle %+0.033 %-0.04 
+dac: BiasCoilX -2.5+0.75 %quantization_bias_x
+dac: BiasCoilY -0.841+0.007 %+(amplitude_scan) %+(-0.08) %+(-2.33)*switch_toggle % %quantization_bias_y %-0.95 
+dac: BiasCoilZ -0.0663+0.019+(-2.23)*switch_toggle %+amplitude_scan %+0.033 %-0.04 
 
 
 t += 100 %750
@@ -188,27 +188,29 @@ off: PrbShutter
 %t += t_shutter
 
 
-%t += 15
-%%%%%%%% depump out of F=2, other than |2,2> if with circular polarization, using cooling 2-2'', using OP beam %%%%%%%%%%%
-%%dacramp: SLMTweezerIntensity slm_twz_intensity slm_twz_intensity*fraction_scan 10
-%off: PrbShutter
-%on: OPShutter
-%off: TARepShutter
-%off: xyzMOTShutter
-%off: D1LGMShutter
-%off: D1LGMPrbShutter
-%ol: ol_cooling d2_cooling_resonance-(3.22+30-266.65) % 30 MHz light shift and 3.22 differential zeeman for 22 to 22, 1/6*1.4MHz/G/mF * 2mF * 7G %resonance_scan
+t += 15
+%%%%%%% depump out of F=2, other than |2,2> if with circular polarization, using cooling 2-2'', using OP beam %%%%%%%%%%%
+dacramp: SLMTweezerIntensity slm_twz_intensity slm_twz_intensity*fraction_scan 10
+off: PrbShutter
+on: OPShutter
+off: TARepShutter
+off: xyzMOTShutter
+off: D1LGMShutter
+off: D1LGMPrbShutter
+ol: ol_cooling d2_cooling_resonance-(3.22/2+7-266.65) % 30 MHz light shift and 3.22 differential zeeman for 22 to 22, 1/6*1.4MHz/G/mF * 2mF * 7G %resonance_scan
 %ol: ol_repump d2_repump_resonance+(28.8+266.65+30) %
-%%dac: OPAmp {0.1 op_pwr} %time_scan
-%%dac: OPAmp {0.03 op_pwr} %time_scan
 %dac: OPAmp {0.1 op_pwr} %time_scan
-%t += 10
-%on: OPTrg
-%t += time_scan*(1-switch_toggle)+time_scan_2*switch_toggle %0.005 %0.08 %0.04 %0.005 %time_scan %0.001
-%off: OPTrg
-%off: OPShutter
-%%dacramp: SLMTweezerIntensity slm_twz_intensity*fraction_scan slm_twz_intensity 10
-%t += 15
+%dac: OPAmp {0.03 op_pwr} %time_scan
+dac: OPAmp {0.1 op_pwr} %time_scan
+t += 10
+t += 0.05
+on: OPTrg
+t += time_scan*(1-switch_toggle)+time_scan_2*switch_toggle %0.005 %0.08 %0.04 %0.005 %time_scan %0.001
+off: OPTrg
+off: OPShutter
+t += 0.05
+dacramp: SLMTweezerIntensity slm_twz_intensity*fraction_scan slm_twz_intensity 10
+t += 15
 
 
 %t += 10

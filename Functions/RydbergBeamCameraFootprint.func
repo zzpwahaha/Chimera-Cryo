@@ -23,7 +23,7 @@ def RydbergBeamCameraFootprint():
     t += 1
     pulseon: Ryd1013Trg 10
     t += 1
-%    pulseon: Ryd1013MAKO 0.6
+    pulseon: Ryd1013MAKO 0.6
     t += 10-1
 
 
