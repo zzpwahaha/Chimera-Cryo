@@ -18,17 +18,17 @@ def extract_beam_position_on_mako(exp : ExperimentProcedure, mako_idx:int, avera
         # exp.setMakoFeatureValue(mako_idx, "AcquisitionFrameRateAbs", "double", "5.0")
         # exp.setMakoFeatureValue(mako_idx, "ExposureTimeAbs", "double", "5000") # in us
 
-        # exp.setTTL(name="ryd420trg", value=True)
-        # exp.setDAC(name='ryd420amp', value=-0.0130) #
-        # exp.setMakoFeatureValue(mako_idx, "TriggerSource", "string", "FixedRate")
-        # exp.setMakoFeatureValue(mako_idx, "AcquisitionFrameRateAbs", "double", "5.0")
-        # exp.setMakoFeatureValue(mako_idx, "ExposureTimeAbs", "double", "16") # in us
-
         exp.setTTL(name="ryd420trg", value=True)
-        exp.setDAC(name='ryd420amp', value=-0.012) #
+        exp.setDAC(name='ryd420amp', value=-0.0130) #
         exp.setMakoFeatureValue(mako_idx, "TriggerSource", "string", "FixedRate")
         exp.setMakoFeatureValue(mako_idx, "AcquisitionFrameRateAbs", "double", "5.0")
-        exp.setMakoFeatureValue(mako_idx, "ExposureTimeAbs", "double", "160") # in us
+        exp.setMakoFeatureValue(mako_idx, "ExposureTimeAbs", "double", "16") # in us
+
+        # exp.setTTL(name="ryd420trg", value=True)
+        # exp.setDAC(name='ryd420amp', value=-0.012) #
+        # exp.setMakoFeatureValue(mako_idx, "TriggerSource", "string", "FixedRate")
+        # exp.setMakoFeatureValue(mako_idx, "AcquisitionFrameRateAbs", "double", "5.0")
+        # exp.setMakoFeatureValue(mako_idx, "ExposureTimeAbs", "double", "160") # in us
 
         # exp.setTTL(name="ryd420trg", value=True)
         # exp.setDAC(name='ryd420amp', value=0.0) #
@@ -195,8 +195,8 @@ def zeroScrews(exp:ExperimentProcedure):
 # RYDBERG_BEAM_1013_POSITION = (33.10,26.91) #(33.02, 27.0) #(32.68, 26.60) #(32.31, 26.02) #(31.88, 27.06) #(31.31,26.33) #(31.89,26.19) #(32.02,25.56) #(33.65,26.38)
 
 
-RYDBERG_BEAM_420_POSITION = (47.94,51.49) #(48.87,50.82) #(47.58,50.33) #(48.04, 49.98) #(54.08,44.39) #(45.17,45.02) #(44.3, 44.8) #(44.26,45.12) #(45.88,41.72)
-RYDBERG_BEAM_1013_POSITION = (116.28, 34.21) #(117.8, 33.94) #(115.4,30.40) #(113,30.72) #(108.8,30.86) #(108.8,31.04) #(99.8,35.73) #(99.8,35.10) #(112.41, 34.75) # (105.6, 34.46) #(102.5, 118.29) #(105.90, 121)
+RYDBERG_BEAM_420_POSITION = (43.55, 51.13) #(47.94,51.49) #(48.87,50.82) #(47.58,50.33) #(48.04, 49.98) #(54.08,44.39) #(45.17,45.02) #(44.3, 44.8) #(44.26,45.12) #(45.88,41.72)
+RYDBERG_BEAM_1013_POSITION = (115.1, 34.59) #(116.28, 34.21) #(117.8, 33.94) #(115.4,30.40) #(113,30.72) #(108.8,30.86) #(108.8,31.04) #(99.8,35.73) #(99.8,35.10) #(112.41, 34.75) # (105.6, 34.46) #(102.5, 118.29) #(105.90, 121)
 
 if __name__=="__main__":
     exp = ExperimentProcedure()

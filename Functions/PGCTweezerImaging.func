@@ -3,6 +3,7 @@
 % also note that this function advance the time by t_twz_imagingms, and the camera shutter will be completely closed
 
 def PGCTweezerImaging():
+    off: OPShutter
     on: PrbShutter
     on: PrbCoolShutter
     on: PrbRepTrg

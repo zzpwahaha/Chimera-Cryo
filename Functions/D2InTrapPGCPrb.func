@@ -2,6 +2,7 @@
 % this function uses probe beam for cooling
 
 def D2InTrapPGCPrb(pgc_time):
+    off: OPShutter
     on: PrbShutter
     on: PrbCoolShutter
     off: xyzMOTShutter

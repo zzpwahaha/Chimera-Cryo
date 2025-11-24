@@ -7,9 +7,14 @@ import time
 YEAR, MONTH, DAY = today()
 exp = ExperimentProcedure()
 
-config_name = "Rydberg_Rabi_SLM.Config"
-config_path = exp.CONFIGURATION_DIR + config_name
+# config_name = "Rydberg_Rabi_SLM.Config"
+# config_path = exp.CONFIGURATION_DIR + config_name
+# config_file = ConfigurationFile(config_path)
+
+config_name = "tweezerloading.Config"
+config_path = "C:/Chimera/Chimera-Cryo/Configurations/CryoTweezerLoading/" + config_name
 config_file = ConfigurationFile(config_path)
+
 
 config_file.modify_parameter("REPETITIONS", "Reps:", str(10))
 for variable in config_file.config_param.variables:
@@ -27,13 +32,19 @@ analysis_locs = da.DataAnalysis(year='2025', month='September', day='30', data_n
 
 
 def resonace_scan(exp_idx, ryd420_amplitude, timeout_control = {'use':True, 'timeout':1000}):
-    script_name = "Calibration_rydberg_420_1013_Rabi_SLM.mScript"
-    CENTER_FREQ = 80 # MHz
-    scan_range_half = np.sqrt(ryd420_amplitude/0.8) * 3 # MHz
-    pulse_time = np.round(1/np.sqrt(ryd420_amplitude/0.8) * 0.30, 2)  #us
+    # script_name = "Calibration_rydberg_420_1013_Rabi_SLM.mScript"
+    script_name = "rydberg_420_1013_excitation_SLM.mScript"
+
+    CENTER_FREQ = 79 # MHz
+    # scan_range_half = np.sqrt(ryd420_amplitude/0.8) * 3 # MHz
+    # pulse_time = np.round(1/np.sqrt(ryd420_amplitude/0.8) * 0.30, 2)  #us
+    rabi_freq = np.sqrt((ryd420_amplitude+0.013)/0.063)*122*147/2/1540
+    scan_range_half = min(10, rabi_freq*2)
+    pulse_time = np.round(1/rabi_freq/2, 2)  #us
+
 
     # Update configuration
-    config_file.modify_parameter("REPETITIONS", "Reps:", str(12))
+    config_file.modify_parameter("REPETITIONS", "Reps:", str(15))
     for variable in config_file.config_param.variables:
         config_file.config_param.update_variable(variable.name, scan_type="Constant", scan_dimension=0)    
     config_file.config_param.update_scan_dimension(0, new_ranges=[ScanRange(index=0,left_inclusive=True, right_inclusive=True, variations=21)])
@@ -44,9 +55,12 @@ def resonace_scan(exp_idx, ryd420_amplitude, timeout_control = {'use':True, 'tim
     
     # Setup experiment details
     YEAR, MONTH, DAY = today()
-    exp_name = f"RESONANCE-SCAN-420AMP-{ryd420_amplitude:.2f}-{exp_idx}"
-    exp.open_configuration("\\ExperimentAutomation\\" + config_name)
-    exp.open_master_script("\\ExperimentAutomation\\" + script_name)
+    exp_name = f"RESONANCE-SCAN-420AMP-{ryd420_amplitude:.3f}-{exp_idx}"
+    # exp.open_configuration("\\ExperimentAutomation\\" + config_name)
+    # exp.open_master_script("\\ExperimentAutomation\\" + script_name)
+    exp.open_configuration("\\CryoTweezerLoading\\" + config_name)
+    exp.open_master_script("\\CryoTweezerLoading\\" + script_name)
+
     exp.run_experiment(exp_name)
     
     # Monitor experiment status
@@ -83,8 +97,11 @@ def resonace_scan(exp_idx, ryd420_amplitude, timeout_control = {'use':True, 'tim
 #     config_file.reopen()
 
 def rabi_scan(exp_idx, ryd420_amplitude, timeout_control = {'use':True, 'timeout':2000}):
-    script_name = "Calibration_rydberg_420_1013_Rabi_SLM.mScript"
-    rabi_freq = np.sqrt(ryd420_amplitude/0.8) * 1.493 # MHz
+    # script_name = "Calibration_rydberg_420_1013_Rabi_SLM.mScript"
+    script_name = "rydberg_420_1013_excitation_SLM.mScript"
+
+    # rabi_freq = np.sqrt(ryd420_amplitude/0.8) * 1.493 # MHz
+    rabi_freq = np.sqrt((ryd420_amplitude+0.013)/0.063)*122*147/2/1540
     twopi_time = np.ceil(1/rabi_freq * 10) / 10 # us and is always divisiable by 10
 
     config_file.modify_parameter("REPETITIONS", "Reps:", str(15))
@@ -93,15 +110,15 @@ def rabi_scan(exp_idx, ryd420_amplitude, timeout_control = {'use':True, 'timeout
         config_file.config_param.update_variable(variable.name, scan_type="Constant", scan_dimension=0)    
     config_file.config_param.update_variable("ryd420_amplitude", constant_value = ryd420_amplitude)
 
-    if twopi_time <= 1.2:
+    if twopi_time <= 0.8:
         config_file.config_param.update_scan_dimension(0, new_ranges=[
             ScanRange(index=0,left_inclusive=True, right_inclusive=True, variations=11),
             ScanRange(index=1,left_inclusive=True, right_inclusive=True, variations=11),
             ScanRange(index=2,left_inclusive=True, right_inclusive=True, variations=11)
             ])
         config_file.config_param.update_variable("time_scan_us", scan_type="Variable", 
-                                                new_initial_values=[0.01, 2.53-twopi_time/2, 5.07-twopi_time/2], 
-                                                new_final_values=[0.01+twopi_time, 2.53+twopi_time/2, 5.07+twopi_time/2])
+                                                new_initial_values=[0.01, 1.33-twopi_time/2, 2.87-twopi_time/2], 
+                                                new_final_values=[0.01+twopi_time, 1.33+twopi_time/2, 2.87+twopi_time/2])
     else:
         config_file.config_param.update_scan_dimension(0, new_ranges=[
             ScanRange(index=0,left_inclusive=True, right_inclusive=True, variations=41)])
@@ -111,9 +128,11 @@ def rabi_scan(exp_idx, ryd420_amplitude, timeout_control = {'use':True, 'timeout
     config_file.save()
     
     YEAR, MONTH, DAY = today()
-    exp_name = f"RABI-SCAN-420AMP-{ryd420_amplitude:.2f}-{exp_idx}"
-    exp.open_configuration("\\ExperimentAutomation\\" + config_name)
-    exp.open_master_script("\\ExperimentAutomation\\" + script_name)
+    exp_name = f"RABI-SCAN-420AMP-{ryd420_amplitude:.3f}-{exp_idx}"
+    # exp.open_configuration("\\ExperimentAutomation\\" + config_name)
+    # exp.open_master_script("\\ExperimentAutomation\\" + script_name)
+    exp.open_configuration("\\CryoTweezerLoading\\" + config_name)
+    exp.open_master_script("\\CryoTweezerLoading\\" + script_name)
     exp.run_experiment(exp_name)
 
     # Monitor experiment status
@@ -123,6 +142,48 @@ def rabi_scan(exp_idx, ryd420_amplitude, timeout_control = {'use':True, 'timeout
                             window=window, thresholds=thresholds, binnings=binnings, 
                             annotate_title = exp_name, annotate_note=" ")
     return aborted
+
+def rabi_scan_twopi_time(exp_idx, ryd420_amplitude, timeout_control = {'use':True, 'timeout':2000}):
+    # script_name = "Calibration_rydberg_420_1013_Rabi_SLM.mScript"
+    script_name = "rydberg_420_1013_excitation_SLM.mScript"
+
+    # rabi_freq = np.sqrt(ryd420_amplitude/0.8) * 1.493 # MHz
+    rabi_freq = np.sqrt((ryd420_amplitude+0.013)/0.063)*122*147/2/1540
+    twopi_time = np.ceil(1/rabi_freq * 100) / 100 # us and is always divisiable by 10
+    n_points = min(int(twopi_time*100), 41) 
+    twopi_time = n_points / 100 # us up to second digit
+
+    config_file.modify_parameter("REPETITIONS", "Reps:", str(15))
+
+    for variable in config_file.config_param.variables:
+        config_file.config_param.update_variable(variable.name, scan_type="Constant", scan_dimension=0)    
+    config_file.config_param.update_variable("ryd420_amplitude", constant_value = ryd420_amplitude)
+
+    config_file.config_param.update_scan_dimension(0, new_ranges=[
+        ScanRange(index=0,left_inclusive=True, right_inclusive=True, variations=n_points)
+        ])
+    config_file.config_param.update_variable("time_scan_us", scan_type="Variable", 
+                                            new_initial_values=[0.01], 
+                                            new_final_values=[0.01+twopi_time])
+    config_file.save()
+    
+    YEAR, MONTH, DAY = today()
+    exp_name = f"RABI-SCAN-420AMP-{ryd420_amplitude:.3f}-TWOPI-{exp_idx}"
+    # exp.open_configuration("\\ExperimentAutomation\\" + config_name)
+    # exp.open_master_script("\\ExperimentAutomation\\" + script_name)
+    exp.open_configuration("\\CryoTweezerLoading\\" + config_name)
+    exp.open_master_script("\\CryoTweezerLoading\\" + script_name)
+    exp.run_experiment(exp_name)
+
+    # Monitor experiment status
+    aborted = experiment_monitoring(exp=exp, timeout_control=timeout_control)
+
+    data_analysis = da.DataAnalysis(YEAR, MONTH, DAY, exp_name, maximaLocs=analysis_locs.maximaLocs,
+                            window=window, thresholds=thresholds, binnings=binnings, 
+                            annotate_title = exp_name, annotate_note=" ")
+    return aborted
+
+
 
 def recenter_beams():
     exp.setDAC()
@@ -138,34 +199,59 @@ def recenter_beams():
 
 def calibration(exp_idx):
     # ryd420_amplitudes = [0.8,0.7,0.6,0.5,0.4,0.3,0.2,0.1]
-    ryd420_amplitudes = [0.2,0.1]
+    # ryd420_amplitudes = [0.2,0.1]
+    # ryd420_amplitudes = [-0.005,-0.004,-0.003,-0.002,-0.001,0,0.005,0.01,0.02,0.03,0.04,0.05,0.06,0.08,0.1]
+    ryd420_amplitudes = [-0.004,-0.003,-0.002,0.005]
+
 
     for ryd420amp in ryd420_amplitudes:
         try:
             # recenter_beams()
             aborted = resonace_scan(exp_idx=exp_idx, ryd420_amplitude=ryd420amp, timeout_control = {'use':True, 'timeout':1200})
-            if aborted:
-                exp.hardware_controller.restart_zynq_control()
-                return
+            # if aborted:
+            #     exp.hardware_controller.restart_zynq_control()
+            #     return
         except Exception as e:
             print(e)
             exp.hardware_controller.restart_zynq_control()
             # calibration(exp_idx)
-            return
+            continue
+        
+        exp.hardware_controller.restart_zynq_control()
+
         try:
             # exp.hardware_controller.restart_zynq_control()
             # _calibration()
             # recenter_beams()
-            aborted = rabi_scan(exp_idx=exp_idx, ryd420_amplitude=ryd420amp, timeout_control = {'use':True, 'timeout':1200}) #1500
-            if aborted:
-                exp.hardware_controller.restart_zynq_control()
-                return
-            sleep(3)
+            aborted = rabi_scan(exp_idx=exp_idx, ryd420_amplitude=ryd420amp, timeout_control = {'use':True, 'timeout':2000}) #1500
+            # if aborted:
+            #     exp.hardware_controller.restart_zynq_control()
+            #     return
+            # sleep(3)
+        except Exception as e:
+            print(e)
+            exp.hardware_controller.restart_zynq_control()
+            continue
+
+        exp.hardware_controller.restart_zynq_control()
+
+        try:
+            # exp.hardware_controller.restart_zynq_control()
+            # _calibration()
+            # recenter_beams()
+            aborted = rabi_scan_twopi_time(exp_idx=exp_idx, ryd420_amplitude=ryd420amp, timeout_control = {'use':True, 'timeout':2000}) #1500
+            # if aborted:
+            #     exp.hardware_controller.restart_zynq_control()
+            #     return
+            # sleep(3)
 
         except Exception as e:
             print(e)
             exp.hardware_controller.restart_zynq_control()
-            return
+            continue
+
+        exp.hardware_controller.restart_zynq_control()
+
 
 if __name__=='__main__':
     for idx in np.arange(1):
@@ -174,6 +260,6 @@ if __name__=='__main__':
         print(f"Running experiment sets number {idx}")
         # if idx != 0:
         #     exp.hardware_controller.restart_zynq_control()
-        calibration(idx)
+        calibration(1)
 
     # _raw_move_EOM_resonance(exp, start_freq=144,end_freq=185,step=0.25)

@@ -104,8 +104,8 @@ if __name__ == '__main__':
     # analysis_locs = da.DataAnalysis(year='2025', month='September', day='18', data_name='data_18', 
     #                                 window=window, thresholds=thresholds, binnings=binnings)
 
-    grid_file_name = 'atomgrid_5x7_8points_2025-10-19'
-    camera_image_dim = {'Left:':1026, 'Right:':1090, 'H-Bin:':1, 'Bottom:': 926, 'Top:': 965, 'V-Bin:': 1}
+    grid_file_name = 'atomgrid_5x7_5points_2025-11-17'
+    camera_image_dim = {'Left:':1026, 'Right:':1090, 'H-Bin:':1, 'Bottom:': 928, 'Top:': 967, 'V-Bin:': 1}
     tweezer_intensity_setpoint = 2.9 #V
     repetitions = 4
 
@@ -129,10 +129,16 @@ if __name__ == '__main__':
     # analysis_locs = da.DataAnalysis(year='2025', month='September', day='30', data_name='data_19', 
     #                                 window=window, thresholds=thresholds, binnings=binnings)
 
-    grid_file_name = 'atomgrid_1x7_4points_2025-11-2'
-    camera_image_dim = {'Left:':971, 'Right:':1150, 'H-Bin:':2, 'Bottom:': 923, 'Top:': 962, 'V-Bin:': 2}
-    tweezer_intensity_setpoint = 0.61 #V
-    repetitions = 8
+    # grid_file_name = 'atomgrid_1x7_4points_2025-11-2'
+    # camera_image_dim = {'Left:':971, 'Right:':1150, 'H-Bin:':2, 'Bottom:': 923, 'Top:': 962, 'V-Bin:': 2}
+    # tweezer_intensity_setpoint = 0.61 #V
+    # repetitions = 8
+
+
+    # grid_file_name = 'atomgrid_7x11_5points_2025-11-7'
+    # camera_image_dim = {'Left:':1026, 'Right:':1090, 'H-Bin:':1, 'Bottom:': 926, 'Top:': 965, 'V-Bin:': 1}
+    # tweezer_intensity_setpoint = 4 #V
+    # repetitions = 4
 
 
     # config_name = "420alignment_with_d1.Config"

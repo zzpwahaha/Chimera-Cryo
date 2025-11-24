@@ -56,7 +56,8 @@ t += 15-(4+4+0.1)
 %%%% 420 sample and hold %%%%
 %%%% D1 state transfer sample and hold %%%%
 t += -15
-dac: D1StateTransferAmp -1.0/25
+%dac: D1StateTransferAmp -1.0/25 % for EIT
+dac: D1StateTransferAmp -1.0
 off: D1StateTransferShutter 
 t += 4
 on: D1StateTransferTrg

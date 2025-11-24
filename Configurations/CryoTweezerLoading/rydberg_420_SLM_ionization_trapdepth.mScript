@@ -32,19 +32,19 @@ call OpticalPumping22()
 
 %%%%%%%%%%%%%%  Prepare Rydberg beams %%%%%%%%%%%%%%%%%%
 var zero1013SetPoint -0.01
-%var ryd1013SetPoint 2.0 %0.02 %2.0
+var ryd1013SetPoint 0.02 %2.0
 
 var zero420SetPoint -0.013
-%var ryd420SetPoint 0.1 %-0.01
+var ryd420SetPoint -0.01
 
 on: Ryd1013Shutter
-ddsfreq: Ryd420Brimrose ryd420_resonance %(14.13*fraction_scan+72.66) %ryd420_resonance
+ddsfreq: Ryd420Brimrose ryd420_resonance
 t += 5
 %on: Ryd420Shutter
 off: Ryd420ExpShutter
 %on: Ryd1013Shutter
 off: Ryd420AWGchswitch
-dac: Ryd420Amp -0.01 %ryd420_amplitude %amplitude_scan %-0.01 %0.1 %0.55 %0.30 %0.34
+dac: Ryd420Amp ryd420SetPoint %0.1 %0.55 %0.30 %0.34
 dac: Ryd1013Amp zero1013SetPoint %2.0 %0.55 %0.60 %0.68
 
 var IQ_MAX_AMP 2.5
@@ -54,61 +54,68 @@ pulseon: MWTrg 0.4
 t += 1
 
 %%%%%%%%%%%%%%  Trap ramp for Rydberg  %%%%%%%%%%%%%%%%%%
-dacramp: SLMTweezerIntensity slm_twz_intensity slm_twz_intensity*0.2 10
+dacramp: SLMTweezerIntensity slm_twz_intensity slm_twz_intensity*fraction_scan 10
 t += 10
-
 %%%% 420 sample and hold %%%%
 t += -10
 pulseon: Ryd420Mako 0.1
 on: Ryd420Trg
-t += 4.0
+t += 3.0
 on: Ryd420Hold
 t += 1.0
 off: Ryd420Trg
 t += 0.1
 on: Ryd420ExpShutter
-t += 10-4.0-1-0.1
+t += 10-3-1-0.1
 %%%% 420 sample and hold %%%%
 
+%%%%% Repump %%%%%
+%t += -10
+%on: PrbShutter
+%off: PrbCoolShutter
+%off: xyzMOTShutter
+%off: D1LGMShutter
+%off: D1LGMPrbShutter
+%off: OPShutter
+%off: TARepShutter
+%%ol: ol_cooling d2_cooling_resonance-(29-266.65)  %29
+%ol: ol_repump d2_repump_prb_resonance+(3) %29
+%dac: PrbRepAmp 8
+%dac: PrbAmp 8
+%t += 10
+%%%%% Repump %%%%%
+
 t += 0.5
-on: SLMTweezerHold
+
+
 
 
 
 %%%%% Rabi %%%%%%
-on: PrbRepTrg
-on: PrbTrg
-on: OPTrg
+%on: PrbRepTrg
+%on: PrbTrg
+%on: OPTrg
 t += 0.005
-%off: SLMTweezerTrg
-t += 0.35/1000
 
 t += -0.95/1000 %time for 420 AOM to turn since the beam is quite far away from the AOM actuator
 
 on: do8_4 %dummy trigger for picoscope
-t += -2/1000
-on: SiglentTrg
-t += 2/1000
-on: Ryd420Trg 
+on: Ryd420Trg % scan to get Rabi
+t += 2/1000 %time_scan
+off: Ryd420Trg
+off: do8_4 
 
-
+%on: do8_4 %dummy trigger for picoscope
+%on: Ryd420Trg 
 %dacramp: Ryd420Amp zero420SetPoint ryd420SetPoint 0.06
 %t += 0.06
-t += time_scan
+%t += time_scan
 %dacramp: Ryd420Amp ryd420SetPoint zero420SetPoint 0.06
 %t += 0.06
-
-off: Ryd420Trg 
-t += 1/1000
-off: SiglentTrg
-t += -1/1000
-off: do8_4 %dummy trigger for picoscope
-
+%off: Ryd420Trg 
+%off: do8_4 %dummy trigger for picoscope
 
 t += 0.95/1000 %time for 420 AOM to turn since the beam is quite far away from the AOM actuator
-
-t += 0.35/1000
-on: SLMTweezerTrg
 
 t += 0.005
 off: OPTrg
@@ -116,28 +123,23 @@ off: PrbTrg
 off: PrbRepTrg
 off: PrbShutter
 off: OPShutter
-off: Ryd420ExpShutter
-%t += time_scan
-off: SLMTweezerHold
+
 t += 0.5
 
 %%%%%%%%%%%%%%% Release/recapture %%%%%%%%%%%%%%%%%
 %call ReleaseRecaptureSLM(t_twz_release)
 %%%%%%%%%%%%%%% Release/recapture %%%%%%%%%%%%%%%%%
 
-dacramp: SLMTweezerIntensity slm_twz_intensity*0.2 slm_twz_intensity 10.08
+dacramp: SLMTweezerIntensity slm_twz_intensity*fraction_scan slm_twz_intensity 10.08
 t += 10.08
 t += 0.1
 
-%t += -9
-%dacramp: Ryd1013Amp ryd1013_amplitude zero1013SetPoint 9
-%t += 9
 
 %pulseon: MWAmpTrg 0.1
 t += 0.1
 off: Ryd1013Trg
 off: Ryd1013Hold
-off: Ryd420ExpShutter
+off: Ryd420Shutter
 off: Ryd1013Shutter
 off: Ryd420Hold
 t += 0.5
@@ -145,7 +147,7 @@ t += 0.5
 %%%%%%%%%%%%%%  End Rydberg  %%%%%%%%%%%%%%%%%%
 
 t += 10
-call StateSelectivePushout()
+%call StateSelectivePushout()
 %call setZeroField()
 
 %    dac: BiasCoilX pgc_twz_bias_x
@@ -164,7 +166,7 @@ t += 100-t_pgc_twz
 call PGCTweezerImaging()
 
 t += 10
-call RydbergBeamCameraFootprint()
+%call RydbergBeamCameraFootprint()
 
 %%%%%%%%%%%%%%  END Sequence  %%%%%%%%%%%%%%%%%%
 t += 10
