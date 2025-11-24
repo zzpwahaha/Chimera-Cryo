@@ -93,6 +93,29 @@ void ElliptecCore::programVariation(unsigned variation, std::vector<parameterTyp
 	//writeElliptecs(outputs);
 }
 
+void ElliptecCore::checkCurrentAngles(std::vector<parameterType>& params)
+{
+	if (safemode) {
+		return;
+	}
+	size_t totalVariations = (params.size() == 0) ? 1 : params.front().keyValues.size();
+	for (auto ch : range(size_t(ElliptecGrid::total))) {
+		expSettings.elliptecs[ch].assertValid(params, GLOBAL_PARAMETER_SCOPE);
+		if (expSettings.elliptecs[ch].varies()) {
+			// leave it if the elliptec is being varied in the experiment (may or maynot being active in the experiment, but we really don't know what the angle should be)
+			continue;
+		}
+		else {
+			double expectedAngleVal = expSettings.elliptecs[ch].evaluate(params, 0);
+			double actualAngleVal = getElliptecPosition(ch);
+			if (abs(actualAngleVal - expectedAngleVal) > 1e-2) {
+				thrower("Error in checking Elliptecs value for channel " + str(ch) + 
+					": The Elliptec value is " + str(actualAngleVal) + " but the expected value is " + str(expectedAngleVal));
+			}
+		}
+	}
+}
+
 ElliptecSettings ElliptecCore::getSettingsFromConfig(ConfigStream& file)
 {
 	ElliptecSettings tempSettings;

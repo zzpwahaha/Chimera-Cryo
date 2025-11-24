@@ -26,7 +26,8 @@ class ExpThreadWorker : public QObject
 		void loadMasterScript(std::string scriptAddress, ScriptStream& script);
 		static void loadGMoogScript(std::string scriptAddress, ScriptStream& gmoogScript);
 		static void loadArbGenScript(std::string scriptAddress, ScriptStream& agilentScript);
-		void checkTriggerNumbers (std::vector<parameterType>& expParams);
+		void checkTriggerNumbers(std::vector<parameterType>& expParams);
+		void checkElliptecAngles(std::vector<parameterType>& expParams);
 		void analyzeMasterScript (DoCore& ttls, AoCore& ao, DdsCore& dds, OlCore& ol,
 			std::vector<parameterType>& vars,
 			ScriptStream& currentMasterScript, bool expectsLoadSkip,
@@ -110,7 +111,8 @@ class ExpThreadWorker : public QObject
     Q_SIGNALS:
         void updateBoxColor (QString, QString);
         void notification (QString msg, unsigned debugLvl=0);
-        void warn (QString msg, unsigned debugLvl=1);
+		void warn (QString msg, unsigned debugLvl = 1);
+		void shortStatusUpdate(QString msg, QString color);
         void repUpdate (unsigned int);
         void prepareAndor (AndorRunSettings*, analysisSettings);
         void prepareMako (MakoSettings* settings, CameraInfo camInfo);

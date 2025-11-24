@@ -276,6 +276,7 @@ void QtMainWindow::startExperimentThread (ExperimentThreadInput* input){
 	connect (expWorker, &ExpThreadWorker::prepareMako, makoWin2, &QtMakoWindow::prepareWinForAcq, Qt::BlockingQueuedConnection);// want expthread wait untill mako set it up
 	connect (expWorker, &ExpThreadWorker::prepareAnalysis, analysisWin, &QtAnalysisWindow::prepareCalcForAcq);
 	connect (expWorker, &ExpThreadWorker::notification, this, &QtMainWindow::handleNotification);
+	connect (expWorker, &ExpThreadWorker::shortStatusUpdate, this, &QtMainWindow::onShortStatusUpdate);
 	connect (expWorker, &ExpThreadWorker::warn, this, &QtMainWindow::onErrorMessage);
 	//connect (expWorker, &ExpThreadWorker::doAoData, auxWin, &QtAuxiliaryWindow::handleDoAoPlotData);
 	connect (expWorker, &ExpThreadWorker::doAoOlData, &analysisWin->SeqPlotter, &ExperimentSeqPlotter::handleDoAoOlPlotData);
@@ -349,7 +350,7 @@ void QtMainWindow::addTimebar (std::string whichStatus){
 
 void QtMainWindow::changeBoxColor (std::string sysDelim, std::string color){
 	IChimeraQtWindow::changeBoxColor (sysDelim, color);
-	changeShortStatusColor (color);
+	//changeShortStatusColor (color);
 }
 
 void QtMainWindow::abortMasterThread (){
@@ -367,6 +368,12 @@ void QtMainWindow::onErrorMessage (QString errMessage, unsigned level){
 	}
 }
 
+void QtMainWindow::onShortStatusUpdate(QString message, QString color)
+{
+	setShortStatus(str(message));
+	changeShortStatusColor(str(color));
+}
+
 void QtMainWindow::onFatalError (QString finMsg){
 	onErrorMessage (finMsg);
 	autoF5_AfterFinish = false;
@@ -374,15 +381,15 @@ void QtMainWindow::onFatalError (QString finMsg){
 	std::string msgText = "Exited with Error!\nPassively Outputting Default Waveform.";
 	//andorWin->abortCameraRun(); this should be aborted in commonFunctions when one press Shift+F5, so no need to do it again
 	auxWin->handleNormalFin();
-	changeShortStatusColor ("R");
+	//changeShortStatusColor ("R");
 	reportErr ("EXITED WITH ERROR!\n");
 	reportStatus ("EXITED WITH ERROR!\nInitialized Default Waveform\r\n");
 }
 
 void QtMainWindow::onNormalFinish (QString finMsg, profileSettings finishedProfile) {
 	handleNotification (finMsg);
-	setShortStatus ("Passively Outputting Default Waveform");
-	changeShortStatusColor ("B");
+	//setShortStatus ("Passively Outputting Default Waveform");
+	//changeShortStatusColor ("B");
 	andorWin->handleNormalFinish (finishedProfile);
 	handleFinishText ();
 	auxWin->handleNormalFin ();

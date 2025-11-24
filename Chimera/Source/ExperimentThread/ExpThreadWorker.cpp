@@ -1198,6 +1198,21 @@ void ExpThreadWorker::checkTriggerNumbers (std::vector<parameterType>& expParams
 	}
 }
 
+void ExpThreadWorker::checkElliptecAngles(std::vector<parameterType>& expParams)
+{
+	auto& ell = input->devices.getSingleDevice<ElliptecCore>();
+	try {
+		ell.checkCurrentAngles(expParams);
+	}
+	catch (ChimeraError& err) {
+		emit warn(qstr(err.whatBare()) + "Make sure that this is what you actually want.\r\n", 0);
+		emit shortStatusUpdate("Elliptec value NOT match", "Red");
+		emit updateBoxColor("Red", ell.getDelim().c_str());
+		return;
+	}
+	emit shortStatusUpdate("Passively Outputing Default Waveform", "Black");
+}
+
 bool ExpThreadWorker::handleFunctionCall (std::string word, ScriptStream& stream, std::vector<parameterType>& vars,
 	DoCore& ttls, AoCore& ao, DdsCore& dds, OlCore& ol, std::string& warnings,
 	std::string callingFunction, timeType& operationTime, repeatManager& repeatMgr) {
@@ -1325,6 +1340,7 @@ void ExpThreadWorker::runConsistencyChecks (std::vector<parameterType> expParams
 	emit expCalibrationsSet(calibrations);
 
 	checkTriggerNumbers(expParams);
+	checkElliptecAngles(expParams);
 }
 
 void ExpThreadWorker::waitForSequenceFinish(double seqTime)
@@ -1375,6 +1391,7 @@ void ExpThreadWorker::initVariation (unsigned variationInc,std::vector<parameter
 
 void ExpThreadWorker::waitForAndorFinish () {
 	auto& andorCamera = input->devices.getSingleDevice<AndorCameraCore> ();
+	Sleep(100);
 	while (true) {
 		if (andorCamera.isRunning()/*andorCamera.queryStatus () == DRV_ACQUIRING*/) {
 			Sleep (100);

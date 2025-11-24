@@ -7,6 +7,7 @@
 #include "OffsetLock/OlSystem.h"
 #include "CMOSCamera/MakoCamera.h"
 #include <Microwave/MicrowaveCore.h>
+#include <ElliptecRotationStage/ElliptecCore.h>
 
 #include "ParameterSystem/ParameterSystem.h"
 #include "MiscellaneousExperimentOptions/DebugOptionsControl.h"

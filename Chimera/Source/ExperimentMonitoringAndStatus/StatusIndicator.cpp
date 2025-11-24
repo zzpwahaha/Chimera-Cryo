@@ -15,4 +15,5 @@ void StatusIndicator::setText(std::string text){
 
 void StatusIndicator::setColor(std::string color){
 	currentColor = color;
+	status->setStyleSheet("QLabel { color : \"" + qstr(color) + "\"; font: bold 30pt;}");
 }

@@ -25,6 +25,7 @@ public:
     virtual void errorFinish() override {};
     virtual std::string getDelim() override { return configDelim; };
 
+    void checkCurrentAngles(std::vector<parameterType>& params);
     ElliptecSettings getSettingsFromConfig(ConfigStream& file);
 
     std::string getDeviceInfo();

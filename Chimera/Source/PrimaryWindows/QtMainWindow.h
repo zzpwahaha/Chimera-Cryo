@@ -93,6 +93,7 @@ class QtMainWindow : public IChimeraQtWindow{
 		void handleNotification (QString txt, unsigned level=0);
 		void onRepProgress (unsigned int repNum);
 		void onErrorMessage (QString errMessage, unsigned level=0);
+		void onShortStatusUpdate (QString message, QString color);
 		void onNormalFinish (QString finMsg, profileSettings finishedProfile );
 		void onFatalError (QString finMsg);
 
