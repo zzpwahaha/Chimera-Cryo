@@ -18,6 +18,13 @@ void Segment::calculateSegVariations( std::vector<parameterType>& variables, uns
 		input.pulse.tOffset.internalEvaluate ( variables, totalNumVariations );
 		input.pulse.width.internalEvaluate ( variables, totalNumVariations );
 	}
+	else if (input.window.isWindow) {
+		input.window.vOffset.internalEvaluate(variables, totalNumVariations);
+		input.window.amplitude.internalEvaluate(variables, totalNumVariations);
+		input.window.tOffset.internalEvaluate(variables, totalNumVariations);
+		input.window.width.internalEvaluate(variables, totalNumVariations);
+		input.window.transientWidth.internalEvaluate(variables, totalNumVariations);
+	}
 	else{
 		input.holdVal.internalEvaluate ( variables, totalNumVariations );
 	}
@@ -103,7 +110,7 @@ double Segment::pulseCalc( segPulseInfo pulse, int iteration, long size, double 
 		// the two beams.
 
 		double x = pulseLength * iteration / size;
-		double result = ampV * exp( -(center - x) * (center - x) / (widthV * widthV) );
+		double result = ampV * exp( -(center - x) * (center - x) / (2 * widthV * widthV) );
 		return result;
 	}
 	else if ( pulse.type == "lorentzian" ){
@@ -125,6 +132,140 @@ double Segment::pulseCalc( segPulseInfo pulse, int iteration, long size, double 
 	else{
 		thrower ( "ERROR: pulse type " + pulse.type + " is unrecognized.\r\n" );
 		return 0;
+	}
+}
+
+double Segment::windowCalc(segWindowInfo window, int iteration, long size, double pulseLength, double center, 
+	unsigned varNum)
+{
+	auto transientWidth = window.transientWidth.getValue(varNum) / 1000.0;
+	auto windowWidth = window.width.getValue(varNum) / 1000.0;
+	auto ampV = window.amplitude.getValue(varNum);
+	auto leftWindowEdge = center - windowWidth / 2.0;
+	auto rightWindowEdge = center + windowWidth / 2.0;
+	
+	double x = pulseLength * iteration / size;
+	double result = 0.0;
+	
+	if (window.type == "__NONE__") {
+		return 0;
+	}
+	else if (window.type == "gaussian") {
+		// in this case, the transient width is the sigma of the gaussian. 
+		if (x < leftWindowEdge) {
+			result = ampV * exp(-(x - leftWindowEdge) * (x - leftWindowEdge) / (2.0 * transientWidth * transientWidth));
+		}
+		else if (x <= rightWindowEdge) {
+			result = ampV;
+		}
+		else {
+			result = ampV * exp(-(x - rightWindowEdge) * (x - rightWindowEdge) / (2.0 * transientWidth * transientWidth));
+		}
+		return result;
+	}
+	else if (window.type == "cosine") {
+		// in this case, the transient width is the half period of the cosine. 
+		double riseStart = leftWindowEdge - transientWidth;
+		double fallEnd = rightWindowEdge + transientWidth;
+		if (x < riseStart) {
+			result = 0.0;
+		}
+		else if (x < leftWindowEdge) {
+			double t = (x - riseStart) / transientWidth;
+			result = ampV * 0.5 * (1 - cos(PI * t));
+		}
+		else if (x <= rightWindowEdge) {
+			result = ampV;
+		}
+		else if (x < fallEnd) {
+			double t = (x - rightWindowEdge) / transientWidth;
+			result = ampV * 0.5 * (1 + cos(PI * t));
+		}
+		else {
+			result = 0.0;
+		}
+		return result;
+	}
+	else if (window.type == "sech") {
+		// in this case, the transient width is the tau of the exponential. 
+		auto sech = [](double y) { return 1.0 / cosh(y); };
+		if (x < leftWindowEdge) {
+			result = ampV * sech((x - leftWindowEdge) / transientWidth);
+		}
+		else if (x <= rightWindowEdge) {
+			result = ampV;
+		}
+		else {
+			result = ampV * sech((x - rightWindowEdge) / transientWidth);
+		}
+		return result;
+	}
+	else if (window.type == "lorentzian") {
+		// in this case, the width is the standard lorentzian half width half max. 
+		auto lorentz = [&](double xx, double x0) {
+			double t = (xx - x0) / transientWidth;
+			return 1.0 / (1.0 + t * t);
+		};
+		if (x < leftWindowEdge) {
+			result = ampV * lorentz(x, leftWindowEdge);
+		}
+		else if (x <= rightWindowEdge) {
+			result = ampV;
+		}
+		else {
+			result = ampV * lorentz(x, rightWindowEdge);
+		}
+		return result;
+	}
+	else if (window.type == "linear") {
+		// in this case, the transient width is the ramp time. 
+		double riseStart = leftWindowEdge - transientWidth;
+		double fallEnd = rightWindowEdge + transientWidth;
+		if (x < riseStart) {
+			result = 0.0;
+		}
+		else if (x < leftWindowEdge) {
+			double t = (x - riseStart) / transientWidth;
+			result = ampV * t;
+		}
+		else if (x <= rightWindowEdge) {
+			result = ampV;
+		}
+		else if (x < fallEnd) {
+			double t = (fallEnd - x) / transientWidth;
+			result = ampV * t;
+		}
+		else {
+			result = 0.0;
+		}
+		return result;
+	}
+	else if (window.type == "quadratic") {
+		// in this case, the transient width is the tau in (x/tau)^2. 
+		double riseStart = leftWindowEdge - transientWidth;
+		double fallEnd = rightWindowEdge + transientWidth;
+		if (x < riseStart) {
+			result = 0.0;
+		}
+		else if (x < leftWindowEdge) {
+			double t = (x - riseStart) / transientWidth;
+			result = ampV * t * t;     
+		}
+		else if (x <= rightWindowEdge) {
+			result = ampV;
+		}
+		else if (x < fallEnd) {
+			double t = (fallEnd - x) / transientWidth;
+			result = ampV * t * t;
+		}
+		else {
+			result = 0.0;
+		}
+		return result;
+	}
+	else {
+		thrower("ERROR: window type " + window.type + " is unrecognized.\r\n");
+		return 0.0;
 	}
 }
 
@@ -158,6 +299,10 @@ void Segment::calcData( unsigned long sampleRate, unsigned varNum){
 			point = input.pulse.vOffset.getValue (varNum) + pulseCalc(input.pulse, dataInc, numDataPoints,
 				input.time.getValue (varNum) / 1e3, input.pulse.tOffset.getValue (varNum)/1000.0, varNum)
 				* modCalc(input.mod, dataInc, numDataPoints, input.time.getValue (varNum) / 1e3, varNum);
+		}
+		else if (input.window.isWindow) {
+			point = input.window.vOffset.getValue(varNum) + windowCalc(input.window, dataInc, numDataPoints,
+				input.time.getValue(varNum) / 1e3, input.window.tOffset.getValue(varNum) / 1000.0, varNum);
 		}
 		else{
 			point = input.holdVal.getValue (varNum);

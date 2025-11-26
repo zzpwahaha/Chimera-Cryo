@@ -38,6 +38,7 @@ bool ScriptedArbGenWaveform::analyzeAgilentScriptCommand( int segNum, ScriptStre
 		else if ( word == "hold" ){
 			workingInput.ramp.isRamp = false;
 			workingInput.pulse.isPulse = false;
+			workingInput.window.isWindow = false;
 			workingInput.mod.modulationIsOn = false;
 
 			script >> workingInput.holdVal;
@@ -47,6 +48,7 @@ bool ScriptedArbGenWaveform::analyzeAgilentScriptCommand( int segNum, ScriptStre
 			// this segment type means ramping.
 			workingInput.ramp.isRamp = true;
 			workingInput.pulse.isPulse = false;
+			workingInput.window.isWindow = false;
 			workingInput.mod.modulationIsOn = false;
 			script >> workingInput.ramp.type;
 			script >> workingInput.ramp.start;
@@ -57,6 +59,7 @@ bool ScriptedArbGenWaveform::analyzeAgilentScriptCommand( int segNum, ScriptStre
 		else if ( word == "pulse" ){
 			workingInput.ramp.isRamp = false;
 			workingInput.pulse.isPulse = true;
+			workingInput.window.isWindow = false;
 			workingInput.mod.modulationIsOn = false;
 			script >> workingInput.pulse.type;
 			script >> workingInput.pulse.vOffset;
@@ -68,9 +71,27 @@ bool ScriptedArbGenWaveform::analyzeAgilentScriptCommand( int segNum, ScriptStre
 			script >> workingInput.pulse.tOffset;
 			workingInput.pulse.tOffset.assertValid ( params, scope );
 		}
+		else if (word == "window") {
+			workingInput.ramp.isRamp = false;
+			workingInput.pulse.isPulse = false;
+			workingInput.window.isWindow = true;
+			workingInput.mod.modulationIsOn = false;
+			script >> workingInput.window.type;
+			script >> workingInput.window.vOffset;
+			workingInput.window.vOffset.assertValid(params, scope);
+			script >> workingInput.window.amplitude;
+			workingInput.window.amplitude.assertValid(params, scope);
+			script >> workingInput.window.transientWidth;
+			workingInput.window.transientWidth.assertValid(params, scope);
+			script >> workingInput.window.width;
+			workingInput.window.width.assertValid(params, scope);
+			script >> workingInput.window.tOffset;
+			workingInput.window.tOffset.assertValid(params, scope);
+		}
 		else if ( word == "modpulse" ){
 			workingInput.ramp.isRamp = false;
 			workingInput.pulse.isPulse = true;
+			workingInput.window.isWindow = false;
 			workingInput.mod.modulationIsOn = true;
 			script >> workingInput.pulse.type;
 			script >> workingInput.pulse.vOffset;

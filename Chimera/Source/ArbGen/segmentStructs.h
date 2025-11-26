@@ -35,8 +35,20 @@ struct segPulseInfo {
 	Expression tOffset;
 };
 
+struct segWindowInfo {
+	// can be "sech", "gaussian", or "lorentzian"
+	bool isWindow;
+	std::string type;
+	Expression amplitude;
+	Expression transientWidth;
+	Expression width;
+	Expression vOffset;
+	Expression tOffset;
+};
+
 struct segmentInfo {
 	segPulseInfo pulse;
+	segWindowInfo window;
 	segModInfo mod;
 	rampInfo ramp;
 	Expression holdVal;

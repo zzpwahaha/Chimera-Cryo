@@ -26,7 +26,7 @@ const arbGenSettings UWAVE_AGILENT_SETTINGS = {
 	// usb/tcpip address
 	/*UWAVE_SIGLENT_ADDRESS*/UWAVE_AGILENT_ADDRESS,
 	// sample rate in hertz
-	1e6,
+	60e6,
 	// Memory location, whether the device will save waveforms to 
 	// the internal 64MB Memory buffer or to an external USB drive, which
 	// can (obviously) have much more space.
@@ -44,7 +44,8 @@ const arbGenSettings UWAVE_AGILENT_SETTINGS = {
 	"Trigger1:Source external", "Trigger1:Slope Positive",
 	"Source1:burst:state off",  "Source2:burst:state off",
 	"output1:load INF", "output2:load INF", 
-	"SOURCE1:FUNC:ARB:FILTER Normal", "SOURCE2:FUNC:ARB:FILTER Normal" }
+	"SOURCE1:FUNC:ARB:FILTER Normal", "SOURCE2:FUNC:ARB:FILTER Normal"/*,
+	"SOURCE1:FUNC:ARB:ADV TRIG", "SOURCE2:FUNC:ARB:ADV TRIG"*/}
 };
 
 const arbGenSettings UWAVE_SIGLENT_SETTINGS = {
@@ -53,7 +54,7 @@ const arbGenSettings UWAVE_SIGLENT_SETTINGS = {
 	// usb/tcpip address
 	UWAVE_SIGLENT_ADDRESS/*UWAVE_AGILENT_ADDRESS*/,
 	// sample rate in hertz
-	20e6,
+	75e6,
 	// Memory location, whether the device will save waveforms to 
 	// the internal 64MB Memory buffer or to an external USB drive, which
 	// can (obviously) have much more space.

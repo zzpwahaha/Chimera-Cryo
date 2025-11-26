@@ -19,6 +19,7 @@ class Segment {
 		static void analyzeRampFile (rampInfo& ramp, long totalSamples);
 		double rampCalc(int totalIterations, int iteration, rampInfo ramp, unsigned varnum);
 		double pulseCalc( segPulseInfo pulse, int iteration, long size, double pulseLength, double center, unsigned varNum );
+		double windowCalc( segWindowInfo window, int iteration, long size, double pulseLength, double center, unsigned varNum );
 		double modCalc( segModInfo mod, int iteration, long size, double pulseLength, unsigned varNum );
 	private:
 		segmentInfo input;

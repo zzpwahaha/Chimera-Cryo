@@ -156,11 +156,31 @@ void ArbGenSystem::initialize(std::string headerText, IChimeraQtWindow* win)
 		}
 	});
 
+	auto triggerNow = new CQPushButton("Trigger", win);
+	win->connect(triggerNow, &QPushButton::released, [win, this]() {
+		win->reportStatus("----------------------\r\nTriggering ArbGen for " + qstr(pCore->getDelim()) + " ... ");
+		try {
+			double triggerPulseTime = 0.05;
+			auto triggerLine = pCore->getTriggerLine();
+			auto& doCore = win->auxWin->getTtlCore();
+			auto dostatus = win->auxWin->getTtlSystem().getCurrentStatus();
+			doCore.FPGAForcePulse(dostatus, std::vector<std::pair<unsigned, unsigned>>{triggerLine}, triggerPulseTime);
+			win->reportStatus("Finished Triggering ArbGen " + qstr(pCore->getDelim()) + " with " + qstr(triggerPulseTime, 5) + " ms .\r\n");
+		}
+		catch (ChimeraError& err) {
+			errBox(err.trace());
+			win->reportStatus(": " + err.qtrace() + "\r\n");
+			win->reportErr(qstr("Error while triggering ArbGen " + pCore->getDelim() + " List: " + err.trace() + "\r\n"));
+			win->mainWin->updateConfigurationSavedStatus(false);
+		}
+		});
+
 	layout2->addWidget(syncedButton, 0);
 	layout2->addWidget(calibratedButton, 0);
 	layout2->addWidget(burstButton, 0);
 	layout2->addWidget(polarityButton, 0);
 	layout2->addWidget(programNow, 0);
+	layout2->addWidget(triggerNow, 0);
 
 	layout->addLayout(layout2, 0);
 

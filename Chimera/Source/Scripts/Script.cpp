@@ -113,6 +113,7 @@ void Script::initialize(IChimeraQtWindow* parent, std::string deviceTypeInput, s
 						"- hold <val> <time(ms)> <Continuation Type> <Possibly Repeat #> <#>\n"
 						"- ramp <type> <initVal> <finVal(V)> <time(ms)> <Continuation Type> <Possibly Repeat #> <#>\n"
 						"- pulse <pulse type> <vOffset> <amp> <pulse-width> <time-offset (ms)> <time(ms)> <Continuation Type> <Possibly Repeat #> <#>\n"
+						"- window <window type> <vOffset> <amp> <transient-width> <window-width> <time-offset (ms)> <time(ms)> <Continuation Type> <Possibly Repeat #> <#>\n"
 						"- modPulse <pulse-type> <vOffset> <amp> <pulse-width> <t-offset (ms)> <mod-Freq(MHz)> <mod-Phase(Rad)> <time(ms)> <Continuation Type> <Repeat #>\n"
 						"The continuation type determines what the agilent does when it reaches the end of the <time> \n"
 						"argument. Accepted Values for the continuation type are:\n"
@@ -128,7 +129,15 @@ void Script::initialize(IChimeraQtWindow* parent, std::string deviceTypeInput, s
 						"Accepted pulse types are:\n"
 						"- sech, ~ sech(time/width)\n"
 						"- gaussian, width = gaussian sigma\n"
-						"- lorentzian, width = FWHM (curve is normalized)\n");
+						"- lorentzian, width = FWHM (curve is normalized)\n"
+						"Accepted window types are:\n"
+						"- sech, width = tau of the exponential\n"
+						"- gaussian, width = gaussian sigma\n"
+						"- lorentzian, width = HWHM\n"
+						"- cosine, width = half period of the cosine\n"
+						"- linear, width = ramp time\n"
+						"- quadratic, width = tau in (x/tau)^2\n"
+		);
 	}
 	else if (deviceType == "GMoog") {
 		help->setToolTip(">>> This is a script for programming the Gigamoogs. <<<\n"

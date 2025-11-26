@@ -270,7 +270,7 @@ void SiglentCore::handleScriptVariation(unsigned variation, scriptedArbInfo& scr
 	std::vector<parameterType>& params) {
 	prepArbGenSettings(channel);
 	/**********make sure be in DDS mode to change burst and sweep***********/
-	programSetupCommands();
+	//programSetupCommands();
 	if (scriptInfo.wave.isVaried() || variation == 0) 
 	{
 		unsigned totalSegmentNumber = scriptInfo.wave.getSegmentNumber();
