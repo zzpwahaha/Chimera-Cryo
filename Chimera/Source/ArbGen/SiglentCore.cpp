@@ -116,6 +116,7 @@ void SiglentCore::setDC(int channel, dcInfo info, unsigned var) {
 		visaFlume.write("C" + str(channel) + ":BSWV WVTP,DC,OFST,"
 			+ str(convertPowerToSetPoint(info.dcLevel.getValue(var), info.useCal, calibrations[channel - 1])) 
 			+ "V");
+		outputOn(channel);
 	}
 	catch (ChimeraError&) {
 		throwNested("Seen while programming DC for channel " + str(channel) + " (1-indexed).");

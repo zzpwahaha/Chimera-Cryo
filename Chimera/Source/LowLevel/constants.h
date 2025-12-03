@@ -83,13 +83,18 @@
 	//ArbGens
 	const bool UWAVE_SAFEMODE = true;
 	const bool UWAVE_SAFEMODE_SIG = false;
+	const bool UWAVE_SAFEMODE_SIG2 = false;
 	const bool UWAVE_SAFEMODE_AGI = false;
-	const int numArbGen = 2;
-	//const std::string UWAVE_AGILENT_ADDRESS = "TCPIP0::10.10.0.5::inst0::INSTR";
-	const std::string UWAVE_AGILENT_ADDRESS = "USB0::0x0957::0x2807::MY57400998::INSTR";
+	const int numArbGen = 3;
+	//const std::string UWAVE_AGILENT_ADDRESS = "USB0::0x0957::0x2807::MY57400998::INSTR";
+	const std::string UWAVE_AGILENT_ADDRESS = "TCPIP0::A-33512B-00998.local::inst0::INSTR";
 	const std::pair<unsigned, unsigned> UWAVE_AGILENT_TRIGGER_LINE = std::make_pair(7 - 1, 0); /*the first is the label on the box minus 1, has minus'd 1 explicitly */
-	const std::string UWAVE_SIGLENT_ADDRESS = "USB0::0xF4EC::0x1102::SDG2XCAC6R0238::INSTR";
+	//const std::string UWAVE_SIGLENT_ADDRESS = "USB0::0xF4EC::0x1102::SDG2XCAC6R0238::INSTR";
+	const std::string UWAVE_SIGLENT_ADDRESS = "TCPIP0::10.10.0.4::inst0::INSTR";
 	const std::pair<unsigned, unsigned> UWAVE_SIGLENT_TRIGGER_LINE = std::make_pair(7 - 1, 1); /*the first is the label on the box minus 1, has minus'd 1 explicitly */
+	const std::string UWAVE_SIGLENT2_ADDRESS = "TCPIP0::10.10.0.15::inst0::INSTR";
+	const std::pair<unsigned, unsigned> UWAVE_SIGLENT2_TRIGGER_LINE = std::make_pair(7 - 1, 1); /*the first is the label on the box minus 1, has minus'd 1 explicitly */
+
 	const std::string RAMP_LOCATION = str(CODE_ROOT) + "\\Ramp_Files\\";
 
 	//Analog in 
@@ -151,7 +156,7 @@
 	const bool ELLIPTEC_SAFEMODE = false;
 	const unsigned ELLIPTEC_CTRL_NUM = 2;
 	const std::array<std::string, ELLIPTEC_CTRL_NUM > ELLIPTEC_PORT = { "COM14", "COM16" };
-	const std::array<bool, 8> ELLIPTEC_CONNECTED = { true,true,true,true,true,true,false,false };
+	const std::array<bool, 8> ELLIPTEC_CONNECTED = { true,true,true,true,true,true,true,true };
 
 	//Temperature Monitor
 	const bool TEMPMON_SAFEMODE = false;

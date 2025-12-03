@@ -235,6 +235,7 @@ void AgilentCore::setDC (int channel, dcInfo info, unsigned var){
 	try {
 		visaFlume.write ("SOURce" + str (channel) + ":APPLy:DC DEF, DEF, "
 			+ str (convertPowerToSetPoint (info.dcLevel.getValue (var), info.useCal, calibrations[channel - 1])) + " V");
+		outputOn(channel);
 	}
 	catch (ChimeraError&) {
 		throwNested ("Seen while programming DC for channel " + str (channel) + " (1-indexed).");
