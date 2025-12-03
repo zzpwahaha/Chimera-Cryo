@@ -129,10 +129,10 @@ if __name__ == '__main__':
     # analysis_locs = da.DataAnalysis(year='2025', month='September', day='30', data_name='data_19', 
     #                                 window=window, thresholds=thresholds, binnings=binnings)
 
-    # grid_file_name = 'atomgrid_1x7_4points_2025-11-2'
-    # camera_image_dim = {'Left:':971, 'Right:':1150, 'H-Bin:':2, 'Bottom:': 923, 'Top:': 962, 'V-Bin:': 2}
-    # tweezer_intensity_setpoint = 0.61 #V
-    # repetitions = 8
+    grid_file_name = 'atomgrid_1x7_4points_2025-11-2'
+    camera_image_dim = {'Left:':971, 'Right:':1150, 'H-Bin:':2, 'Bottom:': 923, 'Top:': 962, 'V-Bin:': 2}
+    tweezer_intensity_setpoint = 0.61 #V
+    repetitions = 8
 
 
     # grid_file_name = 'atomgrid_7x11_5points_2025-11-7'

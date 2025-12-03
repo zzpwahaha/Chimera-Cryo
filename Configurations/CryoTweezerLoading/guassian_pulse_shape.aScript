@@ -2,7 +2,10 @@
 %pulse gaussian 0.0 10.0 0.01 0.05 0.1 onceWaitTrig #
 
 % window <pulse type> <vOffset> <amp> <transient-width> <window-width> <time-offset (ms)> <time(ms)> <Continuation Type> <Possibly Repeat #> <#>
-window quadratic 0.0 10.0 0.1/1000 0.3/1000 0.5/1000 1/1000 onceWaitTrig #
+var total_time 2.0 %us
+%var duty_cycle 0.3 
+var transition_time 0.3 %us
+window cosine 0.0 10.0 transition_time/1000 (total_time*(ryd420_stroboscopic_dutycycle/100)-transition_time*2)/1000 total_time*(ryd420_stroboscopic_dutycycle/100)/2/1000 total_time*(ryd420_stroboscopic_dutycycle/100)/1000 onceWaitTrig #
 
 %hold 0 0.01 onceWaitTrig #
 %hold 5 0.01 onceWaitTrig #

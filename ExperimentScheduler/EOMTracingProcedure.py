@@ -264,7 +264,8 @@ def procedure_onlymove1013(exp_idx):
 def procedure_onlymove420(exp_idx, amplitude_420, aom_start_420, eom_start_420=585, previous_f_420=None, eom_start_1013=120, previous_f_1013=None):
     EOM_START_420 = eom_start_420
     EOM_START_1013 = eom_start_1013
-    DETUNING_RANGE = [12,9,5,3,0,3,-5,-9,-10,-11,-12,-13] 
+    DETUNING_RANGE = [12,9,0,-9,-11,-13] 
+    # DETUNING_RANGE = [12,9,5,3,0,3,-5,-9,-10,-11,-12,-13] 
     # DETUNING_RANGE = [10,8,7,6,5,4,3,2,1,-1,-3,-5,-7] 
     # DETUNING_RANGE = [9,-9] 
     # DETUNING_RANGE = [12, 14, 10,8,6,4,2,0,-2,-4,-6,-8,-10, -11, -13] 

@@ -34,7 +34,7 @@ public:
     void setStaticDDSExpSetting(StaticDDSSettings tmpSetting); // used only for ProgramNow in StaticAOSystem
     void configureDDS();
 
-    const std::string configDelim = "STATIC_DDS_SYSTEM";
+    const std::string configDelim = "STATIC_DDS";
     const std::array<bool, size_t(StaticDDSGrid::numOFunit)> safemodes;
 private:
     std::string getDDSCommand(double ddsfreqVal);

@@ -30,7 +30,7 @@ public:
     std::string getDeviceInfo();
     void setStaticAOExpSetting(StaticAOSettings tmpSetting); // used only for ProgramNow in StaticAOSystem
 
-    const std::string configDelim = "STATIC_DAC_SYSTEM";
+    const std::string configDelim = "STATIC_DAC";
     const bool safemode;
 private:
     std::vector<unsigned char> getDACbytes(double dacVal);

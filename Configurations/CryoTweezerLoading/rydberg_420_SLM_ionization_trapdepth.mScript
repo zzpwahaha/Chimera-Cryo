@@ -44,7 +44,7 @@ t += 5
 off: Ryd420ExpShutter
 %on: Ryd1013Shutter
 off: Ryd420AWGchswitch
-dac: Ryd420Amp ryd420SetPoint %0.1 %0.55 %0.30 %0.34
+dac: Ryd420Amp ryd420_amplitude %ryd420SetPoint %0.1 %0.55 %0.30 %0.34
 dac: Ryd1013Amp zero1013SetPoint %2.0 %0.55 %0.60 %0.68
 
 var IQ_MAX_AMP 2.5
@@ -101,7 +101,7 @@ t += -0.95/1000 %time for 420 AOM to turn since the beam is quite far away from 
 
 on: do8_4 %dummy trigger for picoscope
 on: Ryd420Trg % scan to get Rabi
-t += 2/1000 %time_scan
+t += 0.1/1000 %2/1000 %time_scan
 off: Ryd420Trg
 off: do8_4 
 

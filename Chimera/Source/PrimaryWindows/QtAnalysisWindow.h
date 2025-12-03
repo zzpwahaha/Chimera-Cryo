@@ -42,7 +42,7 @@ public:
 	ExperimentSeqPlotter SeqPlotter;
 	StaticAoSystem staticDac;
 	StaticDdsSystem staticDds;
-	//StaticDasSystem staticDas;
+	StaticDasSystem staticDas;
 	ElliptecSystem elliptec;
 	MicrowaveSystem mwSys2;
 

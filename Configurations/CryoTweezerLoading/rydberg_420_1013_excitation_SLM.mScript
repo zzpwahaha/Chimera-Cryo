@@ -87,6 +87,7 @@ t += 0.1
 t += 10-1-1-0.1
 %%%% 1013 sample and hold %%%%
 
+on: Ryd420AWGchswitch
 t += 0.4
 on: SLMTweezerHold
 t += 0.101
@@ -196,12 +197,14 @@ t += 0.35/1000
 t += 1/1000
 on: do8_4 
 on: MWAmpTrg
+on: SiglentTrg
 t += -1/1000
 
 on: SLMTweezerTrg
 
 t += 0.01
 off: MWAmpTrg
+off: SiglentTrg
 off: do8_4 
 t += -0.01
 

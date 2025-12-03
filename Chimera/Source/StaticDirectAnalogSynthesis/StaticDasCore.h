@@ -35,7 +35,7 @@ public:
     std::string getDeviceInfo();
     void setStaticDASExpSetting(StaticDASSettings tmpSetting); // used only for ProgramNow in StaticAOSystem
 
-    const std::string configDelim = "STATIC_DAS_SYSTEM";
+    const std::string configDelim = "STATIC_DAS";
     const std::array<bool, size_t(StaticDASGrid::numOFunit)> safemodes;
 private:
     std::string getDASCommand(double dasfreqVal, int channel);
@@ -62,7 +62,7 @@ public:
         "PDN 1", /*PDN 1 turns the source on*/
         "OEN 1", /*Enables RF output buffer amplifiers while leaving the synthesizer PLL locked*/
         "PLEV 3", /*set relative power to largest*/
-        "ATT 3", /*set output attenuation: 0 dB attenuation = 15 dBm output power*/
+        "ATT 8.5", /*set output attenuation: 0 dB attenuation = 15 dBm output power*/
 
         "SOURCE2", /*set control controlling channel to Source 1*/
         "MODE CW", /*set to CW mode*/
@@ -77,7 +77,7 @@ public:
         "PDN 1", /*PDN 1 turns the source on*/
         "OEN 1", /*Enables RF output buffer amplifiers while leaving the synthesizer PLL locked*/
         "PLEV 3", /*set relative power to largest*/
-        "ATT 5", /*set output attenuation: 0 dB attenuation = 15 dBm output power*/
+        "ATT 17", /*set output attenuation: 0 dB attenuation = 15 dBm output power*/
 
         "SAVE",
     };
