@@ -35,6 +35,5 @@ private:
 	bool moveActive;
 	rearrangeLUT moveLUT;
 	rearrangeParameters moveParam;
-
 };
 

@@ -51,10 +51,10 @@ double rearrangeLUT::getFreqX(int xIndex, int yIndex)
 {
 	yIndex = (yIndex < 0) ? 0 : yIndex;
 	if (xIndex == -1) { //special handling for atom removal
-		return 60 + xOffset;
+		return 75 + xOffset;
 	}
 	else if (xIndex == -2) {
-		return 300 + xOffset;
+		return 125 + xOffset;
 	}
 	else if (xIndex < xDim && xIndex >= 0 && yIndex < yDim && yIndex >= 0) {
 		return roundToTwoDecimalPlaces(FTW_LUT[2 * xDim * yIndex + 2 * xIndex + 0] + xOffset);

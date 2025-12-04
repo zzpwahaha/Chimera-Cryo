@@ -29,7 +29,7 @@ moveSequence RearrangeGenerator::getRearrangeMoves(std::string rearrangeType)
 	positionsY = moveParam.initialPositionsY;
 	const auto& targetPositionsTemp = moveParam.targetPositions; //Make a copy of the target positions that can be modified.
 
-	filterAtomQueue();
+	filterAtomQueue(); 
 
 	if (rearrangeType == "scrunchx") {
 		scrunchX(moveseq);

@@ -12,8 +12,8 @@ struct rearrangeParameters {
 	std::vector<double> xOffsetManual, yOffsetManual;
 	unsigned repeatX, repeatY;
 
-	unsigned nTweezerX, nTweezerY, nFilterTweezerX, nFilterTweezerY;
-	std::vector<bool> initialPositionsX, initialPositionsY, initialPositions,
+	unsigned nTweezerLoadX, nTweezerLoadY, nTweezerX, nTweezerY, nFilterTweezerX, nFilterTweezerY;
+	std::vector<bool> loadPositionsX, loadPositionsY, initialPositionsX, initialPositionsY, initialPositions,
 		filterPositionsX, filterPositionsY;
 	unsigned targetNumber;
 	std::vector<unsigned char> targetPositions;

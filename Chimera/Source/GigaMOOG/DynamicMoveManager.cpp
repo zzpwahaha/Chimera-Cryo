@@ -17,7 +17,7 @@ bool DynamicMoveManager::analyzeMoogScript(std::string word, ScriptStream& curre
 	}
 
 	Expression ampStepNew, freqStepNew, ampStepPaintNew, freqStepPaintNew, repeatX, repeatY, xoff, yoff, yPaintStartExpr, yPaintEndExpr, scrunchSpacingExpression;
-	std::string tmp, initAOX, initAOY, filterAOX, filterAOY;
+	std::string tmp, loadAOX, loadAOY, initAOX, initAOY, filterAOX, filterAOY;
 	currentMoogScript >> moveParam.rearrangeMode;
 	auto rearrangeMode = moveParam.rearrangeMode;
 	if (rearrangeMode != "scrunchx" && rearrangeMode != "scrunchy" && rearrangeMode != "scrunchxy"
@@ -97,6 +97,48 @@ bool DynamicMoveManager::analyzeMoogScript(std::string word, ScriptStream& curre
 	}
 	else {
 		thrower("Error: must first specify y frequency offset.");
+	}
+
+	currentMoogScript >> tmp;
+	auto& loadPositionsX = moveParam.loadPositionsX;
+	if (tmp == "loadx") {
+		currentMoogScript >> loadAOX;
+		loadPositionsX.clear();
+		auto& nTweezerLoadX = moveParam.nTweezerLoadX;
+		for (auto& ch : loadAOX) { //convert string to boolean vector
+			if (ch == '0') {
+				loadPositionsX.push_back(0);
+			}
+			else if (ch == '1') {
+				loadPositionsX.push_back(1);
+				nTweezerLoadX++;
+			}
+			else { thrower("Error: non-boolean target value."); }
+		}
+	}
+	else {
+		thrower("Error: must first specify load x values.");
+	}
+
+	currentMoogScript >> tmp;
+	auto& loadPositionsY = moveParam.loadPositionsY;
+	if (tmp == "loady") {
+		currentMoogScript >> loadAOY;
+		loadPositionsY.clear();
+		auto& nTweezerLoadY = moveParam.nTweezerLoadY;
+		for (auto& ch : loadAOY) { //convert string to boolean vector
+			if (ch == '0') {
+				loadPositionsY.push_back(0);
+			}
+			else if (ch == '1') {
+				loadPositionsY.push_back(1);
+				nTweezerLoadY++;
+			}
+			else { thrower("Error: non-boolean target value."); }
+		}
+	}
+	else {
+		thrower("Error: must first specify load y values.");
 	}
 
 	currentMoogScript >> tmp;
@@ -418,7 +460,7 @@ void DynamicMoveManager::writeLoad(MessageSender& ms, unsigned variation)
 	updataParameterForVariation(variation);
 	//Write load settings based on initXY
 	size_t iTweezerX = 0, iMaskX = 0;
-	for (bool channelBool : moveParam.initialPositionsX) {
+	for (bool channelBool : moveParam.loadPositionsX) {
 		if (iTweezerX >= MAX_XTONES / moveParam.repeatX) {
 			thrower("For safety, maximum number of x tones is limited to " + str(MAX_XTONES) + " in rearrangement mode");
 		}
@@ -442,7 +484,7 @@ void DynamicMoveManager::writeLoad(MessageSender& ms, unsigned variation)
 	}
 
 	size_t iTweezerY = 0, iMaskY = 0;
-	for (bool channelBool : moveParam.initialPositionsY) {
+	for (bool channelBool : moveParam.loadPositionsY) {
 		if (iTweezerY >= MAX_YTONES / moveParam.repeatY) {
 			thrower("Exceeded MAX_YTONES (" + str(MAX_YTONES) + ") in rearrangement mode");
 		}
@@ -510,43 +552,73 @@ void DynamicMoveManager::writeMoveOff(MessageSender& ms)
 
 void DynamicMoveManager::checkTotalPower()
 {
-	size_t iTweezerX = 0, iMaskX = 0;
-	double totalPowerX = 0.0, maxPowerX = 0.0;
-	for (bool channelBool : moveParam.initialPositionsX) {
-		if (iTweezerX >= MAX_XTONES / moveParam.repeatX) {
+	size_t iLoadTweezerX = 0, iLoadMaskX = 0;
+	double totalLoadPowerX = 0.0, maxLoadPowerX = 0.0;
+	for (bool channelBool : moveParam.loadPositionsX) {
+		if (iLoadTweezerX >= MAX_XTONES / moveParam.repeatX) {
 			thrower("For safety, maximum number of x tones is limited to " + str(MAX_XTONES) + " in rearrangement mode");
 		}
 		if (channelBool) {
-			totalPowerX += moveParam.repeatX * moveParam.repeatX * moveLUT.getAmpX(iMaskX, 0) * moveLUT.getAmpX(iMaskX, 0);
-			iTweezerX++;
+			totalLoadPowerX += moveParam.repeatX * moveParam.repeatX * moveLUT.getAmpX(iLoadMaskX, 0) * moveLUT.getAmpX(iLoadMaskX, 0);
+			iLoadTweezerX++;
 		}
-		maxPowerX += moveParam.repeatX * moveParam.repeatX * moveLUT.getAmpX(iMaskX, 0) * moveLUT.getAmpX(iMaskX, 0);
-		iMaskX++;
+		maxLoadPowerX += moveParam.repeatX * moveParam.repeatX * moveLUT.getAmpX(iLoadMaskX, 0) * moveLUT.getAmpX(iLoadMaskX, 0);
+		iLoadMaskX++;
 	}
-	std::cout << "DynamicMoveManager::checkTotalPower: Total  power in X axis: " << str(totalPowerX) << ", maximum power in X axis: " << str(maxPowerX) << std::endl;
+	std::cout << "DynamicMoveManager::checkTotalPower: Total  power in X axis: " << str(totalLoadPowerX) << ", maximum power in X axis: " << str(maxLoadPowerX) << std::endl;
 
-	size_t iTweezerY = 0, iMaskY = 0;
-	double totalPowerY = 0.0, maxPowerY = 0.0;
-	for (bool channelBool : moveParam.initialPositionsY) {
-		if (iTweezerY >= MAX_YTONES / moveParam.repeatY) {
+	size_t iLoadTweezerY = 0, iLoadMaskY = 0;
+	double totalLoadPowerY = 0.0, maxLoadPowerY = 0.0;
+	for (bool channelBool : moveParam.loadPositionsY) {
+		if (iLoadTweezerY >= MAX_YTONES / moveParam.repeatY) {
 			thrower("For safety, maximum number of Y tones is limited to " + str(MAX_YTONES) + " in rearrangement mode");
 		}
 		if (channelBool) {
-			totalPowerY += moveParam.repeatY * moveParam.repeatY * moveLUT.getAmpY(iMaskY, 0) * moveLUT.getAmpY(iMaskY, 0);
-			iTweezerY++;
+			totalLoadPowerY += moveParam.repeatY * moveParam.repeatY * moveLUT.getAmpY(iLoadMaskY, 0) * moveLUT.getAmpY(iLoadMaskY, 0);
+			iLoadTweezerY++;
 		}
-		maxPowerY += moveParam.repeatY * moveParam.repeatY * moveLUT.getAmpY(iMaskY, 0) * moveLUT.getAmpY(iMaskY, 0);
-		iMaskY++;
+		maxLoadPowerY += moveParam.repeatY * moveParam.repeatY * moveLUT.getAmpY(iLoadMaskY, 0) * moveLUT.getAmpY(iLoadMaskY, 0);
+		iLoadMaskY++;
 	}
-	std::cout << "DynamicMoveManager::checkTotalPower: Total  power in Y axis: " << str(totalPowerY) << ", maximum power in Y axis: " << str(maxPowerY) << std::endl;
+	std::cout << "DynamicMoveManager::checkTotalPower: Total  power in Y axis: " << str(totalLoadPowerY) << ", maximum power in Y axis: " << str(maxLoadPowerY) << std::endl;
 
-	if (maxPowerX > 1.1 * MAX_XPOWER) {
-		thrower("Maximum power for the grid in the X axis is " + str(maxPowerX) + ", and is greater than 1.5W."
-			" If you believe it is fine, please change the alter threshold.");
+	//size_t iTweezerX = 0, iMaskX = 0;
+	//double totalPowerX = 0.0, maxPowerX = 0.0;
+	//for (bool channelBool : moveParam.initialPositionsX) {
+	//	if (iTweezerX >= MAX_XTONES / moveParam.repeatX) {
+	//		thrower("For safety, maximum number of x tones is limited to " + str(MAX_XTONES) + " in rearrangement mode");
+	//	}
+	//	if (channelBool) {
+	//		totalPowerX += moveParam.repeatX * moveParam.repeatX * moveLUT.getAmpX(iMaskX, 0) * moveLUT.getAmpX(iMaskX, 0);
+	//		iTweezerX++;
+	//	}
+	//	maxPowerX += moveParam.repeatX * moveParam.repeatX * moveLUT.getAmpX(iMaskX, 0) * moveLUT.getAmpX(iMaskX, 0);
+	//	iMaskX++;
+	//}
+	//std::cout << "DynamicMoveManager::checkTotalPower: Total  power in X axis: " << str(totalPowerX) << ", maximum power in X axis: " << str(maxPowerX) << std::endl;
+
+	//size_t iTweezerY = 0, iMaskY = 0;
+	//double totalPowerY = 0.0, maxPowerY = 0.0;
+	//for (bool channelBool : moveParam.initialPositionsY) {
+	//	if (iTweezerY >= MAX_YTONES / moveParam.repeatY) {
+	//		thrower("For safety, maximum number of Y tones is limited to " + str(MAX_YTONES) + " in rearrangement mode");
+	//	}
+	//	if (channelBool) {
+	//		totalPowerY += moveParam.repeatY * moveParam.repeatY * moveLUT.getAmpY(iMaskY, 0) * moveLUT.getAmpY(iMaskY, 0);
+	//		iTweezerY++;
+	//	}
+	//	maxPowerY += moveParam.repeatY * moveParam.repeatY * moveLUT.getAmpY(iMaskY, 0) * moveLUT.getAmpY(iMaskY, 0);
+	//	iMaskY++;
+	//}
+	//std::cout << "DynamicMoveManager::checkTotalPower: Total  power in Y axis: " << str(totalPowerY) << ", maximum power in Y axis: " << str(maxPowerY) << std::endl;
+
+	if (maxLoadPowerX > 1.1 * MAX_XPOWER) {
+		thrower("Maximum power for the grid in the X axis is " + str(maxLoadPowerX) + ", and is greater than 1.5W."
+			" If you believe it is fine, please change the alert threshold.");
 	}
-	if (totalPowerY > 1.1 * MAX_YPOWER) {
-		thrower("Maximum power for the grid in the Y axis is " + str(maxPowerY) + ", and is greater than 1.5W."
-			" If you believe it is fine, please change the alter threshold.");
+	if (maxLoadPowerY > 1.1 * MAX_YPOWER) {
+		thrower("Maximum power for the grid in the Y axis is " + str(maxLoadPowerY) + ", and is greater than 1.5W."
+			" If you believe it is fine, please change the alert threshold.");
 	}
 
 }
