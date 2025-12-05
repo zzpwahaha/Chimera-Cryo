@@ -1,7 +1,13 @@
 %%%%%%%%%%%%%%%%% Start With 1ms %%%%%%%%%%%%%%%%% 
 t = 1
 %call CryoMOTLoadingPGC()
-call CryoMOTEnhancedLoadingLGM()
+%call CryoMOTEnhancedLoadingLGM()
+%    call MOTLoadingAOD(t_loading)	
+%    call FreeSpaceLGMEnhancedLoading()
+
+	call MOTLoadingAOD(t_loading)	
+	call FreeSpacePGC(t_pgc_cool_time)
+
 call TOF(10)
 
 %%%%%%%%%%%%%%%  TOF  %%%%%%%%%%%%%%%%%%

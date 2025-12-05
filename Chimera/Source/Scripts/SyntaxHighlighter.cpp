@@ -46,7 +46,10 @@ SyntaxHighlighter::SyntaxHighlighter (ScriptableDevice device, QTextDocument* pa
 		addRules ({ "#" }, QColor (100, 100, 100), true, false);
 	}
 	else if (device == ScriptableDevice::GMoog) {
-		addRules({ "set", "setmove", "repeatx", "repeaty", "loadx", "loady", "initx", "inity", "rearrange", "targetstart", "targetend" } , QColor(108, 113, 196), true, true);
+		addRules({ "set", "setmove",  "xoffset", "yoffset",
+			"loadx", "loady", "initx", "inity", "rearrange", "targetstart", "targetend"}, QColor(108, 113, 196), true, true);
+		addRules({ "singlex_repeatx", "singlex_repeaty" }, QColor(245, 73, 39), true, true);
+		addRules({ "singley_repeatx", "singley_repeaty", }, QColor(39, 211, 245), true, true);
 		addRules({ "{", "}" }, QColor(181, 137, 0), true, true);
 		addRules({ "dac0","dac1","dac2","dac3" }, QColor(153, 115, 0), true, false);
 	}

@@ -52,27 +52,51 @@ bool DynamicMoveManager::analyzeMoogScript(std::string word, ScriptStream& curre
 	}
 
 	currentMoogScript >> tmp;
-	if (tmp == "repeatx") {
+	if (tmp == "singlex_repeatx") {
 		currentMoogScript >> repeatX;
 		if (repeatX.varies()) {
 			thrower("Error: Variation in variable " + repeatX.expressionStr + " is not allowed in rearrangement(gigamoog) script for now.");
 		}
-		moveParam.repeatX = static_cast<unsigned>(std::round(repeatX.evaluate(variables, variation)));
+		moveParam.singlexRepeatX = static_cast<unsigned>(std::round(repeatX.evaluate(variables, variation)));
 	}
 	else {
-		thrower("Error: must first specify number of repeats for tones in X axis.");
+		thrower("Error: must first specify number of repeats for tones in X axis when single X tone is one for move.");
 	}
 
 	currentMoogScript >> tmp;
-	if (tmp == "repeaty") {
+	if (tmp == "singlex_repeaty") {
 		currentMoogScript >> repeatY;
 		if (repeatY.varies()) {
 			thrower("Error: Variation in variable " + repeatY.expressionStr + " is not allowed in rearrangement(gigamoog) script for now.");
 		}
-		moveParam.repeatY = static_cast<unsigned>(std::round(repeatY.evaluate(variables, variation)));
+		moveParam.singlexRepeatY = static_cast<unsigned>(std::round(repeatY.evaluate(variables, variation)));
 	}
 	else {
-		thrower("Error: must first specify number of repeats for tones in X axis.");
+		thrower("Error: must first specify number of repeats for tones in Y axis when single X tone is one for move.");
+	}
+
+	currentMoogScript >> tmp;
+	if (tmp == "singley_repeatx") {
+		currentMoogScript >> repeatX;
+		if (repeatX.varies()) {
+			thrower("Error: Variation in variable " + repeatX.expressionStr + " is not allowed in rearrangement(gigamoog) script for now.");
+		}
+		moveParam.singleyRepeatX = static_cast<unsigned>(std::round(repeatX.evaluate(variables, variation)));
+	}
+	else {
+		thrower("Error: must first specify number of repeats for tones in X axis when single Y tone is one for move.");
+	}
+
+	currentMoogScript >> tmp;
+	if (tmp == "singley_repeaty") {
+		currentMoogScript >> repeatY;
+		if (repeatY.varies()) {
+			thrower("Error: Variation in variable " + repeatY.expressionStr + " is not allowed in rearrangement(gigamoog) script for now.");
+		}
+		moveParam.singleyRepeatY = static_cast<unsigned>(std::round(repeatY.evaluate(variables, variation)));
+	}
+	else {
+		thrower("Error: must first specify number of repeats for tones in Y axis when single Y tone is one for move.");
 	}
 
 	currentMoogScript >> tmp;
@@ -295,7 +319,7 @@ void DynamicMoveManager::writeRearrangeMoves(moveSequence input, MessageSender& 
 	MemoryController memoryDAC0;
 	MemoryController memoryDAC1;
 
-	if (nMoves > 256 / (3 * moveParam.repeatX) || nMoves > 256 / (3 * moveParam.repeatY)) {
+	if (nMoves > 256 / 3 || nMoves > 256 / 3) {
 		thrower("ERROR: too many moves for gmoog buffer");
 	}
 	writeMoveOff(ms);
@@ -307,7 +331,7 @@ void DynamicMoveManager::writeRearrangeMoves(moveSequence input, MessageSender& 
 	int ampstep, freqstep;
 
 	//step 0: turn off all load tones.
-	auto numChannelX = moveParam.nTweezerX * moveParam.repeatX;
+	auto numChannelX = 48; //moveParam.nTweezerX * moveParam.repeatX;
 	for (unsigned channel = 0; channel < numChannelX && channel < MAX_XTONES; channel++) {
 		size_t hardwareChannel = (channel * 8) % 48 + (channel * 8) / 48;
 		memoryDAC0.moveChannel(hardwareChannel / 8);
@@ -318,7 +342,7 @@ void DynamicMoveManager::writeRearrangeMoves(moveSequence input, MessageSender& 
 			.instantFTW(1).ATWIncr(-ampStepMag).stepSequenceID(0).FTWIncr(0).phaseJump(1);;
 		ms.enqueue(m);
 	}
-	auto numChannelY = moveParam.nTweezerY * moveParam.repeatY;
+	auto numChannelY = 48; // moveParam.nTweezerY* moveParam.repeatY;
 	for (unsigned channel = 0; channel < numChannelY && channel < MAX_YTONES; channel++) {
 		size_t hardwareChannel = (channel * 8) % 48 + (channel * 8) / 48;
 		memoryDAC1.moveChannel(hardwareChannel / 8);
@@ -333,14 +357,18 @@ void DynamicMoveManager::writeRearrangeMoves(moveSequence input, MessageSender& 
 	for (size_t stepID = 0; stepID < nMoves; stepID++) {
 		nx = input.moves[stepID].nx();
 		ny = input.moves[stepID].ny();
+		if (nx == 0 || ny == 0) {
+			thrower("Error in writeRearrangeMoves: seeing zero number of moves!");
+		}
+		auto [repeatX, repeatY] = moveParam.getRepeatXY(nx, ny);
 
 		//Get most hardware efficient channels to use. Also handle tripling up of tones.
-		std::vector<int> hardwareChannelsDAC0 = memoryDAC0.getNextChannels(nx * moveParam.repeatX);
-		std::vector<int> hardwareChannelsDAC1 = memoryDAC0.getNextChannels(ny * moveParam.repeatY);
+		std::vector<int> hardwareChannelsDAC0 = memoryDAC0.getNextChannels(nx * repeatX);
+		std::vector<int> hardwareChannelsDAC1 = memoryDAC0.getNextChannels(ny * repeatY);
 
 		//step 1: ramp up tones at initial locations and phases
-		for (int channel = 0; channel < nx * moveParam.repeatX && channel < MAX_XTONES; channel++) {
-			int logicalChannel = channel / moveParam.repeatX;
+		for (int channel = 0; channel < nx * repeatX && channel < MAX_XTONES; channel++) {
+			int logicalChannel = channel / repeatX;
 			size_t hardwareChannel = hardwareChannelsDAC0[channel];
 
 			freq = moveLUT.getFreqX(input.moves[stepID].startAOX[logicalChannel], input.moves[stepID].startAOY[0]);
@@ -354,8 +382,8 @@ void DynamicMoveManager::writeRearrangeMoves(moveSequence input, MessageSender& 
 				.instantFTW(1).ATWIncr(ampStepMag).stepSequenceID(3 * stepID + 1).FTWIncr(0).phaseJump(1);;
 			ms.enqueue(m);
 		}
-		for (int channel = 0; channel < ny * moveParam.repeatY && channel < MAX_YTONES; channel++) {
-			int logicalChannel = channel / moveParam.repeatY;
+		for (int channel = 0; channel < ny * repeatY && channel < MAX_YTONES; channel++) {
+			int logicalChannel = channel / repeatY;
 			size_t hardwareChannel = hardwareChannelsDAC1[channel];
 
 			freq = moveLUT.getFreqY(input.moves[stepID].startAOX[0], input.moves[stepID].startAOY[logicalChannel]);
@@ -371,8 +399,8 @@ void DynamicMoveManager::writeRearrangeMoves(moveSequence input, MessageSender& 
 		}
 
 		//step 2: ramp to new locations
-		for (int channel = 0; channel < nx * moveParam.repeatX && channel < MAX_XTONES; channel++) {
-			int logicalChannel = channel / moveParam.repeatX;
+		for (int channel = 0; channel < nx * repeatX && channel < MAX_XTONES; channel++) {
+			int logicalChannel = channel / repeatX;
 			size_t hardwareChannel = hardwareChannelsDAC0[channel];
 
 			freqPrev = moveLUT.getFreqX(input.moves[stepID].startAOX[logicalChannel], input.moves[stepID].startAOY[0]);
@@ -391,8 +419,8 @@ void DynamicMoveManager::writeRearrangeMoves(moveSequence input, MessageSender& 
 				.instantFTW(0).ATWIncr(ampstep).stepSequenceID(3 * stepID + 1 + 1).FTWIncr(freqstep).phaseJump(0);;
 			ms.enqueue(m);
 		}
-		for (int channel = 0; channel < ny * moveParam.repeatY && channel < MAX_YTONES; channel++) {
-			int logicalChannel = channel / moveParam.repeatY;
+		for (int channel = 0; channel < ny * repeatY && channel < MAX_YTONES; channel++) {
+			int logicalChannel = channel / repeatY;
 			size_t hardwareChannel = hardwareChannelsDAC1[channel];
 
 			freqPrev = moveLUT.getFreqY(input.moves[stepID].startAOX[0], input.moves[stepID].startAOY[logicalChannel]);
@@ -413,8 +441,8 @@ void DynamicMoveManager::writeRearrangeMoves(moveSequence input, MessageSender& 
 		}
 
 		//step 3: ramp all tones to 0
-		for (int channel = 0; channel < nx * moveParam.repeatX && channel < MAX_XTONES; channel++) {
-			int logicalChannel = channel / moveParam.repeatX;
+		for (int channel = 0; channel < nx * repeatX && channel < MAX_XTONES; channel++) {
+			int logicalChannel = channel / repeatX;
 			size_t hardwareChannel = hardwareChannelsDAC0[channel];
 			freq = moveLUT.getFreqX(input.moves[stepID].endAOX[logicalChannel], input.moves[stepID].endAOY[0]);
 			Message m = Message::make().destination(MessageDestination::KA007)
@@ -425,8 +453,8 @@ void DynamicMoveManager::writeRearrangeMoves(moveSequence input, MessageSender& 
 			ms.enqueue(m);
 			//Has trouble with ramping to 0 amp for some reason - set to ~1 LSB = 100/65535.
 		}
-		for (int channel = 0; channel < ny * moveParam.repeatY && channel < MAX_YTONES; channel++) {
-			int logicalChannel = channel / moveParam.repeatY;
+		for (int channel = 0; channel < ny * repeatY && channel < MAX_YTONES; channel++) {
+			int logicalChannel = channel / repeatY;
 			size_t hardwareChannel = hardwareChannelsDAC1[channel];
 			freq = moveLUT.getFreqY(input.moves[stepID].endAOX[0], input.moves[stepID].endAOY[logicalChannel]);
 			Message m = Message::make().destination(MessageDestination::KA007)
@@ -458,16 +486,18 @@ void DynamicMoveManager::writeRearrangeMoves(moveSequence input, MessageSender& 
 void DynamicMoveManager::writeLoad(MessageSender& ms, unsigned variation)
 {
 	updataParameterForVariation(variation);
-	//Write load settings based on initXY
+	auto [repeatX, repeatY] = moveParam.getRepeatXY(moveParam.nTweezerLoadX, moveParam.nTweezerLoadY);
+	
+	//Write load settings based on loadXY
 	size_t iTweezerX = 0, iMaskX = 0;
 	for (bool channelBool : moveParam.loadPositionsX) {
-		if (iTweezerX >= MAX_XTONES / moveParam.repeatX) {
+		if (iTweezerX >= MAX_XTONES / repeatX) {
 			thrower("For safety, maximum number of x tones is limited to " + str(MAX_XTONES) + " in rearrangement mode");
 		}
 		if (channelBool) {
 			double phase = fmod(180 * pow(iTweezerX + 1, 2) / moveParam.nTweezerX, 360); //this assumes comb of even tones.
-			for (size_t r = 0; r < moveParam.repeatX; r++) {
-				size_t toneIdx = iTweezerX * moveParam.repeatX + r;
+			for (size_t r = 0; r < repeatX; r++) {
+				size_t toneIdx = iTweezerX * repeatX + r;
 				size_t hardwareChannel = (toneIdx * 8) % 48 + (toneIdx * 8) / 48;
 				Message m = Message::make().destination(MessageDestination::KA007)
 					.DAC(MessageDAC::DAC0).channel(hardwareChannel)
@@ -485,13 +515,13 @@ void DynamicMoveManager::writeLoad(MessageSender& ms, unsigned variation)
 
 	size_t iTweezerY = 0, iMaskY = 0;
 	for (bool channelBool : moveParam.loadPositionsY) {
-		if (iTweezerY >= MAX_YTONES / moveParam.repeatY) {
+		if (iTweezerY >= MAX_YTONES / repeatY) {
 			thrower("Exceeded MAX_YTONES (" + str(MAX_YTONES) + ") in rearrangement mode");
 		}
 		if (channelBool) {
 			double phase = fmod(180 * pow(iTweezerY + 1, 2) / moveParam.nTweezerY, 360);
-			for (size_t r = 0; r < moveParam.repeatY; ++r) {
-				size_t toneIdx = iTweezerY * moveParam.repeatY + r;
+			for (size_t r = 0; r < repeatY; ++r) {
+				size_t toneIdx = iTweezerY * repeatY + r;
 				size_t hardwareChannel = (toneIdx * 8) % 48 + (toneIdx * 8) / 48;
 				Message m = Message::make().destination(MessageDestination::KA007)
 					.DAC(MessageDAC::DAC1).channel(hardwareChannel)
@@ -552,17 +582,18 @@ void DynamicMoveManager::writeMoveOff(MessageSender& ms)
 
 void DynamicMoveManager::checkTotalPower()
 {
+	auto [repeatX, repeatY] = moveParam.getRepeatXY(moveParam.nTweezerLoadX, moveParam.nTweezerLoadY);
 	size_t iLoadTweezerX = 0, iLoadMaskX = 0;
 	double totalLoadPowerX = 0.0, maxLoadPowerX = 0.0;
 	for (bool channelBool : moveParam.loadPositionsX) {
-		if (iLoadTweezerX >= MAX_XTONES / moveParam.repeatX) {
+		if (iLoadTweezerX >= MAX_XTONES / repeatX) {
 			thrower("For safety, maximum number of x tones is limited to " + str(MAX_XTONES) + " in rearrangement mode");
 		}
 		if (channelBool) {
-			totalLoadPowerX += moveParam.repeatX * moveParam.repeatX * moveLUT.getAmpX(iLoadMaskX, 0) * moveLUT.getAmpX(iLoadMaskX, 0);
+			totalLoadPowerX += repeatX * repeatX * moveLUT.getAmpX(iLoadMaskX, 0) * moveLUT.getAmpX(iLoadMaskX, 0);
 			iLoadTweezerX++;
 		}
-		maxLoadPowerX += moveParam.repeatX * moveParam.repeatX * moveLUT.getAmpX(iLoadMaskX, 0) * moveLUT.getAmpX(iLoadMaskX, 0);
+		maxLoadPowerX += repeatX * repeatX * moveLUT.getAmpX(iLoadMaskX, 0) * moveLUT.getAmpX(iLoadMaskX, 0);
 		iLoadMaskX++;
 	}
 	std::cout << "DynamicMoveManager::checkTotalPower: Total  power in X axis: " << str(totalLoadPowerX) << ", maximum power in X axis: " << str(maxLoadPowerX) << std::endl;
@@ -570,14 +601,14 @@ void DynamicMoveManager::checkTotalPower()
 	size_t iLoadTweezerY = 0, iLoadMaskY = 0;
 	double totalLoadPowerY = 0.0, maxLoadPowerY = 0.0;
 	for (bool channelBool : moveParam.loadPositionsY) {
-		if (iLoadTweezerY >= MAX_YTONES / moveParam.repeatY) {
+		if (iLoadTweezerY >= MAX_YTONES / repeatY) {
 			thrower("For safety, maximum number of Y tones is limited to " + str(MAX_YTONES) + " in rearrangement mode");
 		}
 		if (channelBool) {
-			totalLoadPowerY += moveParam.repeatY * moveParam.repeatY * moveLUT.getAmpY(iLoadMaskY, 0) * moveLUT.getAmpY(iLoadMaskY, 0);
+			totalLoadPowerY += repeatY * repeatY * moveLUT.getAmpY(iLoadMaskY, 0) * moveLUT.getAmpY(iLoadMaskY, 0);
 			iLoadTweezerY++;
 		}
-		maxLoadPowerY += moveParam.repeatY * moveParam.repeatY * moveLUT.getAmpY(iLoadMaskY, 0) * moveLUT.getAmpY(iLoadMaskY, 0);
+		maxLoadPowerY += repeatY * repeatY * moveLUT.getAmpY(iLoadMaskY, 0) * moveLUT.getAmpY(iLoadMaskY, 0);
 		iLoadMaskY++;
 	}
 	std::cout << "DynamicMoveManager::checkTotalPower: Total  power in Y axis: " << str(totalLoadPowerY) << ", maximum power in Y axis: " << str(maxLoadPowerY) << std::endl;
@@ -612,12 +643,12 @@ void DynamicMoveManager::checkTotalPower()
 	//}
 	//std::cout << "DynamicMoveManager::checkTotalPower: Total  power in Y axis: " << str(totalPowerY) << ", maximum power in Y axis: " << str(maxPowerY) << std::endl;
 
-	if (maxLoadPowerX > 1.1 * MAX_XPOWER) {
-		thrower("Maximum power for the grid in the X axis is " + str(maxLoadPowerX) + ", and is greater than 1.5W."
+	if (totalLoadPowerX > 1.1 * MAX_XPOWER) {
+		thrower("Maximum power for the grid in the X axis is " + str(totalLoadPowerX) + ", and is greater than 1.5W."
 			" If you believe it is fine, please change the alert threshold.");
 	}
-	if (maxLoadPowerY > 1.1 * MAX_YPOWER) {
-		thrower("Maximum power for the grid in the Y axis is " + str(maxLoadPowerY) + ", and is greater than 1.5W."
+	if (totalLoadPowerY > 1.1 * MAX_YPOWER) {
+		thrower("Maximum power for the grid in the Y axis is " + str(totalLoadPowerY) + ", and is greater than 1.5W."
 			" If you believe it is fine, please change the alert threshold.");
 	}
 

@@ -1,0 +1,27 @@
+%rearrange mode scrunchspacing amprate moverate 
+rearrange centerscrunchx 1 6000 50 
+%rearrange scrunchx 1 6000 50 
+singlex_repeatx 8
+singlex_repeaty 3
+
+singley_repeatx 3
+singley_repeaty 8
+xoffset 0+0 %aod_dac0_freq
+yoffset 0+0 %aod_dac1_freq
+
+loadx   1111111 
+loady   00001
+
+initx   1111111
+inity   11111
+
+filterx 1111111
+filtery 10000
+
+targetstart 
+0011100
+0011100
+0011100
+0011100
+0011100
+targetend 

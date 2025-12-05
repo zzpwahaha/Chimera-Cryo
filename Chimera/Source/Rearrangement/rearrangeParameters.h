@@ -10,11 +10,17 @@ struct rearrangeParameters {
 
 	double xOffset, yOffset;
 	std::vector<double> xOffsetManual, yOffsetManual;
-	unsigned repeatX, repeatY;
+	unsigned singlexRepeatX, singlexRepeatY; // number of repeat when the move involves single x tone
+	unsigned singleyRepeatX, singleyRepeatY; // number of repeat when the move involves single y tone
 
 	unsigned nTweezerLoadX, nTweezerLoadY, nTweezerX, nTweezerY, nFilterTweezerX, nFilterTweezerY;
 	std::vector<bool> loadPositionsX, loadPositionsY, initialPositionsX, initialPositionsY, initialPositions,
 		filterPositionsX, filterPositionsY;
 	unsigned targetNumber;
 	std::vector<unsigned char> targetPositions;
+	inline std::pair<unsigned, unsigned> getRepeatXY(unsigned char nx, unsigned char ny) {
+		unsigned x_val = (nx == 1) ? singlexRepeatX : singleyRepeatX;
+		unsigned y_val = (ny == 1) ? singleyRepeatY : singlexRepeatY;
+		return { x_val, y_val };
+	};
 };

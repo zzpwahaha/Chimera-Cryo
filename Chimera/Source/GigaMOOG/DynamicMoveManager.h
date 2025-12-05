@@ -27,8 +27,8 @@ private:
 	void checkTotalPower();
 
 public:
-	const unsigned MAX_XTONES = 39; // could be changed to 48 if using more tones for rearrangement
-	const unsigned MAX_YTONES = 13; // could be changed to 48 if using more tones for rearrangement
+	const unsigned MAX_XTONES = 48; // could be changed to 48 if using more tones for rearrangement
+	const unsigned MAX_YTONES = 48; // could be changed to 48 if using more tones for rearrangement
 	const double MAX_XPOWER = 282000; // see 20250603 increase power to 1.5W, 2dB ch0, 3dB ch 1
 	const double MAX_YPOWER = 260000;
 private:
