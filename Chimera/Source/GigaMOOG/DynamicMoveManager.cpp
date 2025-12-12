@@ -22,7 +22,9 @@ bool DynamicMoveManager::analyzeMoogScript(std::string word, ScriptStream& curre
 	auto rearrangeMode = moveParam.rearrangeMode;
 	if (rearrangeMode != "scrunchx" && rearrangeMode != "scrunchy" && rearrangeMode != "scrunchxy"
 		&& rearrangeMode != "centerscrunchx" && rearrangeMode != "centerscrunchy"
-		&& rearrangeMode != "scrunchyx" && rearrangeMode != "centerscrunchyx" && rearrangeMode != "tetris") {
+		&& rearrangeMode != "scrunchyx" && rearrangeMode != "centerscrunchyx" 
+		&& rearrangeMode!="scrunchxtarget" && rearrangeMode != "tetris"
+		&& rearrangeMode != "tweezer1dinittest") {
 		thrower("Invalid rearrangement mode. Valid options are scrunchx, scrunchy, scrunchxy, scrunchyx, centerscrunchyx, and tetris.");
 	}
 
@@ -125,10 +127,11 @@ bool DynamicMoveManager::analyzeMoogScript(std::string word, ScriptStream& curre
 
 	currentMoogScript >> tmp;
 	auto& loadPositionsX = moveParam.loadPositionsX;
+	auto& nTweezerLoadX = moveParam.nTweezerLoadX;
 	if (tmp == "loadx") {
 		currentMoogScript >> loadAOX;
 		loadPositionsX.clear();
-		auto& nTweezerLoadX = moveParam.nTweezerLoadX;
+		nTweezerLoadX = 0;
 		for (auto& ch : loadAOX) { //convert string to boolean vector
 			if (ch == '0') {
 				loadPositionsX.push_back(0);
@@ -146,10 +149,11 @@ bool DynamicMoveManager::analyzeMoogScript(std::string word, ScriptStream& curre
 
 	currentMoogScript >> tmp;
 	auto& loadPositionsY = moveParam.loadPositionsY;
+	auto& nTweezerLoadY = moveParam.nTweezerLoadY;
 	if (tmp == "loady") {
 		currentMoogScript >> loadAOY;
 		loadPositionsY.clear();
-		auto& nTweezerLoadY = moveParam.nTweezerLoadY;
+		nTweezerLoadY = 0;
 		for (auto& ch : loadAOY) { //convert string to boolean vector
 			if (ch == '0') {
 				loadPositionsY.push_back(0);
@@ -305,6 +309,7 @@ bool DynamicMoveManager::analyzeMoogScript(std::string word, ScriptStream& curre
 	}
 	checkTotalPower();
 	writeLoad(ms, variation);
+	//writeMoveOff(ms); // clear move sequence in gigamoog, no matter whether will rearrange or not (depending on loaded atom number)
 	return true;
 }
 
@@ -352,13 +357,19 @@ void DynamicMoveManager::writeRearrangeMoves(moveSequence input, MessageSender& 
 			.frequencyMHz(0).amplitudePercent(0.01).phaseDegrees(0)
 			.instantFTW(1).ATWIncr(-ampStepMag).stepSequenceID(0).FTWIncr(0).phaseJump(1);;
 		ms.enqueue(m);
+		//std::cout << "setmove " << 0/*stepSequenceID*/ << " DAC1 "
+		//	<< hardwareChannel/*channel*/ << " " << 1/*instantFTW*/ << " " << 1/*phaseJump*/ << " "
+		//	<< 0.01/*amplitudePercent*/ << " " << -ampStepMag/*ATWIncr*/ << " "
+		//	<< 0/*frequencyMHz*/ << " " << 0/*FTWIncr*/ << " "
+		//	<< 0/*phaseDegrees*/ << std::endl;
 	}
 
 	for (size_t stepID = 0; stepID < nMoves; stepID++) {
 		nx = input.moves[stepID].nx();
 		ny = input.moves[stepID].ny();
 		if (nx == 0 || ny == 0) {
-			thrower("Error in writeRearrangeMoves: seeing zero number of moves!");
+			//thrower("Error in writeRearrangeMoves: seeing zero number of moves!");
+			continue;
 		}
 		auto [repeatX, repeatY] = moveParam.getRepeatXY(nx, ny);
 
@@ -396,6 +407,11 @@ void DynamicMoveManager::writeRearrangeMoves(moveSequence input, MessageSender& 
 				.frequencyMHz(freq).amplitudePercent(amp).phaseDegrees(phase)
 				.instantFTW(1).ATWIncr(ampStepMag).stepSequenceID(3 * stepID + 1).FTWIncr(0).phaseJump(1);;
 			ms.enqueue(m);
+			//std::cout << "setmove " << 3 * stepID + 1/*stepSequenceID*/ << " DAC1 "
+			//	<< hardwareChannel/*channel*/ << " " << 1/*instantFTW*/ << " " << 1/*phaseJump*/ << " "
+			//	<< amp/*amplitudePercent*/ << " " << ampStepMag/*ATWIncr*/ << " "
+			//	<< freq/*frequencyMHz*/ << " " << 0/*FTWIncr*/ << " "
+			//	<< phase/*phaseDegrees*/ << std::endl;
 		}
 
 		//step 2: ramp to new locations
@@ -438,6 +454,11 @@ void DynamicMoveManager::writeRearrangeMoves(moveSequence input, MessageSender& 
 				.frequencyMHz(freq).amplitudePercent(amp).phaseDegrees(0)
 				.instantFTW(0).ATWIncr(ampstep).stepSequenceID(3 * stepID + 2).FTWIncr(freqstep).phaseJump(0);
 			ms.enqueue(m);
+			//std::cout << "setmove " << 3 * stepID + 2/*stepSequenceID*/ << " DAC1 "
+			//	<< hardwareChannel/*channel*/ << " " << 0/*instantFTW*/ << " " << 0/*phaseJump*/ << " "
+			//	<< amp/*amplitudePercent*/ << " " << ampstep/*ATWIncr*/ << " "
+			//	<< freq/*frequencyMHz*/ << " " << freqstep/*FTWIncr*/ << " "
+			//	<< 0/*phaseDegrees*/ << std::endl;
 		}
 
 		//step 3: ramp all tones to 0
@@ -463,6 +484,11 @@ void DynamicMoveManager::writeRearrangeMoves(moveSequence input, MessageSender& 
 				.frequencyMHz(freq).amplitudePercent(0.01).phaseDegrees(0)  // near-zero amp (~1 LSB)
 				.instantFTW(1).ATWIncr(-ampStepMag).stepSequenceID(3 * stepID + 3).FTWIncr(0).phaseJump(0);
 			ms.enqueue(m);
+			//std::cout << "setmove " << 3 * stepID + 3/*stepSequenceID*/ << " DAC1 "
+			//	<< hardwareChannel/*channel*/ << " " << 1/*instantFTW*/ << " " << 0/*phaseJump*/ << " "
+			//	<< 0.01/*amplitudePercent*/ << " " << -ampStepMag/*ATWIncr*/ << " "
+			//	<< freq/*frequencyMHz*/ << " " << 0/*FTWIncr*/ << " "
+			//	<< 0/*phaseDegrees*/ << std::endl;
 		}
 	}
 	//additional snapshot ramping down all channels - unclear why needed, but prevents extra trigger issues.
@@ -480,6 +506,11 @@ void DynamicMoveManager::writeRearrangeMoves(moveSequence input, MessageSender& 
 			.frequencyMHz(0).amplitudePercent(0.01).phaseDegrees(0)
 			.instantFTW(1).ATWIncr(-ampStepMag).stepSequenceID(3 * (nMoves - 1) + 2 + 2).FTWIncr(0).phaseJump(1);;
 		ms.enqueue(m1);
+		//std::cout << "setmove " << 3 * (nMoves - 1) + 2 + 2/*stepSequenceID*/ << " DAC1 "
+		//	<< channel/*channel*/ << " " << 1/*instantFTW*/ << " " << 1/*phaseJump*/ << " "
+		//	<< 0.01/*amplitudePercent*/ << " " << -ampStepMag/*ATWIncr*/ << " "
+		//	<< 0/*frequencyMHz*/ << " " << 0/*FTWIncr*/ << " "
+		//	<< 0/*phaseDegrees*/ << std::endl;
 	}
 }
 
@@ -506,7 +537,7 @@ void DynamicMoveManager::writeLoad(MessageSender& ms, unsigned variation)
 					.amplitudePercent(moveLUT.getAmpX(iMaskX, 0))
 					.phaseDegrees(phase);
 				ms.enqueue(m);
-				//std::cout << "set DAC0 " << hardwareChannel << " " << moveLUT.getAmpX(iMaskX, 0) << " " << moveLUT.getFreqX(iMaskX, 0) << " " << phase << std::endl;
+				std::cout << "set DAC0 " << hardwareChannel << " " << moveLUT.getAmpX(iMaskX, 0) << " " << moveLUT.getFreqX(iMaskX, 0) << " " << phase << std::endl;
 			}
 			iTweezerX++;
 		}
@@ -530,7 +561,7 @@ void DynamicMoveManager::writeLoad(MessageSender& ms, unsigned variation)
 					.amplitudePercent(moveLUT.getAmpY(0, iMaskY))
 					.phaseDegrees(phase);
 				ms.enqueue(m);
-				std::cout << "set DAC1 " << hardwareChannel << " " << moveLUT.getAmpY(iMaskY, 0) << " " << moveLUT.getFreqY(iMaskY, 0) << " " << phase << std::endl;
+				std::cout << "set DAC1 " << hardwareChannel << " " << moveLUT.getAmpY(0, iMaskY) << " " << moveLUT.getFreqY(0, iMaskY) << " " << phase << std::endl;
 			}
 			iTweezerY++;
 		}
@@ -605,10 +636,10 @@ void DynamicMoveManager::checkTotalPower()
 			thrower("For safety, maximum number of Y tones is limited to " + str(MAX_YTONES) + " in rearrangement mode");
 		}
 		if (channelBool) {
-			totalLoadPowerY += repeatY * repeatY * moveLUT.getAmpY(iLoadMaskY, 0) * moveLUT.getAmpY(iLoadMaskY, 0);
+			totalLoadPowerY += repeatY * repeatY * moveLUT.getAmpY(0, iLoadMaskY) * moveLUT.getAmpY(0, iLoadMaskY);
 			iLoadTweezerY++;
 		}
-		maxLoadPowerY += repeatY * repeatY * moveLUT.getAmpY(iLoadMaskY, 0) * moveLUT.getAmpY(iLoadMaskY, 0);
+		maxLoadPowerY += repeatY * repeatY * moveLUT.getAmpY(0, iLoadMaskY) * moveLUT.getAmpY(0, iLoadMaskY);
 		iLoadMaskY++;
 	}
 	std::cout << "DynamicMoveManager::checkTotalPower: Total  power in Y axis: " << str(totalLoadPowerY) << ", maximum power in Y axis: " << str(maxLoadPowerY) << std::endl;

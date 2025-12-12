@@ -31,8 +31,14 @@ moveSequence RearrangeGenerator::getRearrangeMoves(std::string rearrangeType)
 
 	filterAtomQueue(); 
 
-	if (rearrangeType == "scrunchx") {
+	if (rearrangeType == "tweezer1dinittest") {
+		tweezer1DInitializationTest(moveseq);
+	}
+	else if (rearrangeType == "scrunchx") {
 		scrunchX(moveseq);
+	}
+	else if (rearrangeType == "scrunchxtarget") {
+		scrunchXTarget(moveseq);
 	}
 	else if (rearrangeType == "scrunchy") {
 		scrunchY(moveseq);
@@ -860,6 +866,62 @@ void RearrangeGenerator::scrunchYFixedLength(moveSequence& moveseq, int nPerColu
 	}
 }
 
+void RearrangeGenerator::scrunchXTarget(moveSequence& moveseq, bool constantMoves)
+{
+	const auto& positionsX = moveParam.initialPositionsX;
+	const auto& positionsY = moveParam.initialPositionsY;
+	auto targetPositionsTemp = moveParam.targetPositions;
+	const unsigned wx = positionsX.size();
+	const unsigned wy = positionsY.size();
+
+	int iy = 0;
+	for (auto const& channelBoolY : positionsY) {
+		if (channelBoolY) {
+			int nyTarget = 0;
+			for (int ix = 0; ix < wx; ix++) {
+				//count number of target sites in column.
+				if (targetPositionsTemp[ix + wx * iy]) {
+					nyTarget++;
+				}
+			}
+
+			moveSingle single;
+			int ix = 0;
+			for (auto const& channelBoolX : positionsX) {
+				if (channelBoolX && atomImage.image[ix + wx * iy]) {
+					single.startAOX.push_back(ix); //Place tweezers on all atoms in column
+					atomImage.image[ix + wx * iy] = 0; //remove atom from pickup location
+				}
+				ix++;
+			}
+			single.startAOY.push_back(iy); //Single tone in y
+			single.endAOY.push_back(iy); //y does not move
+			if (single.nx() > 0 || constantMoves) { moveseq.moves.push_back(single); }
+
+			int nAtomsInRow = moveseq.moves.back().nx();
+			int ixTarget = 0;
+			for (int ix2 = 0; ix2 < nAtomsInRow; ix2++) {
+				if (ix2 < (nAtomsInRow - nyTarget) / 2) {
+					//moveseq.moves.back().endAOY.push_back(-1); // remove atom from lower frequency side
+					moveseq.moves.back().endAOX.push_back(ix2); // same as above?
+				}
+				else if (nyTarget > 0) {
+					while (targetPositionsTemp[ixTarget + wx * iy] == 0) { ixTarget++; } //iterate to next target site
+					moveseq.moves.back().endAOX.push_back(ixTarget); //Move tweezer to target site
+					atomImage.image[ixTarget + wx * iy] = 1; //place atom in dropoff location
+					targetPositionsTemp[ixTarget + wx * iy] = 0; //remove target site
+					nyTarget--;
+				}
+				else {
+					//moveseq.moves.back().endAOY.push_back(-2); // remove atom from higher frequency side
+					moveseq.moves.back().endAOX.push_back(wx - (nAtomsInRow - ix2) - 2); // same as above but two sites away from edge?
+				}
+			}
+		}
+		iy++;
+	}
+}
+
 void RearrangeGenerator::scrunchYTarget(moveSequence& moveseq, bool constantMoves)
 {
 	const auto& positionsX = moveParam.initialPositionsX;
@@ -1015,4 +1077,34 @@ void RearrangeGenerator::filterReservoir(moveSequence& moveseq)
 	}
 
 	moveseq.moves.push_back(single);
+}
+
+void RearrangeGenerator::tweezer1DInitializationTest(moveSequence& moveseq)
+{
+	const auto& positions = moveParam.initialPositions;
+	const auto& positionsX = moveParam.initialPositionsX;
+	const auto& positionsY = moveParam.initialPositionsY;
+
+	int iy = 0;
+	for (auto const& channelBoolY : positionsY)
+	{
+		if (channelBoolY) {
+			//If first step, choose the rows with load tweezers. If not first step, choose the rows that atoms were scrunched to.
+			moveSingle single;
+			int ix = 0;
+			for (auto const& channelBoolX : positionsX) {
+				//Place tweezers on all atoms (picked up by initialPositionX and atom existance in image) in row
+				if (channelBoolX && atomImage.image[ix + positionsX.size() * iy]) {
+					single.startAOX.push_back(ix);
+					single.endAOX.push_back(ix);
+				}
+				ix++;
+			}
+			single.startAOY.push_back(iy); //Single tone in y
+			single.endAOY.push_back(iy); //y does not move
+			moveseq.moves.push_back(single);
+			break;
+		}
+		iy++;
+	}
 }

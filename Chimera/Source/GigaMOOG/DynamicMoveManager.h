@@ -20,10 +20,10 @@ public:
 	bool isMoveActive();
 	void updataParameterForVariation(unsigned variation);
 
+	void writeMoveOff(MessageSender& ms);
 private:
 	// write load for move with LUT
 	void writeLoad(MessageSender& ms, unsigned variation);
-	void writeMoveOff(MessageSender& ms);
 	void checkTotalPower();
 
 public:

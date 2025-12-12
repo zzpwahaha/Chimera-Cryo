@@ -166,7 +166,7 @@ void CruncherThreadWorker::handleImage (){
 void CruncherThreadWorker::handleRearrangement(AtomImage atomImage)
 {
 	// only start move procedure if gigamoog is in move script
-	if (!input->gmoog->moveManager.isMoveActive()) {
+	if (!input->gmoog->moveManager.isMoveActive() || !input->gmoog->experimentActive) {
 		return;
 	}
 	// only start move procedure with the first image per experiment sequence

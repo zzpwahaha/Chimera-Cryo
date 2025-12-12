@@ -24,11 +24,13 @@ private:
 	void scrunchX(moveSequence& moveseq, bool centered = false);
 	void scrunchY(moveSequence& moveseq, bool centered = false);
 	void scrunchYFixedLength(moveSequence& moveseq, int nPerColumn, bool centered = false);
+	void scrunchXTarget(moveSequence& moveseq, bool constantMoves = false);
 	void scrunchYTarget(moveSequence& moveseq, bool constantMoves = false);
 	void compressX(moveSequence& moveseq); // need to figure out WTF
 	void compressX2(moveSequence& moveseq);
 	void filterReservoir(moveSequence& moveseq);
 
+	void tweezer1DInitializationTest(moveSequence& moveseq); // This is only initializing and deinitializing tones at loaded atom location, no move is involved. only works for 1D (or first row)
 public:
 
 private:
