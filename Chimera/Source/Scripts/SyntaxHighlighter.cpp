@@ -52,6 +52,7 @@ SyntaxHighlighter::SyntaxHighlighter (ScriptableDevice device, QTextDocument* pa
 		addRules({ "singley_repeatx", "singley_repeaty", }, QColor(39, 211, 245), true, true);
 		addRules({ "{", "}" }, QColor(181, 137, 0), true, true);
 		addRules({ "dac0","dac1","dac2","dac3" }, QColor(153, 115, 0), true, false);
+		addRules({ "hardreset" }, QColor(66, 135, 245), true, true);
 	}
 
 	QTextCharFormat singleLineCommentFormat;

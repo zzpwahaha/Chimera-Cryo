@@ -91,6 +91,20 @@ void GigaMoogCore::programGMoogNow(std::string fileAddr, std::vector<parameterTy
 	doCore.FPGAForcePulse(dostatus, std::vector<std::pair<unsigned, unsigned>>{GM_TRIGGER_LINE[0]}, GM_TRIGGER_TIME);
 }
 
+void GigaMoogCore::resetMemory(DoCore& doCore, DOStatus dostatus)
+{
+	for (size_t i = 0; i < 1; i++) //write twice to reset both sets of memory.
+	{
+		MessageSender msReset;
+		writeOff(msReset);
+		moveManager.writeMoveOff(msReset);
+		writeTerminator(msReset);
+		send(msReset);
+	}
+	Sleep(100);
+	doCore.FPGAForcePulse(dostatus, std::vector<std::pair<unsigned, unsigned>>{GM_TRIGGER_LINE[0]}, GM_TRIGGER_TIME);
+}
+
 void GigaMoogCore::disconnectPort()
 {
 	//fpga.disconnect();
@@ -137,7 +151,7 @@ void GigaMoogCore::analyzeMoogScript(std::string fileAddr, std::vector<parameter
 
 bool GigaMoogCore::analyzeMoogScript(std::string word, ScriptStream& currentMoogScript, MessageSender& ms, std::vector<parameterType>& variables, unsigned variation)
 {
-	if (word != "set" && word != "setmove") {
+	if (word != "set" && word != "setmove" && word != "hardreset") {
 		return false;
 	}
 	while (!(currentMoogScript.peek() == EOF) || word != "__end__")
@@ -218,6 +232,16 @@ bool GigaMoogCore::analyzeMoogScript(std::string word, ScriptStream& currentMoog
 				.FTWIncr(round(freqIncr.evaluate(variables, variation)))
 				.phaseJump(static_cast<unsigned>(jumpPhase.evaluate(variables, variation) + 0.5));
 			ms.enqueue(m);
+		}
+		else if (word == "hardreset") {
+			for (size_t i = 0; i < 1; i++) //write twice to reset both sets of memory.
+			{
+				MessageSender msReset;
+				writeOff(msReset);
+				moveManager.writeMoveOff(msReset);
+				writeTerminator(msReset);
+				send(msReset);
+			}
 		}
 		else {
 			thrower("ERROR: unrecognized LOAD moog command: \"" + word + "\"");

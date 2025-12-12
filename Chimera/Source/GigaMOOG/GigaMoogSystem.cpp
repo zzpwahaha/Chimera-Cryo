@@ -36,15 +36,17 @@ void GigaMoogSystem::initialize(IChimeraQtWindow* win)
 	QPushButton* programNowBtn = new QPushButton("Program", win);
 	QPushButton* trigMoveBtn = new QPushButton("Trig Move", win);
 	QPushButton* trigLoadBtn = new QPushButton("Trig Load", win);
-	QPushButton* disconnectBtn= new QPushButton("Disconnect", win);
-	QPushButton* reconnectBtn = new QPushButton("Reconnect", win);
+	//QPushButton* disconnectBtn= new QPushButton("Disconnect", win);
+	//QPushButton* reconnectBtn = new QPushButton("Reconnect", win);
+	QPushButton* resetMemBtn = new QPushButton("Reset", win);
 	QHBoxLayout* layout1 = new QHBoxLayout();
 	layout1->setContentsMargins(0, 0, 0, 0);
 	layout1->addWidget(header, 1);
 	QHBoxLayout* layout2 = new QHBoxLayout();
 	layout2->setContentsMargins(0, 0, 0, 0);
-	layout2->addWidget(disconnectBtn, 0);
-	layout2->addWidget(reconnectBtn, 0);
+	layout2->addWidget(resetMemBtn, 0);
+	//layout2->addWidget(disconnectBtn, 0);
+	//layout2->addWidget(reconnectBtn, 0);
 	layout2->addWidget(trigLoadBtn, 0);
 	layout2->addWidget(trigMoveBtn, 0);
 	layout2->addWidget(programNowBtn, 0);
@@ -103,12 +105,13 @@ void GigaMoogSystem::initialize(IChimeraQtWindow* win)
 			win->mainWin->updateConfigurationSavedStatus(false);
 		}});
 
-
-	connect(disconnectBtn, &QPushButton::released, this, [this, win]() {
+	connect(resetMemBtn, &QPushButton::released, this, [this, win]() {
 		win->reportStatus("----------------------\r\nDisconnect GigaMoog... ");
 		try {
-			core.disconnectPort();
-			win->reportStatus("Disconnected GigaMoog \r\n");
+			auto& doCore = win->auxWin->getTtlCore();
+			auto dostatus = win->auxWin->getTtlSystem().getCurrentStatus();
+			core.resetMemory(doCore, dostatus);
+			win->reportStatus("Reset GigaMoog \r\n");
 		}
 		catch (ChimeraError& err) {
 			//errBox(err.trace());
@@ -116,17 +119,29 @@ void GigaMoogSystem::initialize(IChimeraQtWindow* win)
 		}
 		});
 
-	connect(reconnectBtn, &QPushButton::released, this, [this, win]() {
-		win->reportStatus("----------------------\r\nReconnect GigaMoog... ");
-		try {
-			core.reconnectPort();
-			win->reportStatus("Reconnected GigaMoog \r\n");
-		}
-		catch (ChimeraError& err) {
-			//errBox(err.trace());
-			win->reportErr(": " + err.qtrace() + "\r\n");
-		}
-		});
+	//connect(disconnectBtn, &QPushButton::released, this, [this, win]() {
+	//	win->reportStatus("----------------------\r\nDisconnect GigaMoog... ");
+	//	try {
+	//		core.disconnectPort();
+	//		win->reportStatus("Disconnected GigaMoog \r\n");
+	//	}
+	//	catch (ChimeraError& err) {
+	//		//errBox(err.trace());
+	//		win->reportErr(": " + err.qtrace() + "\r\n");
+	//	}
+	//	});
+
+	//connect(reconnectBtn, &QPushButton::released, this, [this, win]() {
+	//	win->reportStatus("----------------------\r\nReconnect GigaMoog... ");
+	//	try {
+	//		core.reconnectPort();
+	//		win->reportStatus("Reconnected GigaMoog \r\n");
+	//	}
+	//	catch (ChimeraError& err) {
+	//		//errBox(err.trace());
+	//		win->reportErr(": " + err.qtrace() + "\r\n");
+	//	}
+	//	});
 }
 
 void GigaMoogSystem::handleSaveConfig(ConfigStream& saveFile)
