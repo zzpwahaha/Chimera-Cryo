@@ -53,6 +53,18 @@ void GigaMoogCore::logSettings(DataLogger& logger, ExpThreadWorker* threadworker
 			logger.writeDataSet("Script Failed to load.", "GigaMoog-Script", GMOOGScipt);
 		}
 
+		H5::Group GMOOGLUT(GMoogGroup.createGroup("GMOOGLUT"));
+		auto [rawATWLUT, rawFTWLUT] = moveManager.getRawLUTs();
+		try {
+			logger.writeDataSet(rawATWLUT, "GigaMoog-ATWLUT", GMOOGLUT);
+			logger.writeDataSet(rawFTWLUT, "GigaMoog-FTWLUT", GMOOGLUT);
+		}
+		catch (ChimeraError&) {
+			// failed to open, that's probably fine, 
+			logger.writeDataSet("LUT Failed to load.", "GigaMoog-ATWLUT", GMOOGLUT);
+			logger.writeDataSet("LUT Failed to load.", "GigaMoog-FTWLUT", GMOOGLUT);
+		}
+
 	}
 	catch (H5::Exception err) {
 		logger.logError(err);

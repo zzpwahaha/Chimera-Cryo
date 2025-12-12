@@ -19,6 +19,7 @@ public:
 	rearrangeParameters getRearrangeParameters();
 	bool isMoveActive();
 	void updataParameterForVariation(unsigned variation);
+	std::pair<std::vector<double>, std::vector<double>> getRawLUTs();
 
 	void writeMoveOff(MessageSender& ms);
 private:

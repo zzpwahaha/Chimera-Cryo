@@ -109,7 +109,18 @@ double rearrangeLUT::getAmpY(int xIndex, int yIndex)
 	}
 }
 
+std::vector<double> rearrangeLUT::getRawATWLUT()
+{
+	return ATW_LUT;
+}
+
+std::vector<double> rearrangeLUT::getRawFTWLUT()
+{
+	return FTW_LUT;
+}
+
 double rearrangeLUT::roundToTwoDecimalPlaces(double value)
 {
+	//return value;
 	return std::round(value * 100.0) / 100.0;
 }

@@ -12,6 +12,8 @@ public:
 	double getAmpX(int xIndex, int yIndex);
 	double getAmpY(int xIndex, int yIndex);
 
+	std::vector<double> getRawATWLUT();
+	std::vector<double> getRawFTWLUT();
 private:
 	double roundToTwoDecimalPlaces(double value);
 public:

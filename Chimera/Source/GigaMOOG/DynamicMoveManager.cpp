@@ -712,3 +712,8 @@ void DynamicMoveManager::updataParameterForVariation(unsigned variation)
 		moveLUT.setOffset(moveParam.xOffset, moveParam.yOffset);
 	}
 }
+
+std::pair<std::vector<double>, std::vector<double>> DynamicMoveManager::getRawLUTs()
+{
+	return {moveLUT.getRawATWLUT(), moveLUT.getRawFTWLUT() };
+}
