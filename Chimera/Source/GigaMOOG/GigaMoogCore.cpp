@@ -163,12 +163,15 @@ void GigaMoogCore::analyzeMoogScript(std::string fileAddr, std::vector<parameter
 
 bool GigaMoogCore::analyzeMoogScript(std::string word, ScriptStream& currentMoogScript, MessageSender& ms, std::vector<parameterType>& variables, unsigned variation)
 {
-	if (word != "set" && word != "setmove" && word != "hardreset") {
+	std::string scope = GIGAMOOG_PARAMETER_SCOPE;
+	std::string warnings;
+	if (word != "set" && word != "setmove" && word != "var") {
 		return false;
 	}
 	while (!(currentMoogScript.peek() == EOF) || word != "__end__")
 	{
-		if (word == "set") {
+		if (ExpThreadWorker::handleVariableDeclaration(word, currentMoogScript, variables, scope, warnings)) {}
+		else if (word == "set") {
 			std::string DAC;
 			Expression channel, amplitude, frequency, phase;
 			currentMoogScript >> DAC;
@@ -176,6 +179,10 @@ bool GigaMoogCore::analyzeMoogScript(std::string word, ScriptStream& currentMoog
 			currentMoogScript >> amplitude;
 			currentMoogScript >> frequency;
 			currentMoogScript >> phase;
+
+			for (Expression* expr : { &channel, &amplitude, &frequency, &phase }) {
+				expr->assertValid(variables, GIGAMOOG_PARAMETER_SCOPE);
+			}
 
 			MessageDAC dacset;
 			if (DAC == "dac0") {
@@ -203,7 +210,7 @@ bool GigaMoogCore::analyzeMoogScript(std::string word, ScriptStream& currentMoog
 		else if (word == "setmove") {
 			std::string DAC;
 			Expression channel, amplitude, frequency, phase, ampIncr, freqIncr,
-				jumpFreq, jumpPhase, snapshotID;;
+				jumpFreq, jumpPhase, snapshotID;
 
 			currentMoogScript >> snapshotID;
 			currentMoogScript >> DAC;
@@ -215,6 +222,11 @@ bool GigaMoogCore::analyzeMoogScript(std::string word, ScriptStream& currentMoog
 			currentMoogScript >> frequency;
 			currentMoogScript >> freqIncr;
 			currentMoogScript >> phase;
+
+			for (Expression* expr : { &channel, &amplitude, &frequency, &phase, &ampIncr, &freqIncr,
+				&jumpFreq, &jumpPhase, &snapshotID }) {
+				expr->assertValid(variables, GIGAMOOG_PARAMETER_SCOPE);
+			}
 
 			MessageDAC dacset;
 			if (DAC == "dac0") {
@@ -245,21 +257,14 @@ bool GigaMoogCore::analyzeMoogScript(std::string word, ScriptStream& currentMoog
 				.phaseJump(static_cast<unsigned>(jumpPhase.evaluate(variables, variation) + 0.5));
 			ms.enqueue(m);
 		}
-		else if (word == "hardreset") {
-			for (size_t i = 0; i < 1; i++) //write twice to reset both sets of memory.
-			{
-				MessageSender msReset;
-				writeOff(msReset);
-				moveManager.writeMoveOff(msReset);
-				writeTerminator(msReset);
-				send(msReset);
-			}
-		}
 		else {
 			thrower("ERROR: unrecognized LOAD moog command: \"" + word + "\"");
 		}
 		word = "";
 		currentMoogScript >> word;
+	}
+	if (!warnings.empty()) {
+		emit errBox(qstr(warnings)); // probably fine to ignore the overwritten warning
 	}
 	return true;
 }

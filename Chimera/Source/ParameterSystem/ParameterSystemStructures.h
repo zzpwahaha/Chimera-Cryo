@@ -12,6 +12,7 @@
 #define DDS_PARAMETER_SCOPE "dds"
 #define NO_PARAMETER_SCOPE "__NO__"
 #define AGILENT_PARAMETER_SCOPE "agilent"
+#define GIGAMOOG_PARAMETER_SCOPE "gmoog"
 
 // individual to a given parameter.
 struct indvParamRangeInfo{
