@@ -337,9 +337,11 @@ void DynamicMoveManager::writeRearrangeMoves(moveSequence input, MessageSender& 
 
 	//step 0: turn off all load tones.
 	auto numChannelX = 48; //moveParam.nTweezerX * moveParam.repeatX;
-	for (unsigned channel = 0; channel < numChannelX && channel < MAX_XTONES; channel++) {
-		size_t hardwareChannel = (channel * 8) % 48 + (channel * 8) / 48;
-		memoryDAC0.moveChannel(hardwareChannel / 8);
+	for (unsigned channel = 0; channel < numChannelX /*&& channel < MAX_XTONES*/; channel++) {
+		//size_t hardwareChannel = (channel * 8) % 48 + (channel * 8) / 48;
+		//memoryDAC0.moveChannel(hardwareChannel / 8);
+		size_t hardwareChannel = channel;
+		memoryDAC0.moveChannel(hardwareChannel % 8);
 		Message m = Message::make().destination(MessageDestination::KA007)
 			.DAC(MessageDAC::DAC0).channel(hardwareChannel)
 			.setting(MessageSetting::MOVEFREQUENCY)
@@ -348,9 +350,11 @@ void DynamicMoveManager::writeRearrangeMoves(moveSequence input, MessageSender& 
 		ms.enqueue(m);
 	}
 	auto numChannelY = 48; // moveParam.nTweezerY* moveParam.repeatY;
-	for (unsigned channel = 0; channel < numChannelY && channel < MAX_YTONES; channel++) {
-		size_t hardwareChannel = (channel * 8) % 48 + (channel * 8) / 48;
-		memoryDAC1.moveChannel(hardwareChannel / 8);
+	for (unsigned channel = 0; channel < numChannelY /*&& channel < MAX_YTONES*/; channel++) {
+		//size_t hardwareChannel = (channel * 8) % 48 + (channel * 8) / 48;
+		//memoryDAC1.moveChannel(hardwareChannel / 8);
+		size_t hardwareChannel = channel;
+		memoryDAC1.moveChannel(hardwareChannel % 8);
 		Message m = Message::make().destination(MessageDestination::KA007)
 			.DAC(MessageDAC::DAC1).channel(hardwareChannel)
 			.setting(MessageSetting::MOVEFREQUENCY)

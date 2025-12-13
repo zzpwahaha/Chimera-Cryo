@@ -9,7 +9,7 @@
 int BSplineFit::count = 0;
 BSplineFit::BSplineFit(const BSplineFit& bsfit)
 {
-    qDebug() << "BSplineFit::BSplineFit(const BSplineFit& bsfit)";
+    //qDebug() << "BSplineFit::BSplineFit(const BSplineFit& bsfit)";
     emptyStart = bsfit.emptyStart;
     if (emptyStart) {
         return;
@@ -22,7 +22,7 @@ BSplineFit::BSplineFit(const BSplineFit& bsfit)
 
 BSplineFit& BSplineFit::operator=(const BSplineFit& bsfit)
 {
-    qDebug() << "BSplineFit& BSplineFit::operator=(const BSplineFit& bsfit)";
+    //qDebug() << "BSplineFit& BSplineFit::operator=(const BSplineFit& bsfit)";
     emptyStart = bsfit.emptyStart;
     if (!emptyStart) {
         initialize(bsfit.dataSize, bsfit.datax, bsfit.datay, bsfit.orderBSpline, bsfit.nBreak);
@@ -33,14 +33,14 @@ BSplineFit& BSplineFit::operator=(const BSplineFit& bsfit)
 
 BSplineFit::BSplineFit() : emptyStart(true)
 {
-    qDebug("BSplineFit::BSplineFit() : emptyStart(true) = 0x%08x, X = 0x%08x, count = %d", this, X, count);
+    //qDebug("BSplineFit::BSplineFit() : emptyStart(true) = 0x%08x, X = 0x%08x, count = %d", this, X, count);
     count++;
 }
 
 BSplineFit::~BSplineFit()
 {
     count--;
-    qDebug("BSplineFit::~BSplineFit() = 0x%16x, X = 0x%16x, count = %d", this, X, count);
+    //qDebug("BSplineFit::~BSplineFit() = 0x%16x, X = 0x%16x, count = %d", this, X, count);
     if (!emptyStart) {
         freeAll();
     }
@@ -69,7 +69,7 @@ BSplineFit::BSplineFit(BSplineFit&& bsfit)
     , bw(std::exchange(bsfit.bw, nullptr))
     , mw(std::exchange(bsfit.mw, nullptr))
 {
-    qDebug("BSplineFit::BSplineFit(BSplineFit&& bsfit) = 0x%08x, X = 0x%08x, count = %d, \n old = 0x%08x, old X = 0x%08x", this, X, count, &bsfit, bsfit.X);
+    //qDebug("BSplineFit::BSplineFit(BSplineFit&& bsfit) = 0x%08x, X = 0x%08x, count = %d, \n old = 0x%08x, old X = 0x%08x", this, X, count, &bsfit, bsfit.X);
     count++;
     //X = bsfit.X;
     //y = bsfit.y;

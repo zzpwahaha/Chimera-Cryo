@@ -14,7 +14,9 @@ public:
 private:
 	struct memBlock
 	{
-		int blockID; //each block contains 8 channels. 0-7, 8-15, 16-23, 24-31, 32-39, 40-47;
+		int blockID; //each block contains 6 channels. 
+		// 0-7, 8-15, 16-23, 24-31, 32-39, 40-47; <- This seems wrong ZZP 20251212
+		// block0 = [0,8,16,24,32,40], block1 = [1,9,17,25,33,41], ...; <- This seems correct ZZP 20251212
 		int channelID;
 		size_t usedMemory;
 		//constructor just takes block ID, and assumes memory starts out empty.
@@ -23,7 +25,8 @@ private:
 		bool operator < (const memBlock& mem) const;
 		
 	};
-
+	// return the most empty memblock to be used
+	memBlock& getMemBlock();
 	std::vector<memBlock> memBlocks;
 
 };
