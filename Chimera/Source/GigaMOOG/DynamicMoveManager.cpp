@@ -375,7 +375,7 @@ void DynamicMoveManager::writeRearrangeMoves(moveSequence input, MessageSender& 
 
 		//Get most hardware efficient channels to use. Also handle tripling up of tones.
 		std::vector<int> hardwareChannelsDAC0 = memoryDAC0.getNextChannels(nx * repeatX);
-		std::vector<int> hardwareChannelsDAC1 = memoryDAC0.getNextChannels(ny * repeatY);
+		std::vector<int> hardwareChannelsDAC1 = memoryDAC1.getNextChannels(ny * repeatY);
 
 		//step 1: ramp up tones at initial locations and phases
 		for (int channel = 0; channel < nx * repeatX && channel < MAX_XTONES; channel++) {
