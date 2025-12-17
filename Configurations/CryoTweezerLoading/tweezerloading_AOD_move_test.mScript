@@ -1,27 +1,20 @@
 %%%%%%%%%%%%%%%%% Start With 1ms %%%%%%%%%%%%%%%%% 
 t = 1
 %call CryoMOTLoadingPGC()
-
-call CryoMOTEnhancedLoadingLGM()
-
+%call CryoMOTEnhancedLoadingLGM()
 %    call MOTLoadingAOD(t_loading)	
 %    call FreeSpaceLGMEnhancedLoading()
-%
-%	call MOTLoadingAOD(t_loading)	
-%	call FreeSpacePGC(t_pgc_cool_time)
+
+	call MOTLoadingAOD(t_loading)	
+	call FreeSpacePGC(t_pgc_cool_time)
 
 call TOF(10)
 
 %%%%%%%%%%%%%%%  TOF  %%%%%%%%%%%%%%%%%%
 %call TOF(t_tof)
 
-%dacramp: SLMTweezerIntensity slm_twz_intensity slm_twz_intensity*0.2 10
-%t += 100
-%
-%dacramp: SLMTweezerIntensity slm_twz_intensity*0.2 slm_twz_intensity 10
 %%%%%%%%%%%%%%  PGC in Tweezer %%%%%%%%%%%%%%%%%%
 % change the field/laser freq parameter here because the previous section is TOF and no light is on
-
 call D2InTrapPGC(t_pgc_twz)
 % note the t_pgc_twz should be smaller than 100
 t += 100-t_pgc_twz
@@ -30,8 +23,6 @@ call D2InTrapPGCPrb(t_pgc_twz)
 % note the t_pgc_twz should be smaller than 100
 t += 100-t_pgc_twz
 
-
-t += 10
 %%%%%%%%%%%%%%  Image TWIZZER  %%%%%%%%%%%%%%%%%%
 % change the field/laser freq parameter here because the previous section is dark, i.e. 100-t_pgc_twz is larger than 4
 call PGCTweezerImaging()
@@ -41,7 +32,17 @@ call PGCTweezerImaging()
 %t += time_scan %100
 %dacramp: TweezerIntensity twz_intensity*fraction_scan twz_intensity 10
 %t += 10
+
 t += 100
+
+t += time_scan
+
+%on: TweezerHold
+%pulseon: GMMoveTrg 0.0005
+%t += 3000/1000
+%off: TweezerHold
+
+
 %%%%%%%%%%%%%%  PGC in Tweezer %%%%%%%%%%%%%%%%%%
 % change the field/laser freq parameter here because the previous section is TOF and no light is on
 call D2InTrapPGC(t_pgc_twz)
@@ -56,7 +57,6 @@ t += 100-t_pgc_twz
 %%%%%%%%%%%%%%  Image TWIZZER  %%%%%%%%%%%%%%%%%%
 % change the field/laser freq parameter here because the previous section is dark, i.e. 100-t_pgc_twz is larger than 4
 call PGCTweezerImaging()
-
 
 %%%%%%%%%%%%%%  END Sequence  %%%%%%%%%%%%%%%%%%
 t += 10

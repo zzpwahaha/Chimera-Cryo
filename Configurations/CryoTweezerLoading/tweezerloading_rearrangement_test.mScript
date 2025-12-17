@@ -3,7 +3,7 @@ t = 1
 %call CryoMOTLoadingPGC()
 call CryoMOTEnhancedLoadingLGM()
 
-t += -250
+t += -250-200 % 200 ms is for LGM loading/cooling
 
 % SLM image
 pulseon: Mako2 0.01
@@ -21,15 +21,15 @@ t += 1.1
 
 
 % holding the tweezer at amplitude_scan
-dac: TweezerIntensity twz_intensity %amplitude_scan %6.5
+dac: TweezerIntensity 4.3/37*20 %4.3/37*15 %1.2 %5.5 %twz_intensity %amplitude_scan %6.5
 t += 0.5
 on: TweezerTrg
 %pulseon: Mako2 0.01 
-t += 10.2
+t += 150.2
 on: TweezerHold
 t += 0.1
 off: TweezerTrg
-t += 250-1.1-1-0.2-1.1-0.5-10.2-0.1
+t += 250+200-1.1-1-0.2-1.1-0.5-150.2-0.1
 
 
 %%%%%%%%%%%%%%%  TOF  %%%%%%%%%%%%%%%%%%
@@ -51,104 +51,128 @@ t += 15
 call PGCTweezerImaging()
 t += 15 
 
+t += 300
+call D2InTrapPGCPrb(25)
+% note the t_pgc_twz should be smaller than 100
+t += 15
 
     dac: BiasCoilX pgc_twz_bias_x
     dac: BiasCoilY pgc_twz_bias_y 
     dac: BiasCoilZ pgc_twz_bias_z
-    on: PrbRepTrg
-    ol: ol_cooling d2_cooling_resonance+20-pgc_twz_olcool
-    ol: ol_repump d2_repump_resonance-20+pgc_twz_olrepump
 
-t += 10
+%%%%%%%%%%% PGC %%%%%%%%%%% 
+%    ol: ol_cooling d2_cooling_resonance+20-pgc_twz_olcool
+%    ol: ol_repump d2_repump_resonance-20+pgc_twz_olrepump
+%    on: PrbRepTrg
+%    on: PrbShutter
+%    on: PrbCoolShutter
+%    off: xyzMOTShutter
+%    dac: PrbAmp {pgcprb_twz_cool_amp_cal prb_pwr} 
+%    dac: PrbrepAmp 10 %pgcprb_twz_rep_amp
+%    t += t_shutter
+%%%%%%%%%%% PGC %%%%%%%%%%% 
 
-    on: PrbRepTrg
-    on: PrbShutter
-    on: PrbCoolShutter
-    off: xyzMOTShutter
-    dac: PrbAmp {pgcprb_twz_cool_amp_cal prb_pwr}
-    dac: PrbrepAmp 10 %pgcprb_twz_rep_amp
-    t += t_shutter
+%%%%%%%%%%% LGM %%%%%%%%%%% 
+%    off: xyzMOTShutter
+%    on: D1LGMPrbShutter
+%    off: D1LGMShutter
+%    on: D1LGMEOMTrg
+%    dac: D1LGMEOMAmp d1lgmprb_twz_rep_amp
+%    dac: D1LGMAmp d1lgmprb_twz_cool_amp
+%    ol: ol_D1LGM D1_LGMCooling_resonance-d1lgm_twz_olcool
+%    ol: ol_D1_repump Rb87_HFSplitting+d1lgm_twz_olrepump
+%    t += t_shutter
+%%%%%%%%%%% LGM %%%%%%%%%%% 
 
 
-var SLM_depth 3.5
 
-dacramp: SLMTweezerIntensity slm_twz_intensity SLM_depth 10
-t += 10
+%var SLM_depth 3.5
 
-% SLM image
-%pulseon: Mako2 0.01
-%t += 1.1
-
-%on: PrbTrg
-%pulseon: GMLoadTrg 0.0005
-%dac: TweezerIntensity 6.5
-%t += 1
-%on: TweezerTrg
-%t += 1 
-
-%dacramp: TweezerIntensity 0 4.5 10
+%dacramp: SLMTweezerIntensity slm_twz_intensity SLM_depth 10
 %t += 10
 
 
-%%t += 1
-%on: TweezerHold
-%t += 1
-%
-%% AOD full array image
-%off: TweezerTrg
-%t += 0.1
-%pulseon: Mako2 0.01 
-%t += 0.2
-%pulseon: TweezerTrg 0.1
-%t += 1.1
-%
 %t += 1
 
-pulseon: GMMoveTrg 0.0005
-t += 1
-off: PrbTrg
-on: TweezerTrg
 
-dacramp: SLMTweezerIntensity SLM_depth SLM_depth*fraction_scan 10
+
+dacramp: SLMTweezerIntensity slm_twz_intensity slm_twz_intensity*fraction_scan 10
 t += 10
 
+% this turns off RF tones from load2
+t += -1
+pulseon: GMMoveTrg 0.0005
+t += 1
+%on: TweezerTrg
+
+%on: PrbTrg
+%on: D1LGMTrg3
+%pulseon: do8_4 0.1
+
+%t += 0.1
+%pulseon: GMMoveTrg 0.0005
+%%on: TweezerTrg
+%pulseon: do8_4 0.001
+%t += 0.3 
+%on: TweezerTrg
+%t += 0.01
+%pulseon: GMMoveTrg 0.0005
+%%on: TweezerTrg
+%%t += 1.5+0.3+0.3
+%t += 10.5 % 1x37 180um
+%%t += time_scan
+%off: TweezerTrg
+%
+%pulseon: GMMoveTrg 0.0005
+%t += 0.3
+
+
+repeat: 1
+t += 0.01
 % initialize tones
 pulseon: GMMoveTrg 0.0005
-t += 0.1
-on: PrbTrg
-t += 0.5
-pulseon: do8_4 1
-
+pulseon: do8_4 0.001
+t += 0.3
 % move tones
+%on: PrbTrg
+t += 0.01
+on: TweezerTrg 
+t += 0.01
 pulseon: GMMoveTrg 0.0005
-t += 1.5
+pulseon: do8_4 0.001
+t += 5
+off: TweezerTrg
+t += 0.01
 off: PrbTrg
+% ramp down tones
+pulseon: GMMoveTrg 0.0005
+pulseon: do8_4 0.001
+t += 0.3
+
+end
 
 % after all rearrangement, this would turn off GM completely
-pulseon: GMMoveTrg 0.0005
-
-t += 1
-
-t += 1
+%pulseon: GMMoveTrg 0.0005
 off: TweezerTrg
+
+off: PrbTrg
+off: D1LGMTrg
+off: D1LGMEOMTrg
+off: PrbShutter
+off: D1LGMPrbShutter
+t += 1
+
 off: PrbTrg
 off: TweezerHold
 pulseon: GMLoadTrg 0.0005
 
 
-
-dacramp: SLMTweezerIntensity SLM_depth*fraction_scan SLM_depth 10
+dacramp: SLMTweezerIntensity slm_twz_intensity*fraction_scan slm_twz_intensity 10
 t += 10
-
-    t += 1
-    pulseon: DO1_0 1
-    off: PrbTrg
-    off: PrbShutter 
-
 
 t += 1
-dacramp: SLMTweezerIntensity SLM_depth slm_twz_intensity 10
-t += 10
+%dacramp: SLMTweezerIntensity SLM_depth slm_twz_intensity 10
+%t += 10
 
 %%%%%%%%%%%%%%  PGC in Tweezer with Probe %%%%%%%%%%%%%%%%%%
 % change the field/laser freq parameter here because the previous section is TOF and no light is on
@@ -160,16 +184,16 @@ t += 15
 call PGCTweezerImaging()
 
 
-t += 10
-
-repeat: 2
-pulseon: GMMoveTrg 0.0005
-t += 10
-end
-
-
-
-pulseon: GMMoveTrg 0.0005
+%t += 10
+%
+%repeat: 2
+%pulseon: GMMoveTrg 0.0005
+%t += 10
+%end
+%
+%
+%
+%pulseon: GMMoveTrg 0.0005
 
 %%%%%%%%%%%%%%  END Sequence  %%%%%%%%%%%%%%%%%%
 t += 10

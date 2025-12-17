@@ -1,0 +1,22 @@
+% set DAC, channel, amp, freq, phase
+% 20250606, 2dB ch0, 3dB ch 1 - 1.5W
+var delta_freq 1
+
+set DAC0 0  90.00  96.218-delta_freq/2 0.00
+set DAC0 1  90.00  96.218-delta_freq/2 0.00
+set DAC0 2  90.00  96.218-delta_freq/2 0.00
+set DAC0 3  90.00  96.218-delta_freq/2 0.00
+
+set DAC0 4  90.00  96.218+delta_freq/2 90.00
+set DAC0 5  90.00  96.218+delta_freq/2 90.00
+set DAC0 6  90.00  96.218+delta_freq/2 90.00
+set DAC0 7  90.00  96.218+delta_freq/2 90.00
+
+set DAC1 0  85.00  95.136 240.00
+set DAC1 1  85.00  95.136 240.00
+set DAC1 2  85.00  95.136 240.00
+set DAC1 3  85.00  95.136 240.00
+set DAC1 4  85.00  95.136 240.00
+set DAC1 5  85.00  95.136 240.00
+
+%hardreset

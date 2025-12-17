@@ -1,0 +1,135 @@
+% set DAC, channel, amp, freq, phase
+% setmove stepID, DAC, channel, fjump, pjump, amp, astep, freq, fstep, phase
+
+%set DAC0 0  72.46  80.24   4.90
+%set DAC0 1  70.11  81.24  19.50
+%set DAC0 2  68.53  82.24  43.80
+%set DAC0 3  67.50  83.24  77.80
+%set DAC0 4  66.79  84.24 121.60
+%set DAC0 5  66.63  85.24 175.10
+%set DAC0 6  68.22  86.24 238.40
+%set DAC0 7  71.85  87.24 311.40
+%set DAC0 8  76.09  88.24  34.10
+%set DAC0 9  79.76  89.24 126.50
+%set DAC0 10  82.29  90.24 228.60
+%set DAC0 11  83.49  91.24 340.50
+%set DAC0 12  83.76  92.24 102.20
+%set DAC0 13  83.29  93.24 233.50
+%set DAC0 14  81.77  94.24  14.60
+
+set DAC1 0  69.88  94.50 180.00
+set DAC1 1  69.88  94.50 180.00
+set DAC1 2  69.88  94.50 180.00
+set DAC1 3  69.88  94.50 180.00
+set DAC1 4  69.88  94.50 180.00
+set DAC1 5  69.88  94.50 180.00
+set DAC1 6  69.88  94.50 180.00
+
+
+% setmove stepID, DAC, channel, fjump, pjump, amp, astep, freq, fstep, phase
+%setmove 0 DAC0 0 0 0  84.97 amprate 102.24 moverate  53.50
+%setmove 0 DAC0 1 0 0  92.21 amprate 103.24 moverate 282.20
+%setmove 0 DAC0 2 0 0  99.84 amprate 104.24 moverate 160.50
+%setmove 0 DAC0 3 0 0 100.00 amprate 105.24 moverate  48.60
+%setmove 0 DAC0 4 0 0 100.00 amprate 106.24 moverate 306.50
+%setmove 0 DAC0 5 0 0 100.00 amprate 107.24 moverate 214.10
+%setmove 0 DAC0 6 0 0 100.00 amprate 108.24 moverate 131.40
+%setmove 0 DAC0 7 0 0 100.00 amprate 109.24 moverate  58.40
+%setmove 0 DAC0 8 0 0 100.00 amprate 110.24 moverate 355.10
+%setmove 0 DAC0 9 0 0 100.00 amprate 111.24 moverate 301.60
+%setmove 0 DAC0 10 0 0 100.00 amprate 112.24 moverate 257.80
+%setmove 0 DAC0 11 0 0 100.00 amprate 113.24 moverate 223.80
+%setmove 0 DAC0 12 0 0 100.00 amprate 114.24 moverate 199.50
+%setmove 0 DAC0 13 0 0 100.00 amprate 115.24 moverate 184.90
+%setmove 0 DAC0 14 0 0 100.00 amprate 116.24 moverate 180.00
+
+% initial to zero
+%setmove 0 DAC1 0 1 1  00.01 -amprate  0.00 0 0.00
+%setmove 0 DAC1 1 1 1  00.01 -amprate  0.00 0 0.00
+%setmove 0 DAC1 2 1 1  00.01 -amprate  0.00 0 0.00
+%setmove 0 DAC1 3 1 1  00.01 -amprate  0.00 0 0.00
+%setmove 0 DAC1 4 1 1  00.01 -amprate  0.00 0 0.00
+%setmove 0 DAC1 5 1 1  00.01 -amprate  0.00 0 0.00
+%setmove 0 DAC1 6 1 1  00.01 -amprate  0.00 0 0.00
+setmove 0 DAC1 0 1 1 0.01 -2000 0 0 0
+setmove 0 DAC1 8 1 1 0.01 -2000 0 0 0
+setmove 0 DAC1 16 1 1 0.01 -2000 0 0 0
+setmove 0 DAC1 24 1 1 0.01 -2000 0 0 0
+setmove 0 DAC1 32 1 1 0.01 -2000 0 0 0
+setmove 0 DAC1 40 1 1 0.01 -2000 0 0 0
+setmove 0 DAC1 1 1 1 0.01 -2000 0 0 0
+setmove 0 DAC1 9 1 1 0.01 -2000 0 0 0
+setmove 0 DAC1 17 1 1 0.01 -2000 0 0 0
+setmove 0 DAC1 25 1 1 0.01 -2000 0 0 0
+setmove 0 DAC1 33 1 1 0.01 -2000 0 0 0
+setmove 0 DAC1 41 1 1 0.01 -2000 0 0 0
+setmove 0 DAC1 2 1 1 0.01 -2000 0 0 0
+setmove 0 DAC1 10 1 1 0.01 -2000 0 0 0
+setmove 0 DAC1 18 1 1 0.01 -2000 0 0 0
+setmove 0 DAC1 26 1 1 0.01 -2000 0 0 0
+setmove 0 DAC1 34 1 1 0.01 -2000 0 0 0
+setmove 0 DAC1 42 1 1 0.01 -2000 0 0 0
+setmove 0 DAC1 3 1 1 0.01 -2000 0 0 0
+setmove 0 DAC1 11 1 1 0.01 -2000 0 0 0
+setmove 0 DAC1 19 1 1 0.01 -2000 0 0 0
+setmove 0 DAC1 27 1 1 0.01 -2000 0 0 0
+setmove 0 DAC1 35 1 1 0.01 -2000 0 0 0
+setmove 0 DAC1 43 1 1 0.01 -2000 0 0 0
+setmove 0 DAC1 4 1 1 0.01 -2000 0 0 0
+setmove 0 DAC1 12 1 1 0.01 -2000 0 0 0
+setmove 0 DAC1 20 1 1 0.01 -2000 0 0 0
+setmove 0 DAC1 28 1 1 0.01 -2000 0 0 0
+setmove 0 DAC1 36 1 1 0.01 -2000 0 0 0
+setmove 0 DAC1 44 1 1 0.01 -2000 0 0 0
+setmove 0 DAC1 5 1 1 0.01 -2000 0 0 0
+setmove 0 DAC1 13 1 1 0.01 -2000 0 0 0
+setmove 0 DAC1 21 1 1 0.01 -2000 0 0 0
+setmove 0 DAC1 29 1 1 0.01 -2000 0 0 0
+setmove 0 DAC1 37 1 1 0.01 -2000 0 0 0
+setmove 0 DAC1 45 1 1 0.01 -2000 0 0 0
+setmove 0 DAC1 6 1 1 0.01 -2000 0 0 0
+setmove 0 DAC1 14 1 1 0.01 -2000 0 0 0
+setmove 0 DAC1 22 1 1 0.01 -2000 0 0 0
+setmove 0 DAC1 30 1 1 0.01 -2000 0 0 0
+setmove 0 DAC1 38 1 1 0.01 -2000 0 0 0
+setmove 0 DAC1 46 1 1 0.01 -2000 0 0 0
+setmove 0 DAC1 7 1 1 0.01 -2000 0 0 0
+setmove 0 DAC1 15 1 1 0.01 -2000 0 0 0
+setmove 0 DAC1 23 1 1 0.01 -2000 0 0 0
+setmove 0 DAC1 31 1 1 0.01 -2000 0 0 0
+setmove 0 DAC1 39 1 1 0.01 -2000 0 0 0
+setmove 0 DAC1 47 1 1 0.01 -2000 0 0 0
+
+
+
+
+% ramp to amplitude
+% setmove stepID, DAC, channel, fjump, pjump, amp, astep, freq, fstep, phase
+setmove 1 DAC1 0 1 1  69.88 amprate  94.50 0 18.00
+setmove 1 DAC1 1 1 1  69.88 amprate  94.50 0 18.00
+setmove 1 DAC1 2 1 1  69.88 amprate  94.50 0 18.00
+setmove 1 DAC1 3 1 1  69.88 amprate  94.50 0 18.00
+setmove 1 DAC1 4 1 1  69.88 amprate  94.50 0 18.00
+setmove 1 DAC1 5 1 1  69.88 amprate  94.50 0 18.00
+setmove 1 DAC1 6 1 1  69.88 amprate  94.50 0 18.00
+
+% move frequency, not actually moving since start f = end f
+setmove 2 DAC1 0 0 0  69.88 amprate  94.50 moverate 180.00
+setmove 2 DAC1 1 0 0  69.88 amprate  94.50 moverate 180.00
+setmove 2 DAC1 2 0 0  69.88 amprate  94.50 moverate 180.00
+setmove 2 DAC1 3 0 0  69.88 amprate  94.50 moverate 180.00
+setmove 2 DAC1 4 0 0  69.88 amprate  94.50 moverate 180.00
+setmove 2 DAC1 5 0 0  69.88 amprate  94.50 moverate 180.00
+setmove 2 DAC1 6 0 0  69.88 amprate  94.50 moverate 180.00
+
+% deinitialize
+setmove 3 DAC1 0 1 0  00.01 -amprate  94.50 0 0.00
+setmove 3 DAC1 1 1 0  00.01 -amprate  94.50 0 0.00
+setmove 3 DAC1 2 1 0  00.01 -amprate  94.50 0 0.00
+setmove 3 DAC1 3 1 0  00.01 -amprate  94.50 0 0.00
+setmove 3 DAC1 4 1 0  00.01 -amprate  94.50 0 0.00
+setmove 3 DAC1 5 1 0  00.01 -amprate  94.50 0 0.00
+setmove 3 DAC1 6 1 0  00.01 -amprate  94.50 0 0.00
+
+
+%hardreset

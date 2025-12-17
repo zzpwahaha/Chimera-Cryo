@@ -108,6 +108,16 @@ if __name__ == '__main__':
     camera_image_dim = {'Left:':1026, 'Right:':1090, 'H-Bin:':1, 'Bottom:': 928, 'Top:': 967, 'V-Bin:': 1}
     tweezer_intensity_setpoint = 2.9 #V
     repetitions = 4
+    # AOD - 6x6_60umx60um
+    # camera_image_dim = {'Left:':961, 'Right:':1105, 'H-Bin:':1, 'Bottom:': 880, 'Top:': 1015, 'V-Bin:': 1}
+    # tweezer_intensity_setpoint = 2.9 # 3.75 V for AOD
+    # repetitions = 4
+
+    grid_file_name = 'atomgrid_5x20_7points_20251215_SLM'
+    camera_image_dim = {'Left:':971, 'Right:':1140, 'H-Bin:':1, 'Bottom:': 921, 'Top:': 974, 'V-Bin:': 1}
+    tweezer_intensity_setpoint = 6.5 #V
+    repetitions = 4
+
 
 
     # # analysis grid for 2x7 grid - 20250922
@@ -140,10 +150,19 @@ if __name__ == '__main__':
     # tweezer_intensity_setpoint = 4 #V
     # repetitions = 4
 
-    # AOD
-    # camera_image_dim = {'Left:':961, 'Right:':1105, 'H-Bin:':1, 'Bottom:': 880, 'Top:': 1015, 'V-Bin:': 1}
-    # tweezer_intensity_setpoint = 3.75 #V
+
+
+    # 1x37 SLM
+    # grid_file_name = 'atomgrid_1x37_8points_20251205_SLM'
+    # camera_image_dim = {'Left:':836, 'Right:':1275, 'H-Bin:':1, 'Bottom:': 941, 'Top:': 970, 'V-Bin:': 1}
+    # tweezer_intensity_setpoint = 2.9 
     # repetitions = 4
+    # AOD - 3x12_60umx180um
+    # camera_image_dim = {'Left:':836, 'Right:':1275, 'H-Bin:':1, 'Bottom:': 881, 'Top:': 1030, 'V-Bin:': 1}
+    # tweezer_intensity_setpoint = 2.9 # 3.5 V for AOD
+    # repetitions = 4
+
+
 
 
     # config_name = "420alignment_with_d1.Config"

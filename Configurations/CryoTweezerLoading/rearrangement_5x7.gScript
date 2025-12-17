@@ -1,27 +1,47 @@
 %rearrange mode scrunchspacing amprate moverate 
-rearrange centerscrunchx 1 6000 50 
+% AmpIncr=1, Ramp from 0 to 100: 2**16*2**10/153.6MHz = 0.4369sec
+% Frequency increment = 1  => 0.897 um/ms
+
+rearrange tweezer1dinittest 1 2000 24 
+%rearrange scrunchxtarget 1 2000 24 
+%rearrange centerscrunchx 1 2000 24 
+%rearrange centerscrunchx 1 amprate 50 
+%rearrange scrunchxtarget 1 1750 24 
+%rearrange scrunchxtarget 1 6000 50
+%rearrange centerscrunchx 1 6000 50 
 %rearrange scrunchx 1 6000 50 
-singlex_repeatx 8
+singlex_repeatx 5
 singlex_repeaty 3
+singley_repeatx 1
+singley_repeaty 6 %7
 
-singley_repeatx 3
-singley_repeaty 8
-xoffset 0+0 %aod_dac0_freq
-yoffset 0+0 %aod_dac1_freq
+xoffset 0 %+frequency_scan %aod_dac0_freq
+yoffset 0 %frequency_scan %aod_dac1_freq
 
-loadx   1111111 
-loady   00001
 
-initx   1111111
+loadx   11111111111111111111 %1W
+loady   11111 %1.6W
+
+%loadx   11111111111111111111 % 1W
+%loady   10000 %1.26W
+
+%loadx   10000000000000000000 %1.28W
+%loady   11111 %1.6W
+
+%loadx   10000000000000000000 %1.28W
+%loady   10000 %1.26W
+
+initx   11111111111111111111 
 inity   11111
 
-filterx 1111111
-filtery 10000
+filterx 11111111111111111111 %10
+filtery 11111
 
 targetstart 
-0011100
-0011100
-0011100
-0011100
-0011100
+00000011111111000000
+00000011111111000000
+00000011111111000000
+00000011111111000000
+00000011111111000000
 targetend 
+
