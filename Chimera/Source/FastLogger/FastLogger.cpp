@@ -37,14 +37,14 @@ void FastLogger::shutdown()
         _close(fd);
 }
 
-inline void FastLogger::flush()
+void FastLogger::flush()
 {
     if (pos)
         _write(fd, buffer, (unsigned)pos);
     pos = 0;
 }
 
-inline void FastLogger::writeRaw(const char* data, size_t len)
+void FastLogger::writeRaw(const char* data, size_t len)
 {
     if (pos + len > BUF_SIZE)
         flush();
@@ -53,7 +53,7 @@ inline void FastLogger::writeRaw(const char* data, size_t len)
     pos += len;
 }
 
-inline void FastLogger::writeStr(const char* s)
+void FastLogger::writeStr(const char* s)
 {
     writeRaw(s, std::strlen(s));
 }

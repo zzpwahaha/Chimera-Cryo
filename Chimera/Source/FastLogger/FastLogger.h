@@ -35,17 +35,17 @@ private:
     static void init(std::string path);
     static void shutdown();
 
-    static inline void writeRaw(const char* data, size_t len);
-    static inline void writeStr(const char* s);
+    static void writeRaw(const char* data, size_t len);
+    static void writeStr(const char* s);
 
 private:
-    static constexpr size_t BUF_SIZE = 1 << 20; // 1 MB = 1024*1024 = 1<<20
+    static constexpr size_t BUF_SIZE = 128*1024; // 1 MB = 1024*1024 = 1<<20
 
     static int fd;
     static char buffer[BUF_SIZE];
     static size_t pos;
 
-    static inline void flush();
+    static void flush();
 
 #if FASTLOG_TIMESTAMP
     static inline void writeTimestamp();
