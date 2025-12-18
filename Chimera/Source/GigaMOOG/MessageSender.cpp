@@ -19,7 +19,7 @@ void MessageSender::enqueue(Message &m)
 
 void MessageSender::getQueueElementCount()
 {
-	std::cout << "MessageSender::getQueueElementCount: Queued messages: " << queue.size() << "\n";
+	flog << "MessageSender::getQueueElementCount: Queued messages: " << queue.size() << fendl;
 }
 
 std::vector<int> MessageSender::getMessageBytes()

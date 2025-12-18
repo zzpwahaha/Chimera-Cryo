@@ -361,11 +361,11 @@ void DynamicMoveManager::writeRearrangeMoves(moveSequence input, MessageSender& 
 			.frequencyMHz(0).amplitudePercent(0.01).phaseDegrees(0)
 			.instantFTW(1).ATWIncr(-ampStepMag).stepSequenceID(0).FTWIncr(0).phaseJump(1);;
 		ms.enqueue(m);
-		//std::cout << "setmove " << 0/*stepSequenceID*/ << " DAC1 "
-		//	<< hardwareChannel/*channel*/ << " " << 1/*instantFTW*/ << " " << 1/*phaseJump*/ << " "
-		//	<< 0.01/*amplitudePercent*/ << " " << -ampStepMag/*ATWIncr*/ << " "
-		//	<< 0/*frequencyMHz*/ << " " << 0/*FTWIncr*/ << " "
-		//	<< 0/*phaseDegrees*/ << std::endl;
+		flog << "setmove " << 0/*stepSequenceID*/ << " DAC1 "
+			<< hardwareChannel/*channel*/ << " " << 1/*instantFTW*/ << " " << 1/*phaseJump*/ << " "
+			<< 0.01/*amplitudePercent*/ << " " << -ampStepMag/*ATWIncr*/ << " "
+			<< 0/*frequencyMHz*/ << " " << 0/*FTWIncr*/ << " "
+			<< 0/*phaseDegrees*/ << fendl;
 	}
 
 	for (size_t stepID = 0; stepID < nMoves; stepID++) {
@@ -411,11 +411,11 @@ void DynamicMoveManager::writeRearrangeMoves(moveSequence input, MessageSender& 
 				.frequencyMHz(freq).amplitudePercent(amp).phaseDegrees(phase)
 				.instantFTW(1).ATWIncr(ampStepMag).stepSequenceID(3 * stepID + 1).FTWIncr(0).phaseJump(1);;
 			ms.enqueue(m);
-			//std::cout << "setmove " << 3 * stepID + 1/*stepSequenceID*/ << " DAC1 "
-			//	<< hardwareChannel/*channel*/ << " " << 1/*instantFTW*/ << " " << 1/*phaseJump*/ << " "
-			//	<< amp/*amplitudePercent*/ << " " << ampStepMag/*ATWIncr*/ << " "
-			//	<< freq/*frequencyMHz*/ << " " << 0/*FTWIncr*/ << " "
-			//	<< phase/*phaseDegrees*/ << std::endl;
+			flog << "setmove " << 3 * stepID + 1/*stepSequenceID*/ << " DAC1 "
+				<< hardwareChannel/*channel*/ << " " << 1/*instantFTW*/ << " " << 1/*phaseJump*/ << " "
+				<< amp/*amplitudePercent*/ << " " << ampStepMag/*ATWIncr*/ << " "
+				<< freq/*frequencyMHz*/ << " " << 0/*FTWIncr*/ << " "
+				<< phase/*phaseDegrees*/ << fendl;
 		}
 
 		//step 2: ramp to new locations
@@ -458,11 +458,11 @@ void DynamicMoveManager::writeRearrangeMoves(moveSequence input, MessageSender& 
 				.frequencyMHz(freq).amplitudePercent(amp).phaseDegrees(0)
 				.instantFTW(0).ATWIncr(ampstep).stepSequenceID(3 * stepID + 2).FTWIncr(freqstep).phaseJump(0);
 			ms.enqueue(m);
-			//std::cout << "setmove " << 3 * stepID + 2/*stepSequenceID*/ << " DAC1 "
-			//	<< hardwareChannel/*channel*/ << " " << 0/*instantFTW*/ << " " << 0/*phaseJump*/ << " "
-			//	<< amp/*amplitudePercent*/ << " " << ampstep/*ATWIncr*/ << " "
-			//	<< freq/*frequencyMHz*/ << " " << freqstep/*FTWIncr*/ << " "
-			//	<< 0/*phaseDegrees*/ << std::endl;
+			flog << "setmove " << 3 * stepID + 2/*stepSequenceID*/ << " DAC1 "
+				<< hardwareChannel/*channel*/ << " " << 0/*instantFTW*/ << " " << 0/*phaseJump*/ << " "
+				<< amp/*amplitudePercent*/ << " " << ampstep/*ATWIncr*/ << " "
+				<< freq/*frequencyMHz*/ << " " << freqstep/*FTWIncr*/ << " "
+				<< 0/*phaseDegrees*/ << fendl;
 		}
 
 		//step 3: ramp all tones to 0
@@ -488,11 +488,11 @@ void DynamicMoveManager::writeRearrangeMoves(moveSequence input, MessageSender& 
 				.frequencyMHz(freq).amplitudePercent(0.01).phaseDegrees(0)  // near-zero amp (~1 LSB)
 				.instantFTW(1).ATWIncr(-ampStepMag).stepSequenceID(3 * stepID + 3).FTWIncr(0).phaseJump(0);
 			ms.enqueue(m);
-			//std::cout << "setmove " << 3 * stepID + 3/*stepSequenceID*/ << " DAC1 "
-			//	<< hardwareChannel/*channel*/ << " " << 1/*instantFTW*/ << " " << 0/*phaseJump*/ << " "
-			//	<< 0.01/*amplitudePercent*/ << " " << -ampStepMag/*ATWIncr*/ << " "
-			//	<< freq/*frequencyMHz*/ << " " << 0/*FTWIncr*/ << " "
-			//	<< 0/*phaseDegrees*/ << std::endl;
+			flog << "setmove " << 3 * stepID + 3/*stepSequenceID*/ << " DAC1 "
+				<< hardwareChannel/*channel*/ << " " << 1/*instantFTW*/ << " " << 0/*phaseJump*/ << " "
+				<< 0.01/*amplitudePercent*/ << " " << -ampStepMag/*ATWIncr*/ << " "
+				<< freq/*frequencyMHz*/ << " " << 0/*FTWIncr*/ << " "
+				<< 0/*phaseDegrees*/ << fendl;
 		}
 	}
 	//additional snapshot ramping down all channels - unclear why needed, but prevents extra trigger issues.
@@ -541,7 +541,7 @@ void DynamicMoveManager::writeLoad(MessageSender& ms, unsigned variation)
 					.amplitudePercent(moveLUT.getAmpX(iMaskX, 0))
 					.phaseDegrees(phase);
 				ms.enqueue(m);
-				std::cout << "set DAC0 " << hardwareChannel << " " << moveLUT.getAmpX(iMaskX, 0) << " " << moveLUT.getFreqX(iMaskX, 0) << " " << phase << std::endl;
+				flog << "set DAC0 " << hardwareChannel << " " << moveLUT.getAmpX(iMaskX, 0) << " " << moveLUT.getFreqX(iMaskX, 0) << " " << phase << fendl;
 			}
 			iTweezerX++;
 		}
@@ -565,7 +565,7 @@ void DynamicMoveManager::writeLoad(MessageSender& ms, unsigned variation)
 					.amplitudePercent(moveLUT.getAmpY(0, iMaskY))
 					.phaseDegrees(phase);
 				ms.enqueue(m);
-				std::cout << "set DAC1 " << hardwareChannel << " " << moveLUT.getAmpY(0, iMaskY) << " " << moveLUT.getFreqY(0, iMaskY) << " " << phase << std::endl;
+				flog << "set DAC1 " << hardwareChannel << " " << moveLUT.getAmpY(0, iMaskY) << " " << moveLUT.getFreqY(0, iMaskY) << " " << phase << fendl;
 			}
 			iTweezerY++;
 		}
@@ -631,7 +631,7 @@ void DynamicMoveManager::checkTotalPower()
 		maxLoadPowerX += repeatX * repeatX * moveLUT.getAmpX(iLoadMaskX, 0) * moveLUT.getAmpX(iLoadMaskX, 0);
 		iLoadMaskX++;
 	}
-	std::cout << "DynamicMoveManager::checkTotalPower: Total  power in X axis: " << str(totalLoadPowerX) << ", maximum power in X axis: " << str(maxLoadPowerX) << std::endl;
+	flog << "DynamicMoveManager::checkTotalPower: Total  power in X axis: " << str(totalLoadPowerX) << ", maximum power in X axis: " << str(maxLoadPowerX) << fendl;
 
 	size_t iLoadTweezerY = 0, iLoadMaskY = 0;
 	double totalLoadPowerY = 0.0, maxLoadPowerY = 0.0;
@@ -646,7 +646,7 @@ void DynamicMoveManager::checkTotalPower()
 		maxLoadPowerY += repeatY * repeatY * moveLUT.getAmpY(0, iLoadMaskY) * moveLUT.getAmpY(0, iLoadMaskY);
 		iLoadMaskY++;
 	}
-	std::cout << "DynamicMoveManager::checkTotalPower: Total  power in Y axis: " << str(totalLoadPowerY) << ", maximum power in Y axis: " << str(maxLoadPowerY) << std::endl;
+	flog << "DynamicMoveManager::checkTotalPower: Total  power in Y axis: " << str(totalLoadPowerY) << ", maximum power in Y axis: " << str(maxLoadPowerY) << fendl;
 
 	//size_t iTweezerX = 0, iMaskX = 0;
 	//double totalPowerX = 0.0, maxPowerX = 0.0;

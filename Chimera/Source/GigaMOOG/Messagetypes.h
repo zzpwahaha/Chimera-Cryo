@@ -88,7 +88,16 @@ public:
 		double MHz = 223696213.33333333333333333333333; 
 		return (unsigned long long int)(frequency * MHz);
 	}
-	const bool doPrint = false;
+	const bool doPrint = true;
+	inline void printMessage(const std::vector<int>& bytes) const {
+		if (doPrint) {
+			flog << "Sending bytes: ";
+			for (auto& byte : bytes)
+				flog << /*std::hex <<*/ byte << " ";
+			flog << "\n";
+			flog << fendl;
+		}
+	}
 };
 
 struct SetLoadFrequency : KA007_Message_Base
@@ -146,12 +155,7 @@ struct SetLoadFrequency : KA007_Message_Base
 			bytes.push_back((bits >> (8 * i)) & 0xFF);
 		}
 
-		if (doPrint) {
-			std::cout << "Sending bytes: ";
-			for (auto& byte : bytes)
-				std::cout << std::hex << byte << " ";
-			std::cout << "\n";
-		}
+		printMessage(bytes);
 
 		return bytes;
 	}
@@ -260,12 +264,7 @@ struct SetMoveFrequency : KA007_Message_Base
 			bytes.push_back((bits >> (8 * i)) & 0xFF);
 		}
 
-		if (doPrint) {
-			std::cout << "Sending bytes: ";
-			for (auto& byte : bytes)
-				std::cout << std::hex << byte << " ";
-			std::cout << "\n";
-		}
+		printMessage(bytes);
 
 		return bytes;
 	}
@@ -284,12 +283,7 @@ struct TerminateSequence : KA007_Message_Base
 		bytes.push_back(0);
 		bytes.push_back(0);
 
-		if (doPrint) {
-			std::cout << "Sending bytes: ";
-			for (auto& byte : bytes)
-				std::cout << std::hex << byte << " ";
-			std::cout << "\n";
-		}
+		printMessage(bytes);
 
 		return bytes;
 	}

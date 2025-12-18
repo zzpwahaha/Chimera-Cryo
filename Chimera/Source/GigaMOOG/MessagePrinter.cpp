@@ -25,11 +25,11 @@ void MessagePrinter::callback(int byte)
 				byteCount = 0;
 			}
 			else {
-				std::cout << "Header only message: " << "\n";
-				std::cout << "  Type: " << messagetype << "\n";
-				std::cout << "  Source: " << messagesource << "\n";
-				std::cout << "  Length: " << messagelength << "\n";
-				std::cout << "  Data: " << messagedata_h << " " << messagedata_l << "\n\n";
+				flog << "Header only message: " << "\n";
+				flog << "  Type: " << messagetype << "\n";
+				flog << "  Source: " << messagesource << "\n";
+				flog << "  Length: " << messagelength << "\n";
+				flog << "  Data: " << messagedata_h << " " << messagedata_l << "\n\n";
 			}
 		}
 	}
@@ -42,16 +42,17 @@ void MessagePrinter::callback(int byte)
 			//received all data
 			received.push_back(byte);
 			isReceiving = false;
-			std::cout << "Header: " << "\n";
-			std::cout << "  Type: " << messagetype << "\n";
-			std::cout << "  Source: " << messagesource << "\n";
-			std::cout << "  Length: " << messagelength << "\n";
-			std::cout << "  Data: " << messagedata_h << " " << messagedata_l << "\n";
-			std::cout << "Message payload: " << "\n" << " ";
+			flog << "Header: " << "\n";
+			flog << "  Type: " << messagetype << "\n";
+			flog << "  Source: " << messagesource << "\n";
+			flog << "  Length: " << messagelength << "\n";
+			flog << "  Data: " << messagedata_h << " " << messagedata_l << "\n";
+			flog << "Message payload: " << "\n" << " ";
 			for (auto& item : received) {
-				std::cout << " " << item;
+				flog << " " << item;
 			}
-			std::cout << "\n\n";
+			flog << "\n\n";
+			flog << fendl;
 			received.clear();
 		}
 	}

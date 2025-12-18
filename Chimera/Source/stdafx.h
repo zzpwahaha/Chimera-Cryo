@@ -22,6 +22,7 @@
 #include "GeneralUtilityFunctions/Thrower.h"
 #include "GeneralUtilityFunctions/range.h"
 #include <ExperimentMonitoringAndStatus/statusMsg.h>
+#include <FastLogger/FastLogStream.h>
 
 #include <fstream>
 #include <string>
