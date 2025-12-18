@@ -2,8 +2,8 @@
 #include <cstring>
 #include <cstdio>
 #include <cstdint>
-#include <io.h>
-#include <fcntl.h>
+#include <io.h>  // _write, _open, _close
+#include <fcntl.h> // _O_BINARY, _O_WRONLY
 #include <sys/stat.h>
 
 #include "FastLoggerSetting.h"
@@ -39,7 +39,7 @@ private:
     static inline void writeStr(const char* s);
 
 private:
-    static constexpr size_t BUF_SIZE = 1 << 20; // 1 MB
+    static constexpr size_t BUF_SIZE = 1 << 20; // 1 MB = 1024*1024 = 1<<20
 
     static int fd;
     static char buffer[BUF_SIZE];
