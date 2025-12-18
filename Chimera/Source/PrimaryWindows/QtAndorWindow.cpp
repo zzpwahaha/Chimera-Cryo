@@ -365,7 +365,7 @@ void QtAndorWindow::onCameraProgress(NormalImage picGrabbed){
 	//emit newImage({ {picNum, repVar.first, repVar.second}, calPicData[currentActivePicNum] });
 
 	/// send picture data to plotter
-	qDebug() << "send Image data for drawing for image " << picNum << " at time " << timerE.elapsed() << " ms";
+	flog << "send Image data for drawing for image " << picNum << " at time " << timerE.elapsed() << " ms" << fendl;
 	auto picsToDraw = andorSettingsCtrl.getImagesToDraw (calPicData);
 	try
 	{
@@ -392,7 +392,7 @@ void QtAndorWindow::onCameraProgress(NormalImage picGrabbed){
 		}
 	}
 	/// write the data to the file.
-	qDebug() << "write image to file for image " << picNum << " at time " << timerE.elapsed() << " ms";
+	flog << "write image to file for image " << picNum << " at time " << timerE.elapsed() << " ms" << fendl;
 	if (true/*curSettings.acquisitionMode != AndorRunModes::mode::Video*/){
 		try	{
 			// important! write the original raw data, not the pic-to-draw, which can be a difference pic, or the calibrated
@@ -413,7 +413,7 @@ void QtAndorWindow::onCameraProgress(NormalImage picGrabbed){
 		}
 	}
 	mostRecentPicNum = picNum;
-	qDebug() << "finish write image to file for image " << picNum << " at time " << timerE.elapsed() << " ms";
+	flog << "finish write image to file for image " << picNum << " at time " << timerE.elapsed() << " ms" << fendl;
 	if (picNum == curSettings.totalPicsInExperiment() - 1) {
 		andor.onFinish();
 	}

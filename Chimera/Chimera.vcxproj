@@ -130,7 +130,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="Source\FastLogger\FastLogStream.cpp" />
     <ClCompile Include="Source\FastLogger\FastLogger.cpp" />
     <ClCompile Include="Source\ElliptecRotationStage\ElliptecSystem.cpp" />
     <ClCompile Include="Source\ElliptecRotationStage\ElliptecCore.cpp" />

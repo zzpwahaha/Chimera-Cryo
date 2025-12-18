@@ -36,7 +36,7 @@ void AndorCameraThreadImageGrabber::process()
 			timerE.start();
 			if (popPictureNumber % debugPicsPerRep == 0) {
 				(*input->imageGrabTimes).push_back(std::chrono::high_resolution_clock::now());
-				qDebug() << "From Grabber thread: get image number" << pictureNumber << " at " << std::chrono::duration_cast<std::chrono::nanoseconds>(input->imageGrabTimes->back() - input->imageTimes->back()).count() / 1e6 << " ms relative to worker thread";
+				flog << "From Grabber thread: get image number" << pictureNumber << " at " << std::chrono::duration_cast<std::chrono::nanoseconds>(input->imageGrabTimes->back() - input->imageTimes->back()).count() / 1e6 << " ms relative to worker thread" << fendl;
 			}
 			if (!input->Andor->cameraIsRunning) {
 				// aborted by user and get rewake-ed up by worker thread
@@ -49,14 +49,14 @@ void AndorCameraThreadImageGrabber::process()
 					+ ". This is a low-level error as no other thread should be able to pop the picBufferQueue and the order should be FIFO.", 0);
 			}
 			input->Andor->updatePictureNumber(pictureNumber);
-			qDebug() << "void AndorCameraThreadImageGrabber::process: about to acquireImageData at " << timerE.elapsed() << " ms";
+			flog << "void AndorCameraThreadImageGrabber::process: about to acquireImageData at " << timerE.elapsed() << " ms" << fendl;
 			try {
 				auto images = input->Andor->acquireImageData();
 				auto repVar = input->Andor->getCurrentRepVarNumber(pictureNumber);
 				AndorRunSettings curSettings = input->Andor->getAndorRunSettings();
 				size_t currentActivePicNum = curSettings.continuousMode ? 0 : pictureNumber % curSettings.picsPerRepetition;
 				// push to imageQueue which will invoke the atomCruncher thread
-				qDebug() << "void AndorCameraThreadImageGrabber::process: finished acquireImageData at " << timerE.elapsed() << " ms";
+				flog << "void AndorCameraThreadImageGrabber::process: finished acquireImageData at " << timerE.elapsed() << " ms" << fendl;
 				input->imageQueue.push({ {pictureNumber, repVar.first, repVar.second}, images[currentActivePicNum] });
 				emit pictureGrabbed({ {pictureNumber, repVar.first, repVar.second}, images[currentActivePicNum] });
 			}

@@ -53,11 +53,11 @@ void AndorCameraThreadWorker::process (){
 						catch (ChimeraError& e) {
 							if (e.whatBare() == "AT_ERR_TIMEDOUT") {
 								if (input->Andor->cameraIsRunning) {
-									qDebug() << "input->Andor->waitForAcquisition time out for 1000ms, camera still running, will re-wait for acquisition";
+									flog << "input->Andor->waitForAcquisition time out for 1000ms, camera still running, will re-wait for acquisition" << fendl;
 									continue;
 								}
 								else {
-									qDebug() << "input->Andor->waitForAcquisition time out for 1000ms, camera NOT running, will abort and reset pic counter";
+									flog << "input->Andor->waitForAcquisition time out for 1000ms, camera NOT running, will abort and reset pic counter" << fendl;
 									input->Andor->threadExpectingAcquisition = false;
 								}
 							}
@@ -69,14 +69,14 @@ void AndorCameraThreadWorker::process (){
 					}
 					if (pictureNumber % debugPicsPerRep == 0) {
 						(*input->imageTimes).push_back (std::chrono::high_resolution_clock::now ());
-						if (pictureNumber > 0) { qDebug() << "From Worker thread: get image number" << pictureNumber << " at " << std::chrono::duration_cast<std::chrono::nanoseconds>(*std::next(input->imageTimes->rbegin(), 1) - input->imageTimes->back()).count() / 1e6 << "ms, relative to last experiment run"; }
+						if (pictureNumber > 0) { flog << "From Worker thread: get image number" << pictureNumber << " at " << std::chrono::duration_cast<std::chrono::nanoseconds>(*std::next(input->imageTimes->rbegin(), 1) - input->imageTimes->back()).count() / 1e6 << "ms, relative to last experiment run" << fendl; }
 					}
 					armed = true;
 					if (!input->Andor->cameraIsRunning) {
 						// aborted by user
 						input->Andor->threadExpectingAcquisition = false;
 						input->picBufferQueue.push(-1ULL); // Wake grabber thread with '-1' as arguement (-1 is not being recongnized but just as a signaler) and grabber will reset its counter
-						qDebug() << "CameraThreadWorker aborted from user by awakening it again from the waitForAcquisition";
+						flog << "CameraThreadWorker aborted from user by awakening it again from the waitForAcquisition" << fendl;
 					}
 					else {
 						input->picBufferQueue.push(pictureNumber); // this will wake Grabber thread to grab image from memory with buffer identified by pictureNumber

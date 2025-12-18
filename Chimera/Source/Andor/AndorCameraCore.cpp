@@ -431,7 +431,7 @@ std::vector<Matrix<long>> AndorCameraCore::acquireImageData (){
 						throwNested("Andor camera image buffer is empty. Lowlevel bug???");
 					}
 					else {
-						qDebug() << "AndorCameraCore::acquireImageData: Andor camera aborted, tried to retrieve the last image but the buffer is already cleaned. Nothing to worry about";
+						flog << "AndorCameraCore::acquireImageData: Andor camera aborted, tried to retrieve the last image but the buffer is already cleaned. Nothing to worry about" << fendl;
 					}
 				}
 				for (AT_64 Row = 0; Row < Height; Row++) {
@@ -452,7 +452,7 @@ std::vector<Matrix<long>> AndorCameraCore::acquireImageData (){
 				// let the blank image roll through to keep the image numbers going sensibly. // ??? WTF zzp 20220913
 				throwNested ("Error while calling getOldestImage.\n"+e.trace());
 			}
-			qDebug() << "std::vector<Matrix<long>> AndorCameraCore::acquireImageData: extracted image at time " << timerE.elapsed() << " ms";
+			flog << "std::vector<Matrix<long>> AndorCameraCore::acquireImageData: extracted image at time " << timerE.elapsed() << " ms" << fendl;
 
 			// immediately rotate
 			for (auto imageVecInc : range(repImages[experimentPictureNumber].size ())){
@@ -460,7 +460,7 @@ std::vector<Matrix<long>> AndorCameraCore::acquireImageData (){
 				//	% imSettings.width ()) + 1) * imSettings.height () - imageVecInc / imSettings.width () - 1];
 				repImages[experimentPictureNumber].data[imageVecInc] = tempImage.data[imageVecInc];
 			}
-			qDebug() << "std::vector<Matrix<long>> AndorCameraCore::acquireImageData: rotated " << timerE.elapsed() << " ms";
+			flog << "std::vector<Matrix<long>> AndorCameraCore::acquireImageData: rotated " << timerE.elapsed() << " ms" << fendl;
 
 		}
 		else{
