@@ -1103,7 +1103,7 @@ void RearrangeGenerator::tweezer1DInitializationTest(moveSequence& moveseq)
 			single.startAOY.push_back(iy); //Single tone in y
 			single.endAOY.push_back(iy); //y does not move
 			moveseq.moves.push_back(single);
-			break;
+			//break;
 		}
 		iy++;
 	}
