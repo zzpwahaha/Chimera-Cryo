@@ -9,7 +9,8 @@ FastLogger flogger("C:\\Chimera\\Chimera-Cryo\\Log\\" + FastLogger::getCurrentFo
 FastLogger::FastLogger(std::string path)
 {
     init(path);
-    printf("Start Logging at %s \n", FastLogger::getCurrentFormattedTime());
+    this->printf("Start Logging at %s \n", std::string(FastLogger::getCurrentFormattedTime()).c_str());
+    flush();
 }
 
 FastLogger::~FastLogger()
@@ -63,7 +64,7 @@ std::string FastLogger::getCurrentFormattedTime()
     std::tm tm_struct = *std::localtime(&now);
     char buffer[80];
     // Format string: "%Y-%m-%d %H:%M:%S" gives "YYYY-MM-DD HH:MM:SS"
-    std::strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", &tm_struct);
+    std::strftime(buffer, sizeof(buffer), "%Y-%m-%d %H%M%S", &tm_struct);
     return buffer;
 }
 
