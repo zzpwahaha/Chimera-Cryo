@@ -579,6 +579,12 @@
     <ClCompile Include="Source\StaticDirectDigitalSynthesis\RC035DDSFlume.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\FastLogger\FastLogger.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\FastLogger\FastLogStream.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="3rd_Party\qcustomplot\qcustomplot.h">
@@ -1298,6 +1304,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\StaticDirectDigitalSynthesis\RC035DDSFlume.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\FastLogger\FastLogger.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\FastLogger\FastLogStream.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\FastLogger\FastLoggerSetting.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
