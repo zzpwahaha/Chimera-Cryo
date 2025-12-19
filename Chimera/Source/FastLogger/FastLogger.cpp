@@ -9,7 +9,7 @@ FastLogger flogger("C:\\Chimera\\Chimera-Cryo\\Log\\" + FastLogger::getCurrentFo
 FastLogger::FastLogger(std::string path)
 {
     init(path);
-    this->printf("Start Logging at %s \n", std::string(FastLogger::getCurrentFormattedTime()).c_str());
+    FastLogger::printf("Start Logging at %s \n", std::string(FastLogger::getCurrentFormattedTime()).c_str());
     flush();
 }
 
@@ -39,8 +39,10 @@ void FastLogger::shutdown()
 
 void FastLogger::flush()
 {
-    if (pos)
+    if (pos) {
+        FastLogger::printf("Flushed\n");
         _write(fd, buffer, (unsigned)pos);
+    }
     pos = 0;
 }
 
