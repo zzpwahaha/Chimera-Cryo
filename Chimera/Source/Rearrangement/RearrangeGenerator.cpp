@@ -43,6 +43,15 @@ moveSequence RearrangeGenerator::getRearrangeMoves(std::string rearrangeType)
 	else if (rearrangeType == "scrunchy") {
 		scrunchY(moveseq);
 	}
+	else if (rearrangeType == "equalscrunchxtarget") {
+		equalizeX(moveseq);
+		scrunchXTarget(moveseq);
+	}
+	else if (rearrangeType == "enoughscrunchxtarget") {
+		enoughX(moveseq);
+		scrunchXTarget(moveseq);
+	}
+
 	else if (rearrangeType == "equalscrunchy") {
 		int nPerColumn = equalizeY(moveseq);
 		scrunchYFixedLength(moveseq, nPerColumn);
@@ -567,7 +576,105 @@ int RearrangeGenerator::sourceRowSum(int iRow, const std::vector<bool>& atomImg)
 	return nRowSource;
 }
 
-int RearrangeGenerator::equalizeY(moveSequence& moveseq)
+int RearrangeGenerator::equalizeX(moveSequence& moveseq, bool constantMoves)
+{
+	// Equalize the number of atoms in each row. Returns target atoms/row
+	const auto& positionsX = moveParam.initialPositionsX;
+	const auto& positionsY = moveParam.initialPositionsY;
+	// Calculate mean atom number per row.
+	int nyMean = 0;
+	std::vector<int> nyList;
+	for (auto const& coordY : positionCoordinatesY) {
+		int ny = 0;
+		for (auto const& coordX : positionCoordinatesX) {
+			if (atomImage.image[coordX + positionsX.size() * coordY])
+				ny++;
+		}
+		nyMean += ny;
+		nyList.push_back(ny);
+	}
+	nyMean /= (moveParam.nTweezerY);
+	for (auto& element : nyList) // nyList now contains excess atoms.
+		element -= nyMean;
+
+	// iterate through rows, and move to adjacent row as needed.
+	int iyTweezer = 0; // tweezer index, can step by multiple lattice sites.
+	for (auto const& coordY : positionCoordinatesY)
+	{
+		if (iyTweezer >= positionCoordinatesY.size() - 1) {
+			break; // end on second last load row
+		}
+
+		if (nyList[iyTweezer] > 0) {
+			// move excess atoms out of row
+			moveSingle single;
+			for (auto const& coordX : positionCoordinatesX) {
+				if (atomImage.image[coordX + positionsX.size() * coordY]
+					&& !atomImage.image[coordX + positionsX.size() * positionCoordinatesY[iyTweezer + 1]]) {
+
+					// move only if site in adjacent loaded row is empty.
+					single.startAOX.push_back(coordX);
+					single.endAOX.push_back(coordX);
+
+					atomImage.image[coordX + positionsX.size() * coordY] = 0;
+					atomImage.image[coordX + positionsX.size() * positionCoordinatesY[iyTweezer + 1]] = 1;
+
+					nyList[iyTweezer]--;
+					nyList[iyTweezer + 1]++;
+				}
+				if (nyList[iyTweezer] <= 0) {
+					break;
+				}
+			}
+			single.startAOY.push_back(coordY);
+			single.endAOY.push_back(positionCoordinatesY[iyTweezer + 1]);
+
+			if (single.nx() > 0 || constantMoves) {
+				moveseq.moves.push_back(single);
+			}
+		}
+
+		else if (nyList[iyTweezer] < 0) {
+			// pull missing atoms into row
+			moveSingle single;
+			for (auto const& coordX : positionCoordinatesX) {
+				if (!atomImage.image[coordX + positionsX.size() * coordY]
+					&& atomImage.image[coordX + positionsX.size() * positionCoordinatesY[iyTweezer + 1]]) {
+
+					single.startAOX.push_back(coordX);
+					single.endAOX.push_back(coordX);
+
+					atomImage.image[coordX + positionsX.size() * coordY] = 1;
+					atomImage.image[coordX + positionsX.size() * positionCoordinatesY[iyTweezer + 1]] = 0;
+
+					nyList[iyTweezer]++;
+					nyList[iyTweezer + 1]--;
+				}
+				if (nyList[iyTweezer] >= 0) {
+					break;
+				}
+			}
+			single.startAOY.push_back(positionCoordinatesY[iyTweezer + 1]);
+			single.endAOY.push_back(coordY);
+
+			if (single.nx() > 0 || constantMoves) {
+				moveseq.moves.push_back(single);
+			}
+		}
+		else {
+			if (constantMoves) {
+				moveSingle single;
+				single.startAOY.push_back(coordY);
+				single.endAOY.push_back(coordY);
+				moveseq.moves.push_back(single);
+			}
+		}
+		iyTweezer++;
+	}
+	return nyMean;
+}
+
+int RearrangeGenerator::equalizeY(moveSequence& moveseq, bool constantMoves)
 {
 	// Equalize the number of atoms in each column. Returns target atoms/column
 	const auto& positionsX = moveParam.initialPositionsX;
@@ -615,9 +722,11 @@ int RearrangeGenerator::equalizeY(moveSequence& moveseq)
 			}
 			single.startAOX.push_back(coordX); //Single tone in x
 			single.endAOX.push_back(positionCoordinatesX[ixTweezer + 1]); //x moves to next load column
-			if (single.ny() > 0) { moveseq.moves.push_back(single); }
+			if (single.ny() > 0|| constantMoves) { 
+				moveseq.moves.push_back(single); 
+			}
 		}
-		if (nxList[ixTweezer] < 0) {
+		else if (nxList[ixTweezer] < 0) {
 			// pull missing atoms into column
 			moveSingle single;
 			for (auto const& coordY : positionCoordinatesY) {
@@ -631,18 +740,128 @@ int RearrangeGenerator::equalizeY(moveSequence& moveseq)
 					nxList[ixTweezer]++;
 					nxList[ixTweezer + 1]--; //keep track of column atom numbers
 				}
-				if (nxList[ixTweezer] >= 0)
-				{
+				if (nxList[ixTweezer] >= 0) {
 					break; //stop if all excess atoms have been moved.
 				}
 			}
 			single.startAOX.push_back(positionCoordinatesX[ixTweezer + 1]); //x moves from next load column
 			single.endAOX.push_back(coordX); //Single tone in x
-			if (single.ny() > 0) { moveseq.moves.push_back(single); }
+			if (single.ny() > 0|| constantMoves) { 
+				moveseq.moves.push_back(single); 
+			}
+		}
+		else {
+			if (constantMoves) {
+				moveSingle single;
+				single.startAOX.push_back(coordX); //dummy move to maintain constant move number.
+				single.endAOX.push_back(coordX);
+				moveseq.moves.push_back(single);
+			}
 		}
 		ixTweezer++;
 	}
 	return nxMean;
+}
+
+void RearrangeGenerator::enoughX(moveSequence& moveseq, bool constantMoves)
+{
+	// Ensure the number of atoms in each row is sufficient for target pattern.
+	const auto& positionsX = moveParam.initialPositionsX;
+	const auto& positionsY = moveParam.initialPositionsY;
+	const auto& targetPositions = moveParam.targetPositions;
+	std::vector<int> nyList;
+	int iy = 0;
+	for (auto const& channelBoolY : positionsY) {
+		if (channelBoolY) {
+			int ix = 0;
+			int ny = 0;
+			for (auto const& channelBoolX : positionsX) {
+				if (channelBoolX && atomImage.image[ix + positionsX.size() * iy]) {
+					ny++; // count atoms present
+				}
+				if (targetPositions[ix + positionsX.size() * iy]) {
+					ny--; // remove atoms that are needed in target state
+				}
+				ix++;
+			}
+			nyList.push_back(ny); // nyList contains excess atoms per row
+		}
+		iy++;
+	}
+
+	// iterate through rows, and move to adjacent row as needed.
+	int iyTweezer = 0; // tweezer index, can step by multiple lattice sites.
+	for (auto const& coordY : positionCoordinatesY)
+	{
+		if (iyTweezer >= positionCoordinatesY.size() - 1) {
+			break; // end on second last load row
+		}
+
+		if (nyList[iyTweezer] > 0) {
+			// move excess atoms out of row if next row needs atoms.
+			moveSingle single;
+			for (auto const& coordX : positionCoordinatesX) {
+				if (atomImage.image[coordX + positionsX.size() * coordY]
+					&& !(atomImage.image[coordX + positionsX.size() * positionCoordinatesY[iyTweezer + 1]])
+					&& nyList[iyTweezer + 1] < 0) {
+
+					// move only if site in adjacent loaded row is empty, and adjacent row needs atoms.
+					single.startAOX.push_back(coordX);
+					single.endAOX.push_back(coordX);
+
+					atomImage.image[coordX + positionsX.size() * coordY] = 0;
+					atomImage.image[coordX + positionsX.size() * positionCoordinatesY[iyTweezer + 1]] = 1;
+
+					nyList[iyTweezer]--;
+					nyList[iyTweezer + 1]++;
+				}
+				if (nyList[iyTweezer] <= 0) {
+					break;
+				}
+			}
+			single.startAOY.push_back(coordY);
+			single.endAOY.push_back(positionCoordinatesY[iyTweezer + 1]);
+
+			if (single.nx() > 0 || constantMoves) {
+				moveseq.moves.push_back(single);
+			}
+		}
+		else if (nyList[iyTweezer] < 0) {
+			// pull missing atoms into row.
+			moveSingle single;
+			for (auto const& coordX : positionCoordinatesX) {
+				if (!atomImage.image[coordX + positionsX.size() * coordY]
+					&& atomImage.image[coordX + positionsX.size() * positionCoordinatesY[iyTweezer + 1]]) {
+
+					single.startAOX.push_back(coordX);
+					single.endAOX.push_back(coordX);
+
+					atomImage.image[coordX + positionsX.size() * coordY] = 1;
+					atomImage.image[coordX + positionsX.size() * positionCoordinatesY[iyTweezer + 1]] = 0;
+
+					nyList[iyTweezer]++;
+					nyList[iyTweezer + 1]--;
+				}
+				if (nyList[iyTweezer] >= 0) {
+					break;
+				}
+			}
+			single.startAOY.push_back(positionCoordinatesY[iyTweezer + 1]);
+			single.endAOY.push_back(coordY);
+
+			if (single.nx() > 0 || constantMoves) {
+				moveseq.moves.push_back(single);
+			}
+		}
+		else if (constantMoves) {
+			moveSingle single;
+			single.startAOY.push_back(coordY);
+			single.endAOY.push_back(coordY);
+			moveseq.moves.push_back(single);
+		}
+		iyTweezer++;
+	}
+
 }
 
 void RearrangeGenerator::enoughY(moveSequence& moveseq, bool constantMoves)

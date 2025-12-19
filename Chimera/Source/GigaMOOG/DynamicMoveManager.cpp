@@ -22,8 +22,9 @@ bool DynamicMoveManager::analyzeMoogScript(std::string word, ScriptStream& curre
 	auto rearrangeMode = moveParam.rearrangeMode;
 	if (rearrangeMode != "scrunchx" && rearrangeMode != "scrunchy" && rearrangeMode != "scrunchxy"
 		&& rearrangeMode != "centerscrunchx" && rearrangeMode != "centerscrunchy"
-		&& rearrangeMode != "scrunchyx" && rearrangeMode != "centerscrunchyx" 
-		&& rearrangeMode!="scrunchxtarget" && rearrangeMode != "tetris"
+		&& rearrangeMode != "scrunchyx" && rearrangeMode != "centerscrunchyx"
+		&& rearrangeMode != "scrunchxtarget" && rearrangeMode != "equalscrunchxtarget" && rearrangeMode != "enoughscrunchxtarget"
+		&& rearrangeMode != "tetris"
 		&& rearrangeMode != "tweezer1dinittest") {
 		thrower("Invalid rearrangement mode. Valid options are scrunchx, scrunchy, scrunchxy, scrunchyx, centerscrunchyx, and tetris.");
 	}
@@ -361,11 +362,11 @@ void DynamicMoveManager::writeRearrangeMoves(moveSequence input, MessageSender& 
 			.frequencyMHz(0).amplitudePercent(0.01).phaseDegrees(0)
 			.instantFTW(1).ATWIncr(-ampStepMag).stepSequenceID(0).FTWIncr(0).phaseJump(1);;
 		ms.enqueue(m);
-		flog << "setmove " << 0/*stepSequenceID*/ << " DAC1 "
-			<< hardwareChannel/*channel*/ << " " << 1/*instantFTW*/ << " " << 1/*phaseJump*/ << " "
-			<< 0.01/*amplitudePercent*/ << " " << -ampStepMag/*ATWIncr*/ << " "
-			<< 0/*frequencyMHz*/ << " " << 0/*FTWIncr*/ << " "
-			<< 0/*phaseDegrees*/ << fendl;
+		//flog << "setmove " << 0/*stepSequenceID*/ << " DAC1 "
+		//	<< hardwareChannel/*channel*/ << " " << 1/*instantFTW*/ << " " << 1/*phaseJump*/ << " "
+		//	<< 0.01/*amplitudePercent*/ << " " << -ampStepMag/*ATWIncr*/ << " "
+		//	<< 0/*frequencyMHz*/ << " " << 0/*FTWIncr*/ << " "
+		//	<< 0/*phaseDegrees*/ << fendl;
 	}
 
 	for (size_t stepID = 0; stepID < nMoves; stepID++) {
@@ -411,11 +412,11 @@ void DynamicMoveManager::writeRearrangeMoves(moveSequence input, MessageSender& 
 				.frequencyMHz(freq).amplitudePercent(amp).phaseDegrees(phase)
 				.instantFTW(1).ATWIncr(ampStepMag).stepSequenceID(3 * stepID + 1).FTWIncr(0).phaseJump(1);;
 			ms.enqueue(m);
-			flog << "setmove " << 3 * stepID + 1/*stepSequenceID*/ << " DAC1 "
-				<< hardwareChannel/*channel*/ << " " << 1/*instantFTW*/ << " " << 1/*phaseJump*/ << " "
-				<< amp/*amplitudePercent*/ << " " << ampStepMag/*ATWIncr*/ << " "
-				<< freq/*frequencyMHz*/ << " " << 0/*FTWIncr*/ << " "
-				<< phase/*phaseDegrees*/ << fendl;
+			//flog << "setmove " << 3 * stepID + 1/*stepSequenceID*/ << " DAC1 "
+			//	<< hardwareChannel/*channel*/ << " " << 1/*instantFTW*/ << " " << 1/*phaseJump*/ << " "
+			//	<< amp/*amplitudePercent*/ << " " << ampStepMag/*ATWIncr*/ << " "
+			//	<< freq/*frequencyMHz*/ << " " << 0/*FTWIncr*/ << " "
+			//	<< phase/*phaseDegrees*/ << fendl;
 		}
 
 		//step 2: ramp to new locations
@@ -488,11 +489,11 @@ void DynamicMoveManager::writeRearrangeMoves(moveSequence input, MessageSender& 
 				.frequencyMHz(freq).amplitudePercent(0.01).phaseDegrees(0)  // near-zero amp (~1 LSB)
 				.instantFTW(1).ATWIncr(-ampStepMag).stepSequenceID(3 * stepID + 3).FTWIncr(0).phaseJump(0);
 			ms.enqueue(m);
-			flog << "setmove " << 3 * stepID + 3/*stepSequenceID*/ << " DAC1 "
-				<< hardwareChannel/*channel*/ << " " << 1/*instantFTW*/ << " " << 0/*phaseJump*/ << " "
-				<< 0.01/*amplitudePercent*/ << " " << -ampStepMag/*ATWIncr*/ << " "
-				<< freq/*frequencyMHz*/ << " " << 0/*FTWIncr*/ << " "
-				<< 0/*phaseDegrees*/ << fendl;
+			//flog << "setmove " << 3 * stepID + 3/*stepSequenceID*/ << " DAC1 "
+			//	<< hardwareChannel/*channel*/ << " " << 1/*instantFTW*/ << " " << 0/*phaseJump*/ << " "
+			//	<< 0.01/*amplitudePercent*/ << " " << -ampStepMag/*ATWIncr*/ << " "
+			//	<< freq/*frequencyMHz*/ << " " << 0/*FTWIncr*/ << " "
+			//	<< 0/*phaseDegrees*/ << fendl;
 		}
 	}
 	//additional snapshot ramping down all channels - unclear why needed, but prevents extra trigger issues.

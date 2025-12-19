@@ -2,7 +2,7 @@
 #include "FastLogger.h"
 
 int FastLogger::fd = -1;
-char FastLogger::buffer[FastLogger::BUF_SIZE];
+char FastLogger::buffer[FastLogger::BUF_SIZE + 1024];
 size_t FastLogger::pos = 0;
 FastLogger flogger("C:\\Chimera\\Chimera-Cryo\\Log\\" + FastLogger::getCurrentFormattedTime() + ".log");
 

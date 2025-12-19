@@ -19,7 +19,9 @@ private:
 	void filterAtomQueue();
 	int sourceColumnSum(int iColumn, const std::vector<bool>& atomImg);
 	int sourceRowSum(int iRow, const std::vector<bool>& atomImg);
-	int equalizeY(moveSequence& moveseq);
+	int equalizeX(moveSequence& moveseq, bool constantMoves = false);
+	int equalizeY(moveSequence& moveseq, bool constantMoves = false);
+	void enoughX(moveSequence& moveseq, bool constantMoves = false);
 	void enoughY(moveSequence& moveseq, bool constantMoves = false);
 	void scrunchX(moveSequence& moveseq, bool centered = false);
 	void scrunchY(moveSequence& moveseq, bool centered = false);
