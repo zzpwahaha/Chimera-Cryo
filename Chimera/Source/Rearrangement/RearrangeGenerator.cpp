@@ -15,9 +15,12 @@ void RearrangeGenerator::loadAtomImage(AtomImage atomImage)
 	this->atomImage = atomImage;
 }
 
-moveSequence RearrangeGenerator::getRearrangeMoves()
+moveSequence RearrangeGenerator::getRearrangeMoves(unsigned rearrangeRound)
 {
-	return getRearrangeMoves(moveParam.rearrangeMode);
+	if (rearrangeRound > moveParam.rearrangeRound - 1) {
+		thrower("Trying to rearrange more than number of round! This is a low level bug.");
+	}
+	return getRearrangeMoves(moveParam.rearrangeMode[rearrangeRound]);
 }
 
 moveSequence RearrangeGenerator::getRearrangeMoves(std::string rearrangeType)
@@ -629,7 +632,12 @@ int RearrangeGenerator::equalizeX(moveSequence& moveseq, bool constantMoves)
 			single.startAOY.push_back(coordY);
 			single.endAOY.push_back(positionCoordinatesY[iyTweezer + 1]);
 
-			if (single.nx() > 0 || constantMoves) {
+			if (single.nx() > 0) {
+				moveseq.moves.push_back(single);
+			}
+			else if (constantMoves) {
+				single.startAOX.push_back(-1); // avoid having empty AOX/Y and use frequency outisde ROI
+				single.endAOX.push_back(-1);
 				moveseq.moves.push_back(single);
 			}
 		}
@@ -657,7 +665,12 @@ int RearrangeGenerator::equalizeX(moveSequence& moveseq, bool constantMoves)
 			single.startAOY.push_back(positionCoordinatesY[iyTweezer + 1]);
 			single.endAOY.push_back(coordY);
 
-			if (single.nx() > 0 || constantMoves) {
+			if (single.nx() > 0) {
+				moveseq.moves.push_back(single);
+			}
+			else if (constantMoves) {
+				single.startAOX.push_back(-1); // avoid having empty AOX/Y and use frequency outisde ROI
+				single.endAOX.push_back(-1);
 				moveseq.moves.push_back(single);
 			}
 		}
@@ -666,6 +679,8 @@ int RearrangeGenerator::equalizeX(moveSequence& moveseq, bool constantMoves)
 				moveSingle single;
 				single.startAOY.push_back(coordY);
 				single.endAOY.push_back(coordY);
+				single.startAOX.push_back(-1); // avoid having empty AOX/Y and use frequency outisde ROI
+				single.endAOX.push_back(-1);
 				moveseq.moves.push_back(single);
 			}
 		}
@@ -722,8 +737,13 @@ int RearrangeGenerator::equalizeY(moveSequence& moveseq, bool constantMoves)
 			}
 			single.startAOX.push_back(coordX); //Single tone in x
 			single.endAOX.push_back(positionCoordinatesX[ixTweezer + 1]); //x moves to next load column
-			if (single.ny() > 0|| constantMoves) { 
-				moveseq.moves.push_back(single); 
+			if (single.ny() > 0) {
+				moveseq.moves.push_back(single);
+			}
+			else if (constantMoves) {
+				single.startAOY.push_back(-1); // avoid having empty AOX/Y and use frequency outisde ROI
+				single.endAOY.push_back(-1);
+				moveseq.moves.push_back(single);
 			}
 		}
 		else if (nxList[ixTweezer] < 0) {
@@ -746,8 +766,13 @@ int RearrangeGenerator::equalizeY(moveSequence& moveseq, bool constantMoves)
 			}
 			single.startAOX.push_back(positionCoordinatesX[ixTweezer + 1]); //x moves from next load column
 			single.endAOX.push_back(coordX); //Single tone in x
-			if (single.ny() > 0|| constantMoves) { 
-				moveseq.moves.push_back(single); 
+			if (single.ny() > 0) {
+				moveseq.moves.push_back(single);
+			}
+			else if (constantMoves) {
+				single.startAOY.push_back(-1); // avoid having empty AOX/Y and use frequency outisde ROI
+				single.endAOY.push_back(-1);
+				moveseq.moves.push_back(single);
 			}
 		}
 		else {
@@ -755,6 +780,8 @@ int RearrangeGenerator::equalizeY(moveSequence& moveseq, bool constantMoves)
 				moveSingle single;
 				single.startAOX.push_back(coordX); //dummy move to maintain constant move number.
 				single.endAOX.push_back(coordX);
+				single.startAOY.push_back(-1); // avoid having empty AOX/Y and use frequency outisde ROI
+				single.endAOY.push_back(-1);
 				moveseq.moves.push_back(single);
 			}
 		}
@@ -822,7 +849,12 @@ void RearrangeGenerator::enoughX(moveSequence& moveseq, bool constantMoves)
 			single.startAOY.push_back(coordY);
 			single.endAOY.push_back(positionCoordinatesY[iyTweezer + 1]);
 
-			if (single.nx() > 0 || constantMoves) {
+			if (single.nx() > 0) {
+				moveseq.moves.push_back(single);
+			}
+			else if (constantMoves) {
+				single.startAOX.push_back(-1); // avoid having empty AOX/Y and use frequency outisde ROI
+				single.endAOX.push_back(-1);
 				moveseq.moves.push_back(single);
 			}
 		}
@@ -849,7 +881,12 @@ void RearrangeGenerator::enoughX(moveSequence& moveseq, bool constantMoves)
 			single.startAOY.push_back(positionCoordinatesY[iyTweezer + 1]);
 			single.endAOY.push_back(coordY);
 
-			if (single.nx() > 0 || constantMoves) {
+			if (single.nx() > 0) {
+				moveseq.moves.push_back(single);
+			}
+			else if (constantMoves) {
+				single.startAOX.push_back(-1); // avoid having empty AOX/Y and use frequency outisde ROI
+				single.endAOX.push_back(-1);
 				moveseq.moves.push_back(single);
 			}
 		}
@@ -857,6 +894,8 @@ void RearrangeGenerator::enoughX(moveSequence& moveseq, bool constantMoves)
 			moveSingle single;
 			single.startAOY.push_back(coordY);
 			single.endAOY.push_back(coordY);
+			single.startAOX.push_back(-1); // avoid having empty AOX/Y and use frequency outisde ROI
+			single.endAOX.push_back(-1);
 			moveseq.moves.push_back(single);
 		}
 		iyTweezer++;
@@ -918,7 +957,12 @@ void RearrangeGenerator::enoughY(moveSequence& moveseq, bool constantMoves)
 			}
 			single.startAOX.push_back(coordX); //Single tone in x
 			single.endAOX.push_back(positionCoordinatesX[ixTweezer + 1]); //x moves to next load column
-			if (single.ny() > 0 || constantMoves) { moveseq.moves.push_back(single); } //If constant number of moves are needed, always add the move, even if it's empty.
+			if (single.ny() > 0) { moveseq.moves.push_back(single); } //If constant number of moves are needed, always add the move, even if it's empty.
+			else if (constantMoves) {
+				single.startAOY.push_back(-1); // avoid having empty AOX/Y and use frequency outisde ROI
+				single.endAOY.push_back(-1);
+				moveseq.moves.push_back(single);
+			}
 		}
 		else if (nxList[ixTweezer] < 0) {
 			// pull missing atoms into column.
@@ -940,12 +984,19 @@ void RearrangeGenerator::enoughY(moveSequence& moveseq, bool constantMoves)
 			}
 			single.startAOX.push_back(positionCoordinatesX[ixTweezer + 1]); //x moves from next load column
 			single.endAOX.push_back(coordX); //Single tone in x
-			if (single.ny() > 0 || constantMoves) { moveseq.moves.push_back(single); }
+			if (single.ny() > 0) { moveseq.moves.push_back(single); }
+			else if (constantMoves) {
+				single.startAOY.push_back(-1); // avoid having empty AOX/Y and use frequency outisde ROI
+				single.endAOY.push_back(-1);
+				moveseq.moves.push_back(single);
+			}
 		}
 		else if (constantMoves) {
 			moveSingle single;
 			single.startAOX.push_back(coordX); //dummy move to maintain constant move number.
 			single.endAOX.push_back(coordX);
+			single.startAOY.push_back(-1); // avoid having empty AOX/Y and use frequency outisde ROI
+			single.endAOY.push_back(-1);
 			moveseq.moves.push_back(single);
 		}
 		ixTweezer++;
@@ -1115,7 +1166,13 @@ void RearrangeGenerator::scrunchXTarget(moveSequence& moveseq, bool constantMove
 			}
 			single.startAOY.push_back(iy); //Single tone in y
 			single.endAOY.push_back(iy); //y does not move
-			if (single.nx() > 0 || constantMoves) { moveseq.moves.push_back(single); }
+			if (single.nx() > 0) { moveseq.moves.push_back(single); }
+			else if (constantMoves) {
+				single.startAOX.push_back(-1); // avoid having empty AOX/Y and use frequency outisde ROI
+				single.endAOX.push_back(-1);
+				moveseq.moves.push_back(single);
+				continue;
+			}
 
 			int nAtomsInRow = moveseq.moves.back().nx();
 			int ixTarget = 0;
@@ -1171,7 +1228,13 @@ void RearrangeGenerator::scrunchYTarget(moveSequence& moveseq, bool constantMove
 			}
 			single.startAOX.push_back(ix); //Single tone in x
 			single.endAOX.push_back(ix); //x does not move
-			if (single.ny() > 0 || constantMoves) { moveseq.moves.push_back(single); }
+			if (single.ny() > 0) { moveseq.moves.push_back(single); }
+			else if (constantMoves) {
+				single.startAOY.push_back(-1); // avoid having empty AOX/Y and use frequency outisde ROI
+				single.endAOY.push_back(-1);
+				moveseq.moves.push_back(single);
+				continue;
+			}
 
 			int nAtomsInRow = moveseq.moves.back().ny();
 			int iyTarget = 0;

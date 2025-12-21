@@ -6,7 +6,7 @@
 
 CruncherThreadWorker::CruncherThreadWorker (std::unique_ptr<atomCruncherInput> input_) 
 	: input(std::move(input_)), 
-	rearrangeGenerator(input->gmoog->moveManager.getRearrangeParameters())
+	rearrangeGenerator(input->gmoog->moveManager.getRearrangeParameters()) // winList() guarantee that script window load device earlier than andor
 {}
 
 CruncherThreadWorker::~CruncherThreadWorker () {
@@ -169,8 +169,8 @@ void CruncherThreadWorker::handleRearrangement(AtomImage atomImage)
 	if (!input->gmoog->moveManager.isMoveActive() || !input->gmoog->experimentActive) {
 		return;
 	}
-	// only start move procedure with the first image per experiment sequence
-	if (atomImage.picStat.picNum % input->picsPerRep != 0) {
+	// only start move procedure with the image to be rearranged per experiment sequence
+	if ((atomImage.picStat.picNum % input->picsPerRep) / rearrangeGenerator.moveParam.rearrangeRound != 0) {
 		return;
 	}
 	// only start move procedure with enough atoms
@@ -184,7 +184,7 @@ void CruncherThreadWorker::handleRearrangement(AtomImage atomImage)
 
 	MessageSender ms;
 	//input->gmoog->writeOff(ms); //Important to start with load tones off, so that every tone has explicit settings.
-	input->gmoog->moveManager.writeRearrangeMoves(rearrangeGenerator.getRearrangeMoves(), ms, atomImage.picStat.varNum);
+	input->gmoog->moveManager.writeRearrangeMoves(rearrangeGenerator.getRearrangeMoves(atomImage.picStat.picNum % input->picsPerRep), ms, atomImage.picStat.varNum);
 	input->gmoog->writeTerminator(ms);
 	flog << "From Cruncher thread: ready to send rearrange for image number" << atomImage.picStat.picNum << " at " << std::chrono::duration_cast<std::chrono::nanoseconds>(chronoClockHR::now() - input->imageGrabTimes->back()).count() / 1e6 << "ms, relative to grabber thread" << fendl;
 	input->gmoog->send(ms);

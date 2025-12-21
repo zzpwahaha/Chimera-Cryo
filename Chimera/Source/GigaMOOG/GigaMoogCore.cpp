@@ -84,6 +84,13 @@ void GigaMoogCore::calculateVariations(std::vector<parameterType>& params, ExpTh
 	for (auto variationInc : range(variations)) {
 		analyzeMoogScript(fileAddress, params, variationInc);
 	}
+	if (moveManager.isMoveActive()) {
+		auto moveParam = moveManager.getRearrangeParameters();
+		if (moveParam.rearrangeRound > threadworker->andorPicsPerRepetition()) {
+			thrower("The number of round of rearrangement: " + str(moveParam.rearrangeRound) + " is more than number of pictures per repetition: "
+				+ str(threadworker->andorPicsPerRepetition()) + ". This is not even satisfying the minimum requirement");
+		}
+	}
 
 }
 

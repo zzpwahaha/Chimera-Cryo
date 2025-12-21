@@ -77,6 +77,7 @@ class AndorCameraCore : public IDeviceCore{
 		void errorFinish ();
 		void programVariation (unsigned variationInc, std::vector<parameterType>& params, ExpThreadWorker* threadworker);
 		std::pair<unsigned, unsigned> getCurrentRepVarNumber(unsigned int currentPicNumber);
+		unsigned getPicsPerRepetition();
 		std::vector<std::string> getVertShiftSpeeds ();
 		std::vector<std::string> getHorShiftSpeeds ();
 

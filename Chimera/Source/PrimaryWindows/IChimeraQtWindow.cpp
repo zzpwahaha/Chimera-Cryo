@@ -40,6 +40,7 @@ void IChimeraQtWindow::changeBoxColor (std::string sysDelim, std::string color){
 	}
 }
 
+// important script is before andor so that rearrangement parameter is loaded before cruncher thread is initialized
 std::vector<IChimeraQtWindow*> IChimeraQtWindow::winList (){
 	std::vector<IChimeraQtWindow*> list = { 
 		(IChimeraQtWindow*)scriptWin, (IChimeraQtWindow*)andorWin, 

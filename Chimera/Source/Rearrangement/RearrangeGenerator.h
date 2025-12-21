@@ -11,7 +11,7 @@ public:
 	RearrangeGenerator(const RearrangeGenerator&) = delete;
 	RearrangeGenerator(rearrangeParameters moveParam);
 	void loadAtomImage(AtomImage atomImage);
-	moveSequence getRearrangeMoves();
+	moveSequence getRearrangeMoves(unsigned rearrangeRound);
 	moveSequence getRearrangeMoves(std::string rearrangeType);
 
 private:
@@ -19,10 +19,10 @@ private:
 	void filterAtomQueue();
 	int sourceColumnSum(int iColumn, const std::vector<bool>& atomImg);
 	int sourceRowSum(int iRow, const std::vector<bool>& atomImg);
-	int equalizeX(moveSequence& moveseq, bool constantMoves = false);
-	int equalizeY(moveSequence& moveseq, bool constantMoves = false);
-	void enoughX(moveSequence& moveseq, bool constantMoves = false);
-	void enoughY(moveSequence& moveseq, bool constantMoves = false);
+	int equalizeX(moveSequence& moveseq, bool constantMoves = true);
+	int equalizeY(moveSequence& moveseq, bool constantMoves = true);
+	void enoughX(moveSequence& moveseq, bool constantMoves = true);
+	void enoughY(moveSequence& moveseq, bool constantMoves = true);
 	void scrunchX(moveSequence& moveseq, bool centered = false);
 	void scrunchY(moveSequence& moveseq, bool centered = false);
 	void scrunchYFixedLength(moveSequence& moveseq, int nPerColumn, bool centered = false);
@@ -34,10 +34,10 @@ private:
 
 	void tweezer1DInitializationTest(moveSequence& moveseq); // This is only initializing and deinitializing tones at loaded atom location, no move is involved. only works for 1D (or first row)
 public:
+	const rearrangeParameters moveParam;
 
 private:
 	AtomImage atomImage;
-	const rearrangeParameters moveParam;
 	const std::vector<unsigned> positionCoordinatesX, positionCoordinatesY;
 
 	std::vector<bool> positionsX, positionsY; // will be assigned with moveParam.initialPositionsX/Y and could be changed within getRearrangeMoves

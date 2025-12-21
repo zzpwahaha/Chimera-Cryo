@@ -3,7 +3,8 @@
 #include <vector>
 
 struct rearrangeParameters {
-	std::string rearrangeMode;
+	unsigned rearrangeRound;
+	std::vector<std::string> rearrangeMode;
 	int scrunchSpacing;
 	int ampStepMag/* = 134217727*/;
 	int freqStepMag/* = 511*/;

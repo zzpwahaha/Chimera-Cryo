@@ -10,23 +10,35 @@ bool DynamicMoveManager::analyzeMoogScript(std::string word, ScriptStream& curre
 	}
 	if (variation == 0) {
 		moveLUT.refreshLUT();
+		moveParam.rearrangeMode.clear();
 		moveParam.xOffsetManual.clear();
 		moveParam.yOffsetManual.clear();
 		// DOES NOT SUPPORT VARIATION FOR NOW EXCEPT X/YOFFSET
 		moveActive = true;
 	}
 
-	Expression ampStepNew, freqStepNew, ampStepPaintNew, freqStepPaintNew, repeatX, repeatY, xoff, yoff, yPaintStartExpr, yPaintEndExpr, scrunchSpacingExpression;
+	Expression numRearrangement, ampStepNew, freqStepNew, ampStepPaintNew, freqStepPaintNew, repeatX, repeatY, xoff, yoff, yPaintStartExpr, yPaintEndExpr, scrunchSpacingExpression;
 	std::string tmp, loadAOX, loadAOY, initAOX, initAOY, filterAOX, filterAOY;
-	currentMoogScript >> moveParam.rearrangeMode;
-	auto rearrangeMode = moveParam.rearrangeMode;
-	if (rearrangeMode != "scrunchx" && rearrangeMode != "scrunchy" && rearrangeMode != "scrunchxy"
-		&& rearrangeMode != "centerscrunchx" && rearrangeMode != "centerscrunchy"
-		&& rearrangeMode != "scrunchyx" && rearrangeMode != "centerscrunchyx"
-		&& rearrangeMode != "scrunchxtarget" && rearrangeMode != "equalscrunchxtarget" && rearrangeMode != "enoughscrunchxtarget"
-		&& rearrangeMode != "tetris"
-		&& rearrangeMode != "tweezer1dinittest") {
-		thrower("Invalid rearrangement mode. Valid options are scrunchx, scrunchy, scrunchxy, scrunchyx, centerscrunchyx, and tetris.");
+	currentMoogScript >> numRearrangement;
+	if (numRearrangement.varies()) {
+		thrower("Error: Variation in variable " + numRearrangement.expressionStr + " is not allowed in rearrangement(gigamoog) script for now.");
+	}
+	moveParam.rearrangeRound = numRearrangement.evaluate(variables, variation);
+	if (moveParam.rearrangeRound > 4 || moveParam.rearrangeRound == 0) {
+		thrower("Suspicious number of rearrangement" + numRearrangement.expressionStr + ".");
+	}
+	for (auto round : range(moveParam.rearrangeRound)) {
+		std::string rearrangeMode;
+		currentMoogScript >> rearrangeMode;
+		if (rearrangeMode != "scrunchx" && rearrangeMode != "scrunchy" && rearrangeMode != "scrunchxy"
+			&& rearrangeMode != "centerscrunchx" && rearrangeMode != "centerscrunchy"
+			&& rearrangeMode != "scrunchyx" && rearrangeMode != "centerscrunchyx"
+			&& rearrangeMode != "scrunchxtarget" && rearrangeMode != "equalscrunchxtarget" && rearrangeMode != "enoughscrunchxtarget"
+			&& rearrangeMode != "tetris"
+			&& rearrangeMode != "tweezer1dinittest") {
+			thrower("Invalid rearrangement mode. Valid options are scrunchx, scrunchy, scrunchxy, scrunchyx, centerscrunchyx, and tetris.");
+		}
+		moveParam.rearrangeMode.push_back(rearrangeMode);
 	}
 
 	currentMoogScript >> scrunchSpacingExpression;

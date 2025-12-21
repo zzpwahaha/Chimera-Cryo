@@ -995,6 +995,11 @@ std::pair<unsigned, unsigned> AndorCameraCore::getCurrentRepVarNumber(unsigned i
 	return std::pair<unsigned, unsigned>(currentRepNumber, expRunSettings.variationShuffleIndex[currentVarNumber]);
 }
 
+unsigned AndorCameraCore::getPicsPerRepetition()
+{
+	return expRunSettings.picsPerRepetition;
+}
+
 void AndorCameraCore::normalFinish (){
 }
 
