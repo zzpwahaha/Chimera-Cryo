@@ -9,6 +9,7 @@
 #include "FastLoggerSetting.h"
 
 class FastLogStream;
+class ExpThreadWorker;
 
 #if FASTLOG_TS_CHRONO
 #include <chrono>
@@ -22,6 +23,7 @@ class FastLogStream;
 class FastLogger
 {
     friend class FastLogStream;
+    friend class ExpThreadWorker;
 public:
     FastLogger(std::string path);
     ~FastLogger();
@@ -35,7 +37,7 @@ private:
     static void init(std::string path);
     static void shutdown();
 
-    static void writeRaw(const char* data, size_t len);
+    static void writeRaw(const char* data, size_t len, bool doFlush = true);
     static void writeStr(const char* s);
 
 private:
@@ -48,7 +50,7 @@ private:
     static void flush();
 
 #if FASTLOG_TIMESTAMP
-    static inline void writeTimestamp();
+    static inline void writeTimestamp(bool doFlush = true);
 #endif
 };
 extern FastLogger flogger;

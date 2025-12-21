@@ -23,6 +23,8 @@ class ExpThreadWorker : public QObject
 		void unPause ();
 		bool getIsPaused ();
 		void abort();
+		// This should only be called after deviceLoadExpSettings so that this is properly loaded to andor
+		unsigned andorPicsPerRepetition();
 		void loadMasterScript(std::string scriptAddress, ScriptStream& script);
 		static void loadGMoogScript(std::string scriptAddress, ScriptStream& gmoogScript);
 		static void loadArbGenScript(std::string scriptAddress, ScriptStream& agilentScript);
@@ -70,8 +72,7 @@ class ExpThreadWorker : public QObject
 		void runConsistencyChecks (std::vector<parameterType> expParams, std::vector<calSettings> calibrations);
 		void waitForSequenceFinish(double seqTime);
 		void handlePause (std::atomic<bool>& isPaused, std::atomic<bool>& isAborting);
-		void initVariation (unsigned variationInc,
-			std::vector<parameterType> expParams);
+		void initVariation (unsigned variationInc, std::vector<parameterType> expParams);
 		void normalFinish (ExperimentType& expType, bool runMaster, chronoTime startTime);
 		void errorFinish (std::atomic<bool>& isAborting, ChimeraError& exception, chronoTime startTime);
 		void startRep (unsigned repInc, unsigned variationInc, bool skip);

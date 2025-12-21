@@ -40,15 +40,19 @@ void FastLogger::shutdown()
 void FastLogger::flush()
 {
     if (pos) {
-        FastLogger::printf("Flushed\n");
+        //FastLogger::printf("Flushed\n");
+#if FASTLOG_TIMESTAMP
+        writeTimestamp(false);
+#endif
+        writeRaw("Flushed\n", 8, false);
         _write(fd, buffer, (unsigned)pos);
     }
     pos = 0;
 }
 
-void FastLogger::writeRaw(const char* data, size_t len)
+void FastLogger::writeRaw(const char* data, size_t len, bool doFlush)
 {
-    if (pos + len > BUF_SIZE)
+    if (doFlush && pos + len > BUF_SIZE)
         flush();
 
     std::memcpy(buffer + pos, data, len);
@@ -96,13 +100,13 @@ inline void FastLogger::printf(const char* fmt, Args... args)
 }
 
 #if FASTLOG_TIMESTAMP && FASTLOG_TS_TSC
-inline void FastLogger::writeTimestamp()
+inline void FastLogger::writeTimestamp(bool doFlush)
 {
     uint64_t t = __rdtsc();
     char buf[32];
     int n = std::snprintf(buf, sizeof(buf), "[%llu] ",
         (unsigned long long)t);
-    writeRaw(buf, n);
+    writeRaw(buf, n, doFlush);
 }
 #endif
 

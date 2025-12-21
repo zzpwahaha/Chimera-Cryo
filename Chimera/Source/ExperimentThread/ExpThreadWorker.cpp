@@ -354,6 +354,12 @@ void ExpThreadWorker::abort () {
 	isAborting = true;
 }
 
+unsigned ExpThreadWorker::andorPicsPerRepetition()
+{
+	auto& andorCamera = input->devices.getSingleDevice<AndorCameraCore>();
+	return andorCamera.getPicsPerRepetition();
+}
+
 void ExpThreadWorker::loadGMoogScript(std::string scriptAddress, ScriptStream& gmoogScript) 
 {
 	std::ifstream scriptFile(scriptAddress);
@@ -1441,6 +1447,9 @@ void ExpThreadWorker::errorFinish (std::atomic<bool>& isAborting, ChimeraError& 
 	emit errorExperimentFinish ((finMsg + "\r\nExperiment took " + str (int (exp_t) / 3600) + " hours, "
 		+ str (int (exp_t) % 3600 / 60) + " minutes, "+ str (int (exp_t) % 60) + " seconds.\r\n").c_str (), 
 		input->profile);
+
+	Sleep(100);
+	FastLogger::flush();
 }
 
 void ExpThreadWorker::normalFinish (ExperimentType& expType, bool runMaster,
@@ -1477,6 +1486,9 @@ void ExpThreadWorker::normalFinish (ExperimentType& expType, bool runMaster,
 			+ str (int (exp_t) / 3600) + " hours, " + str (int (exp_t) % 3600 / 60)
 			+ " minutes, " + str (int (exp_t) % 60) + " seconds.\r\n").c_str (), input->profile);
 	}
+
+	Sleep(100);
+	FastLogger::flush();
 }
 
 void ExpThreadWorker::startRep (unsigned repInc, unsigned variationInc, bool skip) {
