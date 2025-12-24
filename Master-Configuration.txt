@@ -265,5 +265,5 @@ rb87_hfsplitting 6834.682
 t_shutter 10
 t_field_settling 100
 rydberg_ionization_frequency 6390
-1026 1090 1 928 967 1
+971 1140 1 921 974 1
 0 1

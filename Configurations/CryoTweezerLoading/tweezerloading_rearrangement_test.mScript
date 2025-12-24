@@ -49,27 +49,27 @@ t += 15
 
 %%%%%%%%%%%%%%  Image TWIZZER  %%%%%%%%%%%%%%%%%%% change the field/laser freq parameter here because the previous section is dark, i.e. 100-t_pgc_twz is larger than 4
 call PGCTweezerImaging()
-t += 15 
+%t += 15 
 
-t += 300
-call D2InTrapPGCPrb(25)
+t += 80
+%call D2InTrapPGCPrb(25)
 % note the t_pgc_twz should be smaller than 100
-t += 15
+%t += 15
 
     dac: BiasCoilX pgc_twz_bias_x
     dac: BiasCoilY pgc_twz_bias_y 
     dac: BiasCoilZ pgc_twz_bias_z
 
 %%%%%%%%%%% PGC %%%%%%%%%%% 
-%    ol: ol_cooling d2_cooling_resonance+20-pgc_twz_olcool
-%    ol: ol_repump d2_repump_resonance-20+pgc_twz_olrepump
-%    on: PrbRepTrg
-%    on: PrbShutter
-%    on: PrbCoolShutter
-%    off: xyzMOTShutter
-%    dac: PrbAmp {pgcprb_twz_cool_amp_cal prb_pwr} 
-%    dac: PrbrepAmp 10 %pgcprb_twz_rep_amp
-%    t += t_shutter
+    ol: ol_cooling d2_cooling_resonance+20-pgc_twz_olcool
+    ol: ol_repump d2_repump_resonance-20+pgc_twz_olrepump
+    on: PrbRepTrg
+    on: PrbShutter
+    on: PrbCoolShutter
+    off: xyzMOTShutter
+    dac: PrbAmp {pgcprb_twz_cool_amp_cal prb_pwr} 
+    dac: PrbrepAmp 10 %pgcprb_twz_rep_amp
+    t += t_shutter
 %%%%%%%%%%% PGC %%%%%%%%%%% 
 
 %%%%%%%%%%% LGM %%%%%%%%%%% 
@@ -87,6 +87,7 @@ t += 15
 
 
 %var SLM_depth 3.5
+var rearrange_SLM_depth 5.8
 
 %dacramp: SLMTweezerIntensity slm_twz_intensity SLM_depth 10
 %t += 10
@@ -94,9 +95,7 @@ t += 15
 
 %t += 1
 
-
-
-dacramp: SLMTweezerIntensity slm_twz_intensity slm_twz_intensity*fraction_scan 10
+dacramp: SLMTweezerIntensity slm_twz_intensity rearrange_SLM_depth 10  %slm_twz_intensity*fraction_scan
 t += 10
 
 % this turns off RF tones from load2
@@ -109,46 +108,58 @@ t += 1
 %on: D1LGMTrg3
 %pulseon: do8_4 0.1
 
-%t += 0.1
+%%%%%%%%% for euql/enough %%%%%%%%%
+%repeat: 4
+%t += 0.01
+%% initialize tones
 %pulseon: GMMoveTrg 0.0005
-%%on: TweezerTrg
 %pulseon: do8_4 0.001
-%t += 0.3 
-%on: TweezerTrg
+%t += 0.3
+%
+%% move tones
+%on: PrbTrg
+%t += 0.01
+%on: TweezerTrg 
 %t += 0.01
 %pulseon: GMMoveTrg 0.0005
-%%on: TweezerTrg
-%%t += 1.5+0.3+0.3
-%t += 10.5 % 1x37 180um
-%%t += time_scan
+%pulseon: do8_4 0.001
+%t += 1
 %off: TweezerTrg
+%t += 0.01
+%off: PrbTrg
 %
+%% ramp down tones
 %pulseon: GMMoveTrg 0.0005
+%pulseon: do8_4 0.001
 %t += 0.3
+%end
+%%%%%%%%% for euql/enough %%%%%%%%%
 
 
-repeat: 1
+repeat: 5
 t += 0.01
 % initialize tones
 pulseon: GMMoveTrg 0.0005
 pulseon: do8_4 0.001
 t += 0.3
+
 % move tones
-%on: PrbTrg
+on: PrbTrg
 t += 0.01
 on: TweezerTrg 
 t += 0.01
 pulseon: GMMoveTrg 0.0005
 pulseon: do8_4 0.001
 t += 5
+%t += time_scan
 off: TweezerTrg
 t += 0.01
 off: PrbTrg
+
 % ramp down tones
 pulseon: GMMoveTrg 0.0005
 pulseon: do8_4 0.001
 t += 0.3
-
 end
 
 % after all rearrangement, this would turn off GM completely
@@ -167,12 +178,98 @@ off: TweezerHold
 pulseon: GMLoadTrg 0.0005
 
 
-dacramp: SLMTweezerIntensity slm_twz_intensity*fraction_scan slm_twz_intensity 10
+dacramp: SLMTweezerIntensity rearrange_SLM_depth slm_twz_intensity 10 %slm_twz_intensity*fraction_scan 
 t += 10
 
 t += 1
 %dacramp: SLMTweezerIntensity SLM_depth slm_twz_intensity 10
 %t += 10
+
+
+
+%%%%%%%%%%%%%%%  second round of rearrangement  %%%%%%%%%%%%%%
+%
+%%%%%%%%%%%%%%%  PGC in Tweezer with Probe %%%%%%%%%%%%%%%%%%
+%% change the field/laser freq parameter here because the previous section is TOF and no light is on
+%call D2InTrapPGCPrb(25)
+%% note the t_pgc_twz should be smaller than 100
+%t += 15
+%%%%%%%%%%%%%%%% Second Twizzer Image
+%% note the previous section should have at least 4 ms dark interval
+%call PGCTweezerImaging()
+%
+%t += 80
+%    dac: BiasCoilX pgc_twz_bias_x
+%    dac: BiasCoilY pgc_twz_bias_y 
+%    dac: BiasCoilZ pgc_twz_bias_z
+%%%%%%%%%%%% PGC %%%%%%%%%%% 
+%    ol: ol_cooling d2_cooling_resonance+20-pgc_twz_olcool
+%    ol: ol_repump d2_repump_resonance-20+pgc_twz_olrepump
+%    on: PrbRepTrg
+%    on: PrbShutter
+%    on: PrbCoolShutter
+%    off: xyzMOTShutter
+%    dac: PrbAmp {pgcprb_twz_cool_amp_cal prb_pwr} 
+%    dac: PrbrepAmp 10 %pgcprb_twz_rep_amp
+%    t += t_shutter
+%%%%%%%%%%%% PGC %%%%%%%%%%% 
+%
+%dacramp: SLMTweezerIntensity slm_twz_intensity slm_twz_intensity*fraction_scan 10
+%t += 10
+%
+%% this turns off RF tones from load2
+%t += -1
+%pulseon: GMMoveTrg 0.0005
+%t += 1
+%%on: TweezerTrg
+%
+%
+%repeat: 5
+%t += 0.01
+%% initialize tones
+%pulseon: GMMoveTrg 0.0005
+%pulseon: do8_4 0.001
+%t += 0.3
+%
+%% move tones
+%on: PrbTrg
+%t += 0.01
+%on: TweezerTrg 
+%t += 0.01
+%pulseon: GMMoveTrg 0.0005
+%pulseon: do8_4 0.001
+%t += 5
+%%t += time_scan
+%off: TweezerTrg
+%t += 0.01
+%off: PrbTrg
+%
+%% ramp down tones
+%pulseon: GMMoveTrg 0.0005
+%pulseon: do8_4 0.001
+%t += 0.3
+%end
+%
+%% after all rearrangement, this would turn off GM completely
+%%pulseon: GMMoveTrg 0.0005
+%off: TweezerTrg
+%
+%off: PrbTrg
+%off: D1LGMTrg
+%off: D1LGMEOMTrg
+%off: PrbShutter
+%off: D1LGMPrbShutter
+%t += 1
+%
+%off: PrbTrg
+%off: TweezerHold
+%pulseon: GMLoadTrg 0.0005
+%
+%
+%dacramp: SLMTweezerIntensity slm_twz_intensity*fraction_scan slm_twz_intensity 10
+%t += 10
+%%%%%%%%%%%%%%  second round of rearrangement  %%%%%%%%%%%%%%
+
 
 %%%%%%%%%%%%%%  PGC in Tweezer with Probe %%%%%%%%%%%%%%%%%%
 % change the field/laser freq parameter here because the previous section is TOF and no light is on
@@ -183,17 +280,6 @@ t += 15
 % note the previous section should have at least 4 ms dark interval
 call PGCTweezerImaging()
 
-
-%t += 10
-%
-%repeat: 2
-%pulseon: GMMoveTrg 0.0005
-%t += 10
-%end
-%
-%
-%
-%pulseon: GMMoveTrg 0.0005
 
 %%%%%%%%%%%%%%  END Sequence  %%%%%%%%%%%%%%%%%%
 t += 10

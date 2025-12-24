@@ -113,7 +113,7 @@ if __name__ == '__main__':
     # tweezer_intensity_setpoint = 2.9 # 3.75 V for AOD
     # repetitions = 4
 
-    grid_file_name = 'atomgrid_5x20_7points_20251215_SLM'
+    grid_file_name = 'atomgrid_5x20_6points_20251218_SLM'
     camera_image_dim = {'Left:':971, 'Right:':1140, 'H-Bin:':1, 'Bottom:': 921, 'Top:': 974, 'V-Bin:': 1}
     tweezer_intensity_setpoint = 6.5 #V
     repetitions = 4

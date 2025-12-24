@@ -25,7 +25,7 @@ call PGCTweezerImaging()
 
 %%%%%%%%%%%%%% Prepare for pulsed PGC with Probe %%%%%%%%%%%%%%%
 %on: UVLampTrg
-dacramp: TweezerIntensity slm_twz_intensity 0.4*slm_twz_intensity 5
+dacramp: TweezerIntensity slm_twz_intensity 0.4*slm_twz_intensity 5 
 %% turn off TA path and turn on Prb path for single beam cooling
 on: PrbCoolShutter
 off: TARepShutter

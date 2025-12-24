@@ -104,9 +104,9 @@
 
 	//Mako camera
 	const unsigned MAKO_NUMBER = 4;
-	const std::array<bool, MAKO_NUMBER> MAKO_SAFEMODE = { false,false,false,false};
-	const std::array<std::string, MAKO_NUMBER> MAKO_DELIMS = { "MAKO1_CAM"/*MOT G125*/, "MAKO2_CAM"/*MOT G319*/, "MAKO3_CAM"/*420 MON*/, "MAKO4_CAM"/*1013 MON*/};
-	const std::array<std::string, MAKO_NUMBER> MAKO_IPADDRS = { "10.10.0.6", "10.10.0.7","10.10.0.12","10.10.0.11" };
+	const std::array<bool, MAKO_NUMBER> MAKO_SAFEMODE = { false,true,false,false};
+	const std::array<std::string, MAKO_NUMBER> MAKO_DELIMS = { "MAKO1_CAM"/*MOT G319*/, "MAKO2_CAM"/*MOT G507*/, "MAKO3_CAM"/*420 MON*/, "MAKO4_CAM"/*1013 MON*/};
+	const std::array<std::string, MAKO_NUMBER> MAKO_IPADDRS = { "10.10.0.7"/*"10.10.0.6"*/, "10.10.0.13"/*"10.10.0.7"*/,"10.10.0.12","10.10.0.11" };
 	const std::vector<std::pair<unsigned, unsigned>> MAKO_TRIGGER_LINE
 		= { std::make_pair(3 - 1,4),std::make_pair(3 - 1,5),std::make_pair(5 - 1,3),std::make_pair(5 - 1,7) };
 	/*the first is the label on the box minus 1, has minus'd 1 explicitly and this is not used in the code, just a reminder*/
@@ -126,7 +126,7 @@
 	const unsigned MICROWAVE_NUM = 2;
 	const std::array<std::string, MICROWAVE_NUM> MICROWAVE_DELIMS = { "MW1","MW2" };
 	const std::array<bool, MICROWAVE_NUM> MICROWAVE_SAFEMODES = { false,false };
-	const std::array<std::string, MICROWAVE_NUM> MICROWAVE_PORTS = { "COM9","COM15" };
+	const std::array<std::string, MICROWAVE_NUM> MICROWAVE_PORTS = { "COM9","COM15"/*"COM17"*/ };
 	const std::array<std::pair<unsigned, unsigned>, MICROWAVE_NUM> MW_TRIGGER_LINES = { std::make_pair(4 - 1, 2), std::make_pair(4 - 1, 1) }; /*the first is the label on the box minus 1, has minus'd 1 explicitly */
 
 	//PicoScrew
@@ -159,7 +159,7 @@
 	const std::array<bool, 8> ELLIPTEC_CONNECTED = { true,true,true,true,true,true,true,true };
 
 	//Temperature Monitor
-	const bool TEMPMON_SAFEMODE = false;
+	const bool TEMPMON_SAFEMODE = true;
 	const unsigned TEMPMON_NUMBER = 5;
 	const std::array<std::string, TEMPMON_NUMBER> TEMPMON_ID{ 
 		"Cold_Shield", "Cold_Finger", "Cold_Box", "Main_Chamber_Pressure", "Cryostat_side_Pressure"};
