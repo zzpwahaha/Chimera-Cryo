@@ -8,6 +8,7 @@ struct rearrangeParameters {
 	int scrunchSpacing;
 	int ampStepMag/* = 134217727*/;
 	int freqStepMag/* = 511*/;
+	std::vector<int> ampStepMags, freqStepMags;
 
 	double xOffset, yOffset;
 	std::vector<double> xOffsetManual, yOffsetManual;

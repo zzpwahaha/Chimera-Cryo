@@ -11,6 +11,8 @@ bool DynamicMoveManager::analyzeMoogScript(std::string word, ScriptStream& curre
 	if (variation == 0) {
 		moveLUT.refreshLUT();
 		moveParam.rearrangeMode.clear();
+		moveParam.ampStepMags.clear();
+		moveParam.freqStepMags.clear();
 		moveParam.xOffsetManual.clear();
 		moveParam.yOffsetManual.clear();
 		// DOES NOT SUPPORT VARIATION FOR NOW EXCEPT X/YOFFSET
@@ -51,20 +53,23 @@ bool DynamicMoveManager::analyzeMoogScript(std::string word, ScriptStream& curre
 	currentMoogScript >> freqStepNew;
 
 	if (ampStepNew.varies()) {
-		thrower("Error: Variation in variable " + ampStepNew.expressionStr + " is not allowed in rearrangement(gigamoog) script for now.");
+		//thrower("Error: Variation in variable " + ampStepNew.expressionStr + " is not allowed in rearrangement(gigamoog) script for now.");
 	}
-	moveParam.ampStepMag = std::round(ampStepNew.evaluate(variables, variation));
-	if (moveParam.ampStepMag > 134217727 || moveParam.ampStepMag < 0) {
+	int ampStepMag = std::round(ampStepNew.evaluate(variables, variation));
+	if (ampStepMag > 134217727 || ampStepMag < 0) {
 		thrower("Warning: gmoog amplitude step out of range [-134217728, 134217727]. Need to be positive.");
 	}
+	moveParam.ampStepMags.push_back(ampStepMag);
+
 
 	if (freqStepNew.varies()) {
-		thrower("Error: Variation in variable " + freqStepNew.expressionStr + " is not allowed in rearrangement(gigamoog) script for now.");
+		//thrower("Error: Variation in variable " + freqStepNew.expressionStr + " is not allowed in rearrangement(gigamoog) script for now.");
 	}
-	moveParam.freqStepMag = round(freqStepNew.evaluate(variables, variation));
-	if (moveParam.freqStepMag > 511 || moveParam.freqStepMag < 0) {
+	int freqStepMag = round(freqStepNew.evaluate(variables, variation));
+	if (freqStepMag > 511 || freqStepMag < 0) {
 		thrower("Warning: gmoog frequency step out of range [-512, 511]. Need to be positive.");
 	}
+	moveParam.freqStepMags.push_back(freqStepMag);
 
 	currentMoogScript >> tmp;
 	if (tmp == "singlex_repeatx") {
@@ -342,8 +347,8 @@ void DynamicMoveManager::writeRearrangeMoves(moveSequence input, MessageSender& 
 	}
 	writeMoveOff(ms);
 
-	const double ampStepMag = moveParam.ampStepMag;
-	const double freqStepMag = moveParam.freqStepMag;
+	const int ampStepMag = moveParam.ampStepMag;
+	const int freqStepMag = moveParam.freqStepMag;
 	size_t nx, ny;
 	double phase, amp, freq, ampPrev, freqPrev;
 	int ampstep, freqstep;
@@ -724,6 +729,8 @@ void DynamicMoveManager::updataParameterForVariation(unsigned variation)
 	//	yOffset = yOffsetManual;
 	//}
 	if (moveActive) {
+		moveParam.ampStepMag = moveParam.ampStepMags[variation];
+		moveParam.freqStepMag = moveParam.freqStepMags[variation];
 		moveParam.xOffset = moveParam.xOffsetManual[variation];
 		moveParam.yOffset = moveParam.yOffsetManual[variation];
 		moveLUT.setOffset(moveParam.xOffset, moveParam.yOffset);

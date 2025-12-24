@@ -41,7 +41,7 @@ private:
     static void writeStr(const char* s);
 
 private:
-    static constexpr size_t BUF_SIZE = 127 * 1024; // 1 MB = 1024*1024 = 1<<20
+    static constexpr size_t BUF_SIZE = 1024 * 1024; // 1 MB = 1024*1024 = 1<<20
 
     static int fd;
     static char buffer[BUF_SIZE + 1024];
