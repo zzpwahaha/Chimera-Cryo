@@ -1175,11 +1175,13 @@ void RearrangeGenerator::scrunchXTarget(moveSequence& moveseq, bool constantMove
 			}
 
 			int nAtomsInRow = moveseq.moves.back().nx();
-			int ixTarget = 0;
-			for (int ix2 = 0; ix2 < nAtomsInRow; ix2++) {
-				if (ix2 < (nAtomsInRow - nyTarget) / 2) {
-					//moveseq.moves.back().endAOY.push_back(-1); // remove atom from lower frequency side
-					moveseq.moves.back().endAOX.push_back(ix2); // same as above?
+			int ixTarget = 0; // iterate through target site
+			int nExcessiveAtoms = (nAtomsInRow - nyTarget);
+			for (int ix2 = 0; ix2 < nAtomsInRow; ix2++) { // ix2 iterate through loaded atoms that was picked up
+				if (ix2 < nExcessiveAtoms / 2) {
+					//moveseq.moves.back().endAOX.push_back(-1); // remove atom from lower frequency side
+					//moveseq.moves.back().endAOX.push_back(ix2);
+					moveseq.moves.back().endAOX.push_back(-nExcessiveAtoms / 2 + ix2); // remove atom from lower frequency side
 				}
 				else if (nyTarget > 0) {
 					while (targetPositionsTemp[ixTarget + wx * iy] == 0) { ixTarget++; } //iterate to next target site
@@ -1189,8 +1191,9 @@ void RearrangeGenerator::scrunchXTarget(moveSequence& moveseq, bool constantMove
 					nyTarget--;
 				}
 				else {
-					//moveseq.moves.back().endAOY.push_back(-2); // remove atom from higher frequency side
-					moveseq.moves.back().endAOX.push_back(wx - (nAtomsInRow - ix2) - 2); // same as above but two sites away from edge?
+					//moveseq.moves.back().endAOX.push_back(-2); // remove atom from higher frequency side
+					//moveseq.moves.back().endAOX.push_back(wx - (nAtomsInRow - ix2)); // same as above but zero sites away from edge
+					moveseq.moves.back().endAOX.push_back(wx + nExcessiveAtoms / 2 + 1 - (nAtomsInRow - ix2)); // remove atom from higher frequency side
 				}
 			}
 		}

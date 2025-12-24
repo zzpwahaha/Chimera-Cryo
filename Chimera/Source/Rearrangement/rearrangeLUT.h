@@ -7,7 +7,7 @@ public:
 	void setOffset(double xOffset, double yOffset);
 	unsigned getXDim() { return xDim; };
 	unsigned getYDim() { return yDim; };
-	double getFreqX(int xIndex, int yIndex);
+	double getFreqX(int xIndex, int yIndex); // use int to make sure the subsequent mulitplication is not overflowing
 	double getFreqY(int xIndex, int yIndex);
 	double getAmpX(int xIndex, int yIndex);
 	double getAmpY(int xIndex, int yIndex);
@@ -22,7 +22,8 @@ public:
 
 
 private:
-	unsigned xDim, yDim;
+	int xDim, yDim;
+	double freqSpacingX, freqSpacingY;
 	double xOffset, yOffset;
 	std::vector<double> ATW_LUT, FTW_LUT;
 };
