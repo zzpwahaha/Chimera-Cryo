@@ -43,7 +43,10 @@ t += 5
 %on: Ryd420Shutter
 off: Ryd420ExpShutter
 %on: Ryd1013Shutter
-off: Ryd420AWGchswitch
+%off: ryd420rfsourceswitch
+on: ryd420RFSourceSwitch
+off: ryd420AWGShapedChSwitch
+
 dac: Ryd420Amp ryd420_amplitude %amplitude_scan %-0.01 %0.1 %0.55 %0.30 %0.34
 dac: Ryd1013Amp zero1013SetPoint %2.0 %0.55 %0.60 %0.68
 
@@ -54,7 +57,7 @@ pulseon: MWTrg 0.4
 t += 1
 
 %%%%%%%%%%%%%%  Trap ramp for Rydberg  %%%%%%%%%%%%%%%%%%
-dacramp: SLMTweezerIntensity slm_twz_intensity slm_twz_intensity*fraction_scan 10
+dacramp: SLMTweezerIntensity slm_twz_intensity slm_twz_intensity*0.5 10
 t += 10
 
 %%%% 420 sample and hold %%%%
@@ -102,7 +105,8 @@ t += 10-4.0-1-0.1
 
 %dac: Ryd420Amp zero420SetPoint
 
-on: Ryd420AWGchswitch
+on: ryd420RFSourceSwitch
+on: ryd420AWGShapedChSwitch
 t += 0.5
 on: SLMTweezerHold
 
@@ -188,7 +192,7 @@ t += 0.5
 %call ReleaseRecaptureSLM(t_twz_release)
 %%%%%%%%%%%%%%% Release/recapture %%%%%%%%%%%%%%%%%
 
-dacramp: SLMTweezerIntensity slm_twz_intensity*fraction_scan slm_twz_intensity 10.08
+dacramp: SLMTweezerIntensity slm_twz_intensity*0.5 slm_twz_intensity 10.08
 t += 10.08
 t += 0.1
 
@@ -211,10 +215,10 @@ t += 10
 %call StateSelectivePushout()
 %call setZeroField()
 
-%    dac: BiasCoilX pgc_twz_bias_x
-%    dac: BiasCoilY pgc_twz_bias_y 
-%    dac: BiasCoilZ pgc_twz_bias_z
-%t += 100
+    dac: BiasCoilX pgc_twz_bias_x
+    dac: BiasCoilY pgc_twz_bias_y 
+    dac: BiasCoilZ pgc_twz_bias_z
+t += 100
 
 %%%%%%%%%%%%%%  PGC in Tweezer %%%%%%%%%%%%%%%%%%
 % change the field/laser freq parameter here because the previous section is TOF and no light is on

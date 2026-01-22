@@ -100,7 +100,7 @@ if __name__ == "__main__":
     # Example usage:
     # config = ConfigManager('C:\\Chimera\\Chimera-Cryo\\Configurations\\ExperimentAutomation\\tweezerloading.Config')
     # config = ConfigurationFile('.\\test\\tweezerloading.Config')
-    config = ConfigurationFile('.\\test\\RamanStateTransfer_Rabi_backup.Config')
+    config = ConfigurationFile('.\\test\\tweezerloading - Copy.Config')
 
     # Get a section
     # siglent_awg_section = config.get_section('SIGLENT_AWG')
@@ -108,22 +108,26 @@ if __name__ == "__main__":
 
     # Update a parameter
     # config.modify_parameter('SIGLENT_AWG', 'Sine Amplitude', '0.95')
+    config.modify_parameter('STATIC_DDS', ' DDS-0 Value:', 0)
+    config.modify_parameter('STATIC_DDS', 'Control?', 1)
 
-    config.config_param.update_variable("resonance_scan", 
-                                        scan_type="Variable", scan_dimension=None, 
-                                        new_initial_values=None, new_final_values=None, 
-                                        constant_value=80, scope=None)
-    config.config_param.update_scan_dimension(0, new_index=None, 
-                                              range_index=1, new_range=None, new_ranges=None,
-                                              left_inclusive=None, right_inclusive=None, variations=5)
+
+
+    # config.config_param.update_variable("resonance_scan", 
+    #                                     scan_type="Variable", scan_dimension=None, 
+    #                                     new_initial_values=None, new_final_values=None, 
+    #                                     constant_value=80, scope=None)
+    # config.config_param.update_scan_dimension(0, new_index=None, 
+    #                                           range_index=1, new_range=None, new_ranges=None,
+    #                                           left_inclusive=None, right_inclusive=None, variations=5)
     
-    new_ranges = config.config_param.get_scan_dimension(0).ranges[:2]
-    config.config_param.update_scan_dimension(0, new_index=None, 
-                                              range_index=None, new_range=None, new_ranges=new_ranges,
-                                              left_inclusive=None, right_inclusive=None, variations=None)
+    # new_ranges = config.config_param.get_scan_dimension(0).ranges[:2]
+    # config.config_param.update_scan_dimension(0, new_index=None, 
+    #                                           range_index=None, new_range=None, new_ranges=new_ranges,
+    #                                           left_inclusive=None, right_inclusive=None, variations=None)
 
 
-
+    
     # Save the updated configuration
     config.save('./test/new_config_file.Config')
     config.save('C:/Chimera/Chimera-Cryo/Configurations/CryoTweezerLoading/new_config_file.Config')

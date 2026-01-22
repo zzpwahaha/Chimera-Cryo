@@ -156,6 +156,7 @@ def _calibration():
     config_file.reopen()
 
 def _raw_move_EOM_resonance(exp:ExperimentProcedure, start_freq, end_freq, step = 0.1, channel = 0):
+    print(f"Move EOM frequency for channel {channel} from {start_freq:10.7f} MHz to {end_freq:10.7f} MHz")
     if start_freq == end_freq:
         return
     # Adjust the step sign so it moves toward end_freq

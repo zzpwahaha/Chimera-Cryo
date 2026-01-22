@@ -27,7 +27,7 @@ config_file.config_param.update_scan_dimension(0, range_index=0, variations=21)
 window = [0,0,90,20]
 thresholds = 100
 binnings = np.linspace(0, 240, 241)
-analysis_locs = da.DataAnalysis(year='2025', month='September', day='30', data_name='data_19', 
+analysis_locs = da.DataAnalysis(year='2025', month='December', day='30', data_name='data_2', 
                                 window=window, thresholds=thresholds, binnings=binnings)
 
 
@@ -39,7 +39,7 @@ def resonace_scan(exp_idx, ryd420_amplitude, timeout_control = {'use':True, 'tim
     # scan_range_half = np.sqrt(ryd420_amplitude/0.8) * 3 # MHz
     # pulse_time = np.round(1/np.sqrt(ryd420_amplitude/0.8) * 0.30, 2)  #us
     rabi_freq = np.sqrt((ryd420_amplitude+0.013)/0.063)*122*147/2/1540
-    scan_range_half = min(10, rabi_freq*2)
+    scan_range_half = min(8, rabi_freq*2)
     pulse_time = np.round(1/rabi_freq/2, 2)  #us
 
 
@@ -110,21 +110,24 @@ def rabi_scan(exp_idx, ryd420_amplitude, timeout_control = {'use':True, 'timeout
         config_file.config_param.update_variable(variable.name, scan_type="Constant", scan_dimension=0)    
     config_file.config_param.update_variable("ryd420_amplitude", constant_value = ryd420_amplitude)
 
-    if twopi_time <= 0.8:
+    if twopi_time <= 0.4: #0.8
         config_file.config_param.update_scan_dimension(0, new_ranges=[
             ScanRange(index=0,left_inclusive=True, right_inclusive=True, variations=11),
             ScanRange(index=1,left_inclusive=True, right_inclusive=True, variations=11),
             ScanRange(index=2,left_inclusive=True, right_inclusive=True, variations=11)
             ])
+        # config_file.config_param.update_variable("time_scan_us", scan_type="Variable", 
+        #                                         new_initial_values=[0.01, 1.33-twopi_time/2, 2.87-twopi_time/2], 
+        #                                         new_final_values=[0.01+twopi_time, 1.33+twopi_time/2, 2.87+twopi_time/2])
         config_file.config_param.update_variable("time_scan_us", scan_type="Variable", 
-                                                new_initial_values=[0.01, 1.33-twopi_time/2, 2.87-twopi_time/2], 
-                                                new_final_values=[0.01+twopi_time, 1.33+twopi_time/2, 2.87+twopi_time/2])
+                                                new_initial_values=[0.01, 0.92-twopi_time/2, 1.69-twopi_time/2], 
+                                                new_final_values=[0.01+twopi_time, 0.92+twopi_time/2, 1.69+twopi_time/2])
     else:
         config_file.config_param.update_scan_dimension(0, new_ranges=[
             ScanRange(index=0,left_inclusive=True, right_inclusive=True, variations=41)])
         config_file.config_param.update_variable("time_scan_us", scan_type="Variable", 
                                                 new_initial_values=[0.01], 
-                                                new_final_values=[0.01+4.80])
+                                                new_final_values=[0.01+2.40]) #4.8
     config_file.save()
     
     YEAR, MONTH, DAY = today()
@@ -184,6 +187,30 @@ def rabi_scan_twopi_time(exp_idx, ryd420_amplitude, timeout_control = {'use':Tru
     return aborted
 
 
+def _raw_move_EOM_resonance(exp:ExperimentProcedure, start_freq, end_freq, step = 0.1, channel = 0):
+    print(f"Move EOM frequency for channel {channel} from {start_freq:10.7f} MHz to {end_freq:10.7f} MHz")
+    if start_freq == end_freq:
+        return
+    # Adjust the step sign so it moves toward end_freq
+    if (end_freq - start_freq) * step < 0:
+        step = -step
+    # Ensure the final frequency is included
+    freqs = np.arange(start_freq, end_freq, step)
+    if freqs[-1] != end_freq:
+        freqs = np.append(freqs, end_freq)
+
+    for f in freqs:
+        exp.setStaticDDS(ddsfreq=f, channel=channel)
+        sleep(0.25)
+    # Final safety set and longer wait
+    exp.setStaticDDS(ddsfreq=end_freq, channel=channel)
+    sleep(0.5)
+
+def _move_EOM_resonance(start_freq, end_freq, step = 0.1, channel = 0):
+    _raw_move_EOM_resonance(exp=exp, start_freq=start_freq, end_freq=end_freq, step=step, channel = channel)
+    exp.save_all()
+    config_file.reopen()
+
 
 def recenter_beams():
     exp.setDAC()
@@ -200,8 +227,9 @@ def recenter_beams():
 def calibration(exp_idx):
     # ryd420_amplitudes = [0.8,0.7,0.6,0.5,0.4,0.3,0.2,0.1]
     # ryd420_amplitudes = [0.2,0.1]
-    # ryd420_amplitudes = [-0.005,-0.004,-0.003,-0.002,-0.001,0,0.005,0.01,0.02,0.03,0.04,0.05,0.06,0.08,0.1]
-    ryd420_amplitudes = [-0.004,-0.003,-0.002,0.005]
+    ryd420_amplitudes = [-0.005,-0.004,-0.003,-0.002,-0.001,0,0.005,0.01,0.02,0.03,0.04,0.05,0.06,0.08,0.1]
+    # ryd420_amplitudes = [0.01,0.02,0.03,0.04,0.05,0.06,0.08,0.1]
+    # ryd420_amplitudes = [-0.004,-0.003,-0.002,0.005]
 
 
     for ryd420amp in ryd420_amplitudes:
@@ -235,22 +263,22 @@ def calibration(exp_idx):
 
         exp.hardware_controller.restart_zynq_control()
 
-        try:
-            # exp.hardware_controller.restart_zynq_control()
-            # _calibration()
-            # recenter_beams()
-            aborted = rabi_scan_twopi_time(exp_idx=exp_idx, ryd420_amplitude=ryd420amp, timeout_control = {'use':True, 'timeout':2000}) #1500
-            # if aborted:
-            #     exp.hardware_controller.restart_zynq_control()
-            #     return
-            # sleep(3)
+        # try:
+        #     # exp.hardware_controller.restart_zynq_control()
+        #     # _calibration()
+        #     # recenter_beams()
+        #     aborted = rabi_scan_twopi_time(exp_idx=exp_idx, ryd420_amplitude=ryd420amp, timeout_control = {'use':True, 'timeout':2000}) #1500
+        #     # if aborted:
+        #     #     exp.hardware_controller.restart_zynq_control()
+        #     #     return
+        #     # sleep(3)
 
-        except Exception as e:
-            print(e)
-            exp.hardware_controller.restart_zynq_control()
-            continue
+        # except Exception as e:
+        #     print(e)
+        #     exp.hardware_controller.restart_zynq_control()
+        #     continue
 
-        exp.hardware_controller.restart_zynq_control()
+        # exp.hardware_controller.restart_zynq_control()
 
 
 if __name__=='__main__':

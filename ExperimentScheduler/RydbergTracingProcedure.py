@@ -30,7 +30,7 @@ config_file.config_param.update_scan_dimension(0, range_index=0, variations=21)
 window = [0,0,90,20]
 thresholds = 100
 binnings = np.linspace(0, 240, 241)
-analysis_locs = da.DataAnalysis(year='2025', month='September', day='30', data_name='data_19', 
+analysis_locs = da.DataAnalysis(year='2025', month='December', day='30', data_name='data_2', 
                                 window=window, thresholds=thresholds, binnings=binnings)
 
 

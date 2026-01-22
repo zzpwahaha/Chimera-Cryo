@@ -70,7 +70,7 @@ pulseon: do8_4 0.001
 t += 0.3
 
 % move tones
-on: PrbTrg
+%on: PrbTrg
 t += 0.01
 on: TweezerTrg 
 t += 0.01

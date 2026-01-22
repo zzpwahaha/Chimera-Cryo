@@ -22,6 +22,10 @@ call TOF(10)
 %%%%%%%%%%%%%%  PGC in Tweezer %%%%%%%%%%%%%%%%%%
 % change the field/laser freq parameter here because the previous section is TOF and no light is on
 
+%dacramp: SLMTweezerIntensity slm_twz_intensity 0.59 10
+%t += 10
+
+
 call D2InTrapPGC(t_pgc_twz)
 % note the t_pgc_twz should be smaller than 100
 t += 100-t_pgc_twz

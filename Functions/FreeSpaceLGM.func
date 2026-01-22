@@ -7,6 +7,7 @@ def FreeSpaceLGM(LGM_cool_time):
     % zero the light amplitude to avoid leakage and turn on shutter
     on: D1LGMShutter
     on: D1LGMPrbShutter
+    on: xyzMOTShutter
     on: D1LGMEOMTrg
     dac: D1LGMEOMAmp 0 
     dac: D1LGMAmp 0 

@@ -19,6 +19,19 @@ camera_image_dim = {'Left:':1026, 'Right:':1090, 'H-Bin:':1, 'Bottom:': 928, 'To
 tweezer_intensity_setpoint = 2.9 #V
 repetitions = 6
 
+
+# analysis grid for 5x20 grid - 20251223
+window = [0,0,170,54]
+thresholds = 103
+binnings = np.linspace(0, 240, 241)
+analysis_locs = da.DataAnalysis(year='2026', month='January', day='19', data_name='data_17', 
+                                window=window, thresholds=thresholds, binnings=binnings, multi_points_option = dict({"active":True, "search_square":4, "num_points":6}))
+grid_file_name = 'atomgrid_5x20_6points_20260120_SLM1'
+camera_image_dim = {'Left:':971, 'Right:':1140, 'H-Bin:':1, 'Bottom:': 921, 'Top:': 974, 'V-Bin:': 1}
+tweezer_intensity_setpoint = 8.7 #6.5 #V
+repetitions = 3
+
+
 # # analysis grid for 2x7 grid - 20250922
 # window = [0,0,90,20]
 # thresholds = 100
@@ -81,9 +94,9 @@ def rydberg_420_lightshift_DLS_D1(exp_postfix: str, amplitude: float = 0.2, time
     for variable in config_file.config_param.variables:
         config_file.config_param.update_variable(variable.name, scan_type="Constant", scan_dimension=0)    
     # config_file.config_param.update_variable("d1_resonance", scan_type="Variable", new_initial_values=[14.5], new_final_values=[14.8])
-    config_file.config_param.update_variable("d1_resonance", scan_type="Variable", new_initial_values=[7.05], new_final_values=[7.35])
+    config_file.config_param.update_variable("d1_resonance", scan_type="Variable", new_initial_values=[7.10], new_final_values=[7.40])
     config_file.config_param.update_variable("amplitude_scan", constant_value = amplitude)
-    config_file.config_param.update_variable("time_scan_us", constant_value = 15)
+    config_file.config_param.update_variable("time_scan_us", constant_value = 17)
     config_file.config_param.update_scan_dimension(0, range_index=0, variations=31)
 
     config_file.save()
@@ -136,9 +149,9 @@ def rydberg_1013_lightshift_DLS_D1(exp_postfix: str, amplitude: float = 1.0, tim
     for variable in config_file.config_param.variables:
         config_file.config_param.update_variable(variable.name, scan_type="Constant", scan_dimension=0)    
     # config_file.config_param.update_variable("d1_resonance", scan_type="Variable", new_initial_values=[14.5], new_final_values=[14.8])
-    config_file.config_param.update_variable("d1_resonance", scan_type="Variable", new_initial_values=[7.05], new_final_values=[7.35])
+    config_file.config_param.update_variable("d1_resonance", scan_type="Variable", new_initial_values=[7.10], new_final_values=[7.40])
     config_file.config_param.update_variable("amplitude_scan", constant_value = amplitude)
-    config_file.config_param.update_variable("time_scan_us", constant_value = 15)
+    config_file.config_param.update_variable("time_scan_us", constant_value = 17)
     config_file.config_param.update_scan_dimension(0, range_index=0, variations=31)
 
     config_file.save()
@@ -207,9 +220,9 @@ def rydberg_420_alignment_DLS(exp_postfix: str, pico_idx: int, amplitude: float 
         config_file.config_param.update_variable(variable.name, scan_type="Constant", scan_dimension=0)    
     config_file.config_param.update_variable("integer_scan", scan_type="Variable", scan_dimension=0, new_initial_values=[-250], new_final_values=[250])
     # config_file.config_param.update_variable("d1_resonance", scan_type="Variable", scan_dimension=1, new_initial_values=[14.5], new_final_values=[14.8])
-    config_file.config_param.update_variable("d1_resonance", scan_type="Variable", scan_dimension=1, new_initial_values=[7.05], new_final_values=[7.35])
+    config_file.config_param.update_variable("d1_resonance", scan_type="Variable", scan_dimension=1, new_initial_values=[7.10], new_final_values=[7.40])
     config_file.config_param.update_variable("amplitude_scan", constant_value = amplitude)
-    config_file.config_param.update_variable("time_scan_us", constant_value = 15)
+    config_file.config_param.update_variable("time_scan_us", constant_value = 17)
     config_file.config_param.update_scan_dimension(0, range_index=0, variations=NUM_POSITION_VAR)
     config_file.config_param.update_scan_dimension(1, range_index=0, variations=NUM_RESONANCE_VAR)
     config_file.save()
@@ -300,9 +313,9 @@ def rydberg_1013_alignment_DLS(exp_postfix: str, pico_idx: int, amplitude: float
     else: # horizontal
         config_file.config_param.update_variable("integer_scan", scan_type="Variable", scan_dimension=0, new_initial_values=[-50], new_final_values=[50])
     # config_file.config_param.update_variable("d1_resonance", sssssssscan_type="Variable", scan_dimension=1, new_initial_values=[14.5], new_final_values=[14.8])
-    config_file.config_param.update_variable("d1_resonance", scan_type="Variable", scan_dimension=1, new_initial_values=[7.05], new_final_values=[7.35])
+    config_file.config_param.update_variable("d1_resonance", scan_type="Variable", scan_dimension=1, new_initial_values=[7.10], new_final_values=[7.40])
     config_file.config_param.update_variable("amplitude_scan", constant_value = amplitude)
-    config_file.config_param.update_variable("time_scan_us", constant_value = 15)
+    config_file.config_param.update_variable("time_scan_us", constant_value = 17)
     config_file.config_param.update_scan_dimension(0, range_index=0, variations=NUM_POSITION_VAR)
     config_file.config_param.update_scan_dimension(1, range_index=0, variations=NUM_RESONANCE_VAR)
     config_file.save()
@@ -388,8 +401,8 @@ if __name__ == '__main__':
     # rydberg_420_lightshift_DLS_D1(exp_postfix="2D-preAlignment", amplitude=0.0)
 
 
-    # rydberg_1013_lightshift_DLS_D1(exp_postfix="2D-preAlignment", amplitude=1.0)
-    # rydberg_1013_lightshift_DLS_D1(exp_postfix="2D-preAlignment", amplitude=0.0)
+    rydberg_1013_lightshift_DLS_D1(exp_postfix="2D-preAlignment", amplitude=1.0)
+    rydberg_1013_lightshift_DLS_D1(exp_postfix="2D-preAlignment", amplitude=0.0)
 
     # for idx in range(9,100):
     #     rydberg_1013_lightshift_DLS_D1(exp_postfix=f"2D-preAlignment-{idx}", amplitude=1.0, timeout_control = {'use':True, 'timeout':420})
@@ -398,26 +411,26 @@ if __name__ == '__main__':
     #     exp.hardware_controller.restart_zynq_control()
 
     # exp.hardware_controller.restart_zynq_control()
-    # rydberg_1013_alignment_DLS(exp_postfix="2D", pico_idx=4)
+    rydberg_1013_alignment_DLS(exp_postfix="2D", pico_idx=4)
     # exp.hardware_controller.restart_zynq_control()
-    # rydberg_1013_alignment_DLS(exp_postfix="2D", pico_idx=3)
+    rydberg_1013_alignment_DLS(exp_postfix="2D", pico_idx=3)
     # exp.hardware_controller.restart_zynq_control()
-    # rydberg_1013_lightshift_DLS_D1(exp_postfix="2D-postAlignment", amplitude=1.0)
-    # rydberg_1013_lightshift_DLS_D1(exp_postfix="2D-postAlignment", amplitude=0.0)
+    rydberg_1013_lightshift_DLS_D1(exp_postfix="2D-postAlignment", amplitude=1.0)
+    rydberg_1013_lightshift_DLS_D1(exp_postfix="2D-postAlignment", amplitude=0.0)
     # sleep(10)
     # exp.hardware_controller.restart_zynq_control()
 
-    rydberg_420_lightshift_DLS_D1(exp_postfix="2D-preAlignment", amplitude=0.2)
-    rydberg_420_lightshift_DLS_D1(exp_postfix="2D-preAlignment", amplitude=0.0)
-    exp.hardware_controller.restart_zynq_control()
-    rydberg_420_alignment_DLS(exp_postfix="2D", pico_idx=1)
-    exp.hardware_controller.restart_zynq_control()
-    rydberg_420_alignment_DLS(exp_postfix="2D", pico_idx=2)
-    exp.hardware_controller.restart_zynq_control()
-    rydberg_420_lightshift_DLS_D1(exp_postfix="2D-postAlignment", amplitude=0.2)
-    rydberg_420_lightshift_DLS_D1(exp_postfix="2D-postAlignment", amplitude=0.0)
-    # sleep(10)
-    # exp.hardware_controller.restart_zynq_control()
+    # rydberg_420_lightshift_DLS_D1(exp_postfix="2D-preAlignment", amplitude=0.2)
+    # rydberg_420_lightshift_DLS_D1(exp_postfix="2D-preAlignment", amplitude=0.0)
+    # # # exp.hardware_controller.restart_zynq_control()
+    # rydberg_420_alignment_DLS(exp_postfix="2D", pico_idx=1)
+    # # # exp.hardware_controller.restart_zynq_control()
+    # rydberg_420_alignment_DLS(exp_postfix="2D", pico_idx=2)
+    # # # exp.hardware_controller.restart_zynq_control()
+    # rydberg_420_lightshift_DLS_D1(exp_postfix="2D-postAlignment", amplitude=0.2)
+    # rydberg_420_lightshift_DLS_D1(exp_postfix="2D-postAlignment", amplitude=0.0)
+    # # sleep(10)
+    # # exp.hardware_controller.restart_zynq_control()
 
     # rydberg_420_lightshift_DLS(exp_postfix="2D-preAlignment-2")
     # exp.hardware_controller.restart_zynq_control()

@@ -54,7 +54,7 @@ t += 5
 %on: Ryd420Shutter
 off: Ryd420ExpShutter
 %on: Ryd1013Shutter
-off: Ryd420AWGchswitch
+off: ryd420rfsourceswitch
 dac: Ryd420Amp ryd420_amplitude %amplitude_scan %-0.01 %0.1 %0.55 %0.30 %0.34
 dac: Ryd1013Amp zero1013SetPoint %2.0 %0.55 %0.60 %0.68
 

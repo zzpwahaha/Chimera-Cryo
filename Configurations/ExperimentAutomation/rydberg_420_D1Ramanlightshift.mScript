@@ -24,10 +24,10 @@ t += 15 %+500
 %%%%%%%%%%%%%%  Set quantization field %%%%%%%%%%%%%%%%%%%
 call setQuantizationField()
 
-dacramp: SLMTweezerIntensity slm_twz_intensity slm_twz_intensity*0.1 10
+dacramp: SLMTweezerIntensity slm_twz_intensity slm_twz_intensity*0.2 10
 t += 10
 t += t_field_settling-20
-dacramp: SLMTweezerIntensity slm_twz_intensity*0.1 slm_twz_intensity 10
+dacramp: SLMTweezerIntensity slm_twz_intensity*0.2 slm_twz_intensity 10
 t += 10
 
 %%%%%%%%%%%%%% optical pumping into |2,2> state with 2-2'' OP, 1-2'' probe %%%%%%%%%%%
@@ -39,7 +39,7 @@ t += 5
 %%%%%%%%%%%%%%% MW %%%%%%%%%%%
 var mw_rabi_pi2 0.0447 %0.041 %0.041 %0.01 %0.0599 %0.0296
 
-dacramp: SLMTweezerIntensity slm_twz_intensity slm_twz_intensity*0.1 10
+dacramp: SLMTweezerIntensity slm_twz_intensity slm_twz_intensity*0.2 10
 t += 10
 
 %%%% 420 sample and hold %%%%
@@ -115,7 +115,7 @@ off: D1StateTransferHold
 off: D1StateTransferShutter 
 t += 0.5
 
-dacramp: SLMTweezerIntensity slm_twz_intensity*0.1 slm_twz_intensity 10
+dacramp: SLMTweezerIntensity slm_twz_intensity*0.2 slm_twz_intensity 10
 t += 10
 
 

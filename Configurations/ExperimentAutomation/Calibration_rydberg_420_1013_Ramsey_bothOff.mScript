@@ -43,7 +43,7 @@ t += 15
 %on: Ryd420Shutter
 off: Ryd420ExpShutter
 %on: Ryd1013Shutter
-off: Ryd420AWGchswitch
+off: ryd420rfsourceswitch
 ddsfreq: Ryd420Brimrose resonance_scan
 dac: Ryd420Amp 0.18 %0.30 %0.34
 dac: Ryd1013Amp 0.45 %0.55 %0.60 %0.68

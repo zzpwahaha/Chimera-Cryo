@@ -5,6 +5,35 @@ import shutil
 from ExperimentProcedure import ConfigurationFile, ExperimentProcedure
 
 
+RT_BIAS_FIELD = {
+    'pgc_bias_x': 0.9,
+    'pgc_bias_y': -1.0,
+    'pgc_bias_z': -0.05,
+
+    'pgc_twz_bias_x': 0.8,
+    'pgc_twz_bias_y': -1.1,
+    'pgc_twz_bias_z': -0.05,
+
+    'pgc_img_bias_x': 0.8,
+    'pgc_img_bias_y': -1.1,
+    'pgc_img_bias_z': 0.05,
+}
+
+CRYO_BIAS_FIELD = {
+    'pgc_bias_x': 3.25,
+    'pgc_bias_y': -1.75,
+    'pgc_bias_z': -0.05,
+
+    'pgc_twz_bias_x': 3.2,
+    'pgc_twz_bias_y': -4.5,
+    'pgc_twz_bias_z': 0.1,
+
+    'pgc_img_bias_x': 3.25,
+    'pgc_img_bias_y': -4.6,
+    'pgc_img_bias_z': 0.11,
+}
+
+
 def find_largest_file_number(directory, name_prefix = "AOD-FREQUENCY-CALIBRATION", extension = ".h5"):
     # List all files in the given directory
     files = os.listdir(directory)
@@ -88,6 +117,11 @@ def update_camera_image_dimension(config_file: ConfigurationFile, camera_image_d
     config_file.modify_parameter("CAMERA_IMAGE_DIMENSIONS", "Top:", str(camera_image_dim['Top:']))
     config_file.modify_parameter("CAMERA_IMAGE_DIMENSIONS", "V-Bin:", str(camera_image_dim['V-Bin:']))
 
+def update_imaging_cooling_bias_field(config_file: ConfigurationFile, fields = CRYO_BIAS_FIELD):
+    for key,value in fields.items():
+        config_file.config_param.update_variable(key, constant_value = value)
+
+
 def shuttle_grid_files(grid_file_name: str):
     # move the grid file already in the GRID folder to archived to make space for the new grid file 
     move_files(parent_dir=ExperimentProcedure.GRID_FILE_LOCATION, new_parent_dir=ExperimentProcedure.ARCHIVED_GRID_FILE_LOCATION, file_extension=".grid")
@@ -113,9 +147,9 @@ if __name__ == '__main__':
     # tweezer_intensity_setpoint = 2.9 # 3.75 V for AOD
     # repetitions = 4
 
-    grid_file_name = 'atomgrid_5x20_6points_20251218_SLM'
+    grid_file_name = 'atomgrid_5x20_6points_20260119_SLM'
     camera_image_dim = {'Left:':971, 'Right:':1140, 'H-Bin:':1, 'Bottom:': 921, 'Top:': 974, 'V-Bin:': 1}
-    tweezer_intensity_setpoint = 6.5 #V
+    tweezer_intensity_setpoint = 8.7 #8 #6.5 #V
     repetitions = 4
 
 
@@ -140,10 +174,19 @@ if __name__ == '__main__':
     #                                 window=window, thresholds=thresholds, binnings=binnings)
 
     # grid_file_name = 'atomgrid_1x7_4points_2025-11-2'
-    # camera_image_dim = {'Left:':971, 'Right:':1150, 'H-Bin:':2, 'Bottom:': 923, 'Top:': 962, 'V-Bin:': 2}
+    # camera_image_dim = {'Left:':971, 'Right:':1150, 'H-Bin:':2, 'Bottom:': 925, 'Top:': 964, 'V-Bin:': 2}
     # tweezer_intensity_setpoint = 0.61 #V
     # repetitions = 8
 
+    # grid_file_name = 'atomgrid_1x4_3points_20260104_SLM'
+    # camera_image_dim = {'Left:':971, 'Right:':1150, 'H-Bin:':2, 'Bottom:': 925, 'Top:': 964, 'V-Bin:': 2}
+    # tweezer_intensity_setpoint = 0.42 #V
+    # repetitions = 8
+
+    # grid_file_name = 'atomgrid_1x1_5points_20260105_SLM'
+    # camera_image_dim = {'Left:':1045, 'Right:':1070, 'H-Bin:':1, 'Bottom:': 939, 'Top:': 960, 'V-Bin:': 1}
+    # tweezer_intensity_setpoint = 0.59 #V
+    # repetitions = 8
 
     # grid_file_name = 'atomgrid_7x11_5points_2025-11-7'
     # camera_image_dim = {'Left:':1026, 'Right:':1090, 'H-Bin:':1, 'Bottom:': 926, 'Top:': 965, 'V-Bin:': 1}
@@ -166,9 +209,12 @@ if __name__ == '__main__':
 
 
     # config_name = "420alignment_with_d1.Config"
+    # config_name = "1013alignment_with_d1.Config"
     # config_path = ExperimentProcedure.CONFIGURATION_DIR + config_name
+
     config_name = "tweezerloading.Config"
     config_path = 'C:/Chimera/Chimera-Cryo/Configurations/CryoTweezerLoading/' + config_name
+    
     config_file = ConfigurationFile(config_path)
 
 
@@ -177,5 +223,8 @@ if __name__ == '__main__':
     update_camera_image_dimension(config_file=config_file, camera_image_dim=camera_image_dim)
     config_file.config_param.update_variable("slm_twz_intensity", constant_value = tweezer_intensity_setpoint)
     config_file.save()
+
+    # update_imaging_cooling_bias_field(config_file=config_file,fields=CRYO_BIAS_FIELD)
+    # config_file.save()
 
     pass

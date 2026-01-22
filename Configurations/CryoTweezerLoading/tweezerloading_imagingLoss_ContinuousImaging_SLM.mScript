@@ -28,8 +28,8 @@ off: xyzMOTShutter
 
 % wait 20 ms before cooling pulse 
 t += 20
-ol: ol_cooling d2_cooling_prb_resonance-pgc_twz_olcool %probe_olcool
-ol: ol_repump d2_repump_prb_resonance+pgc_twz_olrepump %probe_olrepump
+ol: ol_cooling d2_cooling_prb_resonance-probe_olcool %pgc_twz_olcool %probe_olcool
+ol: ol_repump d2_repump_prb_resonance+probe_olrepump %pgc_twz_olrepump %probe_olrepump
 
 %dac: BiasCoilX pgc_img_bias_x
 %dac: BiasCoilY pgc_img_bias_y
@@ -40,10 +40,10 @@ dac: BiasCoilY pgc_twz_bias_y
 dac: BiasCoilZ pgc_twz_bias_z
 
 %call setZeroField()
-%t += 100
+t += 200
 
-dac: PrbAmp {pgcprb_twz_cool_amp_cal prb_pwr} %{probe_cool_amp_cal prb_pwr} %{pgcprb_twz_cool_amp_cal prb_pwr} %{probe_cool_amp_cal prb_pwr}
-dac: PrbrepAmp pgcprb_twz_rep_amp %probe_repump_amp %pgcprb_twz_rep_amp %probe_repump_amp
+dac: PrbAmp {probe_cool_amp_cal prb_pwr} %{pgcprb_twz_cool_amp_cal prb_pwr} %{probe_cool_amp_cal prb_pwr}
+dac: PrbrepAmp probe_repump_amp %pgcprb_twz_rep_amp %probe_repump_amp
     t += -t_shutter
     on: PrbShutter
     off: xyzMOTShutter

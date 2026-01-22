@@ -121,9 +121,9 @@ do8_3
 1
 do8_4
 1
-tweezerintensityswitch
+ryd420awgshapedchswitch
 1
-ryd420awgchswitch
+ryd420rfsourceswitch
 1
 uvlamptrg
 1
@@ -263,7 +263,7 @@ d2_repump_prb_resonance 5262
 d1_lgmcooling_resonance 784
 rb87_hfsplitting 6834.682
 t_shutter 10
-t_field_settling 100
-rydberg_ionization_frequency 6390
+t_field_settling 750
+rydberg_ionization_frequency 7818
 971 1140 1 921 974 1
 0 1

@@ -21,10 +21,10 @@ def StateSelectivePushout():
 %    dacramp: SLMTweezerIntensity slm_twz_intensity*0.1 slm_twz_intensity 10 
 %    t += 10
 
-    var FullTrapLightShift 30 % MHz
+    var FullTrapLightShift 26.4 %30 % MHz
     var Bfield 3.5 %G
     var DifferentialZeemanCoef 1.4 % MHz/G
-    var PushoutTrapFraction 0.1
+    var PushoutTrapFraction 0.115 %0.1
     var PushoutTime 0.01 %ms
     dacramp: SLMTweezerIntensity slm_twz_intensity slm_twz_intensity*PushoutTrapFraction 10
     off: TARepShutter

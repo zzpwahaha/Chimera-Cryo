@@ -52,6 +52,7 @@ def MOTLoadingAOD(loading_time):
     off: PrbShutter 
     on: PrbCoolShutter
     off: D1LGMShutter
+    off: D1LGMPrbShutter
     off: OPShutter
     off: D1StateTransferShutter
     off: Ryd420Shutter
@@ -62,7 +63,6 @@ def MOTLoadingAOD(loading_time):
     off: SLMTweezerTrg
     off: CameraShutter
     on: SrcMOTValve
-    off: TweezerIntensitySwitch
 
     dac: TARepAmp 10
     dac: SrcMOTAmp 10
