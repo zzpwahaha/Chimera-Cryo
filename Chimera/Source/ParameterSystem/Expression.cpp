@@ -233,7 +233,7 @@ double Expression::reduce( std::vector<std::string> terms ){
 // this function and reduce.
 void Expression::evaluateFunctions( std::vector<std::string>& terms ){
 	// list of supported functions.
-	std::vector<std::string> functionList = { "sin", "cos", "exp", "ln", "log10", "int"};
+	std::vector<std::string> functionList = { "sin", "cos", "exp", "ln", "log10", "int", "sign"};
 	bool functionExists = true;
 	while ( functionExists ){
 		std::vector<std::string> functionArgUnevaluated;
@@ -320,6 +320,11 @@ void Expression::evaluateFunctions( std::vector<std::string>& terms ){
 		}
 		else if (funcName == "int") {
 			functionResult = static_cast<int>(functionArg);
+		}
+		else if (funcName == "sign") {
+			if (functionArg > 0.0) { functionResult = 1; }
+			else if (functionArg < 0.0) { functionResult = -1; }
+			else { functionResult = 0; }
 		}
 		std::string resultStr = str( functionResult, 13 );
 		terms.erase( terms.begin( ) + funcPos, terms.begin( ) + (funcArgPosRight + 2) );
@@ -523,7 +528,7 @@ void Expression::assertValid( std::vector<parameterType>& variables, std::string
 					nextCanBeOperator = true;
 					continue;
 				}
-				if ( (elem == "sin" || elem == "cos" || elem == "exp" || elem == "ln" || elem == "log10" || elem == "int")
+				if ( (elem == "sin" || elem == "cos" || elem == "exp" || elem == "ln" || elem == "log10" || elem == "int" || elem == "sign")
 					 && nextCanBeFunction ){
 					// it's a supported math function.
 					nextCanBeFunction = false;
