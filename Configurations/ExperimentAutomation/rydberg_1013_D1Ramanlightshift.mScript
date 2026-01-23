@@ -155,5 +155,4 @@ call PGCTweezerImaging()
 %%%%%%%%%%%%%%  END Sequence  %%%%%%%%%%%%%%%%%%
 t += 10
 %call RydbergBeamCameraFootprint()
-t += 10
-pulseon: DO1_0 0.5
+call EndSequence()

@@ -77,6 +77,8 @@ void ArbGenSystem::initialize(std::string headerText, IChimeraQtWindow* win)
 	QVBoxLayout* layout = new QVBoxLayout(this);
 	layout->setContentsMargins(0, 0, 0, 0);
 	pCore->initialize ();
+
+	QHBoxLayout* layoutHeader = new QHBoxLayout(this);
 	header = new QLabel (cstr (headerText), win);
 	auto deviceInfo = pCore->getDeviceInfo ();
 	if (deviceInfo.size () > 1) {// deal with trailing newline
@@ -84,8 +86,9 @@ void ArbGenSystem::initialize(std::string headerText, IChimeraQtWindow* win)
 	}
 	deviceInfoDisplay = new QLabel (qstr (deviceInfo), win);
 	deviceInfoDisplay->setStyleSheet ("QLabel { font: 8pt }; ");
-	layout->addWidget(header, 0);
-	layout->addWidget(deviceInfoDisplay, 0);
+	layoutHeader->addWidget(header, 0);
+	layoutHeader->addWidget(deviceInfoDisplay, 0);
+	layout->addLayout(layoutHeader);
 
 
 	channelButtonsGroup = new QButtonGroup (win);
@@ -175,10 +178,22 @@ void ArbGenSystem::initialize(std::string headerText, IChimeraQtWindow* win)
 		}
 		});
 
+	auto programSetupCommand = new CQPushButton("Prgm Dfut", win);
+	win->connect(programSetupCommand, &QPushButton::released, [win, this]() {
+		try {
+			pCore->programSetupCommands();
+			win->reportStatus(qstr("Programmed ArbGen " + getConfigDelim() + " for set up command.\r\n"));
+		}
+		catch (ChimeraError& err) {
+			win->reportErr(qstr("Error while programming arbGen " + getConfigDelim() + " for set up command: " + err.trace() + "\r\n"));
+		}
+		});
+
 	layout2->addWidget(syncedButton, 0);
 	layout2->addWidget(calibratedButton, 0);
 	layout2->addWidget(burstButton, 0);
 	layout2->addWidget(polarityButton, 0);
+	layout2->addWidget(programSetupCommand, 0);
 	layout2->addWidget(programNow, 0);
 	layout2->addWidget(triggerNow, 0);
 
@@ -218,7 +233,7 @@ void ArbGenSystem::initialize(std::string headerText, IChimeraQtWindow* win)
 	currentGuiInfo.channel[1].option = ArbGenChannelMode::which::No_Control;
 	arbGenScript.setEnabled ( false, false );
 	try {
-		pCore->programSetupCommands ();
+		//pCore->programSetupCommands ();
 	}
 	catch (ChimeraError & error) {
 		errBox ("Failed to program ArbGen " + getConfigDelim () + " initial settings: " + error.trace ());

@@ -15,7 +15,8 @@ QtScriptWindow::QtScriptWindow(QWidget* parent) : IChimeraQtWindow(parent)
 	, arbGens{ {
 			ArbGenSystem(UWAVE_SIGLENT_SETTINGS, ArbGenType::Siglent, this),
 			ArbGenSystem(UWAVE_SIGLENT2_SETTINGS, ArbGenType::Siglent, this),
-			ArbGenSystem(UWAVE_AGILENT_SETTINGS, ArbGenType::Agilent, this) } }
+			ArbGenSystem(UWAVE_AGILENT_SETTINGS, ArbGenType::Agilent, this),
+			ArbGenSystem(UWAVE_SIGLENT3_SETTINGS, ArbGenType::Siglent, this),} }
 	, gigaMoog(this)
 {
 	setWindowTitle ("Script Window");
@@ -41,6 +42,7 @@ void QtScriptWindow::initializeWidgets (){
 	//profileDisplay.initialize (this);
 	QVBoxLayout* layout1 = new QVBoxLayout(this);
 	layout1->setContentsMargins(0, 0, 0, 0);
+	layout1->addWidget(&arbGens[3], 1);
 	layout1->addWidget(&arbGens[1], 1);
 	layout1->addWidget(&arbGens[0], 1);
 	layout1->addWidget(&arbGens[2], 1);

@@ -45,7 +45,9 @@ const arbGenSettings UWAVE_AGILENT_SETTINGS = {
 	"Source1:burst:state off",  "Source2:burst:state off",
 	"output1:load INF", "output2:load INF", 
 	"SOURCE1:FUNC:ARB:FILTER Normal", "SOURCE2:FUNC:ARB:FILTER Normal"/*,
-	"SOURCE1:FUNC:ARB:ADV TRIG", "SOURCE2:FUNC:ARB:ADV TRIG"*/}
+	"SOURCE1:FUNC:ARB:ADV TRIG", "SOURCE2:FUNC:ARB:ADV TRIG"*/,
+	"SOURce1:APPLy:DC DEF, DEF,0 V", "SOURce2:APPLy:DC DEF, DEF,0 V",
+	"output1 on", "output2 on",}
 };
 
 const arbGenSettings UWAVE_SIGLENT_SETTINGS = {
@@ -73,7 +75,10 @@ const arbGenSettings UWAVE_SIGLENT_SETTINGS = {
 	"MODE PHASE-LOCKED",/*Both DDS reset when changing frequency. Phase deviation between Ch1&2 is maintained. This command somehow does not work*/
 	"C1:BTWV STATE,ON", "C1:BTWV TRSR,EXT,GATE_NCYC,NCYC,EDGE,RISE,TIME,1,STPS,0","C1:BTWV STATE,OFF",
 	"C2:BTWV STATE,ON", "C2:BTWV TRSR,EXT,GATE_NCYC,NCYC,EDGE,RISE,TIME,1,STPS,0","C2:BTWV STATE,OFF",
-	/*"C1:SRATE MODE,TARB","C2:SRATE MODE,TARB",*/"C1:OUTPUT LOAD,HZ,PLRT,NOR", "C2:OUTPUT LOAD,HZ,PLRT,NOR" } // In TrueArb mode, can not use burst
+	/*"C1:SRATE MODE,TARB","C2:SRATE MODE,TARB",*/ // In TrueArb mode, can not use burst
+	"C1:OUTPUT LOAD,HZ,PLRT,NOR", "C2:OUTPUT LOAD,HZ,PLRT,NOR",
+	"C1:BSWV WVTP,DC,OFST,0V", "C2:BSWV WVTP,DC,OFST,0V",
+	"C1:OUTPUT ON", "C2:OUTPUT ON"} 
 };
 
 const arbGenSettings UWAVE_SIGLENT2_SETTINGS = {
@@ -90,7 +95,7 @@ const arbGenSettings UWAVE_SIGLENT2_SETTINGS = {
 	// device name (just a convenience, so that the class instance knows 
 	// which device it is
 	"Cryo Siglent 1 Slave",
-	UWAVE_SIGLENT_TRIGGER_LINE.first, UWAVE_SIGLENT_TRIGGER_LINE.second,
+	UWAVE_SIGLENT2_TRIGGER_LINE.first, UWAVE_SIGLENT2_TRIGGER_LINE.second,
 	// Configuration file delimiter, used for saving settings for this 
 	// agilent.
 	"SIGLENT2_AWG",
@@ -101,7 +106,41 @@ const arbGenSettings UWAVE_SIGLENT2_SETTINGS = {
 	"MODE PHASE-LOCKED",/*Both DDS reset when changing frequency. Phase deviation between Ch1&2 is maintained. This command somehow does not work*/
 	"C1:BTWV STATE,ON", "C1:BTWV TRSR,EXT,GATE_NCYC,NCYC,EDGE,RISE,TIME,1,STPS,0","C1:BTWV STATE,OFF",
 	"C2:BTWV STATE,ON", "C2:BTWV TRSR,EXT,GATE_NCYC,NCYC,EDGE,RISE,TIME,1,STPS,0","C2:BTWV STATE,OFF",
-	/*"C1:SRATE MODE,TARB","C2:SRATE MODE,TARB",*/"C1:OUTPUT LOAD,HZ,PLRT,NOR", "C2:OUTPUT LOAD,HZ,PLRT,NOR" } // In TrueArb mode, can not use burst
+	/*"C1:SRATE MODE,TARB","C2:SRATE MODE,TARB",*/ // In TrueArb mode, can not use burst
+	"C1:OUTPUT LOAD,HZ,PLRT,NOR", "C2:OUTPUT LOAD,HZ,PLRT,NOR",
+	"C1:BSWV WVTP,DC,OFST,0V", "C2:BSWV WVTP,DC,OFST,0V",
+	"C1:OUTPUT ON", "C2:OUTPUT ON"} 
+};
+
+const arbGenSettings UWAVE_SIGLENT3_SETTINGS = {
+	// safemode option											
+	UWAVE_SAFEMODE_SIG3,
+	// usb/tcpip address
+	UWAVE_SIGLENT3_ADDRESS/*UWAVE_AGILENT_ADDRESS*/,
+	// sample rate in hertz
+	75e6,
+	// Memory location, whether the device will save waveforms to 
+	// the internal 64MB Memory buffer or to an external USB drive, which
+	// can (obviously) have much more space.
+	"INT",
+	// device name (just a convenience, so that the class instance knows 
+	// which device it is
+	"Cryo Siglent 3",
+	UWAVE_SIGLENT3_TRIGGER_LINE.first, UWAVE_SIGLENT3_TRIGGER_LINE.second,
+	// Configuration file delimiter, used for saving settings for this 
+	// agilent.
+	"SIGLENT3_AWG",
+	// Calibration coefficients (arb length)
+	{ },
+	/**********make sure be in DDS mode to change burst and sweep***********/
+	{ "C1:OUTPUT OFF", "C2:OUTPUT OFF","C1:SRATE MODE,DDS","C2:SRATE MODE,DDS",
+	"MODE PHASE-LOCKED",/*Both DDS reset when changing frequency. Phase deviation between Ch1&2 is maintained. This command somehow does not work*/
+	"C1:BTWV STATE,ON", "C1:BTWV TRSR,EXT,GATE_NCYC,NCYC,EDGE,RISE,TIME,1,STPS,0","C1:BTWV STATE,OFF",
+	"C2:BTWV STATE,ON", "C2:BTWV TRSR,EXT,GATE_NCYC,NCYC,EDGE,RISE,TIME,1,STPS,0","C2:BTWV STATE,OFF",
+	/*"C1:SRATE MODE,TARB","C2:SRATE MODE,TARB",*/ // In TrueArb mode, can not use burst
+	"C1:OUTPUT LOAD,HZ,PLRT,NOR", "C2:OUTPUT LOAD,HZ,PLRT,NOR",
+	"C1:BSWV WVTP,DC,OFST,0V", "C2:BSWV WVTP,DC,OFST,0V",
+	"C1:OUTPUT ON", "C2:OUTPUT ON"} 
 };
 
 //const agilentSettings TOP_BOTTOM_AGILENT_SETTINGS = { TOP_BOTTOM_AGILENT_SAFEMODE, TOP_BOTTOM_AGILENT_USB_ADDRESS,

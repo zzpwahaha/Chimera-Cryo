@@ -16,11 +16,11 @@ OlCore::OlCore(std::vector<bool> safemodes)
 	BoostAsyncSerial(safemodes[1], OL_COM_PORT[1], 9600, 8,
 		boost::asio::serial_port_base::stop_bits::one,
 		boost::asio::serial_port_base::parity::none,
-		boost::asio::serial_port_base::flow_control::none),
+		boost::asio::serial_port_base::flow_control::none)/*,
 	BoostAsyncSerial(safemodes[2], OL_COM_PORT[2], 115200, 8,
 		boost::asio::serial_port_base::stop_bits::one,
 		boost::asio::serial_port_base::parity::none,
-		boost::asio::serial_port_base::flow_control::none) }
+		boost::asio::serial_port_base::flow_control::none)*/ }
 	, readComplete(true)
 {
 	for (auto& btFlume : btFlumes) {

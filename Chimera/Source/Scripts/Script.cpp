@@ -196,6 +196,9 @@ void Script::initialize(IChimeraQtWindow* parent, std::string deviceTypeInput, s
 
 	layout->addLayout(layout1);
 	layout->addWidget(availableFunctionsCombo.combo, 0);
+	if (deviceType == "ArbGen") {
+		availableFunctionsCombo.combo->hide();
+	}
 	layout->addWidget(edit, 1);
 	
 }

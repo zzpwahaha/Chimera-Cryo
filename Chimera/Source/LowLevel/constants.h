@@ -69,13 +69,13 @@
 	const std::array<unsigned short, 2> DAC_REWIND = { 15, 31 }; // used for the long time run rewind, see AoCore::formatDacForFPGA
 
 	//OffsetLock 
-	const std::vector<bool> OFFSETLOCK_SAFEMODE = std::vector<bool>{ false,false,true };
-	const std::vector<std::string> OL_COM_PORT = { "COM3", "COM7", "COM12"};
+	const std::vector<bool> OFFSETLOCK_SAFEMODE = std::vector<bool>{ false,false/*,true*/ };
+	const std::vector<std::string> OL_COM_PORT = { "COM3", "COM7"/*, "COM12"*/};
 	const double OL_TIME_RESOLUTION = 0.02; //in ms
 	const std::vector<std::pair<unsigned, unsigned>> OL_TRIGGER_LINE
 		= { std::make_pair(3 - 1,6),std::make_pair(3 - 1,7),
 			std::make_pair(4 - 1,6),std::make_pair(4 - 1,7),
-			std::make_pair(5 - 1,6) }; /*the first is the label on the box minus 1, has minus'd 1 explicitly */
+			/*std::make_pair(5 - 1,6)*/ }; /*the first is the label on the box minus 1, has minus'd 1 explicitly */
 	const double OL_TRIGGER_TIME = 0.01; //in ms i.e. 50us
 
 	//#define DDS_FPGA_ADDRESS "FT1I6IBSB"; //Device Serial: FT1I6IBS, Use FT1I6IBSB in C++ to select Channel B
@@ -84,8 +84,9 @@
 	const bool UWAVE_SAFEMODE = true;
 	const bool UWAVE_SAFEMODE_SIG = false;
 	const bool UWAVE_SAFEMODE_SIG2 = false;
+	const bool UWAVE_SAFEMODE_SIG3 = false;
 	const bool UWAVE_SAFEMODE_AGI = false;
-	const int numArbGen = 3;
+	const int numArbGen = 4;
 	//const std::string UWAVE_AGILENT_ADDRESS = "USB0::0x0957::0x2807::MY57400998::INSTR";
 	const std::string UWAVE_AGILENT_ADDRESS = "TCPIP0::A-33512B-00998.local::inst0::INSTR";
 	const std::pair<unsigned, unsigned> UWAVE_AGILENT_TRIGGER_LINE = std::make_pair(7 - 1, 0); /*the first is the label on the box minus 1, has minus'd 1 explicitly */
@@ -94,6 +95,8 @@
 	const std::pair<unsigned, unsigned> UWAVE_SIGLENT_TRIGGER_LINE = std::make_pair(7 - 1, 1); /*the first is the label on the box minus 1, has minus'd 1 explicitly */
 	const std::string UWAVE_SIGLENT2_ADDRESS = "TCPIP0::10.10.0.15::inst0::INSTR";
 	const std::pair<unsigned, unsigned> UWAVE_SIGLENT2_TRIGGER_LINE = std::make_pair(7 - 1, 1); /*the first is the label on the box minus 1, has minus'd 1 explicitly */
+	const std::string UWAVE_SIGLENT3_ADDRESS = "TCPIP0::10.10.0.16::inst0::INSTR";
+	const std::pair<unsigned, unsigned> UWAVE_SIGLENT3_TRIGGER_LINE = std::make_pair(5 - 1, 6); /*the first is the label on the box minus 1, has minus'd 1 explicitly */
 
 	const std::string RAMP_LOCATION = str(CODE_ROOT) + "\\Ramp_Files\\";
 

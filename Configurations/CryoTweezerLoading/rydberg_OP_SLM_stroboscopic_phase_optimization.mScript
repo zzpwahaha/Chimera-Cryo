@@ -1,0 +1,174 @@
+%%%%%%%%%%%%%%%%% Start With 1ms %%%%%%%%%%%%%%%%% 
+t = 1
+%call CryoMOTLoadingPGC()
+call CryoMOTEnhancedLoadingLGM()
+call TOF(10)
+
+%%%%%%%%%%%%%%  PGC in Tweezer %%%%%%%%%%%%%%%%%%
+% change the field/laser freq parameter here because the previous section is TOF and no light is on
+call D2InTrapPGC(t_pgc_twz)
+% note the t_pgc_twz should be smaller than 100
+t += 100-t_pgc_twz
+off: UVLampTrg
+call D2InTrapPGCPrb(t_pgc_twz)
+% note the t_pgc_twz should be smaller than 100
+t += 100-t_pgc_twz
+%%%%%%%%%%%%%%  Image TWIZZER  %%%%%%%%%%%%%%%%%%
+% change the field/laser freq parameter here because the previous section is dark, i.e. 100-t_pgc_twz is larger than 4
+call PGCTweezerImaging()
+
+t += 5
+
+call setQuantizationField()
+%call setZeroField()
+dacramp: SLMTweezerIntensity slm_twz_intensity slm_twz_intensity*0.12 10
+t += 10
+t += t_field_settling-20
+dacramp: SLMTweezerIntensity slm_twz_intensity*0.12 slm_twz_intensity 10
+t += 10
+
+call OpticalPumping22()
+
+
+var IQ_MAX_AMP 2.5
+dac: MW_IQ_I IQ_MAX_AMP
+dac: MW_IQ_Q 0
+pulseon: MWTrg 0.4
+t += 1
+
+%%%%%%%%%%%%%%  Trap ramp for Rydberg  %%%%%%%%%%%%%%%%%%
+dacramp: SLMTweezerIntensity slm_twz_intensity slm_twz_intensity*0.5 10
+t += 10
+
+
+
+%%%%% OP %%%%%
+t += -10
+%on: PrbShutter
+off: PrbShutter
+
+off: PrbRepTrg
+on: PrbCoolShutter
+off: xyzMOTShutter
+off: D1LGMShutter
+off: D1LGMPrbShutter
+
+on: OPShutter
+%off: OPShutter
+
+off: TARepShutter
+
+ol: ol_cooling d2_cooling_resonance-(166.65)  %0.5*30
+ol: ol_repump d2_repump_resonance+(100) %29
+
+dac: PrbRepAmp -1 % use probe cooling only
+dac: PrbAmp {0.00625 prb_pwr_low}
+dac: OPAmp {0.1 op_pwr}
+t += 10
+%%%%% OP %%%%%
+
+
+t += 0.5
+on: SLMTweezerHold
+t += 1
+
+%%%%% Rabi %%%%%%
+%on: PrbRepTrg
+%on: PrbTrg
+%on: OPTrg
+t += 0.005
+%off: SLMTweezerTrg
+t += 0.35/1000
+
+t += -0.95/1000 %time for 420 AOM to turn since the beam is quite far away from the AOM actuator
+
+on: do8_4 %dummy trigger for picoscope
+t += -2/1000
+on: SiglentTrg
+on: Siglent3Trg
+t += 2/1000
+
+ol: ol_cooling d2_cooling_resonance-(resonance_scan-266.65)  %0.5*30
+ol: ol_repump d2_repump_resonance+(100) %29
+
+t += 0.2
+
+on: OPTrg
+%on: PrbTrg
+
+t += time_scan_us/1000
+
+off: PrbTrg
+off: OPTrg
+
+t += 0.2
+ol: ol_cooling d2_cooling_resonance-(166.65)  %0.5*30
+ol: ol_repump d2_repump_resonance+(100) %29
+
+
+t += 1/1000
+off: SiglentTrg
+off: Siglent3Trg
+t += -1/1000
+off: do8_4 %dummy trigger for picoscope
+
+
+t += 0.95/1000 %time for 420 AOM to turn since the beam is quite far away from the AOM actuator
+
+t += 0.35/1000
+on: SLMTweezerTrg
+
+t += 0.005
+off: OPTrg
+off: PrbTrg
+off: PrbRepTrg
+off: PrbShutter
+off: OPShutter
+off: Ryd420ExpShutter
+%t += time_scan
+off: SLMTweezerHold
+t += 0.5
+
+%%%%%%%%%%%%%%% Release/recapture %%%%%%%%%%%%%%%%%
+%call ReleaseRecaptureSLM(t_twz_release)
+%%%%%%%%%%%%%%% Release/recapture %%%%%%%%%%%%%%%%%
+
+dacramp: SLMTweezerIntensity slm_twz_intensity*0.5 slm_twz_intensity 10.08
+t += 10.08
+t += 0.1
+
+%pulseon: MWAmpTrg 0.1
+t += 0.1
+off: Ryd1013Trg
+off: Ryd1013Hold
+off: Ryd420ExpShutter
+off: Ryd1013Shutter
+off: Ryd420Hold
+t += 0.5
+
+%%%%%%%%%%%%%%  End Rydberg  %%%%%%%%%%%%%%%%%%
+
+t += 10
+call StateSelectivePushout()
+%call setZeroField()
+
+    dac: BiasCoilX pgc_twz_bias_x
+    dac: BiasCoilY pgc_twz_bias_y 
+    dac: BiasCoilZ pgc_twz_bias_z
+t += 100
+
+%%%%%%%%%%%%%%  PGC in Tweezer %%%%%%%%%%%%%%%%%%
+% change the field/laser freq parameter here because the previous section is TOF and no light is on
+call D2InTrapPGCPrb(t_pgc_twz)
+% note the t_pgc_twz should be smaller than 100
+t += 100-t_pgc_twz
+
+%%%%%%%%%%%%%%  Image TWIZZER  %%%%%%%%%%%%%%%%%%
+% change the field/laser freq parameter here because the previous section is dark, i.e. 100-t_pgc_twz is larger than 4
+call PGCTweezerImaging()
+
+t += 10
+call RydbergBeamCameraFootprint()
+
+%%%%%%%%%%%%%%  END Sequence  %%%%%%%%%%%%%%%%%%
+call EndSequence()

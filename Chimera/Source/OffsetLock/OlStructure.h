@@ -9,8 +9,8 @@
 enum class OLGrid : size_t
 {
 	numPERunit = 2,
-	numOFunit = 3,
-	total = 5 //numPERunit * numOFunit
+	numOFunit = 2,
+	total = 4 //numPERunit * numOFunit
 };
 
 struct OlInfo

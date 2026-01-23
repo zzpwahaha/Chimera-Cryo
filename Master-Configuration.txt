@@ -75,7 +75,7 @@ ryd1013trg
 1
 ryd1013shutter
 1
-ryd840_ol
+siglent3trg
 1
 ryd1013mako
 1
