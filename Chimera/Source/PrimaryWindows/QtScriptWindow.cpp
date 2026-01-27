@@ -52,8 +52,8 @@ void QtScriptWindow::initializeWidgets (){
 	
 	try {
 		for (auto name : ArbGenEnum::allAgs) {
-			arbGens[(int)name].setDefault(1);
-			arbGens[(int)name].setDefault(2);
+			//arbGens[(int)name].setDefault(1);
+			//arbGens[(int)name].setDefault(2);
 		}
 		//intensityAgilent.setDefault(1);
 	}
