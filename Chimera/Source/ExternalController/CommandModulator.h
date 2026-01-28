@@ -37,6 +37,7 @@ public slots:
 	void setDAC(QString name, QString value, ErrorStatus& status);
 	void setOL(ErrorStatus& status);
 	void setDDS(ErrorStatus& status);
+	void setArbGen(QString whichArbGen, ErrorStatus& status);
 
 	void startMako(QString whichMako, ErrorStatus& status);
 	void stopMako(QString whichMako, ErrorStatus& status);

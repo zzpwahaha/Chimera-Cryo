@@ -26,7 +26,10 @@ class ArbGenSection(ConfigurationSection):
             self.channels.append(config_items)
             self.channel_nums.append(int(re.search(r'CHANNEL_(\d+)', split_chunk[0].strip()).group(1)))
         assert max(self.channel_nums)==len(self.channels), "len of channels should match the one in the config."
-            
+
+    def modify_channel_parameter(self, channel_num: int, param_name: str, new_value: str): 
+        idx = self.channel_nums.index(channel_num)
+        self.channels[idx].parameters[param_name] = new_value            
 
     def print(self):
         """Returns the string representation of the section."""

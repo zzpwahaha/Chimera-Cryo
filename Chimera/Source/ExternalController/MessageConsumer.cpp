@@ -141,6 +141,13 @@ void MessageConsumer::consume()
                 }, Qt::BlockingQueuedConnection);
             connection->do_write(compileReply("Finished setting OL", status));
         }
+        else if (stratWith(message, "Set-ArbGen")) {
+            auto args = getArguments(message, 1, argValid, connection);
+            QMetaObject::invokeMethod(&modulator_, [&]() {
+                modulator_.setArbGen(qstr(args[0]), status);
+                }, Qt::BlockingQueuedConnection);
+            connection->do_write(compileReply("Finished setting arbgen", status));
+        }
         else if (stratWith(message, "Start-MAKO")) {
             auto args = getArguments(message, 1, argValid, connection);
             if (!argValid) continue;
