@@ -73,6 +73,44 @@ class DataAnalysisSection:
         if self._active_plots_declared is None:
             self._active_plots_declared = len(self.active_plots)
 
+    def _rebuild_active_plots_parameters(self):
+        # remove old Active Plot entries
+        keys_to_delete = [
+            k for k in self.parameters
+            if k.startswith("Active Plot")
+        ]
+        for k in keys_to_delete:
+            del self.parameters[k]
+
+        # update declared number
+        self._active_plots_declared = len(self.active_plots)
+        self.parameters["Number of Active Plots:"] = str(self._active_plots_declared)
+
+        # reinsert plots with normalized indices
+        for i, plot in enumerate(self.active_plots, start=1):
+            self.parameters[f"Active Plot #{i}"] = plot
+
+    def add_active_plot(self, plot_name: str, which_grid: int = 0):
+        # Append a new active plot.
+        plot_dict = OrderedDict({"Plot Name:": plot_name, "Which Grid:": str(which_grid)})
+        self.active_plots.append(plot_dict)
+        self._rebuild_active_plots_parameters()
+
+    def delete_active_plot(self, index: int):
+        # Delete an active plot by index (0-based).
+        if not (0 <= index < len(self.active_plots)):
+            raise IndexError("Active plot index out of range")
+        del self.active_plots[index]
+        self._rebuild_active_plots_parameters()
+
+    def insert_active_plot(self, index: int, plot_name: str, which_grid: int = 0):
+        # Insert a new active plot at position `index` (0-based).
+        if not (0 <= index <= len(self.active_plots)):
+            raise IndexError("Active plot index out of range")
+        plot_dict = OrderedDict({"Plot Name:": plot_name, "Which Grid:": str(which_grid)})
+        self.active_plots.insert(index, plot_dict)
+        self._rebuild_active_plots_parameters()
+
     def print(self) -> str:
         out_lines = [self.section_name]
         for key, val in self.parameters.items():
@@ -134,4 +172,5 @@ END_DATA_ANALYSIS
 
     variable = DataAnalysisSection("DATA_ANALYSIS",data_chunk)
     a = variable.__str__()
+    variable.insert_active_plot(0,'test')
     print(variable)
