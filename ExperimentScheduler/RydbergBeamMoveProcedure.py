@@ -196,7 +196,7 @@ def zeroScrews(exp:ExperimentProcedure):
 
 
 RYDBERG_BEAM_420_POSITION = (39.44,48.80) # 39.90, 48.21#(39.28, 48.36) #(41.43, 49.82) RT #(43.55, 51.13) #(47.94,51.49) #(48.87,50.82) #(47.58,50.33) #(48.04, 49.98) #(54.08,44.39) #(45.17,45.02) #(44.3, 44.8) #(44.26,45.12) #(45.88,41.72)
-RYDBERG_BEAM_1013_POSITION = (113.0,36.94) #(114.7,36.34) #(112.6,36.62) #(114.70, 34.78) RT #(115.1, 34.59) #(116.28, 34.21) #(117.8, 33.94) #(115.4,30.40) #(113,30.72) #(108.8,30.86) #(108.8,31.04) #(99.8,35.73) #(99.8,35.10) #(112.41, 34.75) # (105.6, 34.46) #(102.5, 118.29) #(105.90, 121)
+RYDBERG_BEAM_1013_POSITION = (113.3,36.584) #(113.0,36.94) #(114.7,36.34) #(112.6,36.62) #(114.70, 34.78) RT #(115.1, 34.59) #(116.28, 34.21) #(117.8, 33.94) #(115.4,30.40) #(113,30.72) #(108.8,30.86) #(108.8,31.04) #(99.8,35.73) #(99.8,35.10) #(112.41, 34.75) # (105.6, 34.46) #(102.5, 118.29) #(105.90, 121)
 
 if __name__=="__main__":
     exp = ExperimentProcedure()
@@ -206,5 +206,5 @@ if __name__=="__main__":
     move_beam_to_target(exp, mako_idx=3, pico_idx=(1,2), target_position=RYDBERG_BEAM_420_POSITION, tolerance=0.1,max_iterations=50, gain=(-8, 8))
     print("asd")
 
-    move_beam_to_target(exp, mako_idx=4, pico_idx=(3,4), target_position=RYDBERG_BEAM_1013_POSITION, tolerance=0.1,max_iterations=50, gain=(-8, 8))
+    move_beam_to_target(exp, mako_idx=4, pico_idx=(3,4), target_position=RYDBERG_BEAM_1013_POSITION, tolerance=0.05,max_iterations=50, gain=(-8, 8))
     print("asd")

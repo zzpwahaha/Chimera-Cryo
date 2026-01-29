@@ -129,6 +129,77 @@ def shuttle_grid_files(grid_file_name: str):
     move_files(parent_dir=ExperimentProcedure.ARCHIVED_GRID_FILE_LOCATION, new_parent_dir=ExperimentProcedure.GRID_FILE_LOCATION, file_extension=".grid", file_name=grid_file_name, throw=True)
 
 
+def set_2pic_da(config_file: ConfigurationFile):
+    for _ in range(config_file.get_section("DATA_ANALYSIS").get_num_active_plots()):
+        config_file.delete_plot_da(0)
+    config_file.add_plot_da("Histogram-2Pic", 0)
+    config_file.add_plot_da("Loadingrate-2Pic", 0)
+    config_file.add_plot_da("Survival-2Pic", 0)
+    config_file.modify_parameter("CAMERA_SETTINGS", "Andor Pics Per Rep:", 2)
+
+
+def set_3pic_da(config_file: ConfigurationFile):
+    for _ in range(config_file.get_section("DATA_ANALYSIS").get_num_active_plots()):
+        config_file.delete_plot_da(0)
+    config_file.add_plot_da("Histogram-3Pic-Pic0", 0)
+    config_file.add_plot_da("Histogram-3Pic-Pic1", 0)
+    config_file.add_plot_da("Loadingrate-3Pic", 0)
+    config_file.add_plot_da("Survival-3Pic-Pic1-0", 0)
+    config_file.add_plot_da("Survival-3Pic-Pic2-0", 0)
+    config_file.add_plot_da("Survival-3Pic-Pic2-1", 0)
+    config_file.modify_parameter("CAMERA_SETTINGS", "Andor Pics Per Rep:", 3)
+
+
+def set_AWG_rabi(config_file: ConfigurationFile, exp: ExperimentProcedure):
+    config_file.modify_parameter_AWG("AGILENT_AWG", 1, "Channel Mode:", "dc")
+    config_file.modify_parameter_AWG("AGILENT_AWG", 2, "Channel Mode:", "dc")
+    config_file.modify_parameter_AWG("SIGLENT_AWG", 1, "Channel Mode:", "dc")
+    config_file.modify_parameter_AWG("SIGLENT_AWG", 2, "Channel Mode:", "square")
+    config_file.modify_parameter_AWG("SIGLENT2_AWG", 1, "Channel Mode:", "dc")
+    config_file.modify_parameter_AWG("SIGLENT2_AWG", 2, "Channel Mode:", "dc")
+    config_file.modify_parameter_AWG("SIGLENT3_AWG", 1, "Channel Mode:", "script")
+    config_file.modify_parameter_AWG("SIGLENT3_AWG", 2, "Channel Mode:", "dc")
+    config_file.save()
+    exp.open_configuration(config_file.file_path)
+    for arbgen_name in exp.ARBGEN_NAMES:
+        exp.setArbGen(arbgen_name)
+    config_file.modify_parameter_AWG("AGILENT_AWG", 1, "Channel Mode:", "no_control")
+    config_file.modify_parameter_AWG("AGILENT_AWG", 2, "Channel Mode:", "no_control")
+    config_file.modify_parameter_AWG("SIGLENT_AWG", 1, "Channel Mode:", "no_control")
+    config_file.modify_parameter_AWG("SIGLENT_AWG", 2, "Channel Mode:", "no_control")
+    config_file.modify_parameter_AWG("SIGLENT2_AWG", 1, "Channel Mode:", "no_control")
+    config_file.modify_parameter_AWG("SIGLENT2_AWG", 2, "Channel Mode:", "no_control")
+    config_file.modify_parameter_AWG("SIGLENT3_AWG", 1, "Channel Mode:", "no_control")
+    config_file.modify_parameter_AWG("SIGLENT3_AWG", 2, "Channel Mode:", "no_control")
+    config_file.save()
+    exp.open_configuration(config_file.file_path)
+
+
+def set_AWG_avalanche(config_file: ConfigurationFile, exp: ExperimentProcedure):
+    config_file.modify_parameter_AWG("AGILENT_AWG", 1, "Channel Mode:", "square")
+    config_file.modify_parameter_AWG("AGILENT_AWG", 2, "Channel Mode:", "square")
+    config_file.modify_parameter_AWG("SIGLENT_AWG", 1, "Channel Mode:", "square")
+    config_file.modify_parameter_AWG("SIGLENT_AWG", 2, "Channel Mode:", "dc")
+    config_file.modify_parameter_AWG("SIGLENT2_AWG", 1, "Channel Mode:", "square")
+    config_file.modify_parameter_AWG("SIGLENT2_AWG", 2, "Channel Mode:", "square")
+    config_file.modify_parameter_AWG("SIGLENT3_AWG", 1, "Channel Mode:", "script")
+    config_file.modify_parameter_AWG("SIGLENT3_AWG", 2, "Channel Mode:", "dc")
+    config_file.save()
+    exp.open_configuration(config_file.file_path)
+    for arbgen_name in exp.ARBGEN_NAMES:
+        exp.setArbGen(arbgen_name)
+    config_file.modify_parameter_AWG("AGILENT_AWG", 1, "Channel Mode:", "no_control")
+    config_file.modify_parameter_AWG("AGILENT_AWG", 2, "Channel Mode:", "no_control")
+    config_file.modify_parameter_AWG("SIGLENT_AWG", 1, "Channel Mode:", "no_control")
+    config_file.modify_parameter_AWG("SIGLENT_AWG", 2, "Channel Mode:", "no_control")
+    config_file.modify_parameter_AWG("SIGLENT2_AWG", 1, "Channel Mode:", "no_control")
+    config_file.modify_parameter_AWG("SIGLENT2_AWG", 2, "Channel Mode:", "no_control")
+    config_file.modify_parameter_AWG("SIGLENT3_AWG", 1, "Channel Mode:", "no_control")
+    config_file.modify_parameter_AWG("SIGLENT3_AWG", 2, "Channel Mode:", "no_control")
+    config_file.save()
+    exp.open_configuration(config_file.file_path)
+
+
 if __name__ == '__main__':
 
     # analysis grid for 5x7 grid - 20250922
@@ -137,6 +208,8 @@ if __name__ == '__main__':
     # binnings = np.linspace(0, 240, 241)
     # analysis_locs = da.DataAnalysis(year='2025', month='September', day='18', data_name='data_18', 
     #                                 window=window, thresholds=thresholds, binnings=binnings)
+
+    NUM_OF_PIC = 3
 
     grid_file_name = 'atomgrid_5x7_8points_20251203_SLM'
     camera_image_dim = {'Left:':1026, 'Right:':1090, 'H-Bin:':1, 'Bottom:': 928, 'Top:': 967, 'V-Bin:': 1}
@@ -147,7 +220,7 @@ if __name__ == '__main__':
     # tweezer_intensity_setpoint = 2.9 # 3.75 V for AOD
     # repetitions = 4
 
-    grid_file_name = 'atomgrid_5x20_6points_20260119_SLM'
+    grid_file_name = 'atomgrid_5x20_6points_20260123_SLM'
     camera_image_dim = {'Left:':971, 'Right:':1140, 'H-Bin:':1, 'Bottom:': 921, 'Top:': 974, 'V-Bin:': 1}
     tweezer_intensity_setpoint = 8.7 #8 #6.5 #V
     repetitions = 4
@@ -166,7 +239,7 @@ if __name__ == '__main__':
     # repetitions = 4
 
 
-    # # analysis grid for 1x7 grid - 20250930
+    # analysis grid for 1x7 grid - 20250930
     # window = [0,0,90,20]
     # thresholds = 100
     # binnings = np.linspace(0, 240, 241)
@@ -222,6 +295,12 @@ if __name__ == '__main__':
     config_file.modify_parameter("DATA_ANALYSIS", "Grid File Name:", grid_file_name)
     update_camera_image_dimension(config_file=config_file, camera_image_dim=camera_image_dim)
     config_file.config_param.update_variable("slm_twz_intensity", constant_value = tweezer_intensity_setpoint)
+    
+    if NUM_OF_PIC==2:
+        set_2pic_da(config_file=config_file)
+    elif NUM_OF_PIC==3:
+        set_3pic_da(config_file=config_file)
+
     config_file.save()
 
     # update_imaging_cooling_bias_field(config_file=config_file,fields=CRYO_BIAS_FIELD)

@@ -24,9 +24,9 @@ repetitions = 6
 window = [0,0,170,54]
 thresholds = 103
 binnings = np.linspace(0, 240, 241)
-analysis_locs = da.DataAnalysis(year='2026', month='January', day='19', data_name='data_17', 
+analysis_locs = da.DataAnalysis(year='2026', month='January', day='23', data_name='data_3', 
                                 window=window, thresholds=thresholds, binnings=binnings, multi_points_option = dict({"active":True, "search_square":4, "num_points":6}))
-grid_file_name = 'atomgrid_5x20_6points_20260120_SLM1'
+grid_file_name = 'atomgrid_5x20_6points_20260123_SLM'
 camera_image_dim = {'Left:':971, 'Right:':1140, 'H-Bin:':1, 'Bottom:': 921, 'Top:': 974, 'V-Bin:': 1}
 tweezer_intensity_setpoint = 8.7 #6.5 #V
 repetitions = 3
