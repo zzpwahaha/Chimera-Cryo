@@ -17,8 +17,8 @@ call D2InTrapPGCPrb(t_pgc_twz)
 % note the t_pgc_twz should be smaller than 100
 t += 100-t_pgc_twz
 
-off: UVLampTrg
-t += 200
+%off: UVLampTrg
+%t += 200
 %%%%%%%%%%%%%%  Image TWIZZER  %%%%%%%%%%%%%%%%%%
 % change the field/laser freq parameter here because the previous section is dark, i.e. 100-t_pgc_twz is larger than 4
 call PGCTweezerImaging()
@@ -116,5 +116,6 @@ call PGCTweezerImaging()
 %on: UVLampTrg
 
 %%%%%%%%%%%%%%  END Sequence  %%%%%%%%%%%%%%%%%%
-t += 100
-pulseon: DO1_0 0.5
+%t += 100
+%pulseon: DO1_0 0.5
+call EndSequence()

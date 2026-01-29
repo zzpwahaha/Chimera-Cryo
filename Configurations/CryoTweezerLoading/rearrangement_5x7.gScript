@@ -17,8 +17,8 @@ singlex_repeaty 3
 singley_repeatx 1
 singley_repeaty 6 %7
 
-xoffset 0.141 %+frequency_scan %aod_dac0_freq
-yoffset 0.010 %+frequency_scan  %frequency_scan %aod_dac1_freq
+xoffset 0.151 %+frequency_scan %aod_dac0_freq
+yoffset 0.03  %frequency_scan %aod_dac1_freq
 
 
 %loadx   11111111111111111111 %1W

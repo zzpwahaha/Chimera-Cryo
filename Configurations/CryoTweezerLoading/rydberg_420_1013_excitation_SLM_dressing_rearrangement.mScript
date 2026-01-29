@@ -37,7 +37,7 @@ t += 15
 call PGCTweezerImaging()
 
 
-%%%%%%%%%%%%%%%%%%%%%  rearrangement  %%%%%%%%%%%%%%%%%%%% 
+%%%%%%%%%%%%%%%%%%%%%%  rearrangement  %%%%%%%%%%%%%%%%%%%% 
 t += 50
 %%%%%%%%%%% PGC %%%%%%%%%%% 
     dac: BiasCoilX pgc_twz_bias_x
@@ -105,7 +105,7 @@ t += 10
 % note the previous section should have at least 4 ms dark interval
 call PGCTweezerImaging()
 
-%%%%%%%%%%%%%%%%%%%  rearrangement  %%%%%%%%%%%%%%%%%%%% 
+%%%%%%%%%%%%%%%%%%%%  rearrangement  %%%%%%%%%%%%%%%%%%%% 
 
 
 

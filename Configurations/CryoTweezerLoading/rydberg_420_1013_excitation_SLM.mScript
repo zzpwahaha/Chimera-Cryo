@@ -99,7 +99,7 @@ on: SLMTweezerHold
 t += 0.101
 off: SLMTweezerTrg
 
-%%%% Ryd Rabi %%%%%%
+%%% Ryd Rabi %%%%%%
 t += 0.35/1000
 t += -0.95/1000 %time for 420 AOM to turn since the beam is quite far away from the AOM actuator
 %pulseon: Ryd1013Mako 10/1000
@@ -111,7 +111,7 @@ off: Ryd420Trg
 off: do8_4 
 t += 0.95/1000
 t += 0.35/1000
-
+%%% Ryd Rabi %%%%%%
 
 %%%%% Ryd Ramsey %%%%%%
 %var Ryd_pi2_us 0.06
@@ -163,7 +163,8 @@ t += 0.35/1000
 %t += 0.95/1000 %time for 420 AOM to turn since the beam is quite far away from the AOM actuator
 %t += (Ryd_lifetime_t_total_us/2-Ryd_pi_us-time_scan_us/2)/1000
 %%%%%% Ryd pi wait Rydb pi lifetime %%%%%%
-%%%%% Ryd pi MW Rydb pi %%%%%%
+%%%%%% Ryd pi MW Rydb pi %%%%%%
+%var Ryd_pi_us 0.06
 %var Ryd_lifetime_t_total_us 6.4
 %t += 0.35/1000
 %t += -0.95/1000 %time for 420 AOM to turn since the beam is quite far away from the AOM actuator
@@ -198,8 +199,8 @@ t += 0.35/1000
 %
 %t += 0.95/1000
 %t += 0.35/1000
-
-%%%%% Ryd pi MW Rydb pi %%%%%%
+%
+%%%%%% Ryd pi MW Rydb pi %%%%%%
 
 
 t += 1/1000

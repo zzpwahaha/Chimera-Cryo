@@ -264,6 +264,6 @@ d1_lgmcooling_resonance 784
 rb87_hfsplitting 6834.682
 t_shutter 10
 t_field_settling 750
-rydberg_ionization_frequency 7818
-971 1140 1 921 974 1
+rydberg_ionization_frequency 6280
+971 1150 2 925 964 2
 0 1
