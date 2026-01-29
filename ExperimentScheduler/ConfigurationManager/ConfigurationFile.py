@@ -85,6 +85,15 @@ class ConfigurationFile:
     def modify_parameter_AWG(self, section_name, channel, param_name, new_value):
         self.sections[section_name].modify_channel_parameter(channel, param_name, new_value)
 
+    def add_plot_da(self, plot_name: str, which_grid: int = 0):
+        self.get_section('DATA_ANALYSIS').add_active_plot(plot_name, which_grid)
+        
+    def delete_plot_da(self, index: int):
+        self.get_section('DATA_ANALYSIS').delete_active_plot(index)
+    
+    def insert_plot_da(self, index: int, plot_name: str, which_grid: int = 0):
+        self.get_section('DATA_ANALYSIS').insert_active_plot(index, plot_name, which_grid)
+
     def get_parameter(self, section_name, param_name):
         """Gets a parameter's value from a section."""
         if section_name in self.sections:

@@ -2,7 +2,8 @@
 import os
 import re
 import shutil
-from ExperimentProcedure import ConfigurationFile, ExperimentProcedure
+from ExperimentProcedure import ConfigurationFile, ExperimentProcedure, sleep
+from pathlib import Path
 
 
 RT_BIAS_FIELD = {
@@ -151,53 +152,66 @@ def set_3pic_da(config_file: ConfigurationFile):
 
 
 def set_AWG_rabi(config_file: ConfigurationFile, exp: ExperimentProcedure):
-    config_file.modify_parameter_AWG("AGILENT_AWG", 1, "Channel Mode:", "dc")
-    config_file.modify_parameter_AWG("AGILENT_AWG", 2, "Channel Mode:", "dc")
-    config_file.modify_parameter_AWG("SIGLENT_AWG", 1, "Channel Mode:", "dc")
-    config_file.modify_parameter_AWG("SIGLENT_AWG", 2, "Channel Mode:", "square")
-    config_file.modify_parameter_AWG("SIGLENT2_AWG", 1, "Channel Mode:", "dc")
-    config_file.modify_parameter_AWG("SIGLENT2_AWG", 2, "Channel Mode:", "dc")
-    config_file.modify_parameter_AWG("SIGLENT3_AWG", 1, "Channel Mode:", "script")
+    path = Path(config_file.file_path)
+    result = Path(*path.parts[path.parts.index("Configurations") + 1:])
+    config_sub_path = "/" + result.as_posix()
+
+    config_file.modify_parameter_AWG("SIGLENT3_AWG", 1, "Channel Mode:", "dc")
     config_file.modify_parameter_AWG("SIGLENT3_AWG", 2, "Channel Mode:", "dc")
+    config_file.modify_parameter_AWG("SIGLENT2_AWG", 1, "Channel Mode:", "dc")
+    config_file.modify_parameter_AWG("SIGLENT2_AWG", 2, "Channel Mode:", "square")
+    config_file.modify_parameter_AWG("SIGLENT_AWG", 1, "Channel Mode:", "dc")
+    config_file.modify_parameter_AWG("SIGLENT_AWG", 2, "Channel Mode:", "dc")
+    config_file.modify_parameter_AWG("AGILENT_AWG", 1, "Channel Mode:", "script")
+    config_file.modify_parameter_AWG("AGILENT_AWG", 2, "Channel Mode:", "dc")
     config_file.save()
-    exp.open_configuration(config_file.file_path)
+    sleep(1)
+    exp.open_configuration(config_sub_path)
     for arbgen_name in exp.ARBGEN_NAMES:
         exp.setArbGen(arbgen_name)
-    config_file.modify_parameter_AWG("AGILENT_AWG", 1, "Channel Mode:", "no_control")
-    config_file.modify_parameter_AWG("AGILENT_AWG", 2, "Channel Mode:", "no_control")
-    config_file.modify_parameter_AWG("SIGLENT_AWG", 1, "Channel Mode:", "no_control")
-    config_file.modify_parameter_AWG("SIGLENT_AWG", 2, "Channel Mode:", "no_control")
-    config_file.modify_parameter_AWG("SIGLENT2_AWG", 1, "Channel Mode:", "no_control")
-    config_file.modify_parameter_AWG("SIGLENT2_AWG", 2, "Channel Mode:", "no_control")
+        sleep(1)
     config_file.modify_parameter_AWG("SIGLENT3_AWG", 1, "Channel Mode:", "no_control")
     config_file.modify_parameter_AWG("SIGLENT3_AWG", 2, "Channel Mode:", "no_control")
+    config_file.modify_parameter_AWG("SIGLENT2_AWG", 1, "Channel Mode:", "no_control")
+    config_file.modify_parameter_AWG("SIGLENT2_AWG", 2, "Channel Mode:", "no_control")
+    config_file.modify_parameter_AWG("SIGLENT_AWG", 1, "Channel Mode:", "no_control")
+    config_file.modify_parameter_AWG("SIGLENT_AWG", 2, "Channel Mode:", "no_control")
+    config_file.modify_parameter_AWG("AGILENT_AWG", 1, "Channel Mode:", "no_control")
+    config_file.modify_parameter_AWG("AGILENT_AWG", 2, "Channel Mode:", "no_control")
     config_file.save()
-    exp.open_configuration(config_file.file_path)
+    exp.open_configuration(config_sub_path)
 
 
 def set_AWG_avalanche(config_file: ConfigurationFile, exp: ExperimentProcedure):
-    config_file.modify_parameter_AWG("AGILENT_AWG", 1, "Channel Mode:", "square")
-    config_file.modify_parameter_AWG("AGILENT_AWG", 2, "Channel Mode:", "square")
-    config_file.modify_parameter_AWG("SIGLENT_AWG", 1, "Channel Mode:", "square")
-    config_file.modify_parameter_AWG("SIGLENT_AWG", 2, "Channel Mode:", "dc")
+    path = Path(config_file.file_path)
+    result = Path(*path.parts[path.parts.index("Configurations") + 1:])
+    config_sub_path = "/" + result.as_posix()
+
+    config_file.modify_parameter_AWG("SIGLENT3_AWG", 1, "Channel Mode:", "square")
+    config_file.modify_parameter_AWG("SIGLENT3_AWG", 2, "Channel Mode:", "square")
     config_file.modify_parameter_AWG("SIGLENT2_AWG", 1, "Channel Mode:", "square")
-    config_file.modify_parameter_AWG("SIGLENT2_AWG", 2, "Channel Mode:", "square")
-    config_file.modify_parameter_AWG("SIGLENT3_AWG", 1, "Channel Mode:", "script")
-    config_file.modify_parameter_AWG("SIGLENT3_AWG", 2, "Channel Mode:", "dc")
+    config_file.modify_parameter_AWG("SIGLENT2_AWG", 2, "Channel Mode:", "dc")
+    config_file.modify_parameter_AWG("SIGLENT_AWG", 1, "Channel Mode:", "square")
+    config_file.modify_parameter_AWG("SIGLENT_AWG", 2, "Channel Mode:", "square")
+    config_file.modify_parameter_AWG("AGILENT_AWG", 1, "Channel Mode:", "script")
+    config_file.modify_parameter_AWG("AGILENT_AWG", 2, "Channel Mode:", "dc")
     config_file.save()
-    exp.open_configuration(config_file.file_path)
+
+    exp.open_configuration(config_sub_path)
+    sleep(1)
     for arbgen_name in exp.ARBGEN_NAMES:
         exp.setArbGen(arbgen_name)
-    config_file.modify_parameter_AWG("AGILENT_AWG", 1, "Channel Mode:", "no_control")
-    config_file.modify_parameter_AWG("AGILENT_AWG", 2, "Channel Mode:", "no_control")
-    config_file.modify_parameter_AWG("SIGLENT_AWG", 1, "Channel Mode:", "no_control")
-    config_file.modify_parameter_AWG("SIGLENT_AWG", 2, "Channel Mode:", "no_control")
-    config_file.modify_parameter_AWG("SIGLENT2_AWG", 1, "Channel Mode:", "no_control")
-    config_file.modify_parameter_AWG("SIGLENT2_AWG", 2, "Channel Mode:", "no_control")
+        sleep(1)
     config_file.modify_parameter_AWG("SIGLENT3_AWG", 1, "Channel Mode:", "no_control")
     config_file.modify_parameter_AWG("SIGLENT3_AWG", 2, "Channel Mode:", "no_control")
+    config_file.modify_parameter_AWG("SIGLENT2_AWG", 1, "Channel Mode:", "no_control")
+    config_file.modify_parameter_AWG("SIGLENT2_AWG", 2, "Channel Mode:", "no_control")
+    config_file.modify_parameter_AWG("SIGLENT_AWG", 1, "Channel Mode:", "no_control")
+    config_file.modify_parameter_AWG("SIGLENT_AWG", 2, "Channel Mode:", "no_control")
+    config_file.modify_parameter_AWG("AGILENT_AWG", 1, "Channel Mode:", "no_control")
+    config_file.modify_parameter_AWG("AGILENT_AWG", 2, "Channel Mode:", "no_control")
     config_file.save()
-    exp.open_configuration(config_file.file_path)
+    exp.open_configuration(config_sub_path)
 
 
 if __name__ == '__main__':
@@ -210,6 +224,7 @@ if __name__ == '__main__':
     #                                 window=window, thresholds=thresholds, binnings=binnings)
 
     NUM_OF_PIC = 3
+    AWG_AVALANCHE = False
 
     grid_file_name = 'atomgrid_5x7_8points_20251203_SLM'
     camera_image_dim = {'Left:':1026, 'Right:':1090, 'H-Bin:':1, 'Bottom:': 928, 'Top:': 967, 'V-Bin:': 1}
@@ -300,6 +315,13 @@ if __name__ == '__main__':
         set_2pic_da(config_file=config_file)
     elif NUM_OF_PIC==3:
         set_3pic_da(config_file=config_file)
+
+    exp = ExperimentProcedure()
+    if AWG_AVALANCHE:
+        set_AWG_avalanche(config_file=config_file, exp=exp)
+    else:
+        set_AWG_rabi(config_file=config_file, exp=exp)
+
 
     config_file.save()
 

@@ -85,10 +85,14 @@ class DataAnalysisSection:
         # update declared number
         self._active_plots_declared = len(self.active_plots)
         self.parameters["Number of Active Plots:"] = str(self._active_plots_declared)
+        active_plot_index = list(self.parameters.keys()).index("Number of Active Plots:") + 1
 
         # reinsert plots with normalized indices
+        parameter_list = list(self.parameters.items())
         for i, plot in enumerate(self.active_plots, start=1):
-            self.parameters[f"Active Plot #{i}"] = plot
+            parameter_list.insert(active_plot_index, (f"Active Plot #{i}", plot))
+            active_plot_index += 1
+        self.parameters = OrderedDict(parameter_list)
 
     def add_active_plot(self, plot_name: str, which_grid: int = 0):
         # Append a new active plot.
@@ -110,6 +114,9 @@ class DataAnalysisSection:
         plot_dict = OrderedDict({"Plot Name:": plot_name, "Which Grid:": str(which_grid)})
         self.active_plots.insert(index, plot_dict)
         self._rebuild_active_plots_parameters()
+
+    def get_num_active_plots(self) -> int:
+        return len(self.active_plots)
 
     def print(self) -> str:
         out_lines = [self.section_name]
@@ -172,5 +179,5 @@ END_DATA_ANALYSIS
 
     variable = DataAnalysisSection("DATA_ANALYSIS",data_chunk)
     a = variable.__str__()
-    variable.insert_active_plot(0,'test')
+    variable.insert_active_plot(1,'test')
     print(variable)
