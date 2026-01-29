@@ -81,6 +81,9 @@ class ConfigurationFile:
         """Modifies a parameter within a section."""
         if section_name in self.sections:
             self.sections[section_name].parameters[param_name] = new_value
+    
+    def modify_parameter_AWG(self, section_name, channel, param_name, new_value):
+        self.sections[section_name].modify_channel_parameter(channel, param_name, new_value)
 
     def get_parameter(self, section_name, param_name):
         """Gets a parameter's value from a section."""

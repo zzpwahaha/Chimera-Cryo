@@ -26,6 +26,7 @@ class ExperimentProcedure:
     ZYNQ_PORT = 8080
     SYNACCESS_HOST_ZYNQ = '10.10.0.100'
     SYNACCESS_HOST_COIL = '10.10.0.101'
+    ARBGEN_NAMES = ["Cryo Agilent", "Cryo Siglent", "Cryo Siglent 1 Slave", "Cryo Siglent 3"]
 
     def __init__(self):
         # Set up logging
@@ -147,6 +148,12 @@ class ExperimentProcedure:
     def setOL(self):
         return self.chimera_command(f"Set-OL")
 
+    def setArbGen(self, name:str):
+        if name not in self.ARBGEN_NAMES:
+            print("ArbGen name not in the list. Lists are " + self.ARBGEN_NAMES.__str__())
+            return
+        return self.chimera_command(f"Set-ArbGen ${name}")
+
     def setZynqOutput(self):
         self.setDAC()
         time.sleep(1)
@@ -264,6 +271,9 @@ def today():
 if __name__ == "__main__":
     # EfieldCalibrationProcedure()
     exp = ExperimentProcedure()
+
+    exp.setArbGen("Cryo Siglent 3")
+
     from RydbergBeamMoveProcedure import extract_beam_position_on_mako
     # exp.run_calibration("prb_pwr")
     # exp.setStaticDDS(580.9,0)

@@ -334,6 +334,26 @@ void CommandModulator::setDDS(ErrorStatus& status)
 	}
 }
 
+void CommandModulator::setArbGen(QString whichArbGen, ErrorStatus& status)
+{
+	scriptWin->reportStatus("----------------------\r\nSetting ArbGens... ");
+	try {
+		status.error = false;
+		auto name = ArbGenEnum::fromStr(whichArbGen.toStdString());
+		scriptWin->reportStatus("Setting ArbGens...\r\n");
+		auto arbGensRefs = scriptWin->getArbGenSystem();
+		auto& arbGen = arbGensRefs[(int)name];
+		arbGen.get().programArbGenNow(auxWin->getUsableConstants());
+		scriptWin->reportStatus("Finished Setting ArbGens.\r\n");
+	}
+	catch (ChimeraError& err) {
+		mainWin->reportStatus(": " + err.qtrace() + "\r\n");
+		mainWin->reportErr(err.qtrace());
+		status.error = true;
+		status.errorMsg = err.trace();
+	}
+}
+
 void CommandModulator::startMako(QString whichMako, ErrorStatus& status)
 {
 	auto* cam = getMakoCameraPtr(whichMako, status);
