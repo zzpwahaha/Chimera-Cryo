@@ -120,18 +120,18 @@ t += 1
 dacramp: SLMTweezerIntensity slm_twz_intensity slm_twz_intensity*0.1 10
 t += 10
 %%%%%%%% D1 sample and hold %%%%%%%% 
-t += -15
-dac: D1StateTransferAmp -1 %-5 %-1.6 %-2.5
-off: D1StateTransferShutter 
-t += 4
-on: D1StateTransferTrg
-pulseon: mako1 0.1
-t += 4
-on: D1StateTransferHold
-t += 0.1
-off: D1StateTransferTrg
-on: D1StateTransferShutter 
-t += 15-(4+4+0.1)
+%t += -15
+%dac: D1StateTransferAmp -1 %-5 %-1.6 %-2.5
+%off: D1StateTransferShutter 
+%t += 4
+%on: D1StateTransferTrg
+%pulseon: mako1 0.1
+%t += 4
+%on: D1StateTransferHold
+%t += 0.1
+%off: D1StateTransferTrg
+%on: D1StateTransferShutter 
+%t += 15-(4+4+0.1)
 %%%%%%%% D1 sample and hold %%%%%%%% 
 
 %%%%%%%%%%%%%%%% Turn off microwave, blast with D1
@@ -145,26 +145,27 @@ t += 15-(4+4+0.1)
 %
 %on: qubitmwtrg
 %%%%%%%%%%%%%%%
-var D1_Rabi_pi_us 16.47
-var MW_Rabi_2111_pi 0.01742
+var D1_Rabi_pi_us 16.67
+var MW_Rabi_2111_pi_us 20
 %pulseon: mako1 0.1
 t += 1
 
 pulseon: do8_4 0.1 %dummy trigger for picoscope
-
-on: D1StateTransferTrg
-t += time_scan_us/1000
-off: D1StateTransferTrg
+%%%%%%%%%% D1 %%%%%%%%%% 
+%on: D1StateTransferTrg
+%t += time_scan_us/1000
+%off: D1StateTransferTrg
+%%%%%%%%%% D1 %%%%%%%%%% 
 
 
 %%%%%%%%%% MW after D1 %%%%%%%%%% 
-%%on: D1StateTransferTrg
-%%t += D1_Rabi_pi_us/1000
-%%off: D1StateTransferTrg
-%
-%t += 0.010
-%pulseon: MWAmpTrg MW_Rabi_2111_pi  %time_scan
-%t += MW_Rabi_2111_pi %time_scan
+%on: D1StateTransferTrg
+%t += D1_Rabi_pi_us/1000
+%off: D1StateTransferTrg
+
+t += 0.010
+pulseon: MWAmpTrg MW_Rabi_2111_pi_us/1000 %MW_Rabi_2111_pi  %time_scan
+t += MW_Rabi_2111_pi_us/1000 %MW_Rabi_2111_pi %time_scan
 %%%%%%%%%% MW after D1 %%%%%%%%%% 
 
 

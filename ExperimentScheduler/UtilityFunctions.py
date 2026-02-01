@@ -4,6 +4,7 @@ import re
 import shutil
 from ExperimentProcedure import ConfigurationFile, ExperimentProcedure, sleep
 from pathlib import Path
+import numpy as np
 
 
 RT_BIAS_FIELD = {
@@ -122,6 +123,24 @@ def update_imaging_cooling_bias_field(config_file: ConfigurationFile, fields = C
     for key,value in fields.items():
         config_file.config_param.update_variable(key, constant_value = value)
 
+def _raw_move_EOM_resonance(exp:ExperimentProcedure, start_freq, end_freq, step = 0.1, channel = 0):
+    print(f"Move EOM frequency for channel {channel} from {start_freq:10.7f} MHz to {end_freq:10.7f} MHz")
+    if start_freq == end_freq:
+        return
+    # Adjust the step sign so it moves toward end_freq
+    if (end_freq - start_freq) * step < 0:
+        step = -step
+    # Ensure the final frequency is included
+    freqs = np.arange(start_freq, end_freq, step)
+    if freqs[-1] != end_freq:
+        freqs = np.append(freqs, end_freq)
+
+    for f in freqs:
+        exp.setStaticDDS(ddsfreq=f, channel=channel)
+        sleep(0.25)
+    # Final safety set and longer wait
+    exp.setStaticDDS(ddsfreq=end_freq, channel=channel)
+    sleep(0.5)
 
 def shuttle_grid_files(grid_file_name: str):
     # move the grid file already in the GRID folder to archived to make space for the new grid file 
@@ -130,7 +149,7 @@ def shuttle_grid_files(grid_file_name: str):
     move_files(parent_dir=ExperimentProcedure.ARCHIVED_GRID_FILE_LOCATION, new_parent_dir=ExperimentProcedure.GRID_FILE_LOCATION, file_extension=".grid", file_name=grid_file_name, throw=True)
 
 
-def set_2pic_da(config_file: ConfigurationFile):
+def set_configuration_2pic(config_file: ConfigurationFile):
     for _ in range(config_file.get_section("DATA_ANALYSIS").get_num_active_plots()):
         config_file.delete_plot_da(0)
     config_file.add_plot_da("Histogram-2Pic", 0)
@@ -139,7 +158,7 @@ def set_2pic_da(config_file: ConfigurationFile):
     config_file.modify_parameter("CAMERA_SETTINGS", "Andor Pics Per Rep:", 2)
 
 
-def set_3pic_da(config_file: ConfigurationFile):
+def set_configuration_3pic(config_file: ConfigurationFile):
     for _ in range(config_file.get_section("DATA_ANALYSIS").get_num_active_plots()):
         config_file.delete_plot_da(0)
     config_file.add_plot_da("Histogram-3Pic-Pic0", 0)
@@ -215,6 +234,7 @@ def set_AWG_avalanche(config_file: ConfigurationFile, exp: ExperimentProcedure):
 
 
 if __name__ == '__main__':
+    from EthernetClient.EthernetClient import EthernetClient
 
     # analysis grid for 5x7 grid - 20250922
     # window = [0, 0, 65, 40]
@@ -223,25 +243,30 @@ if __name__ == '__main__':
     # analysis_locs = da.DataAnalysis(year='2025', month='September', day='18', data_name='data_18', 
     #                                 window=window, thresholds=thresholds, binnings=binnings)
 
-    NUM_OF_PIC = 3
+    NUM_OF_PIC = 2
     AWG_AVALANCHE = False
 
-    grid_file_name = 'atomgrid_5x7_8points_20251203_SLM'
-    camera_image_dim = {'Left:':1026, 'Right:':1090, 'H-Bin:':1, 'Bottom:': 928, 'Top:': 967, 'V-Bin:': 1}
-    tweezer_intensity_setpoint = 2.9 #V
-    repetitions = 4
+    # grid_file_name = 'atomgrid_5x7_8points_20251203_SLM'
+    # camera_image_dim = {'Left:':1026, 'Right:':1090, 'H-Bin:':1, 'Bottom:': 928, 'Top:': 967, 'V-Bin:': 1}
+    # tweezer_intensity_setpoint = 2.9 #V
+    # repetitions = 4
+
     # AOD - 6x6_60umx60um
     # camera_image_dim = {'Left:':961, 'Right:':1105, 'H-Bin:':1, 'Bottom:': 880, 'Top:': 1015, 'V-Bin:': 1}
     # tweezer_intensity_setpoint = 2.9 # 3.75 V for AOD
     # repetitions = 4
 
-    grid_file_name = 'atomgrid_5x20_6points_20260123_SLM'
+    grid_file_name = 'atomgrid_5x20_6points_20260129_SLM'
     camera_image_dim = {'Left:':971, 'Right:':1140, 'H-Bin:':1, 'Bottom:': 921, 'Top:': 974, 'V-Bin:': 1}
     tweezer_intensity_setpoint = 8.7 #8 #6.5 #V
     repetitions = 4
 
+    # grid_file_name = 'atomgrid_1x7_4points_2025-11-2'
+    # camera_image_dim = {'Left:':971, 'Right:':1150, 'H-Bin:':2, 'Bottom:': 925, 'Top:': 964, 'V-Bin:': 2}
+    # tweezer_intensity_setpoint = 0.61 #V
+    # repetitions = 8
 
-
+    '''
     # # analysis grid for 2x7 grid - 20250922
     # window = [0,0,90,20]
     # thresholds = 100
@@ -260,11 +285,6 @@ if __name__ == '__main__':
     # binnings = np.linspace(0, 240, 241)
     # analysis_locs = da.DataAnalysis(year='2025', month='September', day='30', data_name='data_19', 
     #                                 window=window, thresholds=thresholds, binnings=binnings)
-
-    # grid_file_name = 'atomgrid_1x7_4points_2025-11-2'
-    # camera_image_dim = {'Left:':971, 'Right:':1150, 'H-Bin:':2, 'Bottom:': 925, 'Top:': 964, 'V-Bin:': 2}
-    # tweezer_intensity_setpoint = 0.61 #V
-    # repetitions = 8
 
     # grid_file_name = 'atomgrid_1x4_3points_20260104_SLM'
     # camera_image_dim = {'Left:':971, 'Right:':1150, 'H-Bin:':2, 'Bottom:': 925, 'Top:': 964, 'V-Bin:': 2}
@@ -292,7 +312,7 @@ if __name__ == '__main__':
     # camera_image_dim = {'Left:':836, 'Right:':1275, 'H-Bin:':1, 'Bottom:': 881, 'Top:': 1030, 'V-Bin:': 1}
     # tweezer_intensity_setpoint = 2.9 # 3.5 V for AOD
     # repetitions = 4
-
+    '''
 
 
 
@@ -312,9 +332,12 @@ if __name__ == '__main__':
     config_file.config_param.update_variable("slm_twz_intensity", constant_value = tweezer_intensity_setpoint)
     
     if NUM_OF_PIC==2:
-        set_2pic_da(config_file=config_file)
+        set_configuration_2pic(config_file=config_file)
     elif NUM_OF_PIC==3:
-        set_3pic_da(config_file=config_file)
+        set_configuration_3pic(config_file=config_file)
+
+    # update_imaging_cooling_bias_field(config_file=config_file,fields=CRYO_BIAS_FIELD)
+    # update_imaging_cooling_bias_field(config_file=config_file,fields=RT_BIAS_FIELD)
 
     exp = ExperimentProcedure()
     if AWG_AVALANCHE:
@@ -322,10 +345,17 @@ if __name__ == '__main__':
     else:
         set_AWG_rabi(config_file=config_file, exp=exp)
 
-
     config_file.save()
 
-    # update_imaging_cooling_bias_field(config_file=config_file,fields=CRYO_BIAS_FIELD)
-    # config_file.save()
+    client = EthernetClient(host='10.10.0.14', port=8080)
+    client.connect()
+    if '5x20' in grid_file_name:
+        client.send("Phase-Pattern 5x20_20umx95um_trapBalanceCamera_cameraBalanced_balanced4")
+    if '1x7' in grid_file_name:
+        client.send("Phase-Pattern 1x7_latticeconstant16.5um_trapBalanceCamera_cameraBalanced_balanced2")
+    recv = client.receive()
+    print(recv)
+    client.close()
+
 
     pass

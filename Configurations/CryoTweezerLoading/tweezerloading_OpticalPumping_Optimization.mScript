@@ -42,19 +42,19 @@ off: ryd420trg
 
 
 %%%%% cold bias field %%%%% 
-dac: BiasCoilX -2.5+0.75 %-2.5
-dac: BiasCoilY -0.824+(-2.33/2)*switch_toggle
-dac: BiasCoilZ -0.0510 %amplitude_scan 
+%dac: BiasCoilX -2.5+0.75 %-2.5
+%dac: BiasCoilY -0.824+(-2.33/2)*switch_toggle
+%dac: BiasCoilZ -0.0510 %amplitude_scan 
 
 
 %%%%% warm bias field %%%%% 
-%dac: BiasCoilX -2.5+0.75 %quantization_bias_x
-%dac: BiasCoilY -0.841+0.007 %+(amplitude_scan) %+(-0.08) %+(-2.33)*switch_toggle % %quantization_bias_y %-0.95 
-%dac: BiasCoilZ -0.0663+0.019 %+(-2.23/2)*switch_toggle %+amplitude_scan %+0.033 %-0.04
+dac: BiasCoilX -2.5+0.75 %quantization_bias_x
+dac: BiasCoilY -0.835+(-2.23/2)*switch_toggle %-0.834
+dac: BiasCoilZ -0.0464 %+amplitude_scan %-0.0473 
 % -2.23V for 7G bias field, -2.23V/2 for 3.5 G bias field 
 
 
-t += 750 %100 %750
+t += t_field_settling %100 %750
 
 %t += 10
 %%%%%%%%%%%% pump out of F=2 using probe cooling 2-2'' %%%%%%%%%%%
