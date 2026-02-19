@@ -19,7 +19,6 @@ struct arbGenSettings {
 };
 
 
-// NOT IN USE AT THE MOMENT (Nov 27th, 2020)
 const arbGenSettings UWAVE_AGILENT_SETTINGS = {
 	// safemode option											
 	UWAVE_SAFEMODE_AGI,
@@ -47,8 +46,40 @@ const arbGenSettings UWAVE_AGILENT_SETTINGS = {
 	//"TRIG:SOUR EXT", 
 	"TRIGger1:SOURce EXTernal", "TRIGger1:SLOPe NEGative", // NEED TO BE AFTER APPLY!!!
 	"TRIGger2:SOURce EXTernal", "TRIGger2:SLOPe NEGative",
-	"SOURce1:FUNCtion:ARBitrary:ADVance SRATe", "SOURCE1:FUNC:ARB:FILTER Normal",
-	"SOURce2:FUNCtion:ARBitrary:ADVance SRATe", "SOURCE2:FUNC:ARB:FILTER Normal",
+	"SOURce1:FUNCtion:ARBitrary:ADVance SRATe", "SOURCE1:FUNC:ARB:FILTER NORMal",
+	"SOURce2:FUNCtion:ARBitrary:ADVance SRATe", "SOURCE2:FUNC:ARB:FILTER NORMal",
+	"output1 on", "output2 on",}
+};
+
+const arbGenSettings UWAVE_AGILENT2_SETTINGS = {
+	// safemode option											
+	UWAVE_SAFEMODE_AGI2,
+	// usb/tcpip address
+	/*UWAVE_SIGLENT_ADDRESS*/UWAVE_AGILENT2_ADDRESS,
+	// sample rate in hertz
+	60e6,
+	// Memory location, whether the device will save waveforms to 
+	// the internal 64MB Memory buffer or to an external USB drive, which
+	// can (obviously) have much more space.
+	"INT",
+	// device name (just a convenience, so that the class instance knows 
+	// which device it is
+	"Cryo Agilent 2",
+	UWAVE_AGILENT2_TRIGGER_LINE.first, UWAVE_AGILENT2_TRIGGER_LINE.second,
+	// Configuration file delimiter, used for saving settings for this 
+	// agilent.
+	"AGILENT2_AWG",
+	// Calibration coefficients (arb length)
+	{ },
+	{ "output1 off", "output2 off",
+	"Source1:burst:state off",  "Source2:burst:state off",
+	"output1:load INF", "output2:load INF",
+	"SOURce1:APPLy:DC DEF, DEF,0 V", "SOURce2:APPLy:DC DEF, DEF,0 V",
+	//"TRIG:SOUR EXT", 
+	"TRIGger1:SOURce EXTernal", "TRIGger1:SLOPe POSitive", // NEED TO BE AFTER APPLY!!!
+	"TRIGger2:SOURce EXTernal", "TRIGger2:SLOPe POSitive",
+	"SOURce1:FUNCtion:ARBitrary:ADVance SRATe", "SOURCE1:FUNC:ARB:FILTER OFF",
+	"SOURce2:FUNCtion:ARBitrary:ADVance SRATe", "SOURCE2:FUNC:ARB:FILTER OFF",
 	"output1 on", "output2 on",}
 };
 

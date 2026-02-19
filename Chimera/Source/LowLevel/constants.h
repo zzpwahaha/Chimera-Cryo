@@ -81,15 +81,18 @@
 	//#define DDS_FPGA_ADDRESS "FT1I6IBSB"; //Device Serial: FT1I6IBS, Use FT1I6IBSB in C++ to select Channel B
 
 	//ArbGens
-	const bool UWAVE_SAFEMODE = true;
 	const bool UWAVE_SAFEMODE_SIG = false;
 	const bool UWAVE_SAFEMODE_SIG2 = false;
 	const bool UWAVE_SAFEMODE_SIG3 = false;
 	const bool UWAVE_SAFEMODE_AGI = false;
-	const int numArbGen = 4;
+	const bool UWAVE_SAFEMODE_AGI2 = false;
+	const int numArbGen = 5;
 	//const std::string UWAVE_AGILENT_ADDRESS = "USB0::0x0957::0x2807::MY57400998::INSTR";
 	const std::string UWAVE_AGILENT_ADDRESS = "TCPIP0::A-33512B-00998.local::inst0::INSTR";
 	const std::pair<unsigned, unsigned> UWAVE_AGILENT_TRIGGER_LINE = std::make_pair(7 - 1, 0); /*the first is the label on the box minus 1, has minus'd 1 explicitly */
+	const std::string UWAVE_AGILENT2_ADDRESS = "TCPIP0::A-33512B-02674.local::inst0::INSTR"; 
+	const std::pair<unsigned, unsigned> UWAVE_AGILENT2_TRIGGER_LINE = std::make_pair(3 - 1, 3); /*the first is the label on the box minus 1, has minus'd 1 explicitly */
+
 	//const std::string UWAVE_SIGLENT_ADDRESS = "USB0::0xF4EC::0x1102::SDG2XCAC6R0238::INSTR";
 	const std::string UWAVE_SIGLENT_ADDRESS = "TCPIP0::10.10.0.4::inst0::INSTR";
 	const std::pair<unsigned, unsigned> UWAVE_SIGLENT_TRIGGER_LINE = std::make_pair(7 - 1, 1); /*the first is the label on the box minus 1, has minus'd 1 explicitly */

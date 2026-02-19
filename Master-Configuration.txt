@@ -37,7 +37,7 @@ dipolepushreptrg
 1
 d1lgmtrg
 1
-do3_3
+keysight2trg
 1
 mako1
 1

@@ -9,7 +9,7 @@ enum class ArbGenType {
 /*this name is only for assisting the coding, not related to script at all*/
 struct ArbGenEnum {
 	enum class name {
-		Siglent0, Agilent0, Siglent0FlashingSlave, Siglent1 /*, Flashing, Microwave*/
+		Siglent0, Agilent0, Siglent0FlashingSlave, Siglent1, Agilent1
 	};
 	static const std::array<name, numArbGen> allAgs;
 	static std::string toStr (name m_) {
@@ -22,10 +22,8 @@ struct ArbGenEnum {
 			return UWAVE_AGILENT_SETTINGS.deviceName;
 		case name::Siglent1:
 			return UWAVE_SIGLENT3_SETTINGS.deviceName;
-		//case name::Flashing:
-		//	return "Flashing";
-		//case name::Microwave:
-		//	return "Microwave";
+		case name::Agilent1:
+			return UWAVE_AGILENT2_SETTINGS.deviceName;
 		}
 		return "";
 	}

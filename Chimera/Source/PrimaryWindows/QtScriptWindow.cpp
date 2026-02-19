@@ -16,7 +16,8 @@ QtScriptWindow::QtScriptWindow(QWidget* parent) : IChimeraQtWindow(parent)
 			ArbGenSystem(UWAVE_SIGLENT_SETTINGS, ArbGenType::Siglent, this),
 			ArbGenSystem(UWAVE_SIGLENT2_SETTINGS, ArbGenType::Siglent, this),
 			ArbGenSystem(UWAVE_AGILENT_SETTINGS, ArbGenType::Agilent, this),
-			ArbGenSystem(UWAVE_SIGLENT3_SETTINGS, ArbGenType::Siglent, this),} }
+			ArbGenSystem(UWAVE_SIGLENT3_SETTINGS, ArbGenType::Siglent, this),
+			ArbGenSystem(UWAVE_AGILENT2_SETTINGS, ArbGenType::Agilent, this),} }
 	, gigaMoog(this)
 {
 	setWindowTitle ("Script Window");
@@ -47,7 +48,13 @@ void QtScriptWindow::initializeWidgets (){
 	layout1->addWidget(&arbGens[0], 1);
 	layout1->addWidget(&arbGens[2], 1);
 	layout->addLayout(layout1, 1);
-	layout->addWidget(&gigaMoog, 1);
+	QVBoxLayout* layout2 = new QVBoxLayout(this);
+	layout2->setContentsMargins(0, 0, 0, 0);
+	layout2->addWidget(&arbGens[4], 0);
+	arbGens[4].setMaximumHeight(232);
+	arbGens[4].setMaximumWidth(600);
+	layout2->addWidget(&gigaMoog, 1);
+	layout->addLayout(layout2, 1);
 	layout->addWidget(&masterScript, 1);
 	
 	try {

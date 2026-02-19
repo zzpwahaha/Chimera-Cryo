@@ -1,4 +1,4 @@
 #include <stdafx.h>
 #include "whichAg.h"
 const std::array<ArbGenEnum::name, numArbGen> ArbGenEnum::allAgs =
-{ name::Siglent0, name::Agilent0, name::Siglent0FlashingSlave, name::Siglent1/*, name::Flashing, name::Microwave*/};
+{ name::Siglent0, name::Agilent0, name::Siglent0FlashingSlave, name::Siglent1, name::Agilent1 };
