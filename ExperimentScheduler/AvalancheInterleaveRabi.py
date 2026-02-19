@@ -30,6 +30,8 @@ config_file = ConfigurationFile(config_path)
 class AvalancheTimeScanConfig(Enum):
     FIVE_BY_ELEVEN_N60_RED = "5x11_n60_red"
     FIVE_BY_ELEVEN_N60_BLUE = "5x11_n60_blue"
+    FIVE_BY_ELEVEN_N70_RED = "5x11_n70_red"
+    FIVE_BY_ELEVEN_N80_RED = "5x11_n80_red"
 
 class AvalancheInterleaveRabi:
     def __init__(self, ryd_420_amplitude, AVALANCHE_420_FREQ, RABI_420_FREQ, CURRENT_EOM_FREQ, avalanche_repetitions_arr):
@@ -62,6 +64,28 @@ class AvalancheInterleaveRabi:
                                                     new_initial_values=[0.01, 1000, 4000], 
                                                     new_final_values=[0.01+900.01, 3000, 8000])
             
+        elif config_mode == AvalancheTimeScanConfig.FIVE_BY_ELEVEN_N70_RED:
+            # for 5x11, n=60, red
+            config_file.config_param.update_scan_dimension(0, new_ranges=[
+                ScanRange(index=0,left_inclusive=True, right_inclusive=True, variations=16),
+                ScanRange(index=1,left_inclusive=True, right_inclusive=True, variations=6),
+                ScanRange(index=2,left_inclusive=True, right_inclusive=True, variations=3)
+                ])
+            config_file.config_param.update_variable("time_scan_us", scan_type="Variable", 
+                                                    new_initial_values=[0.01, 500, 2000], 
+                                                    new_final_values=[0.01+450.01, 1500, 5000])
+            
+        elif config_mode == AvalancheTimeScanConfig.FIVE_BY_ELEVEN_N80_RED:
+            # for 5x11, n=60, blue
+            config_file.config_param.update_scan_dimension(0, new_ranges=[
+                ScanRange(index=0,left_inclusive=True, right_inclusive=True, variations=16),
+                ScanRange(index=1,left_inclusive=True, right_inclusive=True, variations=6),
+                ScanRange(index=2,left_inclusive=True, right_inclusive=True, variations=3)
+                ])
+            config_file.config_param.update_variable("time_scan_us", scan_type="Variable", 
+                                                    new_initial_values=[0.01, 170, 500], 
+                                                    new_final_values=[0.01+150, 470, 1000])
+
         else:
             raise ValueError(f"Unsupported avalanche time scan config: {config_mode}")
 
@@ -93,7 +117,7 @@ class AvalancheInterleaveRabi:
         set_configuration_3pic(config_file)
 
         # set up the rest of the config file
-        config_file.modify_parameter("REPETITIONS", "Reps:", str(self.avalanche_repetitions_arr[exp_idx]))
+        config_file.modify_parameter("REPETITIONS", "Reps:", str(self.avalanche_repetitions_arr[exp_idx])) #
         config_file.modify_parameter("MAIN_OPTIONS", "Randomize Variations?", str(0))
         config_file.modify_parameter("MAIN_OPTIONS", "Repetition First Over Variation?", str(0))
         config_file.modify_parameter("STATIC_DDS", "Control?", 0)
@@ -105,7 +129,7 @@ class AvalancheInterleaveRabi:
         config_file.config_param.update_variable("ryd420_amplitude", constant_value=self.ryd_420_amplitude)
         config_file.config_param.update_variable("ryd1013_amplitude", constant_value=4)
 
-        self._update_avalanche_time_scan_parameter(config_file=config_file, config_mode=AvalancheTimeScanConfig.FIVE_BY_ELEVEN_N60_RED)
+        self._update_avalanche_time_scan_parameter(config_file=config_file, config_mode=AvalancheTimeScanConfig.FIVE_BY_ELEVEN_N80_RED)
 
         config_file.modify_parameter("MAKO3_CAM", "Mako System Active:", str(0))
         config_file.modify_parameter("MAKO3_CAM", "Exposure Time:", str(1035))
@@ -119,6 +143,7 @@ class AvalancheInterleaveRabi:
         set_AWG_avalanche(config_file, exp)
         config_file.save()
 
+        YEAR, MONTH, DAY = today()
         # run experiment
         exp_name = f"AVALANCHE-{exp_name_prefix}-{exp_idx}{exp_name_postfix}"
         exp.open_configuration("\\CryoTweezerLoading\\" + config_name)
@@ -144,7 +169,7 @@ class AvalancheInterleaveRabi:
                                         window=window, thresholds=thresholds, binnings=binnings)
         
         grid_file_name = 'atomgrid_1x7_4points_2025-9-30'
-        camera_image_dim = {'Left:':971, 'Right:':1150, 'H-Bin:':2, 'Bottom:': 929, 'Top:': 968, 'V-Bin:': 2}
+        camera_image_dim = {'Left:':971, 'Right:':1150, 'H-Bin:':2, 'Bottom:': 927, 'Top:': 966, 'V-Bin:': 2}
         tweezer_intensity_setpoint = 0.61 #V
 
         # move 420 frequency, config is saved, must run this first
@@ -172,7 +197,7 @@ class AvalancheInterleaveRabi:
         config_file.config_param.update_variable("ryd420_amplitude", constant_value=self.ryd_420_amplitude)
         config_file.config_param.update_variable("ryd1013_amplitude", constant_value=4)
         config_file.config_param.update_scan_dimension(0, new_ranges=[
-            ScanRange(index=0,left_inclusive=True, right_inclusive=True, variations=61),
+            ScanRange(index=0,left_inclusive=True, right_inclusive=True, variations=61), #61
             ])
         config_file.config_param.update_variable("time_scan_us", scan_type="Variable", 
                                                 new_initial_values=[0.01], 
@@ -190,6 +215,7 @@ class AvalancheInterleaveRabi:
         set_AWG_rabi(config_file, exp)
         config_file.save()
 
+        YEAR, MONTH, DAY = today()
         # run experiment
         exp_name = f"RABI-{exp_name_prefix}-{exp_idx}{exp_name_postfix}"
         exp.open_configuration("\\CryoTweezerLoading\\" + config_name)
@@ -255,13 +281,33 @@ if __name__ == "__main__":
     # EXP_NAME_PREFIX = "N-60-BLUE"
 
     # n=60, red, 1/30
-    RABI_420_FREQ = 578.72 
-    AVALANCHE_420_FREQ = RABI_420_FREQ - 36/2
-    CURRENT_EOM_FREQ = 578.72
-    RYD_420_AMPLITUDE = 0.081
-    EXP_NAME_PREFIX = "N-60-RED"
+    # RABI_420_FREQ = 579.09
+    # AVALANCHE_420_FREQ = RABI_420_FREQ - 36/2
+    # CURRENT_EOM_FREQ = RABI_420_FREQ
+    # RYD_420_AMPLITUDE = 0.081
+    # EXP_NAME_PREFIX = "N-60-RED-5x6"
 
+    # n=70, red, 2/2
+    # RABI_420_FREQ = 530.47
+    # AVALANCHE_420_FREQ = RABI_420_FREQ - 36/2
+    # CURRENT_EOM_FREQ = RABI_420_FREQ
+    # RYD_420_AMPLITUDE = 0.15
+    # EXP_NAME_PREFIX = "N-70-RED"
 
+    # n=80, red, 2/4
+    # RABI_420_FREQ = 554.97
+    # AVALANCHE_420_FREQ = RABI_420_FREQ - 30/2
+    # CURRENT_EOM_FREQ = 547.47 #RABI_420_FREQ
+    # RYD_420_AMPLITUDE = 0.15
+    # EXP_NAME_PREFIX = "N-80-RED"
+
+    # n=80, red, 2/4, 5x6, checkerboard
+    RABI_420_FREQ = 554.90
+    AVALANCHE_420_FREQ = RABI_420_FREQ - 30/2
+    CURRENT_EOM_FREQ = AVALANCHE_420_FREQ
+    RYD_420_AMPLITUDE = 0.15
+    # EXP_NAME_PREFIX = "N-80-RED-5x6-CHECKERBOARD"
+    EXP_NAME_PREFIX = "N-80-RED-5x3"
 
 
     AVALANCHE_REPETITIONS = 600

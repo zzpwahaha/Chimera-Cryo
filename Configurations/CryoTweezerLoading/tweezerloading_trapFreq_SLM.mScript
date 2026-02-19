@@ -25,18 +25,20 @@ call PGCTweezerImaging()
 t += 10
 
 %%%%%%%%%%%%%%  Kickout TWIZZER  %%%%%%%%%%%%%%%%%%
-var measure_trap_depth_at 4.0
+var measure_trap_depth_at 7.5
 dacramp: SLMTweezerIntensity slm_twz_intensity measure_trap_depth_at 10 
 t += 10
 
 %pulseon: TweezerHold 100
+pulseon: DO8_4 100
 pulseon: SLMTweezerHold 100
-pulseon: KeysightTrg 100
+%pulseon: KeysightTrg 100
+pulseon: Siglent3Trg 100
 t += 105
 
-dacramp: SLMTweezerIntensity measure_trap_depth_at 0.1*slm_twz_intensity 10 
+dacramp: SLMTweezerIntensity measure_trap_depth_at 0.1*slm_twz_intensity 10 %measure_trap_depth_at
 t += 10+15
-dacramp: SLMTweezerIntensity 0.1*slm_twz_intensity measure_trap_depth_at 10 
+dacramp: SLMTweezerIntensity 0.1*slm_twz_intensity measure_trap_depth_at 10 % measure_trap_depth_at
 t += 10
 
 dacramp: SLMTweezerIntensity measure_trap_depth_at slm_twz_intensity 10 
@@ -53,7 +55,7 @@ call PGCTweezerImaging()
 
 
 %%%%%%%%%%%%%%  END Sequence  %%%%%%%%%%%%%%%%%%
-t += 10
+call EndSequence()
 pulseon: DO1_0 0.5
 
 

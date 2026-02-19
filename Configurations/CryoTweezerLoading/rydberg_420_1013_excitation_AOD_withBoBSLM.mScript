@@ -1,7 +1,25 @@
 %%%%%%%%%%%%%%%%% Start With 1ms %%%%%%%%%%%%%%%%% 
 t = 1
 %call CryoMOTLoadingPGC()
-call CryoMOTEnhancedLoadingLGM()
+%call CryoMOTEnhancedLoadingLGM()
+
+    call MOTLoadingAOD(t_loading)	
+    call FreeSpaceLGMEnhancedLoading()
+
+
+t += -250-200 % 200 ms is for LGM loading/cooling
+% holding the tweezer at amplitude_scan
+dac: SLMTweezerIntensity amplitude_scan %1
+t += 0.5
+on: SLMTweezerTrg
+%pulseon: Mako2 0.01 
+t += 150.2
+on: SLMTweezerHold
+t += 0.1
+off: SLMTweezerTrg
+t += 250+200-0.5-150.2-0.1
+
+
 call TOF(10)
 
 %t += -10
@@ -23,36 +41,11 @@ call PGCTweezerImaging()
 
 t += 5
 
-%%%%%%%%%%%%%%%% large field LGM %%%%%%%%%%%%%%%%
-t += 10
-    off: xyzMOTShutter
-    on: D1LGMPrbShutter
-    off: D1LGMShutter
-    on: D1LGMEOMTrg
-    dac: D1LGMEOMAmp 0 %amplitude_scan %d1lgmprb_twz_rep_amp
-    dac: D1LGMAmp {3 d1lgm_prb_pwr} % amplitude_scan%d1lgmprb_twz_cool_amp
-    ol: ol_D1LGM D1_LGMCooling_resonance-150 %resonance_scan %d1lgm_twz_olcool
-    ol: ol_D1_repump Rb87_HFSplitting+4.5 %resonance_scan %d1lgm_twz_olrepump
-
-    dac: BiasCoilX pgc_twz_bias_x
-    dac: BiasCoilY -5 %pgc_twz_bias_y=-4.5
-    dac: BiasCoilZ pgc_twz_bias_z %pgc_twz_bias_z
-    t += t_shutter
-
-    on: D1LGMTrg
-    t += 25 %time_scan %t_lgm_cool_time 
-    pulseon: DO1_0 1
-    off: D1LGMTrg
-    off: D1LGMEOMTrg
-    off: D1LGMShutter
-    off: D1LGMPrbShutter
-%%%%%%%%%%%%%%%% large field LGM %%%%%%%%%%%%%%%%
-
 call setQuantizationField()
-dacramp: SLMTweezerIntensity slm_twz_intensity slm_twz_intensity*0.02 10
+dacramp: TweezerIntensity twz_intensity twz_intensity*0.15 10
 t += 10
 t += t_field_settling-20
-dacramp: SLMTweezerIntensity slm_twz_intensity*0.02 slm_twz_intensity 10
+dacramp: TweezerIntensity twz_intensity*0.15 twz_intensity 10
 t += 10
 
 call OpticalPumping22()
@@ -93,9 +86,9 @@ pulseon: MWTrg 0.4
 t += 1
 
 %%%%%%%%%%%%%%  Trap ramp for Rydberg  %%%%%%%%%%%%%%%%%%
-dacramp: SLMTweezerIntensity slm_twz_intensity slm_twz_intensity*0.02 10 %0.15
+dacramp: TweezerIntensity twz_intensity twz_intensity*0.15 10
 t += 10
-%%%%% 420 sample and hold %%%%
+%%%% 420 sample and hold %%%%
 t += -10
 on: Ryd420Trg
 t += 3.0
@@ -105,8 +98,8 @@ off: Ryd420Trg
 t += 0.1
 on: Ryd420ExpShutter
 t += 10-3-1-0.1
-%%%%% 420 sample and hold %%%%
-%%% 1013 sample and hold %%%%
+%%%% 420 sample and hold %%%%
+%%%% 1013 sample and hold %%%%
 t += -10
 on: Ryd1013Trg
 t += 1
@@ -116,18 +109,17 @@ t += 1
 t += 0.1
 %off: Ryd1013Trg
 t += 10-1-1-0.1
-%%% 1013 sample and hold %%%%
+%%%% 1013 sample and hold %%%%
 
 on: ryd420RFSourceSwitch
 t += 0.4
-on: SLMTweezerHold
+on: TweezerHold
 t += 0.101
-off: SLMTweezerTrg
-
+off: TweezerTrg
 
 %%% Ryd Rabi %%%%%%
 t += 0.35/1000
-t += -0.95/1000 %time for 420 AOM to turn since the beam is quite far away from the AOM actuator
+t += -0.90/1000 %time for 420 AOM to turn since the beam is quite far away from the AOM actuator
 %pulseon: Ryd1013Mako 10/1000
 on: do8_4 %dummy trigger for picoscope
 on: Ryd420Trg % scan to get Rabi
@@ -135,7 +127,7 @@ t += time_scan_us/1000
 %t += (0.01+((sign(20.5-x)+1)/2)*0.01*x+((sign(x-20.5)+1)/2)*int(0.4*exp((x-21)*ln(1.076))*100)/100)/1000
 off: Ryd420Trg
 off: do8_4 
-t += 0.95/1000
+t += 0.90/1000
 t += 0.35/1000
 %%% Ryd Rabi %%%%%%
 
@@ -143,7 +135,7 @@ t += 0.35/1000
 %var Ryd_pi2_us 0.06
 %%var Ryd_pi_us 0.1 %0.20 %0.185
 %t += 0.35/1000
-%t += -0.95/1000 %time for 420 AOM to turn since the beam is quite far away from the AOM actuator
+%t += -0.90/1000 %time for 420 AOM to turn since the beam is quite far away from the AOM actuator
 %on: do8_4 %dummy trigger for picoscope
 %on: Ryd420Trg % scan to get Rabi
 %t += Ryd_pi2_us/1000
@@ -158,37 +150,85 @@ t += 0.35/1000
 %off: Ryd420Trg
 %off: do8_4 
 %
-%t += 0.95/1000
+%t += 0.90/1000
 %t += 0.35/1000
 %%%%% Ryd Ramsey %%%%%%
 
-%%%%%% Ryd pi wait Rydb pi lifetime %%%%%%
-%var Ryd_pi_us 0.10
-%var Ryd_lifetime_t_total_us 7.4
-%t += Ryd_lifetime_t_total_us/1000
-%t += -(Ryd_lifetime_t_total_us/2+Ryd_pi_us+time_scan_us/2)/1000
+%%%%%%% Ryd pi wait Rydb pi lifetime %%%%%%
+%var Ryd_pi_us 0.11
+%%var Ryd_lifetime_t_total_us 12.4
+%t += (time_scan_us+1.4)/1000
+%t += -((time_scan_us+1.4)/2+Ryd_pi_us+time_scan_us/2)/1000
 %
-%t += 0.35/1000
-%t += -0.95/1000 %time for 420 AOM to turn since the beam is quite far away from the AOM actuator
-%pulseon: Ryd1013Mako 10/1000
+%%t += 0.35/1000
+%t += -0.9/1000 %time for 420 AOM to turn since the beam is quite far away from the AOM actuator
+%%pulseon: Ryd1013Mako 10/1000
 %on: do8_4 %dummy trigger for picoscope
 %on: Ryd420Trg % scan to get Rabi
 %t += Ryd_pi_us/1000
 %off: Ryd420Trg
 %off: do8_4 
+%
+%
+%t += 1.5/1000
+%on: SLMTweezerTrg
+%t += -1.5/1000
 %
 %t += time_scan_us/1000
 %
+%t += 0.4/1000
+%off: SLMTweezerTrg
+%t += -0.4/1000
+%
+%
 %on: do8_4 %dummy trigger for picoscope
 %on: Ryd420Trg % scan to get Rabi
 %t += Ryd_pi_us/1000
 %off: Ryd420Trg
 %off: do8_4 
 %
-%t += 0.35/1000
-%t += 0.95/1000 %time for 420 AOM to turn since the beam is quite far away from the AOM actuator
+%%t += 0.35/1000
+%t += 0.9/1000 %time for 420 AOM to turn since the beam is quite far away from the AOM actuator
+%t += ((time_scan_us+1.4)/2-Ryd_pi_us-time_scan_us/2)/1000
+%%%%%%% Ryd pi wait Rydb pi lifetime %%%%%%
+
+%%%%%%% Ryd pi wait Rydb pi lifetime %%%%%%
+%var Ryd_pi_us 0.10
+%var Ryd_lifetime_t_total_us 12.4
+%t += Ryd_lifetime_t_total_us/1000
+%t += -(Ryd_lifetime_t_total_us/2+Ryd_pi_us+time_scan_us/2)/1000
+%
+%%t += 0.35/1000
+%t += -0.9/1000 %time for 420 AOM to turn since the beam is quite far away from the AOM actuator
+%%pulseon: Ryd1013Mako 10/1000
+%on: do8_4 %dummy trigger for picoscope
+%on: Ryd420Trg % scan to get Rabi
+%t += Ryd_pi_us/1000
+%off: Ryd420Trg
+%off: do8_4 
+%
+%
+%t += 1.5/1000
+%on: SLMTweezerTrg
+%t += -1.5/1000
+%
+%t += time_scan_us/1000
+%
+%t += 0.4/1000
+%off: SLMTweezerTrg
+%t += -0.4/1000
+%
+%
+%on: do8_4 %dummy trigger for picoscope
+%on: Ryd420Trg % scan to get Rabi
+%t += Ryd_pi_us/1000
+%off: Ryd420Trg
+%off: do8_4 
+%
+%%t += 0.35/1000
+%t += 0.9/1000 %time for 420 AOM to turn since the beam is quite far away from the AOM actuator
 %t += (Ryd_lifetime_t_total_us/2-Ryd_pi_us-time_scan_us/2)/1000
-%%%%%% Ryd pi wait Rydb pi lifetime %%%%%%
+%%%%%%% Ryd pi wait Rydb pi lifetime %%%%%%
 %%%%%% Ryd pi MW Rydb pi %%%%%%
 %var Ryd_pi_us 0.06
 %var Ryd_lifetime_t_total_us 6.4
@@ -235,7 +275,7 @@ on: MWAmpTrg
 on: SiglentTrg
 t += -1/1000
 
-on: SLMTweezerTrg
+on: TweezerTrg
 
 t += 0.01
 off: MWAmpTrg
@@ -244,9 +284,8 @@ off: do8_4
 t += -0.01
 
 %t += -0.1
-off: SLMTweezerHold
-t += 0.1
-dacramp: SLMTweezerIntensity slm_twz_intensity*0.02 slm_twz_intensity 10.08 %0.15
+off: TweezerHold
+dacramp: TweezerIntensity twz_intensity*0.15 twz_intensity 10.08
 t += 10.08
 %t += 0.1
 

@@ -1,0 +1,8 @@
+% Each row is for an atom, the col number should be even and is arranged as x y x y ... 
+4 11 5 11 4 10
+17 11 16 11 17 12
+30 11 29 11 30 12
+42 11 43 11 42 12
+55 11 56 11 55 12
+68 11 67 11 68 12
+81 11 80 11 81 12

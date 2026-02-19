@@ -1,0 +1,21 @@
+% set DAC, channel, amp, freq, phase
+set DAC0 0  59.10 86.50000+frequency_scan  25.70
+set DAC0 1  59.10 86.50000+frequency_scan  25.70
+set DAC0 2  68.97 89.50000+frequency_scan 102.90
+set DAC0 3  68.97 89.50000+frequency_scan 102.90
+set DAC0 4  71.68 92.50000+frequency_scan 231.40
+set DAC0 5  71.68 92.50000+frequency_scan 231.40
+set DAC0 6  67.28 95.50000+frequency_scan  51.40
+set DAC0 7  67.28 95.50000+frequency_scan  51.40
+set DAC0 8  63.46 98.50000+frequency_scan 282.90
+set DAC0 9  63.46 98.50000+frequency_scan 282.90
+set DAC0 10  69.05 101.50000+frequency_scan 205.70
+set DAC0 11  69.05 101.50000+frequency_scan 205.70
+set DAC0 12  87.12 104.50000+frequency_scan 180.00
+set DAC0 13  87.12 104.50000+frequency_scan 180.00
+
+set DAC1 0  78.00 93.90000+frequency_scan_2 180.00
+set DAC1 1  78.00 93.90000+frequency_scan_2 180.00
+set DAC1 2  78.00 93.90000+frequency_scan_2 180.00
+set DAC1 3  78.00 93.90000+frequency_scan_2 180.00
+set DAC1 4  78.00 93.90000+frequency_scan_2 180.00

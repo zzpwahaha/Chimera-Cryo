@@ -23,36 +23,11 @@ call PGCTweezerImaging()
 
 t += 5
 
-%%%%%%%%%%%%%%%% large field LGM %%%%%%%%%%%%%%%%
-t += 10
-    off: xyzMOTShutter
-    on: D1LGMPrbShutter
-    off: D1LGMShutter
-    on: D1LGMEOMTrg
-    dac: D1LGMEOMAmp 0 %amplitude_scan %d1lgmprb_twz_rep_amp
-    dac: D1LGMAmp {3 d1lgm_prb_pwr} % amplitude_scan%d1lgmprb_twz_cool_amp
-    ol: ol_D1LGM D1_LGMCooling_resonance-150 %resonance_scan %d1lgm_twz_olcool
-    ol: ol_D1_repump Rb87_HFSplitting+4.5 %resonance_scan %d1lgm_twz_olrepump
-
-    dac: BiasCoilX pgc_twz_bias_x
-    dac: BiasCoilY -5 %pgc_twz_bias_y=-4.5
-    dac: BiasCoilZ pgc_twz_bias_z %pgc_twz_bias_z
-    t += t_shutter
-
-    on: D1LGMTrg
-    t += 25 %time_scan %t_lgm_cool_time 
-    pulseon: DO1_0 1
-    off: D1LGMTrg
-    off: D1LGMEOMTrg
-    off: D1LGMShutter
-    off: D1LGMPrbShutter
-%%%%%%%%%%%%%%%% large field LGM %%%%%%%%%%%%%%%%
-
 call setQuantizationField()
-dacramp: SLMTweezerIntensity slm_twz_intensity slm_twz_intensity*0.02 10
+dacramp: SLMTweezerIntensity slm_twz_intensity slm_twz_intensity*0.15 10
 t += 10
 t += t_field_settling-20
-dacramp: SLMTweezerIntensity slm_twz_intensity*0.02 slm_twz_intensity 10
+dacramp: SLMTweezerIntensity slm_twz_intensity*0.15 slm_twz_intensity 10
 t += 10
 
 call OpticalPumping22()
@@ -80,7 +55,7 @@ t += 5
 %on: Ryd420Shutter
 off: Ryd420ExpShutter
 %on: Ryd1013Shutter
-on: ryd420RFSourceSwitch
+off: ryd420RFSourceSwitch
 off: ryd420AWGShapedChSwitch
 
 dac: Ryd420Amp ryd420_amplitude %0.11 %0.11 %0.05 %0.2 %amplitude_scan %0.8 %0.1 %0.55 %0.30 %0.34
@@ -93,9 +68,9 @@ pulseon: MWTrg 0.4
 t += 1
 
 %%%%%%%%%%%%%%  Trap ramp for Rydberg  %%%%%%%%%%%%%%%%%%
-dacramp: SLMTweezerIntensity slm_twz_intensity slm_twz_intensity*0.02 10 %0.15
+dacramp: SLMTweezerIntensity slm_twz_intensity slm_twz_intensity*0.15 10
 t += 10
-%%%%% 420 sample and hold %%%%
+%%%% 420 sample and hold %%%%
 t += -10
 on: Ryd420Trg
 t += 3.0
@@ -105,8 +80,8 @@ off: Ryd420Trg
 t += 0.1
 on: Ryd420ExpShutter
 t += 10-3-1-0.1
-%%%%% 420 sample and hold %%%%
-%%% 1013 sample and hold %%%%
+%%%% 420 sample and hold %%%%
+%%%% 1013 sample and hold %%%%
 t += -10
 on: Ryd1013Trg
 t += 1
@@ -116,14 +91,13 @@ t += 1
 t += 0.1
 %off: Ryd1013Trg
 t += 10-1-1-0.1
-%%% 1013 sample and hold %%%%
+%%%% 1013 sample and hold %%%%
 
-on: ryd420RFSourceSwitch
+off: ryd420RFSourceSwitch
 t += 0.4
 on: SLMTweezerHold
 t += 0.101
 off: SLMTweezerTrg
-
 
 %%% Ryd Rabi %%%%%%
 t += 0.35/1000
@@ -245,8 +219,7 @@ t += -0.01
 
 %t += -0.1
 off: SLMTweezerHold
-t += 0.1
-dacramp: SLMTweezerIntensity slm_twz_intensity*0.02 slm_twz_intensity 10.08 %0.15
+dacramp: SLMTweezerIntensity slm_twz_intensity*0.15 slm_twz_intensity 10.08
 t += 10.08
 %t += 0.1
 

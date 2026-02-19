@@ -13,6 +13,6 @@ def PrepareF1Manifold():
     t += t_shutter
 
     on: PrbTrg
-    t += 0.05 
+    t += 0.5 %0.05 
     off: PrbTrg
     off: PrbRepTrg

@@ -264,6 +264,45 @@ if __name__=='__main__':
     # _raw_move_EOM_resonance(exp, start_freq=530.49 ,end_freq=530.49-36.094/2, step=0.25, channel=0)
     # _raw_move_EOM_resonance(exp, start_freq=530.49-36.094/2,end_freq=530.49, step=0.25, channel=0)
 
+    # _raw_move_EOM_resonance(exp, start_freq=578.72,end_freq=530-12/2, step=0.25, channel=0)
+    # _raw_move_EOM_resonance(exp, start_freq=530-12/2,end_freq=530-12/2+8.36, step=0.25, channel=0)
+    # _raw_move_EOM_resonance(exp, start_freq=530-12/2+8.36,end_freq=530-12/2, step=0.25, channel=0)
+    # _raw_move_EOM_resonance(exp, start_freq=530.47-36/2,end_freq=530.47, step=0.25, channel=0)
+    # _raw_move_EOM_resonance(exp, start_freq=530.47,end_freq=530.47-36/2, step=0.25, channel=0)
+    # _raw_move_EOM_resonance(exp, start_freq=535,end_freq=525, step=0.25, channel=0)
+    # _raw_move_EOM_resonance(exp, start_freq=530,end_freq=525+2.535, step=0.25, channel=0)
+    # _raw_move_EOM_resonance(exp, start_freq=527.5,end_freq=525, step=0.25, channel=0)
+    # _raw_move_EOM_resonance(exp, start_freq=530,end_freq=527.346, step=0.25, channel=0)
+
+
+
+    # _raw_move_EOM_resonance(exp, start_freq=530.47,end_freq=542-20/2, step=0.25, channel=0)
+    # _raw_move_EOM_resonance(exp, start_freq=542-20/2,end_freq=542+20/2, step=0.25, channel=0)
+    # _raw_move_EOM_resonance(exp, start_freq=542+20/2,end_freq=542+20/2+3-14/2, step=0.25, channel=0)
+    # _raw_move_EOM_resonance(exp, start_freq=548-14/2-9,end_freq=555.14, step=0.25, channel=0)
+    # _raw_move_EOM_resonance(exp, start_freq=555,end_freq=555-10, step=0.25, channel=0)
+    # _raw_move_EOM_resonance(exp, start_freq=565,end_freq=554.97, step=0.25, channel=0)
+    # _raw_move_EOM_resonance(exp, start_freq=554.97,end_freq=554.97-30/2, step=0.25, channel=0)
+    # _raw_move_EOM_resonance(exp, start_freq=565,end_freq=554.9, step=0.25, channel=0)
+    # _raw_move_EOM_resonance(exp, start_freq=540,end_freq=555-10/2, step=0.25, channel=0)
+    # _raw_move_EOM_resonance(exp, start_freq=555-10/2,end_freq=555.149, step=0.25, channel=0)
+
+
+    # _raw_move_EOM_resonance(exp, start_freq=554.97,end_freq=579-14/2, step=0.25, channel=0)
+    # _raw_move_EOM_resonance(exp, start_freq=572,end_freq=579.09, step=0.25, channel=0)
+    # _raw_move_EOM_resonance(exp, start_freq=579.09,end_freq=579.09-36/2, step=0.25, channel=0)
+    # _raw_move_EOM_resonance(exp, start_freq=555.149,end_freq=579-10/2, step=0.25, channel=0)
+    # _raw_move_EOM_resonance(exp, start_freq=579+10/2,end_freq=579-5+4.9, step=0.25, channel=0)
+    # _raw_move_EOM_resonance(exp, start_freq=579,end_freq=579-10/2, step=0.25, channel=0)
+    # _raw_move_EOM_resonance(exp, start_freq=579+10/2,end_freq=579-5+4.33, step=0.25, channel=0)
+    # _raw_move_EOM_resonance(exp, start_freq=579-5+3.5,end_freq=579-10/2, step=0.25, channel=0)
+    # _raw_move_EOM_resonance(exp, start_freq=579,end_freq=579-3/2, step=0.25, channel=0)
+    # _raw_move_EOM_resonance(exp, start_freq=579+3/2,end_freq=579-3/2-4/2, step=0.25, channel=0)
+    # _raw_move_EOM_resonance(exp, start_freq=577,end_freq=577-3/2, step=0.25, channel=0)
+    # _raw_move_EOM_resonance(exp, start_freq=575+4,end_freq=575+1.933, step=0.25, channel=0)
+
+    # _raw_move_EOM_resonance(exp, start_freq=198.845,end_freq=198.845+20, step=0.5, channel=0)
+    # _raw_move_EOM_resonance(exp, start_freq=198.845+20,end_freq=198.845, step=0.5, channel=0)
 
 
     # _raw_move_EOM_resonance(exp, start_freq=530.83,end_freq=583, step=0.25, channel=0)
@@ -286,7 +325,7 @@ if __name__=='__main__':
     # _raw_move_EOM_resonance(exp, start_freq=578+10/2,end_freq=578.55, step=0.25, channel=0)
     # _raw_move_EOM_resonance(exp, start_freq=583,end_freq=578-10/2+5.16, step=0.25, channel=0)
 
-    _raw_move_EOM_resonance(exp, start_freq=578.72-36/2,end_freq=578.72, step=0.25, channel=0)
+    # _raw_move_EOM_resonance(exp, start_freq=578.72-36/2,end_freq=578.72, step=0.25, channel=0)
 
 
     # _raw_move_EOM_resonance(exp, start_freq=530.+16/2 ,end_freq=530.-16/2+7.718, step=0.25, channel=0)
@@ -295,6 +334,15 @@ if __name__=='__main__':
     # _raw_move_EOM_resonance(exp, start_freq= 152.45,end_freq=152.45+20, step=0.25, channel=0)
     # _raw_move_EOM_resonance(exp, start_freq= 152.45+20,end_freq=152.45, step=0.25, channel=0)
 
+    # _raw_move_EOM_resonance(exp, start_freq=577-20,end_freq=577, step=0.25, channel=0)
+    # _raw_move_EOM_resonance(exp, start_freq=577+5,end_freq=582-10, step=0.25, channel=0)
+    # _raw_move_EOM_resonance(exp, start_freq=582+10,end_freq=584.68, step=0.25, channel=0)
+    # _raw_move_EOM_resonance(exp, start_freq=584.68,end_freq=580, step=0.25, channel=0)
+    # _raw_move_EOM_resonance(exp, start_freq=586.5-4.5,end_freq=584.672, step=0.25, channel=0)
+    _raw_move_EOM_resonance(exp, start_freq=588,end_freq=582+2.661, step=0.25, channel=0)
 
+
+
+    #   _raw_move_EOM_resonance(exp, start_freq=120,end_freq=140, step=0.25, channel=1)
     #   _raw_move_EOM_resonance(exp, start_freq=140,end_freq=120, step=0.25, channel=1)
 

@@ -310,10 +310,10 @@ t += 10
 t += 10
 %call setZeroField()
 
-    dac: BiasCoilX pgc_twz_bias_x
-    dac: BiasCoilY pgc_twz_bias_y 
-    dac: BiasCoilZ pgc_twz_bias_z
-t += 100
+%    dac: BiasCoilX pgc_twz_bias_x
+%    dac: BiasCoilY pgc_twz_bias_y 
+%    dac: BiasCoilZ pgc_twz_bias_z
+%t += 100
 %%%%%%%%%%%%%%  PGC in Tweezer %%%%%%%%%%%%%%%%%%
 % change the field/laser freq parameter here because the previous section is TOF and no light is on
 call D2InTrapPGCPrb(t_pgc_twz)

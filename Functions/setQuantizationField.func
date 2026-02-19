@@ -16,7 +16,7 @@ def setQuantizationField():
 %dac: BiasCoilZ -0.0510
 
 % warm bias field 3.5 G 
-dac: BiasCoilX -2.5+0.75 
+dac: BiasCoilX -2.5+0.75
 dac: BiasCoilY -0.835
 dac: BiasCoilZ -0.0464 
 

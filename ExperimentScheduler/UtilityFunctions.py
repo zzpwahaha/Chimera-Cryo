@@ -256,15 +256,34 @@ if __name__ == '__main__':
     # tweezer_intensity_setpoint = 2.9 # 3.75 V for AOD
     # repetitions = 4
 
-    grid_file_name = 'atomgrid_5x20_6points_20260129_SLM'
-    camera_image_dim = {'Left:':971, 'Right:':1140, 'H-Bin:':1, 'Bottom:': 921, 'Top:': 974, 'V-Bin:': 1}
-    tweezer_intensity_setpoint = 8.7 #8 #6.5 #V
-    repetitions = 4
+    # grid_file_name = 'atomgrid_5x20_6points_20260129_SLM'
+    # camera_image_dim = {'Left:':971, 'Right:':1140, 'H-Bin:':1, 'Bottom:': 921, 'Top:': 974, 'V-Bin:': 1}
+    # tweezer_intensity_setpoint = 8.7 #8 #6.5 #V
+    # repetitions = 4
 
     # grid_file_name = 'atomgrid_1x7_4points_2025-11-2'
-    # camera_image_dim = {'Left:':971, 'Right:':1150, 'H-Bin:':2, 'Bottom:': 925, 'Top:': 964, 'V-Bin:': 2}
+    # camera_image_dim = {'Left:':971, 'Right:':1150, 'H-Bin:':2, 'Bottom:': 927, 'Top:': 966, 'V-Bin:': 2}
     # tweezer_intensity_setpoint = 0.61 #V
     # repetitions = 8
+
+    # grid_file_name = 'atomgrid_1x1_5points_20260105_SLM'
+    # camera_image_dim = {'Left:':1045, 'Right:':1070, 'H-Bin:':1, 'Bottom:': 939, 'Top:': 960, 'V-Bin:': 1}
+    # # tweezer_intensity_setpoint = 0.59 #V for 8 dump tweezer
+    # tweezer_intensity_setpoint = 0.1 #V, for zero dump tweezer
+    # repetitions = 8
+
+
+    # grid_file_name = 'atomgrid_1x4_3points_20260104_SLM'
+    # camera_image_dim = {'Left:':971, 'Right:':1150, 'H-Bin:':2, 'Bottom:': 927, 'Top:': 966, 'V-Bin:': 2}
+    # tweezer_intensity_setpoint = 0.42 #V
+    # repetitions = 8
+
+    grid_file_name = 'atomgrid_1x4_3points_20260104_SLM'
+    camera_image_dim = {'Left:':971, 'Right:':1150, 'H-Bin:':2, 'Bottom:': 927, 'Top:': 966, 'V-Bin:': 2}
+    # tweezer_intensity_setpoint = 0.42 #V for diffraction limited 1x4
+    # tweezer_intensity_setpoint = 1.88 #V for 0.222 NA 1x4
+    tweezer_intensity_setpoint = 2.15 #V for 0.222 NA 1x4
+    repetitions = 8
 
     '''
     # # analysis grid for 2x7 grid - 20250922
@@ -285,16 +304,6 @@ if __name__ == '__main__':
     # binnings = np.linspace(0, 240, 241)
     # analysis_locs = da.DataAnalysis(year='2025', month='September', day='30', data_name='data_19', 
     #                                 window=window, thresholds=thresholds, binnings=binnings)
-
-    # grid_file_name = 'atomgrid_1x4_3points_20260104_SLM'
-    # camera_image_dim = {'Left:':971, 'Right:':1150, 'H-Bin:':2, 'Bottom:': 925, 'Top:': 964, 'V-Bin:': 2}
-    # tweezer_intensity_setpoint = 0.42 #V
-    # repetitions = 8
-
-    # grid_file_name = 'atomgrid_1x1_5points_20260105_SLM'
-    # camera_image_dim = {'Left:':1045, 'Right:':1070, 'H-Bin:':1, 'Bottom:': 939, 'Top:': 960, 'V-Bin:': 1}
-    # tweezer_intensity_setpoint = 0.59 #V
-    # repetitions = 8
 
     # grid_file_name = 'atomgrid_7x11_5points_2025-11-7'
     # camera_image_dim = {'Left:':1026, 'Right:':1090, 'H-Bin:':1, 'Bottom:': 926, 'Top:': 965, 'V-Bin:': 1}
@@ -347,15 +356,21 @@ if __name__ == '__main__':
 
     config_file.save()
 
-    client = EthernetClient(host='10.10.0.14', port=8080)
-    client.connect()
-    if '5x20' in grid_file_name:
-        client.send("Phase-Pattern 5x20_20umx95um_trapBalanceCamera_cameraBalanced_balanced4")
-    if '1x7' in grid_file_name:
-        client.send("Phase-Pattern 1x7_latticeconstant16.5um_trapBalanceCamera_cameraBalanced_balanced2")
-    recv = client.receive()
-    print(recv)
-    client.close()
+    # client = EthernetClient(host='10.10.0.14', port=8080)
+    # client.connect()
+    # # if '5x20' in grid_file_name:
+    # #     client.send("Phase-Pattern 5x20_20umx95um_trapBalanceCamera_cameraBalanced_balanced4")
+    # # if '1x7' in grid_file_name:
+    # #     client.send("Phase-Pattern 1x7_latticeconstant16.5um_trapBalanceCamera_cameraBalanced_balanced2")
+    # # if '1x1' in grid_file_name:
+    # #     # client.send("Phase-Pattern 1x1_with8extrasAt200umCorner_trapBalanceCamera_cameraBalanced")
+    # #     client.send("Phase-Pattern 1x1_with_zeroDumpTweezer")
+    # # if '1x4' in grid_file_name:
+    # #     client.send("Phase-Pattern 1x4_latticeconstant33um_trapBalanceCamera_cameraBalanced_balanced")
+    # # client.send("Phase-Pattern 1x1_bottle_beam")
+    # # recv = client.receive()
+    # print(recv)
+    # client.close()
 
 
     pass

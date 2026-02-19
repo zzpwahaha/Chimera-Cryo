@@ -1,0 +1,109 @@
+%%%%%%%%%%%%%%%%% Start With 1ms %%%%%%%%%%%%%%%%% 
+t = 1
+%call CryoMOTLoadingPGC()
+%call CryoMOTEnhancedLoadingLGM()
+
+    call MOTLoadingAOD(t_loading)	
+    call FreeSpaceLGMEnhancedLoading()
+
+
+t += -250-200 % 200 ms is for LGM loading/cooling
+% holding the tweezer at amplitude_scan
+dac: SLMTweezerIntensity amplitude_scan %1
+t += 0.5
+on: SLMTweezerTrg
+%pulseon: Mako2 0.01 
+t += 150.2
+on: SLMTweezerHold
+t += 0.1
+off: SLMTweezerTrg
+t += 250+200-0.5-150.2-0.1
+
+
+call TOF(10)
+
+%t += -10
+%dacramp: SLMTweezerIntensity 1.2 slm_twz_intensity 10
+%t += 10
+
+%%%%%%%%%%%%%%  PGC in Tweezer %%%%%%%%%%%%%%%%%%
+% change the field/laser freq parameter here because the previous section is TOF and no light is on
+call D2InTrapPGC(t_pgc_twz)
+% note the t_pgc_twz should be smaller than 100
+t += t_pgc_twz+10
+off: UVLampTrg
+call D2InTrapPGCPrb(t_pgc_twz)
+% note the t_pgc_twz should be smaller than 100
+t += t_pgc_twz+10
+%%%%%%%%%%%%%%  Image TWIZZER  %%%%%%%%%%%%%%%%%%
+% change the field/laser freq parameter here because the previous section is dark, i.e. 100-t_pgc_twz is larger than 4
+call PGCTweezerImaging()
+
+t += 5
+
+call setQuantizationField()
+dacramp: TweezerIntensity twz_intensity twz_intensity*0.15 10
+t += 10
+t += t_field_settling-20
+dacramp: TweezerIntensity twz_intensity*0.15 twz_intensity 10
+t += 10
+
+call OpticalPumping22()
+
+
+%%%%%%%%%%%%%%  Trap ramp for Rydberg  %%%%%%%%%%%%%%%%%%
+dacramp: TweezerIntensity twz_intensity twz_intensity*0.15 10
+t += 10
+
+t += 0.1
+on: TweezerHold
+t += 0.1
+
+on: DO8_4
+off: TweezerTrg
+
+t += 1/1000
+on: SLMTweezerTrg
+
+t += time_scan_us/1000
+
+off: SLMTweezerTrg
+t += 1/1000
+
+on: TweezerTrg
+off: DO8_4
+t += 0.1
+off: TweezerHold
+t += 0.1
+dacramp: TweezerIntensity twz_intensity*0.15 twz_intensity 10.08
+t += 10.08
+%t += 0.1
+
+
+%%%%%%%%%%%%%%  End Rydberg  %%%%%%%%%%%%%%%%%%
+
+
+t += 10
+%call StateSelectivePushout()
+%t += 10
+%call setZeroField()
+
+%    dac: BiasCoilX pgc_twz_bias_x
+%    dac: BiasCoilY pgc_twz_bias_y 
+%    dac: BiasCoilZ pgc_twz_bias_z
+%t += 100
+%%%%%%%%%%%%%%  PGC in Tweezer %%%%%%%%%%%%%%%%%%
+% change the field/laser freq parameter here because the previous section is TOF and no light is on
+call D2InTrapPGCPrb(t_pgc_twz)
+% note the t_pgc_twz should be smaller than 100
+t += 10+t_pgc_twz
+
+%%%%%%%%%%%%%%  Image TWIZZER  %%%%%%%%%%%%%%%%%%
+% change the field/laser freq parameter here because the previous section is dark, i.e. 100-t_pgc_twz is larger than 4
+call PGCTweezerImaging()
+
+t += 10
+call RydbergBeamCameraFootprint()
+
+%%%%%%%%%%%%%%  END Sequence  %%%%%%%%%%%%%%%%%%
+call EndSequence()

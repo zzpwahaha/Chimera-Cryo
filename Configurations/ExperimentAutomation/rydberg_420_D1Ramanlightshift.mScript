@@ -32,41 +32,46 @@ t += 10
 
 %%%%%%%%%%%%%% optical pumping into |2,2> state with 2-2'' OP, 1-2'' probe %%%%%%%%%%%
 call OpticalPumping22()
-t += 1
 
-t += 5
 
 %%%%%%%%%%%%%%% MW %%%%%%%%%%%
 var mw_rabi_pi2 0.0447 %0.041 %0.041 %0.01 %0.0599 %0.0296
 
+%ddsfreq: Ryd420Brimrose ryd420_resonance
+t += 5
+off: Ryd420ExpShutter
+on: ryd420RFSourceSwitch
+off: ryd420AWGShapedChSwitch
+dac: Ryd420Amp amplitude_scan %0.2 %0.01 %0.05 %0.34
+
+t += 1
+
 dacramp: SLMTweezerIntensity slm_twz_intensity slm_twz_intensity*0.2 10
 t += 10
-
 %%%% 420 sample and hold %%%%
-t += -15
-dac: Ryd420Amp amplitude_scan %0.2 %0.01 %0.05 %0.34
+t += -10
 on: Ryd420Trg
-t += 4.0
+t += 3.0
 on: Ryd420Hold
-t += 4.0
+t += 1.0
 off: Ryd420Trg
 t += 0.1
 on: Ryd420ExpShutter
-t += 15-(4+4+0.1)
+t += 10-(3+1+0.1)
 %%%% 420 sample and hold %%%%
 %%%% D1 state transfer sample and hold %%%%
-t += -15
+t += -10
 %dac: D1StateTransferAmp -1.0/25 % for EIT
 dac: D1StateTransferAmp -1.0
 off: D1StateTransferShutter 
-t += 4
+t += 3
 on: D1StateTransferTrg
-t += 4
+t += 1
 on: D1StateTransferHold
 t += 0.1
 off: D1StateTransferTrg
 on: D1StateTransferShutter 
-t += 15-(4+4+0.1)
+t += 10-(3+1+0.1)
 %%%% D1 state transfer sample and hold %%%%
 
 t += 0.5
