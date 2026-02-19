@@ -41,12 +41,14 @@ const arbGenSettings UWAVE_AGILENT_SETTINGS = {
 	// Calibration coefficients (arb length)
 	{ },
 	{ "output1 off", "output2 off",
-	"TRIG:SOURCE EXT", /*"Trigger1:Source external",*/ "Trigger1:Slope Negative",
 	"Source1:burst:state off",  "Source2:burst:state off",
-	"output1:load INF", "output2:load INF", 
-	"SOURCE1:FUNC:ARB:FILTER Normal", "SOURCE2:FUNC:ARB:FILTER Normal"/*,
-	"SOURCE1:FUNC:ARB:ADV TRIG", "SOURCE2:FUNC:ARB:ADV TRIG"*/,
+	"output1:load INF", "output2:load INF",
 	"SOURce1:APPLy:DC DEF, DEF,0 V", "SOURce2:APPLy:DC DEF, DEF,0 V",
+	//"TRIG:SOUR EXT", 
+	"TRIGger1:SOURce EXTernal", "TRIGger1:SLOPe NEGative", // NEED TO BE AFTER APPLY!!!
+	"TRIGger2:SOURce EXTernal", "TRIGger2:SLOPe NEGative",
+	"SOURce1:FUNCtion:ARBitrary:ADVance SRATe", "SOURCE1:FUNC:ARB:FILTER Normal",
+	"SOURce2:FUNCtion:ARBitrary:ADVance SRATe", "SOURCE2:FUNC:ARB:FILTER Normal",
 	"output1 on", "output2 on",}
 };
 
