@@ -154,7 +154,6 @@ void AgilentCore::prepArbGenSettings(unsigned channel){
  */
 void AgilentCore::setScriptOutput (unsigned varNum, scriptedArbInfo scriptInfo, unsigned chan){
 	if (scriptInfo.wave.isVaried () || varNum == 0){
-		prepArbGenSettings(chan);
 		// check if effectively dc
 		if (scriptInfo.wave.minsAndMaxes.size () == 0){
 			thrower ("script wave min max size is zero???");
@@ -169,6 +168,7 @@ void AgilentCore::setScriptOutput (unsigned varNum, scriptedArbInfo scriptInfo, 
 			setDC (chan, tempDc, 0);
 		}
 		else{
+			outputOff(chan);
 			auto schan = "SOURCE" + str (chan);
 			// Load sequence that was previously loaded.
 			visaFlume.write ("MMEM:LOAD:DATA" + str (chan) + " \"" + memoryLoc + ":\\sequence" + str (varNum) + ".seq\"");
@@ -179,7 +179,8 @@ void AgilentCore::setScriptOutput (unsigned varNum, scriptedArbInfo scriptInfo, 
 			visaFlume.write (schan + ":VOLT:OFFSET " + str ((minMaxs.first + minMaxs.second) / 2) + " V");
 			visaFlume.write (schan + ":VOLT:LOW " + str (minMaxs.first) + " V");
 			visaFlume.write (schan + ":VOLT:HIGH " + str (minMaxs.second) + " V");
-			//visaFlume.write ("OUTPUT" + str (chan) + " ON");
+			prepArbGenSettings(chan);
+			visaFlume.write("TRIGger" + str(chan) + ":SOURce EXTernal");
 			outputOn(chan);
 		}
 	}
@@ -235,6 +236,7 @@ void AgilentCore::setDC (int channel, dcInfo info, unsigned var){
 	try {
 		visaFlume.write ("SOURce" + str (channel) + ":APPLy:DC DEF, DEF, "
 			+ str (convertPowerToSetPoint (info.dcLevel.getValue (var), info.useCal, calibrations[channel - 1])) + " V");
+		visaFlume.write("TRIGGER" + str(channel) + ":SOURCE EXTERNAL");
 		outputOn(channel);
 	}
 	catch (ChimeraError&) {
@@ -287,6 +289,7 @@ void AgilentCore::setSquare (int channel, squareInfo info, unsigned var){
 			+ str (convertPowerToSetPoint (info.offset.getValue (var), info.useCal, calibrations[channel - 1])) + " V");
 		visaFlume.write("SOURCE" + str(channel) + ":FUNCTION:SQUARE:DCYCLE " + str(info.dutyCycle.getValue(var)));
 		visaFlume.write("SOURCE" + str(channel) + ":PHASE " + str(info.phase.getValue(var)) + " DEG");
+		visaFlume.write("TRIGGER" + str(channel) + ":SOURCE EXTERNAL");
 		if (info.burstMode) {
 			visaFlume.write("SOURCE" + str(channel) + ":BURST:MODE GATED");
 			visaFlume.write("SOURCE" + str(channel) + ":BURST:GATE:POLARITY NORMAL");
@@ -311,6 +314,7 @@ void AgilentCore::setSine (int channel, sineInfo info, unsigned var){
 		visaFlume.write ("SOURCE" + str (channel) + ":APPLY:SINUSOID " + str (info.frequency.getValue(var)) + " KHZ, "
 			+ str (convertPowerToSetPoint (info.amplitude.getValue(var), info.useCal, calibrations[channel - 1])) + " VPP");
 		visaFlume.write("SOURCE" + str(channel) + ":PHASE " + str(info.phase.getValue(var)) + " DEG");
+		visaFlume.write("TRIGGER" + str(channel) + ":SOURCE EXTERNAL");
 		if (info.burstMode) {
 			visaFlume.write(sStr + ":BURST:MODE GATED");
 			visaFlume.write(sStr + ":BURST:GATE:POLARITY NORMAL");
@@ -369,6 +373,7 @@ void AgilentCore::setDefault (int channel){
 		// turn it to the default voltage...
 		std::string setPointString = str (convertPowerToSetPoint (AGILENT_DEFAULT_POWER, true, calibrations[channel - 1]));
 		visaFlume.write ("SOURce" + str (channel) + ":APPLy:DC DEF, DEF, " + setPointString + " V");
+		visaFlume.write("TRIGGER" + str(channel) + ":SOURCE EXTERNAL");
 		outputOff(channel);
 	}
 	catch (ChimeraError &) {
