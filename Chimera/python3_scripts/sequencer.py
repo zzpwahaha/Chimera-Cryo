@@ -62,6 +62,7 @@ class DDS_ftw_seq_point:
     self.chan = chan
 
 class sequencer:
+	DEBUG_PRINT = False
 	def __init__(self):
 		self.dacRes = 65535 #0xffff
 		self.dacRange = [-10, 10]
@@ -254,13 +255,13 @@ class sequencer:
 			print('MOD is not in valid state, a low level bug')
 
 	def dac_seq_write_points(self, byte_len, byte_buf, num_snapshots):
-		print('DAC points')
+		if sequencer.DEBUG_PRINT: print('DAC points')
 		points0 = []
 		points1 = []
 		for ii in range(num_snapshots):
 			# t is in 10ns, s is in V, end is in V, duration is in 10ns
 			[t, chan, s, end, duration] = self.dac_read_point(byte_buf[ii*byte_len: ii*byte_len + byte_len])
-			print('time',t,'channel', chan,'start', s,'end', end,'duration', duration)
+			if sequencer.DEBUG_PRINT: print('time',t,'channel', chan,'start', s,'end', end,'duration', duration)
 			num_steps = int(duration/self.dacRampTimeRes + 0.5)
 			# num_steps = int(duration * self.accUpdateFreq) # duration is in us and accUpdateFreq is in MHz
 			if (num_steps < 1):
@@ -272,7 +273,7 @@ class sequencer:
 				# print(s, end, num_steps, ramp_inc)
 			if (end<s and ramp_inc != 0):
 				ramp_inc = int(self.dacIncrMax  + 1 - ramp_inc)
-			print('time',t,'channel', chan,'start', s,'end', end,'duration', duration, 'num_step',num_steps, 'ramp_inc: ', ramp_inc)
+			if sequencer.DEBUG_PRINT: print('time',t,'channel', chan,'start', s,'end', end,'duration', duration, 'num_step',num_steps, 'ramp_inc: ', ramp_inc)
 			t = int(t/self.dacRampTimeRes + 0.5) * self.dacRampTimeRes + (chan%16)
 			if (chan < 16):
 				points0.append(DAC_seq_point(address=len(points0),time=t,start=s,incr=ramp_inc,chan=chan,clr_incr=clr_incr))
@@ -284,7 +285,7 @@ class sequencer:
 			points1.append(DAC_seq_point(address=len(points1), time=0,  start=0,incr=0,chan=0,clr_incr=0))
 
 		for point in points0:
-			print('DAC_seq_point(',
+			if sequencer.DEBUG_PRINT: print('DAC_seq_point(',
 			'address=', point.address,
 			', time = ', point.time,
 			',start =', point.start,
@@ -294,7 +295,7 @@ class sequencer:
 			self.write_dac_point(self.fifo_dac0_seq, point)
 
 		for point in points1:
-			print('DAC_seq_point(',
+			if sequencer.DEBUG_PRINT: print('DAC_seq_point(',
 			'address=', point.address,
 			', time = ', point.time,
 			',start =', point.start,
@@ -323,7 +324,7 @@ class sequencer:
 				ramp_inc = int((end - s)*1.0 / num_steps * 4096) 
 				# * 1.0 just to avoid zero if end-s < num_steps(this is not true in python3, but in python2 int(2)/int(3)=0), 
 				# 4096=0xfff+1 comes from the 12bit accumulator 
-			print('time',t,'channel', channel, aorf,'start', s,'end', end,'duration', duration, 'num_step',num_steps, 'ramp_inc: ', ramp_inc)
+			if sequencer.DEBUG_PRINT: print('time',t,'channel', channel, aorf,'start', s,'end', end,'duration', duration, 'num_step',num_steps, 'ramp_inc: ', ramp_inc)
 			if (aorf == b'f'):
 				if (ramp_inc < 0):
 					# ramp_inc = int(self.ddsFreqRangeConv + ramp_inc)
@@ -405,7 +406,7 @@ class sequencer:
 		  self.write_ftw_point(self.fifo_dds_ftw_seq, point)
 
 	def dio_seq_write_points(self, byte_len, byte_buf, num_snapshots):
-		print('DIO points')
+		if sequencer.DEBUG_PRINT: print('DIO points')
 		points=[]
 		for ii in range(num_snapshots):
 			[t, outA, outB] = self.dio_read_point(byte_buf[ii*byte_len: ii*byte_len + byte_len])
@@ -417,7 +418,7 @@ class sequencer:
 		for point in points:
 				# writeToSeqGPIO(character, point)
 			seqWords = getSeqGPIOWords(point)
-			print('GPIO_seq_point(address = ',point.address,
+			if sequencer.DEBUG_PRINT: print('GPIO_seq_point(address = ',point.address,
 				  ',time=',point.time,
 				  ',outputA = ',"{0:#0{1}x}".format(point.outputA,8+2),
 				  ',outputB = ',"{0:#0{1}x}".format(point.outputB,8+2), ')')
@@ -426,7 +427,7 @@ class sequencer:
 				self.fifo_dio_seq.write_axis_fifo(word[0], MSB_first=False)
 
 	def dio_read_point(self, snapshot):
-		print(snapshot)
+		if sequencer.DEBUG_PRINT: print(snapshot)
 		snapshot_split = snapshot.split(b'_')
 		t = int(snapshot_split[0].strip(b't'), 16)
 		out = snapshot_split[1].strip(b'b').strip(b'\0')
@@ -435,7 +436,7 @@ class sequencer:
 		return [t, outA, outB]
 
 	def dac_read_point(self, snapshot):
-		print(snapshot)
+		if sequencer.DEBUG_PRINT: print(snapshot)
 		snapshot_split = snapshot.split(b'_')
 		t = int(snapshot_split[0].strip(b't'), 16)
 		chan = int(snapshot_split[1].strip(b'c'), 16)
@@ -447,7 +448,7 @@ class sequencer:
 		return [t, chan, start, end, duration]
 
 	def dds_read_point(self, snapshot):
-		print(snapshot)
+		if sequencer.DEBUG_PRINT: print(snapshot)
 		snapshot_split = snapshot.split(b'_')
 		t = int(snapshot_split[0].strip(b't'), 16)
 		chan = int(snapshot_split[1].strip(b'c'), 16)

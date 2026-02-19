@@ -20,6 +20,7 @@ import dds_lock_pll
 from dac81416 import DAC81416
 
 class zynq_tcp_server:
+	DEBUG_PRINT = False
 	def __init__(self):
 		self.seq = sequencer.sequencer()
 		self.dioByteLen = 28
@@ -54,7 +55,7 @@ class zynq_tcp_server:
 					while True:
 						data = connection.recv(64).decode('utf-8')
 						print('------------------------------------------------------------')
-						print('received "%s"' % data)
+						if zynq_tcp_server.DEBUG_PRINT: print('received "%s"' % data)
 						# print(len(data))
 						if data=='QUIT':
 							print('QUIT')
@@ -124,8 +125,8 @@ class zynq_tcp_server:
 		byte_buf = self.socket_read(conn, self.dioByteLen*num_snapshots)#.decode('utf-8') #each byte buffer snapshot consists of 3 sets of 4 bytes
 		# print hex(ord(byte_buf[0]))
 		for ii in range(num_snapshots):
-			print('\n', 'snapshot', ii)
-			print(byte_buf[ii*self.dioByteLen: ii*self.dioByteLen + self.dioByteLen])
+			if zynq_tcp_server.DEBUG_PRINT: print('\n', 'snapshot', ii)
+			if zynq_tcp_server.DEBUG_PRINT: print(byte_buf[ii*self.dioByteLen: ii*self.dioByteLen + self.dioByteLen])
 		self.seq.dio_seq_write_points(self.dioByteLen, byte_buf, num_snapshots)
 
 	def writeDACseq(self, conn, data_split):
@@ -133,8 +134,8 @@ class zynq_tcp_server:
 		print('num_snapshots = ', num_snapshots)
 		byte_buf = self.socket_read(conn, self.dacByteLen*num_snapshots)
 		for ii in range(num_snapshots):
-			print('\n', 'snapshot', ii)
-			print(byte_buf[ii*self.dacByteLen: ii*self.dacByteLen + self.dacByteLen])
+			if zynq_tcp_server.DEBUG_PRINT: print('\n', 'snapshot', ii)
+			if zynq_tcp_server.DEBUG_PRINT: print(byte_buf[ii*self.dacByteLen: ii*self.dacByteLen + self.dacByteLen])
 		self.seq.dac_seq_write_points(self.dacByteLen, byte_buf, num_snapshots)
 
 	def writeDDSseq(self, conn, data_split):
@@ -142,10 +143,10 @@ class zynq_tcp_server:
 		print('num_snapshots = ', num_snapshots)
 		byte_buf = self.socket_read(conn, self.ddsByteLen*num_snapshots)
 		for ii in range(num_snapshots):
-			print('\n', 'snapshot', ii)
-			print(byte_buf[ii*self.ddsByteLen: ii*self.ddsByteLen + self.ddsByteLen])
-		print("self.ddsByteLen = ", self.ddsByteLen)
-		print("byte_buf = ", byte_buf)
+			if zynq_tcp_server.DEBUG_PRINT: print('\n', 'snapshot', ii)
+			if zynq_tcp_server.DEBUG_PRINT: print(byte_buf[ii*self.ddsByteLen: ii*self.ddsByteLen + self.ddsByteLen])
+		if zynq_tcp_server.DEBUG_PRINT: print("self.ddsByteLen = ", self.ddsByteLen)
+		if zynq_tcp_server.DEBUG_PRINT: print("byte_buf = ", byte_buf)
 		self.seq.dds_seq_write_points(self.ddsByteLen, byte_buf, num_snapshots)
 
 	def socket_read(self, conn, expected):
