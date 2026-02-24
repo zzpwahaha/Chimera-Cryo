@@ -35,6 +35,7 @@ void ExpThreadWorker::process ()
  * configuration settings to determine how to program and run the experiment.
  */
 void ExpThreadWorker::experimentThreadProcedure () {
+	flogger.resetTimeStamp();
 	auto startTime = chronoClock::now ();
 	experimentIsRunning = true;
 	emit notification (qstr ("Starting Experiment " + input->profile.configuration + "...\n"));
@@ -93,12 +94,15 @@ void ExpThreadWorker::experimentThreadProcedure () {
 
 			for (const auto& variationInc : range(determineVariationNumber(expRuntime.expParams))) {
 				initVariation(variationInc, expRuntime.expParams);
+				if (debugPrint) { flog << "variation: " << variationInc << fendl; }
 				emit notification("Programming Devices for Variation...#" + qstr(variationInc) + "\n");
 				for (auto& device : input->devices.list) {
 					deviceProgramVariation(device, expRuntime.expParams, variationInc);
+					if (debugPrint) { flog << "\tprogrammed: "<< device.get().getDelim() << fendl; }
 				}
 				emit notification("Running Experiment.\n");
 				for (const auto& repInc : range(expRuntime.repetitions)) {
+					if (debugPrint) { flog << "Reptition: " << repInc << fendl; }
 					inExpCalibrationRun(expRuntime);
 					emit notification(qstr("Starting Repetition #" + qstr(repInc) + "\n"), 2);
 					handlePause(isPaused, isAborting);
@@ -112,14 +116,17 @@ void ExpThreadWorker::experimentThreadProcedure () {
 				" variation first and then repeat it for " + qstr(expRuntime.repetitions) + " repetitions \r\n");
 
 			for (const auto& repInc : range(expRuntime.repetitions)) {
+				if (debugPrint) { flog << "Reptition: " << repInc << fendl; }
 				emit notification(qstr("Starting Repetition #" + qstr(repInc) + "\n"), 0);
 				emit repUpdate(repInc);
 				for (const auto& variationInc : range(determineVariationNumber(expRuntime.expParams))) {
+					if (debugPrint) { flog << "variation: " << variationInc << fendl; }
 					inExpCalibrationRun(expRuntime);
 					emit notification("Programming Devices for Variation...\n", 2);
 					qDebug() << "Programming Devices for Variation"<< variationInc;
 					for (auto& device : input->devices.list) {
 						deviceProgramVariation(device, expRuntime.expParams, variationInc);
+						if (debugPrint) { flog << "\tprogrammed: " << device.get().getDelim() << fendl; }
 					}
 					initVariation(variationInc, expRuntime.expParams);
 					handlePause(isPaused, isAborting);
@@ -1498,19 +1505,28 @@ void ExpThreadWorker::startRep (unsigned repInc, unsigned variationInc, bool ski
 		//emit notification (qstr ("Starting Repetition #" + qstr (repInc) + "\n"), 2);
 		emit repUpdate (repInc + 1);
 		input->zynqExp.sendCommand("initExp");
+		if (debugPrint) { flog << "\tZynq: initExp" << fendl; }
 		Sleep(10);
 		//input->aoSys.resetDacs (variationInc, skip);
 		//input->ttls.ftdi_trigger ();
 		//input->ttls.FtdiWaitTillFinished (variationInc);
 		//input->aoSys.stopDacs();
 		//input->aoSys.configureClocks(variationInc, skip);
+		if (debugPrint) { flog << "\tZynq: start to write DAC,DDS,OL,TTL, slept 10ms from initExp" << fendl; }
 		input->ao.writeDacs(variationInc, skip);
+		if (debugPrint) { flog << "\tZynq: start to write DDS,OL,TTL" << fendl; }
 		input->dds.writeDDSs(variationInc, skip);
+		if (debugPrint) { flog << "\tZynq: start to write OL,TTL" << fendl; }
 		input->ol.writeOLs(variationInc);
+		if (debugPrint) { flog << "\tZynq: start to write TTL" << fendl; }
 		input->ttls.writeTtlDataToFPGA(variationInc, skip);
 		//emit notification("0.1: " + qstr(timer.elapsed()) + "\t");
+		if (debugPrint) { flog << "\tZynq: finished writing DAC,DDS,OL,TTL" << fendl; }
 		Sleep(50); /// have to sleep for this amount of time to make TCP connect smoothly?????? zzp 2021/06/04 very annoying
+		if (debugPrint) { flog << "\tZynq: start to write trigger, slept 50ms from Finished writing DAC,DDS,OL,TTL" << fendl; }
 		input->zynqExp.sendCommand("trigger");
+		if (debugPrint) { flog << "\tZynq: finished trigger" << fendl; }
+
 		//emit notification("0.2: " + qstr(timer.elapsed()) + "\n");
 	}
 }

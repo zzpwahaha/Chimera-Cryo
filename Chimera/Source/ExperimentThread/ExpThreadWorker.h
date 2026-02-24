@@ -132,6 +132,7 @@ class ExpThreadWorker : public QObject
 
     private:
         // add your variables here
+		const bool debugPrint = true;
 		std::unique_ptr< ExperimentThreadInput > input;
 		std::unique_ptr<repeatManager> repeatMgrPtr;
 };
