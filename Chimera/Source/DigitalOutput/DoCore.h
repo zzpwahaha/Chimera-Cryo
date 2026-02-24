@@ -102,6 +102,6 @@ class DoCore
 		std::vector<std::vector<WORD>> finalFormatTtlData, loadSkipFinalFormatTtlData;
 		DOStatus defaultTtlState;
 
-
+		const unsigned maxCommandNum = 1024;
 
 };

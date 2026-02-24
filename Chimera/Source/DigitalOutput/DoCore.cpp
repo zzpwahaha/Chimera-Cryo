@@ -601,6 +601,10 @@ void DoCore::formatForFPGA(UINT variation)
 		doFPGA[variation].push_back(byte_buf);
 		snapIndex++;
 	}
+	if (doFPGA[variation].size() > maxCommandNum) {
+		thrower("DO command number " + str(doFPGA[variation].size()) + " for variation " + str(variation) + " is greater than the maximum DO command that the"
+			"FPGA can accept, which is " + str(maxCommandNum));
+	}
 }
 
 void DoCore::writeTtlDataToFPGA(UINT variation, bool loadSkip) //arguments unused, just paralleling original DIO structure
