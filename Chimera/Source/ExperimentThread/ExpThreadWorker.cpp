@@ -1358,7 +1358,7 @@ void ExpThreadWorker::runConsistencyChecks (std::vector<parameterType> expParams
 
 void ExpThreadWorker::waitForSequenceFinish(double seqTime)
 {
-	const double minimumSleep = 10.0;
+	const double minimumSleep = 30.0; // 10.0;
 	const double maximumSleep = 300.0;
 	const double targetSleep = seqTime * 0.1;
 	double sleepTime = seqTime + minimumSleep;
@@ -1407,7 +1407,7 @@ void ExpThreadWorker::waitForAndorFinish () {
 	Sleep(100);
 	while (true) {
 		if (andorCamera.isRunning()/*andorCamera.queryStatus () == DRV_ACQUIRING*/) {
-			Sleep (100);
+			Sleep (300);
 			emit notification ("Waiting for Andor camera to finish acquisition...\n");
 			if (isAborting) { thrower (abortString); }
 		}
@@ -1421,8 +1421,8 @@ void ExpThreadWorker::errorFinish (std::atomic<bool>& isAborting, ChimeraError& 
 	try {
 		input->zynqExp.sendCommand("resetSeq");
 		Sleep(50);
-		input->zynqExp.sendCommand("resetSeq");
-		Sleep(50);
+		//input->zynqExp.sendCommand("resetSeq");
+		//Sleep(50);
 		input->ttls.FPGAForceOutput(input->ttlSys.getCurrentStatus());
 		Sleep(50);
 		input->aoSys.setDACs();
