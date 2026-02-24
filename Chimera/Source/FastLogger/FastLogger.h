@@ -31,6 +31,7 @@ public:
     template<typename... Args>
     static inline void printf(const char* fmt, Args... args);
     static std::string getCurrentFormattedTime();
+    static void resetTimeStamp();
 
 private:
     static void init(const char* path);
@@ -48,7 +49,11 @@ private:
     static size_t pos;
 
     static void flush();
-
+#if FASTLOG_TS_TSC
+    static void calibrate_tsc();
+    static uint64_t tsc_cycles_per_sec;
+    static uint64_t start_rdtsc;
+#endif
 #if FASTLOG_TIMESTAMP
     static inline void writeTimestamp(bool doFlush = true);
 #endif
