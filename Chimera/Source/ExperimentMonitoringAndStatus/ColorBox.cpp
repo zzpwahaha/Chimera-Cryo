@@ -8,6 +8,11 @@
 ColorBox::ColorBox(IChimeraQtWindow* parent, DeviceList devices) 
 {
 	parent->setStatusBar(this);
+	//QWidget* container = new QWidget(this);
+	//this->addWidget(container);
+	//QVBoxLayout* layout = new QVBoxLayout(container);
+	//layout->setContentsMargins(0, 0, 0, 0);
+	//layout->setSpacing(0);
 
 	auto numCtrls = devices.list.size ()+1;
 	boxes.resize (numCtrls);
@@ -17,7 +22,7 @@ ColorBox::ColorBox(IChimeraQtWindow* parent, DeviceList devices)
 		box.delim = dev.getDelim ();
 		box.ctrl = new QLabel(box.delim.c_str(), parent);
 		this->addWidget(box.ctrl, 0);
-		box.ctrl->setStyleSheet ("QLabel { font: 12pt; }");
+		box.ctrl->setStyleSheet ("QLabel { font: 10pt; }");
 	}
 	//zynqProg =new QProgressBar(parent);
 	//zynqProg->setRange(0, 100);
@@ -39,7 +44,7 @@ ColorBox::ColorBox(IChimeraQtWindow* parent, DeviceList devices)
 	box.ctrl = new QLabel (qstr(box.delim), parent);
 	box.ctrl->setToolTip (box.delim.c_str ());
 	this->addWidget(box.ctrl, 0);
-	box.ctrl->setStyleSheet ("QLabel { font: 12pt; }");
+	box.ctrl->setStyleSheet ("QLabel { font: 10pt; }");
 
 	initialized = true;
 }
@@ -50,11 +55,11 @@ void ColorBox::changeColor( std::string delim, std::string color ){
 		if (device.delim == delim){
 			foundMatch = true;
 			device.color = color;
-			device.ctrl->setStyleSheet (("QLabel {background-color: \"" + str(color) + "\"; font: 12pt;}").c_str());
+			device.ctrl->setStyleSheet (("QLabel {background-color: \"" + str(color) + "\"; font: 10pt;}").c_str());
 		}
 	}
 	if (!foundMatch) {
 		boxes.back ().color = color;
-		boxes.back ().ctrl->setStyleSheet (("QLabel {background-color: \"" + str (color) + "\"; font: 12pt;}").c_str ());
+		boxes.back ().ctrl->setStyleSheet (("QLabel {background-color: \"" + str (color) + "\"; font: 10pt;}").c_str ());
 	}
 }
