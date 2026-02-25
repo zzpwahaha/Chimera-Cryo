@@ -78,6 +78,7 @@ class AndorCameraCore : public IDeviceCore{
 		void programVariation (unsigned variationInc, std::vector<parameterType>& params, ExpThreadWorker* threadworker);
 		std::pair<unsigned, unsigned> getCurrentRepVarNumber(unsigned int currentPicNumber);
 		unsigned getPicsPerRepetition();
+		unsigned __int64 getCurrentPictureNumber();
 		std::vector<std::string> getVertShiftSpeeds ();
 		std::vector<std::string> getHorShiftSpeeds ();
 
@@ -112,7 +113,7 @@ class AndorCameraCore : public IDeviceCore{
 		bool plotThreadExitIndicator;
 		bool cameraThreadExitIndicator = false;
 		bool dataSetShouldBeValid = false;
-		unsigned __int64 currentPictureNumber;
+		std::atomic<unsigned __int64> currentPictureNumber;
 		unsigned __int64 currentRepetitionNumber;
 		HANDLE plottingMutex;
 		std::vector<Matrix<long> > repImages; // images per one exp cycle

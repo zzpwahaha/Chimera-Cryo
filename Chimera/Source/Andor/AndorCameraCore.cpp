@@ -1000,6 +1000,11 @@ unsigned AndorCameraCore::getPicsPerRepetition()
 	return expRunSettings.picsPerRepetition;
 }
 
+unsigned __int64 AndorCameraCore::getCurrentPictureNumber()
+{
+	return currentPictureNumber;
+}
+
 void AndorCameraCore::normalFinish (){
 }
 

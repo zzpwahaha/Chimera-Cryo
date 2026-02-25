@@ -57,6 +57,7 @@ void ExpThreadWorker::experimentThreadProcedure () {
 			deviceLoadExpSettings (device, cStream);/*TODO: remove dds from device, and now device only has andor*/
 		}
 		input->numVariations = determineVariationNumber(expRuntime.expParams);
+		input->picsPerRepetition = input->devices.getSingleDevice<AndorCameraCore>().getPicsPerRepetition();
 
 		/// The Variation Calculation Step.
 		emit notification ("Calculating All Variation Data...\r\n");
@@ -1385,17 +1386,42 @@ void ExpThreadWorker::runConsistencyChecks (std::vector<parameterType> expParams
 
 void ExpThreadWorker::waitForSequenceFinish(double seqTime)
 {
-	const double minimumSleep = 30.0; // 10.0;
-	const double maximumSleep = 300.0;
-	const double targetSleep = seqTime * 0.1;
-	double sleepTime = seqTime + minimumSleep;
-	if (targetSleep > minimumSleep) {
-		sleepTime = seqTime + targetSleep;
+
+	//const double minimumSleep = 10.0; // 10.0;
+	//const double maximumSleep = 150.0;
+	//const double targetSleep = seqTime * 0.1;
+	//double sleepTime = seqTime + minimumSleep;
+	//if (targetSleep > minimumSleep) {
+	//	sleepTime = seqTime + targetSleep;
+	//}
+	//if (targetSleep > maximumSleep) {
+	//	sleepTime = seqTime + maximumSleep;
+	//}
+	//Sleep(sleepTime);
+
+	Sleep(seqTime);
+	auto& andorCamera = input->devices.getSingleDevice<AndorCameraCore>();
+	if (andorCamera.experimentActive) {
+		const unsigned long pollInterval = 10;
+		const unsigned long maxWaitTime = 5000;
+		const int maxSleeps = maxWaitTime / pollInterval;
+		int sleepCount = 0;
+		auto currentAndorPicNumber = andorCamera.getCurrentPictureNumber();
+		while ((currentAndorPicNumber + 1) % input->picsPerRepetition) {
+			if (!andorCamera.isRunning()) {
+				break;
+			}
+			sleepCount++;
+			if (sleepCount >= maxSleeps) {
+				flog << "\t\tTimeout waiting for experiment shot to finish." << fendl;
+				break;
+			}
+			flog << "\t\tWaiting for experiment shot #" << currentAndorPicNumber / input->picsPerRepetition << " to finish." << fendl;
+			Sleep(pollInterval);
+			currentAndorPicNumber = andorCamera.getCurrentPictureNumber();
+		}
 	}
-	if (targetSleep > maximumSleep) {
-		sleepTime = seqTime + maximumSleep;
-	}
-	Sleep(sleepTime);
+	Sleep(50);
 }
 
 void ExpThreadWorker::handlePause (std::atomic<bool>& isPaused, std::atomic<bool>& isAborting) {
