@@ -994,7 +994,7 @@ void DdsCore::standardExperimentPrep(UINT variation)
 	makeFinalDataFormat(variation);
 }
 
-void DdsCore::writeDDSs(UINT variation, bool loadSkip)
+void DdsCore::writeDDSs(UINT variation)
 {
 
 	//dioFPGA[variation].write();
@@ -1024,7 +1024,7 @@ void DdsCore::setGUIDdsChange(std::vector<std::vector<DdsChannelSnapshot>> chann
 {
 	prepareForce();
 	ddsChannelSnapshots = channelSnapShot;
-	writeDDSs(0, true);
+	writeDDSs(0);
 	//int tcp_connect;
 	//try {
 	//	tcp_connect = zynq_tcp.connectTCP(ZYNQ_ADDRESS);

@@ -380,7 +380,7 @@ void QtMainWindow::onFatalError (QString finMsg){
 	// resetting things.
 	std::string msgText = "Exited with Error!\nPassively Outputting Default Waveform.";
 	//andorWin->abortCameraRun(); this should be aborted in commonFunctions when one press Shift+F5, so no need to do it again
-	auxWin->handleNormalFin();
+	//auxWin->handleNormalFin(); this is taken out since this functionality is done in ExpThreadWorker::errorFinish 
 	//changeShortStatusColor ("R");
 	reportErr ("EXITED WITH ERROR!\n");
 	reportStatus ("EXITED WITH ERROR!\nInitialized Default Waveform\r\n");
@@ -392,7 +392,7 @@ void QtMainWindow::onNormalFinish (QString finMsg, profileSettings finishedProfi
 	//changeShortStatusColor ("B");
 	andorWin->handleNormalFinish (finishedProfile);
 	handleFinishText ();
-	auxWin->handleNormalFin ();
+	//auxWin->handleNormalFin (); this is taken out since this functionality is done in ExpThreadWorker::normalFinish
 	if (autoF5_AfterFinish)	{
 		commonFunctions::handleCommonMessage (ID_ACCELERATOR_F5, this);
 		autoF5_AfterFinish = false;

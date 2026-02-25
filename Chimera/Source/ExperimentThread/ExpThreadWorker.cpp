@@ -93,20 +93,24 @@ void ExpThreadWorker::experimentThreadProcedure () {
 				" repetition first and then run it for all " + qstr(determineVariationNumber(expRuntime.expParams)) + " variations \r\n");
 
 			for (const auto& variationInc : range(determineVariationNumber(expRuntime.expParams))) {
+				if (debugPrint) { flog << "Variation: " << variationInc << fendl; }
 				initVariation(variationInc, expRuntime.expParams);
-				if (debugPrint) { flog << "variation: " << variationInc << fendl; }
 				emit notification("Programming Devices for Variation...#" + qstr(variationInc) + "\n");
 				for (auto& device : input->devices.list) {
 					deviceProgramVariation(device, expRuntime.expParams, variationInc);
 					if (debugPrint) { flog << "\tprogrammed: "<< device.get().getDelim() << fendl; }
 				}
+				zynqProgramVariation(variationInc);
+				Sleep(200);
 				emit notification("Running Experiment.\n");
 				for (const auto& repInc : range(expRuntime.repetitions)) {
+					if (debugPrint) { flog << "\tZynq: start to write OL" << fendl; }
+					input->ol.writeOLs(variationInc); // This is outside zynqProgramVariation since OL is not looping back for triggers, need to program before each shot
 					if (debugPrint) { flog << "Reptition: " << repInc << fendl; }
 					inExpCalibrationRun(expRuntime);
 					emit notification(qstr("Starting Repetition #" + qstr(repInc) + "\n"), 2);
 					handlePause(isPaused, isAborting);
-					startRep(repInc, variationInc, input->skipNext == nullptr ? false : input->skipNext->load());
+					startExp(repInc, variationInc, input->skipNext == nullptr ? false : input->skipNext->load());
 					waitForSequenceFinish(finaltimes[variationInc]);
 				}
 			}
@@ -120,17 +124,20 @@ void ExpThreadWorker::experimentThreadProcedure () {
 				emit notification(qstr("Starting Repetition #" + qstr(repInc) + "\n"), 0);
 				emit repUpdate(repInc);
 				for (const auto& variationInc : range(determineVariationNumber(expRuntime.expParams))) {
-					if (debugPrint) { flog << "variation: " << variationInc << fendl; }
+					if (debugPrint) { flog << "Variation: " << variationInc << fendl; }
 					inExpCalibrationRun(expRuntime);
+					initVariation(variationInc, expRuntime.expParams);
 					emit notification("Programming Devices for Variation...\n", 2);
-					qDebug() << "Programming Devices for Variation"<< variationInc;
 					for (auto& device : input->devices.list) {
 						deviceProgramVariation(device, expRuntime.expParams, variationInc);
 						if (debugPrint) { flog << "\tprogrammed: " << device.get().getDelim() << fendl; }
 					}
-					initVariation(variationInc, expRuntime.expParams);
+					if (debugPrint) { flog << "\tZynq: start to write OL" << fendl; }
+					input->ol.writeOLs(variationInc); // This is outside zynqProgramVariation since OL is not looping back for triggers, need to program before each shot
+					zynqProgramVariation(variationInc);
+					Sleep(200);
 					handlePause(isPaused, isAborting);
-					startRep(repInc, variationInc, input->skipNext == nullptr ? false : input->skipNext->load());
+					startExp(repInc, variationInc, input->skipNext == nullptr ? false : input->skipNext->load());
 					waitForSequenceFinish(finaltimes[variationInc]);
 				}
 			}
@@ -1283,8 +1290,6 @@ void ExpThreadWorker::calculateAdoVariations (ExpRuntimeData& runtime) {
 		input->dds.initializeDataObjects(0);
 		input->ol.initializeDataObjects(0);
 
-		input->zynqExp.sendCommand("initExp");
-
 		loadSkipTimes = std::vector<double> (variations);
 		emit notification ("Analyzing Master Script...\n");
 		std::string warnings;
@@ -1338,6 +1343,28 @@ void ExpThreadWorker::calculateAdoVariations (ExpRuntimeData& runtime) {
 		emit notification (("Number of TTL Events in experiment: " + str (input->ttls.getNumberEvents (0)) + "\r\n").c_str (), 1);
 		emit notification (("Number of DAC Events in experiment: " + str (input->ao.getNumberEvents (0)) + "\r\n").c_str (), 1);
 	}
+}
+
+void ExpThreadWorker::zynqProgramVariation(unsigned variationInc)
+{
+	/// leaving the initExp in or out before each shot didn't seem to make a difference to zynq behaviour BUT including this will 
+	/// immediately stop the sequence which can cause the last image trigger not issued. If include this, need to generally wait 
+	/// longer in waitForSequenceFinish. If not include, and not waiting long enough, the zynq triggering process can be halted for 3s (not 100% sure yet)
+	/// In this sense it is better to NOT include this to convert early terminated sequence which can miss image trigger to long zynq trigger wait time
+	//input->zynqExp.sendCommand("initExp");
+	//if (debugPrint) { flog << "\tZynq: initExp" << fendl; }
+	//Sleep(10);
+	if (debugPrint) { flog << "\tZynq: start to write DAC,DDS,OL,TTL, slept 10ms from initExp" << fendl; }
+	input->ao.writeDacs(variationInc);
+	if (debugPrint) { flog << "\tZynq: start to write DDS,OL,TTL" << fendl; }
+	input->dds.writeDDSs(variationInc);
+	//if (debugPrint) { flog << "\tZynq: start to write OL,TTL" << fendl; }
+	//input->ol.writeOLs(variationInc);
+	if (debugPrint) { flog << "\tZynq: start to write TTL" << fendl; }
+	input->ttls.writeTtlDataToFPGA(variationInc);
+	if (debugPrint) { flog << "\tZynq: finished writing DAC,DDS,OL,TTL" << fendl; }
+	//Sleep(50); /// have to sleep for this amount of time to make TCP connect smoothly?????? zzp 2021/06/04 very annoying
+	//if (debugPrint) { flog << "\tZynq: start to write trigger, slept 50ms from Finished writing DAC,DDS,OL,TTL" << fendl; }
 }
 
 void ExpThreadWorker::runConsistencyChecks (std::vector<parameterType> expParams, std::vector<calSettings> calibrations) {
@@ -1419,21 +1446,18 @@ void ExpThreadWorker::errorFinish (std::atomic<bool>& isAborting, ChimeraError& 
 	chronoTime startTime) {
 	//setExperimentGUIcolor();
 	try {
+		//ORDER BELOW MATTERS. TTL (CONTAIN ZYNQ TRIGGERS) NEED TO BE SET AFTER DAC AND DDS
 		input->zynqExp.sendCommand("resetSeq");
-		Sleep(50);
-		//input->zynqExp.sendCommand("resetSeq");
-		//Sleep(50);
-		input->ttls.FPGAForceOutput(input->ttlSys.getCurrentStatus());
-		Sleep(50);
+		Sleep(10);
+		input->ddsSys.relockPLL();
+		Sleep(10);
 		input->aoSys.setDACs();
-		Sleep(50);
+		Sleep(10);
 		input->ddsSys.setDDSs();
 		Sleep(50);
-		input->olSys.setOLs(input->ttls, input->ttlSys.getCurrentStatus());
-		Sleep(50);
-		input->ddsSys.relockPLL();
-		Sleep(100);
 		input->ttls.FPGAForceOutput(input->ttlSys.getCurrentStatus());
+		Sleep(10);
+		input->olSys.setOLs(input->ttls, input->ttlSys.getCurrentStatus());
 	}
 	catch (ChimeraError& e) {
 		emit warn("Failed to set default output for ZYNQ and/or Offsetlock after experiment ERROR-FINISH.\r\n" + e.qtrace(), 0);
@@ -1464,19 +1488,18 @@ void ExpThreadWorker::normalFinish (ExperimentType& expType, bool runMaster,
 	auto exp_t = std::chrono::duration_cast<std::chrono::seconds>((chronoClock::now () - startTime)).count ();
 	try {
 		setExperimentGUIcolor();
-		input->zynqExp.sendCommand("resetSeq"); 
-		Sleep(50);
-		input->ttls.FPGAForceOutput(input->ttlSys.getCurrentStatus());
-		Sleep(50);
+		//ORDER BELOW MATTERS. TTL (CONTAIN ZYNQ TRIGGERS) NEED TO BE SET AFTER DAC AND DDS
+		input->zynqExp.sendCommand("resetSeq");
+		Sleep(10);
+		input->ddsSys.relockPLL();
+		Sleep(10);
 		input->aoSys.setDACs();
-		Sleep(50);
+		Sleep(10);
 		input->ddsSys.setDDSs();
 		Sleep(50);
-		input->olSys.setOLs(input->ttls, input->ttlSys.getCurrentStatus());
-		Sleep(50);
-		input->ddsSys.relockPLL();
-		Sleep(100);
 		input->ttls.FPGAForceOutput(input->ttlSys.getCurrentStatus());
+		Sleep(10);
+		input->olSys.setOLs(input->ttls, input->ttlSys.getCurrentStatus());
 	}
 	catch (ChimeraError& e) {
 		emit warn("Failed to set default output for ZYNQ and/or Offsetlock after experiment NORMAL-FINISH.\r\nTHIS SHOULDN\'T HAPPEN\r\n" + e.qtrace(), 0);
@@ -1498,36 +1521,12 @@ void ExpThreadWorker::normalFinish (ExperimentType& expType, bool runMaster,
 	FastLogger::flush();
 }
 
-void ExpThreadWorker::startRep (unsigned repInc, unsigned variationInc, bool skip) {
+void ExpThreadWorker::startExp(unsigned repInc, unsigned variationInc, bool skip) {
 	if (true /*runMaster*/) {
-		//QTime timer;
-		//timer.start();
 		//emit notification (qstr ("Starting Repetition #" + qstr (repInc) + "\n"), 2);
 		emit repUpdate (repInc + 1);
-		input->zynqExp.sendCommand("initExp");
-		if (debugPrint) { flog << "\tZynq: initExp" << fendl; }
-		Sleep(10);
-		//input->aoSys.resetDacs (variationInc, skip);
-		//input->ttls.ftdi_trigger ();
-		//input->ttls.FtdiWaitTillFinished (variationInc);
-		//input->aoSys.stopDacs();
-		//input->aoSys.configureClocks(variationInc, skip);
-		if (debugPrint) { flog << "\tZynq: start to write DAC,DDS,OL,TTL, slept 10ms from initExp" << fendl; }
-		input->ao.writeDacs(variationInc, skip);
-		if (debugPrint) { flog << "\tZynq: start to write DDS,OL,TTL" << fendl; }
-		input->dds.writeDDSs(variationInc, skip);
-		if (debugPrint) { flog << "\tZynq: start to write OL,TTL" << fendl; }
-		input->ol.writeOLs(variationInc);
-		if (debugPrint) { flog << "\tZynq: start to write TTL" << fendl; }
-		input->ttls.writeTtlDataToFPGA(variationInc, skip);
-		//emit notification("0.1: " + qstr(timer.elapsed()) + "\t");
-		if (debugPrint) { flog << "\tZynq: finished writing DAC,DDS,OL,TTL" << fendl; }
-		Sleep(50); /// have to sleep for this amount of time to make TCP connect smoothly?????? zzp 2021/06/04 very annoying
-		if (debugPrint) { flog << "\tZynq: start to write trigger, slept 50ms from Finished writing DAC,DDS,OL,TTL" << fendl; }
 		input->zynqExp.sendCommand("trigger");
 		if (debugPrint) { flog << "\tZynq: finished trigger" << fendl; }
-
-		//emit notification("0.2: " + qstr(timer.elapsed()) + "\n");
 	}
 }
 

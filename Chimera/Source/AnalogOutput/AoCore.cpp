@@ -769,12 +769,12 @@ void AoCore::formatDacForFPGA(UINT variation, AoSnapshot initSnap)
 		}
 	}
 	if (finalDacSnapshots[variation].size() > maxCommandNum) {
-		thrower("AO command number " + str(finalDacSnapshots[variation].size()) + " is greater than the maximum AO command that the"
-			"microcontroller can accept, which is " + str(maxCommandNum));
+		thrower("AO command number " + str(finalDacSnapshots[variation].size()) + " for variation " + str(variation) + " is greater than the maximum AO command that the"
+			"FPGA  can accept, which is " + str(maxCommandNum));
 	}
 }
 
-void AoCore::writeDacs(unsigned variation, bool loadSkip) 
+void AoCore::writeDacs(unsigned variation) 
 {
 	if (getNumberEvents(variation) != 0) {
 		int tcp_connect;
@@ -808,7 +808,7 @@ void AoCore::setGUIDacChange(std::vector<std::vector<AoChannelSnapshot>> channel
 	dacSnapshots[0].resize(channelSnapShot.size());
 	finalDacSnapshots = channelSnapShot;
 	try {
-		writeDacs(0, true);
+		writeDacs(0);
 	}
 	catch (ChimeraError& e) {
 		thrower("GUI sending data to DAC failed: \r\n" + e.trace());

@@ -128,7 +128,7 @@ public:
 	void organizeDDSCommands(UINT variation);
 	void makeFinalDataFormat(UINT variation);
 	void standardExperimentPrep(UINT variation);
-	void writeDDSs(UINT variation, bool loadSkip);
+	void writeDDSs(UINT variation);
 	void setGUIDdsChange(std::vector<std::vector<DdsChannelSnapshot>> channelSnapShot);
 
 private:

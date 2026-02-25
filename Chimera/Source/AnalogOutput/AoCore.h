@@ -52,7 +52,7 @@ public:
 	void findLoadSkipSnapshots(double time, std::vector<parameterType>& variables, unsigned variation);
 	void formatDacForFPGA(UINT variation, AoSnapshot initSnap);
 
-	void writeDacs(unsigned variation, bool loadSkip);
+	void writeDacs(unsigned variation);
 
 	void makeFinalDataFormat(unsigned variation);
 

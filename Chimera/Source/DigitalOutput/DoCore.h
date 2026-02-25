@@ -77,8 +77,8 @@ class DoCore
 		//void standardExperimentPrep (unsigned variationInc, double currLoadSkipTime, std::vector<parameterType>& expParams);
 
 		void DoCore::formatForFPGA(UINT variation);
-		void DoCore::writeTtlDataToFPGA(UINT variation, bool loadSkip);
-		void FPGAForceOutput(DOStatus status);
+		void DoCore::writeTtlDataToFPGA(UINT variation);
+		void FPGAForceOutput(DOStatus status); 
 		void FPGAForcePulse(DOStatus status, std::vector<std::pair<unsigned, unsigned>> rowcol, double dur);
 
 		DOStatus getFinalSnapshot();

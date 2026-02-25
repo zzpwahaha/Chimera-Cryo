@@ -68,6 +68,7 @@ class ExpThreadWorker : public QObject
 		void handleDebugPlots (DoCore& ttls, AoCore& ao, OlCore& ol, unsigned variation);
 		double convertToTime (timeType time, std::vector<parameterType> variables, unsigned variation);
 		void calculateAdoVariations (ExpRuntimeData& runtime);
+		void zynqProgramVariation(unsigned variationInc);
 		static std::vector<parameterType> getLocalParameters (ScriptStream& stream);
 		void runConsistencyChecks (std::vector<parameterType> expParams, std::vector<calSettings> calibrations);
 		void waitForSequenceFinish(double seqTime);
@@ -75,7 +76,7 @@ class ExpThreadWorker : public QObject
 		void initVariation (unsigned variationInc, std::vector<parameterType> expParams);
 		void normalFinish (ExperimentType& expType, bool runMaster, chronoTime startTime);
 		void errorFinish (std::atomic<bool>& isAborting, ChimeraError& exception, chronoTime startTime);
-		void startRep (unsigned repInc, unsigned variationInc, bool skip);
+		void startExp(unsigned repInc, unsigned variationInc, bool skip);
 		//std::string abortString;
 		void loadExperimentRuntime (ConfigStream& config, ExpRuntimeData& runtime);
 		void setExperimentGUIcolor();

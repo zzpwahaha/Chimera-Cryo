@@ -472,30 +472,14 @@ void DoCore::FPGAForceOutput(DOStatus status)
 	prepareForce();
 	ttlSnapshots[0].push_back({ 0.1, status });
 	formatForFPGA(0);
-	writeTtlDataToFPGA(0, false);
+	writeTtlDataToFPGA(0);
 
-	int tcp_connect;
-	try
-	{
-		tcp_connect = zynq_tcp.connectTCP(ZYNQ_ADDRESS);
+	try {
+		zynq_tcp.sendCommand("trigger");
 	}
-	catch (ChimeraError& err)
-	{
-		tcp_connect = 1;
-		thrower(err.what());
+	catch (ChimeraError &e) {
+		throwNested("connection to zynq failed. can't write TTL data\n");
 	}
-
-	if (tcp_connect == 0)
-	{
-		Sleep(1);
-		zynq_tcp.writeCommand("trigger");
-		zynq_tcp.disconnect();
-	}
-	else
-	{
-		thrower("connection to zynq failed. can't write TTL data\n");
-	}
-
 }
 
 void DoCore::FPGAForcePulse(DOStatus status, std::vector<std::pair<unsigned, unsigned>> rowcol, double dur)
@@ -513,24 +497,31 @@ void DoCore::FPGAForcePulse(DOStatus status, std::vector<std::pair<unsigned, uns
 	}
 	ttlSnapshots[0].push_back({ 0.1 + dur + dur, status });
 	formatForFPGA(0);
-	writeTtlDataToFPGA(0, false);
+	writeTtlDataToFPGA(0);
 
-	int tcp_connect;
-	try {
-		tcp_connect = zynq_tcp.connectTCP(ZYNQ_ADDRESS);
-	}
-	catch (ChimeraError& err) {
-		tcp_connect = 1;
-		thrower(err.what());
-	}
 	Sleep(15); // somehow has to wait 15ms, have to sleep for this amount of time to make TCP connect smoothly??????,  same for ExpThreadWorker::startRep zzp 2022/06/10 very annoying
-	if (tcp_connect == 0) {
-		zynq_tcp.writeCommand("trigger");
-		zynq_tcp.disconnect();
+	try {
+		zynq_tcp.sendCommand("trigger");
 	}
-	else {
-		thrower("connection to zynq failed. can't write TTL data\n");
+	catch (ChimeraError& e) {
+		throwNested("connection to zynq failed. can't write TTL data\n");
 	}
+
+	//int tcp_connect;
+	//try {
+	//	tcp_connect = zynq_tcp.connectTCP(ZYNQ_ADDRESS);
+	//}
+	//catch (ChimeraError& err) {
+	//	tcp_connect = 1;
+	//	thrower(err.what());
+	//}
+	//if (tcp_connect == 0) {
+	//	zynq_tcp.writeCommand("trigger");
+	//	zynq_tcp.disconnect();
+	//}
+	//else {
+	//	thrower("connection to zynq failed. can't write TTL data\n");
+	//}
 
 
 	// set up a sequence that will just flush out the current static output so that when dac gui get updated, 
@@ -607,7 +598,7 @@ void DoCore::formatForFPGA(UINT variation)
 	}
 }
 
-void DoCore::writeTtlDataToFPGA(UINT variation, bool loadSkip) //arguments unused, just paralleling original DIO structure
+void DoCore::writeTtlDataToFPGA(UINT variation)
 {
 
 	//dioFPGA[variation].write();
