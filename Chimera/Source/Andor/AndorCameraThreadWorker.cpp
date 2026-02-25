@@ -69,11 +69,11 @@ void AndorCameraThreadWorker::process (){
 					}
 					if (pictureNumber % debugPicsPerRep == 0) {
 						(*input->imageTimes).push_back (std::chrono::high_resolution_clock::now ());
-						if (pictureNumber > 0) { flog << "From Worker thread: get image number" << pictureNumber << " at " << std::chrono::duration_cast<std::chrono::nanoseconds>(*std::next(input->imageTimes->rbegin(), 1) - input->imageTimes->back()).count() / 1e6 << "ms, relative to last experiment run" << fendl; }
+						if (pictureNumber > 0) { flog << "From Worker thread: get image number" << pictureNumber << " at " << std::chrono::duration_cast<std::chrono::nanoseconds>(input->imageTimes->back() - *std::next(input->imageTimes->rbegin(), 1)).count() / 1e6 << "ms, relative to last experiment run" << fendl; }
 					}
 					armed = true;
-					if (!input->Andor->cameraIsRunning) {
-						// aborted by user
+					if (!input->Andor->cameraIsRunning && pictureNumber != input->Andor->runSettings.totalPicsInExperiment() - 1) {
+						// aborted by user but NOT if the pictureNumber is the last image, which is probably an early turn off of the camera Thread with finished experiment
 						input->Andor->threadExpectingAcquisition = false;
 						input->picBufferQueue.push(-1ULL); // Wake grabber thread with '-1' as arguement (-1 is not being recongnized but just as a signaler) and grabber will reset its counter
 						flog << "CameraThreadWorker aborted from user by awakening it again from the waitForAcquisition" << fendl;
