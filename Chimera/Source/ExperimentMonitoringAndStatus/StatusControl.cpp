@@ -156,12 +156,7 @@ void StatusControl::clear() {
 
 
 void StatusControl::appendTimebar() {
-	time_t time_obj = time(0);   // get time now
-	struct tm currentTime;
-	localtime_s(&currentTime, &time_obj);
-	std::string timeStr = "(" + str(currentTime.tm_year + 1900) + ":" + str(currentTime.tm_mon + 1) + ":"
-		+ str(currentTime.tm_mday) + ") " + str(currentTime.tm_hour) + ":"
-		+ str(currentTime.tm_min) + ":" + str(currentTime.tm_sec);
+	auto timeStr = getCurrentTimeString();
 	statusMsg timebarMsg;
 	timebarMsg.msg = qstr("\r\n**********" + timeStr + "**********\r\n");
 	addStatusText(timebarMsg);

@@ -14,3 +14,14 @@ unsigned long getNextFileIndex( std::string fileBase, std::string ext )
 	}
 	return fileNum;
 }
+
+std::string getCurrentTimeString()
+{
+	time_t time_obj = time(0);   // get time now
+	struct tm currentTime;
+	localtime_s(&currentTime, &time_obj);
+	std::string timeStr = "(" + str(currentTime.tm_year + 1900) + ":" + str(currentTime.tm_mon + 1) + ":"
+		+ str(currentTime.tm_mday) + ") " + str(currentTime.tm_hour) + ":"
+		+ str(currentTime.tm_min) + ":" + str(currentTime.tm_sec);
+	return timeStr;
+}

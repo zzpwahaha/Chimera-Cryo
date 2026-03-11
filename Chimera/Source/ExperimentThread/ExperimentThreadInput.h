@@ -61,8 +61,9 @@ struct ExperimentThreadInput{
 	std::vector<parameterType> globalParameters;
 	unsigned sleepTime = 0;
 	DataLogger& logger;
-	unsigned numVariations = 1;
-	unsigned picsPerRepetition = 1;
+	unsigned long numVariations = 1;
+	unsigned long numRepetitions = 1;
+	unsigned long picsPerRepetition = 1;
 	bool quiet = false;
 	unsigned numAiMeasurements=0;
 	bool updatePlotterXVals = false;

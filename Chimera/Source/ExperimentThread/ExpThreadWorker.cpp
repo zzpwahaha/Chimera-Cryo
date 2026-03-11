@@ -36,9 +36,13 @@ void ExpThreadWorker::process ()
  */
 void ExpThreadWorker::experimentThreadProcedure () {
 	flogger.resetTimeStamp();
+	flogger.flush();
 	auto startTime = chronoClock::now ();
 	experimentIsRunning = true;
 	emit notification (qstr ("Starting Experiment " + input->profile.configuration + "...\n"));
+	flog << "**********" << getCurrentTimeString() << "**********" << fendl;
+	flog << "Starting Experiment " + input->profile.configuration + "..." << fendl;
+
 	ExpRuntimeData expRuntime;
 	isPaused = false;
 	try {
@@ -47,23 +51,29 @@ void ExpThreadWorker::experimentThreadProcedure () {
 	 	}
 		emit updateBoxColor ("Violet", "Other");
 		emit notification ("Loading Experiment Settings...\n");
+		flog << "Loading Experiment Settings..." << fendl;
 		ConfigStream cStream (input->profile.configFilePath (), true);
 		loadExperimentRuntime (cStream, expRuntime);
 		if (input->expType != ExperimentType::LoadMot) {
 			emit notification ("Loading Master Runtime...\n", 1);
+			flog << "Loading Master Runtime..." << fendl;
 			input->logger.logMasterRuntime (expRuntime);
 		}
 		for (auto& device : input->devices.list) {
 			deviceLoadExpSettings (device, cStream);/*TODO: remove dds from device, and now device only has andor*/
 		}
 		input->numVariations = determineVariationNumber(expRuntime.expParams);
+		input->numRepetitions = expRuntime.repetitions;
 		input->picsPerRepetition = input->devices.getSingleDevice<AndorCameraCore>().getPicsPerRepetition();
 
 		/// The Variation Calculation Step.
 		emit notification ("Calculating All Variation Data...\r\n");
+		flog << "Calculating All Variation Data for IDevices..." << fendl;
 		for (auto& device : input->devices.list) {
 			deviceCalculateVariations (device, expRuntime.expParams);
 		}
+		emit notification("Calculating All Variation Data for ZYNQ related...\r\n");
+		flog << "Calculating All Variation Data for ZYNQ related..." << fendl;
 		calculateAdoVariations (expRuntime);
 
 		/// In-Experiment calibration
@@ -74,13 +84,14 @@ void ExpThreadWorker::experimentThreadProcedure () {
 		/// Anaylsis preparation
 		emit prepareAnalysis();
 		emit notification("Enabling real time analysis \r\n", 1);
+		flog << "Enabling real time analysis..." << fendl;
 
 		runConsistencyChecks (expRuntime.expParams, input->calibrations);
 		if (input->expType != ExperimentType::LoadMot) {
 			for (auto& device : input->devices.list) {
 				if (device.get ().experimentActive) {
-					emit notification (qstr ("Logging Device " + device.get ().getDelim ()
-						+ " Settings...\n"), 1);
+					emit notification (qstr ("Logging Device " + device.get ().getDelim () + " Settings...\n"), 1);
+					flog << "Logging Device " + device.get().getDelim() + " Settings..." << fendl;
 				}
 				device.get().logSettings(input->logger, this);
 			}
@@ -90,16 +101,17 @@ void ExpThreadWorker::experimentThreadProcedure () {
 		std::vector<double> finaltimes = input->ttls.getFinalTimes();
 
 		if (expRuntime.mainOpts.repetitionFirst) {
-			emit notification("Experiment programmed to be running " + qstr(expRuntime.repetitions) +
-				" repetition first and then run it for all " + qstr(determineVariationNumber(expRuntime.expParams)) + " variations \r\n");
+			emit notification("Experiment programmed to be running " + qstr(input->numRepetitions) +
+				" repetition first and then run it for all " + qstr(input->numVariations) + " variations \r\n");
+			flog << "Experiment programmed to be running " + str(input->numRepetitions) +
+				" repetition first and then run it for all " + str(input->numVariations) + " variations" << fendl;
 
-			for (const auto& variationInc : range(determineVariationNumber(expRuntime.expParams))) {
-				if (debugPrint) { flog << "Variation: " << variationInc << fendl; }
+			for (const auto& variationInc : range(input->numVariations)) {
 				initVariation(variationInc, expRuntime.expParams);
 				emit notification("Programming Devices for Variation...#" + qstr(variationInc) + "\n");
+				flog << "Programming Devices for Variation...#" << variationInc << fendl;
 				for (auto& device : input->devices.list) {
 					deviceProgramVariation(device, expRuntime.expParams, variationInc);
-					if (debugPrint) { flog << "\tprogrammed: "<< device.get().getDelim() << fendl; }
 				}
 				zynqProgramVariation(variationInc);
 				Sleep(200);
@@ -107,7 +119,6 @@ void ExpThreadWorker::experimentThreadProcedure () {
 				for (const auto& repInc : range(expRuntime.repetitions)) {
 					if (debugPrint) { flog << "\tZynq: start to write OL" << fendl; }
 					input->ol.writeOLs(variationInc); // This is outside zynqProgramVariation since OL is not looping back for triggers, need to program before each shot
-					if (debugPrint) { flog << "Reptition: " << repInc << fendl; }
 					inExpCalibrationRun(expRuntime);
 					emit notification(qstr("Starting Repetition #" + qstr(repInc) + "\n"), 2);
 					handlePause(isPaused, isAborting);
@@ -117,21 +128,23 @@ void ExpThreadWorker::experimentThreadProcedure () {
 			}
 		}
 		else {
-			emit notification("Experiment programmed to be running " + qstr(determineVariationNumber(expRuntime.expParams)) +
-				" variation first and then repeat it for " + qstr(expRuntime.repetitions) + " repetitions \r\n");
+			emit notification("Experiment programmed to be running " + qstr(input->numVariations) +
+				" variation first and then repeat it for " + qstr(input->numRepetitions) + " repetitions \r\n");
+			flog << "Experiment programmed to be running " + str(input->numVariations) +
+				" variation first and then repeat it for " + str(input->numRepetitions) + " repetitions" << fendl;
 
-			for (const auto& repInc : range(expRuntime.repetitions)) {
-				if (debugPrint) { flog << "Reptition: " << repInc << fendl; }
+			for (const auto& repInc : range(input->numRepetitions)) {
 				emit notification(qstr("Starting Repetition #" + qstr(repInc) + "\n"), 0);
+				flog << "Starting Repetition #" << repInc << fendl;
 				emit repUpdate(repInc);
-				for (const auto& variationInc : range(determineVariationNumber(expRuntime.expParams))) {
+				for (const auto& variationInc : range(input->numVariations)) {
 					if (debugPrint) { flog << "Variation: " << variationInc << fendl; }
 					inExpCalibrationRun(expRuntime);
 					initVariation(variationInc, expRuntime.expParams);
 					emit notification("Programming Devices for Variation...\n", 2);
+					flog << "Programming Devices for Variation...#" << variationInc << fendl;
 					for (auto& device : input->devices.list) {
 						deviceProgramVariation(device, expRuntime.expParams, variationInc);
-						if (debugPrint) { flog << "\tprogrammed: " << device.get().getDelim() << fendl; }
 					}
 					if (debugPrint) { flog << "\tZynq: start to write OL" << fendl; }
 					input->ol.writeOLs(variationInc); // This is outside zynqProgramVariation since OL is not looping back for triggers, need to program before each shot
@@ -1413,15 +1426,16 @@ void ExpThreadWorker::waitForSequenceFinish(double seqTime)
 			}
 			sleepCount++;
 			if (sleepCount >= maxSleeps) {
-				flog << "\t\tTimeout waiting for experiment shot to finish." << fendl;
+				if (debugPrint) { flog << "\t\tTimeout waiting for experiment shot to finish." << fendl; }
 				break;
 			}
-			flog << "\t\tWaiting for experiment shot #" << currentAndorPicNumber / input->picsPerRepetition << " to finish." << fendl;
+			if (debugPrint) { flog << "\t\tWaiting for experiment shot #" << currentAndorPicNumber / input->picsPerRepetition << " to finish." << fendl; }
 			Sleep(pollInterval);
 			currentAndorPicNumber = andorCamera.getCurrentPictureNumber();
 		}
 	}
 	Sleep(50);
+	flog << "Experiment shot finished." << fendl;
 }
 
 void ExpThreadWorker::handlePause (std::atomic<bool>& isPaused, std::atomic<bool>& isAborting) {
@@ -1437,8 +1451,9 @@ void ExpThreadWorker::handlePause (std::atomic<bool>& isPaused, std::atomic<bool
 }
 
 void ExpThreadWorker::initVariation (unsigned variationInc,std::vector<parameterType> expParams) {
-	auto variations = determineVariationNumber (expParams);
+	auto variations = input->numVariations;
 	emit notification (qstr("Variation #" + str (variationInc + 1) + "/" + str (variations) + ": \n"), 2);
+	if (debugPrint) { flog << "Variation #" + str(variationInc + 1) + "/" + str(variations) << fendl; }
 	if (input->sleepTime != 0) { Sleep (input->sleepTime); }
 	for (auto param : expParams) {
 		if (param.valuesVary) {
@@ -1550,6 +1565,7 @@ void ExpThreadWorker::normalFinish (ExperimentType& expType, bool runMaster,
 void ExpThreadWorker::startExp(unsigned repInc, unsigned variationInc, bool skip) {
 	if (true /*runMaster*/) {
 		//emit notification (qstr ("Starting Repetition #" + qstr (repInc) + "\n"), 2);
+		flog << "Starting Repetition #" + str(repInc + 1) + "/" + str(input->numRepetitions) + ", Variation#" + str(variationInc + 1) + "/" + str(input->numVariations) << fendl;
 		emit repUpdate (repInc + 1);
 		input->zynqExp.sendCommand("trigger");
 		if (debugPrint) { flog << "\tZynq: finished trigger" << fendl; }
@@ -1574,6 +1590,7 @@ void ExpThreadWorker::deviceProgramVariation (IDeviceCore& device, std::vector<p
 		try {
 			emit notification (qstr ("Programming Devce " + device.getDelim () + "...\n"), 3);
 			device.programVariation (variationInc, expParams, this);
+			if (debugPrint) { flog << "\tprogrammed: " << device.getDelim() << fendl; }
 			emit updateBoxColor ("Blue", device.getDelim ().c_str ());
 		}
 		catch (ChimeraError&) {

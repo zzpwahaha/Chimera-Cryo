@@ -33,3 +33,4 @@ template <typename T> void infoBox( T msg ){
 
 unsigned long getNextFileIndex( std::string fileBase, std::string ext );
 
+std::string getCurrentTimeString();
