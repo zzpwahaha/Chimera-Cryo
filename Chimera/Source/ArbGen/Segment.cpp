@@ -73,6 +73,12 @@ double Segment::rampCalc( int totalSamples, int sample, rampInfo ramp, unsigned 
 	else if (ramp.type == "tanh"){
 		return rampSize * (tanh( -4 + 8 * (double)sample / totalSamples ) + 1) / 2;
 	}
+	else if (ramp.type == "cosine") {
+		return rampSize * 0.5 * (1 - cos(PI * (double)sample / totalSamples));
+	}
+	else if (ramp.type == "gaussian") {
+		return rampSize * exp(-((double)sample / totalSamples) * ((double)sample / totalSamples) / 2.0);
+	}
 	else{
 		if (ramp.isFileRamp) {
 			if (ramp.rampFileVals.size () != totalSamples) {
@@ -284,7 +290,8 @@ void Segment::calcData( unsigned long sampleRate, unsigned varNum){
 				 + str(input.time.getValue (varNum) / 1e3) + ", and the sample rate is " + str( sampleRate ) + ". The product of these"
 				 " is the number of samples in the segment, and this must be an integer." );
 	}
-	if (input.ramp.isRamp && (input.ramp.type != "lin" && input.ramp.type != "tanh" && input.ramp.type != "nr")) {
+	if (input.ramp.isRamp && (input.ramp.type != "lin" && input.ramp.type != "tanh" && 
+		input.ramp.type != "cosine" && input.ramp.type != "gaussian" && input.ramp.type != "nr")) {
 		Segment::analyzeRampFile (input.ramp, numDataPoints);
 	}
 	// resize to zero. This is a complete reset of the data points in the class.

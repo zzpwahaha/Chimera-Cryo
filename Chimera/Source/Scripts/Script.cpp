@@ -126,6 +126,7 @@ void Script::initialize(IChimeraQtWindow* parent, std::string deviceTypeInput, s
 						"- nr (no ramp)\n"
 						"- lin\n"
 						"- tanh\n"
+						"- cosine\n"
 						"Accepted pulse types are:\n"
 						"- sech, ~ sech(time/width)\n"
 						"- gaussian, width = gaussian sigma\n"

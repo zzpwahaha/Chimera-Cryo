@@ -420,6 +420,7 @@ void AgilentCore::setDefault (int channel){
 void AgilentCore::handleScriptVariation (unsigned variation, scriptedArbInfo& scriptInfo, unsigned channel,
 	std::vector<parameterType>& params) {
 	prepArbGenSettings(channel);
+	//prepArbGenSettings(channel);
 	//programSetupCommands ();
 	if (scriptInfo.wave.isVaried () || variation == 0) {
 		unsigned totalSegmentNumber = scriptInfo.wave.getSegmentNumber ();
@@ -436,14 +437,16 @@ void AgilentCore::handleScriptVariation (unsigned variation, scriptedArbInfo& sc
 		}
 		// order matters.
 		// loop through again and calc/normalize/writebtn values.
-		scriptInfo.wave.convertPowersToVoltages (scriptInfo.useCal, calibrations[channel - 1]);
+		flog << "Time after calSegmentData: " << eTimer.elapsed();
+		//scriptInfo.wave.convertPowersToVoltages (scriptInfo.useCal, calibrations[channel - 1]); // ZZP20240610: copying calibrations is too time intensive 
 		scriptInfo.wave.calcMinMax ();
 		scriptInfo.wave.minsAndMaxes.resize (variation + 1);
 		scriptInfo.wave.minsAndMaxes[variation].second = scriptInfo.wave.getMaxVolt ();
 		scriptInfo.wave.minsAndMaxes[variation].first = scriptInfo.wave.getMinVolt ();
 		scriptInfo.wave.normalizeVoltages ();
+		flog << "Time after normalizeVoltages: " << eTimer.elapsed();
 		visaFlume.write ("SOURCE" + str (channel) + ":DATA:VOL:CLEAR");
-		prepArbGenSettings(channel);
+		//prepArbGenSettings(channel);
 		for (unsigned segNumInc : range (totalSegmentNumber)) {
 			//visaFlume.write (scriptInfo.wave.compileAndReturnDataSendString (segNumInc, variation,
 			//	totalSegmentNumber, channel));
@@ -453,14 +456,17 @@ void AgilentCore::handleScriptVariation (unsigned variation, scriptedArbInfo& sc
 			visaFlume.write ("MMEM:STORE:DATA" + str (channel) + " \"" + memoryLoc + ":\\segment"
 				+ str (segNumInc + totalSegmentNumber * variation) + ".arb\"");
 		}
+		flog << "Time after compileAndReturnDataSendString: " << eTimer.elapsed();
 		//scriptInfo.wave.compileSequenceString (totalSegmentNumber, variation, channel, variation);
 		compileSequenceString(scriptInfo, totalSegmentNumber, variation, channel, variation);
 		// submit the sequence
 		visaFlume.write (scriptInfo.wave.returnSequenceString ());
+		flog << "Time after write returnSequenceString " << eTimer.elapsed();
 		// Save the sequence
 		visaFlume.write ("SOURCE" + str (channel) + ":FUNC:ARB sequence" + str (variation));
 		visaFlume.write ("MMEM:STORE:DATA" + str (channel) + " \"" + memoryLoc + ":\\sequence"
 			+ str (variation) + ".seq\"");
+		flog << "Time after write compileSequenceString " << eTimer.elapsed();
 		// clear temporary memory.
 		visaFlume.write ("SOURCE" + str (channel) + ":DATA:VOL:CLEAR");
 	}

@@ -146,7 +146,9 @@ void ArbGenCore::setArbGen(unsigned var, std::vector<parameterType>& params, dev
 			case ArbGenChannelMode::which::Script:
 				notify({ stdNote + " Script \"" + qstr(channel.scriptedArb.fileAddress) + "\"\n", 1 }, expWorker);
 				handleScriptVariation(var, channel.scriptedArb, chan + 1, params);
+				flog << "Time after handleScriptVariation: "<<eTimer.elapsed();
 				setScriptOutput(var, channel.scriptedArb, chan + 1);
+				flog << "Time after setScriptOutput: " << eTimer.elapsed();
 				break;
 			default:
 				thrower("Unrecognized channel " + str(chan) + " setting?!?!?!: "
