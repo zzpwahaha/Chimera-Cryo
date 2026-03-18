@@ -165,16 +165,33 @@ class DataAnalysis:
 
         return vertical, horizontal
 
-    def analyze_data(self, xkey = None, function = gaussian, p0=None, debug=False) -> List[ah.unc.UFloat]:
-        result = ah.getAtomSurvivalData(
-            self.andor_datas,
-            atomLocation=self.maximaLocs,
-            window=self.window,
-            bins=self.binnings,
-            thresholds=self.thresholds
-        )
+    def getXYYerrs(self, xkey = None, locs_selection = None):
+        if locs_selection is None:
+            result = ah.getAtomSurvivalData(
+                self.andor_datas,
+                atomLocation=self.maximaLocs,
+                window=self.window,
+                bins=self.binnings,
+                thresholds=self.thresholds,
+                CP_errorbar=True,
+            )
+        else:
+            if self.maximaLocs.shape[0] != locs_selection.shape[0]:
+                raise ValueError(f"The shape for atom locations {self.maximaLocs.shape} does NOT match the shape for location selection {locs_selection.shape[0]} for rearrangement!")
+            if self.andor_datas.shape[0]<=2:
+                raise ValueError(f"The number of andor pic per run is only {self.andor_datas.shape[0]} but expecting at least 3!")
 
-        x, y, yerr = self.exp_file.individual_keys[0][:], result['survival_mean'][:], result['survival_err'][:]
+            res1 = ah.getAtomSurvivalData(data=self.andor_datas, atomLocation=self.maximaLocs[~locs_selection], 
+                    bins=binnings, thresholds=self.thresholds, window=window, CP_errorbar=False, empty_loading_warn=False)
+            # no excessive atoms
+            rearranged = res1['second_exists'].sum(axis=(0,))==0
+            print('rearranged: ', rearranged.sum(1))
+            result = ah.getAtomSurvivalData(data=self.andor_datas[[1,2]], atomLocation=self.maximaLocs[locs_selection], 
+                    bins=binnings, thresholds=self.thresholds, window=window, CP_errorbar=True, 
+                    rearranged = rearranged)
+
+
+        x, y, yerr = self.exp_file.individual_keys[0][:], result['survival_mean'][:], result['survival_CPerr'][:]
         if xkey is not None:
             xkey = np.array(xkey)
             if xkey.shape != y.shape:
@@ -182,13 +199,17 @@ class DataAnalysis:
             x = xkey.copy()
         # x_fit = x[yerr!=0]; y_fit = y[yerr!=0]; yerr_fit = yerr[yerr!=0]
         x_fit,y_fit, yerr_fit = x.copy(),y.copy(),yerr.copy()
-        yerr_fit[yerr==0] = yerr[yerr!=0].min()
+        # yerr_fit[yerr==0] = yerr[yerr!=0].min()
+        return x_fit,y_fit, yerr_fit
+
+    def analyze_data(self, xkey = None, function = gaussian, p0=None, locs_selection=None, debug=False) -> List[ah.unc.UFloat]:
+        x,y,yerr = self.getXYYerrs(xkey=xkey, locs_selection=locs_selection)
         if p0 is None:
             p0 = function.guess(x, y)
-        p, c = ah.fit(function.f, x_fit, y_fit, sigma=yerr_fit, p0=p0)
-        punc = ah.getConfidentialInterval(p, c, n_sample=x.size)
-        ah.fit_data(x,y,yerr, fit_function=function, p0=p0, use_unc=True, ignore_zero_unc=False)
-        print(ah.printFittingResult(func=function, popt_unc=punc)[1])
+        # p, c = ah.fit(function.f, x_fit, y_fit, sigma=yerr_fit, p0=p0)
+        # punc = ah.getConfidentialInterval(p, c, n_sample=x.size)
+        punc, p, fit_str = ah.fit_data(x,y,yerr, fit_function=function, p0=p0, use_unc=True, ignore_zero_unc=False)
+        print(fit_str)
 
         if debug:
             guess = None
@@ -200,6 +221,30 @@ class DataAnalysis:
             ax.set_ylabel('survival')
             mp.plt.show()
 
+        return punc
+
+    def analyze_data_with_rearrangement(self, xkey = None, function = gaussian, p0=None, debug=False) -> List[ah.unc.UFloat]:
+        x,y,yerr = self.getXYYerrs(xkey=xkey)
+
+
+    def analyze_data_AOD_alignment(self, xkey = None, function = gaussian, p0=None, debug=False) -> List[ah.unc.UFloat]:
+        x,y,yerr = self.getXYYerrs(xkey=xkey)
+        valley_idx = ah.findLocalMinima(x,y)[0]
+        punc,p,fit_str = ah.fit_data(
+            x[valley_idx[0]:valley_idx[1]], 
+            y[valley_idx[0]:valley_idx[1]], 
+            yerr[:,valley_idx[0]:valley_idx[1]], fit_function=function)
+        print(fit_str)
+
+        if debug:
+            guess = None
+            fig, ax = mp._plotStandard1D(
+                x, y, yerr, exp_file=self.exp_file, fitb=True, fit_function=function, guess=guess, 
+                ignore_zero_unc=True, use_unc=True, plot_guess=False
+            )
+            ax.set_xlabel(self.exp_file.key_name[0])
+            ax.set_ylabel('survival')
+            mp.plt.show()
         return punc
 
     def analyze_data_2D(self, xkey0 = None, function_d0 = Quadratic, function_d1 = gaussian, debug=False) -> List[ah.unc.UFloat]:

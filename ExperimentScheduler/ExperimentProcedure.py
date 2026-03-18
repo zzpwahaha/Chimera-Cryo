@@ -10,11 +10,13 @@ from ZynqController.TCPClient import TCPClient
 from Logging.PrintLogger import Logger
 import DataProcess.DataAnalyzer as da
 from ConfigurationManager.ConfigurationFile import ConfigurationFile
+from ConfigurationManager.ConfigurationConstantParameter.ConfigurationConstantParameter import MasterConfiguration
 from ConfigurationManager.ConfigurationScanParameter.ScanRange import ScanRange
 
 
 class ExperimentProcedure:
     CONFIGURATION_DIR = "C:/Chimera/Chimera-Cryo/Configurations/ExperimentAutomation/"
+    MASTER_CONFIGURATION_DIR = "C:/Chimera/Chimera-Cryo/"
     DATA_FILE_LOCATION = "C:/Chimera/Chimera-Cryo/tmpDataSave/"
     GRID_FILE_LOCATION = "C:/Chimera/Chimera-Cryo/Plotting/"
     ARCHIVED_GRID_FILE_LOCATION = "C:/Chimera/Chimera-Cryo/Plotting/ArchivedGridFiles/"
@@ -119,6 +121,9 @@ class ExperimentProcedure:
 
     def open_master_script(self, script_path_name: str):
         self.chimera_command(f"Open-Master-Script ${script_path_name}")
+
+    def reload_master_configuration(self):
+        return self.chimera_command(f"Reload-Master-Configuration")
 
     def save_all(self):
         return self.chimera_command(f"Save-All")

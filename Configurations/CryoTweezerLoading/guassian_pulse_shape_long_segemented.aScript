@@ -1,0 +1,7 @@
+var transition_time 6 %us
+var start_amplitude 0 %V
+var end_amplitude 10 %V
+ramp cosine start_amplitude end_amplitude transition_time/1000 onceWaitTrig #
+ramp cosine end_amplitude start_amplitude transition_time/1000 onceWaitTrig #
+
+

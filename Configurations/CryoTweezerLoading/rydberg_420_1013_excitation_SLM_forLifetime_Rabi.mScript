@@ -122,7 +122,7 @@ off: Ryd420Trg
 t += 0.1
 on: Ryd420ExpShutter
 t += 10-3-1-0.1
-%%%% 420 sample and hold %%%%
+%%%%% 420 sample and hold %%%%
 %% 1013 sample and hold %%%%
 t += -10
 on: Ryd1013Trg
@@ -151,28 +151,28 @@ t += 10-8.8-1-0.1
 %off: PrbTrg
 %t += 10
 %%%%%%% ground state pushout with probe beam %%%%%
-%%%% ground state pushout with OP beam %%%%%
-t += -10
-on: PrbShutter
-on: OPShutter
+%%%%% ground state pushout with OP beam %%%%%
+%t += -10
+%%on: PrbShutter
+%%on: OPShutter
 %off: PrbShutter
 %off: OPShutter
-
-off: PrbCoolShutter
-off: xyzMOTShutter
-off: D1LGMShutter
-off: D1LGMPrbShutter
-off: TARepShutter
-ol: ol_cooling d2_cooling_resonance-(250) %-(-266.65)
-ol: ol_repump d2_repump_prb_resonance+150
-dac: PrbRepAmp 10
-dac: PrbAmp 8
-dac: OPAmp {3 op_pwr_high} %1
-off: PrbRepTrg
-off: PrbTrg
-off: OPTrg
-t += 10
-%%%% ground state pushout with OP beam %%%%%
+%
+%off: PrbCoolShutter
+%off: xyzMOTShutter
+%off: D1LGMShutter
+%off: D1LGMPrbShutter
+%off: TARepShutter
+%ol: ol_cooling d2_cooling_resonance-(250) %-(-266.65)
+%ol: ol_repump d2_repump_prb_resonance+150
+%dac: PrbRepAmp 10
+%dac: PrbAmp 8
+%dac: OPAmp {3 op_pwr_high} %1
+%off: PrbRepTrg
+%off: PrbTrg
+%off: OPTrg
+%t += 10
+%%%%% ground state pushout with OP beam %%%%%
 %%%%%%% ground state depump with probe beam %%%%%
 %t += -10
 %on: PrbShutter
@@ -193,220 +193,38 @@ t += 10
 %t += 10
 %%%%%%% ground state depump with probe beam %%%%%
 
-pulseon: Ryd1013Mako 10/1000
+%pulseon: Ryd1013Mako 10/1000
 on: ryd420RFSourceSwitch
 t += 0.4
 on: SLMTweezerHold
 t += 0.101
 off: SLMTweezerTrg
 
-%%t += 0.35/1000
-%
-%%t += -250/1000
-%%ol: ol_repump d2_repump_prb_resonance
-%%ol: ol_cooling d2_cooling_resonance
-%%t += 250/1000
-%%
-%%t += time_scan
-%
-%
-%%off: SLMTweezerTrg
-%%t += 20/1000-time_scan_us/1000
-%on: do8_4
-%%on: PrbTrg
-%%on: PrbRepTrg
-%%on: OPTrg
-%t += time_scan_us/1000 %0.9/1000
-%%off: OPTrg
-%%off: PrbTrg
-%%off: PrbRepTrg
-%%ol: ol_cooling d2_cooling_resonance-(250)
-%%ol: ol_repump d2_repump_prb_resonance+150
-%off: do8_4
-%
-%%t += 0.35/1000
-%
-%%on: SLMTweezerTrg
-%%t += 10/1000
 
-%%%%%%% Ryd Rabi %%%%%%
-%t += 0.35/1000
-%t += -0.95/1000 %time for 420 AOM to turn since the beam is quite far away from the AOM actuator
-%
-%%t += -2/1000
-%%off: Ryd1013Trg
-%%t += 2/1000
-%
-%t += 0.9/1000
-%t += -0.5/1000 %-int((1+time_scan_us)*50)/50/1000/2
-%%pulseon: Ryd1013Trg 1/1000+time_scan_us/1000
-%t += 0.5/1000
-%t += -0.9/1000
-%
-%on: do8_4 %dummy trigger for picoscope
-%on: Ryd420Trg % scan to get Rabi
-%t += time_scan_us/1000
-%%t += (0.01+((sign(20.5-x)+1)/2)*0.01*x+((sign(x-20.5)+1)/2)*int(0.4*exp((x-21)*ln(1.076))*100)/100)/1000
-%off: Ryd420Trg
-%off: do8_4 
-%t += 0.95/1000
-%t += 0.35/1000
-%%%%%%% Ryd Rabi %%%%%%
-
-%%%%% Ryd Ramsey %%%%%%
-%var Ryd_pi2_us 0.06
-%%var Ryd_pi_us 0.1 %0.20 %0.185
-%t += 0.35/1000
-%t += -0.95/1000 %time for 420 AOM to turn since the beam is quite far away from the AOM actuator
-%on: do8_4 %dummy trigger for picoscope
-%on: Ryd420Trg % scan to get Rabi
-%t += Ryd_pi2_us/1000
-%off: Ryd420Trg
-%off: do8_4 
-%
-%t += time_scan_us/1000
-%
-%on: do8_4 %dummy trigger for picoscope
-%on: Ryd420Trg % scan to get Rabi
-%t += Ryd_pi2_us/1000
-%off: Ryd420Trg
-%off: do8_4 
-%
-%t += 0.95/1000
-%t += 0.35/1000
-%%%%% Ryd Ramsey %%%%%%
-
-%%%%% Ryd pi wait Rydb pi lifetime %%%%%%
-var Ryd_pi_us 0.58 %0.42 %0.31
-var Ryd_lifetime_t_total_us 40
-t += Ryd_lifetime_t_total_us/1000
-%t += -(Ryd_lifetime_t_total_us/2+Ryd_pi_us+time_scan_us/2)/1000 % center align
-t += -(2*Ryd_pi_us+time_scan_us)/1000 % right align
-
+%%%%%% Ryd Rabi %%%%%%
 t += 0.35/1000
 t += -0.95/1000 %time for 420 AOM to turn since the beam is quite far away from the AOM actuator
-on: do8_4 %dummy trigger for picoscope
-on: Ryd420Trg % scan to get Rabi
-t += Ryd_pi_us/1000
-off: Ryd420Trg
-off: do8_4 
 
-t += time_scan_us/1000
-
-% Pushout, 4.5us (quench) or 2us (ramp) pushout time
-t += -(2.24+0.5)/1000 %3us pushout, 0.5us is buffer time
-%t += -(3.78+0.25)/1000 %4.5us pushout, 0.25 is for center it with 5us wait time
-t += -250/1000
-ol: ol_repump d2_repump_prb_resonance
-ol: ol_cooling d2_cooling_resonance
-t += 250/1000
-on: PrbTrg
-on: PrbRepTrg
-on: OPTrg
-t += 3/1000 %4.5/1000 %2/1000 for non-quenching
-off: OPTrg
-off: PrbTrg
-off: PrbRepTrg
-%ol: ol_cooling d2_cooling_resonance-(250)
-%ol: ol_repump d2_repump_prb_resonance+150
-t += -3/1000 %-4.5/1000 %2/1000 for non-quenching
-%t += (3.78+0.25)/1000
-t += (2.24+0.5)/1000 %3us pushout, 0.5us is buffer time
-% Pushout, 4.5us (quench) or 2us (ramp) pushout time
-
-%% depump, 4us before second Ryd pi pulse, 2us pushout time
-%t += -(1.21+0.5)/1000 %2us depump, 0.5us is buffer time
-%t += -250/1000
-%ol: ol_cooling d2_cooling_prb_resonance-(-266.65)
-%ol: ol_repump d2_repump_prb_resonance+150
-%t += 250/1000
-%on: PrbTrg
-%t += 2/1000 %0.9/1000
-%off: PrbTrg
-%%ol: ol_cooling d2_cooling_prb_resonance-(-50)
-%%ol: ol_repump d2_repump_prb_resonance+150
 %t += -2/1000
-%t += (1.21+0.5)/1000 %(2+0.33+0.6-1)/1000
-%% depump, 4us before second Ryd pi pulse, 2us pushout time
+%off: Ryd1013Trg
+%t += 2/1000
 
-
+t += 0.9/1000
+t += -0.5/1000 %-int((1+time_scan_us)*50)/50/1000/2
+%pulseon: Ryd1013Trg 1/1000+time_scan_us/1000
+t += 0.5/1000
+t += -0.9/1000
 
 on: do8_4 %dummy trigger for picoscope
 on: Ryd420Trg % scan to get Rabi
-t += Ryd_pi_us/1000 
+t += time_scan_us/1000
+%t += (0.01+((sign(20.5-x)+1)/2)*0.01*x+((sign(x-20.5)+1)/2)*int(0.4*exp((x-21)*ln(1.076))*100)/100)/1000
 off: Ryd420Trg
 off: do8_4 
-
-%% Pushout, 4us before second Ryd pi pulse, 2us pushout time
-%t += (-2.24+3+0.5)/1000
-%%t += (-3.78+4.5)/1000 %0.4 is pi time used in measurement
-%on: PrbTrg
-%on: PrbRepTrg
-%on: OPTrg
-%t += 3/1000  %4.5/1000 %2/1000
-%off: OPTrg
-%off: PrbTrg
-%off: PrbRepTrg
-%%ol: ol_cooling d2_cooling_resonance-(250)
-%%ol: ol_repump d2_repump_prb_resonance+150
-%t += -3/1000
-%%t += -(-3.78+4.5)/1000
-%t += -(-2.24+3+0.5)/1000
-%% Pushout, 4us before second Ryd pi pulse, 2us pushout time
-
-t += 30/1000
-% for pushout
-ol: ol_cooling d2_cooling_resonance-(250)
-ol: ol_repump d2_repump_prb_resonance+150
-% for depump
-%ol: ol_cooling d2_cooling_prb_resonance-(-50)
-%ol: ol_repump d2_repump_prb_resonance+150
-t += -30/1000
-
+t += 0.95/1000
 t += 0.35/1000
-t += 0.95/1000 %time for 420 AOM to turn since the beam is quite far away from the AOM actuator
-%t += (Ryd_lifetime_t_total_us/2-Ryd_pi_us-time_scan_us/2)/1000 % center align
-%t += 3.5/1000
-%%%%%% Ryd pi wait Rydb pi lifetime %%%%%%
+%%%%%% Ryd Rabi %%%%%%
 
-%%%%%% Ryd pi MW Rydb pi %%%%%%
-%var Ryd_pi_us 0.06
-%var Ryd_lifetime_t_total_us 6.4
-%t += 0.35/1000
-%t += -0.95/1000 %time for 420 AOM to turn since the beam is quite far away from the AOM actuator
-%
-%t += Ryd_lifetime_t_total_us/1000
-%t += -(Ryd_lifetime_t_total_us/2+Ryd_pi_us+time_scan_us/2+0.2)/1000
-%
-%pulseon: Ryd1013Mako 10/1000
-%on: do8_4 %dummy trigger for picoscope
-%on: Ryd420Trg % scan to get Rabi
-%t += Ryd_pi_us/1000
-%off: Ryd420Trg
-%off: do8_4 
-%
-%t += 1.5/1000
-%t += 0.2/1000
-%on: do8_4 
-%on: MWAmpTrg
-%t += time_scan_us/1000
-%off: MWAmpTrg
-%off: do8_4 
-%t += 0.2/1000
-%t += -1.5/1000
-%
-%%on: do8_4 %dummy trigger for picoscope
-%on: Ryd420Trg % scan to get Rabi
-%t += Ryd_pi_us/1000
-%off: Ryd420Trg
-%%off: do8_4 
-%
-%t += (Ryd_lifetime_t_total_us/2-Ryd_pi_us-time_scan_us/2-0.2)/1000
-%
-%t += 0.95/1000
-%t += 0.35/1000
-%
-%%%%%% Ryd pi MW Rydb pi %%%%%%
 
 %repeat: int(integer_scan)
 t += 1/1000
@@ -479,7 +297,7 @@ t += 10+t_pgc_twz
 call PGCTweezerImaging()
 
 t += 10
-%call RydbergBeamCameraFootprint()
+call RydbergBeamCameraFootprint()
 
 %%%%%%%%%%%%%%  END Sequence  %%%%%%%%%%%%%%%%%%
 call EndSequence()

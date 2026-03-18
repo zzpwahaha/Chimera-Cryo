@@ -1,0 +1,43 @@
+%rearrange mode scrunchspacing amprate moverate 
+% AmpIncr=1, Ramp from 0 to 100: 2**16*2**10/153.6MHz = 0.4369sec
+% Frequency increment = 1  => 0.897 um/ms
+
+rearrange 1 scrunchxtarget 1 2000 24 %160 %24 %moverate 
+%rearrange 1 tweezer1dinittest 1 2000 24 
+singlex_repeatx 5
+singlex_repeaty 3
+singley_repeatx 1
+singley_repeaty 6 %7
+
+xoffset aod_offset_x %+frequency_scan %aod_dac0_freq
+yoffset aod_offset_y %+frequency_scan %aod_dac1_freq
+
+
+%loadx   11111111111111111111 %1W
+%loady   11111 %1.6W
+
+loadx   11111111111111111111 % 1W
+loady   10000 %1.26W
+
+%loadx   10000000000000000000 %1.28W
+%loady   11111 %1.6W
+
+%loadx   10000000000000000000 %1.28W
+%loady   10000 %1.26W
+
+initx   11111111111111111111 
+inity   11111
+
+filterx 11111111111111111111 %10
+filtery 11111
+
+targetstart 
+
+00000000000000000000
+00000000000000000000
+10010010010010010010
+00000000000000000000
+00000000000000000000
+
+targetend 
+

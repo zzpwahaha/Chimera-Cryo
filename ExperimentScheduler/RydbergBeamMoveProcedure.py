@@ -138,6 +138,7 @@ def move_beam_to_target(exp: ExperimentProcedure, mako_idx: int, pico_idx: tuple
     Returns:
         bool: True if successful, False if maximum iterations were reached or no improvement is possible.
     """
+    if type(tolerance) is float: tolerance=[tolerance, tolerance]
     pico_idx_vertical, pico_idx_horizontal = pico_idx
     current_screw_position_vertical = exp.getPicoScrewPositions()[pico_idx_vertical - 1]
     current_screw_position_horizontal = exp.getPicoScrewPositions()[pico_idx_horizontal - 1]
@@ -158,7 +159,7 @@ def move_beam_to_target(exp: ExperimentProcedure, mako_idx: int, pico_idx: tuple
         vertical_diff = target_vertical - current_vertical
         horizontal_diff = target_horizontal - current_horizontal
         # Check if the beam is within the tolerance range
-        if abs(vertical_diff) < tolerance and abs(horizontal_diff) < tolerance:
+        if abs(vertical_diff) < tolerance[0] and abs(horizontal_diff) < tolerance[1]:
             print(f"Beam moved to target position: ({current_vertical}, {current_horizontal}) in {iteration + 1} iterations.")
             return True
         
@@ -195,8 +196,8 @@ def zeroScrews(exp:ExperimentProcedure):
 # RYDBERG_BEAM_1013_POSITION = (33.10,26.91) #(33.02, 27.0) #(32.68, 26.60) #(32.31, 26.02) #(31.88, 27.06) #(31.31,26.33) #(31.89,26.19) #(32.02,25.56) #(33.65,26.38)
 
 
-RYDBERG_BEAM_420_POSITION = (39.4, 50.8) #(39.82, 50.20) #(39.44,48.80) # 39.90, 48.21#(39.28, 48.36) #(41.43, 49.82) RT #(43.55, 51.13) #(47.94,51.49) #(48.87,50.82) #(47.58,50.33) #(48.04, 49.98) #(54.08,44.39) #(45.17,45.02) #(44.3, 44.8) #(44.26,45.12) #(45.88,41.72)
-RYDBERG_BEAM_1013_POSITION = (114.3, 34.60) #(115.8, 35.20) #(113.3,36.584) #(113.0,36.94) #(114.7,36.34) #(112.6,36.62) #(114.70, 34.78) RT #(115.1, 34.59) #(116.28, 34.21) #(117.8, 33.94) #(115.4,30.40) #(113,30.72) #(108.8,30.86) #(108.8,31.04) #(99.8,35.73) #(99.8,35.10) #(112.41, 34.75) # (105.6, 34.46) #(102.5, 118.29) #(105.90, 121)
+RYDBERG_BEAM_420_POSITION = (37.72, 48.66) #(39.4, 50.8) #(39.82, 50.20) #(39.44,48.80) # 39.90, 48.21#(39.28, 48.36) #(41.43, 49.82) RT #(43.55, 51.13) #(47.94,51.49) #(48.87,50.82) #(47.58,50.33) #(48.04, 49.98) #(54.08,44.39) #(45.17,45.02) #(44.3, 44.8) #(44.26,45.12) #(45.88,41.72)
+RYDBERG_BEAM_1013_POSITION = (112.2, 36.859) #(114.3, 34.60) #(115.8, 35.20) #(113.3,36.584) #(113.0,36.94) #(114.7,36.34) #(112.6,36.62) #(114.70, 34.78) RT #(115.1, 34.59) #(116.28, 34.21) #(117.8, 33.94) #(115.4,30.40) #(113,30.72) #(108.8,30.86) #(108.8,31.04) #(99.8,35.73) #(99.8,35.10) #(112.41, 34.75) # (105.6, 34.46) #(102.5, 118.29) #(105.90, 121)
 
 if __name__=="__main__":
     exp = ExperimentProcedure()
@@ -206,5 +207,5 @@ if __name__=="__main__":
     move_beam_to_target(exp, mako_idx=3, pico_idx=(1,2), target_position=RYDBERG_BEAM_420_POSITION, tolerance=0.1,max_iterations=50, gain=(-8, 8))
     print("asd")
 
-    move_beam_to_target(exp, mako_idx=4, pico_idx=(3,4), target_position=RYDBERG_BEAM_1013_POSITION, tolerance=0.05,max_iterations=50, gain=(-8, 8))
+    move_beam_to_target(exp, mako_idx=4, pico_idx=(3,4), target_position=RYDBERG_BEAM_1013_POSITION, tolerance=(0.1,0.01),max_iterations=50, gain=(-8, 8))
     print("asd")

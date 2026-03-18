@@ -91,5 +91,6 @@ t += 100-t_pgc_twz
 
 
 %%%%%%%%%%%%%%  END Sequence  %%%%%%%%%%%%%%%%%%
-t += 100
+call EndSequence()
+t += 10
 pulseon: DO1_0 0.5

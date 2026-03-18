@@ -45,6 +45,19 @@ void CommandModulator::openMasterScript(QString addressName, ErrorStatus& status
 	}
 }
 
+void CommandModulator::reloadMasterConfiguration(ErrorStatus& status)
+{
+	try {
+		status.error = false;
+		mainWin->masterConfig.load(mainWin, auxWin, andorWin);
+	}
+	catch (ChimeraError& err) {
+		mainWin->reportErr(err.qtrace());
+		status.error = true;
+		status.errorMsg = err.trace();
+	}
+}
+
 void CommandModulator::saveAll(ErrorStatus& status)
 {
 	try {

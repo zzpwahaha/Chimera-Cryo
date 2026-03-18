@@ -25,11 +25,11 @@ config_file.config_param.update_scan_dimension(0, range_index=0, variations=33)
 #                                 window=window, thresholds=70, binnings=binnings)
 
 # analysis grid for 2x7 grid - 20250922
-window = [0,0,90,20]
-thresholds = 100
-binnings = np.linspace(0, 240, 241)
-analysis_locs = da.DataAnalysis(year='2025', month='September', day='19', data_name='data_13', 
-                                window=window, thresholds=thresholds, binnings=binnings)
+# window = [0,0,90,20]
+# thresholds = 100
+# binnings = np.linspace(0, 240, 241)
+# analysis_locs = da.DataAnalysis(year='2025', month='September', day='19', data_name='data_13', 
+#                                 window=window, thresholds=thresholds, binnings=binnings)
 
 
 def resonace_scan(exp_idx, exp_name_prefix, timeout_control = {'use':False, 'timeout':600}):
@@ -273,6 +273,10 @@ if __name__=='__main__':
     # _raw_move_EOM_resonance(exp, start_freq=530,end_freq=525+2.535, step=0.25, channel=0)
     # _raw_move_EOM_resonance(exp, start_freq=527.5,end_freq=525, step=0.25, channel=0)
     # _raw_move_EOM_resonance(exp, start_freq=530,end_freq=527.346, step=0.25, channel=0)
+    # _raw_move_EOM_resonance(exp, start_freq=527.5,end_freq=525, step=0.25, channel=0)
+    # _raw_move_EOM_resonance(exp, start_freq=525+5,end_freq=525, step=0.25, channel=0)
+    # _raw_move_EOM_resonance(exp, start_freq=525+4,end_freq=525+1.934, step=0.25, channel=0)
+    # _raw_move_EOM_resonance(exp, start_freq=526.934,end_freq=575, step=0.25, channel=0)
 
 
 
@@ -324,6 +328,8 @@ if __name__=='__main__':
     # _raw_move_EOM_resonance(exp, start_freq=578,end_freq=578-16/2, step=0.25, channel=0)
     # _raw_move_EOM_resonance(exp, start_freq=578+10/2,end_freq=578.55, step=0.25, channel=0)
     # _raw_move_EOM_resonance(exp, start_freq=583,end_freq=578-10/2+5.16, step=0.25, channel=0)
+    # _raw_move_EOM_resonance(exp, start_freq=577.822,end_freq=577.822-5-3, step=0.25, channel=0)
+    _raw_move_EOM_resonance(exp, start_freq=577.822-5-3,end_freq=577.822, step=0.25, channel=0)
 
     # _raw_move_EOM_resonance(exp, start_freq=578.72-36/2,end_freq=578.72, step=0.25, channel=0)
 
@@ -336,13 +342,23 @@ if __name__=='__main__':
 
     # _raw_move_EOM_resonance(exp, start_freq=577-20,end_freq=577, step=0.25, channel=0)
     # _raw_move_EOM_resonance(exp, start_freq=577+5,end_freq=582-10, step=0.25, channel=0)
+    # _raw_move_EOM_resonance(exp, start_freq=584.514,end_freq=575, step=0.25, channel=0)
+    # _raw_move_EOM_resonance(exp, start_freq=575+4,end_freq=575+1.652, step=0.25, channel=0)
+
+    # _raw_move_EOM_resonance(exp, start_freq=576.652,end_freq=584.514, step=0.25, channel=0)
+
+
     # _raw_move_EOM_resonance(exp, start_freq=582+10,end_freq=584.68, step=0.25, channel=0)
     # _raw_move_EOM_resonance(exp, start_freq=584.68,end_freq=580, step=0.25, channel=0)
     # _raw_move_EOM_resonance(exp, start_freq=586.5-4.5,end_freq=584.672, step=0.25, channel=0)
-    _raw_move_EOM_resonance(exp, start_freq=588,end_freq=582+2.661, step=0.25, channel=0)
+    # _raw_move_EOM_resonance(exp, start_freq=588,end_freq=584.661, step=0.25, channel=0)
+    # _raw_move_EOM_resonance(exp, start_freq=584.661,end_freq=582, step=0.25, channel=0)
+    # _raw_move_EOM_resonance(exp, start_freq=582+5,end_freq=584.626, step=0.25, channel=0)
+    # _raw_move_EOM_resonance(exp, start_freq=584.626,end_freq=582, step=0.25, channel=0)
+    # _raw_move_EOM_resonance(exp, start_freq=582+5,end_freq=582+2.514, step=0.25, channel=0)
 
 
 
-    #   _raw_move_EOM_resonance(exp, start_freq=120,end_freq=140, step=0.25, channel=1)
+    #   _raw_move_EOM_resonance(exp, start_freq=120,end_freq=130, step=0.25, channel=1)
     #   _raw_move_EOM_resonance(exp, start_freq=140,end_freq=120, step=0.25, channel=1)
 

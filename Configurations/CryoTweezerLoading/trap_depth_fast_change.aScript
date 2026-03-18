@@ -1,7 +1,8 @@
-var TweezerOutput 3.2
+var TweezerOutput -4.7 %-5.0
 hold 0 0.01 onceWaitTrig #
 hold TweezerOutput 0.01 onceWaitTrig #
-hold 0 0.01 onceWaitTrig #
+ramp lin TweezerOutput 0 1 onceWaitTrig #
+%hold 0 0.01 onceWaitTrig #
 
 %hold twz_intensity 1 onceWaitTrig #
 %ramp lin twz_intensity twz_intensity*0.88 10 onceWaitTrig #

@@ -58,6 +58,12 @@ void MessageConsumer::consume()
             connection->do_write(compileReply("Finished opening master script: " + args[0], status));
 
         }
+        else if (stratWith(message, "Reload-Master-Configuration")) {
+            QMetaObject::invokeMethod(&modulator_, [&]() {
+                modulator_.reloadMasterConfiguration(status);
+                }, Qt::BlockingQueuedConnection);
+            connection->do_write(compileReply("Finished reloading master configuration", status));
+        }
         else if (stratWith(message, "Save-All")) {
             QMetaObject::invokeMethod(&modulator_, [&]() {
                 modulator_.saveAll(status);

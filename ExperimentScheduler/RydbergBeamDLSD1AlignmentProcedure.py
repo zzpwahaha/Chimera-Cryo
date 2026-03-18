@@ -7,17 +7,18 @@ import time
 
 YEAR, MONTH, DAY = today()
 exp = ExperimentProcedure()
+CRYO = True
 
-# analysis grid for 5x7 grid - 20250922
-window = [0, 0, 65, 40]
-thresholds = 105
-binnings = np.linspace(0, 240, 241)
-analysis_locs = da.DataAnalysis(year='2025', month='November', day='17', data_name='data_2', 
-                                window=window, thresholds=thresholds, binnings=binnings, multi_points_option = dict({"active":True, "search_square":2, "num_points":5}))
-grid_file_name = 'atomgrid_5x7_5points_2025-11-17'
-camera_image_dim = {'Left:':1026, 'Right:':1090, 'H-Bin:':1, 'Bottom:': 928, 'Top:': 967, 'V-Bin:': 1}
-tweezer_intensity_setpoint = 2.9 #V
-repetitions = 6
+# # analysis grid for 5x7 grid - 20250922
+# window = [0, 0, 65, 40]
+# thresholds = 105
+# binnings = np.linspace(0, 240, 241)
+# analysis_locs = da.DataAnalysis(year='2025', month='November', day='17', data_name='data_2', 
+#                                 window=window, thresholds=thresholds, binnings=binnings, multi_points_option = dict({"active":True, "search_square":2, "num_points":5}))
+# grid_file_name = 'atomgrid_5x7_5points_2025-11-17'
+# camera_image_dim = {'Left:':1026, 'Right:':1090, 'H-Bin:':1, 'Bottom:': 928, 'Top:': 967, 'V-Bin:': 1}
+# tweezer_intensity_setpoint = 2.9 #V
+# repetitions = 6
 
 
 # analysis grid for 5x20 grid - 20251223
@@ -78,6 +79,8 @@ def rydberg_420_lightshift_DLS_D1(exp_postfix: str, amplitude: float = 0.2, time
     config_name = "420alignment_with_d1.Config"
     config_path = exp.CONFIGURATION_DIR + config_name
     config_file = ConfigurationFile(config_path)
+    if CRYO: uf.update_imaging_cooling_bias_field(config_file=config_file,fields=uf.CRYO_BIAS_FIELD)
+    else: uf.update_imaging_cooling_bias_field(config_file=config_file,fields=uf.RT_BIAS_FIELD)
 
     # Update configuration
     config_file.modify_parameter("REPETITIONS", "Reps:", str(repetitions))
@@ -133,6 +136,8 @@ def rydberg_1013_lightshift_DLS_D1(exp_postfix: str, amplitude: float = 1.0, tim
     config_name = "1013alignment_with_d1.Config"
     config_path = exp.CONFIGURATION_DIR + config_name
     config_file = ConfigurationFile(config_path)
+    if CRYO: uf.update_imaging_cooling_bias_field(config_file=config_file,fields=uf.CRYO_BIAS_FIELD)
+    else: uf.update_imaging_cooling_bias_field(config_file=config_file,fields=uf.RT_BIAS_FIELD)
 
     # Update configuration
     config_file.modify_parameter("REPETITIONS", "Reps:", str(repetitions))
@@ -199,6 +204,8 @@ def rydberg_420_alignment_DLS(exp_postfix: str, pico_idx: int, amplitude: float 
     config_name = "420alignment_with_d1.Config"
     config_path = exp.CONFIGURATION_DIR + config_name
     config_file = ConfigurationFile(config_path)
+    if CRYO: uf.update_imaging_cooling_bias_field(config_file=config_file,fields=uf.CRYO_BIAS_FIELD)
+    else: uf.update_imaging_cooling_bias_field(config_file=config_file,fields=uf.RT_BIAS_FIELD)
 
     # # Update configuration
     config_file.modify_parameter("REPETITIONS", "Reps:", str(repetitions))
@@ -289,6 +296,8 @@ def rydberg_1013_alignment_DLS(exp_postfix: str, pico_idx: int, amplitude: float
     config_name = "1013alignment_with_d1.Config"
     config_path = exp.CONFIGURATION_DIR + config_name
     config_file = ConfigurationFile(config_path)
+    if CRYO: uf.update_imaging_cooling_bias_field(config_file=config_file,fields=uf.CRYO_BIAS_FIELD)
+    else: uf.update_imaging_cooling_bias_field(config_file=config_file,fields=uf.RT_BIAS_FIELD)
 
     # # Update configuration
     config_file.modify_parameter("REPETITIONS", "Reps:", str(repetitions))
@@ -420,14 +429,14 @@ if __name__ == '__main__':
     # # sleep(10)
     # exp.hardware_controller.restart_zynq_control()
 
-    # rydberg_420_lightshift_DLS_D1(exp_postfix="2D-preAlignment", amplitude=0.2)
+    # rydberg_420_lightshift_DLS_D1(exp_postfix="2D-preAlignment", amplitude=0.1) #0.2
     # rydberg_420_lightshift_DLS_D1(exp_postfix="2D-preAlignment", amplitude=0.0)
     # # # exp.hardware_controller.restart_zynq_control()
-    # rydberg_420_alignment_DLS(exp_postfix="2D", pico_idx=1)
+    # rydberg_420_alignment_DLS(exp_postfix="2D", pico_idx=1, amplitude=0.1)
     # # # exp.hardware_controller.restart_zynq_control()
-    rydberg_420_alignment_DLS(exp_postfix="2D", pico_idx=2)
-    # # # exp.hardware_controller.restart_zynq_control()
-    rydberg_420_lightshift_DLS_D1(exp_postfix="2D-postAlignment", amplitude=0.2)
+    rydberg_420_alignment_DLS(exp_postfix="2D", pico_idx=2, amplitude=0.1)
+    # # exp.hardware_controller.restart_zynq_control()
+    rydberg_420_lightshift_DLS_D1(exp_postfix="2D-postAlignment", amplitude=0.1)
     rydberg_420_lightshift_DLS_D1(exp_postfix="2D-postAlignment", amplitude=0.0)
     # sleep(10)
     # # exp.hardware_controller.restart_zynq_control()

@@ -8,6 +8,7 @@ from ConfigurationManager.ConfigurationDevices.ArbGenSection import ArbGenSectio
 from ConfigurationManager.ConfigurationDevices.MicrowaveSection import MicrowaveSection
 from ConfigurationManager.ConfigurationDevices.CalibrationSection import CalibrationSection
 from ConfigurationManager.ConfigurationDevices.DataAnalysisSection import DataAnalysisSection
+from ConfigurationManager.ConfigurationConstantParameter.ConfigurationConstantParameter import MasterConfiguration
 
 class ConfigurationFile:
     """Represents the entire config file."""

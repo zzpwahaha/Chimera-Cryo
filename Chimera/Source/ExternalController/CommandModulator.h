@@ -26,6 +26,7 @@ public:
 public slots:
 	void openConfiguration(QString addressName, ErrorStatus& status);
 	void openMasterScript(QString addressName, ErrorStatus& status);
+	void reloadMasterConfiguration(ErrorStatus& status);
 	void saveAll(ErrorStatus& status);
 	void startExperiment(QString expDataName, ErrorStatus& status);
 	void abortExperiment(bool keepData, QString dataName, ErrorStatus& status);

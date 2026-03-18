@@ -243,7 +243,7 @@ if __name__ == '__main__':
     # analysis_locs = da.DataAnalysis(year='2025', month='September', day='18', data_name='data_18', 
     #                                 window=window, thresholds=thresholds, binnings=binnings)
 
-    NUM_OF_PIC = 2
+    NUM_OF_PIC = 3
     AWG_AVALANCHE = False
 
     # grid_file_name = 'atomgrid_5x7_8points_20251203_SLM'
@@ -256,10 +256,10 @@ if __name__ == '__main__':
     # tweezer_intensity_setpoint = 2.9 # 3.75 V for AOD
     # repetitions = 4
 
-    # grid_file_name = 'atomgrid_5x20_6points_20260129_SLM'
-    # camera_image_dim = {'Left:':971, 'Right:':1140, 'H-Bin:':1, 'Bottom:': 921, 'Top:': 974, 'V-Bin:': 1}
-    # tweezer_intensity_setpoint = 8.7 #8 #6.5 #V
-    # repetitions = 4
+    grid_file_name = 'atomgrid_5x20_6points_20260129_SLM'
+    camera_image_dim = {'Left:':971, 'Right:':1140, 'H-Bin:':1, 'Bottom:': 921, 'Top:': 974, 'V-Bin:': 1}
+    tweezer_intensity_setpoint = 8.7 #8 #6.5 #V
+    repetitions = 4
 
     # grid_file_name = 'atomgrid_1x7_4points_2025-11-2'
     # camera_image_dim = {'Left:':971, 'Right:':1150, 'H-Bin:':2, 'Bottom:': 927, 'Top:': 966, 'V-Bin:': 2}
@@ -278,12 +278,12 @@ if __name__ == '__main__':
     # tweezer_intensity_setpoint = 0.42 #V
     # repetitions = 8
 
-    grid_file_name = 'atomgrid_1x4_3points_20260104_SLM'
-    camera_image_dim = {'Left:':971, 'Right:':1150, 'H-Bin:':2, 'Bottom:': 927, 'Top:': 966, 'V-Bin:': 2}
-    # tweezer_intensity_setpoint = 0.42 #V for diffraction limited 1x4
-    # tweezer_intensity_setpoint = 1.88 #V for 0.222 NA 1x4
-    tweezer_intensity_setpoint = 2.15 #V for 0.222 NA 1x4
-    repetitions = 8
+    # grid_file_name = 'atomgrid_1x4_3points_20260104_SLM'
+    # camera_image_dim = {'Left:':971, 'Right:':1150, 'H-Bin:':2, 'Bottom:': 927, 'Top:': 966, 'V-Bin:': 2}
+    # # tweezer_intensity_setpoint = 0.42 #V for diffraction limited 1x4
+    # # tweezer_intensity_setpoint = 1.88 #V for 0.222 NA 1x4
+    # tweezer_intensity_setpoint = 2.15 #V for 0.222 NA 1x4
+    # repetitions = 8
 
     '''
     # # analysis grid for 2x7 grid - 20250922
