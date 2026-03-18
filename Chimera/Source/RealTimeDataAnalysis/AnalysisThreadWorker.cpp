@@ -198,6 +198,7 @@ void AnalysisThreadWorker::init (){
 			//finalErrorBars[plotInc][dataSetInc].resize (groupNum);
 			//finalXVals[plotInc][dataSetInc].resize (groupNum);
 			for (auto varInc : range(groupNum)) {
+				histogramData[plotInc][dataSetInc][varInc].clear();
 				finalAtomData[plotInc][dataSetInc][varInc].resize(input->variations);
 			}
 		}
@@ -329,6 +330,12 @@ std::vector<std::vector<dataPoint>> AnalysisThreadWorker::handlePlotHist (Plotti
 						}
 					}
 				}
+			}
+			// remove non-positive bins: there was sometime bugs that put -2^31 on the keys of histData and cause crashes
+			while (!histData[dataSetI][groupI].empty() && histData[dataSetI][groupI].begin()->first <= 0) {
+				auto it = histData[dataSetI][groupI].begin();
+				flog << "**DEBUG**\tRemoving element with key in handlePlotHist for histData: " << it->first << fendl;
+				histData[dataSetI][groupI].erase(it);
 			}
 			// find the range of bins
 			int min_bin = histData[dataSetI][groupI].begin()->first;
