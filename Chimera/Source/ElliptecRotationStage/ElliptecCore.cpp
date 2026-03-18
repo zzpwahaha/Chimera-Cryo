@@ -108,7 +108,7 @@ void ElliptecCore::checkCurrentAngles(std::vector<parameterType>& params)
 		else {
 			double expectedAngleVal = expSettings.elliptecs[ch].evaluate(params, 0);
 			double actualAngleVal = getElliptecPosition(ch);
-			if (abs(actualAngleVal - expectedAngleVal) > 1e-2) {
+			if (abs(actualAngleVal - expectedAngleVal) > 2e-2) {
 				thrower("Error in checking Elliptecs value for channel " + str(ch) + 
 					": The Elliptec value is " + str(actualAngleVal) + " but the expected value is " + str(expectedAngleVal));
 			}

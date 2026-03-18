@@ -72,7 +72,15 @@ void StaticDdsSystem::initialize()
 		labels[ch] = new QLabel(strChan + ":", this);
 		edits[ch] = new QLineEdit(this);
 		edits[ch]->setText("0.0");
-		connect(edits[ch], &QLineEdit::textChanged, [this]() { parentWin->configUpdated(); });
+		connect(edits[ch], &QLineEdit::textChanged, this, [this]() { parentWin->configUpdated(); });
+		connect(edits[ch], &QLineEdit::returnPressed, this, [this]() { 
+			try {
+				handleProgramNowPress(parentWin->auxWin->getUsableConstants());
+			}
+			catch (ChimeraError& err) {
+				parentWin->reportErr("Failed to program Static DDS system! \n" + err.qtrace());
+			}
+			});
 	}
 
 	for (auto ch : range(size_t(StaticDDSGrid::total))) {

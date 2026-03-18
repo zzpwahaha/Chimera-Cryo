@@ -20,7 +20,28 @@ void StaticDdsCore::loadExpSettings(ConfigStream& stream)
 }
 
 void StaticDdsCore::logSettings(DataLogger& logger, ExpThreadWorker* threadworker)
-{}
+{
+	try {
+		H5::Group staticDDSGroup;
+		try {
+			staticDDSGroup = logger.file.createGroup("/" + str(configDelim));
+		}
+		catch (H5::Exception&) {
+			staticDDSGroup = logger.file.openGroup("/" + str(configDelim));
+		}
+		logger.writeDataSet(expSettings.ctrlDDS, str("Control"), staticDDSGroup);
+		unsigned count = 0;
+		for (auto& ddsExpression : expSettings.staticDDSs) {
+			auto ddsGroup = staticDDSGroup.createGroup("DDS" + str(count));
+			logger.writeDataSet(ddsExpression.expressionStr, "Frequency", ddsGroup);
+			logger.writeDataSet(ddsExpression.expressionStr, "Power", ddsGroup);
+			count++;
+		}
+	}
+	catch (H5::Exception&) {
+		throwNested("Failed to save StaticDds settings to H5 File!");
+	}
+}
 
 void StaticDdsCore::calculateVariations(std::vector<parameterType>&params, ExpThreadWorker * threadworker)
 {
