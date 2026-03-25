@@ -38,7 +38,7 @@ call PGCTweezerImaging()
 
 
 %%%%%%%%%%%%%%%%%%%%%%%  rearrangement  %%%%%%%%%%%%%%%%%%%% 
-t += 50
+t += 50+50
 %%%%%%%%%%% PGC %%%%%%%%%%% 
     dac: BiasCoilX pgc_twz_bias_x
     dac: BiasCoilY pgc_twz_bias_y 
@@ -60,22 +60,22 @@ dacramp: SLMTweezerIntensity slm_twz_intensity rearrange_SLM_depth 10  %slm_twz_
 t += 10
 % this turns off RF tones from load2
 t += -1
-%pulseon: GMMoveTrg 0.0005
+pulseon: GMMoveTrg 0.0005
 t += 1
 
 repeat: 5
 t += 0.01
 % initialize tones
-%pulseon: GMMoveTrg 0.0005
+pulseon: GMMoveTrg 0.0005
 %pulseon: do8_4 0.001
 t += 0.3
 
 % move tones
 on: PrbTrg
 t += 0.01
-%on: TweezerTrg 
+on: TweezerTrg 
 t += 0.01
-%pulseon: GMMoveTrg 0.0005
+pulseon: GMMoveTrg 0.0005
 %pulseon: do8_4 0.001
 t += 5 %1.5 %5
 off: TweezerTrg
@@ -83,7 +83,7 @@ t += 0.01
 off: PrbTrg
 
 % ramp down tones
-%pulseon: GMMoveTrg 0.0005
+pulseon: GMMoveTrg 0.0005
 %pulseon: do8_4 0.001
 t += 0.3
 end
@@ -95,7 +95,7 @@ off: PrbTrg
 off: PrbShutter
 t += 1
 off: TweezerHold
-%pulseon: GMLoadTrg 0.0005
+pulseon: GMLoadTrg 0.0005
 
 dacramp: SLMTweezerIntensity rearrange_SLM_depth slm_twz_intensity 10 %slm_twz_intensity*fraction_scan 
 t += 10
@@ -163,7 +163,6 @@ t += 1
 %%%%%%%%%%%%%%%%% large field LGM optimized at RT  %%%%%%%%%%%%%%%%
 
 
-
 t += 5
 
 call setQuantizationField()
@@ -203,7 +202,7 @@ off: Ryd420ExpShutter
 on: ryd420RFSourceSwitch
 off: ryd420AWGShapedChSwitch
 
-dac: Ryd420Amp 0.01 %ryd420_amplitude %0.05 %0.11 %(0.11+0.013)*fraction_scan-0.013 %0.11 %0.05 %0.2 %amplitude_scan %0.8 %0.1 %0.55 %0.30 %0.34
+dac: Ryd420Amp ryd420_amplitude %0.05 %0.11 %(0.11+0.013)*fraction_scan-0.013 %0.11 %0.05 %0.2 %amplitude_scan %0.8 %0.1 %0.55 %0.30 %0.34
 dac: Ryd1013Amp zero1013SetPoint %2.0 %0.55 %0.60 %0.68
 
 var IQ_MAX_AMP 2.5
@@ -217,10 +216,10 @@ t += 1
 
 
 %%%%%%%%%%%%%%  Trap ramp for Rydberg  %%%%%%%%%%%%%%%%%%
-%var fraction_trapdepth 0.005 %0.06
-%dacramp: SLMTweezerIntensity slm_twz_intensity slm_twz_intensity*fraction_trapdepth 10
+var fraction_trapdepth 0.01
+dacramp: SLMTweezerIntensity slm_twz_intensity slm_twz_intensity*fraction_trapdepth 10
 t += 10
-%%%%%% 420 sample and hold %%%%
+%%%%%%% 420 sample and hold %%%%
 t += -10
 on: Ryd420Trg
 t += 3.0
@@ -230,18 +229,19 @@ off: Ryd420Trg
 t += 0.1
 on: Ryd420ExpShutter
 t += 10-3-1-0.1
-%%%%%% 420 sample and hold %%%%
+%%%%%%% 420 sample and hold %%%%
 %%%%%% 1013 sample and hold %%%%
-%t += -10
-%on: Ryd1013Trg
-%t += 1
-%dacramp: Ryd1013Amp zero1013SetPoint ryd1013_amplitude 4
-%t += 1
-%%on: Ryd1013Hold
-%t += 0.1
-%%off: Ryd1013Trg
-%t += 10-1-1-0.1
-%%%%%%% 1013 sample and hold %%%%
+t += -10
+on: Ryd1013Trg
+t += 1
+dacramp: Ryd1013Amp zero1013SetPoint ryd1013_amplitude 4
+t += 1
+%on: Ryd1013Hold
+t += 0.1
+%off: Ryd1013Trg
+t += 10-1-1-0.1
+%%%%%% 1013 sample and hold %%%%
+
 %%%%%%%%%% OP %%%%%
 t += -10
 on: PrbShutter
@@ -251,8 +251,8 @@ off: D1LGMShutter
 off: D1LGMPrbShutter
 on: OPShutter
 off: TARepShutter
-ol: ol_cooling d2_cooling_resonance-(0.877*30-266.65)  %29
-ol: ol_repump d2_repump_prb_resonance+(0.877*30) %29
+ol: ol_cooling d2_cooling_resonance-(fraction_trapdepth*0.877*30-266.65)  %29
+ol: ol_repump d2_repump_prb_resonance+(fraction_trapdepth*0.877*30) %29
 dac: PrbRepAmp 8
 dac: PrbAmp 8
 dac: OPAmp {0.1 op_pwr}
@@ -260,8 +260,8 @@ t += 10
 %%%%%%%%%%% OP %%%%%
 
 on: ryd420RFSourceSwitch
-off: ryd420AWGShapedChSwitch
-%on: ryd420AWGShapedChSwitch
+%off: ryd420AWGShapedChSwitch
+on: ryd420AWGShapedChSwitch
 
 %var Ryd_pi2_us 0.09
 var Ryd_pi_us 0.42 %0.20 %0.185
@@ -285,14 +285,83 @@ t += -2/1000
 %on: Siglent3Trg
 t += 2/1000
 
+%%%%%%%%%% MW ionization timing alignment %%%%%%%%%%
+%on: Ryd420Trg 
+%t += Ryd_2pi_us/1000
+%off: Ryd420Trg 
+%
+%t += -time_scan_us/1000
+%on: MWAmpTrg
+%t += 1.5/1000
+%off: MWAmpTrg
+%t += -1.5/1000
+%t += time_scan_us/1000
+%
+%t += 1.5/1000
+%
+%on: Ryd420Trg 
+%t += Ryd_2pi_us/1000
+%off: Ryd420Trg 
+%%%%%%%%%% MW ionization timing alignment %%%%%%%%%%
+
+%%%%%%%%%%% Ramp adiabaticity measurement %%%%%%%%%%
+%on: OPTrg
+%on: PrbTrg
+%on: PrbRepTrg
+%
+%var MW_delay_us -0.86
+%var MW_buffer_us 0.4
+%repeat: integer_scan
+%on: Ryd420Trg
+%t += 2*6/1000
+%off: Ryd420Trg
+%t += -2*6/1000
+%pulseon: Keysight2Trg 0.1/1000
+%t += 6/1000
+%t += 0.01/1000
+%pulseon: Keysight2Trg 0.1/1000
+%t += 6/1000
+%
+%t += -(MW_delay_us-MW_buffer_us)/1000 %0.86us is the timing delay, 0.4us is the buffer time
+%repeat: integer_scan_2
+%on: MWAmpTrg
+%on: DO1_0
+%t += 2/1000
+%off: DO1_0
+%off: MWAmpTrg
+%t += -2/1000
+%end
+%t += 2/1000
+%t += (MW_delay_us-MW_buffer_us)/1000
+%
+%t += 2*MW_buffer_us/1000
+%end
+%%%%%%%%%%% Ramp adiabaticity measurement %%%%%%%%%%
+
+
+%%%%%%%%%%%%% Dressing %%%%%%%%%%
+on: Ryd420Trg 
 on: OPTrg
 on: PrbTrg
 on: PrbRepTrg
 
+t += 0.2/1000
+pulseon: Keysight2Trg 0.1/1000
+t += time_scan_us_2/1000
+
+t += (75+6-time_scan_us_2)/1000
+
+pulseon: Keysight2Trg 0.1/1000
+t += time_scan_us_2/1000
+t += 0.2/1000
+
+off: Ryd420Trg 
+%%%%%%%%%%%% Dressing %%%%%%%%%%
+
 %%%%%%%%%%%%% Rabi %%%%%%%%%%
-on: Ryd420Trg
-t += time_scan_us/1000
-off: Ryd420Trg
+%on: Ryd420Trg 
+%t += time_scan_us/1000
+%off: Ryd420Trg 
 %%%%%%%%%%%%% Rabi %%%%%%%%%%
 
 off: OPTrg
@@ -322,7 +391,7 @@ t += -0.01
 %t += -0.1
 off: SLMTweezerHold
 t += 0.1
-%dacramp: SLMTweezerIntensity slm_twz_intensity*fraction_trapdepth slm_twz_intensity 10.08
+dacramp: SLMTweezerIntensity slm_twz_intensity*fraction_trapdepth slm_twz_intensity 10.08
 t += 10.08
 %t += 0.1
 
@@ -351,10 +420,10 @@ t += 0.5
 t += 10
 %call setZeroField()
 
-    dac: BiasCoilX pgc_twz_bias_x
-    dac: BiasCoilY pgc_twz_bias_y 
-    dac: BiasCoilZ pgc_twz_bias_z
-t += 100
+%    dac: BiasCoilX pgc_twz_bias_x
+%    dac: BiasCoilY pgc_twz_bias_y 
+%    dac: BiasCoilZ pgc_twz_bias_z
+%t += 100
 %%%%%%%%%%%%%%  PGC in Tweezer %%%%%%%%%%%%%%%%%%
 % change the field/laser freq parameter here because the previous section is TOF and no light is on
 call D2InTrapPGCPrb(t_pgc_twz)

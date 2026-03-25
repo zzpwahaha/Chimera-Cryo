@@ -49,8 +49,8 @@ off: ryd420trg
 
 %%%%% warm bias field %%%%% 
 dac: BiasCoilX -2.5+0.75 %quantization_bias_x
-dac: BiasCoilY -0.835+(-2.23/2)*switch_toggle %-0.834
-dac: BiasCoilZ -0.0464 %+amplitude_scan %-0.0473 
+dac: BiasCoilY -0.830+(-2.23/2)*switch_toggle %-0.834
+dac: BiasCoilZ -0.0438 %+amplitude_scan %+amplitude_scan %-0.0473 
 % -2.23V for 7G bias field, -2.23V/2 for 3.5 G bias field 
 
 
@@ -369,6 +369,9 @@ call D2InTrapPGCPrb(t_pgc_twz)
 t += 15
 %%%%%%%%%%%%%%% Second Twizzer Image
 % note the previous section should have at least 4 ms dark interval
+call PGCTweezerImaging()
+
+t += 200
 call PGCTweezerImaging()
 
 %%%%%%%%%%%%%%  END Sequence  %%%%%%%%%%%%%%%%%%

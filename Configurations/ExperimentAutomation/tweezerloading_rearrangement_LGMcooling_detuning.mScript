@@ -107,7 +107,7 @@ call PGCTweezerImaging()
 
 %%%%%%%%%%%%%%%%%%%%%  rearrangement  %%%%%%%%%%%%%%%%%%%% 
 
-%%%%%%%%%%%%%%%%% large field LGM optimzied at cryo %%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%% large field LGM optimzied at cryo %%%%%%%%%%%%%%%%
 %t += 10
 %    off: xyzMOTShutter
 %    on: D1LGMPrbShutter
@@ -116,7 +116,7 @@ call PGCTweezerImaging()
 %    dac: D1LGMEOMAmp 0 %amplitude_scan %d1lgmprb_twz_rep_amp
 %    dac: D1LGMAmp {4.5 d1lgm_prb_pwr} %3% amplitude_scan%d1lgmprb_twz_cool_amp
 %    ol: ol_D1LGM D1_LGMCooling_resonance-230 %resonance_scan %200-cryo %150-RT %resonance_scan %d1lgm_twz_olcool
-%    ol: ol_D1_repump Rb87_HFSplitting+(-8.92) %(-9.0) %(-8.9) %resonance_scan %4.5 %resonance_scan %d1lgm_twz_olrepump
+%    ol: ol_D1_repump Rb87_HFSplitting+resonance_scan %(-8.92) %(-9.0) %(-8.9) %resonance_scan %4.5 %resonance_scan %d1lgm_twz_olrepump
 %
 %    dac: BiasCoilX pgc_twz_bias_x %0.8-RT
 %    dac: BiasCoilY pgc_twz_bias_y %pgc_twz_bias_y_scan %-5 %pgc_twz_bias_y=-4.5 %-1.1 RT
@@ -130,8 +130,7 @@ call PGCTweezerImaging()
 %    off: D1LGMEOMTrg
 %    off: D1LGMShutter
 %    off: D1LGMPrbShutter
-%%%%%%%%%%%%%%%%% large field LGM optimzied at cryo %%%%%%%%%%%%%%%%
-
+%%%%%%%%%%%%%%%% large field LGM optimzied at cryo %%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%% large field LGM optimized at RT %%%%%%%%%%%%%%%%
 t += 10
     off: xyzMOTShutter
@@ -141,7 +140,7 @@ t += 10
     dac: D1LGMEOMAmp 0 %amplitude_scan %d1lgmprb_twz_rep_amp
     dac: D1LGMAmp {4.5 d1lgm_prb_pwr} % amplitude_scan%d1lgmprb_twz_cool_amp
     ol: ol_D1LGM D1_LGMCooling_resonance-230 %resonance_scan %d1lgm_twz_olcool
-    ol: ol_D1_repump Rb87_HFSplitting+(-7.6) %4.5 %resonance_scan %d1lgm_twz_olrepump
+    ol: ol_D1_repump Rb87_HFSplitting+resonance_scan %(-7.6) %4.5 %resonance_scan %d1lgm_twz_olrepump
 
     dac: BiasCoilX pgc_twz_bias_x %-1.75 %pgc_twz_bias_x
     dac: BiasCoilY -4.5 %pgc_twz_bias_y %-5 %pgc_twz_bias_y=-4.5
@@ -161,6 +160,7 @@ t += 1
     dac: BiasCoilY pgc_twz_bias_y
     dac: BiasCoilZ pgc_twz_bias_z
 %%%%%%%%%%%%%%%%% large field LGM optimized at RT  %%%%%%%%%%%%%%%%
+
 
 
 
@@ -203,7 +203,7 @@ off: Ryd420ExpShutter
 on: ryd420RFSourceSwitch
 off: ryd420AWGShapedChSwitch
 
-dac: Ryd420Amp 0.01 %ryd420_amplitude %0.05 %0.11 %(0.11+0.013)*fraction_scan-0.013 %0.11 %0.05 %0.2 %amplitude_scan %0.8 %0.1 %0.55 %0.30 %0.34
+dac: Ryd420Amp ryd420_amplitude %0.05 %0.11 %(0.11+0.013)*fraction_scan-0.013 %0.11 %0.05 %0.2 %amplitude_scan %0.8 %0.1 %0.55 %0.30 %0.34
 dac: Ryd1013Amp zero1013SetPoint %2.0 %0.55 %0.60 %0.68
 
 var IQ_MAX_AMP 2.5
@@ -213,135 +213,8 @@ pulseon: MWTrg 0.4
 t += 1
 
 
-%call releaseRecaptureSLM(time_scan_us/1000)
+call releaseRecaptureSLM(20/1000)
 
-
-%%%%%%%%%%%%%%  Trap ramp for Rydberg  %%%%%%%%%%%%%%%%%%
-%var fraction_trapdepth 0.005 %0.06
-%dacramp: SLMTweezerIntensity slm_twz_intensity slm_twz_intensity*fraction_trapdepth 10
-t += 10
-%%%%%% 420 sample and hold %%%%
-t += -10
-on: Ryd420Trg
-t += 3.0
-on: Ryd420Hold
-t += 1.0
-off: Ryd420Trg
-t += 0.1
-on: Ryd420ExpShutter
-t += 10-3-1-0.1
-%%%%%% 420 sample and hold %%%%
-%%%%%% 1013 sample and hold %%%%
-%t += -10
-%on: Ryd1013Trg
-%t += 1
-%dacramp: Ryd1013Amp zero1013SetPoint ryd1013_amplitude 4
-%t += 1
-%%on: Ryd1013Hold
-%t += 0.1
-%%off: Ryd1013Trg
-%t += 10-1-1-0.1
-%%%%%%% 1013 sample and hold %%%%
-%%%%%%%%%% OP %%%%%
-t += -10
-on: PrbShutter
-off: PrbCoolShutter
-off: xyzMOTShutter
-off: D1LGMShutter
-off: D1LGMPrbShutter
-on: OPShutter
-off: TARepShutter
-ol: ol_cooling d2_cooling_resonance-(0.877*30-266.65)  %29
-ol: ol_repump d2_repump_prb_resonance+(0.877*30) %29
-dac: PrbRepAmp 8
-dac: PrbAmp 8
-dac: OPAmp {0.1 op_pwr}
-t += 10
-%%%%%%%%%%% OP %%%%%
-
-on: ryd420RFSourceSwitch
-off: ryd420AWGShapedChSwitch
-%on: ryd420AWGShapedChSwitch
-
-%var Ryd_pi2_us 0.09
-var Ryd_pi_us 0.42 %0.20 %0.185
-var Ryd_2pi_us 0.83 %0.20 %0.185
-
-t += 0.4
-%on: SLMTweezerHold
-t += 0.101
-%off: SLMTweezerTrg
-
-
-
-
-%%%%%%%%%%%%%%%%% Ryd Rabi %%%%%%%%%%%%%%%%%
-t += 0.35/1000
-t += -0.95/1000 %time for 420 AOM to turn since the beam is quite far away from the AOM actuator
-%pulseon: Ryd1013Mako 10/1000
-on: do8_4 %dummy trigger for picoscope
-t += -2/1000
-%on: SiglentTrg
-%on: Siglent3Trg
-t += 2/1000
-
-on: OPTrg
-on: PrbTrg
-on: PrbRepTrg
-
-%%%%%%%%%%%%% Rabi %%%%%%%%%%
-on: Ryd420Trg
-t += time_scan_us/1000
-off: Ryd420Trg
-%%%%%%%%%%%%% Rabi %%%%%%%%%%
-
-off: OPTrg
-off: PrbTrg
-off: PrbRepTrg
-t += 2/1000
-off: SiglentTrg
-off: Siglent3Trg
-t += -2/1000
-off: do8_4 
-t += 0.95/1000
-t += 0.35/1000
-
-
-t += 1/1000
-on: do8_4 
-on: MWAmpTrg
-t += -1/1000
-
-on: SLMTweezerTrg
-
-t += 0.01
-off: MWAmpTrg
-off: do8_4 
-t += -0.01
-
-%t += -0.1
-off: SLMTweezerHold
-t += 0.1
-%dacramp: SLMTweezerIntensity slm_twz_intensity*fraction_trapdepth slm_twz_intensity 10.08
-t += 10.08
-%t += 0.1
-
-t += -9
-dacramp: Ryd1013Amp ryd1013_amplitude zero1013SetPoint 9
-t += 9
-
-%pulseon: MWAmpTrg 0.1
-t += 0.1
-off: Ryd1013Trg
-off: Ryd1013Hold
-off: Ryd420Shutter
-off: Ryd1013Shutter
-off: Ryd420Hold
-off: OPShutter
-off: PrbShutter
-t += 0.5
-
-%%%%%%%%%%%%%%%%% End Ryd Rabi %%%%%%%%%%%%%%%%%
 
 
 %t += 10

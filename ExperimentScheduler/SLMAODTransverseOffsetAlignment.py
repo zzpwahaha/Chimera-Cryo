@@ -21,9 +21,9 @@ constant_name = {'x': 'aod_offset_x', 'y': 'aod_offset_y'}
 # analysis grid for 5x20 grid - 20251223
 window = [0,0,170,54]
 thresholds = 105
-binnings = np.linspace(0, 240, 241)
+binnings = np.linspace(80, 120, 161)
 analysis_locs = da.DataAnalysis(year='2026', month='March', day='16', data_name='data_17', 
-                                window=window, thresholds=thresholds, binnings=binnings, 
+                                window=window, thresholds=thresholds, binnings=binnings, n_cluster_row=5,
                                 multi_points_option = dict({"active":True, "search_square":4, "num_points":6}))
 
 def setup(config_file: ConfigurationFile):
@@ -47,14 +47,14 @@ def alignment(exp:ExperimentProcedure, config_file: ConfigurationFile, master_fi
         gscript = gscript_name_y
     else:
         raise ValueError(f'Unrecognized alignment direction: {x_or_y}')
-    config_file.modify_parameter("GMOOG", "Scripted Arb Address:", gscript)
+    config_file.modify_parameter("GMOOG", "Scripted Arb Address:", exp.CONFIGURATION_DIR+gscript)
     config_file.save()
     
     # Setup experiment details
     YEAR, MONTH, DAY = today()
-    exp_name = f"AODSLM-ALIGNMENT-{x_or_y}-{exp_idx}{postfix}"
+    exp_name = f"AODSLM-ALIGNMENT-{x_or_y}-{exp_idx}-{postfix}"
 
-    # exp.open_configuration("\\ExperimentAutomation\\" + config_name)
+    exp.open_configuration("\\ExperimentAutomation\\" + config_name)
     exp.open_master_script("\\ExperimentAutomation\\" + script_name)
     exp.run_experiment(exp_name)
     
@@ -63,7 +63,7 @@ def alignment(exp:ExperimentProcedure, config_file: ConfigurationFile, master_fi
 
     # Analyze the data
     data_analysis = da.DataAnalysis(YEAR, MONTH, DAY, exp_name, maximaLocs=analysis_locs.maximaLocs,
-                            window=window, thresholds=thresholds, binnings=binnings, 
+                            window=window, thresholds=thresholds, binnings=binnings, n_cluster_row=analysis_locs.n_cluster_row,
                             annotate_title = exp_name, annotate_note=" ")
     try:                   
         analysis_result = data_analysis.analyze_data_AOD_alignment()
@@ -81,6 +81,8 @@ def alignment(exp:ExperimentProcedure, config_file: ConfigurationFile, master_fi
         master_file.set_constant(constant_name[x_or_y], f"{current_val+optimal_field.n:.3f}")
         print(f"Set the parameter {constant_name[x_or_y]} in master configuration from {current_val:.3f} to {current_val+optimal_field.n:.3f}")
         master_file.save()
+        sleep(1)
+        exp.reload_master_configuration()
     return  False #fit_fail
 
 

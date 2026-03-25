@@ -263,9 +263,9 @@ d2_repump_prb_resonance 5262
 d1_lgmcooling_resonance 784
 rb87_hfsplitting 6834.682
 t_shutter 10
-t_field_settling 750
+t_field_settling 100
 rydberg_ionization_frequency 6375
-aod_offset_x 0.236
-aod_offset_y 0.108
+aod_offset_x 0.199
+aod_offset_y 0.253
 971 1140 1 921 974 1
 0 1

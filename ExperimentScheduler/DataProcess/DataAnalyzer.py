@@ -168,7 +168,7 @@ class DataAnalysis:
     def getXYYerrs(self, xkey = None, locs_selection = None):
         if locs_selection is None:
             result = ah.getAtomSurvivalData(
-                self.andor_datas,
+                self.andor_datas[0:2],
                 atomLocation=self.maximaLocs,
                 window=self.window,
                 bins=self.binnings,
@@ -180,16 +180,14 @@ class DataAnalysis:
                 raise ValueError(f"The shape for atom locations {self.maximaLocs.shape} does NOT match the shape for location selection {locs_selection.shape[0]} for rearrangement!")
             if self.andor_datas.shape[0]<=2:
                 raise ValueError(f"The number of andor pic per run is only {self.andor_datas.shape[0]} but expecting at least 3!")
-
             res1 = ah.getAtomSurvivalData(data=self.andor_datas, atomLocation=self.maximaLocs[~locs_selection], 
-                    bins=binnings, thresholds=self.thresholds, window=window, CP_errorbar=False, empty_loading_warn=False)
+                    bins=self.binnings, thresholds=self.thresholds, window=self.window, CP_errorbar=False, empty_loading_warn=False)
             # no excessive atoms
             rearranged = res1['second_exists'].sum(axis=(0,))==0
             print('rearranged: ', rearranged.sum(1))
             result = ah.getAtomSurvivalData(data=self.andor_datas[[1,2]], atomLocation=self.maximaLocs[locs_selection], 
-                    bins=binnings, thresholds=self.thresholds, window=window, CP_errorbar=True, 
+                    bins=self.binnings, thresholds=self.thresholds, window=self.window, CP_errorbar=True, 
                     rearranged = rearranged)
-
 
         x, y, yerr = self.exp_file.individual_keys[0][:], result['survival_mean'][:], result['survival_CPerr'][:]
         if xkey is not None:
@@ -222,10 +220,6 @@ class DataAnalysis:
             mp.plt.show()
 
         return punc
-
-    def analyze_data_with_rearrangement(self, xkey = None, function = gaussian, p0=None, debug=False) -> List[ah.unc.UFloat]:
-        x,y,yerr = self.getXYYerrs(xkey=xkey)
-
 
     def analyze_data_AOD_alignment(self, xkey = None, function = gaussian, p0=None, debug=False) -> List[ah.unc.UFloat]:
         x,y,yerr = self.getXYYerrs(xkey=xkey)
