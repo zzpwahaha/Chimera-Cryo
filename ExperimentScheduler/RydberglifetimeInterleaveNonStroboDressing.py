@@ -11,7 +11,7 @@ import SLMAODTransverseOffsetAlignment as aod_align
 YEAR, MONTH, DAY = today()
 exp = ExperimentProcedure()
 
-config_name = "tweezerloading.Config"
+config_name = "tweezerloading_manyBodyRydbergLifetimeDressingNoStrobo.Config"
 config_path = "C:/Chimera/Chimera-Cryo/Configurations/CryoTweezerLoading/" + config_name
 config_file = ConfigurationFile(config_path)
 
@@ -20,8 +20,9 @@ window = [0,0,170,54]
 thresholds = 105
 binnings = np.linspace(0, 240, 4*240+1)
 binnings = np.linspace(80, 120, 161)
-analysis_locs = da.DataAnalysis(year='2026', month='March', day='19', data_name='data_1', n_cluster_row=5,
-                                window=window, thresholds=thresholds, binnings=binnings, multi_points_option = dict({"active":True, "search_square":4, "num_points":6}))
+analysis_locs = da.DataAnalysis(year='2026', month='April', day='22', data_name='data_1', n_cluster_row=5,
+                                window=window, thresholds=thresholds, binnings=binnings, 
+                                multi_points_option = dict({"active":True, "search_square":4, "num_points":6}))
 
 
 class LifetimeInterleaveRabi:
@@ -70,16 +71,23 @@ class LifetimeInterleaveRabi:
 
         for variable in config_file.config_param.variables:
             config_file.config_param.update_variable(variable.name, scan_type="Constant", scan_dimension=0)
-        config_file.config_param.update_variable("ryd420_amplitude", constant_value=-0.009)
-        config_file.config_param.update_variable("ryd1013_amplitude", constant_value=4)
+        config_file.config_param.update_variable("ryd420_amplitude", constant_value=-0.0093) #-0.0069 # -0.0072 #-0.0096
+        config_file.config_param.update_variable("ryd1013_amplitude", constant_value=2.25) #4
         config_file.config_param.update_scan_dimension(0, new_ranges=[
-            ScanRange(index=0,left_inclusive=True, right_inclusive=True, variations=21),
-            ScanRange(index=1,left_inclusive=True, right_inclusive=True, variations=11),
-            ScanRange(index=2,left_inclusive=True, right_inclusive=True, variations=6),])
+            ScanRange(index=0,left_inclusive=True, right_inclusive=True, variations=11),
+            ScanRange(index=1,left_inclusive=True, right_inclusive=True, variations=16),
+            ScanRange(index=2,left_inclusive=True, right_inclusive=True, variations=4),])
         config_file.config_param.update_variable("time_scan_us", scan_type="Variable", 
                                                 # new_initial_values=[0.01,220,500], new_final_values=[200.01,420,2000])
                                                 # new_initial_values=[0.01,110,400], new_final_values=[100.01,310,1400])
-                                                new_initial_values=[0.01,55,170], new_final_values=[50.01,155,420])
+                                                # new_initial_values=[0.01,55,170], new_final_values=[50.01,155,420])
+                                                # new_initial_values=[0.01,29.5,122], new_final_values=[25.01,97,197]) # 50, 5x14
+                                                new_initial_values=[0.01,45,230], new_final_values=[35.01,195,335]) # 50, 5x5
+                                                # new_initial_values=[0.01,31,154], new_final_values=[25.01,121,253]) # 50, 5x10
+                                                # new_initial_values=[0.01,36,146], new_final_values=[30.01,126,266]) # 70, 5x14
+                                                # new_initial_values=[0.01,47,172], new_final_values=[40.01,152,292]) # 70, 5x10
+                                                # new_initial_values=[0.01,72,292], new_final_values=[60.01,252,412]) # 70, 5x5
+
 
         config_file.modify_parameter("MAKO3_CAM", "Mako System Active:", str(0))
         config_file.modify_parameter("MAKO3_CAM", "Exposure Time:", str(1035))
@@ -112,8 +120,8 @@ class LifetimeInterleaveRabi:
         self.move_EOM_resonance(end_freq=self.RABI_420_FREQ, step=0.25, channel=0)
 
         # set up the config file
-        config_file.modify_parameter("REPETITIONS", "Reps:", str(12))
-        config_file.modify_parameter("MAIN_OPTIONS", "Randomize Variations?", str(0))
+        config_file.modify_parameter("REPETITIONS", "Reps:", str(10))
+        config_file.modify_parameter("MAIN_OPTIONS", "Randomize Variations?", str(1))
         config_file.modify_parameter("MAIN_OPTIONS", "Repetition First Over Variation?", str(1))
         config_file.modify_parameter("STATIC_DDS", "Control?", 0)
         config_file.modify_parameter("MW1", "Control?", 1)
@@ -122,8 +130,8 @@ class LifetimeInterleaveRabi:
 
         for variable in config_file.config_param.variables:
             config_file.config_param.update_variable(variable.name, scan_type="Constant", scan_dimension=0)
-        config_file.config_param.update_variable("ryd420_amplitude", constant_value=-0.009)
-        config_file.config_param.update_variable("ryd1013_amplitude", constant_value=4)
+        config_file.config_param.update_variable("ryd420_amplitude", constant_value=-0.0093) #-0.0069 # -0.0072 #-0.0096
+        config_file.config_param.update_variable("ryd1013_amplitude", constant_value=2.25) #4
         config_file.config_param.update_scan_dimension(0, new_ranges=[
             ScanRange(index=0,left_inclusive=True, right_inclusive=True, variations=31), #61
             ])
@@ -166,7 +174,7 @@ class LifetimeInterleaveRabi:
 
 
         # set up the config file
-        config_file.modify_parameter("REPETITIONS", "Reps:", str(15))
+        config_file.modify_parameter("REPETITIONS", "Reps:", str(12))
         config_file.modify_parameter("MAIN_OPTIONS", "Randomize Variations?", str(0))
         config_file.modify_parameter("MAIN_OPTIONS", "Repetition First Over Variation?", str(1))
         config_file.modify_parameter("MW1", "Control?", 1)
@@ -175,9 +183,9 @@ class LifetimeInterleaveRabi:
 
         for variable in config_file.config_param.variables:
             config_file.config_param.update_variable(variable.name, scan_type="Constant", scan_dimension=0)
-        config_file.config_param.update_variable("ryd420_amplitude", constant_value=-0.009)
-        config_file.config_param.update_variable("ryd1013_amplitude", constant_value=4)
-        config_file.config_param.update_variable("time_scan_us", constant_value=0.42)
+        config_file.config_param.update_variable("ryd420_amplitude", constant_value=-0.0093) #-0.0069 # -0.0072 #-0.0096
+        config_file.config_param.update_variable("ryd1013_amplitude", constant_value=2.25) #4
+        config_file.config_param.update_variable("time_scan_us", constant_value=0.41)
         config_file.config_param.update_scan_dimension(0, new_ranges=[
             ScanRange(index=0,left_inclusive=True, right_inclusive=True, variations=31), #61
             ])
@@ -265,14 +273,14 @@ class LifetimeInterleaveRabi:
 
 if __name__ == "__main__":
 
-    EXP_NAME_PREFIX = "N-60-0.01-5x10-0.0V"
+    EXP_NAME_PREFIX = "N-50-0.01-5x5-0.0V"
 
-    LIFETIME_REPETITIONS = 800
-    NUM_LIFETIME_SEGMENTS = 16
-    RABI_420_FREQ = 578.108000   #578.091 #577.977 #578.096 #576.334 #578.271 #578.656 #578.56 # MHz
+    NUM_LIFETIME_SEGMENTS = 32
+    LIFETIME_REPETITIONS = 60*NUM_LIFETIME_SEGMENTS
+    RABI_420_FREQ = 583.868 #529.08 #578.048   #578.091 #577.977 #578.096 #576.334 #578.271 #578.656 #578.56 # MHz
     AVALANCHE_420_FREQ = RABI_420_FREQ-1 # MHz
 
-    CURRENT_EOM_FREQ = 577.108  #RABI_420_FREQ
+    CURRENT_EOM_FREQ = 583.868  #RABI_420_FREQ
 
     quotient, remainder = divmod(LIFETIME_REPETITIONS, NUM_LIFETIME_SEGMENTS)
     lifetime_repetitions_arr = [
@@ -288,12 +296,12 @@ if __name__ == "__main__":
     )
 
     for exp_idx, _ in enumerate(lifetime_repetitions_arr):
-        # if exp_idx in [0,1,2,3,4,5,]: continue
+        # if exp_idx in np.arange(2): continue
         
         eid = 0
         exp_postfix = ''
         while True:
-            if exp_idx==0: break
+            # if exp_idx in [0,]: break
             try:
                 aborted = experiment.AOD_alignment(exp_idx=exp_idx, exp_name_prefix=EXP_NAME_PREFIX, exp_name_postfix=exp_postfix,
                                                timeout_control={"use": True, "timeout": 1800})
@@ -313,7 +321,7 @@ if __name__ == "__main__":
         eid = 0
         exp_postfix = ''
         while True:
-            if exp_idx==0: break
+            if exp_idx in [0,]: break
             try:
                 aborted = experiment.lifetime(exp_idx=exp_idx, exp_name_prefix=EXP_NAME_PREFIX, exp_name_postfix=exp_postfix,
                                                timeout_control={"use": True, "timeout": 7000})
@@ -333,7 +341,7 @@ if __name__ == "__main__":
         eid = 0
         exp_postfix = ''
         while True:
-            if exp_idx==0: break
+            # if exp_idx==0: break
             try:
                 aborted = experiment.resonance(exp_idx=exp_idx, exp_name_prefix=EXP_NAME_PREFIX, exp_name_postfix=exp_postfix,
                                         timeout_control={"use": True, "timeout": 1800})

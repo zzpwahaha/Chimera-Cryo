@@ -9,7 +9,7 @@ def D1InTrapLGMPrb(lgm_time):
     ol: ol_D1_repump Rb87_HFSplitting+d1lgm_twz_olrepump
 
     dac: BiasCoilX pgc_twz_bias_x
-    dac: BiasCoilY -5 %pgc_twz_bias_y=-4.5
+    dac: BiasCoilY pgc_twz_bias_y %-5 %pgc_twz_bias_y=-4.5
     dac: BiasCoilZ pgc_twz_bias_z
     t += t_shutter
 

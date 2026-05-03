@@ -10,7 +10,7 @@ from RydbergBeamMoveProcedure import (
 YEAR, MONTH, DAY = today()
 exp = ExperimentProcedure()
 
-config_name = "tweezerloading.Config"
+config_name = "tweezerloading_singleBodyRydbergLifetime.Config"
 config_path = "C:/Chimera/Chimera-Cryo/Configurations/CryoTweezerLoading/" + config_name
 config_file = ConfigurationFile(config_path)
 
@@ -36,10 +36,11 @@ class LifetimeInterleaveRabi:
 
     def lifetime(self, exp_idx, exp_name_prefix, exp_name_postfix = '', timeout_control={"use": True, "timeout": 6000}):
         script_name = "rydberg_420_1013_excitation_SLM_forLifetime.mScript"
+        # script_name = "rydberg_420_1013_excitation_SLM_forLifetime_static1013.mScript"
 
         # set up the rest of the config file
         config_file.modify_parameter("REPETITIONS", "Reps:", str(self.lifetime_repetitions_arr[exp_idx])) #
-        config_file.modify_parameter("MAIN_OPTIONS", "Randomize Variations?", str(0))
+        config_file.modify_parameter("MAIN_OPTIONS", "Randomize Variations?", str(1))
         config_file.modify_parameter("MAIN_OPTIONS", "Repetition First Over Variation?", str(0))
         config_file.modify_parameter("STATIC_DDS", "Control?", 0)
         config_file.modify_parameter("MW1", "Control?", 1)
@@ -47,10 +48,10 @@ class LifetimeInterleaveRabi:
 
         for variable in config_file.config_param.variables:
             config_file.config_param.update_variable(variable.name, scan_type="Constant", scan_dimension=0)
-        config_file.config_param.update_variable("ryd420_amplitude", constant_value=0.04)
-        config_file.config_param.update_variable("ryd1013_amplitude", constant_value=0.25)
+        config_file.config_param.update_variable("ryd420_amplitude", constant_value=0.02) #0.1 #0.02 #0.04
+        config_file.config_param.update_variable("ryd1013_amplitude", constant_value=2) #4 #0.25
         config_file.config_param.update_scan_dimension(0, new_ranges=[
-            ScanRange(index=0,left_inclusive=True, right_inclusive=True, variations=31),])
+            ScanRange(index=0,left_inclusive=True, right_inclusive=True, variations=16),])
         config_file.config_param.update_variable("time_scan_us", scan_type="Variable", 
                                                 new_initial_values=[5], new_final_values=[35])
 
@@ -132,11 +133,11 @@ class LifetimeInterleaveRabi:
 
 if __name__ == "__main__":
 
-    EXP_NAME_PREFIX = "N-60-0.06"
+    EXP_NAME_PREFIX = "N-55-RIGHTALIGNED-CRYO-SHIELDANDOR"
 
 
-    LIFETIME_REPETITIONS = 800
-    NUM_LIFETIME_SEGMENTS = 16
+    NUM_LIFETIME_SEGMENTS = 16*2
+    LIFETIME_REPETITIONS = 60*NUM_LIFETIME_SEGMENTS
 
 
     quotient, remainder = divmod(LIFETIME_REPETITIONS, NUM_LIFETIME_SEGMENTS)
@@ -150,12 +151,13 @@ if __name__ == "__main__":
     )
 
     for exp_idx, _ in enumerate(lifetime_repetitions_arr):
+        # if exp_idx in [0,1,]: continue
         eid = 0
         exp_postfix = ''
         while True:
             try:
                 aborted = experiment.lifetime(exp_idx=exp_idx, exp_name_prefix=EXP_NAME_PREFIX, exp_name_postfix=exp_postfix,
-                                               timeout_control={"use": True, "timeout": 6000})
+                                               timeout_control={"use": True, "timeout": 6000/2})
                 if aborted:
                     # exp.hardware_controller.restart_zynq_control()
                     sleep(5)
@@ -167,26 +169,26 @@ if __name__ == "__main__":
                 print(f"Lifetime failed at experiment run number {exp_idx}")
                 print("Attempting recovery and retrying with incremented exp_idx...")
                 sleep(10)
-                exp.hardware_controller.restart_zynq_control()
+                # exp.hardware_controller.restart_zynq_control()
 
-        eid = 0
-        exp_postfix = ''
-        while True:
-            try:
-                aborted = experiment.rabi(exp_idx=exp_idx, exp_name_prefix=EXP_NAME_PREFIX, exp_name_postfix=exp_postfix,
-                                        timeout_control={"use": True, "timeout": 1800})
-                if aborted:
-                    # exp.hardware_controller.restart_zynq_control()
-                    sleep(5)
-                break
-            except Exception as e:
-                print(e)
-                eid += 1
-                exp_postfix = f'-{eid}'
-                print(f"Rabi scan failed at experiment run number {exp_idx}")
-                print("Attempting recovery and retrying with incremented exp_idx...")
-                sleep(10)
-                exp.hardware_controller.restart_zynq_control()
+        # eid = 0
+        # exp_postfix = ''
+        # while True:
+        #     try:
+        #         aborted = experiment.rabi(exp_idx=exp_idx, exp_name_prefix=EXP_NAME_PREFIX, exp_name_postfix=exp_postfix,
+        #                                 timeout_control={"use": True, "timeout": 1800})
+        #         if aborted:
+        #             # exp.hardware_controller.restart_zynq_control()
+        #             sleep(5)
+        #         break
+        #     except Exception as e:
+        #         print(e)
+        #         eid += 1
+        #         exp_postfix = f'-{eid}'
+        #         print(f"Rabi scan failed at experiment run number {exp_idx}")
+        #         print("Attempting recovery and retrying with incremented exp_idx...")
+        #         sleep(10)
+        #         # exp.hardware_controller.restart_zynq_control()
 
         for _ in range(3):
             trial_num = 0
@@ -196,7 +198,7 @@ if __name__ == "__main__":
                     break
                 except Exception as e:
                     print(e)
-                    exp.hardware_controller.restart_zynq_control()
+                    # exp.hardware_controller.restart_zynq_control()
                     trial_num += 1
                     if trial_num>=3:
                         print("Tried to recetner the beam in Avalanche experiment for 3 times but it failed for all 3 !!!!")

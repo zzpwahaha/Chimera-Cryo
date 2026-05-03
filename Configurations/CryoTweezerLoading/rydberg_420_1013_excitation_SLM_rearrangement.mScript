@@ -5,7 +5,7 @@ call CryoMOTEnhancedLoadingLGM()
 
 t += -250-200 % 200 ms is for LGM loading/cooling
 % holding the tweezer at amplitude_scan
-dac: TweezerIntensity 4.3/37*20 %4.3/37*15 %1.2 %5.5 %twz_intensity %amplitude_scan %6.5
+dac: TweezerIntensity 2.3 %3.0 %2.3 %3 %4.3/37*20 %4.3/37*15 %1.2 %5.5 %twz_intensity %amplitude_scan %6.5
 t += 0.5
 on: TweezerTrg
 %pulseon: Mako2 0.01 
@@ -38,7 +38,7 @@ call PGCTweezerImaging()
 
 
 %%%%%%%%%%%%%%%%%%%%%%%  rearrangement  %%%%%%%%%%%%%%%%%%%% 
-t += 50
+t += 50+50
 %%%%%%%%%%% PGC %%%%%%%%%%% 
     dac: BiasCoilX pgc_twz_bias_x
     dac: BiasCoilY pgc_twz_bias_y 
@@ -88,6 +88,65 @@ pulseon: GMMoveTrg 0.0005
 t += 0.3
 end
 
+
+%%% optional filtering
+off: TweezerHold
+pulseon: GMMoveTrg 0.0005
+%pulseon: do8_4 0.001
+t += 0.3
+
+on: PrbTrg
+t += 0.01
+on: TweezerTrg 
+t += 0.01
+pulseon: GMMoveTrg 0.0005
+%pulseon: do8_4 0.001
+dacramp: SLMTweezerIntensity rearrange_SLM_depth 1.75 5
+t += 5
+%off: SLMTweezerTrg
+t += 5 %1.5 %5
+%on: SLMTweezerTrg
+dacramp: SLMTweezerIntensity 1.75 rearrange_SLM_depth 5
+t += 5
+%t += time_scan
+off: TweezerTrg
+t += 0.01
+off: PrbTrg
+off: D1LGMTrg
+
+pulseon: GMMoveTrg 0.0005
+%pulseon: do8_4 0.001
+t += 0.3
+%%% optional filtering
+
+%%%%%%% optional removal %%%%%
+%repeat: 5
+%t += 0.01
+%% initialize tones
+%pulseon: GMMoveTrg 0.0005
+%%pulseon: do8_4 0.001
+%t += 0.3
+%
+%% move tones
+%%on: PrbTrg
+%t += 0.01
+%on: TweezerTrg 
+%t += 0.01
+%pulseon: GMMoveTrg 0.0005
+%%pulseon: do8_4 0.001
+%t += 5 %1.5 %5
+%off: TweezerTrg
+%t += 0.01
+%off: PrbTrg
+%
+%% ramp down tones
+%pulseon: GMMoveTrg 0.0005
+%%pulseon: do8_4 0.001
+%t += 0.3
+%end
+%%%%%%% optional removal %%%%%
+
+
 % after all rearrangement, this would turn off GM completely
 %pulseon: GMMoveTrg 0.0005
 off: TweezerTrg
@@ -107,30 +166,9 @@ call PGCTweezerImaging()
 
 %%%%%%%%%%%%%%%%%%%%%  rearrangement  %%%%%%%%%%%%%%%%%%%% 
 
-%%%%%%%%%%%%%%%% large field LGM optimzied at cryo %%%%%%%%%%%%%%%%
-t += 10
-    off: xyzMOTShutter
-    on: D1LGMPrbShutter
-    off: D1LGMShutter
-    on: D1LGMEOMTrg
-    dac: D1LGMEOMAmp 0 %amplitude_scan %d1lgmprb_twz_rep_amp
-    dac: D1LGMAmp {4.5 d1lgm_prb_pwr} %3% amplitude_scan%d1lgmprb_twz_cool_amp
-    ol: ol_D1LGM D1_LGMCooling_resonance-230 %resonance_scan %200-cryo %150-RT %resonance_scan %d1lgm_twz_olcool
-    ol: ol_D1_repump Rb87_HFSplitting+(-8.92) %(-9.0) %(-8.9) %resonance_scan %4.5 %resonance_scan %d1lgm_twz_olrepump
-
-    dac: BiasCoilX pgc_twz_bias_x %0.8-RT
-    dac: BiasCoilY pgc_twz_bias_y %pgc_twz_bias_y_scan %-5 %pgc_twz_bias_y=-4.5 %-1.1 RT
-    dac: BiasCoilZ pgc_twz_bias_z %pgc_twz_bias_z_scan %pgc_twz_bias_z %-0.05RT
-    t += t_shutter
-
-    on: D1LGMTrg
-    t += 25 %time_scan %25 %time_scan %t_lgm_cool_time 
-    pulseon: DO1_0 1
-    off: D1LGMTrg
-    off: D1LGMEOMTrg
-    off: D1LGMShutter
-    off: D1LGMPrbShutter
-%%%%%%%%%%%%%%%% large field LGM optimzied at cryo %%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%% large field LGM optimzied at cryo %%%%%%%%%%%%%%%%
+call D1InTrapLargeFieldLGMPrb_Combined()
+%%%%%%%%%%%%%%%%% large field LGM optimized at RT  %%%%%%%%%%%%%%%%
 
 
 t += 5
@@ -143,19 +181,6 @@ dacramp: SLMTweezerIntensity slm_twz_intensity*0.06 slm_twz_intensity 10
 t += 10
 
 call OpticalPumping22()
-
-%%change field to original OP befor angle
-%t += 5
-%    dac: BiasCoilX -2.5+0.75-2.5 
-%    dac: BiasCoilY -0.839
-%    dac: BiasCoilZ -0.048
-%% warm
-%dacramp: SLMTweezerIntensity slm_twz_intensity slm_twz_intensity*0.1 10
-%t += 10
-%t += 50-20
-%dacramp: SLMTweezerIntensity slm_twz_intensity*0.1 slm_twz_intensity 10
-%t += 10
-
 
 %%%%%%%%%%%%%%  Prepare Rydberg beams %%%%%%%%%%%%%%%%%%
 %var beta 0.1
@@ -200,39 +225,71 @@ t += 0.1
 on: Ryd420ExpShutter
 t += 10-3-1-0.1
 %%%%%%% 420 sample and hold %%%%
-%%%%%% 1013 sample and hold %%%%
+%%%%%%% 1013 sample and hold %%%%
 t += -10
 on: Ryd1013Trg
 t += 1
 dacramp: Ryd1013Amp zero1013SetPoint ryd1013_amplitude 4
+t += 4
 t += 1
 %on: Ryd1013Hold
 t += 0.1
 %off: Ryd1013Trg
-t += 10-1-1-0.1
+t += 10-4-1-1-0.1
 %%%%%% 1013 sample and hold %%%%
-%%%%% ground state pushout with OP beam %%%%%
-t += -10
-on: PrbShutter
-on: OPShutter
-%off: PrbShutter
-%off: OPShutter
+%%%%%%%% D1 sample and hold %%%%%%%% 
+%t += -15
+%dac: D1StateTransferAmp -1 %-5 %-1.6 %-2.5
+%off: D1StateTransferShutter 
+%t += 4
+%on: D1StateTransferTrg
+%%pulseon: mako1 0.1
+%t += 4
+%on: D1StateTransferHold
+%t += 0.1
+%off: D1StateTransferTrg
+%on: D1StateTransferShutter 
+%t += 15-(4+4+0.1)
+%%%%%%%% D1 sample and hold %%%%%%%% 
+%%%%%%% ground state pushout with OP beam %%%%%
+%t += -10
+%on: PrbShutter
+%on: OPShutter
+%%off: PrbShutter
+%%off: OPShutter
+%
+%off: PrbCoolShutter
+%off: xyzMOTShutter
+%off: D1LGMShutter
+%off: D1LGMPrbShutter
+%off: TARepShutter
+%ol: ol_cooling d2_cooling_resonance-(250) %-(-266.65)
+%ol: ol_repump d2_repump_prb_resonance+150
+%dac: PrbRepAmp 10
+%dac: PrbAmp 8
+%dac: OPAmp {3 op_pwr_high} %1
+%off: PrbRepTrg
+%off: PrbTrg
+%off: OPTrg
+%t += 10
+%%%%%%% ground state pushout with OP beam %%%%%
+%%%%%%%%%%% OP %%%%%
+%t += -10
+%on: PrbShutter
+%off: PrbCoolShutter
+%off: xyzMOTShutter
+%off: D1LGMShutter
+%off: D1LGMPrbShutter
+%on: OPShutter
+%off: TARepShutter
+%ol: ol_cooling d2_cooling_resonance-(fraction_trapdepth*0.877*30-266.65)  %29
+%ol: ol_repump d2_repump_prb_resonance+(fraction_trapdepth*0.877*30) %29
+%dac: PrbRepAmp 8
+%dac: PrbAmp 8
+%dac: OPAmp {0.1 op_pwr}
+%t += 10
+%%%%%%%%%%%% OP %%%%%
 
-off: PrbCoolShutter
-off: xyzMOTShutter
-off: D1LGMShutter
-off: D1LGMPrbShutter
-off: TARepShutter
-ol: ol_cooling d2_cooling_resonance-(250) %-(-266.65)
-ol: ol_repump d2_repump_prb_resonance+150
-dac: PrbRepAmp 10
-dac: PrbAmp 8
-dac: OPAmp {3 op_pwr_high} %1
-off: PrbRepTrg
-off: PrbTrg
-off: OPTrg
-t += 10
-%%%%% ground state pushout with OP beam %%%%%
 
 
 on: ryd420RFSourceSwitch
@@ -244,7 +301,7 @@ off: ryd420AWGShapedChSwitch
 %var Ryd_2pi_us 0.83 %0.20 %0.185
 
 t += 0.4
-%on: SLMTweezerHold
+on: SLMTweezerHold
 t += 0.101
 off: SLMTweezerTrg
 
@@ -280,116 +337,309 @@ t += 2/1000
 %off: Ryd420Trg 
 %%%%%%%%%% MW ionization timing alignment %%%%%%%%%%
 
-%%%%%%%%%%% Ramp adiabaticity measurement %%%%%%%%%%
+%%%%%%%%%%%%%% Dressing %%%%%%%%%%
+%t += 21/1000
+%t += -(0.2+3+time_scan_us+3+0.2)/1000
+%
+%on: Ryd420Trg 
 %on: OPTrg
 %on: PrbTrg
 %on: PrbRepTrg
 %
-%var MW_delay_us -0.86
-%var MW_buffer_us 0.4
-%repeat: integer_scan
-%on: Ryd420Trg
-%t += 2*6/1000
-%off: Ryd420Trg
-%t += -2*6/1000
+%t += 0.2/1000
 %pulseon: Keysight2Trg 0.1/1000
-%t += 6/1000
-%t += 0.01/1000
+%t += 3/1000
+%
+%t += (time_scan_us)/1000
+%
 %pulseon: Keysight2Trg 0.1/1000
-%t += 6/1000
+%t += 3/1000
+%t += 0.2/1000
 %
-%t += -(MW_delay_us-MW_buffer_us)/1000 %0.86us is the timing delay, 0.4us is the buffer time
-%repeat: integer_scan_2
-%on: MWAmpTrg
-%on: DO1_0
-%t += 2/1000
-%off: DO1_0
-%off: MWAmpTrg
-%t += -2/1000
-%end
-%t += 2/1000
-%t += (MW_delay_us-MW_buffer_us)/1000
-%
-%t += 2*MW_buffer_us/1000
-%end
-%%%%%%%%%%% Ramp adiabaticity measurement %%%%%%%%%%
+%off: Ryd420Trg 
+%%%%%%%%%%%%% Dressing %%%%%%%%%%
 
 %%%%%%%%%%%%% Rabi %%%%%%%%%%
+
+%%%%% pulsed 1013 %%%%
+%t += 0.9/1000
+%t += -0.5/1000 %-int((1+time_scan_us)*50)/50/1000/2
+%
+%t += -1./1000
+%t += -1./1000
+%on: Ryd1013Hold
+%t += 1./1000
+%off: Ryd1013Trg
+%t += 1./1000
+%
+%on: Ryd1013Trg 
+%t += 1/1000+time_scan_us/1000
+%off: Ryd1013Trg 
+%
+%t += 1./1000
+%on: Ryd1013Trg
+%t += 400./1000
+%off: Ryd1013Hold
+%t += -400./1000
+%t += -1./1000
+%
+%t += -(1/1000+time_scan_us/1000)
+%
+%t += 0.5/1000
+%t += -0.9/1000
+%%%% pulsed 1013 %%%%
+
+on: Ryd420Trg 
+t += time_scan_us/1000
+off: Ryd420Trg 
+
+%t += time_scan_us_2/1000 %30/1000
+%
+%%%% pulsed 1013 %%%%
+%t += 0.9/1000
+%t += -0.5/1000 %-int((1+time_scan_us)*50)/50/1000/2
+%
+%t += -1./1000
+%t += -1./1000
+%on: Ryd1013Hold
+%t += 1./1000
+%off: Ryd1013Trg
+%t += 1./1000
+%
+%on: Ryd1013Trg 
+%t += 1/1000+time_scan_us/1000
+%off: Ryd1013Trg 
+%
+%%t += 1./1000
+%%on: Ryd1013Trg
+%%t += 1./1000
+%%off: Ryd1013Hold
+%%t += -1./1000
+%%t += -1./1000
+%
+%t += -(1/1000+time_scan_us/1000)
+%
+%t += 0.5/1000
+%t += -0.9/1000
+%%%% pulsed 1013 %%%%
+%
 %on: Ryd420Trg 
 %t += time_scan_us/1000
 %off: Ryd420Trg 
+
+
 %%%%%%%%%%%%% Rabi %%%%%%%%%%
 
-%%%%%%%%%%%%%% Rabi fidelity %%%%%%%%%%%%%
-var Push_delay_us -0.76
-var Push_buffer_us 0.5
-var MW_delay_us -0.86
-var MW_buffer_us 0.5
-var Ryd_pi_us 0.41 %0.58 %0.42 %0.31
-var Ryd_lifetime_t_total_us 5
-t += Ryd_lifetime_t_total_us/1000
-t += -(Ryd_pi_us*2+4)/1000 % right align
-
-on: Ryd420Trg 
-on: do8_4 %dummy trigger for picoscope
-t += Ryd_pi_us/1000
-off: Ryd420Trg 
-off: do8_4 %dummy trigger for picoscope
-
-%%%%% Pushout, 3us pushout time
-t += -(Push_delay_us-Push_buffer_us)/1000
-%t += (-2.24+3+0.5)/1000
-%t += (-3.78+4.5)/1000 %0.4 is pi time used in measurement
-t += -250/1000
-ol: ol_repump d2_repump_prb_resonance
-ol: ol_cooling d2_cooling_resonance
-t += 250/1000
-%on: do8_4 
-on: PrbTrg
-on: PrbRepTrg
-on: OPTrg
-t += 3/1000  %4.5/1000 %2/1000
-off: OPTrg
-off: PrbTrg
-off: PrbRepTrg
-%off: do8_4 
-t += -3/1000
-%t += -(-3.78+4.5)/1000
-%t += -(-2.24+3+0.5)/1000
-t += (Push_delay_us-Push_buffer_us)/1000
-%%%%% Pushout, 3us pushout time
-
-%%%%%% MW ionizatoin, 2us ionization time
-t += -(MW_delay_us-MW_buffer_us)/1000 %0.86us is the timing delay, 0.4us is the buffer time
-on: MWAmpTrg
-on: DO1_0
-t += time_scan_us/1000 %2/1000
-off: DO1_0
-off: MWAmpTrg
-t += -time_scan_us/1000 %-2/1000
-t += (MW_delay_us-MW_buffer_us)/1000
-
-%t += 2/1000
-%t += 2*MW_buffer_us/1000
-%%%%%% MW ionizatoin, 2us ionization time
-
-t += 4/1000
-
-on: Ryd420Trg 
-on: do8_4 %dummy trigger for picoscope
-t += Ryd_pi_us/1000
-off: Ryd420Trg 
-off: do8_4 %dummy trigger for picoscope
-
-t += 30/1000
-% for pushout
-ol: ol_cooling d2_cooling_resonance-(250)
-ol: ol_repump d2_repump_prb_resonance+150
-% for depump
-%ol: ol_cooling d2_cooling_prb_resonance-(-50)
+%%%%%%%%%%%%%%% Rabi fidelity %%%%%%%%%%%%%
+%var Push_delay_us -0.76
+%var Push_buffer_us 0.5
+%var MW_delay_us -0.86
+%var MW_buffer_us 0.5
+%var Ryd_pi_us 0.21 %0.21 %0.16 %0.19 %0.2 %0.24 %0.16 %0.11 %0.19 %0.41 %0.58 %0.42 %0.31
+%var Ryd_lifetime_t_total_us 5
+%t += Ryd_lifetime_t_total_us/1000
+%t += -(Ryd_pi_us*2+4)/1000 % right align
+%
+%on: Ryd420Trg 
+%on: do8_4 %dummy trigger for picoscope
+%t += Ryd_pi_us/1000
+%off: Ryd420Trg 
+%off: do8_4 %dummy trigger for picoscope
+%
+%%%%%% Pushout, 3us pushout time
+%t += -(Push_delay_us-Push_buffer_us)/1000
+%%t += (-2.24+3+0.5)/1000
+%%t += (-3.78+4.5)/1000 %0.4 is pi time used in measurement
+%t += -250/1000
+%ol: ol_repump d2_repump_prb_resonance
+%ol: ol_cooling d2_cooling_resonance
+%t += 250/1000
+%%on: do8_4 
+%on: PrbTrg
+%on: PrbRepTrg
+%on: OPTrg
+%t += 3/1000  %4.5/1000 %2/1000
+%off: OPTrg
+%off: PrbTrg
+%off: PrbRepTrg
+%%off: do8_4 
+%t += -3/1000
+%%t += -(-3.78+4.5)/1000
+%%t += -(-2.24+3+0.5)/1000
+%t += (Push_delay_us-Push_buffer_us)/1000
+%%%%%% Pushout, 3us pushout time
+%
+%%%%%%% MW ionizatoin, 2us ionization time
+%t += -(MW_delay_us-MW_buffer_us)/1000 %0.86us is the timing delay, 0.4us is the buffer time
+%on: MWAmpTrg
+%on: DO1_0
+%t += time_scan_us/1000 %2/1000
+%off: DO1_0
+%off: MWAmpTrg
+%t += -time_scan_us/1000 %-2/1000
+%t += (MW_delay_us-MW_buffer_us)/1000
+%
+%%t += 2/1000
+%%t += 2*MW_buffer_us/1000
+%%%%%%% MW ionizatoin, 2us ionization time
+%
+%t += 4/1000
+%
+%on: Ryd420Trg 
+%on: do8_4 %dummy trigger for picoscope
+%t += Ryd_pi_us/1000
+%off: Ryd420Trg 
+%off: do8_4 %dummy trigger for picoscope
+%
+%t += 30/1000
+%% for pushout
+%ol: ol_cooling d2_cooling_resonance-(250)
 %ol: ol_repump d2_repump_prb_resonance+150
-t += -30/1000
-%%%%%%%%%%%%%% Rabi fidelity %%%%%%%%%%%%%
+%% for depump
+%%ol: ol_cooling d2_cooling_prb_resonance-(-50)
+%%ol: ol_repump d2_repump_prb_resonance+150
+%t += -30/1000
+%%%%%%%%%%%%%%% Rabi fidelity %%%%%%%%%%%%%
+
+%%%%%% Ryd pi wait Rydb pi lifetime %%%%%%
+%var Ryd_pi_us 0.15 %0.16 %0.14 %0.15->n=60 %0.42 %0.31
+%var Ryd_lifetime_t_total_us 20 %25
+%t += (Ryd_lifetime_t_total_us)/1000
+%%t += -(Ryd_lifetime_t_total_us/2+Ryd_pi_us+time_scan_us/2)/1000 % center align
+%t += -(2*Ryd_pi_us+time_scan_us)/1000 % right align
+%
+%t += 0.35/1000
+%t += -0.95/1000 %time for 420 AOM to turn since the beam is quite far away from the AOM actuator
+%
+%%%%%% pulsed 1013 %%%%
+%t += 0.9/1000
+%t += -0.5/1000 
+%
+%t += -1./1000
+%t += -1./1000
+%on: Ryd1013Hold
+%t += 1./1000
+%off: Ryd1013Trg
+%t += 1./1000
+%
+%on: Ryd1013Trg 
+%t += 1/1000+Ryd_pi_us/1000
+%off: Ryd1013Trg 
+%t += -(1/1000+Ryd_pi_us/1000)
+%
+%t += 0.5/1000
+%t += -0.9/1000
+%%%%% pulsed 1013 %%%%
+%on: do8_4 %dummy trigger for picoscope
+%on: Ryd420Trg % scan to get Rabi
+%t += Ryd_pi_us/1000
+%off: Ryd420Trg
+%off: do8_4 
+%
+%t += time_scan_us/1000
+%
+%% Pushout, 4.5us (quench) or 2us (ramp) pushout time
+%t += -(2.24+0.5+0.5)/1000 %3us pushout, 0.5us is buffer time
+%%t += -(3.78+0.25)/1000 %4.5us pushout, 0.25 is for center it with 5us wait time
+%t += -250/1000
+%ol: ol_repump d2_repump_prb_resonance
+%ol: ol_cooling d2_cooling_resonance
+%t += 250/1000
+%on: PrbTrg
+%on: PrbRepTrg
+%on: OPTrg
+%t += 3/1000 %4.5/1000 %2/1000 for non-quenching
+%off: OPTrg
+%off: PrbTrg
+%off: PrbRepTrg
+%%ol: ol_cooling d2_cooling_resonance-(250)
+%%ol: ol_repump d2_repump_prb_resonance+150
+%t += -3/1000 %-4.5/1000 %2/1000 for non-quenching
+%%t += (3.78+0.25)/1000
+%t += (2.24+0.5+0.5)/1000 %3us pushout, 0.5us is buffer time
+%% Pushout, 4.5us (quench) or 2us (ramp) pushout time
+%
+%%% depump, 4us before second Ryd pi pulse, 2us pushout time
+%%t += -(1.21+0.5)/1000 %2us depump, 0.5us is buffer time
+%%t += -250/1000
+%%ol: ol_cooling d2_cooling_prb_resonance-(-266.65)
+%%ol: ol_repump d2_repump_prb_resonance+150
+%%t += 250/1000
+%%on: PrbTrg
+%%t += 2/1000 %0.9/1000
+%%off: PrbTrg
+%%%ol: ol_cooling d2_cooling_prb_resonance-(-50)
+%%%ol: ol_repump d2_repump_prb_resonance+150
+%%t += -2/1000
+%%t += (1.21+0.5)/1000 %(2+0.33+0.6-1)/1000
+%%% depump, 4us before second Ryd pi pulse, 2us pushout time
+%
+%
+%%%%%% pulsed 1013 %%%%
+%t += 0.9/1000
+%t += -0.5/1000 
+%
+%t += -1./1000
+%t += -1./1000
+%on: Ryd1013Hold
+%t += 1./1000
+%off: Ryd1013Trg
+%t += 1./1000
+%
+%on: Ryd1013Trg 
+%t += 1/1000+Ryd_pi_us/1000
+%off: Ryd1013Trg 
+%
+%t += (1.)/1000
+%on: Ryd1013Trg
+%t += 2000./1000
+%off: Ryd1013Hold
+%t += -2000./1000
+%t += -(1.)/1000
+%
+%t += -(1/1000+Ryd_pi_us/1000)
+%
+%t += 0.5/1000
+%t += -0.9/1000
+%%%%% pulsed 1013 %%%%
+%on: do8_4 %dummy trigger for picoscope
+%on: Ryd420Trg % scan to get Rabi
+%t += Ryd_pi_us/1000 
+%off: Ryd420Trg
+%off: do8_4 
+%
+%%% Pushout, 4us before second Ryd pi pulse, 2us pushout time
+%%t += (-2.24+3+Ryd_pi_us+0.75)/1000 %0.75 is the buffer time for pulsed 1013
+%%%t += (-3.78+4.5)/1000 %0.4 is pi time used in measurement
+%%on: PrbTrg
+%%on: PrbRepTrg
+%%on: OPTrg
+%%t += 3/1000  %4.5/1000 %2/1000
+%%off: OPTrg
+%%off: PrbTrg
+%%off: PrbRepTrg
+%%%ol: ol_cooling d2_cooling_resonance-(250)
+%%%ol: ol_repump d2_repump_prb_resonance+150
+%%t += -3/1000
+%%%t += -(-3.78+4.5)/1000
+%%t += -(-2.24+3+Ryd_pi_us+0.75)/1000
+%%% Pushout, 4us before second Ryd pi pulse, 2us pushout time
+%
+%t += 30/1000
+%% for pushout
+%ol: ol_cooling d2_cooling_resonance-(250)
+%ol: ol_repump d2_repump_prb_resonance+150
+%% for depump
+%%ol: ol_cooling d2_cooling_prb_resonance-(-50)
+%%ol: ol_repump d2_repump_prb_resonance+150
+%t += -30/1000
+%
+%t += 0.35/1000
+%t += 0.95/1000 %time for 420 AOM to turn since the beam is quite far away from the AOM actuator
+%%t += (Ryd_lifetime_t_total_us/2-Ryd_pi_us-time_scan_us/2)/1000 % center align
+%%t += 4.0/1000
+%%%%%%% Ryd pi wait Rydb pi lifetime %%%%%%
+
 
 
 off: OPTrg
@@ -418,7 +668,22 @@ t += -0.01
 
 %t += -0.1
 off: SLMTweezerHold
+off: Ryd420Shutter
+off: PrbShutter
+on: PrbCoolShutter
+off: OPShutter
+on: TARepShutter
 t += 0.1
+
+%%%%%%%%%% D1 %%%%%%%%%% 
+%on: D1StateTransferTrg
+%t += 18/1000 %15/1000
+%off: D1StateTransferTrg
+%t += 0.1
+%off: D1StateTransferHold
+%off: D1StateTransferShutter 
+%%%%%%%%%% D1 %%%%%%%%%% 
+
 dacramp: SLMTweezerIntensity slm_twz_intensity*fraction_trapdepth slm_twz_intensity 10.08
 t += 10.08
 %t += 0.1
@@ -441,7 +706,7 @@ t += 0.5
 %%%%%%%%%%%%%%%%% End Ryd Rabi %%%%%%%%%%%%%%%%%
 
 
-%t += 10
+t += 10
 %repeat: int(integer_scan_2)
 %call StateSelectivePushout()
 %end

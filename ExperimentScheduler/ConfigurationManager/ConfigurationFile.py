@@ -121,6 +121,7 @@ if __name__ == "__main__":
 
     # Update a parameter
     # config.modify_parameter('SIGLENT_AWG', 'Sine Amplitude', '0.95')
+    config.sections['MW1'].mw_lists
     config.modify_parameter('STATIC_DDS', ' DDS-0 Value:', 0)
     config.modify_parameter('STATIC_DDS', 'Control?', 1)
 

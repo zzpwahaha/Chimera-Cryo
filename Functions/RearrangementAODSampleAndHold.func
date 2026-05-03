@@ -1,0 +1,12 @@
+def RearrangementAODSampleAndHold(AOD_amplitude):
+    t += -250-200 % 200 ms is for LGM loading/cooling
+    % holding the tweezer at amplitude_scan
+    dac: TweezerIntensity AOD_amplitude %2.3 %3.0 % 2.3 %3 %4.3/37*20 %4.3/37*15 %1.2 %5.5 %twz_intensity %amplitude_scan %6.5
+    t += 0.5
+    on: TweezerTrg
+    %pulseon: Mako2 0.01 
+    t += 150.2
+    on: TweezerHold
+    t += 0.1
+    off: TweezerTrg
+    t += 250+200-0.5-150.2-0.1

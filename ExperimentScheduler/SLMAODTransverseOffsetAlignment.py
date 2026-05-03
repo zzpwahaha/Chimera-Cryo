@@ -22,7 +22,7 @@ constant_name = {'x': 'aod_offset_x', 'y': 'aod_offset_y'}
 window = [0,0,170,54]
 thresholds = 105
 binnings = np.linspace(80, 120, 161)
-analysis_locs = da.DataAnalysis(year='2026', month='March', day='16', data_name='data_17', 
+analysis_locs = da.DataAnalysis(year='2026', month='April', day='22', data_name='data_1', 
                                 window=window, thresholds=thresholds, binnings=binnings, n_cluster_row=5,
                                 multi_points_option = dict({"active":True, "search_square":4, "num_points":6}))
 
@@ -88,10 +88,10 @@ def alignment(exp:ExperimentProcedure, config_file: ConfigurationFile, master_fi
 
 def procedure():
     exp.open_configuration("\\ExperimentAutomation\\" + config_name)
-
-    alignment(exp, config_file, master_file, exp_idx=0, x_or_y='y')
+    exp_idx = 0
+    alignment(exp, config_file, master_file, exp_idx=exp_idx, x_or_y='y')
     sleep(5)
-    alignment(exp, config_file, master_file, exp_idx=0, x_or_y='x')
+    alignment(exp, config_file, master_file, exp_idx=exp_idx, x_or_y='x')
 
 if __name__=='__main__':
     procedure()

@@ -107,60 +107,19 @@ call PGCTweezerImaging()
 
 %%%%%%%%%%%%%%%%%%%%%  rearrangement  %%%%%%%%%%%%%%%%%%%% 
 
+repeat: is_cryo
 %%%%%%%%%%%%%%%%% large field LGM optimzied at cryo %%%%%%%%%%%%%%%%
-%t += 10
-%    off: xyzMOTShutter
-%    on: D1LGMPrbShutter
-%    off: D1LGMShutter
-%    on: D1LGMEOMTrg
-%    dac: D1LGMEOMAmp 0 %amplitude_scan %d1lgmprb_twz_rep_amp
-%    dac: D1LGMAmp {4.5 d1lgm_prb_pwr} %3% amplitude_scan%d1lgmprb_twz_cool_amp
-%    ol: ol_D1LGM D1_LGMCooling_resonance-230 %resonance_scan %200-cryo %150-RT %resonance_scan %d1lgm_twz_olcool
-%    ol: ol_D1_repump Rb87_HFSplitting+(-8.92) %(-9.0) %(-8.9) %resonance_scan %4.5 %resonance_scan %d1lgm_twz_olrepump
-%
-%    dac: BiasCoilX pgc_twz_bias_x %0.8-RT
-%    dac: BiasCoilY pgc_twz_bias_y %pgc_twz_bias_y_scan %-5 %pgc_twz_bias_y=-4.5 %-1.1 RT
-%    dac: BiasCoilZ pgc_twz_bias_z %pgc_twz_bias_z_scan %pgc_twz_bias_z %-0.05RT
-%    t += t_shutter
-%
-%    on: D1LGMTrg
-%    t += 25 %time_scan %25 %time_scan %t_lgm_cool_time 
-%    pulseon: DO1_0 1
-%    off: D1LGMTrg
-%    off: D1LGMEOMTrg
-%    off: D1LGMShutter
-%    off: D1LGMPrbShutter
-%%%%%%%%%%%%%%%%% large field LGM optimzied at cryo %%%%%%%%%%%%%%%%
-
-%%%%%%%%%%%%%%%%% large field LGM optimized at RT %%%%%%%%%%%%%%%%
 t += 10
-    off: xyzMOTShutter
-    on: D1LGMPrbShutter
-    off: D1LGMShutter
-    on: D1LGMEOMTrg
-    dac: D1LGMEOMAmp 0 %amplitude_scan %d1lgmprb_twz_rep_amp
-    dac: D1LGMAmp {4.5 d1lgm_prb_pwr} % amplitude_scan%d1lgmprb_twz_cool_amp
-    ol: ol_D1LGM D1_LGMCooling_resonance-230 %resonance_scan %d1lgm_twz_olcool
-    ol: ol_D1_repump Rb87_HFSplitting+(-7.6) %4.5 %resonance_scan %d1lgm_twz_olrepump
+call D1InTrapLargeFieldLGMPrb_Cryo(-8.95)
+%%%%%%%%%%%%%%%%% large field LGM optimzied at cryo %%%%%%%%%%%%%%%%
+end
 
-    dac: BiasCoilX pgc_twz_bias_x %-1.75 %pgc_twz_bias_x
-    dac: BiasCoilY -4.5 %pgc_twz_bias_y %-5 %pgc_twz_bias_y=-4.5
-    dac: BiasCoilZ pgc_twz_bias_z %pgc_twz_bias_z
-    t += t_shutter
-
-    on: D1LGMTrg
-    t += 25 %time_scan %t_lgm_cool_time 
-    pulseon: DO1_0 1
-    off: D1LGMTrg
-    off: D1LGMEOMTrg
-    off: D1LGMShutter
-    off: D1LGMPrbShutter
-
-t += 1
-    dac: BiasCoilX pgc_twz_bias_x 
-    dac: BiasCoilY pgc_twz_bias_y
-    dac: BiasCoilZ pgc_twz_bias_z
-%%%%%%%%%%%%%%%%% large field LGM optimized at RT  %%%%%%%%%%%%%%%%
+repeat: 1-is_cryo
+%%%%%%%%%%%%%%%% large field LGM optimized at RT %%%%%%%%%%%%%%%%
+t += 10
+call D1InTrapLargeFieldLGMPrb_RT(-7.6)
+%%%%%%%%%%%%%%%% large field LGM optimized at RT  %%%%%%%%%%%%%%%%
+end
 
 
 

@@ -5,7 +5,7 @@ call CryoMOTEnhancedLoadingLGM()
 
 t += -250-200 % 200 ms is for LGM loading/cooling
 % holding the tweezer at amplitude_scan
-dac: TweezerIntensity 4.3/37*20 %4.3/37*15 %1.2 %5.5 %twz_intensity %amplitude_scan %6.5
+dac: TweezerIntensity 3 %2.3 %3.0 %4.3/37*20 %4.3/37*15 %1.2 %5.5 %twz_intensity %amplitude_scan %6.5
 t += 0.5
 on: TweezerTrg
 %pulseon: Mako2 0.01 
@@ -38,7 +38,7 @@ call PGCTweezerImaging()
 
 
 %%%%%%%%%%%%%%%%%%%%%%%  rearrangement  %%%%%%%%%%%%%%%%%%%% 
-t += 50+50
+t += 50 %+50
 %%%%%%%%%%% PGC %%%%%%%%%%% 
     dac: BiasCoilX pgc_twz_bias_x
     dac: BiasCoilY pgc_twz_bias_y 
@@ -88,6 +88,63 @@ pulseon: GMMoveTrg 0.0005
 t += 0.3
 end
 
+%%% optional filtering
+off: TweezerHold
+pulseon: GMMoveTrg 0.0005
+%pulseon: do8_4 0.001
+t += 0.3
+
+on: PrbTrg
+t += 0.01
+on: TweezerTrg 
+t += 0.01
+pulseon: GMMoveTrg 0.0005
+%pulseon: do8_4 0.001
+dacramp: SLMTweezerIntensity rearrange_SLM_depth 1.75 5
+t += 5
+%off: SLMTweezerTrg
+t += 5 %1.5 %5
+%on: SLMTweezerTrg
+dacramp: SLMTweezerIntensity 1.75 rearrange_SLM_depth 5
+t += 5
+%t += time_scan
+off: TweezerTrg
+t += 0.01
+off: PrbTrg
+off: D1LGMTrg
+
+pulseon: GMMoveTrg 0.0005
+%pulseon: do8_4 0.001
+t += 0.3
+%%% optional filtering
+
+%%%%%%% optional removal %%%%%
+%repeat: 5
+%t += 0.01
+%% initialize tones
+%pulseon: GMMoveTrg 0.0005
+%%pulseon: do8_4 0.001
+%t += 0.3
+%
+%% move tones
+%%on: PrbTrg
+%t += 0.01
+%on: TweezerTrg 
+%t += 0.01
+%pulseon: GMMoveTrg 0.0005
+%%pulseon: do8_4 0.001
+%t += 5 %1.5 %5
+%off: TweezerTrg
+%t += 0.01
+%off: PrbTrg
+%
+%% ramp down tones
+%pulseon: GMMoveTrg 0.0005
+%%pulseon: do8_4 0.001
+%t += 0.3
+%end
+%%%%%%% optional removal %%%%%
+
 % after all rearrangement, this would turn off GM completely
 %pulseon: GMMoveTrg 0.0005
 off: TweezerTrg
@@ -108,58 +165,7 @@ call PGCTweezerImaging()
 %%%%%%%%%%%%%%%%%%%%%  rearrangement  %%%%%%%%%%%%%%%%%%%% 
 
 %%%%%%%%%%%%%%%%% large field LGM optimzied at cryo %%%%%%%%%%%%%%%%
-%t += 10
-%    off: xyzMOTShutter
-%    on: D1LGMPrbShutter
-%    off: D1LGMShutter
-%    on: D1LGMEOMTrg
-%    dac: D1LGMEOMAmp 0 %amplitude_scan %d1lgmprb_twz_rep_amp
-%    dac: D1LGMAmp {4.5 d1lgm_prb_pwr} %3% amplitude_scan%d1lgmprb_twz_cool_amp
-%    ol: ol_D1LGM D1_LGMCooling_resonance-230 %resonance_scan %200-cryo %150-RT %resonance_scan %d1lgm_twz_olcool
-%    ol: ol_D1_repump Rb87_HFSplitting+(-8.92) %(-9.0) %(-8.9) %resonance_scan %4.5 %resonance_scan %d1lgm_twz_olrepump
-%
-%    dac: BiasCoilX pgc_twz_bias_x %0.8-RT
-%    dac: BiasCoilY pgc_twz_bias_y %pgc_twz_bias_y_scan %-5 %pgc_twz_bias_y=-4.5 %-1.1 RT
-%    dac: BiasCoilZ pgc_twz_bias_z %pgc_twz_bias_z_scan %pgc_twz_bias_z %-0.05RT
-%    t += t_shutter
-%
-%    on: D1LGMTrg
-%    t += 25 %time_scan %25 %time_scan %t_lgm_cool_time 
-%    pulseon: DO1_0 1
-%    off: D1LGMTrg
-%    off: D1LGMEOMTrg
-%    off: D1LGMShutter
-%    off: D1LGMPrbShutter
-%%%%%%%%%%%%%%%%% large field LGM optimzied at cryo %%%%%%%%%%%%%%%%
-
-%%%%%%%%%%%%%%%%% large field LGM optimized at RT %%%%%%%%%%%%%%%%
-t += 10
-    off: xyzMOTShutter
-    on: D1LGMPrbShutter
-    off: D1LGMShutter
-    on: D1LGMEOMTrg
-    dac: D1LGMEOMAmp 0 %amplitude_scan %d1lgmprb_twz_rep_amp
-    dac: D1LGMAmp {4.5 d1lgm_prb_pwr} % amplitude_scan%d1lgmprb_twz_cool_amp
-    ol: ol_D1LGM D1_LGMCooling_resonance-230 %resonance_scan %d1lgm_twz_olcool
-    ol: ol_D1_repump Rb87_HFSplitting+(-7.6) %4.5 %resonance_scan %d1lgm_twz_olrepump
-
-    dac: BiasCoilX pgc_twz_bias_x %-1.75 %pgc_twz_bias_x
-    dac: BiasCoilY -4.5 %pgc_twz_bias_y %-5 %pgc_twz_bias_y=-4.5
-    dac: BiasCoilZ pgc_twz_bias_z %pgc_twz_bias_z
-    t += t_shutter
-
-    on: D1LGMTrg
-    t += 25 %time_scan %t_lgm_cool_time 
-    pulseon: DO1_0 1
-    off: D1LGMTrg
-    off: D1LGMEOMTrg
-    off: D1LGMShutter
-    off: D1LGMPrbShutter
-
-t += 1
-    dac: BiasCoilX pgc_twz_bias_x 
-    dac: BiasCoilY pgc_twz_bias_y
-    dac: BiasCoilZ pgc_twz_bias_z
+call D1InTrapLargeFieldLGMPrb_Combined()
 %%%%%%%%%%%%%%%%% large field LGM optimized at RT  %%%%%%%%%%%%%%%%
 
 

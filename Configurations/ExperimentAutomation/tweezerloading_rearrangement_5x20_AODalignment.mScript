@@ -3,17 +3,9 @@ t = 1
 %call CryoMOTLoadingPGC()
 call CryoMOTEnhancedLoadingLGM()
 
-t += -250-200 % 200 ms is for LGM loading/cooling
-% holding the tweezer at amplitude_scan
-dac: TweezerIntensity 4.3/37*20 %4.3/37*15 %1.2 %5.5 %twz_intensity %amplitude_scan %6.5
-t += 0.5
-on: TweezerTrg
-%pulseon: Mako2 0.01 
-t += 150.2
-on: TweezerHold
-t += 0.1
-off: TweezerTrg
-t += 250+200-0.5-150.2-0.1
+%%%%%%%%%%%%%%%%%%%%%  rearrangement S&H %%%%%%%%%%%%%%%%%%%% 
+call RearrangementAODSampleAndHold(2.3)
+%%%%%%%%%%%%%%%%%%%%%  rearrangement S&H %%%%%%%%%%%%%%%%%%%% 
 
 
 %%%%%%%%%%%%%%%  TOF  %%%%%%%%%%%%%%%%%%
@@ -37,109 +29,10 @@ t += 15
 call PGCTweezerImaging()
 
 
-%%%%%%%%%%%%%%%%%%%%  rearrangement  %%%%%%%%%%%%%%%%%%%% 
+%%%%%%%%%%%%%%%%%%%%%%%  rearrangement  %%%%%%%%%%%%%%%%%%%% 
+call Rearrangement5MovesNoCooling(5.8)
+%%%%%%%%%%%%%%%%%%%%%%%  rearrangement  %%%%%%%%%%%%%%%%%%%% 
 
-t += 50
-%%%%%%%%%% PGC %%%%%%%%%%% 
-    dac: BiasCoilX pgc_twz_bias_x
-    dac: BiasCoilY pgc_twz_bias_y 
-    dac: BiasCoilZ pgc_twz_bias_z
-
-    ol: ol_cooling d2_cooling_resonance+20-pgc_twz_olcool
-    ol: ol_repump d2_repump_resonance-20+pgc_twz_olrepump
-    on: PrbRepTrg
-    on: PrbShutter
-    on: PrbCoolShutter
-    off: xyzMOTShutter
-    dac: PrbAmp {pgcprb_twz_cool_amp_cal prb_pwr} 
-    dac: PrbrepAmp pgcprb_twz_rep_amp
-    t += t_shutter
-%%%%%%%%%% PGC %%%%%%%%%%% 
-
-%%%%%%%%%%%%%%%%%% LGM for full NA %%%%%%%%%%%%%%%%
-%t += 10
-%    off: xyzMOTShutter
-%    on: D1LGMPrbShutter
-%    off: D1LGMShutter
-%    on: D1LGMEOMTrg
-%    dac: D1LGMEOMAmp 0 %amplitude_scan %d1lgmprb_twz_rep_amp
-%    dac: D1LGMAmp {4.5 d1lgm_prb_pwr} %3% amplitude_scan%d1lgmprb_twz_cool_amp
-%    ol: ol_D1LGM D1_LGMCooling_resonance-230 %resonance_scan %200-cryo %150-RT %resonance_scan %d1lgm_twz_olcool
-%    ol: ol_D1_repump Rb87_HFSplitting+(-9.24) %resonance_scan %(-8.9) %resonance_scan %4.5 %resonance_scan %d1lgm_twz_olrepump
-%
-%    dac: BiasCoilX pgc_twz_bias_x %0.8-RT
-%    dac: BiasCoilY pgc_twz_bias_y %pgc_twz_bias_y_scan %-5 %pgc_twz_bias_y=-4.5 %-1.1 RT
-%    dac: BiasCoilZ pgc_twz_bias_z %pgc_twz_bias_z_scan %pgc_twz_bias_z %-0.05RT
-%    t += t_shutter
-%%%%%%%%%%%%%%%%%% LGM for full NA %%%%%%%%%%%%%%%%
-
-
-
-var rearrange_SLM_depth 5.8
-dacramp: SLMTweezerIntensity slm_twz_intensity rearrange_SLM_depth 10  %slm_twz_intensity*fraction_scan
-t += 10
-% this turns off RF tones from load2
-t += -1
-pulseon: GMMoveTrg 0.0005
-t += 1
-
-repeat: 5
-t += 0.01
-% initialize tones
-pulseon: GMMoveTrg 0.0005
-pulseon: do8_4 0.001
-t += 0.3
-
-% move tones
-%on: PrbTrg
-%on: D1LGMTrg
-t += 0.01
-on: TweezerTrg 
-t += 0.01
-pulseon: GMMoveTrg 0.0005
-pulseon: do8_4 0.001
-t += 5 %1.5 %5
-%t += time_scan
-off: TweezerTrg
-t += 0.01
-off: PrbTrg
-off: D1LGMTrg
-
-% ramp down tones
-pulseon: GMMoveTrg 0.0005
-pulseon: do8_4 0.001
-t += 0.3
-end
-
-% after all rearrangement, this would turn off GM completely
-%pulseon: GMMoveTrg 0.0005
-off: TweezerTrg
-off: PrbTrg
-off: PrbShutter
-    
-off: D1LGMTrg
-off: D1LGMEOMTrg
-off: D1LGMShutter
-off: D1LGMPrbShutter
-t += 1
-off: TweezerHold
-pulseon: GMLoadTrg 0.0005
-
-dacramp: SLMTweezerIntensity rearrange_SLM_depth slm_twz_intensity 10 %slm_twz_intensity*fraction_scan 
-t += 10
-
-
-%%%%%%%%%%%%%%  PGC in Tweezer with Probe %%%%%%%%%%%%%%%%%%
-% change the field/laser freq parameter here because the previous section is TOF and no light is on
-%call D2InTrapPGCPrb(25)
-%% note the t_pgc_twz should be smaller than 100
-%t += 15
-%%%%%%%%%%%%%%% Second Twizzer Image
-% note the previous section should have at least 4 ms dark interval
-call PGCTweezerImaging()
-
-
-%%%%%%%%%%%%%%  END Sequence  %%%%%%%%%%%%%%%%%%
 t += 10
 
 t += 200

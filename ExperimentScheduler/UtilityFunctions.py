@@ -6,6 +6,11 @@ from ExperimentProcedure import ConfigurationFile, ExperimentProcedure, sleep
 from pathlib import Path
 import numpy as np
 
+BIAS_E_FIELD = {
+    'bias_e_x': 0.609,
+    'bias_e_y': -0.368,
+    'bias_e_z': -0.091,
+}
 
 RT_BIAS_FIELD = {
     'pgc_bias_x': 0.9,
@@ -243,9 +248,6 @@ if __name__ == '__main__':
     # analysis_locs = da.DataAnalysis(year='2025', month='September', day='18', data_name='data_18', 
     #                                 window=window, thresholds=thresholds, binnings=binnings)
 
-    NUM_OF_PIC = 3
-    AWG_AVALANCHE = False
-
     # grid_file_name = 'atomgrid_5x7_8points_20251203_SLM'
     # camera_image_dim = {'Left:':1026, 'Right:':1090, 'H-Bin:':1, 'Bottom:': 928, 'Top:': 967, 'V-Bin:': 1}
     # tweezer_intensity_setpoint = 2.9 #V
@@ -256,10 +258,10 @@ if __name__ == '__main__':
     # tweezer_intensity_setpoint = 2.9 # 3.75 V for AOD
     # repetitions = 4
 
-    grid_file_name = 'atomgrid_5x20_6points_20260129_SLM'
-    camera_image_dim = {'Left:':971, 'Right:':1140, 'H-Bin:':1, 'Bottom:': 921, 'Top:': 974, 'V-Bin:': 1}
-    tweezer_intensity_setpoint = 8.7 #8 #6.5 #V
-    repetitions = 4
+    # grid_file_name = 'atomgrid_5x20_6points_20260331_SLM_data_12'
+    # camera_image_dim = {'Left:':971, 'Right:':1140, 'H-Bin:':1, 'Bottom:': 921, 'Top:': 974, 'V-Bin:': 1}
+    # tweezer_intensity_setpoint = 8.7 #8 #6.5 #V
+    # repetitions = 4
 
     # grid_file_name = 'atomgrid_1x7_4points_2025-11-2'
     # camera_image_dim = {'Left:':971, 'Right:':1150, 'H-Bin:':2, 'Bottom:': 927, 'Top:': 966, 'V-Bin:': 2}
@@ -278,12 +280,12 @@ if __name__ == '__main__':
     # tweezer_intensity_setpoint = 0.42 #V
     # repetitions = 8
 
-    # grid_file_name = 'atomgrid_1x4_3points_20260104_SLM'
-    # camera_image_dim = {'Left:':971, 'Right:':1150, 'H-Bin:':2, 'Bottom:': 927, 'Top:': 966, 'V-Bin:': 2}
-    # # tweezer_intensity_setpoint = 0.42 #V for diffraction limited 1x4
-    # # tweezer_intensity_setpoint = 1.88 #V for 0.222 NA 1x4
-    # tweezer_intensity_setpoint = 2.15 #V for 0.222 NA 1x4
-    # repetitions = 8
+    grid_file_name = 'atomgrid_1x4_3points_20260104_SLM'
+    camera_image_dim = {'Left:':971, 'Right:':1150, 'H-Bin:':2, 'Bottom:': 927, 'Top:': 966, 'V-Bin:': 2}
+    # tweezer_intensity_setpoint = 0.42 #V for diffraction limited 1x4
+    # tweezer_intensity_setpoint = 1.88 #V for 0.222 NA 1x4
+    tweezer_intensity_setpoint = 2.15 #V for 0.222 NA 1x4
+    repetitions = 8
 
     '''
     # # analysis grid for 2x7 grid - 20250922
@@ -323,13 +325,15 @@ if __name__ == '__main__':
     # repetitions = 4
     '''
 
-
+    NUM_OF_PIC = 2
+    AWG_AVALANCHE = False
 
     # config_name = "420alignment_with_d1.Config"
     # config_name = "1013alignment_with_d1.Config"
     # config_path = ExperimentProcedure.CONFIGURATION_DIR + config_name
 
-    config_name = "tweezerloading.Config"
+    # config_name = "tweezerloading.Config"
+    config_name = "tweezerloading_singleBodyRydbergLifetime.Config"
     config_path = 'C:/Chimera/Chimera-Cryo/Configurations/CryoTweezerLoading/' + config_name
     
     config_file = ConfigurationFile(config_path)
@@ -348,11 +352,11 @@ if __name__ == '__main__':
     # update_imaging_cooling_bias_field(config_file=config_file,fields=CRYO_BIAS_FIELD)
     # update_imaging_cooling_bias_field(config_file=config_file,fields=RT_BIAS_FIELD)
 
-    exp = ExperimentProcedure()
-    if AWG_AVALANCHE:
-        set_AWG_avalanche(config_file=config_file, exp=exp)
-    else:
-        set_AWG_rabi(config_file=config_file, exp=exp)
+    # exp = ExperimentProcedure()
+    # if AWG_AVALANCHE:
+    #     set_AWG_avalanche(config_file=config_file, exp=exp)
+    # else:
+    #     set_AWG_rabi(config_file=config_file, exp=exp)
 
     config_file.save()
 
