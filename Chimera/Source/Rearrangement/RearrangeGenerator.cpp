@@ -43,6 +43,14 @@ moveSequence RearrangeGenerator::getRearrangeMoves(std::string rearrangeType)
 	else if (rearrangeType == "scrunchxtarget") {
 		scrunchXTarget(moveseq);
 	}
+	else if (rearrangeType == "filterscrunchxtarget") {
+		scrunchXTarget(moveseq);
+		filterReservoir(moveseq);
+	}
+	else if (rearrangeType == "removefilterscrunchxtarget") {
+		scrunchXTarget(moveseq);
+		removeFilteredAtomX(moveseq);
+	}
 	else if (rearrangeType == "scrunchy") {
 		scrunchY(moveseq);
 	}
@@ -1362,6 +1370,94 @@ void RearrangeGenerator::filterReservoir(moveSequence& moveseq)
 	}
 
 	moveseq.moves.push_back(single);
+}
+
+void RearrangeGenerator::removeFilteredAtomX(moveSequence& moveseq)
+{
+	const auto& filterX = moveParam.filterPositionsX;
+	const auto& filterY = moveParam.filterPositionsY;
+
+	const unsigned wx = positionsX.size();
+	const unsigned wy = filterY.size();
+
+	// --- segment check ---
+	auto segments = moveParam.filterSegementsX;
+	if (segments.size() > 2) {
+		thrower("Filter X has more than 2 contiguous segments — cannot remove without crossing.");
+	}
+
+	for (int iy = 0; iy < wy; iy++) {
+		if (!filterY[iy]) { 
+			continue; 
+		}
+		moveSingle single;
+		// process each segment independently
+		for (int segIdx = 0; segIdx < (int)segments.size(); segIdx++) {
+			auto [start, end] = segments[segIdx];
+			int n = end - start + 1;
+			for (int i = 0; i < n; i++) {
+				int ix = start + i;
+				single.startAOX.push_back(ix);
+				if (segIdx == 0) {
+					// first segment -> left
+					single.endAOX.push_back(-n + i);
+				}
+				else {
+					// second segment -> right
+					single.endAOX.push_back(wx + i);
+				}
+			}
+		}
+		if (!single.startAOX.empty()) {
+			single.startAOY.push_back(iy);
+			single.endAOY.push_back(iy); 
+			moveseq.moves.push_back(single);
+		}
+	}
+}
+
+void RearrangeGenerator::removeFilteredAtomY(moveSequence& moveseq)
+{
+	const auto& filterX = moveParam.filterPositionsX;
+	const auto& filterY = moveParam.filterPositionsY;
+
+	const unsigned wx = filterX.size();
+	const unsigned wy = positionsY.size();
+
+	// --- segment check ---
+	const auto& segments = moveParam.filterSegementsY;
+	if (segments.size() > 2) {
+		thrower("Filter Y has more than 2 contiguous segments — cannot remove without crossing.");
+	}
+
+	for (int ix = 0; ix < wx; ix++) {
+		if (!filterX[ix]) { 
+			continue; 
+		}
+		moveSingle single;
+		for (int segIdx = 0; segIdx < (int)segments.size(); segIdx++) {
+			auto [start, end] = segments[segIdx];
+			int n = end - start + 1;
+			for (int i = 0; i < n; i++) {
+				int iy = start + i;
+				single.startAOY.push_back(iy);
+				if (segIdx == 0) {
+					// first segment -> down.
+					single.endAOY.push_back(-n + i);
+				}
+				else {
+					// second segment -> up
+					single.endAOY.push_back(wy + i);
+				}
+			}
+		}
+
+		if (!single.startAOY.empty()) {
+			single.startAOX.push_back(ix);
+			single.endAOX.push_back(ix); // keep X fixed
+			moveseq.moves.push_back(single);
+		}
+	}
 }
 
 void RearrangeGenerator::tweezer1DInitializationTest(moveSequence& moveseq)

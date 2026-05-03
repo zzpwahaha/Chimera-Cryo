@@ -508,8 +508,8 @@ void QtAuxiliaryWindow::handleMasterConfigOpen (ConfigStream& configStream){
 		aoSys.setName (dacInc, name);
 		aoSys.setNote (dacInc, noteString);
 		aoSys.setMinMax (dacInc, min, max);
-		aoSys.prepareDacForceChange (dacInc, defaultValue);
-		aoSys.updateEdits ();
+		//aoSys.prepareDacForceChange (dacInc, defaultValue);
+		//aoSys.updateEdits ();
 		aoSys.setDefaultValue (dacInc, defaultValue);
 	}
 	// variables.

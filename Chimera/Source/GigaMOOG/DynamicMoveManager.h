@@ -26,6 +26,8 @@ private:
 	// write load for move with LUT
 	void writeLoad(MessageSender& ms, unsigned variation);
 	void checkTotalPower();
+	// get [start, end] of a contiguous segement in a 1D strings of 0s and 1s, used in filterPositionsX to get filterSegements
+	std::vector<std::pair<int, int>> getSegments(const std::vector<bool>& mask);
 
 public:
 	const unsigned MAX_XTONES = 48; // could be changed to 48 if using more tones for rearrangement

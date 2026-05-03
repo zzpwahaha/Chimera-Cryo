@@ -31,6 +31,8 @@ private:
 	void compressX(moveSequence& moveseq); // need to figure out WTF
 	void compressX2(moveSequence& moveseq);
 	void filterReservoir(moveSequence& moveseq);
+	void RearrangeGenerator::removeFilteredAtomX(moveSequence& moveseq);
+	void RearrangeGenerator::removeFilteredAtomY(moveSequence& moveseq);
 
 	void tweezer1DInitializationTest(moveSequence& moveseq); // This is only initializing and deinitializing tones at loaded atom location, no move is involved. only works for 1D (or first row)
 public:

@@ -18,6 +18,7 @@ struct rearrangeParameters {
 	unsigned nTweezerLoadX, nTweezerLoadY, nTweezerX, nTweezerY, nFilterTweezerX, nFilterTweezerY;
 	std::vector<bool> loadPositionsX, loadPositionsY, initialPositionsX, initialPositionsY, initialPositions,
 		filterPositionsX, filterPositionsY;
+	std::vector<std::pair<int, int>> filterSegementsX, filterSegementsY;
 	unsigned targetNumber;
 	std::vector<unsigned char> targetPositions;
 	inline std::pair<unsigned, unsigned> getRepeatXY(unsigned char nx, unsigned char ny) {

@@ -35,7 +35,8 @@ bool DynamicMoveManager::analyzeMoogScript(std::string word, ScriptStream& curre
 		if (rearrangeMode != "scrunchx" && rearrangeMode != "scrunchy" && rearrangeMode != "scrunchxy"
 			&& rearrangeMode != "centerscrunchx" && rearrangeMode != "centerscrunchy"
 			&& rearrangeMode != "scrunchyx" && rearrangeMode != "centerscrunchyx"
-			&& rearrangeMode != "scrunchxtarget" && rearrangeMode != "equalscrunchxtarget" && rearrangeMode != "enoughscrunchxtarget"
+			&& rearrangeMode != "scrunchxtarget" && rearrangeMode != "filterscrunchxtarget" && rearrangeMode != "removefilterscrunchxtarget"
+			&& rearrangeMode != "equalscrunchxtarget" && rearrangeMode != "enoughscrunchxtarget"
 			&& rearrangeMode != "tetris"
 			&& rearrangeMode != "tweezer1dinittest") {
 			thrower("Invalid rearrangement mode. Valid options are scrunchx, scrunchy, scrunchxy, scrunchyx, centerscrunchyx, and tetris.");
@@ -266,6 +267,7 @@ bool DynamicMoveManager::analyzeMoogScript(std::string word, ScriptStream& curre
 	else {
 		thrower("Error: must first specify filter x values.");
 	}
+	moveParam.filterSegementsX = getSegments(filterPositionsX);
 
 	currentMoogScript >> tmp;
 	auto& filterPositionsY = moveParam.filterPositionsY;
@@ -288,6 +290,7 @@ bool DynamicMoveManager::analyzeMoogScript(std::string word, ScriptStream& curre
 	else {
 		thrower("Error: must first specify filter y values.");
 	}
+	moveParam.filterSegementsY = getSegments(filterPositionsY);
 
 	currentMoogScript >> tmp;
 	auto& targetPositions = moveParam.targetPositions;
@@ -705,6 +708,30 @@ void DynamicMoveManager::checkTotalPower()
 			" If you believe it is fine, please change the alert threshold.");
 	}
 
+}
+
+std::vector<std::pair<int, int>> DynamicMoveManager::getSegments(const std::vector<bool>& mask)
+{
+	std::vector<std::pair<int, int>> segments;
+	int start = -1;
+
+	for (int i = 0; i < mask.size(); i++) {
+		if (mask[i]) {
+			if (start == -1) { 
+				start = i; 
+			}
+		}
+		else {
+			if (start != -1) {
+				segments.emplace_back(start, i - 1);
+				start = -1;
+			}
+		}
+	}
+	if (start != -1) {
+		segments.emplace_back(start, mask.size() - 1);
+	}
+	return segments;
 }
 
 rearrangeParameters DynamicMoveManager::getRearrangeParameters()
