@@ -4,7 +4,7 @@ t = 1
 call CryoMOTEnhancedLoadingLGM()
 
 %%%%%%%%%%%%%%%%%%%%%  rearrangement S&H %%%%%%%%%%%%%%%%%%%% 
-call RearrangementAODSampleAndHold(2.3)
+call RearrangementAODSampleAndHold(3.0)
 %%%%%%%%%%%%%%%%%%%%%  rearrangement S&H %%%%%%%%%%%%%%%%%%%% 
 
 

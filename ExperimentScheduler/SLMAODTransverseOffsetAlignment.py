@@ -60,7 +60,7 @@ def alignment(exp:ExperimentProcedure, config_file: ConfigurationFile, master_fi
     
     # Monitor experiment status
     experiment_monitoring(exp=exp, timeout_control=timeout_control)
-
+    sleep(5)
     # Analyze the data
     data_analysis = da.DataAnalysis(YEAR, MONTH, DAY, exp_name, maximaLocs=analysis_locs.maximaLocs,
                             window=window, thresholds=thresholds, binnings=binnings, n_cluster_row=analysis_locs.n_cluster_row,

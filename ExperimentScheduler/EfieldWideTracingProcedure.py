@@ -405,8 +405,9 @@ if __name__=='__main__':
     # _raw_move_EOM_resonance(exp, start_freq=565.3 ,end_freq=428-4, step=0.25, channel=0)
     # _raw_move_EOM_resonance(exp, start_freq=428+4 ,end_freq=427.773, step=0.25, channel=0)
     # _raw_move_EOM_resonance(exp, start_freq=427.7+4,end_freq=427.751, step=0.25, channel=0)
-    _raw_move_EOM_resonance(exp, start_freq=427.7,end_freq=583.7-3, step=0.25, channel=0)
+    # _raw_move_EOM_resonance(exp, start_freq=427.7,end_freq=583.7-3, step=0.25, channel=0)
+    _raw_move_EOM_resonance(exp, start_freq=585+10,end_freq=587-1.5, step=0.25, channel=0)
 
     #   _raw_move_EOM_resonance(exp, start_freq=130,end_freq=120, step=0.25, channel=1)
-    #   _raw_move_EOM_resonance(exp, start_freq=140,end_freq=120, step=0.25, channel=1)
+    #   _raw_move_EOM_resonance(exp, start_freq=120,end_freq=130, step=0.25, channel=1)
 

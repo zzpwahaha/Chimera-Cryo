@@ -81,8 +81,8 @@ class LifetimeInterleaveRabi:
                                                 # new_initial_values=[0.01,220,500], new_final_values=[200.01,420,2000])
                                                 # new_initial_values=[0.01,110,400], new_final_values=[100.01,310,1400])
                                                 # new_initial_values=[0.01,55,170], new_final_values=[50.01,155,420])
-                                                # new_initial_values=[0.01,29.5,122], new_final_values=[25.01,97,197]) # 50, 5x14
-                                                new_initial_values=[0.01,45,230], new_final_values=[35.01,195,335]) # 50, 5x5
+                                                new_initial_values=[0.01,29.5,122], new_final_values=[25.01,97,197]) # 50, 5x14
+                                                # new_initial_values=[0.01,45,230], new_final_values=[35.01,195,335]) # 50, 5x5
                                                 # new_initial_values=[0.01,31,154], new_final_values=[25.01,121,253]) # 50, 5x10
                                                 # new_initial_values=[0.01,36,146], new_final_values=[30.01,126,266]) # 70, 5x14
                                                 # new_initial_values=[0.01,47,172], new_final_values=[40.01,152,292]) # 70, 5x10
@@ -273,14 +273,14 @@ class LifetimeInterleaveRabi:
 
 if __name__ == "__main__":
 
-    EXP_NAME_PREFIX = "N-50-0.01-5x5-0.0V"
+    EXP_NAME_PREFIX = "N-50-0.01-5x14-0.0V-NOOPRP-F1"
 
     NUM_LIFETIME_SEGMENTS = 32
     LIFETIME_REPETITIONS = 60*NUM_LIFETIME_SEGMENTS
-    RABI_420_FREQ = 583.868 #529.08 #578.048   #578.091 #577.977 #578.096 #576.334 #578.271 #578.656 #578.56 # MHz
+    RABI_420_FREQ = 582.795 #587.9 #585.037 #583.868 #529.08 #578.048   #578.091 #577.977 #578.096 #576.334 #578.271 #578.656 #578.56 # MHz
     AVALANCHE_420_FREQ = RABI_420_FREQ-1 # MHz
 
-    CURRENT_EOM_FREQ = 583.868  #RABI_420_FREQ
+    CURRENT_EOM_FREQ = 582.795  #RABI_420_FREQ
 
     quotient, remainder = divmod(LIFETIME_REPETITIONS, NUM_LIFETIME_SEGMENTS)
     lifetime_repetitions_arr = [
@@ -296,12 +296,12 @@ if __name__ == "__main__":
     )
 
     for exp_idx, _ in enumerate(lifetime_repetitions_arr):
-        # if exp_idx in np.arange(2): continue
+        if exp_idx in np.arange(2): continue
         
         eid = 0
         exp_postfix = ''
         while True:
-            # if exp_idx in [0,]: break
+            if exp_idx in [0,1,2]: break
             try:
                 aborted = experiment.AOD_alignment(exp_idx=exp_idx, exp_name_prefix=EXP_NAME_PREFIX, exp_name_postfix=exp_postfix,
                                                timeout_control={"use": True, "timeout": 1800})
@@ -321,7 +321,7 @@ if __name__ == "__main__":
         eid = 0
         exp_postfix = ''
         while True:
-            if exp_idx in [0,]: break
+            if exp_idx in [0,1,2]: break
             try:
                 aborted = experiment.lifetime(exp_idx=exp_idx, exp_name_prefix=EXP_NAME_PREFIX, exp_name_postfix=exp_postfix,
                                                timeout_control={"use": True, "timeout": 7000})
