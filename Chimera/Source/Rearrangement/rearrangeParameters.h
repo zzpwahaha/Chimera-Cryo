@@ -15,9 +15,9 @@ struct rearrangeParameters {
 	unsigned singlexRepeatX, singlexRepeatY; // number of repeat when the move involves single x tone
 	unsigned singleyRepeatX, singleyRepeatY; // number of repeat when the move involves single y tone
 
-	unsigned nTweezerLoadX, nTweezerLoadY, nTweezerX, nTweezerY, nFilterTweezerX, nFilterTweezerY;
+	unsigned nTweezerLoadX, nTweezerLoadY, nTweezerX, nTweezerY, nFilterTweezerX, nFilterTweezerY, nPaintTweezerX, nPaintTweezerY;
 	std::vector<bool> loadPositionsX, loadPositionsY, initialPositionsX, initialPositionsY, initialPositions,
-		filterPositionsX, filterPositionsY;
+		filterPositionsX, filterPositionsY, paintPositionsX, paintPositionsY;
 	std::vector<std::pair<int, int>> filterSegementsX, filterSegementsY;
 	unsigned targetNumber;
 	std::vector<unsigned char> targetPositions;

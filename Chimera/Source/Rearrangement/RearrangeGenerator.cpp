@@ -51,6 +51,16 @@ moveSequence RearrangeGenerator::getRearrangeMoves(std::string rearrangeType)
 		scrunchXTarget(moveseq);
 		removeFilteredAtomX(moveseq);
 	}
+	else if (rearrangeType == "filterscrunchxtargetpaint") {
+		scrunchXTarget(moveseq);
+		filterReservoir(moveseq);
+		paintStaticPositions(moveseq);
+	}
+	else if (rearrangeType == "removefilterscrunchxtargetpaint") {
+		scrunchXTarget(moveseq);
+		removeFilteredAtomX(moveseq);
+		paintStaticPositions(moveseq);
+	}
 	else if (rearrangeType == "scrunchy") {
 		scrunchY(moveseq);
 	}
@@ -1458,6 +1468,35 @@ void RearrangeGenerator::removeFilteredAtomY(moveSequence& moveseq)
 			moveseq.moves.push_back(single);
 		}
 	}
+}
+
+void RearrangeGenerator::paintStaticPositions(moveSequence& moveseq)
+{
+	const auto& paintPositionsX = moveParam.paintPositionsX;
+	const auto& paintPositionsY = moveParam.paintPositionsY;
+
+	moveSingle single;
+
+	// Add all X tones
+	int ix = 0;
+	for (auto const& channelBoolX : paintPositionsX) {
+		if (channelBoolX) {
+			single.startAOX.push_back(ix);
+			single.endAOX.push_back(ix);
+		}
+		ix++;
+	}
+	// Add all Y tones
+	int iy = 0;
+	for (auto const& channelBoolY : paintPositionsY) {
+		if (channelBoolY) {
+			single.startAOY.push_back(iy);
+			single.endAOY.push_back(iy);
+		}
+		iy++;
+	}
+
+	moveseq.moves.push_back(single);
 }
 
 void RearrangeGenerator::tweezer1DInitializationTest(moveSequence& moveseq)

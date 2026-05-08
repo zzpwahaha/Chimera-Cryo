@@ -3,11 +3,22 @@
 
 MemoryController::MemoryController()
 {
-	memBlocks.reserve(8); 
-	for (size_t i = 0; i < 8; i++) {
+	// Ours, doesn't work with more than 32 moves
+	//memBlocks.reserve(8); 
+	//for (size_t i = 0; i < 8; i++) {
+	//	memBlock mem(i);
+	//	memBlocks.push_back(mem);
+	//}
+
+	// From Sr
+	memBlocks.reserve(6); //reminder - always a lot faster to assign vector size ahead of time.
+	for (size_t i = 0; i < 6; i++)
+	{
 		memBlock mem(i);
 		memBlocks.push_back(mem);
 	}
+
+
 }
 
 std::vector<int> MemoryController::getNextChannels(int channelsNeeded)
@@ -16,7 +27,9 @@ std::vector<int> MemoryController::getNextChannels(int channelsNeeded)
 
 	for (size_t i = 0; i < channelsNeeded; i++) {
 		memBlock& mBlock = getMemBlock();
-		channelsOut[i] = mBlock.blockID + 8 * mBlock.channelID;
+		//channelsOut[i] = mBlock.blockID + 8 * mBlock.channelID; // Ours, doesn't work with more than 32 moves
+		channelsOut[i] = 8 * (memBlocks[0].blockID) + memBlocks[0].channelID; // From Sr
+
 		mBlock.channelID += 1; //iterate the channel ID, so that if this block is selected again we use the next channel.
 		mBlock.usedMemory += 3; //each full move uses up 3 snapshots.
 

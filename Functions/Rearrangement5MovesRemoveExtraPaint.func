@@ -1,0 +1,110 @@
+def Rearrangement5MovesRemoveExtraPaint(rearrange_SLM_depth):
+    %%%%%%%%%%%%%%%%%%%%%%%  rearrangement  %%%%%%%%%%%%%%%%%%%% 
+    t += 50+50
+    %%%%%%%%%%% PGC %%%%%%%%%%% 
+        dac: BiasCoilX pgc_twz_bias_x
+        dac: BiasCoilY pgc_twz_bias_y 
+        dac: BiasCoilZ pgc_twz_bias_z
+
+        ol: ol_cooling d2_cooling_resonance+20-pgc_twz_olcool
+        ol: ol_repump d2_repump_resonance-20+pgc_twz_olrepump
+        on: PrbRepTrg
+        on: PrbShutter
+        on: PrbCoolShutter
+        off: xyzMOTShutter
+        dac: PrbAmp {pgcprb_twz_cool_amp_cal prb_pwr} 
+        dac: PrbrepAmp pgcprb_twz_rep_amp
+        t += t_shutter
+    %%%%%%%%%%% PGC %%%%%%%%%%% 
+
+    %var rearrange_SLM_depth 5.8
+    dacramp: SLMTweezerIntensity slm_twz_intensity rearrange_SLM_depth 10  %slm_twz_intensity*fraction_scan
+    t += 10
+    % this turns off RF tones from load2
+    t += -1
+    pulseon: GMMoveTrg 0.0005
+    t += 1
+
+    repeat: 5
+    t += 0.01
+    % initialize tones
+    pulseon: GMMoveTrg 0.0005
+    %pulseon: do8_4 0.001
+    t += 0.3
+
+    % move tones
+    on: PrbTrg
+    t += 0.01
+    on: TweezerTrg 
+    t += 0.01
+    pulseon: GMMoveTrg 0.0005
+    %pulseon: do8_4 0.001
+    t += 5 %1.5 %5
+    off: TweezerTrg
+    t += 0.01
+    off: PrbTrg
+
+    % ramp down tones
+    pulseon: GMMoveTrg 0.0005
+    %pulseon: do8_4 0.001
+    t += 0.3
+    end
+
+    %%%%%% optional removal %%%%%
+    repeat: 5
+    t += 0.01
+    % initialize tones
+    pulseon: GMMoveTrg 0.0005
+    %pulseon: do8_4 0.001
+    t += 0.3
+
+    % move tones
+    %on: PrbTrg
+    t += 0.01
+    on: TweezerTrg 
+    t += 0.01
+    pulseon: GMMoveTrg 0.0005
+    %pulseon: do8_4 0.001
+    t += 5 %1.5 %5
+    off: TweezerTrg
+    t += 0.01
+    off: PrbTrg
+
+    % ramp down tones
+    pulseon: GMMoveTrg 0.0005
+    %pulseon: do8_4 0.001
+    t += 0.3
+    end
+    %%%%%% optional removal %%%%%
+
+    % after all rearrangement, this would turn off GM completely
+    %pulseon: GMMoveTrg 0.0005
+    off: TweezerTrg
+    off: PrbTrg
+    off: PrbShutter
+    t += 1
+    %off: TweezerHold
+    %pulseon: GMLoadTrg 0.0005
+
+    t += 0.01
+    % initialize paint tones
+    pulseon: GMMoveTrg 0.0005
+    %pulseon: do8_4 0.001
+    t += 0.3
+    % move tones - fake, just for formality
+    %on: PrbTrg
+    t += 0.01
+    %on: TweezerTrg 
+    t += 0.01
+    pulseon: GMMoveTrg 0.0005
+    %pulseon: do8_4 0.001
+    t += -(0.01+0.3+0.01+0.01)
+
+    dacramp: SLMTweezerIntensity rearrange_SLM_depth slm_twz_intensity 10 %slm_twz_intensity*fraction_scan 
+    t += 10
+
+    %%%%%%%%%%%%%%% Second Twizzer Image
+    % note the previous section should have at least 4 ms dark interval
+    call PGCTweezerImaging()
+
+    %%%%%%%%%%%%%%%%%%%%%  rearrangement  %%%%%%%%%%%%%%%%%%%% 

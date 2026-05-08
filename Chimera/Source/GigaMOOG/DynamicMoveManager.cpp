@@ -20,7 +20,7 @@ bool DynamicMoveManager::analyzeMoogScript(std::string word, ScriptStream& curre
 	}
 
 	Expression numRearrangement, ampStepNew, freqStepNew, ampStepPaintNew, freqStepPaintNew, repeatX, repeatY, xoff, yoff, yPaintStartExpr, yPaintEndExpr, scrunchSpacingExpression;
-	std::string tmp, loadAOX, loadAOY, initAOX, initAOY, filterAOX, filterAOY;
+	std::string tmp, loadAOX, loadAOY, initAOX, initAOY, filterAOX, filterAOY, paintAOX, paintAOY;
 	currentMoogScript >> numRearrangement;
 	if (numRearrangement.varies()) {
 		thrower("Error: Variation in variable " + numRearrangement.expressionStr + " is not allowed in rearrangement(gigamoog) script for now.");
@@ -36,6 +36,7 @@ bool DynamicMoveManager::analyzeMoogScript(std::string word, ScriptStream& curre
 			&& rearrangeMode != "centerscrunchx" && rearrangeMode != "centerscrunchy"
 			&& rearrangeMode != "scrunchyx" && rearrangeMode != "centerscrunchyx"
 			&& rearrangeMode != "scrunchxtarget" && rearrangeMode != "filterscrunchxtarget" && rearrangeMode != "removefilterscrunchxtarget"
+			&& rearrangeMode != "filterscrunchxtargetpaint" && rearrangeMode != "removefilterscrunchxtargetpaint" 
 			&& rearrangeMode != "equalscrunchxtarget" && rearrangeMode != "enoughscrunchxtarget"
 			&& rearrangeMode != "tetris"
 			&& rearrangeMode != "tweezer1dinittest") {
@@ -293,6 +294,54 @@ bool DynamicMoveManager::analyzeMoogScript(std::string word, ScriptStream& curre
 	moveParam.filterSegementsY = getSegments(filterPositionsY);
 
 	currentMoogScript >> tmp;
+	auto& paintPositionsX = moveParam.paintPositionsX;
+	auto& nPaintTweezerX = moveParam.nPaintTweezerX;
+	if (tmp == "paintx") {
+		currentMoogScript >> paintAOX;
+		paintPositionsX.clear();
+		nPaintTweezerX = 0;
+		for (auto& ch : paintAOX) { // convert string to boolean vector
+			if (ch == '0') {
+				paintPositionsX.push_back(0);
+			}
+			else if (ch == '1') {
+				paintPositionsX.push_back(1);
+				nPaintTweezerX++;
+			}
+			else {
+				thrower("Error: non-boolean paint x value.");
+			}
+		}
+	}
+	else {
+		thrower("Error: must first specify paint x values.");
+	}
+
+	currentMoogScript >> tmp;
+	auto& paintPositionsY = moveParam.paintPositionsY;
+	auto& nPaintTweezerY = moveParam.nPaintTweezerY;
+	if (tmp == "painty") {
+		currentMoogScript >> paintAOY;
+		paintPositionsY.clear();
+		nPaintTweezerY = 0;
+		for (auto& ch : paintAOY) { // convert string to boolean vector
+			if (ch == '0') {
+				paintPositionsY.push_back(0);
+			}
+			else if (ch == '1') {
+				paintPositionsY.push_back(1);
+				nPaintTweezerY++;
+			}
+			else {
+				thrower("Error: non-boolean paint y value.");
+			}
+		}
+	}
+	else {
+		thrower("Error: must first specify paint y values.");
+	}
+
+	currentMoogScript >> tmp;
 	auto& targetPositions = moveParam.targetPositions;
 	auto& targetNumber = moveParam.targetNumber;
 	if (tmp == "targetstart") {
@@ -359,10 +408,14 @@ void DynamicMoveManager::writeRearrangeMoves(moveSequence input, MessageSender& 
 	//step 0: turn off all load tones.
 	auto numChannelX = 48; //moveParam.nTweezerX * moveParam.repeatX;
 	for (unsigned channel = 0; channel < numChannelX /*&& channel < MAX_XTONES*/; channel++) {
-		//size_t hardwareChannel = (channel * 8) % 48 + (channel * 8) / 48;
-		//memoryDAC0.moveChannel(hardwareChannel / 8);
-		size_t hardwareChannel = channel;
-		memoryDAC0.moveChannel(hardwareChannel % 8);
+		// From Sr
+		size_t hardwareChannel = (channel * 8) % 48 + (channel * 8) / 48;
+		memoryDAC0.moveChannel(hardwareChannel / 8);
+
+		// Ours, doesn't work with more than 32 moves
+		//size_t hardwareChannel = channel;
+		//memoryDAC0.moveChannel(hardwareChannel % 8);
+
 		Message m = Message::make().destination(MessageDestination::KA007)
 			.DAC(MessageDAC::DAC0).channel(hardwareChannel)
 			.setting(MessageSetting::MOVEFREQUENCY)
@@ -372,10 +425,14 @@ void DynamicMoveManager::writeRearrangeMoves(moveSequence input, MessageSender& 
 	}
 	auto numChannelY = 48; // moveParam.nTweezerY* moveParam.repeatY;
 	for (unsigned channel = 0; channel < numChannelY /*&& channel < MAX_YTONES*/; channel++) {
-		//size_t hardwareChannel = (channel * 8) % 48 + (channel * 8) / 48;
-		//memoryDAC1.moveChannel(hardwareChannel / 8);
-		size_t hardwareChannel = channel;
-		memoryDAC1.moveChannel(hardwareChannel % 8);
+		// From Sr
+		size_t hardwareChannel = (channel * 8) % 48 + (channel * 8) / 48;
+		memoryDAC1.moveChannel(hardwareChannel / 8);
+
+		// Ours, doesn't work with more than 32 moves
+		//size_t hardwareChannel = channel;
+		//memoryDAC1.moveChannel(hardwareChannel % 8);
+		
 		Message m = Message::make().destination(MessageDestination::KA007)
 			.DAC(MessageDAC::DAC1).channel(hardwareChannel)
 			.setting(MessageSetting::MOVEFREQUENCY)
@@ -459,6 +516,11 @@ void DynamicMoveManager::writeRearrangeMoves(moveSequence input, MessageSender& 
 				.frequencyMHz(freq).amplitudePercent(amp).phaseDegrees(0)
 				.instantFTW(0).ATWIncr(ampstep).stepSequenceID(3 * stepID + 1 + 1).FTWIncr(freqstep).phaseJump(0);;
 			ms.enqueue(m);
+			//flog << "setmove " << 3 * stepID + 2/*stepSequenceID*/ << " DAC0 "
+			//	<< hardwareChannel/*channel*/ << " " << 0/*instantFTW*/ << " " << 0/*phaseJump*/ << " "
+			//	<< amp/*amplitudePercent*/ << " " << ampstep/*ATWIncr*/ << " "
+			//	<< freq/*frequencyMHz*/ << " " << freqstep/*FTWIncr*/ << " "
+			//	<< 0/*phaseDegrees*/ << fendl;
 		}
 		for (int channel = 0; channel < ny * repeatY && channel < MAX_YTONES; channel++) {
 			int logicalChannel = channel / repeatY;
@@ -479,11 +541,11 @@ void DynamicMoveManager::writeRearrangeMoves(moveSequence input, MessageSender& 
 				.frequencyMHz(freq).amplitudePercent(amp).phaseDegrees(0)
 				.instantFTW(0).ATWIncr(ampstep).stepSequenceID(3 * stepID + 2).FTWIncr(freqstep).phaseJump(0);
 			ms.enqueue(m);
-			flog << "setmove " << 3 * stepID + 2/*stepSequenceID*/ << " DAC1 "
-				<< hardwareChannel/*channel*/ << " " << 0/*instantFTW*/ << " " << 0/*phaseJump*/ << " "
-				<< amp/*amplitudePercent*/ << " " << ampstep/*ATWIncr*/ << " "
-				<< freq/*frequencyMHz*/ << " " << freqstep/*FTWIncr*/ << " "
-				<< 0/*phaseDegrees*/ << fendl;
+			//flog << "setmove " << 3 * stepID + 2/*stepSequenceID*/ << " DAC1 "
+			//	<< hardwareChannel/*channel*/ << " " << 0/*instantFTW*/ << " " << 0/*phaseJump*/ << " "
+			//	<< amp/*amplitudePercent*/ << " " << ampstep/*ATWIncr*/ << " "
+			//	<< freq/*frequencyMHz*/ << " " << freqstep/*FTWIncr*/ << " "
+			//	<< 0/*phaseDegrees*/ << fendl;
 		}
 
 		//step 3: ramp all tones to 0

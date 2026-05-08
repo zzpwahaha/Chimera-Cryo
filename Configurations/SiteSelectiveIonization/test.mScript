@@ -1,0 +1,56 @@
+%%%%%%%%%%%%%%%%% Start With 1ms %%%%%%%%%%%%%%%%% 
+t = 1
+%call CryoMOTLoadingPGC()
+call CryoMOTEnhancedLoadingLGM()
+
+%%%%%%%%%%%%%%%%%%%%%  rearrangement S&H %%%%%%%%%%%%%%%%%%%% 
+call RearrangementAODSampleAndHold(3.0) %2.3
+%%%%%%%%%%%%%%%%%%%%%  rearrangement S&H %%%%%%%%%%%%%%%%%%%% 
+
+
+call TOF(10)
+
+%t += -10
+%dacramp: SLMTweezerIntensity 1.2 slm_twz_intensity 10
+%t += 10
+
+%%%%%%%%%%%%%%  PGC in Tweezer %%%%%%%%%%%%%%%%%%
+% change the field/laser freq parameter here because the previous section is TOF and no light is on
+call D2InTrapPGC(t_pgc_twz)
+% note the t_pgc_twz should be smaller than 100
+t += 15
+%%%%%%%%%%%%%%  PGC in Tweezer with Probe %%%%%%%%%%%%%%%%%%
+% change the field/laser fre q parameter here because the previous section is TOF and no light is on
+call D2InTrapPGCPrb(25)
+% note the t_pgc_twz should be smaller than 100
+t += 15
+%%%%%%%%%%%%%%  Image TWIZZER  %%%%%%%%%%%%%%%%%%
+% change the field/laser freq parameter here because the previous section is dark, i.e. 100-t_pgc_twz is larger than 4
+call PGCTweezerImaging()
+
+
+%%%%%%%%%%%%%%%%%%%%%  rearrangement  %%%%%%%%%%%%%%%%%%%% 
+%call Rearrangement5MoveFilterTarget(5.8)
+%call Rearrangement5MoveFilterTargetPaint(5.8)
+%call Rearrangement5MovesRemoveExtra(5.8)
+%call Rearrangement5MovesRemoveExtraPaint(5.8)
+%%%%%%%%%%%%%%%%%%%%%  rearrangement  %%%%%%%%%%%%%%%%%%%% 
+
+t += 200
+
+
+%%%%%%%%%%%%%%  Image TWIZZER  %%%%%%%%%%%%%%%%%%
+% change the field/laser freq parameter here because the previous section is dark, i.e. 100-t_pgc_twz is larger than 4
+call PGCTweezerImaging()
+
+
+t += 200
+
+
+%%%%%%%%%%%%%%  Image TWIZZER  %%%%%%%%%%%%%%%%%%
+% change the field/laser freq parameter here because the previous section is dark, i.e. 100-t_pgc_twz is larger than 4
+call PGCTweezerImaging()
+
+
+%%%%%%%%%%%%%%  END Sequence  %%%%%%%%%%%%%%%%%%
+call EndSequence()

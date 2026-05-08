@@ -88,7 +88,7 @@ def alignment(exp:ExperimentProcedure, config_file: ConfigurationFile, master_fi
 
 def procedure():
     exp.open_configuration("\\ExperimentAutomation\\" + config_name)
-    exp_idx = 0
+    exp_idx = 3
     alignment(exp, config_file, master_file, exp_idx=exp_idx, x_or_y='y')
     sleep(5)
     alignment(exp, config_file, master_file, exp_idx=exp_idx, x_or_y='x')

@@ -296,12 +296,12 @@ if __name__ == "__main__":
     )
 
     for exp_idx, _ in enumerate(lifetime_repetitions_arr):
-        if exp_idx in np.arange(2): continue
+        # if exp_idx in np.arange(2): continue
         
         eid = 0
         exp_postfix = ''
         while True:
-            if exp_idx in [0,1,2]: break
+            if exp_idx in [0,]: break
             try:
                 aborted = experiment.AOD_alignment(exp_idx=exp_idx, exp_name_prefix=EXP_NAME_PREFIX, exp_name_postfix=exp_postfix,
                                                timeout_control={"use": True, "timeout": 1800})
@@ -321,7 +321,7 @@ if __name__ == "__main__":
         eid = 0
         exp_postfix = ''
         while True:
-            if exp_idx in [0,1,2]: break
+            if exp_idx in [0,]: break
             try:
                 aborted = experiment.lifetime(exp_idx=exp_idx, exp_name_prefix=EXP_NAME_PREFIX, exp_name_postfix=exp_postfix,
                                                timeout_control={"use": True, "timeout": 7000})

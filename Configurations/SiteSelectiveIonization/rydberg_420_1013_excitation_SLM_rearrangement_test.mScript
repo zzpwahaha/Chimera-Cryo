@@ -1,0 +1,258 @@
+%%%%%%%%%%%%%%%%% Start With 1ms %%%%%%%%%%%%%%%%% 
+t = 1
+%call CryoMOTLoadingPGC()
+call CryoMOTEnhancedLoadingLGM()
+
+%%%%%%%%%%%%%%%%%%%%%  rearrangement S&H %%%%%%%%%%%%%%%%%%%% 
+call RearrangementAODSampleAndHold(3.0) %2.3
+%%%%%%%%%%%%%%%%%%%%%  rearrangement S&H %%%%%%%%%%%%%%%%%%%% 
+
+
+call TOF(10)
+
+%t += -10
+%dacramp: SLMTweezerIntensity 1.2 slm_twz_intensity 10
+%t += 10
+
+%%%%%%%%%%%%%%  PGC in Tweezer %%%%%%%%%%%%%%%%%%
+% change the field/laser freq parameter here because the previous section is TOF and no light is on
+call D2InTrapPGC(t_pgc_twz)
+% note the t_pgc_twz should be smaller than 100
+t += 15
+%%%%%%%%%%%%%%  PGC in Tweezer with Probe %%%%%%%%%%%%%%%%%%
+% change the field/laser fre q parameter here because the previous section is TOF and no light is on
+call D2InTrapPGCPrb(25)
+% note the t_pgc_twz should be smaller than 100
+t += 15
+%%%%%%%%%%%%%%  Image TWIZZER  %%%%%%%%%%%%%%%%%%
+% change the field/laser freq parameter here because the previous section is dark, i.e. 100-t_pgc_twz is larger than 4
+call PGCTweezerImaging()
+
+
+%%%%%%%%%%%%%%%%%%%%%  rearrangement  %%%%%%%%%%%%%%%%%%%% 
+%call Rearrangement5MoveFilterTarget(5.8)
+%call Rearrangement5MoveFilterTargetPaint(5.8)
+%call Rearrangement5MovesRemoveExtra(5.8)
+call Rearrangement5MovesRemoveExtraPaint(5.8)
+%%%%%%%%%%%%%%%%%%%%%  rearrangement  %%%%%%%%%%%%%%%%%%%% 
+
+%%%%%%%%%%%%%%%%% large field LGM optimzied at cryo %%%%%%%%%%%%%%%%
+call D1InTrapLargeFieldLGMPrb_Combined()
+%%%%%%%%%%%%%%%%% large field LGM optimized at RT  %%%%%%%%%%%%%%%%
+
+
+t += 5
+
+call setQuantizationField()
+dacramp: SLMTweezerIntensity slm_twz_intensity slm_twz_intensity*0.06 10
+t += 10
+t += t_field_settling-20
+dacramp: SLMTweezerIntensity slm_twz_intensity*0.06 slm_twz_intensity 10
+t += 10
+
+call OpticalPumping22()
+
+%%change field to original OP befor angle
+%t += 5
+%    dac: BiasCoilX -2.5+0.75-2.5 
+%    dac: BiasCoilY -0.839
+%    dac: BiasCoilZ -0.048
+%% warm
+%dacramp: SLMTweezerIntensity slm_twz_intensity slm_twz_intensity*0.1 10
+%t += 10
+%t += 50-20
+%dacramp: SLMTweezerIntensity slm_twz_intensity*0.1 slm_twz_intensity 10
+%t += 10
+
+
+%%%%%%%%%%%%%%  Prepare Rydberg beams %%%%%%%%%%%%%%%%%%
+%var beta 0.1
+var zero1013SetPoint -0.01
+%var ryd1013SetPoint 4.0 %2.0
+
+on: Ryd1013Shutter
+ddsfreq: Ryd420Brimrose ryd420_resonance %82.29+0*10.134 %(78.13+1.057*(4*fraction_scan))+1.0134*(4*fraction_scan)/(2*beta)/2 %ryd420_resonance
+t += 5
+%on: Ryd420Shutter
+off: Ryd420ExpShutter
+%on: Ryd1013Shutter
+
+%off: ryd420rfsourceswitch
+on: ryd420RFSourceSwitch
+off: ryd420AWGShapedChSwitch
+
+dac: Ryd420Amp ryd420_amplitude %0.05 %0.11 %(0.11+0.013)*fraction_scan-0.013 %0.11 %0.05 %0.2 %amplitude_scan %0.8 %0.1 %0.55 %0.30 %0.34
+dac: Ryd1013Amp zero1013SetPoint %2.0 %0.55 %0.60 %0.68
+
+var IQ_MAX_AMP 2.5
+dac: MW_IQ_I IQ_MAX_AMP
+dac: MW_IQ_Q 0
+pulseon: MWTrg 0.4
+t += 1
+
+
+%call releaseRecaptureSLM(time_scan_us/1000)
+
+
+%%%%%%%%%%%%%%  Trap ramp for Rydberg  %%%%%%%%%%%%%%%%%%
+var fraction_trapdepth 0.01 %0.01
+dacramp: SLMTweezerIntensity slm_twz_intensity slm_twz_intensity*fraction_trapdepth 10
+t += 10
+%%%%%%% 420 sample and hold %%%%
+t += -10
+on: Ryd420Trg
+t += 3.0
+on: Ryd420Hold
+t += 1.0
+off: Ryd420Trg
+t += 0.1
+on: Ryd420ExpShutter
+t += 10-3-1-0.1
+%%%%%%% 420 sample and hold %%%%
+%%%%%% 1013 sample and hold %%%%
+t += -10
+%on: Ryd1013Trg
+t += 1
+dacramp: Ryd1013Amp zero1013SetPoint ryd1013_amplitude 4
+t += 1
+%on: Ryd1013Hold
+t += 0.1
+%off: Ryd1013Trg
+t += 10-1-1-0.1
+%%%%%% 1013 sample and hold %%%%
+
+%off: ryd420RFSourceSwitch
+on: ryd420RFSourceSwitch
+off: ryd420AWGShapedChSwitch
+%on: ryd420AWGShapedChSwitch
+
+%var Ryd_pi2_us 0.09
+var Ryd_pi_us 0.42 %0.20 %0.185
+var Ryd_2pi_us 0.83 %0.20 %0.185
+
+t += 0.4
+on: SLMTweezerHold
+t += 0.101
+off: SLMTweezerTrg
+%on: TweezerTrg 
+
+t += -7.1
+dac: TweezerIntensity 0
+t += 3
+off: TweezerHold
+t += 1
+on: TweezerTrg 
+dacramp: TweezerIntensity 0 amplitude_scan 3
+t += 3
+t += -(3+1+3)
+t += 7.1
+
+%%%%%%%%%%%%%%%%% Ryd Rabi %%%%%%%%%%%%%%%%%
+t += 0.35/1000
+t += -0.95/1000 %time for 420 AOM to turn since the beam is quite far away from the AOM actuator
+%pulseon: Ryd1013Mako 10/1000
+on: do8_4 %dummy trigger for picoscope
+t += -2/1000
+%on: SiglentTrg
+%on: Siglent3Trg
+t += 2/1000
+
+
+
+%%%%%%%%%%%%% Rabi %%%%%%%%%%
+%on: Ryd420Trg 
+%t += time_scan_us/1000
+%off: Ryd420Trg 
+%%%%%%%%%%%%% Rabi %%%%%%%%%%
+
+t += time_scan_us/1000
+
+off: OPTrg
+off: PrbTrg
+off: PrbRepTrg
+t += 2/1000
+off: SiglentTrg
+off: Siglent3Trg
+t += -2/1000
+off: do8_4 
+t += 0.95/1000
+t += 0.35/1000
+
+
+t += 1/1000
+on: do8_4 
+on: MWAmpTrg
+t += -1/1000
+
+on: SLMTweezerTrg
+%off: TweezerTrg
+%pulseon: GMMoveTrg 0.0005
+%t += 0.01
+%off: TweezerHold
+%pulseon: GMLoadTrg 0.0005
+%t += -0.01
+
+dacramp: TweezerIntensity amplitude_scan 0 3
+t += 3
+off: TweezerTrg 
+pulseon: GMMoveTrg 0.0005
+t += 0.01
+pulseon: GMLoadTrg 0.0005
+t += -(3+0.01)
+
+t += 0.01
+off: MWAmpTrg
+off: do8_4 
+t += -0.01
+
+%t += -0.1
+off: SLMTweezerHold
+t += 0.1
+dacramp: SLMTweezerIntensity slm_twz_intensity*fraction_trapdepth slm_twz_intensity 10.08
+t += 10.08
+%t += 0.1
+
+t += -9
+dacramp: Ryd1013Amp ryd1013_amplitude zero1013SetPoint 9
+t += 9
+
+%pulseon: MWAmpTrg 0.1
+t += 0.1
+off: Ryd1013Trg
+off: Ryd1013Hold
+off: Ryd420Shutter
+off: Ryd1013Shutter
+off: Ryd420Hold
+off: OPShutter
+off: PrbShutter
+t += 0.5
+
+%%%%%%%%%%%%%%%%% End Ryd Rabi %%%%%%%%%%%%%%%%%
+
+
+%t += 10
+%repeat: int(integer_scan_2)
+%call StateSelectivePushout()
+%end
+t += 10
+%call setZeroField()
+
+    dac: BiasCoilX pgc_twz_bias_x
+    dac: BiasCoilY pgc_twz_bias_y 
+    dac: BiasCoilZ pgc_twz_bias_z
+t += 100
+%%%%%%%%%%%%%%  PGC in Tweezer %%%%%%%%%%%%%%%%%%
+% change the field/laser freq parameter here because the previous section is TOF and no light is on
+call D2InTrapPGCPrb(t_pgc_twz)
+% note the t_pgc_twz should be smaller than 100
+t += 15
+
+%%%%%%%%%%%%%%  Image TWIZZER  %%%%%%%%%%%%%%%%%%
+% change the field/laser freq parameter here because the previous section is dark, i.e. 100-t_pgc_twz is larger than 4
+call PGCTweezerImaging()
+
+t += 10
+call RydbergBeamCameraFootprint()
+
+%%%%%%%%%%%%%%  END Sequence  %%%%%%%%%%%%%%%%%%
+call EndSequence()

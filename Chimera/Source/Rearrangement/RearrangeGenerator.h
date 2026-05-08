@@ -33,8 +33,9 @@ private:
 	void filterReservoir(moveSequence& moveseq);
 	void RearrangeGenerator::removeFilteredAtomX(moveSequence& moveseq);
 	void RearrangeGenerator::removeFilteredAtomY(moveSequence& moveseq);
+	void RearrangeGenerator::paintStaticPositions(moveSequence& moveseq);
 
-	void tweezer1DInitializationTest(moveSequence& moveseq); // This is only initializing and deinitializing tones at loaded atom location, no move is involved. only works for 1D (or first row)
+	void tweezer1DInitializationTest(moveSequence& moveseq); // This is only initializing and deinitializing tones at loaded atom location row by row, no move is involved.
 public:
 	const rearrangeParameters moveParam;
 

@@ -265,8 +265,8 @@ rb87_hfsplitting 6834.682
 t_shutter 10
 t_field_settling 750
 rydberg_ionization_frequency 6375
-aod_offset_x 0.26
-aod_offset_y 0.011
+aod_offset_x 0.278
+aod_offset_y 0.119
 is_cryo 1
 971 1140 1 921 974 1
 0 1
