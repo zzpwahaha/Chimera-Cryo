@@ -45,6 +45,7 @@ public:
 	StaticDasSystem staticDas;
 	ElliptecSystem elliptec;
 	MicrowaveSystem mwSys2;
+	MicrowaveSystem mwSys3;
 
 private:
 	Ui::QtAnalysisWindow* ui;

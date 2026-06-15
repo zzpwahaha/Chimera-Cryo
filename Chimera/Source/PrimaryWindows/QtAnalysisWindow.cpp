@@ -16,6 +16,7 @@ QtAnalysisWindow::QtAnalysisWindow(QWidget* parent)
 	, staticDas(this)
 	, elliptec(this)
 	, mwSys2(MICROWAVE_DELIMS[1], MICROWAVE_SAFEMODES[1], MICROWAVE_PORTS[1], MW_TRIGGER_LINES[1], this)
+	, mwSys3(MICROWAVE_DELIMS[2], MICROWAVE_SAFEMODES[2], MICROWAVE_PORTS[2], MW_TRIGGER_LINES[2], this)
 {
 	setWindowTitle("Analysis Window");
 }
@@ -70,13 +71,27 @@ std::string QtAnalysisWindow::getSystemStatusString()
 		msg += "\tElliptec System is disabled! Enable in \"constants.h\"\n";
 	}
 
-	msg += "Microwave System:\n";
+	msg += "Microwave System 2:\n";
 	if (!mwSys2.getCore().safemode) {
 		msg += "\tCode System is Active!\n";
 		msg += "\t" + mwSys2.getIdentity() + "\n\t";
 		msg += "Attached trigger line is \n\t\t";
 		{
 			msg += "(" + str(mwSys2.getCore().uwaveTriggerLine.first) + "," + str(mwSys2.getCore().uwaveTriggerLine.second) + ") ";
+		}
+		msg += "\n";
+	}
+	else {
+		msg += "\tCode System is disabled! Enable in \"constants.h\"\n";
+	}
+
+	msg += "Microwave System 3:\n";
+	if (!mwSys3.getCore().safemode) {
+		msg += "\tCode System is Active!\n";
+		msg += "\t" + mwSys3.getIdentity() + "\n\t";
+		msg += "Attached trigger line is \n\t\t";
+		{
+			msg += "(" + str(mwSys3.getCore().uwaveTriggerLine.first) + "," + str(mwSys3.getCore().uwaveTriggerLine.second) + ") ";
 		}
 		msg += "\n";
 	}
@@ -98,6 +113,8 @@ void QtAnalysisWindow::windowOpenConfig(ConfigStream& configFile)
 		microwaveSettings uwsettings;
 		ConfigSystem::stdGetFromConfig(configFile, mwSys2.getCore(), uwsettings);
 		mwSys2.setMicrowaveSettings(uwsettings);
+		ConfigSystem::stdGetFromConfig(configFile, mwSys3.getCore(), uwsettings);
+		mwSys3.setMicrowaveSettings(uwsettings);
 	}
 	catch (ChimeraError&) {
 		throwNested("Analysis Window failed to read parameters from the configuration file.");
@@ -111,6 +128,7 @@ void QtAnalysisWindow::windowSaveConfig(ConfigStream& configFile)
 	staticDas.handleSaveConfig(configFile);
 	elliptec.handleSaveConfig(configFile);
 	mwSys2.handleSaveConfig(configFile);
+	mwSys3.handleSaveConfig(configFile);
 }
 
 void QtAnalysisWindow::fillExpDeviceList(DeviceList& list)
@@ -120,6 +138,7 @@ void QtAnalysisWindow::fillExpDeviceList(DeviceList& list)
 	list.list.push_back(staticDas.getCore());
 	list.list.push_back(elliptec.getCore());
 	list.list.push_back(mwSys2.getCore());
+	list.list.push_back(mwSys3.getCore());
 }
 
 void QtAnalysisWindow::initializeWidgets()
@@ -164,6 +183,8 @@ void QtAnalysisWindow::initializeWidgets()
 	layoutAux->addWidget(&elliptec);
 	mwSys2.initialize(this);
 	layoutAux->addWidget(&mwSys2);
+	mwSys3.initialize(this);
+	layoutAux->addWidget(&mwSys3);
 
 	layoutAux->addStretch(1);
 
