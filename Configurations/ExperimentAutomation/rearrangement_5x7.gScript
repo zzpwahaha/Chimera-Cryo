@@ -5,7 +5,7 @@
 %rearrange 1 tweezer1dinittest 1 2000 24 
 %rearrange 1 enoughscrunchxtarget 1 2000 moverate 
 %rearrange 2 centerscrunchx scrunchxtarget 1 2000 24 
-%rearrange 1 scrunchxtarget 1 2000 24 %160 %24 %moverate 
+%rearrange 1 scrunchxtarget 1 2000 moverate %24 %160 %24 %moverate 
 rearrange 1 removefilterscrunchxtarget 1 2000 moverate %165 %moverate %135 %moverate %135 %24 %160 %24 %moverate 
 %rearrange 1 centerscrunchx 1 2000 24 
 %rearrange 1 centerscrunchx 1 amprate 50 

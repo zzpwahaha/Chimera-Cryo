@@ -74,7 +74,7 @@ t += 50+50 %+50
 
 
 
-var rearrange_SLM_depth 5.8
+%var rearrange_SLM_depth 5.8
 dacramp: SLMTweezerIntensity slm_twz_intensity rearrange_SLM_depth  10  %slm_twz_intensity*fraction_scan
 t += 10
 

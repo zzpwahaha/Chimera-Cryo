@@ -30,7 +30,7 @@ call PGCTweezerImaging()
 
 
 %%%%%%%%%%%%%%%%%%%%%  rearrangement  %%%%%%%%%%%%%%%%%%%% 
-call Rearrangement5MoveFilterTarget(5.8)
+call Rearrangement5MoveFilterTarget(5.8) %5.8
 %%%%%%%%%%%%%%%%%%%%%  rearrangement  %%%%%%%%%%%%%%%%%%%% 
 
 %%%%%%%%%%%%%%%%% large field LGM optimzied at cryo %%%%%%%%%%%%%%%%

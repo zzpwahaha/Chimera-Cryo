@@ -25,7 +25,7 @@ CRYO = False
 window = [0,0,170,54]
 thresholds = 103
 binnings = np.linspace(0, 240, 241)
-analysis_locs = da.DataAnalysis(year='2026', month='March', day='19', data_name='data_1', 
+analysis_locs = da.DataAnalysis(year='2026', month='June', day='1', data_name='data_2', 
                                 window=window, thresholds=thresholds, binnings=binnings, multi_points_option = dict({"active":True, "search_square":4, "num_points":6}))
 grid_file_name = 'atomgrid_5x20_6points_20260319_SLM'
 camera_image_dim = {'Left:':971, 'Right:':1140, 'H-Bin:':1, 'Bottom:': 921, 'Top:': 974, 'V-Bin:': 1}
@@ -281,7 +281,7 @@ def rydberg_420_alignment_DLS(exp_postfix: str, pico_idx: int, amplitude: float 
 
 def rydberg_1013_alignment_DLS(exp_postfix: str, pico_idx: int, amplitude: float = 1.0, timeout_control = {'use':True, 'timeout':3000}):
     NUM_POSITION_VAR = 11
-    NUM_RESONANCE_VAR = 21
+    NUM_RESONANCE_VAR = 26
     if pico_idx not in [3,4]:
         raise ValueError("pico_idx out of the range. Ranges are " + str([1,2,3,4]))
     VERTICAL = 1; HORIZONTAL = 2;
@@ -410,8 +410,8 @@ if __name__ == '__main__':
     # rydberg_420_lightshift_DLS_D1(exp_postfix="2D-preAlignment", amplitude=0.0)
 
 
-    # rydberg_1013_lightshift_DLS_D1(exp_postfix="2D-preAlignment", amplitude=1.0)
-    # rydberg_1013_lightshift_DLS_D1(exp_postfix="2D-preAlignment", amplitude=0.0)
+    rydberg_1013_lightshift_DLS_D1(exp_postfix="2D-preAlignment-1", amplitude=1.0)
+    rydberg_1013_lightshift_DLS_D1(exp_postfix="2D-preAlignment-1", amplitude=0.0)
 
     # for idx in range(9,100):
     #     rydberg_1013_lightshift_DLS_D1(exp_postfix=f"2D-preAlignment-{idx}", amplitude=1.0, timeout_control = {'use':True, 'timeout':420})
@@ -420,12 +420,12 @@ if __name__ == '__main__':
     #     exp.hardware_controller.restart_zynq_control()
 
     # exp.hardware_controller.restart_zynq_control()
-    # rydberg_1013_alignment_DLS(exp_postfix="2D", pico_idx=4)
+    rydberg_1013_alignment_DLS(exp_postfix="2D-1", pico_idx=4)
     # exp.hardware_controller.restart_zynq_control()
-    rydberg_1013_alignment_DLS(exp_postfix="2D", pico_idx=3)
+    rydberg_1013_alignment_DLS(exp_postfix="2D-1", pico_idx=3)
     # exp.hardware_controller.restart_zynq_control()
-    # rydberg_1013_lightshift_DLS_D1(exp_postfix="2D-postAlignment", amplitude=1.0)
-    # rydberg_1013_lightshift_DLS_D1(exp_postfix="2D-postAlignment", amplitude=0.0)
+    rydberg_1013_lightshift_DLS_D1(exp_postfix="2D-postAlignment-1", amplitude=1.0)
+    rydberg_1013_lightshift_DLS_D1(exp_postfix="2D-postAlignment-1", amplitude=0.0)
     # # sleep(10)
     # exp.hardware_controller.restart_zynq_control()
 

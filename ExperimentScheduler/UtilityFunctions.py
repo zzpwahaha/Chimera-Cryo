@@ -24,6 +24,8 @@ RT_BIAS_FIELD = {
     'pgc_img_bias_x': 0.8,
     'pgc_img_bias_y': -1.1,
     'pgc_img_bias_z': 0.05,
+
+    'd1lgm_cool_amp': 2,
 }
 
 CRYO_BIAS_FIELD = {
@@ -38,6 +40,8 @@ CRYO_BIAS_FIELD = {
     'pgc_img_bias_x': 3.25,
     'pgc_img_bias_y': -4.6,
     'pgc_img_bias_z': 0.11,
+
+    'd1lgm_cool_amp': 8,
 }
 
 

@@ -20,17 +20,23 @@ window = [0,0,170,54]
 thresholds = 105
 binnings = np.linspace(0, 240, 4*240+1)
 binnings = np.linspace(80, 120, 161)
-analysis_locs = da.DataAnalysis(year='2026', month='April', day='22', data_name='data_1', n_cluster_row=5,
+analysis_locs = da.DataAnalysis(year='2026', month='May', day='19', data_name='data_1', n_cluster_row=5,
                                 window=window, thresholds=thresholds, binnings=binnings, 
                                 multi_points_option = dict({"active":True, "search_square":4, "num_points":6}))
 
 
 class LifetimeInterleaveRabi:
-    def __init__(self, lifetime_repetitions_arr, AVALANCHE_420_FREQ, RABI_420_FREQ, CURRENT_EOM_FREQ):
+    def __init__(self, lifetime_repetitions_arr, AVALANCHE_420_FREQ, RABI_420_FREQ, 
+                 CURRENT_EOM_FREQ, RYDBERG_420_SETPOINT, RYDBERG_1013_SETPOINT, 
+                 RYDBERG_RABI_PI_TIME, RYDBERG_RABI_SCAN_TIME):
         self.lifetime_repetitions_arr = lifetime_repetitions_arr
         self.AVALANCHE_420_FREQ = AVALANCHE_420_FREQ
         self.RABI_420_FREQ = RABI_420_FREQ
         self.CURRENT_EOM_FREQ = CURRENT_EOM_FREQ
+        self.RYDBERG_420_SETPOINT = RYDBERG_420_SETPOINT
+        self.RYDBERG_1013_SETPOINT = RYDBERG_1013_SETPOINT
+        self.RYDBERG_RABI_PI_TIME = RYDBERG_RABI_PI_TIME
+        self.RYDBERG_RABI_SCAN_TIME = RYDBERG_RABI_SCAN_TIME
         aod_align.setup(aod_align.config_file)
 
         s = """00000000000000000000
@@ -71,18 +77,25 @@ class LifetimeInterleaveRabi:
 
         for variable in config_file.config_param.variables:
             config_file.config_param.update_variable(variable.name, scan_type="Constant", scan_dimension=0)
-        config_file.config_param.update_variable("ryd420_amplitude", constant_value=-0.0093) #-0.0069 # -0.0072 #-0.0096
-        config_file.config_param.update_variable("ryd1013_amplitude", constant_value=2.25) #4
+        config_file.config_param.update_variable("ryd420_amplitude", constant_value=self.RYDBERG_420_SETPOINT) #-0.0093 #-0.0069 # -0.0072 #-0.0096
+        config_file.config_param.update_variable("ryd1013_amplitude", constant_value=self.RYDBERG_1013_SETPOINT) #4, 2.25
         config_file.config_param.update_scan_dimension(0, new_ranges=[
             ScanRange(index=0,left_inclusive=True, right_inclusive=True, variations=11),
             ScanRange(index=1,left_inclusive=True, right_inclusive=True, variations=16),
             ScanRange(index=2,left_inclusive=True, right_inclusive=True, variations=4),])
+        # config_file.config_param.update_scan_dimension(0, new_ranges=[
+        #     ScanRange(index=0,left_inclusive=True, right_inclusive=True, variations=11),
+        #     ScanRange(index=1,left_inclusive=True, right_inclusive=True, variations=6),])
         config_file.config_param.update_variable("time_scan_us", scan_type="Variable", 
                                                 # new_initial_values=[0.01,220,500], new_final_values=[200.01,420,2000])
-                                                # new_initial_values=[0.01,110,400], new_final_values=[100.01,310,1400])
-                                                # new_initial_values=[0.01,55,170], new_final_values=[50.01,155,420])
-                                                new_initial_values=[0.01,29.5,122], new_final_values=[25.01,97,197]) # 50, 5x14
-                                                # new_initial_values=[0.01,45,230], new_final_values=[35.01,195,335]) # 50, 5x5
+                                                # new_initial_values=[0.01,110,400], new_final_values=[100.01,310,1400]) #60, 5x5
+                                                # new_initial_values=[0.01,55,170], new_final_values=[50.01,155,420]) #60, 5x10, 5x14, 5x8
+                                                # new_initial_values=[0.01,25], new_final_values=[20.01,50]) #60, 5x10, 5x14, 5x8
+                                                # new_initial_values=[0.01,110,530], new_final_values=[100.01,410,890]) #60, 4x4， 3x3
+                                                # new_initial_values=[0.01,29.5,122], new_final_values=[25.01,97,197]) # 50, 5x14
+                                                # new_initial_values=[0.01,70,430], new_final_values=[50.01,370,610]) # 50, 5x14, 0.6 MHz Rabi
+                                                # new_initial_values=[0.01,45,230], new_final_values=[35.01,195,335]) # 50, 5x5, 5x14 0.8 MHz Rabi
+                                                new_initial_values=[0.01,31.25,168.75], new_final_values=[25.01,125,300]) # 50, 5x5, 5x14 1.0 MHz Rabi
                                                 # new_initial_values=[0.01,31,154], new_final_values=[25.01,121,253]) # 50, 5x10
                                                 # new_initial_values=[0.01,36,146], new_final_values=[30.01,126,266]) # 70, 5x14
                                                 # new_initial_values=[0.01,47,172], new_final_values=[40.01,152,292]) # 70, 5x10
@@ -130,14 +143,14 @@ class LifetimeInterleaveRabi:
 
         for variable in config_file.config_param.variables:
             config_file.config_param.update_variable(variable.name, scan_type="Constant", scan_dimension=0)
-        config_file.config_param.update_variable("ryd420_amplitude", constant_value=-0.0093) #-0.0069 # -0.0072 #-0.0096
-        config_file.config_param.update_variable("ryd1013_amplitude", constant_value=2.25) #4
+        config_file.config_param.update_variable("ryd420_amplitude", constant_value=self.RYDBERG_420_SETPOINT) #-0.0093 #-0.0069 # -0.0072 #-0.0096
+        config_file.config_param.update_variable("ryd1013_amplitude", constant_value=self.RYDBERG_1013_SETPOINT) #4, 2.25
         config_file.config_param.update_scan_dimension(0, new_ranges=[
             ScanRange(index=0,left_inclusive=True, right_inclusive=True, variations=31), #61
             ])
         config_file.config_param.update_variable("time_scan_us", scan_type="Variable", 
                                                 new_initial_values=[0.01], 
-                                                new_final_values=[0.01+3.6])
+                                                new_final_values=[0.01+self.RYDBERG_RABI_SCAN_TIME])
         
         config_file.modify_parameter("MAKO3_CAM", "Mako System Active:", str(1))
         config_file.modify_parameter("MAKO3_CAM", "Exposure Time:", str(1035))
@@ -183,9 +196,9 @@ class LifetimeInterleaveRabi:
 
         for variable in config_file.config_param.variables:
             config_file.config_param.update_variable(variable.name, scan_type="Constant", scan_dimension=0)
-        config_file.config_param.update_variable("ryd420_amplitude", constant_value=-0.0093) #-0.0069 # -0.0072 #-0.0096
-        config_file.config_param.update_variable("ryd1013_amplitude", constant_value=2.25) #4
-        config_file.config_param.update_variable("time_scan_us", constant_value=0.41)
+        config_file.config_param.update_variable("ryd420_amplitude", constant_value=self.RYDBERG_420_SETPOINT) #-0.0093 #-0.0069 # -0.0072 #-0.0096
+        config_file.config_param.update_variable("ryd1013_amplitude", constant_value=self.RYDBERG_1013_SETPOINT) #4, 2.25
+        config_file.config_param.update_variable("time_scan_us", constant_value=self.RYDBERG_RABI_PI_TIME)
         config_file.config_param.update_scan_dimension(0, new_ranges=[
             ScanRange(index=0,left_inclusive=True, right_inclusive=True, variations=31), #61
             ])
@@ -272,15 +285,19 @@ class LifetimeInterleaveRabi:
 
 
 if __name__ == "__main__":
+    RYDBERG_420_SETPOINT = 0.01 #0.002 #-0.005 #-0.0099 #-0.0093 #-0.0069 # -0.0072 #-0.0096
+    RYDBERG_1013_SETPOINT = 2.25 #4, 2.25
+    RYDBERG_RABI_PI_TIME = 0.57 #0.73 #0.91 #0.41
+    RYDBERG_RABI_SCAN_TIME = 4.2 #5.4 #7.2 #3.6
 
-    EXP_NAME_PREFIX = "N-50-0.01-5x14-0.0V-NOOPRP-F1"
+    EXP_NAME_PREFIX = "N-50-0.01-5x14-0.0V-1.0MHz"
 
     NUM_LIFETIME_SEGMENTS = 32
     LIFETIME_REPETITIONS = 60*NUM_LIFETIME_SEGMENTS
-    RABI_420_FREQ = 582.795 #587.9 #585.037 #583.868 #529.08 #578.048   #578.091 #577.977 #578.096 #576.334 #578.271 #578.656 #578.56 # MHz
+    RABI_420_FREQ = 583.5 #577.624 #587. #583.8 #582.795 #587.9 #585.037 #583.868 #529.08 #578.048   #578.091 #577.977 #578.096 #576.334 #578.271 #578.656 #578.56 # MHz
     AVALANCHE_420_FREQ = RABI_420_FREQ-1 # MHz
 
-    CURRENT_EOM_FREQ = 582.795  #RABI_420_FREQ
+    CURRENT_EOM_FREQ = 583.5-1  #RABI_420_FREQ
 
     quotient, remainder = divmod(LIFETIME_REPETITIONS, NUM_LIFETIME_SEGMENTS)
     lifetime_repetitions_arr = [
@@ -292,11 +309,15 @@ if __name__ == "__main__":
         lifetime_repetitions_arr=lifetime_repetitions_arr,
         CURRENT_EOM_FREQ = CURRENT_EOM_FREQ,
         AVALANCHE_420_FREQ = AVALANCHE_420_FREQ,
-        RABI_420_FREQ = RABI_420_FREQ
+        RABI_420_FREQ = RABI_420_FREQ,
+        RYDBERG_420_SETPOINT = RYDBERG_420_SETPOINT,
+        RYDBERG_1013_SETPOINT = RYDBERG_1013_SETPOINT,
+        RYDBERG_RABI_PI_TIME = RYDBERG_RABI_PI_TIME,
+        RYDBERG_RABI_SCAN_TIME = RYDBERG_RABI_SCAN_TIME,
     )
 
     for exp_idx, _ in enumerate(lifetime_repetitions_arr):
-        # if exp_idx in np.arange(2): continue
+        # if exp_idx in np.arange(10): continue
         
         eid = 0
         exp_postfix = ''
@@ -378,7 +399,7 @@ if __name__ == "__main__":
                 sleep(10)
                 # exp.hardware_controller.restart_zynq_control()
 
-        for _ in range(3):
+        for _ in range(2):
             trial_num = 0
             while True:
                 try:

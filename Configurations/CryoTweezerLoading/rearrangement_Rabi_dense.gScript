@@ -3,7 +3,7 @@
 % Frequency increment = 1  => 0.897 um/ms
 
 %rearrange 1 scrunchxtarget 1 2000 135 %160 %24 %moverate 
-rearrange 1 removefilterscrunchxtarget 1 2000 28 %27 %20 %27 %135 
+rearrange 1 removefilterscrunchxtarget 1 2000 22 %28 %27 %20 %27 %135 
 %rearrange 1 filterscrunchxtarget 1 2000 135 %24 %160 %24 %moverate 
 %rearrange 1 tweezer1dinittest 1 2000 24 
 singlex_repeatx 5

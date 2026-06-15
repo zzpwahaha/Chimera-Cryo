@@ -4,7 +4,7 @@ t = 1
 call CryoMOTEnhancedLoadingLGM()
 
 %%%%%%%%%%%%%%%%%%%%%  rearrangement S&H %%%%%%%%%%%%%%%%%%%% 
-call RearrangementAODSampleAndHold(2.3)
+call RearrangementAODSampleAndHold(3)
 %%%%%%%%%%%%%%%%%%%%%  rearrangement S&H %%%%%%%%%%%%%%%%%%%% 
 
 
@@ -228,33 +228,33 @@ t += 2/1000
 
 %%%%%%%%%%%%% Rabi %%%%%%%%%%
 
-%%%%% pulsed 1013 %%%%
-%t += 0.9/1000
-%t += -0.5/1000 %-int((1+time_scan_us)*50)/50/1000/2
-%
-%t += -1./1000
-%t += -1./1000
-%on: Ryd1013Hold
-%t += 1./1000
-%off: Ryd1013Trg
-%t += 1./1000
-%
-%on: Ryd1013Trg 
-%t += 1/1000+time_scan_us/1000
-%off: Ryd1013Trg 
-%
-%t += 1./1000
-%on: Ryd1013Trg
-%t += 400./1000
-%off: Ryd1013Hold
-%t += -400./1000
-%t += -1./1000
-%
-%t += -(1/1000+time_scan_us/1000)
-%
-%t += 0.5/1000
-%t += -0.9/1000
 %%%% pulsed 1013 %%%%
+t += 0.9/1000
+t += -0.5/1000 %-int((1+time_scan_us)*50)/50/1000/2
+
+t += -1./1000
+t += -1./1000
+on: Ryd1013Hold
+t += 1./1000
+off: Ryd1013Trg
+t += 1./1000
+
+on: Ryd1013Trg 
+t += 1/1000+time_scan_us/1000
+off: Ryd1013Trg 
+
+t += 1./1000
+on: Ryd1013Trg
+t += 400./1000
+off: Ryd1013Hold
+t += -400./1000
+t += -1./1000
+
+t += -(1/1000+time_scan_us/1000)
+
+t += 0.5/1000
+t += -0.9/1000
+%%% pulsed 1013 %%%%
 
 on: Ryd420Trg 
 t += time_scan_us/1000

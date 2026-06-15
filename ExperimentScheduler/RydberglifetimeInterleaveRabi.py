@@ -24,8 +24,11 @@ analysis_locs = da.DataAnalysis(year='2026', month='February', day='24', data_na
 
 
 class LifetimeInterleaveRabi:
-    def __init__(self, lifetime_repetitions_arr):
+    def __init__(self, lifetime_repetitions_arr, RYDBERG_1013_AMPLITUDE, RYDBERG_420_AMPLITUDE):
         self.lifetime_repetitions_arr = lifetime_repetitions_arr
+        self.RYDBERG_1013_AMPLITUDE = RYDBERG_1013_AMPLITUDE
+        self.RYDBERG_420_AMPLITUDE = RYDBERG_420_AMPLITUDE
+
         pass
     # def __init__(self, ryd_420_amplitude, AVALANCHE_420_FREQ, RABI_420_FREQ, CURRENT_EOM_FREQ, avalanche_repetitions_arr):
         # self.ryd_420_amplitude = ryd_420_amplitude
@@ -48,8 +51,8 @@ class LifetimeInterleaveRabi:
 
         for variable in config_file.config_param.variables:
             config_file.config_param.update_variable(variable.name, scan_type="Constant", scan_dimension=0)
-        config_file.config_param.update_variable("ryd420_amplitude", constant_value=0.02) #0.1 #0.02 #0.04
-        config_file.config_param.update_variable("ryd1013_amplitude", constant_value=2) #4 #0.25
+        config_file.config_param.update_variable("ryd420_amplitude", constant_value=self.RYDBERG_420_AMPLITUDE) #0.1 #0.02 #0.04
+        config_file.config_param.update_variable("ryd1013_amplitude", constant_value=self.RYDBERG_1013_AMPLITUDE) #2 #4 #0.25
         config_file.config_param.update_scan_dimension(0, new_ranges=[
             ScanRange(index=0,left_inclusive=True, right_inclusive=True, variations=16),])
         config_file.config_param.update_variable("time_scan_us", scan_type="Variable", 
@@ -133,8 +136,9 @@ class LifetimeInterleaveRabi:
 
 if __name__ == "__main__":
 
-    EXP_NAME_PREFIX = "N-55-RIGHTALIGNED-CRYO-SHIELDANDOR"
-
+    EXP_NAME_PREFIX = "N-50-RIGHTALIGNED-RT-SHIELDANDOR"
+    RYDBERG_420_AMPLITUDE = 0.02
+    RYDBERG_1013_AMPLITUDE = 2
 
     NUM_LIFETIME_SEGMENTS = 16*2
     LIFETIME_REPETITIONS = 60*NUM_LIFETIME_SEGMENTS
@@ -148,10 +152,12 @@ if __name__ == "__main__":
 
     experiment = LifetimeInterleaveRabi(
         lifetime_repetitions_arr=lifetime_repetitions_arr,
+        RYDBERG_420_AMPLITUDE=RYDBERG_420_AMPLITUDE,
+        RYDBERG_1013_AMPLITUDE=RYDBERG_1013_AMPLITUDE,
     )
 
     for exp_idx, _ in enumerate(lifetime_repetitions_arr):
-        # if exp_idx in [0,1,]: continue
+        # if exp_idx in [0,1,2,3]: continue
         eid = 0
         exp_postfix = ''
         while True:

@@ -175,6 +175,8 @@ class DataAnalysis:
                 thresholds=self.thresholds,
                 CP_errorbar=True,
             )
+            x, y, yerr = self.exp_file.individual_keys[0][:], result['survival_mean'][:], result['survival_CPerr'][:]
+        
         else:
             if self.maximaLocs.shape[0] != locs_selection.shape[0]:
                 raise ValueError(f"The shape for atom locations {self.maximaLocs.shape} does NOT match the shape for location selection {locs_selection.shape[0]} for rearrangement!")
@@ -188,8 +190,8 @@ class DataAnalysis:
             result = ah.getAtomSurvivalData(data=self.andor_datas[[1,2]], atomLocation=self.maximaLocs[locs_selection], 
                     bins=self.binnings, thresholds=self.thresholds, window=self.window, CP_errorbar=True, 
                     rearranged = rearranged)
+            x, y, yerr = self.exp_file.individual_keys[0][:], result['fill_rates_rearr'][:], result['fill_rates_rearr_CPerr'][:]
 
-        x, y, yerr = self.exp_file.individual_keys[0][:], result['survival_mean'][:], result['survival_CPerr'][:]
         if xkey is not None:
             xkey = np.array(xkey)
             if xkey.shape != y.shape:

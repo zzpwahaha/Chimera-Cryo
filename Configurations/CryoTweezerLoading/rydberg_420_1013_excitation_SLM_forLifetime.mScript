@@ -264,7 +264,7 @@ off: SLMTweezerTrg
 %%%%%% Ryd Ramsey %%%%%%
 
 %%%%% Ryd pi wait Rydb pi lifetime %%%%%%
-var Ryd_pi_us 0.20 %0.16 %0.2 %0.14 %0.14 %0.21 %$0.14 %0.21 %0.16 %0.17 %0.15 %0.19 %0.21 %0.24 %0.21 %0.16 %0.15->n=60 %0.42 %0.31
+var Ryd_pi_us 0.16 %0.2 %0.14 %0.2 %0.17 %0.20 %0.16 %0.2 %0.14 %0.14 %0.21 %$0.14 %0.21 %0.16 %0.17 %0.15 %0.19 %0.21 %0.24 %0.21 %0.16 %0.15->n=60 %0.42 %0.31
 var Ryd_lifetime_t_total_us 40
 t += (Ryd_lifetime_t_total_us)/1000
 %t += -(Ryd_lifetime_t_total_us/2+Ryd_pi_us+time_scan_us/2)/1000 % center align
@@ -500,7 +500,7 @@ t += 10
 %call StateSelectivePushout()
 %t += 10
 %call setZeroField()
-repeat: is_cryo %int(t_field_settling/400)
+repeat: 1 %is_cryo %int(t_field_settling/400)
     dac: BiasCoilX pgc_twz_bias_x
     dac: BiasCoilY pgc_twz_bias_y 
     dac: BiasCoilZ pgc_twz_bias_z

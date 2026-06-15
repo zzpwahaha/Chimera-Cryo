@@ -2,7 +2,7 @@ def D1InTrapLargeFieldLGMPrb_Combined():
     repeat: is_cryo
     %%%%%%%%%%%%%%%%% large field LGM optimzied at cryo %%%%%%%%%%%%%%%%
     t += 10
-    call D1InTrapLargeFieldLGMPrb_Cryo(-8.98)
+    call D1InTrapLargeFieldLGMPrb_Cryo(-8.955)
     %%%%%%%%%%%%%%%%% large field LGM optimzied at cryo %%%%%%%%%%%%%%%%
     end
 

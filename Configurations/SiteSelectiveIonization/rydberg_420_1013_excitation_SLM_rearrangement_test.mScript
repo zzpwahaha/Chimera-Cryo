@@ -95,7 +95,7 @@ t += 1
 
 
 %%%%%%%%%%%%%%  Trap ramp for Rydberg  %%%%%%%%%%%%%%%%%%
-var fraction_trapdepth 0.01 %0.01
+var fraction_trapdepth 0.1 %0.99 %0.01
 dacramp: SLMTweezerIntensity slm_twz_intensity slm_twz_intensity*fraction_trapdepth 10
 t += 10
 %%%%%%% 420 sample and hold %%%%
@@ -120,6 +120,23 @@ t += 0.1
 %off: Ryd1013Trg
 t += 10-1-1-0.1
 %%%%%% 1013 sample and hold %%%%
+%%%%%%%%%%% OP %%%%%
+t += -10
+on: PrbShutter
+off: PrbCoolShutter
+off: xyzMOTShutter
+off: D1LGMShutter
+off: D1LGMPrbShutter
+on: OPShutter
+off: TARepShutter
+ol: ol_cooling d2_cooling_resonance-(fraction_trapdepth*0.877*30-266.65)  %29
+ol: ol_repump d2_repump_prb_resonance+(fraction_trapdepth*0.877*30) %29
+dac: PrbRepAmp 8
+dac: PrbAmp 8
+dac: OPAmp {0.1 op_pwr}
+t += 10
+%%%%%%%%%%%% OP %%%%%
+
 
 %off: ryd420RFSourceSwitch
 on: ryd420RFSourceSwitch
@@ -133,19 +150,19 @@ var Ryd_2pi_us 0.83 %0.20 %0.185
 t += 0.4
 on: SLMTweezerHold
 t += 0.101
-off: SLMTweezerTrg
+%off: SLMTweezerTrg
 %on: TweezerTrg 
 
-t += -7.1
+t += -(3+1+time_scan+0.1)
 dac: TweezerIntensity 0
 t += 3
 off: TweezerHold
 t += 1
-on: TweezerTrg 
-dacramp: TweezerIntensity 0 amplitude_scan 3
-t += 3
-t += -(3+1+3)
-t += 7.1
+%on: TweezerTrg 
+dacramp: TweezerIntensity 0 amplitude_scan time_scan
+t += time_scan
+t += -(3+1+time_scan)
+t += (3+1+time_scan+0.1)
 
 %%%%%%%%%%%%%%%%% Ryd Rabi %%%%%%%%%%%%%%%%%
 t += 0.35/1000
@@ -158,14 +175,19 @@ t += -2/1000
 t += 2/1000
 
 
-
+on: OPTrg
+on: PrbTrg
+on: PrbRepTrg
 %%%%%%%%%%%%% Rabi %%%%%%%%%%
-%on: Ryd420Trg 
-%t += time_scan_us/1000
-%off: Ryd420Trg 
-%%%%%%%%%%%%% Rabi %%%%%%%%%%
-
+on: Ryd420Trg 
 t += time_scan_us/1000
+off: Ryd420Trg 
+%%%%%%%%%%%%% Rabi %%%%%%%%%%
+off: OPTrg
+off: PrbTrg
+off: PrbRepTrg
+
+%t += time_scan_us/1000
 
 off: OPTrg
 off: PrbTrg
@@ -192,13 +214,15 @@ on: SLMTweezerTrg
 %pulseon: GMLoadTrg 0.0005
 %t += -0.01
 
-dacramp: TweezerIntensity amplitude_scan 0 3
-t += 3
+t += 0.1
+dacramp: TweezerIntensity amplitude_scan 0 time_scan
+t += time_scan
 off: TweezerTrg 
 pulseon: GMMoveTrg 0.0005
-t += 0.01
+t += 1
 pulseon: GMLoadTrg 0.0005
-t += -(3+0.01)
+t += -(time_scan+1)
+t += -0.1
 
 t += 0.01
 off: MWAmpTrg

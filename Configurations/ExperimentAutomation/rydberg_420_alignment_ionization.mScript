@@ -162,7 +162,7 @@ off: Ryd420ExpShutter
 on: ryd420RFSourceSwitch
 off: ryd420AWGShapedChSwitch
 
-dac: Ryd420Amp 0.01 %ryd420_amplitude %0.05 %0.11 %(0.11+0.013)*fraction_scan-0.013 %0.11 %0.05 %0.2 %amplitude_scan %0.8 %0.1 %0.55 %0.30 %0.34
+dac: Ryd420Amp 0.05 %0.01 %ryd420_amplitude %0.05 %0.11 %(0.11+0.013)*fraction_scan-0.013 %0.11 %0.05 %0.2 %amplitude_scan %0.8 %0.1 %0.55 %0.30 %0.34
 dac: Ryd1013Amp zero1013SetPoint %2.0 %0.55 %0.60 %0.68
 
 var IQ_MAX_AMP 2.5
@@ -250,7 +250,7 @@ on: PrbRepTrg
 
 %%%%%%%%%%%%% Rabi %%%%%%%%%%
 on: Ryd420Trg
-t += time_scan_us/1000
+t += 2*time_scan_us/1000
 off: Ryd420Trg
 %%%%%%%%%%%%% Rabi %%%%%%%%%%
 

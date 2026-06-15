@@ -30,7 +30,8 @@ call PGCTweezerImaging()
 
 
 %%%%%%%%%%%%%%%%%%%%%  rearrangement  %%%%%%%%%%%%%%%%%%%% 
-call Rearrangement5MovesRemoveExtra(5.8)
+call Rearrangement5MovesRemoveExtra(5.8) %5.8
+%call Rearrangement5MoveFilterTarget(5.8) %5.8
 %%%%%%%%%%%%%%%%%%%%%  rearrangement  %%%%%%%%%%%%%%%%%%%% 
 
 %%%%%%%%%%%%%%%%% large field LGM optimzied at cryo %%%%%%%%%%%%%%%%
@@ -286,6 +287,13 @@ off: PrbShutter
 t += 0.5
 
 %%%%%%%%%%%%%%%%% End Ryd Rabi %%%%%%%%%%%%%%%%%
+
+%t += 0.01
+%on: SLMTweezerHold
+%t += 0.002
+%off: SLMTweezerTrg
+%t += time_scan_us_2/1000
+%on: SLMTweezerTrg
 
 
 t += 10

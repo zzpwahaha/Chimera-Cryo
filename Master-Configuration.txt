@@ -255,7 +255,7 @@ dac1_15
 -9.9 - 10
 0
 dac1_15
-12
+20
 d2_cooling_resonance 1206
 d2_repump_resonance 5282
 d2_cooling_prb_resonance 1226
@@ -263,10 +263,18 @@ d2_repump_prb_resonance 5262
 d1_lgmcooling_resonance 784
 rb87_hfsplitting 6834.682
 t_shutter 10
-t_field_settling 750
+t_field_settling 100
 rydberg_ionization_frequency 6375
-aod_offset_x 0.278
-aod_offset_y 0.119
-is_cryo 1
+aod_offset_x 0.249
+aod_offset_y -0.292
+is_cryo 0
+ryd420_l2 -20.62
+ryd420_l4 -8.49
+ryd1013_l2 -14.825
+ryd1013_l4 117.804
+d1statetransfer_l2 0
+d1statetransfer_l4 25.3
+op_l2 -1
+op_l4 19.54
 971 1140 1 921 974 1
 0 1

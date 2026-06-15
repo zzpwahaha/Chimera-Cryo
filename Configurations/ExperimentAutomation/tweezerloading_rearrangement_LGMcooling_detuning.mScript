@@ -175,7 +175,7 @@ t += 10
     dac: D1LGMEOMAmp 0 %amplitude_scan %d1lgmprb_twz_rep_amp
     dac: D1LGMAmp {4.5 d1lgm_prb_pwr} %3% amplitude_scan%d1lgmprb_twz_cool_amp
     ol: ol_D1LGM D1_LGMCooling_resonance-230 %resonance_scan %200-cryo %150-RT %resonance_scan %d1lgm_twz_olcool
-    ol: ol_D1_repump Rb87_HFSplitting+resonance_scan %(-8.92) %(-9.0) %(-8.9) %resonance_scan %4.5 %resonance_scan %d1lgm_twz_olrepump
+    ol: ol_D1_repump Rb87_HFSplitting+resonance_scan %(-8.92) %(-9.0) %(-8.9) %resonance_scan %4.5 %resonance_scan %d1lgm_twz_olrepump % -9.4 to -8.6 MHz
 
     dac: BiasCoilX pgc_twz_bias_x %0.8-RT
     dac: BiasCoilY pgc_twz_bias_y %pgc_twz_bias_y_scan %-5 %pgc_twz_bias_y=-4.5 %-1.1 RT
