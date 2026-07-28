@@ -20,9 +20,9 @@ constant_name = {'x': 'aod_offset_x', 'y': 'aod_offset_y'}
 # analysis grid
 # analysis grid for 5x20 grid - 20251223
 window = [0,0,170,54]
-thresholds = 105
+thresholds = 102
 binnings = np.linspace(80, 120, 161)
-analysis_locs = da.DataAnalysis(year='2026', month='May', day='19', data_name='data_1', n_cluster_row=5,
+analysis_locs = da.DataAnalysis(year='2026', month='July', day='17', data_name='data_2', n_cluster_row=5,
                                 window=window, thresholds=thresholds, binnings=binnings, 
                                 multi_points_option = dict({"active":True, "search_square":4, "num_points":6}))
 

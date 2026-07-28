@@ -1,5 +1,5 @@
 %%%%% push out F=2 using 2-3'', using OP beam %%%%%
-def StateSelectivePushout():
+def StateSelectivePushout(Bfield):
 %    dacramp: SLMTweezerIntensity slm_twz_intensity slm_twz_intensity*0.1 10
 %%    t += 10
 %    off: TARepShutter
@@ -22,7 +22,7 @@ def StateSelectivePushout():
 %    t += 10
 
     var FullTrapLightShift 26.4 %30 % MHz
-    var Bfield 3.5 %G
+    %var Bfield 3.5 %G
     var DifferentialZeemanCoef 1.4 % MHz/G
     var PushoutTrapFraction 0.115 %0.1
     var PushoutTime 0.01 %ms

@@ -89,7 +89,7 @@ on: Ryd420Hold
 t += 1.0
 off: Ryd420Trg
 t += 0.1
-on: Ryd420ExpShutter
+%on: Ryd420ExpShutter
 t += 10-3-1-0.1
 %%%%%%% 420 sample and hold %%%%
 %%%%%%% 1013 sample and hold %%%%
@@ -228,33 +228,33 @@ t += 2/1000
 
 %%%%%%%%%%%%% Rabi %%%%%%%%%%
 
+%%%%% pulsed 1013 %%%%
+%t += 0.9/1000
+%t += -0.5/1000 %-int((1+time_scan_us)*50)/50/1000/2
+%
+%t += -1./1000
+%t += -1./1000
+%on: Ryd1013Hold
+%t += 1./1000
+%off: Ryd1013Trg
+%t += 1./1000
+%
+%on: Ryd1013Trg 
+%t += 1/1000+time_scan_us/1000
+%off: Ryd1013Trg 
+%
+%t += 1./1000
+%on: Ryd1013Trg
+%t += 400./1000
+%off: Ryd1013Hold
+%t += -400./1000
+%t += -1./1000
+%
+%t += -(1/1000+time_scan_us/1000)
+%
+%t += 0.5/1000
+%t += -0.9/1000
 %%%% pulsed 1013 %%%%
-t += 0.9/1000
-t += -0.5/1000 %-int((1+time_scan_us)*50)/50/1000/2
-
-t += -1./1000
-t += -1./1000
-on: Ryd1013Hold
-t += 1./1000
-off: Ryd1013Trg
-t += 1./1000
-
-on: Ryd1013Trg 
-t += 1/1000+time_scan_us/1000
-off: Ryd1013Trg 
-
-t += 1./1000
-on: Ryd1013Trg
-t += 400./1000
-off: Ryd1013Hold
-t += -400./1000
-t += -1./1000
-
-t += -(1/1000+time_scan_us/1000)
-
-t += 0.5/1000
-t += -0.9/1000
-%%% pulsed 1013 %%%%
 
 on: Ryd420Trg 
 t += time_scan_us/1000
@@ -575,7 +575,7 @@ t += 0.5
 
 t += 10
 %repeat: int(integer_scan_2)
-%call StateSelectivePushout()
+%call StateSelectivePushout(3.5)
 %end
 t += 10
 %call setZeroField()

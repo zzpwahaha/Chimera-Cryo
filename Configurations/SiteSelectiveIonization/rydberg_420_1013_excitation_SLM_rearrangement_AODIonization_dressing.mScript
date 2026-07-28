@@ -278,7 +278,7 @@ t += 0.5
 
 %t += 10
 %repeat: int(integer_scan_2)
-%call StateSelectivePushout()
+%call StateSelectivePushout(3.5)
 %end
 t += 10
 %call setZeroField()

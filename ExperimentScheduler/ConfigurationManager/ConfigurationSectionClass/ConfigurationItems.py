@@ -22,6 +22,23 @@ class ConfigurationItems():
         """Returns the parameters in the section."""
         return self.parameters
 
+    def set_parameter(self, name, value):
+        """
+        Updates an existing parameter.
+
+        Raises
+        ------
+        KeyError
+            If the parameter does not already exist.
+        """
+        if name not in self.parameters:
+            raise KeyError(
+                f"Parameter '{name}' does not exist. "
+                f"Please add it first using add_parameter('{name}', value)."
+            )
+
+        self.parameters[name] = value
+
     def print(self):
         """Returns the string representation of the section."""
         result = []

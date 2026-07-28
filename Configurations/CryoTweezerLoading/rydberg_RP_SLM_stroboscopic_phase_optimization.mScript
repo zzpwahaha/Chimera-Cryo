@@ -149,7 +149,7 @@ t += 0.5
 %%%%%%%%%%%%%%  End Rydberg  %%%%%%%%%%%%%%%%%%
 
 t += 10
-%call StateSelectivePushout()
+%call StateSelectivePushout(3.5)
 %call setZeroField()
 
     dac: BiasCoilX pgc_twz_bias_x

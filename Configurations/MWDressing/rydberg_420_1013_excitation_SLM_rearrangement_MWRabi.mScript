@@ -1,0 +1,348 @@
+%%%%%%%%%%%%%%%%% Start With 1ms %%%%%%%%%%%%%%%%% 
+t = 1
+%call CryoMOTLoadingPGC()
+call CryoMOTEnhancedLoadingLGM()
+
+%%%%%%%%%%%%%%%%%%%%%  rearrangement S&H %%%%%%%%%%%%%%%%%%%% 
+call RearrangementAODSampleAndHold(3)
+%%%%%%%%%%%%%%%%%%%%%  rearrangement S&H %%%%%%%%%%%%%%%%%%%% 
+
+
+call TOF(10)
+
+%t += -10
+%dacramp: SLMTweezerIntensity 1.2 slm_twz_intensity 10
+%t += 10
+
+%%%%%%%%%%%%%%  PGC in Tweezer %%%%%%%%%%%%%%%%%%
+% change the field/laser freq parameter here because the previous section is TOF and no light is on
+call D2InTrapPGC(t_pgc_twz)
+% note the t_pgc_twz should be smaller than 100
+t += 15
+%%%%%%%%%%%%%%  PGC in Tweezer with Probe %%%%%%%%%%%%%%%%%%
+% change the field/laser fre q parameter here because the previous section is TOF and no light is on
+call D2InTrapPGCPrb(25)
+% note the t_pgc_twz should be smaller than 100
+t += 15
+%%%%%%%%%%%%%%  Image TWIZZER  %%%%%%%%%%%%%%%%%%
+% change the field/laser freq parameter here because the previous section is dark, i.e. 100-t_pgc_twz is larger than 4
+call PGCTweezerImaging()
+
+
+%%%%%%%%%%%%%%%%%%%%%  rearrangement  %%%%%%%%%%%%%%%%%%%% 
+%call Rearrangement5MoveFilterTarget(5.8)
+call Rearrangement5Moves(4.8) %5.8
+%%%%%%%%%%%%%%%%%%%%%  rearrangement  %%%%%%%%%%%%%%%%%%%% 
+
+%%%%%%%%%%%%%%%%% large field LGM optimzied at cryo %%%%%%%%%%%%%%%%
+call D1InTrapLargeFieldLGMPrb_Combined()
+%%%%%%%%%%%%%%%%% large field LGM optimized at RT  %%%%%%%%%%%%%%%%
+
+
+t += 5
+
+%call setQuantizationField()
+call setQuantizationField7G()
+dacramp: SLMTweezerIntensity slm_twz_intensity slm_twz_intensity*0.06 10
+t += 10
+t += t_field_settling-20
+dacramp: SLMTweezerIntensity slm_twz_intensity*0.06 slm_twz_intensity 10
+t += 10
+
+call OpticalPumping22()
+
+%%%%%%%%%%%%%%  Prepare Rydberg beams %%%%%%%%%%%%%%%%%%
+%var beta 0.1
+var zero1013SetPoint -0.01
+%var ryd1013SetPoint 4.0 %2.0
+
+on: Ryd1013Shutter
+ddsfreq: Ryd420Brimrose ryd420_resonance %82.29+0*10.134 %(78.13+1.057*(4*fraction_scan))+1.0134*(4*fraction_scan)/(2*beta)/2 %ryd420_resonance
+t += 5
+%on: Ryd420Shutter
+off: Ryd420ExpShutter
+%on: Ryd1013Shutter
+%off: ryd420rfsourceswitch
+on: ryd420RFSourceSwitch
+off: ryd420AWGShapedChSwitch
+
+dac: Ryd420Amp ryd420_amplitude %0.05 %0.11 %(0.11+0.013)*fraction_scan-0.013 %0.11 %0.05 %0.2 %amplitude_scan %0.8 %0.1 %0.55 %0.30 %0.34
+dac: Ryd1013Amp zero1013SetPoint %2.0 %0.55 %0.60 %0.68
+
+var IQ_MAX_AMP 2.5
+dac: MW_IQ_I IQ_MAX_AMP
+dac: MW_IQ_Q 0
+pulseon: MWTrg 0.4
+t += 1
+
+
+%call releaseRecaptureSLM(time_scan_us/1000)
+
+
+%%%%%%%%%%%%%%  Trap ramp for Rydberg  %%%%%%%%%%%%%%%%%%
+var fraction_trapdepth 0.01
+dacramp: SLMTweezerIntensity slm_twz_intensity slm_twz_intensity*fraction_trapdepth 10
+t += 10
+%%%%%%% 420 sample and hold %%%%
+t += -10
+on: Ryd420Trg
+t += 3.0
+on: Ryd420Hold
+t += 1.0
+off: Ryd420Trg
+t += 0.1
+on: Ryd420ExpShutter
+t += 10-3-1-0.1
+%%%%%%% 420 sample and hold %%%%
+%%%%%%% 1013 sample and hold %%%%
+t += -10
+on: Ryd1013Trg
+t += 1
+dacramp: Ryd1013Amp zero1013SetPoint ryd1013_amplitude 4
+t += 4
+t += 1
+%on: Ryd1013Hold
+t += 0.1
+%off: Ryd1013Trg
+t += 10-4-1-1-0.1
+%%%%%% 1013 sample and hold %%%%
+%%%%%%%% D1 sample and hold %%%%%%%% 
+%t += -15
+%dac: D1StateTransferAmp -1 %-5 %-1.6 %-2.5
+%off: D1StateTransferShutter 
+%t += 4
+%on: D1StateTransferTrg
+%%pulseon: mako1 0.1
+%t += 4
+%on: D1StateTransferHold
+%t += 0.1
+%off: D1StateTransferTrg
+%on: D1StateTransferShutter 
+%t += 15-(4+4+0.1)
+%%%%%%%% D1 sample and hold %%%%%%%% 
+%%%%%%%% ground state pushout with OP beam %%%%%
+%t += -10
+%on: PrbShutter
+%on: OPShutter
+%%off: PrbShutter
+%%off: OPShutter
+%
+%off: PrbCoolShutter
+%off: xyzMOTShutter
+%off: D1LGMShutter
+%off: D1LGMPrbShutter
+%off: TARepShutter
+%ol: ol_cooling d2_cooling_resonance-(250) %-(-266.65)
+%ol: ol_repump d2_repump_prb_resonance+150
+%dac: PrbRepAmp 10
+%dac: PrbAmp 8
+%dac: OPAmp {3 op_pwr_high} %1
+%off: PrbRepTrg
+%off: PrbTrg
+%off: OPTrg
+%t += 10
+%%%%%%%% ground state pushout with OP beam %%%%%
+%%%%%%%%%%% OP %%%%%
+%t += -10
+%on: PrbShutter
+%off: PrbCoolShutter
+%off: xyzMOTShutter
+%off: D1LGMShutter
+%off: D1LGMPrbShutter
+%on: OPShutter
+%off: TARepShutter
+%ol: ol_cooling d2_cooling_resonance-(fraction_trapdepth*0.877*30-266.65)  %29
+%ol: ol_repump d2_repump_prb_resonance+(fraction_trapdepth*0.877*30) %29
+%dac: PrbRepAmp 8
+%dac: PrbAmp 8
+%dac: OPAmp {0.1 op_pwr}
+%t += 10
+%%%%%%%%%%%% OP %%%%%
+
+
+
+on: ryd420RFSourceSwitch
+off: ryd420AWGShapedChSwitch
+%on: ryd420AWGShapedChSwitch
+
+%on: RydDressMWAmp
+
+%var Ryd_pi2_us 0.09
+var Ryd_pi_us 0.21 %0.44 %0.41 %0.20 %0.185
+%var Ryd_2pi_us 0.83 %0.20 %0.185
+
+t += 0.4
+on: SLMTweezerHold
+t += 0.101
+off: SLMTweezerTrg
+
+
+
+
+%%%%%%%%%%%%%%%%% Ryd Rabi %%%%%%%%%%%%%%%%%
+t += 0.35/1000
+t += -0.95/1000 %time for 420 AOM to turn since the beam is quite far away from the AOM actuator
+%pulseon: Ryd1013Mako 10/1000
+%on: do8_4 %dummy trigger for picoscope
+t += -2/1000
+%on: SiglentTrg
+%on: Siglent3Trg
+t += 2/1000
+
+
+%%%%%%%%%%%%% nS-nP Rabi %%%%%%%%%%
+
+var RFSpinMW_delay_us 1.36
+
+on: Ryd420Trg 
+t += Ryd_pi_us/1000
+off: Ryd420Trg 
+
+t += 0.2/1000
+
+t += RFSpinMW_delay_us/1000 
+on: RydDressMWAmp
+on: do8_4
+t += time_scan_us/1000
+off: RydDressMWAmp
+off: do8_4
+t += -time_scan_us/1000
+t += -RFSpinMW_delay_us/1000
+
+t += time_scan_us/1000
+
+t += 0.2/1000
+
+on: Ryd420Trg 
+t += Ryd_pi_us/1000
+off: Ryd420Trg 
+
+%%%%%%%%%%%%% nS-nP Rabi %%%%%%%%%%
+
+%%%%%%%%%%%%%% Ryd pi, wait, MW pi, Ryd pi,  %%%%%%%%%%
+%
+%var RFSpinMW_delay_us 1.36
+%var RFSpinMW_pi_us 0.11
+%
+%on: Ryd420Trg 
+%t += Ryd_pi_us/1000
+%off: Ryd420Trg 
+%
+%t += time_scan_us/1000 %20/1000
+%
+%t += RFSpinMW_delay_us/1000 
+%on: RydDressMWAmp
+%on: do8_4
+%t += RFSpinMW_pi_us/1000
+%off: RydDressMWAmp
+%off: do8_4
+%t += -RFSpinMW_pi_us/1000
+%t += -RFSpinMW_delay_us/1000
+%
+%t += RFSpinMW_pi_us/1000
+%
+%t += 0.2/1000
+%
+%on: Ryd420Trg 
+%t += Ryd_pi_us/1000
+%off: Ryd420Trg 
+%
+%%%%%%%%%%%%%% Ryd pi, wait, MW pi, Ryd pi,  %%%%%%%%%%
+
+
+
+
+
+off: OPTrg
+off: PrbTrg
+off: PrbRepTrg
+t += 2/1000
+off: SiglentTrg
+off: Siglent3Trg
+t += -2/1000
+%off: do8_4 
+t += 0.95/1000
+t += 0.35/1000
+
+
+t += 1/1000
+on: do8_4 
+on: MWAmpTrg
+t += -1/1000
+
+on: SLMTweezerTrg
+
+t += 0.01
+off: MWAmpTrg
+off: do8_4 
+t += -0.01
+
+%t += -0.1
+off: SLMTweezerHold
+off: Ryd420Shutter
+off: PrbShutter
+on: PrbCoolShutter
+off: OPShutter
+on: TARepShutter
+
+off: RydDressMWAmp
+
+t += 0.1
+
+%%%%%%%%%% D1 %%%%%%%%%% 
+%on: D1StateTransferTrg
+%t += 18/1000 %15/1000
+%off: D1StateTransferTrg
+%t += 0.1
+%off: D1StateTransferHold
+%off: D1StateTransferShutter 
+%%%%%%%%%% D1 %%%%%%%%%% 
+
+dacramp: SLMTweezerIntensity slm_twz_intensity*fraction_trapdepth slm_twz_intensity 10.08
+t += 10.08
+%t += 0.1
+
+t += -9
+dacramp: Ryd1013Amp ryd1013_amplitude zero1013SetPoint 9
+t += 9
+
+%pulseon: MWAmpTrg 0.1
+t += 0.1
+off: Ryd1013Trg
+off: Ryd1013Hold
+off: Ryd420Shutter
+off: Ryd1013Shutter
+off: Ryd420Hold
+off: OPShutter
+off: PrbShutter
+t += 0.5
+
+%%%%%%%%%%%%%%%%% End Ryd Rabi %%%%%%%%%%%%%%%%%
+
+
+t += 10
+%repeat: int(integer_scan_2)
+%call StateSelectivePushout(3.5)
+%end
+t += 10
+%call setZeroField()
+
+    dac: BiasCoilX pgc_twz_bias_x
+    dac: BiasCoilY pgc_twz_bias_y 
+    dac: BiasCoilZ pgc_twz_bias_z
+t += 100
+%%%%%%%%%%%%%%  PGC in Tweezer %%%%%%%%%%%%%%%%%%
+% change the field/laser freq parameter here because the previous section is TOF and no light is on
+call D2InTrapPGCPrb(t_pgc_twz)
+% note the t_pgc_twz should be smaller than 100
+t += 15
+
+%%%%%%%%%%%%%%  Image TWIZZER  %%%%%%%%%%%%%%%%%%
+% change the field/laser freq parameter here because the previous section is dark, i.e. 100-t_pgc_twz is larger than 4
+call PGCTweezerImaging()
+
+t += 10
+%call RydbergBeamCameraFootprint()
+
+%%%%%%%%%%%%%%  END Sequence  %%%%%%%%%%%%%%%%%%
+call EndSequence()

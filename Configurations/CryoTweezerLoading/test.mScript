@@ -30,7 +30,7 @@ t += 200 %100 %750
 call OpticalPumping22()
 
 t += 15
-%call StateSelectivePushout()
+%call StateSelectivePushout(3.5)
     dacramp: TweezerIntensity twz_intensity twz_intensity*0.1 10
     t += 10
     on: TARepShutter

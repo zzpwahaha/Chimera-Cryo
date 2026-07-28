@@ -99,7 +99,7 @@ off: D1StateTransferShutter
 dacramp: SLMTweezerIntensity measure_trap_depth_at slm_twz_intensity 10
 t += 10
 
-call StateSelectivePushout()
+call StateSelectivePushout(3.5)
 
 %dac: BiasCoilX pgc_twz_bias_x
 %dac: BiasCoilY pgc_twz_bias_y 

@@ -49,10 +49,16 @@ off: ryd420trg
 %dac: BiasCoilZ -0.05+(-0.039)+0.036 
 
 
-%%%%% warm bias field %%%%% 
-dac: BiasCoilX -2.5+0.75 
-dac: BiasCoilY -0.827+(-2.33)*switch_toggle 
-dac: BiasCoilZ -0.0438 %+amplitude_scan %+amplitude_scan 
+%%%%%% warm bias field %%%%% 
+%dac: BiasCoilX -2.5+0.75 
+%dac: BiasCoilY -0.827+(-2.33)*switch_toggle 
+%dac: BiasCoilZ -0.0438 %+amplitude_scan %+amplitude_scan 
+%% -2.23V for 7G bias field, -2.23V/2 for 3.5 G bias field 
+
+%%%%% warm bias field 7G %%%%% 
+dac: BiasCoilX -2.5+0.75-2.5 
+dac: BiasCoilY -0.801+(-2.33)*switch_toggle %+amplitude_scan
+dac: BiasCoilZ -0.0593 %+amplitude_scan %-0.0438 %+amplitude_scan %+amplitude_scan 
 % -2.23V for 7G bias field, -2.23V/2 for 3.5 G bias field 
 
 t += t_field_settling %750 %100 %750
@@ -82,7 +88,7 @@ t += 15
 
 
 t += 10
-call StateSelectivePushout()
+call StateSelectivePushout(7.0) %3.5
 t += 5 
 
 

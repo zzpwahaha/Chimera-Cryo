@@ -30,7 +30,7 @@ call PGCTweezerImaging()
 
 
 %%%%%%%%%%%%%%%%%%%%%  rearrangement  %%%%%%%%%%%%%%%%%%%% 
-call Rearrangement5MoveFilterTarget(5.8) %5.8
+call Rearrangement5MoveFilterTarget(4.8) %5.8
 %%%%%%%%%%%%%%%%%%%%%  rearrangement  %%%%%%%%%%%%%%%%%%%% 
 
 %%%%%%%%%%%%%%%%% large field LGM optimzied at cryo %%%%%%%%%%%%%%%%
@@ -199,7 +199,7 @@ t += 0.5
 
 %t += 10
 %repeat: int(integer_scan_2)
-%call StateSelectivePushout()
+%call StateSelectivePushout(3.5)
 %end
 t += 10
 %call setZeroField()
