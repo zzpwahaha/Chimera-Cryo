@@ -131,9 +131,9 @@ void MicrowaveSystem::initialize( IChimeraQtWindow* parent ){
 	layout2->addStretch(1);
 	
 	uwListListview = new QTableWidget (parent);
-	uwListListview->setColumnCount (3);
+	uwListListview->setColumnCount (4);
 	QStringList labels;
-	labels << "#" << "Frequency (MHz)" << "Power (dBm)";
+	labels << "#" << "Frequency (MHz)" << "Power (dBm)" << "Channel";
 	uwListListview->setHorizontalHeaderLabels (labels);
 	uwListListview->horizontalHeader ()->setFixedHeight (20);
 	uwListListview->verticalHeader ()->setFixedWidth (25);
@@ -165,6 +165,7 @@ void MicrowaveSystem::refreshCurrentUwList () {
 		try {
 			currentList[rowI].frequency = str (uwListListview->item (rowI, 1)->text ());
 			currentList[rowI].power = str (uwListListview->item (rowI, 2)->text ());
+			currentList[rowI].channel = str(uwListListview->item(rowI, 3)->text());
 		}
 		catch (ChimeraError&) {
 			throwNested ("Failed to convert microwave table data to uw list structure!");
@@ -247,6 +248,7 @@ void MicrowaveSystem::refreshListview (){
 		uwListListview->item (ind, 0)->setFlags (uwListListview->item (ind, 0)->flags () ^ Qt::ItemIsEnabled);
 		uwListListview->setItem (ind, 1, new QTableWidgetItem (qstr (listElem.frequency.expressionStr)));
 		uwListListview->setItem (ind, 2, new QTableWidgetItem (qstr (listElem.power.expressionStr)));
+		uwListListview->setItem(ind, 3, new QTableWidgetItem(qstr(listElem.channel)));
 		count++;
 	}
 }

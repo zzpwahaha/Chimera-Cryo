@@ -15,6 +15,8 @@ struct microwaveListEntry
 {
 	Expression frequency;
 	Expression power;
+	// the chosen channel C0 = RFoutA, C1 = RFoutB
+	unsigned channel = 0;
 };
 
 struct microwaveSettings

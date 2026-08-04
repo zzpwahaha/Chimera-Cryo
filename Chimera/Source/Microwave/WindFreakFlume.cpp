@@ -129,7 +129,7 @@ void WindFreakFlume::setFmSettings (){
 
 void WindFreakFlume::programSingleSetting (microwaveListEntry setting, unsigned varNumber){
 	std::string answer;
-	write ("C0");
+	//write ("C0");
 	write ("E1");
 	write ("Ld");	// delete prev list
 	write ("w0");
@@ -141,10 +141,11 @@ void WindFreakFlume::programList (std::vector<microwaveListEntry> list, unsigned
 	//wfFlume.reconnect();
 	// Settings for RfoutA
 	std::string answer;
-	write ("C0");
+	//write ("C0");
 	unsigned count = 0;
 	// delete prev list
 	write ("Ld");
+	// loop through the microwave list
 	for (auto entry : list)	{
 		auto ln = "L" + str (count);
 		write(ln + "f" + str(entry.frequency.getValue(varNum), 7, false, false, true));

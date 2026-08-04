@@ -45,14 +45,40 @@ void MicrowaveCore::programVariation (unsigned variationNumber, std::vector<para
 		return;
 	}
 	//setPmSettings ();
+
+	std::vector<microwaveListEntry> listChannelA;
+	std::vector<microwaveListEntry> listChannelB;
+
+	for (auto entry : experimentSettings.list) {
+		if (entry.channel == 0) {
+			listChannelA.push_back(entry);
+		}
+		else {
+			listChannelB.push_back(entry);
+		}
+	}
+
 	QElapsedTimer etimer;
 	etimer.start();
 	try	{
-		if (experimentSettings.list.size () == 1)	{
-			uwFlume.programSingleSetting (experimentSettings.list[0], variationNumber);
+		if (!listChannelA.empty()) {
+			uwFlume.write("C0");
+			sleep(5);
+			if (listChannelA.size() == 1) {
+				uwFlume.programSingleSetting(listChannelA[0], variationNumber);
+			}
+			else {
+				uwFlume.programList(listChannelA, variationNumber, triggerTime);
+			}
 		}
-		else{
-			uwFlume.programList (experimentSettings.list, variationNumber, triggerTime);
+		if (!listChannelB.empty()) {
+			uwFlume.write("C1");
+			if (listChannelB.size() == 1) {
+				uwFlume.programSingleSetting(listChannelB[0], variationNumber);
+			}
+			else {
+				uwFlume.programList(listChannelB, variationNumber, triggerTime);
+			}
 		}
 	}
 	catch (ChimeraError&)	{
@@ -68,13 +94,18 @@ void MicrowaveCore::programVariation (unsigned variationNumber, std::vector<para
 				uwFlume.query ("?");
 			}
 			catch (ChimeraError & ) {}
-			if (experimentSettings.list.size () == 1) {
-				uwFlume.programSingleSetting (experimentSettings.list[0], variationNumber);
+			if (!listChannelA.empty()) {
+				uwFlume.write("C0");
+				sleep(5);
+				if (listChannelA.size() == 1) uwFlume.programSingleSetting(listChannelA[0], variationNumber);
+				else uwFlume.programList(listChannelA, variationNumber, triggerTime);
 			}
-			else {
-				uwFlume.programList (experimentSettings.list, variationNumber, triggerTime);
+			if (!listChannelB.empty()) {
+				uwFlume.write("C1");
+				if (listChannelB.size() == 1) uwFlume.programSingleSetting(listChannelB[0], variationNumber);
+				else uwFlume.programList(listChannelB, variationNumber, triggerTime);
+
 			}
-		}
 		catch (ChimeraError & ){
 			throwNested ("Failed to program Windfreak!");
 		}
@@ -100,6 +131,7 @@ void MicrowaveCore::logSettings (DataLogger& log, ExpThreadWorker* threadworker)
 			auto listElemGroup = microwaveGroup.createGroup ("List Elem #" + str (count++));
 			log.writeDataSet (listSetting.frequency.expressionStr, "Frequency", listElemGroup);
 			log.writeDataSet (listSetting.power.expressionStr, "Power", listElemGroup);
+			log.writeDataSet (listSetting.channel, "Channel", listElemGroup);
 		}
 	}
 	catch (H5::Exception&) {
@@ -172,6 +204,17 @@ microwaveSettings MicrowaveCore::getSettingsFromConfig (ConfigStream& openFile){
 	for (auto num : range (numInList)){
 		getlineF (openFile, settings.list[num].frequency.expressionStr);
 		getlineF (openFile, settings.list[num].power.expressionStr);
+		try {
+			unsigned ch = 0;
+			openFile >> ch;
+			settings.list[num].channel = ch;
+			if (num != numInList - 1) {
+				openFile.get();
+			}
+		}
+		catch (...) {
+			settings.list[num].channel = 0;
+		}
 	}
 	return settings;
 }
