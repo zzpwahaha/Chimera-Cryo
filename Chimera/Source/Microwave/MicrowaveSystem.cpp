@@ -233,6 +233,7 @@ void MicrowaveSystem::handleSaveConfig (ConfigStream& saveFile){
 	for (auto listElem : currentList){
 		saveFile << "\n/*Freq:*/ " << listElem.frequency 
 				 << "\n/*Power:*/ " << listElem.power;
+				 << "\n/*Channel:*/ " << listElem.channel;
 	}
 	saveFile << "\nEND_" << core.configDelim << "\n";
 }

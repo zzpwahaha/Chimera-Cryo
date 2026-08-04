@@ -208,23 +208,29 @@ microwaveSettings MicrowaveCore::getSettingsFromConfig (ConfigStream& openFile){
 	for (auto num : range (numInList)){
 		getlineF (openFile, settings.list[num].frequency.expressionStr);
 		getlineF (openFile, settings.list[num].power.expressionStr);
-		settings.list[num].channel = 0;
-		openFile >> std::ws;
-		int nextC = openFile.peek();
-		if (nextC == EOF) {
-			thrower("Unexpected end of config while reading microwave channel.");
+		settings.list[num].channel = 0; // default
+
+		//handle old config files which don't have channel info
+		int c = openFile.peek();
+		while (c != EOF && std::isspace(static_cast<unsigned char>(c))) {
+			openFile.get(); // consume whitespace
+			c = openFile.peek();
 		}
-		char nc = static_cast<char>(nextC);
-		if (!std::isdigit(static_cast<unsigned char>(nc))) {
-			// Not a digit where we expect a numeric channel token.
-			thrower("Expected numeric channel token for microwave list entry but found: \"" + std::string(1, nc) + "\"");
+		if (c != EOF && std::isdigit(static_cast<unsigned char>(c))) {
+			std::string chLine;
+			getlineF(openFile, chLine);
+			// trim
+			auto l = chLine.find_first_not_of(" \t\r\n");
+			auto r = chLine.find_last_not_of(" \t\r\n");
+			if (l == std::string::npos) chLine.clear();
+			else chLine = chLine.substr(l, r - l + 1);
+			try {
+				settings.list[num].channel = boost::lexical_cast<unsigned>(chLine);
+			}
+			catch (...) {
+				thrower("Failed to parse microwave channel token: \"" + chLine + "\"");
+			}
 		}
-		// Now safe to extract an unsigned
-		unsigned ch = 0;
-		openFile >> ch;
-		settings.list[num].channel = ch;
-		// consume a single trailing newline if present (preserve alignment)
-		if (openFile.peek() == '\n') { openFile.get(); }
 	}
 	return settings;
 }
