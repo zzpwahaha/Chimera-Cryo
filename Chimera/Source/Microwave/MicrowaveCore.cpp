@@ -6,6 +6,7 @@
 #include "MicrowaveCore.h"
 #include <qdebug>
 #include <qelapsedtimer.h>
+#include <cctype>
 
 MicrowaveCore::MicrowaveCore(std::string delim, bool safemode, std::string port, std::pair<unsigned, unsigned> uwaveTriggerLine) : 
 	configDelim(delim),
@@ -63,7 +64,7 @@ void MicrowaveCore::programVariation (unsigned variationNumber, std::vector<para
 	try	{
 		if (!listChannelA.empty()) {
 			uwFlume.write("C0");
-			sleep(5);
+			Sleep(5);
 			if (listChannelA.size() == 1) {
 				uwFlume.programSingleSetting(listChannelA[0], variationNumber);
 			}
@@ -73,6 +74,7 @@ void MicrowaveCore::programVariation (unsigned variationNumber, std::vector<para
 		}
 		if (!listChannelB.empty()) {
 			uwFlume.write("C1");
+			Sleep(5);
 			if (listChannelB.size() == 1) {
 				uwFlume.programSingleSetting(listChannelB[0], variationNumber);
 			}
@@ -88,24 +90,25 @@ void MicrowaveCore::programVariation (unsigned variationNumber, std::vector<para
 			emit threadworker->warn ("Failed to program windfreak first time! Trying again...");
 		}
 		// should probably emit a warning here. 
-		try	{
+		try {
 			// something in the windfreak seems to need flushing at this point.
 			try {
-				uwFlume.query ("?");
+				uwFlume.query("?");
 			}
-			catch (ChimeraError & ) {}
+			catch (ChimeraError&) {}
 			if (!listChannelA.empty()) {
 				uwFlume.write("C0");
-				sleep(5);
+				Sleep(5);
 				if (listChannelA.size() == 1) uwFlume.programSingleSetting(listChannelA[0], variationNumber);
 				else uwFlume.programList(listChannelA, variationNumber, triggerTime);
 			}
 			if (!listChannelB.empty()) {
 				uwFlume.write("C1");
+				Sleep(5);
 				if (listChannelB.size() == 1) uwFlume.programSingleSetting(listChannelB[0], variationNumber);
 				else uwFlume.programList(listChannelB, variationNumber, triggerTime);
-
 			}
+		}
 		catch (ChimeraError & ){
 			throwNested ("Failed to program Windfreak!");
 		}
@@ -204,17 +207,23 @@ microwaveSettings MicrowaveCore::getSettingsFromConfig (ConfigStream& openFile){
 	for (auto num : range (numInList)){
 		getlineF (openFile, settings.list[num].frequency.expressionStr);
 		getlineF (openFile, settings.list[num].power.expressionStr);
-		try {
-			unsigned ch = 0;
-			openFile >> ch;
-			settings.list[num].channel = ch;
-			if (num != numInList - 1) {
-				openFile.get();
-			}
+		settings.list[num].channel = 0;
+		openFiled >> std::ws;
+		int nextC = openFile.peek();
+		if (nextC == EOF) {
+			thrower("Unexpected end of config while reading microwave channel.");
 		}
-		catch (...) {
-			settings.list[num].channel = 0;
+		char nc = static_cast<char>(nextC);
+		if (!std::isdigit(static_cast<unsigned char>(nc))) {
+			// Not a digit where we expect a numeric channel token.
+			thrower("Expected numeric channel token for microwave list entry but found: \"" + std::string(1, nc) + "\"");
 		}
+		// Now safe to extract an unsigned
+		unsigned ch = 0;
+		openFile >> ch;
+		settings.list[num].channel = ch;
+		// consume a single trailing newline if present (preserve alignment)
+		if (openFile.peek() == '\n') { openFile.get(); }
 	}
 	return settings;
 }

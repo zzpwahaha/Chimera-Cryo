@@ -165,7 +165,13 @@ void MicrowaveSystem::refreshCurrentUwList () {
 		try {
 			currentList[rowI].frequency = str (uwListListview->item (rowI, 1)->text ());
 			currentList[rowI].power = str (uwListListview->item (rowI, 2)->text ());
-			currentList[rowI].channel = str(uwListListview->item(rowI, 3)->text());
+			try {
+				auto chTxt = uwListListview->item(rowI, 3) ? uwListListview->item(rowI, 3)->text() : QString("0");
+				currentList[rowI].channel = static_cast<unsigned>(boost::lexical_cast<unsigned>(str(chTxt)));
+			}
+			catch (boost::bad_lexical_cast&) {
+				currentList[rowI].channel = 0;
+			}
 		}
 		catch (ChimeraError&) {
 			throwNested ("Failed to convert microwave table data to uw list structure!");
