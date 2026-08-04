@@ -7,6 +7,7 @@
 #include <qdebug>
 #include <qelapsedtimer.h>
 #include <cctype>
+#include <istream>
 
 MicrowaveCore::MicrowaveCore(std::string delim, bool safemode, std::string port, std::pair<unsigned, unsigned> uwaveTriggerLine) : 
 	configDelim(delim),
@@ -208,7 +209,7 @@ microwaveSettings MicrowaveCore::getSettingsFromConfig (ConfigStream& openFile){
 		getlineF (openFile, settings.list[num].frequency.expressionStr);
 		getlineF (openFile, settings.list[num].power.expressionStr);
 		settings.list[num].channel = 0;
-		openFiled >> std::ws;
+		openFile >> std::ws;
 		int nextC = openFile.peek();
 		if (nextC == EOF) {
 			thrower("Unexpected end of config while reading microwave channel.");
