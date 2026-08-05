@@ -211,25 +211,35 @@ microwaveSettings MicrowaveCore::getSettingsFromConfig (ConfigStream& openFile){
 		settings.list[num].channel = 0; // default
 
 		//handle old config files which don't have channel info
-		int c = openFile.peek();
-		while (c != EOF && std::isspace(static_cast<unsigned char>(c))) {
-			openFile.get(); // consume whitespace
-			c = openFile.peek();
+		auto pos = openFile.tellg();
+		std::string maybeChannel;
+		getlineF(openFile, maybeChannel);
+
+		// trim whitespace
+		auto l = maybeChannel.find_first_not_of(" \t\r\n");
+		if (l == std::string::npos) {
+			maybeChannel.clear();
 		}
-		if (c != EOF && std::isdigit(static_cast<unsigned char>(c))) {
-			std::string chLine;
-			getlineF(openFile, chLine);
-			// trim
-			auto l = chLine.find_first_not_of(" \t\r\n");
-			auto r = chLine.find_last_not_of(" \t\r\n");
-			if (l == std::string::npos) chLine.clear();
-			else chLine = chLine.substr(l, r - l + 1);
+		else {
+			auto r = maybeChannel.find_last_not_of(" \t\r\n");
+			maybeChannel = maybeChannel.substr(l, r - l + 1);
+		}
+
+		if (!maybeChannel.empty() && std::isdigit(static_cast<unsigned char>(maybeChannel[0]))) {
+			// looks like a channel token; parse it strictly
 			try {
-				settings.list[num].channel = boost::lexical_cast<unsigned>(chLine);
+				unsigned parsed = boost::lexical_cast<unsigned>(maybeChannel);
+				settings.list[num].channel = parsed;
 			}
 			catch (...) {
-				thrower("Failed to parse microwave channel token: \"" + chLine + "\"");
+				thrower("Failed to parse microwave channel token: \"" + maybeChannel + "\"");
 			}
+		}
+		else {
+			// Not a channel line — rewind so the caller can see the original next line (e.g. END_MW1)
+			openFile.clear();            // clear EOF/fail bits set by getlineF if any
+			openFile.seekg(pos);        // restore position
+			settings.list[num].channel = 0;
 		}
 	}
 	return settings;
