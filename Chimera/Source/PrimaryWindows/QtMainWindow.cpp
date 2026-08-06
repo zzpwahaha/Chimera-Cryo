@@ -16,6 +16,7 @@
 #include <qwindow.h>
 #include <qscreen.h>
 
+
 QtMainWindow::QtMainWindow () : 
 	profile (PROFILES_PATH, this),
 	masterConfig (MASTER_CONFIGURATION_FILE_ADDRESS),

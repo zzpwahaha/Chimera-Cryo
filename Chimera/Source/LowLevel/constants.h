@@ -130,9 +130,9 @@
 
 	//Microwave Windfreak
 	const unsigned MICROWAVE_NUM = 3;
-	const std::array<std::string, MICROWAVE_NUM> MICROWAVE_DELIMS = { "MW1","MW2","MWAnt" };
+	const std::array<std::string, MICROWAVE_NUM> MICROWAVE_DELIMS = { "MW1","MW2","MWAnt1","MWAnt2"};
 	const std::array<bool, MICROWAVE_NUM> MICROWAVE_SAFEMODES = { false,false,false };
-	const std::array<std::string, MICROWAVE_NUM> MICROWAVE_PORTS = { "COM9","COM15","COM17" }; // update for dressing windfreak port
+	const std::array<std::string, MICROWAVE_NUM> MICROWAVE_PORTS = { "COM9","COM15","COM17","COM8"}; // update for dressing windfreak port
 	const std::array<std::pair<unsigned, unsigned>, MICROWAVE_NUM> MW_TRIGGER_LINES = { std::make_pair(4 - 1, 2), std::make_pair(4 - 1, 1), std::make_pair(4 - 1, 1) }; /*the first is the label on the box minus 1, has minus'd 1 explicitly */
 
 	//PicoScrew

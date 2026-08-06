@@ -46,6 +46,8 @@ public:
 	ElliptecSystem elliptec;
 	MicrowaveSystem mwSys2;
 	MicrowaveSystem mwSys3;
+	MicrowaveSystem mwSys4;
+
 
 private:
 	Ui::QtAnalysisWindow* ui;

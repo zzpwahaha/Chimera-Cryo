@@ -146,7 +146,7 @@ void MicrowaveSystem::initialize( IChimeraQtWindow* parent ){
 	uwListListview->setColumnWidth (2, 140);
 
 	uwListListview->setShowGrid (true);
-	uwListListview->setMaximumHeight(100);
+	uwListListview->setMaximumHeight(80);
 	refreshListview ();
 	
 	layout->addLayout(layout1);
