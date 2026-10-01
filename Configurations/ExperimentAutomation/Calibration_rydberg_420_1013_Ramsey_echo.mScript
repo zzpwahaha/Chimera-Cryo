@@ -149,7 +149,7 @@ off: MWAmpTrg
 %t += 10
 
 t += 15
-%call StateSelectivePushout()
+%call StateSelectivePushout(3.5)
 
 %%%%%%%%%%%%%%  PGC in Tweezer %%%%%%%%%%%%%%%%%%
 % change the field/laser freq parameter here because the previous section is TOF and no light is on

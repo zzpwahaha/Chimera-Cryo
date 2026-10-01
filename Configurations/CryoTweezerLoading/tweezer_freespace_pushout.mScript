@@ -44,7 +44,7 @@ on: Ryd1013Shutter
 on: TARepShutter
 on: OPShutter
 t += 15
-%call StateSelectivePushout()
+%call StateSelectivePushout(3.5)
 
 %on: Ryd420Shutter
 off: Ryd420ExpShutter

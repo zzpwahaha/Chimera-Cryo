@@ -1,0 +1,187 @@
+%%%%%%%%%%%%%%%%% Start With 1ms %%%%%%%%%%%%%%%%% 
+t = 1
+%call CryoMOTLoadingPGC()
+call CryoMOTEnhancedLoadingLGM()
+
+%%%%%%%%%%%%%%%%%%%%%  rearrangement S&H %%%%%%%%%%%%%%%%%%%% 
+call RearrangementAODSampleAndHold(3.0)
+%%%%%%%%%%%%%%%%%%%%%  rearrangement S&H %%%%%%%%%%%%%%%%%%%% 
+
+
+
+call TOF(10)
+
+%t += -10
+%dacramp: SLMTweezerIntensity 1.2 slm_twz_intensity 10
+%t += 10
+
+%%%%%%%%%%%%%%  PGC in Tweezer %%%%%%%%%%%%%%%%%%
+% change the field/laser freq parameter here because the previous section is TOF and no light is on
+call D2InTrapPGC(t_pgc_twz)
+% note the t_pgc_twz should be smaller than 100
+t += 15
+%%%%%%%%%%%%%%  PGC in Tweezer with Probe %%%%%%%%%%%%%%%%%%
+% change the field/laser fre q parameter here because the previous section is TOF and no light is on
+call D2InTrapPGCPrb(25)
+% note the t_pgc_twz should be smaller than 100
+t += 15
+%%%%%%%%%%%%%%  Image TWIZZER  %%%%%%%%%%%%%%%%%%
+% change the field/laser freq parameter here because the previous section is dark, i.e. 100-t_pgc_twz is larger than 4
+call PGCTweezerImaging()
+
+%%%%%%%%%%%%%%%%%%%%%  rearrangement  %%%%%%%%%%%%%%%%%%%% 
+call Rearrangement5MovesNoAOD(5.8)
+t += 30
+%%%%%%%%%%%%%%%%%%%%%  rearrangement  %%%%%%%%%%%%%%%%%%%% 
+
+%%%%%%%%%%%%%%%% large field LGM optimzied at cryo %%%%%%%%%%%%%%%%
+%t += 10
+%    off: xyzMOTShutter
+%    on: D1LGMPrbShutter
+%    off: D1LGMShutter
+%    on: D1LGMEOMTrg
+%    dac: D1LGMEOMAmp 0 %amplitude_scan %d1lgmprb_twz_rep_amp
+%    dac: D1LGMAmp {4.5 d1lgm_prb_pwr} %3% amplitude_scan%d1lgmprb_twz_cool_amp
+%    ol: ol_D1LGM D1_LGMCooling_resonance-230 %resonance_scan %200-cryo %150-RT %resonance_scan %d1lgm_twz_olcool
+%    ol: ol_D1_repump Rb87_HFSplitting+resonance_scan %(-8.92) %(-9.0) %(-8.9) %resonance_scan %4.5 %resonance_scan %d1lgm_twz_olrepump % -9.4 to -8.6 MHz
+%
+%    dac: BiasCoilX pgc_twz_bias_x %0.8-RT
+%    dac: BiasCoilY pgc_twz_bias_y %pgc_twz_bias_y_scan %-5 %pgc_twz_bias_y=-4.5 %-1.1 RT
+%    dac: BiasCoilZ pgc_twz_bias_z %pgc_twz_bias_z_scan %pgc_twz_bias_z %-0.05RT
+%    t += t_shutter
+%
+%    on: D1LGMTrg
+%    t += 25 %time_scan %25 %time_scan %t_lgm_cool_time 
+%    pulseon: DO1_0 1
+%    off: D1LGMTrg
+%    off: D1LGMEOMTrg
+%    off: D1LGMShutter
+%    off: D1LGMPrbShutter
+%%%%%%%%%%%%%%%% large field LGM optimzied at cryo %%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%% large field LGM optimized at RT %%%%%%%%%%%%%%%%
+t += 10
+    off: xyzMOTShutter
+    on: D1LGMPrbShutter
+    off: D1LGMShutter
+    on: D1LGMEOMTrg
+    dac: D1LGMEOMAmp 0 %amplitude_scan %d1lgmprb_twz_rep_amp
+    dac: D1LGMAmp {4.5 d1lgm_prb_pwr} % amplitude_scan%d1lgmprb_twz_cool_amp
+    ol: ol_D1LGM D1_LGMCooling_resonance-230 %resonance_scan %d1lgm_twz_olcool
+    ol: ol_D1_repump Rb87_HFSplitting+(-7.62) %resonance_scan %(-7.6) %4.5 %resonance_scan %d1lgm_twz_olrepump
+
+    dac: BiasCoilX pgc_twz_bias_x %-1.75 %pgc_twz_bias_x
+    dac: BiasCoilY -4.5 %pgc_twz_bias_y %-5 %pgc_twz_bias_y=-4.5
+    dac: BiasCoilZ pgc_twz_bias_z %pgc_twz_bias_z
+    t += t_shutter
+
+    on: D1LGMTrg
+    t += 25 %time_scan %t_lgm_cool_time 
+    pulseon: DO1_0 1
+    off: D1LGMTrg
+    off: D1LGMEOMTrg
+    off: D1LGMShutter
+    off: D1LGMPrbShutter
+
+%%%%%%%%%%%%%%%%% large field LGM optimized at RT  %%%%%%%%%%%%%%%%
+t += 5
+
+%%%%%%%%%%%%%%%%%% OP %%%%%%%%%%%%%%%%% 
+call setQuantizationField()
+dacramp: SLMTweezerIntensity slm_twz_intensity slm_twz_intensity*0.06 10
+t += 10
+t += t_field_settling-20
+dacramp: SLMTweezerIntensity slm_twz_intensity*0.06 slm_twz_intensity 10
+t += 10
+call OpticalPumping22()
+
+t += 0.1
+dacramp: BiasCoilX -2.5+0.75 0.75 60
+dacramp: BiasCoilY -0.827 -0.827 60
+dacramp: BiasCoilZ -0.0438 -0.0438+1.12 60
+t += 60
+t += 1
+%%%%%%%%%%%%%%%%%% OP %%%%%%%%%%%%%%%%% 
+
+
+
+
+%t += 1
+%dacramp: SLMTweezerIntensity slm_twz_intensity slm_twz_intensity*0.2 10
+%dacramp: BiasCoilX pgc_twz_bias_x 0.75 10
+%dac: BiasCoilY -4.5
+%dacramp: BiasCoilZ pgc_twz_bias_z -0.0438 10
+%t += 10
+
+t += -10
+dacramp: SLMTweezerIntensity slm_twz_intensity slm_twz_intensity*0.5 10
+t += 10
+
+%%% D1 state transfer sample and hold %%%%
+t += -10
+%dac: D1StateTransferAmp -1.0/25 % for EIT
+dac: D1StateTransferAmp -0.5 %-1.0 %-3.0
+off: D1StateTransferShutter 
+t += 3
+on: D1StateTransferTrg
+t += 1
+on: D1StateTransferHold
+t += 0.1
+off: D1StateTransferTrg
+on: D1StateTransferShutter 
+t += 10-(3+1+0.1)
+%%%% D1 state transfer sample and hold %%%%
+
+
+on: do8_4
+on: D1StateTransferTrg
+t += time_scan_us/1000 %5.66/1000 %17/1000 %time_scan_us/1000 
+off: D1StateTransferTrg
+off: do8_4
+
+
+t += 0.1
+off: Ryd420Hold
+off: Ryd420Shutter
+off: D1StateTransferHold
+off: D1StateTransferShutter 
+t += 0.5
+
+%call releaseRecaptureSLM(20/1000) %20 $ time_scan_us
+
+
+t += 1
+dacramp: SLMTweezerIntensity slm_twz_intensity*0.5 slm_twz_intensity 10
+%dacramp: SLMTweezerIntensity slm_twz_intensity slm_twz_intensity*0.06 10
+dacramp: BiasCoilX 0.75 -2.5+0.75 60
+dacramp: BiasCoilY -0.827 -0.827 60
+dacramp: BiasCoilZ -0.0438+1.12 -0.0438 60
+t += 60
+%dacramp: SLMTweezerIntensity slm_twz_intensity*0.06 slm_twz_intensity 10
+t += 10
+
+
+%repeat: int(integer_scan_2)
+call StateSelectivePushout(3.5)
+%end
+t += 10
+%call setZeroField()
+
+    dac: BiasCoilX pgc_twz_bias_x
+    dac: BiasCoilY pgc_twz_bias_y 
+    dac: BiasCoilZ pgc_twz_bias_z
+t += 100
+%%%%%%%%%%%%%%  PGC in Tweezer %%%%%%%%%%%%%%%%%%
+% change the field/laser freq parameter here because the previous section is TOF and no light is on
+call D2InTrapPGCPrb(t_pgc_twz)
+% note the t_pgc_twz should be smaller than 100
+t += 15
+
+%%%%%%%%%%%%%%  Image TWIZZER  %%%%%%%%%%%%%%%%%%
+% change the field/laser freq parameter here because the previous section is dark, i.e. 100-t_pgc_twz is larger than 4
+call PGCTweezerImaging()
+
+t += 10
+%call RydbergBeamCameraFootprint()
+
+%%%%%%%%%%%%%%  END Sequence  %%%%%%%%%%%%%%%%%%
+call EndSequence()

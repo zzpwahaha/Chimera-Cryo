@@ -222,7 +222,7 @@ t += 10
 
 
 t += 10
-%call StateSelectivePushout()
+%call StateSelectivePushout(3.5)
     var FullTrapLightShift 30 % MHz
     var Bfield 7 %G
     var DifferentialZeemanCoef 1.4 % MHz/G

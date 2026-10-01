@@ -212,7 +212,7 @@ off: MWAmpTrg
 %t += 10
 
 t += 15
-%call StateSelectivePushout()
+%call StateSelectivePushout(3.5)
 %call setZeroField()
 %t += 400
 %%%%%%%%%%%%%%  PGC in Tweezer %%%%%%%%%%%%%%%%%%

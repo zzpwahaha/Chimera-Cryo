@@ -187,7 +187,7 @@ t += 10
 
 
 t += 10
-call StateSelectivePushout()
+call StateSelectivePushout(3.5)
 t += 5
 
 %call TrapLowerAndRise(twz_intensity, twz_intensity*0.1, 10, 15)

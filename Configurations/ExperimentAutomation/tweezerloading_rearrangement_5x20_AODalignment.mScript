@@ -30,7 +30,7 @@ call PGCTweezerImaging()
 
 
 %%%%%%%%%%%%%%%%%%%%%%%  rearrangement  %%%%%%%%%%%%%%%%%%%% 
-call Rearrangement5MovesNoCooling(4.8) %5.8
+call Rearrangement5MovesNoCooling(4.2) %4.8%5.8
 %call Rearrangement5MovesNoCooling(amplitude_scan) %5.8
 %call Rearrangement5Moves(amplitude_scan) %5.8
 %%%%%%%%%%%%%%%%%%%%%%%  rearrangement  %%%%%%%%%%%%%%%%%%%% 

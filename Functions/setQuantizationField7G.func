@@ -1,0 +1,14 @@
+%%%%%% leave enough time for field to settle down, typically use 750ms
+def setQuantizationField7G():
+
+%cold
+%    dac: BiasCoilX -2.5+0.75-2.5 %quantization_bias_x
+%    dac: BiasCoilY -1.065+0.05+(-0.1)+0.297 %-2.33 %quantization_bias_y %-0.95 
+%    dac: BiasCoilZ -0.05-0.039+0.036+0.0156-0.015 %-0.04 
+
+
+% warm bias field 7 G 
+dac: BiasCoilX -2.5+0.75-2.5
+dac: BiasCoilY -0.801
+dac: BiasCoilZ -0.0593 
+

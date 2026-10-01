@@ -1,7 +1,7 @@
 Version 1.0
 do1_0
 1
-do1_1
+ryddressmwamp
 1
 opshutter
 1
@@ -265,16 +265,16 @@ rb87_hfsplitting 6834.682
 t_shutter 10
 t_field_settling 100
 rydberg_ionization_frequency 6375
-aod_offset_x 0.249
-aod_offset_y -0.292
+aod_offset_x 0.362
+aod_offset_y -0.763
 is_cryo 0
-ryd420_l2 -20.62
-ryd420_l4 -8.49
+ryd420_l2 -21.119
+ryd420_l4 -10.38
 ryd1013_l2 -14.825
 ryd1013_l4 117.804
 d1statetransfer_l2 0
 d1statetransfer_l4 25.3
-op_l2 -1
-op_l4 19.54
+op_l2 -0.623
+op_l4 19.851
 971 1140 1 921 974 1
 0 1

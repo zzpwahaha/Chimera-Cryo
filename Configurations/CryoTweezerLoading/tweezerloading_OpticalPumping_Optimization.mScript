@@ -359,7 +359,7 @@ t += 15
 %t += 15
 
 t += 10
-call StateSelectivePushout()
+call StateSelectivePushout(3.5)
 t += 5 
 
 %%%%%%%%%%%%%%  PGC in Tweezer with Probe %%%%%%%%%%%%%%%%%%

@@ -135,7 +135,7 @@ t += 10
 
 % Wait longer(why?) and then do state selective imaging
 t += 10
-call StateSelectivePushout()
+call StateSelectivePushout(3.5)
 
 %dac: BiasCoilX pgc_twz_bias_x
 %dac: BiasCoilY pgc_twz_bias_y 
