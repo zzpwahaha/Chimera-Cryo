@@ -582,6 +582,12 @@
     <ClCompile Include="Source\FastLogger\FastLogger.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\GigaMOOG\GigaMoog420Core.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\GigaMOOG\SynthesizerSequences.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="3rd_Party\qcustomplot\qcustomplot.h">
@@ -1310,6 +1316,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\FastLogger\FastLoggerSetting.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\GigaMOOG\GigaMoog420Core.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\GigaMOOG\GigaMoog420Packets.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\GigaMOOG\SynthesizerSequences.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

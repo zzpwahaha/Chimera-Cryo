@@ -141,6 +141,8 @@
     <ClCompile Include="Source\ExternalController\MessageDisplay.cpp" />
     <ClCompile Include="Source\ExternalController\MessageConsumer.cpp" />
     <ClCompile Include="Source\GeneralFlumes\BoostAsyncTCPServer.cpp" />
+    <ClCompile Include="Source\GigaMOOG\GigaMoog420Core.cpp" />
+    <ClCompile Include="Source\GigaMOOG\SynthesizerSequences.cpp" />
     <ClCompile Include="Source\PicoScrew\NewportUSB.cpp" />
     <ClCompile Include="Source\PicoScrew\PicoScrewSystem.cpp" />
     <ClCompile Include="Source\PicoScrew\PicoScrewCore.cpp" />
@@ -215,6 +217,9 @@
     <ClInclude Include="Source\GeneralFlumes\BoostSyncSerial.h" />
     <ClInclude Include="Source\GeneralFlumes\BoostSyncUDP.h" />
     <ClInclude Include="Source\GeneralFlumes\BoostSyncTCP.h" />
+    <ClInclude Include="Source\GigaMOOG\GigaMoog420Core.h" />
+    <ClInclude Include="Source\GigaMOOG\GigaMoog420Packets.h" />
+    <ClInclude Include="Source\GigaMOOG\SynthesizerSequences.h" />
     <ClInclude Include="Source\StaticAnalogOutput\StaticAoCore.h" />
     <QtMoc Include="Source\StaticDirectAnalogSynthesis\StaticDasSystem.h" />
     <ClInclude Include="Source\StaticDirectAnalogSynthesis\StaticDasCore.h" />
