@@ -15,6 +15,7 @@
 template <typename type> struct scriptInfo{
 	type master;
 	type gmoog;
+	type gmoog420;
 };
 
 namespace Ui {
@@ -73,6 +74,12 @@ class QtScriptWindow : public IChimeraQtWindow{
 		void saveGMoogScript();
 		void saveGMoogScriptAs(IChimeraQtWindow* parent);
 
+		void newGMoogScript(int deviceIndex);
+		void openGMoogScript(int deviceIndex, IChimeraQtWindow* parent);
+		void openGMoogScript(int deviceIndex, std::string name);
+		void saveGMoogScript(int deviceIndex);
+		void saveGMoogScriptAs(int deviceIndex, IChimeraQtWindow* parent);
+
 		void saveAllScript();
 
 		void updateConfigurationSavedStatus (bool status);
@@ -86,7 +93,8 @@ class QtScriptWindow : public IChimeraQtWindow{
 
 		std::vector<std::reference_wrapper<ArbGenSystem>> getArbGenSystem();
 		std::vector<std::reference_wrapper<ArbGenCore>> getArbGenCore();
-		GigaMoogCore& getGigaMoogCore();;
+		GigaMoogCore& getGigaMoogCore();
+		GigaMoog420Core& getGigaMoog420Core();
 
     private:
         Ui::QtScriptWindow* ui;

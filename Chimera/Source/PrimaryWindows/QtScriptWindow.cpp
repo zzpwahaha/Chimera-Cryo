@@ -53,6 +53,22 @@ void QtScriptWindow::initializeWidgets (){
 	layout2->addWidget(&arbGens[4], 0);
 	arbGens[4].setMaximumHeight(232);
 	arbGens[4].setMaximumWidth(600);
+
+	QHBoxLayout* gmoogBtnLayout = new QHBoxLayout();
+	gmoogBtnLayout->setContentsMargins(0, 0, 0, 0);
+	QPushButton* openGm1Btn = new QPushButton("Open GM", this);
+	QPushButton* openGm2Btn = new QPushButton("Open GM420", this);
+	gmoogBtnLayout->addWidget(openGm1Btn);
+	gmoogBtnLayout->addWidget(openGm2Btn);
+	gmoogBtnLayout->addStretch(1);
+	layout2->addLayout(gmoogBtnLayout);
+	connect(openGm1Btn, &QPushButton::released, this, [this]() {
+		openGMoogScript(1, this);
+		});
+	connect(openGm2Btn, &QPushButton::released, this, [this]() {
+		openGMoogScript(2, this);
+		});
+
 	layout2->addWidget(&gigaMoog, 1);
 	layout->addLayout(layout2, 1);
 	layout->addWidget(&masterScript, 1);
@@ -131,6 +147,7 @@ void QtScriptWindow::handleMasterFunctionChange (){
 void QtScriptWindow::checkScriptSaves (){
 	masterScript.checkSave (getProfile ().configLocation, mainWin->getRunInfo());
 	gigaMoog.gmoogScript.checkSave(getProfile().configLocation, mainWin->getRunInfo());
+	gigaMoog.gmoogScript420.checkSave(getProfile().configLocation, mainWin->getRunInfo());
 	for (auto name : ArbGenEnum::allAgs) {
 		arbGens[(int)name].checkSave(getProfile().configLocation, mainWin->getRunInfo());
 	}
@@ -161,6 +178,19 @@ std::string QtScriptWindow::getSystemStatusString (){
 	else {
 		status += "\tGIGAMOOG System is disabled! Enable in \"constants.h\" \n";
 	}
+
+	status += "GIGAMOOG420:\n\t";
+	if (!GIGAMOOG420_SAFEMODE) {
+		status += str("GIGAMOOG420 System is Active at " + GIGAMOOG420_IPADDRESS + " and port," + str(GIGAMOOG420_IPPORT) + "\n\t");
+		status += "Attached trigger line is \n\t\t";
+		for (const auto& gmtrig : GM420_TRIGGER_LINE) {
+			status += "(" + str(gmtrig.first) + "," + str(gmtrig.second) + ") ";
+		}
+		status += "\n";
+	}
+	else {
+		status += "\tGIGAMOOG420 System is disabled! Enable in \"constants.h\" \n";
+	}
 	return status;
 }
 
@@ -171,6 +201,8 @@ scriptInfo<std::string> QtScriptWindow::getScriptNames (){
 	scriptInfo<std::string> names;
 	names.master = masterScript.getScriptName ();
 	names.gmoog = gigaMoog.gmoogScript.getScriptName();
+	names.gmoog420 = gigaMoog.gmoogScript420.getScriptName();
+
 	//names.intensityAgilent = intensityAgilent.arbGenScript.getScriptName();
 	return names;
 }
@@ -183,6 +215,8 @@ scriptInfo<bool> QtScriptWindow::getScriptSavedStatuses (){
 	//status.intensityAgilent = intensityAgilent.arbGenScript.savedStatus();
 	status.master = masterScript.savedStatus ();
 	status.gmoog = gigaMoog.gmoogScript.savedStatus();
+	status.gmoog420 = gigaMoog.gmoogScript420.savedStatus();
+
 	return status;
 }
 
@@ -194,6 +228,7 @@ scriptInfo<std::string> QtScriptWindow::getScriptAddresses (){
 	//addresses.intensityAgilent = intensityAgilent.arbGenScript.getScriptPathAndName();
 	addresses.master = masterScript.getScriptPathAndName ();
 	addresses.gmoog = gigaMoog.gmoogScript.getScriptPathAndName();
+	addresses.gmoog420 = gigaMoog.gmoogScript420.getScriptPathAndName();
 	return addresses;
 }
 
@@ -295,21 +330,21 @@ profileSettings QtScriptWindow::getProfile (){
 	return mainWin->getProfileSettings ();
 }
 
-void QtScriptWindow::windowOpenConfig (ConfigStream& configFile){
-	try{
-		ConfigSystem::initializeAtDelim (configFile, "SCRIPTS");
+void QtScriptWindow::windowOpenConfig(ConfigStream& configFile) {
+	try {
+		ConfigSystem::initializeAtDelim(configFile, "SCRIPTS");
 	}
-	catch (ChimeraError&){
-		reportErr ("Failed to initialize configuration file at scripting window entry point \"SCRIPTS\".");
+	catch (ChimeraError&) {
+		reportErr("Failed to initialize configuration file at scripting window entry point \"SCRIPTS\".");
 		return;
 	}
-	try{
-		auto getlineFunc = ConfigSystem::getGetlineFunc (configFile.ver);
+	try {
+		auto getlineFunc = ConfigSystem::getGetlineFunc(configFile.ver);
 		std::string masterName/*, gmoogName*/;
 		// order should match the windowsaveconfig
-		getlineFunc (configFile, masterName);
+		getlineFunc(configFile, masterName);
 		//getlineFunc(configFile, gmoogName);
-		ConfigSystem::checkDelimiterLine (configFile, "END_SCRIPTS");
+		ConfigSystem::checkDelimiterLine(configFile, "END_SCRIPTS");
 		try {
 			openMasterScript(masterName);
 		}
@@ -323,15 +358,41 @@ void QtScriptWindow::windowOpenConfig (ConfigStream& configFile){
 
 		ConfigSystem::standardOpenConfig(configFile, gigaMoog.getDelim(), &gigaMoog);
 		try {
-			openGMoogScript(gigaMoog.scriptAddress);
+			openGMoogScript(1, gigaMoog.scriptAddress);
 		}
 		catch (ChimeraError& err) {
-			auto answer = QMessageBox::question(this, "Open Failed", "ERROR: Failed to open master script file: "
+			auto answer = QMessageBox::question(this, "Open Failed", "ERROR: Failed to open GigaMoog script file: "
 				+ qstr(gigaMoog.scriptAddress) + ", with error \r\n" + err.qtrace() + "\r\nAttempt to find file yourself?");
 			if (answer == QMessageBox::Yes) {
 				openGMoogScript(openWithExplorer(nullptr, "gScript", CONFIGURATION_PATH));
 			}
 		}
+
+		// Handle old config files with no GMOOG420 delimiter
+		bool has420Section = false;
+		try {
+			ConfigSystem::initializeAtDelim(configFile, gigaMoog.getDelim420());
+			gigaMoog.handleOpenConfig420(configFile);
+			ConfigSystem::checkDelimiterLine(configFile, "END_" + gigaMoog.getDelim420());
+			has420Section = true;
+		}
+		catch (ChimeraError&) {
+			reportErr("No GMOOG420 section in this config. Re-save the config to add one.\r\n");
+		}
+
+		if (has420Section) {
+			try {
+				openGMoogScript(2, gigaMoog.scriptAddress420);
+			}
+			catch (ChimeraError& err) {
+				auto answer = QMessageBox::question(this, "Open Failed", "ERROR: Failed to open GigaMoog420 script file: "
+					+ qstr(gigaMoog.scriptAddress420) + ", with error \r\n" + err.qtrace() + "\r\nAttempt to find file yourself?");
+				if (answer == QMessageBox::Yes) {
+					openGMoogScript(2, openWithExplorer(nullptr, "gScript", CONFIGURATION_PATH));
+				}
+			}
+		}
+
 		for (auto name : ArbGenEnum::allAgs) {
 			deviceOutputInfo info;
 			ConfigSystem::stdGetFromConfig(configFile, arbGens[(int)name].getCore(), info, Version("1.0"));
@@ -342,8 +403,8 @@ void QtScriptWindow::windowOpenConfig (ConfigStream& configFile){
 
 		considerScriptLocations();
 	}
-	catch (ChimeraError& err)	{
-		reportErr ("Scripting Window failed to read parameters from the configuration file.\n\n" + err.qtrace ());
+	catch (ChimeraError& err) {
+		reportErr("Scripting Window failed to read parameters from the configuration file.\n\n" + err.qtrace());
 	}
 }
 
@@ -429,61 +490,118 @@ void QtScriptWindow::deleteMasterFunction (){
 	// todo. Right now you can just delete the file itself...
 }
 
-void QtScriptWindow::newGMoogScript()
+void QtScriptWindow::newGMoogScript() { newGMoogScript(1); }
+void QtScriptWindow::openGMoogScript(IChimeraQtWindow* parent) { openGMoogScript(1, parent); }
+void QtScriptWindow::openGMoogScript(std::string name) { openGMoogScript(1, name); }
+void QtScriptWindow::saveGMoogScript() { saveGMoogScript(1); }
+void QtScriptWindow::saveGMoogScriptAs(IChimeraQtWindow* parent) { saveGMoogScriptAs(1, parent); }
+
+void QtScriptWindow::newGMoogScript(int deviceIndex)
 {
 	try {
-		gigaMoog.gmoogScript.checkSave(getProfile().configLocation, mainWin->getRunInfo());
-		gigaMoog.gmoogScript.newScript();
-		updateConfigurationSavedStatus(false);
-		gigaMoog.gmoogScript.updateScriptNameText(getProfile().configLocation);
+		auto profile = getProfile();
+		auto run = mainWin->getRunInfo();
+		auto& profileLoc = profile.configLocation;
+		auto& runInfo = run;
+		if (deviceIndex == 1) {
+			gigaMoog.gmoogScript.checkSave(profileLoc, runInfo);
+			gigaMoog.gmoogScript.newScript();
+			updateConfigurationSavedStatus(false);
+			gigaMoog.gmoogScript.updateScriptNameText(profileLoc);
+		}
+		else {
+			gigaMoog.gmoogScript420.checkSave(profileLoc, runInfo);
+			gigaMoog.gmoogScript420.newScript();
+			updateConfigurationSavedStatus(false);
+			gigaMoog.gmoogScript420.updateScriptNameText(profileLoc);
+		}
 	}
 	catch (ChimeraError& err) {
 		reportErr(err.qtrace());
 	}
 }
 
-void QtScriptWindow::openGMoogScript(IChimeraQtWindow* parent)
+void QtScriptWindow::openGMoogScript(int deviceIndex, IChimeraQtWindow* parent)
 {
 	try {
-		gigaMoog.gmoogScript.checkSave(getProfile().configLocation, mainWin->getRunInfo());
-		std::string openName = openWithExplorer(parent, Script::GMOOG_SCRIPT_EXTENSION, CONFIGURATION_PATH);
-		gigaMoog.gmoogScript.openParentScript(openName, getProfile().configLocation, mainWin->getRunInfo());
-		updateConfigurationSavedStatus(false);
-		gigaMoog.gmoogScript.updateScriptNameText(getProfile().configLocation);
+		auto profile = getProfile();
+		auto run = mainWin->getRunInfo();
+		auto& profileLoc = profile.configLocation;
+		auto& runInfo = run;
+		if (deviceIndex == 1) {
+			gigaMoog.gmoogScript.checkSave(profileLoc, runInfo);
+			std::string openName = openWithExplorer(parent, Script::GMOOG_SCRIPT_EXTENSION, CONFIGURATION_PATH);
+			gigaMoog.gmoogScript.openParentScript(openName, profileLoc, runInfo);
+			updateConfigurationSavedStatus(false);
+			gigaMoog.gmoogScript.updateScriptNameText(profileLoc);
+		}
+		else {
+			gigaMoog.gmoogScript420.checkSave(profileLoc, runInfo);
+			std::string openName = openWithExplorer(parent, Script::GMOOG_SCRIPT_EXTENSION, CONFIGURATION_PATH);
+			gigaMoog.gmoogScript420.openParentScript(openName, profileLoc, runInfo);
+			updateConfigurationSavedStatus(false);
+			gigaMoog.gmoogScript420.updateScriptNameText(profileLoc);
+		}
 	}
 	catch (ChimeraError& err) {
 		reportErr("Open GigaMoog Script Failed: " + err.qtrace() + "\r\n");
 	}
 }
 
-void QtScriptWindow::openGMoogScript(std::string name)
+void QtScriptWindow::openGMoogScript(int deviceIndex, std::string name)
 {
-	gigaMoog.gmoogScript.openParentScript(name, getProfile().configLocation, mainWin->getRunInfo());
-}
-
-void QtScriptWindow::saveGMoogScript()
-{
-	gigaMoog.gmoogScript.saveScript(getProfile().configLocation, mainWin->getRunInfo());
-	gigaMoog.gmoogScript.updateScriptNameText(getProfile().configLocation);
-}
-
-void QtScriptWindow::saveGMoogScriptAs(IChimeraQtWindow* parent)
-{
-	std::string extensionNoPeriod = gigaMoog.gmoogScript.getExtension();
-	if (extensionNoPeriod.size() == 0) {
-		return;
+	if (deviceIndex == 1) {
+		gigaMoog.gmoogScript.openParentScript(name, getProfile().configLocation, mainWin->getRunInfo());
 	}
-	extensionNoPeriod = extensionNoPeriod.substr(1, extensionNoPeriod.size());
-	std::string newScriptAddress = saveWithExplorer(parent, extensionNoPeriod, getProfileSettings());
-	gigaMoog.gmoogScript.saveScriptAs(newScriptAddress, mainWin->getRunInfo());
-	updateConfigurationSavedStatus(false);
-	gigaMoog.gmoogScript.updateScriptNameText(getProfile().configLocation);
+	else {
+		gigaMoog.gmoogScript420.openParentScript(name, getProfile().configLocation, mainWin->getRunInfo());
+	}
+}
+
+void QtScriptWindow::saveGMoogScript(int deviceIndex)
+{
+	if (deviceIndex == 1) {
+		gigaMoog.gmoogScript.saveScript(getProfile().configLocation, mainWin->getRunInfo());
+		gigaMoog.gmoogScript.updateScriptNameText(getProfile().configLocation);
+	}
+	else {
+		gigaMoog.gmoogScript420.saveScript(getProfile().configLocation, mainWin->getRunInfo());
+		gigaMoog.gmoogScript420.updateScriptNameText(getProfile().configLocation);
+	}
+}
+
+void QtScriptWindow::saveGMoogScriptAs(int deviceIndex, IChimeraQtWindow* parent)
+{
+	try {
+		std::string extensionNoPeriod;
+		if (deviceIndex == 1) extensionNoPeriod = gigaMoog.gmoogScript.getExtension();
+		else extensionNoPeriod = gigaMoog.gmoogScript420.getExtension();
+
+		if (extensionNoPeriod.size() == 0) {
+			return;
+		}
+		extensionNoPeriod = extensionNoPeriod.substr(1, extensionNoPeriod.size());
+		std::string newScriptAddress = saveWithExplorer(parent, extensionNoPeriod, getProfileSettings());
+		if (deviceIndex == 1) {
+			gigaMoog.gmoogScript.saveScriptAs(newScriptAddress, mainWin->getRunInfo());
+			gigaMoog.gmoogScript.updateScriptNameText(getProfile().configLocation);
+		}
+		else {
+			gigaMoog.gmoogScript420.saveScriptAs(newScriptAddress, mainWin->getRunInfo());
+			gigaMoog.gmoogScript420.updateScriptNameText(getProfile().configLocation);
+		}
+		updateConfigurationSavedStatus(false);
+	}
+	catch (ChimeraError& err) {
+		reportErr(err.qtrace());
+	}
 }
 
 void QtScriptWindow::saveAllScript()
 {
 	saveMasterScript();
-	saveGMoogScript();
+	saveGMoogScript(1);
+	saveGMoogScript(2);
 	for (auto name : ArbGenEnum::allAgs) {
 		saveArbGenScript(name);
 	}
@@ -505,6 +623,7 @@ void QtScriptWindow::windowSaveConfig (ConfigStream& saveFile){
 void QtScriptWindow::checkMasterSave (){
 	masterScript.checkSave (getProfile ().configLocation, mainWin->getRunInfo());
 	gigaMoog.gmoogScript.checkSave(getProfile().configLocation, mainWin->getRunInfo());
+	gigaMoog.gmoogScript420.checkSave(getProfile().configLocation, mainWin->getRunInfo());
 }
 
 void QtScriptWindow::considerScriptLocations() {
@@ -513,6 +632,7 @@ void QtScriptWindow::considerScriptLocations() {
 	}
 	masterScript.considerCurrentLocation(getProfile().configLocation, mainWin->getRunInfo());
 	gigaMoog.gmoogScript.considerCurrentLocation(getProfile().configLocation, mainWin->getRunInfo());
+	gigaMoog.gmoogScript420.considerCurrentLocation(getProfile().configLocation, mainWin->getRunInfo());
 }
 
 //void QtScriptWindow::updateProfile (std::string text){
@@ -532,6 +652,7 @@ void QtScriptWindow::fillExpDeviceList (DeviceList& list) {
 		list.list.push_back(arbGens[(int)name].getCore());
 	}
 	list.list.push_back(gigaMoog.getCore());
+	list.list.push_back(gigaMoog.getCore420());
 }
 
 std::vector<std::reference_wrapper<ArbGenSystem>> QtScriptWindow::getArbGenSystem()
@@ -555,4 +676,9 @@ std::vector<std::reference_wrapper<ArbGenCore>> QtScriptWindow::getArbGenCore()
 GigaMoogCore& QtScriptWindow::getGigaMoogCore()
 {
 	return gigaMoog.getCore();
+}
+
+GigaMoog420Core& QtScriptWindow::getGigaMoog420Core()
+{
+	return gigaMoog.getCore420();
 }

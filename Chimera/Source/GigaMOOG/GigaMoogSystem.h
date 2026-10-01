@@ -7,6 +7,7 @@
 #include <chrono> 
 #include <windows.h> 
 #include <GigaMOOG/GigaMoogCore.h>
+#include <GigaMOOG/GigaMoog420Core.h>
 
 
 class IChimeraQtWindow;
@@ -27,7 +28,10 @@ public:
 	// configs
 	void handleSaveConfig(ConfigStream& saveFile);
 	void handleOpenConfig(ConfigStream& openFile);
+	void handleOpenConfig420(ConfigStream& openFile);
+	std::string getDelim420() { return core420.configDelim; }
 	std::string getDelim() { return core.configDelim; }
+	GigaMoog420Core& getCore420() { return core420; }
 	GigaMoogCore& getCore() { return core; }
 
 	//Attempt to parse moog script 
@@ -36,9 +40,13 @@ public:
 	Script gmoogScript;
 	CQCheckBox* expActive;
 	std::string scriptAddress;
+	Script gmoogScript420;
+	CQCheckBox* expActive420;
+	std::string scriptAddress420;
 
 private:
 	GigaMoogCore core;
+	GigaMoog420Core core420;
 
 };
 
