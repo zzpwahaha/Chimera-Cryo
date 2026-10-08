@@ -5,6 +5,7 @@
 #include <Scripts/ScriptStream.h>
 #include "SynthesizerSequences.h"
 #include "GigaMoog420Packets.h"
+#include "AomFeedforward.h"
 
 // Core for the 32-bit GigaMoog420 box (ZCU106 / YJ205 timestamped sequencer, 4 channels).
 // Unlike GigaMoogCore, this box does not use the KA007 message protocol in Messagetypes.h.
@@ -37,13 +38,25 @@ public:
 	void disconnectPort() {};
 	void reconnectPort() {};
 
+	// Per-block amplitude corrections (see AomFeedforward.h), keyed by block label. They come from
+	// these calls (for the GUI) or from "correction <label> <path>" lines in the script, which take
+	// precedence. Only labeled blocks are changed, and raw "bit" scripts never are. A script can turn
+	// all corrections off or on with "feedforward 0" or "feedforward 1".
+	void loadCorrection(const std::string& label, const std::string& filePath);
+	void clearCorrection(const std::string& label);
+	const std::map<std::string, gm420::AmplitudeCorrection>& getCorrections() const { return corrections; }
+	void setFeedforwardEnabled(bool enabled) { feedforwardEnabled = enabled; }
+	bool isFeedforwardEnabled() const { return feedforwardEnabled; }
+
 private:
 	using SequenceMap = std::map<int, std::vector<std::shared_ptr<synth::RFBlock>>>;
 
 	// Parse the script file for one variation and append its table packets to commandList.
 	void analyzeMoogScript(std::string fileAddr, std::vector<parameterType>& variables, unsigned variation);
+	using CorrectionMap = std::map<std::string, gm420::AmplitudeCorrection>;
 	bool analyzeMoogScript(std::string word, ScriptStream& script, SequenceMap& sequence,
-		gm420::PacketList& rawPackets, std::vector<parameterType>& variables, unsigned variation);
+		gm420::PacketList& rawPackets, bool& useFeedforward, CorrectionMap& scriptCorrections,
+		std::vector<parameterType>& variables, unsigned variation);
 
 	void sendReset(bool resetOutputs);
 	void sendPackets(const gm420::PacketList& packets);
@@ -58,6 +71,9 @@ private:
 	std::string fileAddress;
 	std::vector<gm420::PacketList> commandList; // [variation] -> every datagram to send, in order
 	gm420::PacketList lastSent;                 // what the last program call sent, for reporting
+	CorrectionMap corrections;                  // [label] -> correction loaded through the API/GUI
+	CorrectionMap lastAppliedCorrections;       // what variation 0 of the last compile used, for logging
+	bool feedforwardEnabled = true;
 
 	friend class CruncherThreadWorker;
 };

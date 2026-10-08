@@ -5,6 +5,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <fstream>
 #include <sstream>
 #include <stdexcept>
 
@@ -350,6 +351,100 @@ namespace synth {
         return "Repeat(..., " + std::to_string(repetitions) + ")";
     }
 
+    // --- read_numeric_table -------------------------------------------------------
+
+    std::vector<std::vector<double>> read_numeric_table(const std::string& path, size_t minCols, size_t maxCols) {
+        std::ifstream file(path);
+        if (!file.is_open())
+            throw std::runtime_error("could not open \"" + path + "\"");
+        std::vector<std::vector<double>> rows;
+        std::string line;
+        int lineNum = 0;
+        while (std::getline(file, line)) {
+            ++lineNum;
+            std::string where = "\"" + path + "\", line " + std::to_string(lineNum);
+            auto comment = line.find_first_of("#%");
+            if (comment != std::string::npos) line.erase(comment);
+            for (char& c : line)
+                if (c == ',' || c == ';' || c == '\t') c = ' ';
+            std::istringstream tokens(line);
+            std::vector<double> values;
+            std::string token;
+            bool numeric = true;
+            while (tokens >> token) {
+                try {
+                    size_t used = 0;
+                    double v = std::stod(token, &used);
+                    if (used != token.size() || !std::isfinite(v)) { numeric = false; break; }
+                    values.push_back(v);
+                }
+                catch (std::exception&) { numeric = false; break; }
+            }
+            if (!numeric) {
+                if (rows.empty()) continue;                // column header
+                throw std::runtime_error(where + " is not numeric");
+            }
+            if (values.empty()) continue;                  // blank or comment-only line
+            if (values.size() < minCols || values.size() > maxCols)
+                throw std::runtime_error(where + " has " + std::to_string(values.size()) + " columns; expected "
+                    + (minCols == maxCols ? std::to_string(minCols)
+                                          : std::to_string(minCols) + "-" + std::to_string(maxCols)));
+            rows.push_back(std::move(values));
+        }
+        return rows;
+    }
+
+    // --- TableRamp ----------------------------------------------------------------
+
+    std::shared_ptr<TableRamp> TableRamp::fromFile(const std::string& path) {
+        auto rows = read_numeric_table(path, 3, 4);
+        if (rows.size() < 2)
+            throw std::runtime_error("table ramp \"" + path + "\" needs at least two rows (the last one marks the end)");
+        const size_t nCols = rows.front().size();
+        auto table = std::make_shared<TableRamp>();
+        table->source = path;
+        for (size_t i = 0; i < rows.size(); ++i) {
+            const auto& r = rows[i];
+            std::string where = "table ramp \"" + path + "\", row " + std::to_string(i + 1);
+            if (r.size() != nCols)
+                throw std::runtime_error(where + ": every row must have the same number of columns");
+            double tau = r[0], fHz = r[1] * 1e6, amp = r[2] / 100.0;
+            if (i == 0 && tau != 0.0)
+                throw std::runtime_error(where + ": tau must start at 0 (time from the start of the block)");
+            if (i > 0 && tau - table->tau.back() < MIN_DURATION * (1.0 - 1e-9))
+                throw std::runtime_error(where + ": tau must increase by at least one clock tick ("
+                    + std::to_string(MIN_DURATION * 1e9) + " ns) per row");
+            validate_parameters(std::nullopt, amp, std::nullopt, fHz);
+            table->tau.push_back(tau);
+            table->frequency.push_back(fHz);
+            table->amplitude.push_back(amp);
+            if (nCols == 4) table->phase.push_back(r[3] * PI / 180.0);
+        }
+        if (table->tau.size() > static_cast<size_t>(MAX_LENGTH))
+            throw std::runtime_error("table ramp \"" + path + "\" has more rows than the table holds ("
+                + std::to_string(MAX_LENGTH) + ")");
+        validate_parameters(table->tau.back());
+        return table;
+    }
+
+    std::vector<std::shared_ptr<RFBlock>>
+        TableRamp::expand(const SequenceState&) const {
+        std::vector<std::shared_ptr<RFBlock>> seq;
+        const bool hasPhase = !phase.empty();
+        for (size_t i = 0; i < tau.size(); ++i) {
+            // The last row lasts zero time: compile_sequence gives it no table row of its own, but it
+            // leaves the running state at the table's final output for whatever follows.
+            double duration = (i + 1 < tau.size()) ? tau[i + 1] - tau[i] : 0.0;
+            std::optional<double> ph = hasPhase ? std::optional<double>(phase[i]) : std::nullopt;
+            seq.push_back(std::make_shared<Timestamp>(duration, amplitude[i], ph, frequency[i]));
+        }
+        return seq;
+    }
+
+    std::string TableRamp::repr() const {
+        return "TableRamp(\"" + source + "\", " + std::to_string(tau.size()) + " rows)";
+    }
+
     // --- compile_sequence ---------------------------------------------------------
 
     CompileResult compile_sequence(
@@ -370,6 +465,8 @@ namespace synth {
 
                 if (!head->isAtomic()) {
                     auto children = head->expand(state);
+                    for (auto& child : children)
+                        if (child->label.empty()) child->label = head->label;
                     for (auto it = children.rbegin(); it != children.rend(); ++it)
                         stack.push_back(*it);
                     continue;
@@ -517,6 +614,7 @@ namespace synth {
                 ct.amplitude = ts->amplitude.value_or(0.0);
                 ct.frequency = ts->frequency.value_or(0.0);
                 ct.wait_for_trigger = ts->wait_for_trigger;
+                ct.label = ts->label;
                 for (int i = 0; i < N_DIGITAL; ++i)
                     ct.digital_out[i] = ts->digital_out.count(i) ? ts->digital_out.at(i) : false;
                 result.channels[channel].push_back(ct);
