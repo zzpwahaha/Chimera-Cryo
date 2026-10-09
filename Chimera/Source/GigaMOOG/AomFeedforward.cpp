@@ -117,7 +117,9 @@ namespace gm420 {
 			const double sectionEnd = section < durations.size() ? durations[section] : rows[last].timestamp;
 			const double blockStart = rows[first].timestamp;
 
-			size_t uncovered = 0, clipped = 0;
+			// Rows the curve doesn't cover are left unchanged without a warning: a correction curve that
+			// ends before the block does (e.g. once the light is already off) is normal.
+			size_t clipped = 0;
 			for (size_t i = first; i <= last; ++i) {
 				double tau0 = rows[i].timestamp - blockStart;
 				double tau1 = ((i + 1 < rows.size() && !rows[i + 1].wait_for_trigger) ? rows[i + 1].timestamp : sectionEnd)
@@ -125,7 +127,6 @@ namespace gm420 {
 				if (tau1 <= tau0) continue;
 				double g;
 				if (!corr.rowGain(tau0, tau1, g)) {
-					++uncovered;
 					continue;
 				}
 				double a = rows[i].amplitude * g;
@@ -134,10 +135,6 @@ namespace gm420 {
 					++clipped;
 				}
 				rows[i].amplitude = a;
-			}
-			if (uncovered > 0) {
-				warnings += where + " (channel " + str(channel) + "): " + str(uncovered)
-					+ " rows fall outside the correction curve and were left unchanged.\r\n";
 			}
 			if (clipped > 0) {
 				warnings += where + " (channel " + str(channel) + "): " + str(clipped)

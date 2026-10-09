@@ -283,9 +283,6 @@ void GigaMoog420Core::analyzeMoogScript(std::string fileAddr, std::vector<parame
 	}
 	if (!feedforwardWarnings.empty()) {
 		flog << feedforwardWarnings << fendl;
-		if (variation == 0) {               // same warning for every variation; show it once
-			emit errBox(qstr(feedforwardWarnings));
-		}
 	}
 	//packets.push_back(gm420::triggerPacket());
 	commandList.push_back(std::move(packets));
