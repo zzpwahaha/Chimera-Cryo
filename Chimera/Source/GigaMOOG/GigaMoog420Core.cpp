@@ -104,10 +104,27 @@ void GigaMoog420Core::softwareTrigger()
 // Script words are lowercased by ScriptStream, so labels are matched case-insensitively.
 static std::string normalizeLabel(std::string label)
 {
-	if (!label.empty() && label[0] == '@') label.erase(0, 1);
 	for (char& c : label) c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
 	if (label.empty()) thrower("ERROR: GigaMoog420 block label is empty.");
 	return label;
+}
+
+// Table ramps and corrections live in Chimera-Cryo\Ramps. Scripts give just the file name; ".csv" is
+// added if it's missing. Returns the full path; name is set to the file name without ".csv".
+static const std::string GM420_RAMPS_FOLDER = str(CODE_ROOT) + "\\Ramps\\";
+
+static std::string rampsFilePath(std::string fileName, std::string& name)
+{
+	if (fileName.find_first_of("/\\:") != std::string::npos) {
+		thrower("ERROR: GigaMoog420: give just the file name (\"" + fileName + "\" contains a folder). "
+			"Ramp and correction files must be in " + GM420_RAMPS_FOLDER);
+	}
+	const std::string ext = ".csv";
+	if (fileName.size() < ext.size() || fileName.compare(fileName.size() - ext.size(), ext.size(), ext) != 0) {
+		fileName += ext;
+	}
+	name = normalizeLabel(fileName.substr(0, fileName.size() - ext.size()));
+	return GM420_RAMPS_FOLDER + fileName;
 }
 
 void GigaMoog420Core::loadCorrection(const std::string& label, const std::string& filePath)
@@ -289,16 +306,18 @@ void GigaMoog420Core::analyzeMoogScript(std::string fileAddr, std::vector<parame
 // 
 // absPhase = 1 loads the phase absolutely; 0 applies it as a relative (phase-continuous) update.
 //
-//   tableramp <ch> <path>   play the table in <path>: rows of tau_s, frequency_MHz, amplitude_percent
-//                           [, phase_deg], tau from the block start (see synth::TableRamp). The block is
-//                           labeled with the file name (no folder or extension) unless an @label is given.
-//                           The path must not contain spaces.
+//   tableramp <ch> <name>   play Chimera-Cryo\Ramps\<name>.csv: rows of tau_s, frequency_MHz,
+//                           amplitude_percent [, phase_deg], tau from the block start (see synth::TableRamp).
+//                           Give only the file name (".csv" optional). The block is labeled <name> unless
+//                           a "label" command comes before it.
 //
 // Block labels and amplitude corrections (see AomFeedforward.h):
-//   @<label> <command ...>        name the block made by this command, e.g. "@sweepa freqfuncramp ...".
-//                                 Labels are case-insensitive and must be unique in the script.
-//   correction <label> <path>     apply the tau_s,gain file at <path> to the block named <label>, with
-//                                 tau measured from the block's start. The path must not contain spaces.
+//   label <name>                  name the block made by the next command, e.g. "label sweepa" followed by
+//                                 "freqfuncramp ...". Labels are case-insensitive and must be unique.
+//                                 (Labels can't be written as "@name": the script editor deletes lines that
+//                                 start with "@" when it loads a file.)
+//   correction <label> <name>     apply Chimera-Cryo\Ramps\<name>.csv (tau_s, gain) to the block labeled
+//                                 <label>, tau from the block's start. Give only the file name.
 //   feedforward <0|1>             turn all corrections off/on for this script, overriding the GUI setting.
 //                                 Use "feedforward 0" while measuring the uncorrected output.
 //
@@ -311,11 +330,11 @@ bool GigaMoog420Core::analyzeMoogScript(std::string word, ScriptStream& script, 
 {
 	static const std::set<std::string> commands =
 	{ "var", "bit", "set", "settrig", "trigger", "hold", "freqramp", "freqfuncramp", "ampramp", "ampfuncramp",
-	  "tableramp", "feedforward", "correction" };
-	if (commands.count(word) == 0 && (word.empty() || word[0] != '@')) {
+	  "tableramp", "feedforward", "correction", "label" };
+	if (commands.count(word) == 0) {
 		return false;
 	}
-	std::string pendingLabel;                   // set by "@label", attached to the next command's block
+	std::string pendingLabel;                   // set by "label", attached to the next command's block
 	std::set<std::string> usedLabels;
 	std::string scope = GIGAMOOG_PARAMETER_SCOPE;
 	std::string warnings;
@@ -338,13 +357,15 @@ bool GigaMoog420Core::analyzeMoogScript(std::string word, ScriptStream& script, 
 
 	while (!(script.peek() == EOF) || word != "__end__")
 	{
-		if (!word.empty() && word[0] == '@') {
+		if (word == "label") {
+			std::string name;
+			script >> name;
 			if (!pendingLabel.empty()) {
-				thrower("ERROR: GigaMoog420 labels \"@" + pendingLabel + "\" and \"" + word + "\" are on the same command.");
+				thrower("ERROR: GigaMoog420 labels \"" + pendingLabel + "\" and \"" + name + "\" are on the same command.");
 			}
-			pendingLabel = normalizeLabel(word);
+			pendingLabel = normalizeLabel(name);
 			if (!usedLabels.insert(pendingLabel).second) {
-				thrower("ERROR: GigaMoog420 label \"@" + pendingLabel + "\" is used more than once.");
+				thrower("ERROR: GigaMoog420 label \"" + pendingLabel + "\" is used more than once.");
 			}
 			word = "";
 			script >> word;
@@ -439,8 +460,9 @@ bool GigaMoog420Core::analyzeMoogScript(std::string word, ScriptStream& script, 
 		}
 		else if (word == "tableramp") {
 			int ch = nextChannel();
-			std::string path;
-			script >> path;
+			std::string fileName, name;
+			script >> fileName;
+			std::string path = rampsFilePath(fileName, name);
 			std::shared_ptr<synth::TableRamp> table;
 			try {
 				table = synth::TableRamp::fromFile(path);
@@ -448,20 +470,17 @@ bool GigaMoog420Core::analyzeMoogScript(std::string word, ScriptStream& script, 
 			catch (std::exception& e) {
 				thrower("ERROR: GigaMoog420 tableramp: " + std::string(e.what()));
 			}
-			// Default label: the file name without folder or extension. An @label in front overrides it.
-			std::string stem = path.substr(path.find_last_of("/\\") + 1);
-			stem = stem.substr(0, stem.find_last_of('.'));
-			table->label = normalizeLabel(stem);
+			table->label = name;                    // a preceding "label" command overrides this below
 			sequence[ch].push_back(table);
 		}
 		else if (word == "feedforward") {
 			useFeedforward = nextValue() > 0.5;
 		}
 		else if (word == "correction") {
-			std::string label, path;
-			script >> label >> path;
+			std::string label, fileName, name;
+			script >> label >> fileName;
 			gm420::AmplitudeCorrection corr;
-			corr.load(path);
+			corr.load(rampsFilePath(fileName, name));
 			scriptCorrections[normalizeLabel(label)] = std::move(corr);
 		}
 		else {
@@ -475,7 +494,7 @@ bool GigaMoog420Core::analyzeMoogScript(std::string word, ScriptStream& script, 
 				if (blocks.size() == before + 1) added = blocks.back();
 			}
 			if (!added) {
-				thrower("ERROR: GigaMoog420 label \"@" + pendingLabel + "\" must be followed by a command that "
+				thrower("ERROR: GigaMoog420 label \"" + pendingLabel + "\" must be followed by a command that "
 					"adds a block (set, settrig, trigger, hold or a ramp), not \"" + word + "\".");
 			}
 			added->label = pendingLabel;
@@ -485,7 +504,7 @@ bool GigaMoog420Core::analyzeMoogScript(std::string word, ScriptStream& script, 
 		script >> word;
 	}
 	if (!pendingLabel.empty()) {
-		thrower("ERROR: GigaMoog420 label \"@" + pendingLabel + "\" at the end of the script has no command.");
+		thrower("ERROR: GigaMoog420 label \"" + pendingLabel + "\" at the end of the script has no command.");
 	}
 	if (!warnings.empty()) {
 		emit errBox(qstr(warnings));

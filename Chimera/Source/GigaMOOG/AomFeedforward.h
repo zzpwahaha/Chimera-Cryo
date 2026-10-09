@@ -13,8 +13,10 @@
 //
 // The curve is computed outside Chimera (e.g. the Python optimization loop measures the PD trace,
 // aligns it to the block including any trigger-to-light delay, and updates g), so Chimera only maps
-// it onto rows. Blocks are labeled in the script by putting @name in front of the command:
-//     @sweepa freqfuncramp 0 2 50 80 90 sin2 0.001
+// it onto rows. A table ramp is labeled with its file name; other blocks get a label from a
+// "label <name>" line just before them:
+//     tableramp 0 sweepa                         (plays Ramps\sweepa.csv, label "sweepa")
+//     correction sweepa sweepa_gain              (applies Ramps\sweepa_gain.csv to it)
 //
 // File format (.csv or .txt), one sample per line:  tau_s, gain
 // Same separators/comments/header rules as synth::read_numeric_table. Gains must be >= 0.
