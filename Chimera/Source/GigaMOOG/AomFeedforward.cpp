@@ -130,15 +130,15 @@ namespace gm420 {
 					continue;
 				}
 				double a = rows[i].amplitude * g;
-				if (a > 1.0) {
-					a = 1.0;
+				if (a > MAX_CORRECTED_AMPLITUDE) {
+					a = MAX_CORRECTED_AMPLITUDE;
 					++clipped;
 				}
 				rows[i].amplitude = a;
 			}
 			if (clipped > 0) {
-				warnings += where + " (channel " + str(channel) + "): " + str(clipped)
-					+ " rows would exceed full scale and were clipped to 100 %.\r\n";
+				warnings += where + " (channel " + str(channel) + "): " + str(clipped) + " rows would exceed "
+					+ str(MAX_CORRECTED_AMPLITUDE * 100) + " % and were clipped to it.\r\n";
 			}
 		}
 		return warnings;

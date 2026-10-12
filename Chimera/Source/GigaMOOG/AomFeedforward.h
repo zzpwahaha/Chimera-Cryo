@@ -9,7 +9,7 @@
 //
 // where g_row is the mean of the g samples inside the row's window [tau0, tau1) (or g interpolated
 // at the window's center when the row is shorter than the sample spacing). Rows the curve doesn't
-// cover are left unchanged. A' is clipped at full scale.
+// cover are left unchanged. A' is clipped at MAX_CORRECTED_AMPLITUDE (90 %).
 //
 // The curve is computed outside Chimera (e.g. the Python optimization loop measures the PD trace,
 // aligns it to the block including any trigger-to-light delay, and updates g), so Chimera only maps
@@ -28,6 +28,10 @@
 #include <vector>
 
 namespace gm420 {
+
+	// Highest amplitude (fraction of full scale) a correction may produce. Above about 0.9 the RF chain /
+	// AOM is in the danger zone, so corrected rows are clipped here rather than at 1.0.
+	constexpr double MAX_CORRECTED_AMPLITUDE = 0.9;
 
 	class AmplitudeCorrection {
 	public:
