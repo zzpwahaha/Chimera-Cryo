@@ -53,12 +53,17 @@ void GigaMoog420Core::logSettings(DataLogger& logger, ExpThreadWorker* threadwor
 		// the files. These are the corrections variation 0 actually used (empty if feedforward was off).
 		H5::Group ffGroup(GMoogGroup.createGroup("Corrections"));
 		logger.writeDataSet(feedforwardEnabled, "Enabled", ffGroup);
-		for (const auto& [label, corr] : lastAppliedCorrections) {
-			if (!corr.isLoaded()) continue;
+		// One subgroup per stacked correction, numbered in the order they were applied: Corrections/<label>/<n>.
+		for (const auto& [label, stack] : lastAppliedCorrections) {
 			H5::Group labelGroup(ffGroup.createGroup(label));
-			logger.writeDataSet(corr.getPath(), "File-Path", labelGroup);
-			logger.writeDataSet(corr.getTimes(), "Tau-s", labelGroup);
-			logger.writeDataSet(corr.getGains(), "Gain", labelGroup);
+			for (size_t n = 0; n < stack.size(); ++n) {
+				const auto& corr = stack[n];
+				if (!corr.isLoaded()) continue;
+				H5::Group corrGroup(labelGroup.createGroup(str(n)));
+				logger.writeDataSet(corr.getPath(), "File-Path", corrGroup);
+				logger.writeDataSet(corr.getTimes(), "Tau-s", corrGroup);
+				logger.writeDataSet(corr.getGains(), "Gain", corrGroup);
+			}
 		}
 	}
 	catch (H5::Exception err) {
@@ -131,7 +136,7 @@ void GigaMoog420Core::loadCorrection(const std::string& label, const std::string
 {
 	gm420::AmplitudeCorrection corr;
 	corr.load(filePath);                 // throws before anything is replaced
-	corrections[normalizeLabel(label)] = std::move(corr);
+	corrections[normalizeLabel(label)].push_back(std::move(corr));
 }
 
 void GigaMoog420Core::clearCorrection(const std::string& label)
@@ -257,11 +262,11 @@ void GigaMoog420Core::analyzeMoogScript(std::string fileAddr, std::vector<parame
 	// exceptions; convert them so the GUI and experiment thread catch them as ChimeraErrors.
 	gm420::PacketList packets{ gm420::resetPacket(false) };
 	std::string feedforwardWarnings;
-	// Script corrections override GUI/API ones with the same label.
+	// A label named in the script uses the script's stack instead of the GUI/API one.
 	CorrectionMap active;
 	if (useFeedforward) {
 		active = corrections;
-		for (auto& [label, corr] : scriptCorrections) active[label] = std::move(corr);
+		for (auto& [label, stack] : scriptCorrections) active[label] = std::move(stack);
 	}
 	if (variation == 0) {
 		lastAppliedCorrections = active;
@@ -314,7 +319,9 @@ void GigaMoog420Core::analyzeMoogScript(std::string fileAddr, std::vector<parame
 //                                 (Labels can't be written as "@name": the script editor deletes lines that
 //                                 start with "@" when it loads a file.)
 //   correction <label> <name>     apply Chimera-Cryo\Ramps\<name>.csv (tau_s, gain) to the block labeled
-//                                 <label>, tau from the block's start. Give only the file name.
+//                                 <label>, tau from the block's start. Give only the file name. Several
+//                                 correction lines for one label stack: their gains multiply, and the
+//                                 product is clipped once at the end.
 //   feedforward <0|1>             turn all corrections off/on for this script, overriding the GUI setting.
 //                                 Use "feedforward 0" while measuring the uncorrected output.
 //
@@ -478,7 +485,7 @@ bool GigaMoog420Core::analyzeMoogScript(std::string word, ScriptStream& script, 
 			script >> label >> fileName;
 			gm420::AmplitudeCorrection corr;
 			corr.load(rampsFilePath(fileName, name));
-			scriptCorrections[normalizeLabel(label)] = std::move(corr);
+			scriptCorrections[normalizeLabel(label)].push_back(std::move(corr));   // stacks in script order
 		}
 		else {
 			thrower("ERROR: unrecognized GigaMoog420 command: \"" + word + "\"");

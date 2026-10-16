@@ -55,6 +55,12 @@ namespace gm420 {
 
 	// Apply each correction to the rows carrying its label. Throws a ChimeraError if a label is used
 	// for more than one block or spans a trigger. Returns warning text, empty if there is nothing to report.
-	std::string applyCorrections(synth::CompileResult& compiled, const std::map<std::string, AmplitudeCorrection>& corrections);
+	// Several corrections can be stacked on one label, in the order they were given. Each row's amplitude
+	// is multiplied by the gain of every correction in the stack that covers it; the result is clipped to
+	// MAX_CORRECTED_AMPLITUDE once, after all of them, so the order of the stack doesn't change the result.
+	using CorrectionStack = std::vector<AmplitudeCorrection>;
+	using CorrectionMap = std::map<std::string, CorrectionStack>;
+
+	std::string applyCorrections(synth::CompileResult& compiled, const CorrectionMap& corrections);
 
 }

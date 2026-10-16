@@ -70,11 +70,13 @@ namespace gm420 {
 		return true;
 	}
 
-	std::string applyCorrections(synth::CompileResult& compiled, const std::map<std::string, AmplitudeCorrection>& corrections)
+	std::string applyCorrections(synth::CompileResult& compiled, const CorrectionMap& corrections)
 	{
 		std::string warnings;
-		for (const auto& [label, corr] : corrections) {
-			if (!corr.isLoaded()) continue;
+		for (const auto& [label, stack] : corrections) {
+			if (std::none_of(stack.begin(), stack.end(), [](const AmplitudeCorrection& c) { return c.isLoaded(); })) {
+				continue;
+			}
 			std::string where = "GigaMoog420 correction \"" + label + "\"";
 
 			// Find the one channel and the one contiguous run of rows carrying this label.
@@ -117,19 +119,26 @@ namespace gm420 {
 			const double sectionEnd = section < durations.size() ? durations[section] : rows[last].timestamp;
 			const double blockStart = rows[first].timestamp;
 
-			// Rows the curve doesn't cover are left unchanged without a warning: a correction curve that
-			// ends before the block does (e.g. once the light is already off) is normal.
+			// Each correction in the stack multiplies the rows it covers. Rows a curve doesn't cover are left
+			// unchanged by that curve without a warning: a curve that ends before the block does (e.g. once
+			// the light is already off) is normal. Clipping happens once, on the product.
 			size_t clipped = 0;
 			for (size_t i = first; i <= last; ++i) {
 				double tau0 = rows[i].timestamp - blockStart;
 				double tau1 = ((i + 1 < rows.size() && !rows[i + 1].wait_for_trigger) ? rows[i + 1].timestamp : sectionEnd)
 					- blockStart;
 				if (tau1 <= tau0) continue;
-				double g;
-				if (!corr.rowGain(tau0, tau1, g)) {
-					continue;
+				double gTotal = 1.0;
+				bool covered = false;
+				for (const auto& corr : stack) {
+					double g;
+					if (corr.isLoaded() && corr.rowGain(tau0, tau1, g)) {
+						gTotal *= g;
+						covered = true;
+					}
 				}
-				double a = rows[i].amplitude * g;
+				if (!covered) continue;
+				double a = rows[i].amplitude * gTotal;
 				if (a > MAX_CORRECTED_AMPLITUDE) {
 					a = MAX_CORRECTED_AMPLITUDE;
 					++clipped;
