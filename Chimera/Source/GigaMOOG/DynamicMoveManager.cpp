@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "DynamicMoveManager.h"
 #include <GigaMOOG/MemoryController.h>
+#include <algorithm>
 
 bool DynamicMoveManager::analyzeMoogScript(std::string word, ScriptStream& currentMoogScript, MessageSender& ms, std::vector<parameterType>& variables, unsigned variation)
 {
@@ -39,10 +40,17 @@ bool DynamicMoveManager::analyzeMoogScript(std::string word, ScriptStream& curre
 			&& rearrangeMode != "filterscrunchxtargetpaint" && rearrangeMode != "removefilterscrunchxtargetpaint" 
 			&& rearrangeMode != "equalscrunchxtarget" && rearrangeMode != "enoughscrunchxtarget"
 			&& rearrangeMode != "tetris"
-			&& rearrangeMode != "tweezer1dinittest") {
-			thrower("Invalid rearrangement mode. Valid options are scrunchx, scrunchy, scrunchxy, scrunchyx, centerscrunchyx, and tetris.");
+			&& rearrangeMode != "tweezer1dinittest"
+			&& rearrangeMode != "loadpaint") {
+			thrower("Invalid rearrangement mode. Valid options are scrunchx, scrunchy, scrunchxy, scrunchyx, centerscrunchyx, tetris and loadpaint.");
 		}
 		moveParam.rearrangeMode.push_back(rearrangeMode);
+	}
+	// loadpaint is a static pattern, not an image-based rearrangement, so it can't be combined with other rounds.
+	const bool loadPaint = std::find(moveParam.rearrangeMode.begin(), moveParam.rearrangeMode.end(), "loadpaint")
+		!= moveParam.rearrangeMode.end();
+	if (loadPaint && moveParam.rearrangeRound != 1) {
+		thrower("Error: loadpaint must be the only rearrangement mode (use \"rearrange 1 loadpaint ...\").");
 	}
 
 	currentMoogScript >> scrunchSpacingExpression;
@@ -380,7 +388,119 @@ bool DynamicMoveManager::analyzeMoogScript(std::string word, ScriptStream& curre
 	checkTotalPower();
 	writeLoad(ms, variation);
 	//writeMoveOff(ms); // clear move sequence in gigamoog, no matter whether will rearrange or not (depending on loaded atom number)
+	if (loadPaint) {
+		// The paint step is fixed by the script, so it's written here, once per variation, instead of by the
+		// cruncher after each image. Turning moveActive off keeps the cruncher from rearranging (and from
+		// overwriting the step table) in this mode.
+		writeLoadPaintStep(ms);
+		moveActive = false;
+	}
 	return true;
+}
+
+// "loadpaint" mode: move step 0 = the load pattern with only the painted columns/rows left on.
+//
+// Every painted tone plays on exactly the channels writeLoad gave it, with the same LUT frequency, LUT amplitude,
+// repeats and phase as during loading, so switching to the paint step can't raise any tone's RF power above its
+// loading (LUT) value: painted tones are unchanged and all other tones go to ~0. Paint must therefore be a subset
+// of load. Triggers: GMMoveTrg switches to the paint step, GMLoadTrg returns to the load tones.
+void DynamicMoveManager::writeLoadPaintStep(MessageSender& ms)
+{
+	const auto& loadX = moveParam.loadPositionsX;
+	const auto& loadY = moveParam.loadPositionsY;
+	const auto& paintX = moveParam.paintPositionsX;
+	const auto& paintY = moveParam.paintPositionsY;
+
+	if (loadX.size() != moveLUT.getXDim() || loadY.size() != moveLUT.getYDim()
+		|| paintX.size() != moveLUT.getXDim() || paintY.size() != moveLUT.getYDim()) {
+		thrower("Error: loadpaint needs loadx/paintx with " + str(moveLUT.getXDim()) + " entries and loady/painty with "
+			+ str(moveLUT.getYDim()) + " entries, the tweezer look up table size.");
+	}
+	for (size_t i = 0; i < loadX.size(); i++) {
+		if (paintX[i] && !loadX[i]) {
+			thrower("Error: loadpaint paints column " + str(i) + ", which is not loaded. Painted tones must be a subset of the load tones.");
+		}
+	}
+	for (size_t i = 0; i < loadY.size(); i++) {
+		if (paintY[i] && !loadY[i]) {
+			thrower("Error: loadpaint paints row " + str(i) + ", which is not loaded. Painted tones must be a subset of the load tones.");
+		}
+	}
+	if (moveParam.nPaintTweezerX == 0 || moveParam.nPaintTweezerY == 0) {
+		thrower("Error: loadpaint needs at least one painted column and one painted row.");
+	}
+
+	// Clear every step first: steps left over from an earlier rearrangement run would otherwise still be stored
+	// after step 0. Step 0 is then overwritten below.
+	writeMoveOff(ms);
+
+	// Largest amplitude increment the message format allows (it's clamped to 26 bits): the switch to the paint
+	// pattern is effectively instant instead of following the rearrangement ramp rate.
+	const int MAX_ATW_STEP = 33554431;
+	// Same repeats as writeLoad, so painted tones keep their loading channels and per-tone power.
+	auto [repeatX, repeatY] = moveParam.getRepeatXY(moveParam.nTweezerLoadX, moveParam.nTweezerLoadY);
+
+	std::vector<bool> usedX(48, false), usedY(48, false);
+	size_t iTweezerX = 0;
+	for (size_t iMaskX = 0; iMaskX < loadX.size(); iMaskX++) {
+		if (!loadX[iMaskX]) continue;
+		const bool painted = paintX[iMaskX];
+		double phase = fmod(180 * pow(iTweezerX + 1, 2) / moveParam.nTweezerX, 360); // same as writeLoad
+		for (size_t r = 0; r < repeatX; r++) {
+			size_t toneIdx = iTweezerX * repeatX + r;
+			size_t hardwareChannel = (toneIdx * 8) % 48 + (toneIdx * 8) / 48;     // same as writeLoad
+			usedX[hardwareChannel] = true;
+			Message m = Message::make().destination(MessageDestination::KA007)
+				.DAC(MessageDAC::DAC0).channel(hardwareChannel)
+				.setting(MessageSetting::MOVEFREQUENCY)
+				.frequencyMHz(moveLUT.getFreqX(iMaskX, 0))
+				.amplitudePercent(painted ? moveLUT.getAmpX(iMaskX, 0) : 0.01)   // never above the LUT amplitude
+				.phaseDegrees(phase)
+				.instantFTW(1).ATWIncr(painted ? MAX_ATW_STEP : -MAX_ATW_STEP)
+				.stepSequenceID(0).FTWIncr(0).phaseJump(0);
+			ms.enqueue(m);
+		}
+		iTweezerX++;
+	}
+
+	size_t iTweezerY = 0;
+	for (size_t iMaskY = 0; iMaskY < loadY.size(); iMaskY++) {
+		if (!loadY[iMaskY]) continue;
+		const bool painted = paintY[iMaskY];
+		double phase = fmod(180 * pow(iTweezerY + 1, 2) / moveParam.nTweezerY, 360); // same as writeLoad
+		for (size_t r = 0; r < repeatY; r++) {
+			size_t toneIdx = iTweezerY * repeatY + r;
+			size_t hardwareChannel = (toneIdx * 8) % 48 + (toneIdx * 8) / 48;     // same as writeLoad
+			usedY[hardwareChannel] = true;
+			Message m = Message::make().destination(MessageDestination::KA007)
+				.DAC(MessageDAC::DAC1).channel(hardwareChannel)
+				.setting(MessageSetting::MOVEFREQUENCY)
+				.frequencyMHz(moveLUT.getFreqY(0, iMaskY))
+				.amplitudePercent(painted ? moveLUT.getAmpY(0, iMaskY) : 0.01)   // never above the LUT amplitude
+				.phaseDegrees(phase)
+				.instantFTW(1).ATWIncr(painted ? MAX_ATW_STEP : -MAX_ATW_STEP)
+				.stepSequenceID(0).FTWIncr(0).phaseJump(0);
+			ms.enqueue(m);
+		}
+		iTweezerY++;
+	}
+
+	// Channels the load pattern doesn't use: off in the paint step too.
+	for (unsigned channel = 0; channel < 48; channel++) {
+		for (int axis = 0; axis < 2; axis++) {
+			const bool used = (axis == 0) ? usedX[channel] : usedY[channel];
+			if (used) continue;
+			Message m = Message::make().destination(MessageDestination::KA007)
+				.DAC(axis == 0 ? MessageDAC::DAC0 : MessageDAC::DAC1).channel(channel)
+				.setting(MessageSetting::MOVEFREQUENCY)
+				.frequencyMHz(0).amplitudePercent(0.01).phaseDegrees(0)
+				.instantFTW(1).ATWIncr(-MAX_ATW_STEP).stepSequenceID(0).FTWIncr(0).phaseJump(0);
+			ms.enqueue(m);
+		}
+	}
+	flog << "DynamicMoveManager::writeLoadPaintStep: paint step 0 written, " << moveParam.nPaintTweezerX << " of "
+		<< moveParam.nTweezerLoadX << " x tones and " << moveParam.nPaintTweezerY << " of " << moveParam.nTweezerLoadY
+		<< " y tones kept" << fendl;
 }
 
 void DynamicMoveManager::writeRearrangeMoves(moveSequence input, MessageSender& ms, unsigned variation)

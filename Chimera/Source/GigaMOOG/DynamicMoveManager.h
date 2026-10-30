@@ -25,6 +25,8 @@ public:
 private:
 	// write load for move with LUT
 	void writeLoad(MessageSender& ms, unsigned variation);
+	// "loadpaint" mode: writes move step 0 = load tones with only the painted columns/rows left on (see .cpp)
+	void writeLoadPaintStep(MessageSender& ms);
 	void checkTotalPower();
 	// get [start, end] of a contiguous segement in a 1D strings of 0s and 1s, used in filterPositionsX to get filterSegements
 	std::vector<std::pair<int, int>> getSegments(const std::vector<bool>& mask);
